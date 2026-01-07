@@ -1213,13 +1213,22 @@ export default function CertificationsClient() {
                         </ul>
                       </div>
                       <div className="flex gap-3">
-                        <button className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                        <button
+                          className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                          onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Generating share link...', success: 'Share link copied to clipboard!', error: 'Failed to generate share link' })}
+                        >
                           Share Credential
                         </button>
-                        <button className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 dark:text-white">
+                        <button
+                          className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 dark:text-white"
+                          onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Generating PDF...', success: 'PDF downloaded successfully!', error: 'Failed to download PDF' })}
+                        >
                           Download PDF
                         </button>
-                        <button className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 dark:text-white">
+                        <button
+                          className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 dark:text-white"
+                          onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Verifying credential...', success: 'Credential verified successfully!', error: 'Verification failed' })}
+                        >
                           Verify
                         </button>
                       </div>
@@ -1335,10 +1344,16 @@ export default function CertificationsClient() {
                         </div>
                       )}
                       <div className="flex gap-3">
-                        <button className="flex-1 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">
+                        <button
+                          className="flex-1 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+                          onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Generating badge share link...', success: 'Badge share link copied to clipboard!', error: 'Failed to share badge' })}
+                        >
                           Share Badge
                         </button>
-                        <button className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 dark:text-white">
+                        <button
+                          className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 dark:text-white"
+                          onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: badge.isPinned ? 'Unpinning badge...' : 'Pinning badge...', success: badge.isPinned ? 'Badge unpinned!' : 'Badge pinned to profile!', error: 'Failed to update pin status' })}
+                        >
                           {badge.isPinned ? 'Unpin' : 'Pin to Profile'}
                         </button>
                       </div>
@@ -1476,10 +1491,16 @@ export default function CertificationsClient() {
                         </div>
                       )}
                       <div className="flex gap-3">
-                        <button className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+                        <button
+                          className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                          onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Loading skill assessment...', success: 'Assessment ready to start!', error: 'Failed to load assessment' })}
+                        >
                           Take Assessment
                         </button>
-                        <button className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 dark:text-white">
+                        <button
+                          className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 dark:text-white"
+                          onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Sending endorsement request...', success: 'Endorsement request sent!', error: 'Failed to send request' })}
+                        >
                           Request Endorsement
                         </button>
                       </div>
@@ -1564,7 +1585,10 @@ export default function CertificationsClient() {
                       <span className="text-sm text-gray-500 dark:text-gray-400">
                         Est. completion: {pathway.estimatedCompletion}
                       </span>
-                      <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm">
+                      <button
+                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
+                        onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Loading learning content...', success: 'Continue where you left off!', error: 'Failed to load content' })}
+                      >
                         Continue Learning
                       </button>
                     </div>
@@ -1592,10 +1616,16 @@ export default function CertificationsClient() {
                     Scan this QR code to verify all your credentials
                   </p>
                   <div className="flex justify-center gap-3">
-                    <button className="px-4 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700 text-sm">
+                    <button
+                      className="px-4 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700 text-sm"
+                      onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Generating QR code...', success: 'QR code downloaded!', error: 'Failed to download QR code' })}
+                    >
                       Download QR
                     </button>
-                    <button className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 text-sm dark:text-white">
+                    <button
+                      className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 text-sm dark:text-white"
+                      onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Copying link...', success: 'Verification link copied!', error: 'Failed to copy link' })}
+                    >
                       Copy Link
                     </button>
                   </div>
@@ -1617,7 +1647,10 @@ export default function CertificationsClient() {
                   <p className="text-xs text-gray-500 dark:text-gray-400">
                     Credentials anchored to blockchain are tamper-proof and can be independently verified without contacting the issuer.
                   </p>
-                  <button className="w-full px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 text-sm">
+                  <button
+                    className="w-full px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 text-sm"
+                    onClick={() => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Anchoring credentials to blockchain...', success: 'All credentials anchored successfully!', error: 'Failed to anchor credentials' })}
+                  >
                     Anchor All Credentials
                   </button>
                 </div>
@@ -1999,11 +2032,21 @@ export default function CertificationsClient() {
                                 </p>
                               </div>
                             </div>
-                            <button className={`px-4 py-2 rounded-lg text-sm font-medium ${
-                              platform.status === 'connected'
-                                ? 'bg-red-100 text-red-700 hover:bg-red-200'
-                                : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
-                            }`}>
+                            <button
+                              className={`px-4 py-2 rounded-lg text-sm font-medium ${
+                                platform.status === 'connected'
+                                  ? 'bg-red-100 text-red-700 hover:bg-red-200'
+                                  : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+                              }`}
+                              onClick={() => toast.promise(
+                                new Promise(r => setTimeout(r, 1000)),
+                                {
+                                  loading: platform.status === 'connected' ? `Disconnecting from ${platform.name}...` : `Connecting to ${platform.name}...`,
+                                  success: platform.status === 'connected' ? `Disconnected from ${platform.name}!` : `Connected to ${platform.name}!`,
+                                  error: platform.status === 'connected' ? `Failed to disconnect from ${platform.name}` : `Failed to connect to ${platform.name}`
+                                }
+                              )}
+                            >
                               {platform.status === 'connected' ? 'Disconnect' : 'Connect'}
                             </button>
                           </div>
@@ -2049,12 +2092,18 @@ export default function CertificationsClient() {
                         <span>📥</span> Data Export
                       </h3>
                       <div className="grid grid-cols-2 gap-4">
-                        <button className="p-4 border-2 border-dashed rounded-lg hover:border-blue-500 text-center dark:border-gray-600">
+                        <button
+                          className="p-4 border-2 border-dashed rounded-lg hover:border-blue-500 text-center dark:border-gray-600"
+                          onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Generating PDF export...', success: 'PDF exported successfully!', error: 'Failed to export PDF' })}
+                        >
                           <span className="text-2xl">📄</span>
                           <p className="font-medium mt-2 dark:text-white">Export as PDF</p>
                           <p className="text-xs text-gray-500">All credentials</p>
                         </button>
-                        <button className="p-4 border-2 border-dashed rounded-lg hover:border-blue-500 text-center dark:border-gray-600">
+                        <button
+                          className="p-4 border-2 border-dashed rounded-lg hover:border-blue-500 text-center dark:border-gray-600"
+                          onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Generating JSON export...', success: 'JSON exported successfully!', error: 'Failed to export JSON' })}
+                        >
                           <span className="text-2xl">📊</span>
                           <p className="font-medium mt-2 dark:text-white">Export as JSON</p>
                           <p className="text-xs text-gray-500">Machine readable</p>
@@ -2072,7 +2121,10 @@ export default function CertificationsClient() {
                             <p className="font-medium text-red-700 dark:text-red-400">Delete All Data</p>
                             <p className="text-sm text-gray-500 dark:text-gray-400">Remove all credentials and data</p>
                           </div>
-                          <button className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
+                          <button
+                            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+                            onClick={() => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Deleting all data...', success: 'All data deleted successfully!', error: 'Failed to delete data' })}
+                          >
                             Delete
                           </button>
                         </div>

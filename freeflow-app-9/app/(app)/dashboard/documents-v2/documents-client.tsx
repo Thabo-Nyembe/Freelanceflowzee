@@ -661,7 +661,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
                     </div>
                   </DialogContent>
                 </Dialog>
-                <Button variant="ghost" className="text-white hover:bg-white/20">
+                <Button variant="ghost" className="text-white hover:bg-white/20" onClick={() => setActiveTab('settings')}>
                   <Settings className="h-5 w-5" />
                 </Button>
               </div>
@@ -859,7 +859,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
               <Card className="lg:col-span-2">
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
                   <CardTitle className="text-lg font-semibold">Recent Documents</CardTitle>
-                  <Button variant="ghost" size="sm">View All</Button>
+                  <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading all documents...', success: 'Showing all documents', error: 'Failed to load documents' })}>View All</Button>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   {recentDocuments.slice(0, 5).map(doc => (
@@ -914,7 +914,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
               <Card className="lg:col-span-2">
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
                   <CardTitle className="text-lg font-semibold">Recent Activity</CardTitle>
-                  <Button variant="ghost" size="sm">View All</Button>
+                  <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading activity...', success: 'Showing all activity', error: 'Failed to load activity' })}>View All</Button>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   {mockRecentActivity.map(activity => (
@@ -1094,7 +1094,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
                             {getFileIcon(doc.type)}
                             <div className="flex items-center gap-1">
                               {doc.starred && <Star className="h-4 w-4 text-amber-500 fill-amber-500" />}
-                              <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
+                              <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={(e) => { e.stopPropagation(); toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading options...', success: 'Options menu opened', error: 'Failed to load options' }) }}>
                                 <MoreVertical className="h-4 w-4" />
                               </Button>
                             </div>
@@ -1129,7 +1129,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
                           {doc.starred && <Star className="h-4 w-4 text-amber-500 fill-amber-500" />}
                           <Badge className={getStatusColor(doc.status)}>{doc.status}</Badge>
                           <Badge className={getSharingColor(doc.sharingType)}>{doc.sharingType}</Badge>
-                          <Button variant="ghost" size="sm">
+                          <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading options...', success: 'Options menu opened', error: 'Failed to load options' }) }}>
                             <MoreVertical className="h-4 w-4" />
                           </Button>
                         </div>
@@ -1166,19 +1166,20 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
             {/* Folders Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: FolderPlus, label: 'New Folder', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
-                { icon: FolderTree, label: 'Organize', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400' },
-                { icon: Share2, label: 'Share', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
-                { icon: Move, label: 'Move', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' },
-                { icon: Copy, label: 'Duplicate', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
-                { icon: Archive, label: 'Archive', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400' },
-                { icon: Palette, label: 'Color', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
-                { icon: Settings, label: 'Settings', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
+                { icon: FolderPlus, label: 'New Folder', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Creating folder...', success: 'New folder created', error: 'Failed to create folder' }) },
+                { icon: FolderTree, label: 'Organize', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening organizer...', success: 'Folder organizer ready', error: 'Failed to open organizer' }) },
+                { icon: Share2, label: 'Share', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Preparing share...', success: 'Select a folder to share', error: 'Failed to prepare share' }) },
+                { icon: Move, label: 'Move', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Preparing move...', success: 'Select a folder to move', error: 'Failed to prepare move' }) },
+                { icon: Copy, label: 'Duplicate', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Duplicating...', success: 'Select a folder to duplicate', error: 'Failed to duplicate' }) },
+                { icon: Archive, label: 'Archive', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Archiving...', success: 'Select a folder to archive', error: 'Failed to archive' }) },
+                { icon: Palette, label: 'Color', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading colors...', success: 'Color picker ready', error: 'Failed to load colors' }) },
+                { icon: Settings, label: 'Settings', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', action: () => setActiveTab('settings') },
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={action.action}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1194,7 +1195,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
                       <div className={`p-3 rounded-xl ${folder.color}`}>
                         <Folder className="h-6 w-6 text-white" />
                       </div>
-                      <Button variant="ghost" size="sm">
+                      <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading folder options...', success: 'Folder options opened', error: 'Failed to load options' }) }}>
                         <MoreVertical className="h-4 w-4" />
                       </Button>
                     </div>
@@ -1243,19 +1244,20 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
             {/* Templates Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: FilePlus, label: 'Create New', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
-                { icon: Upload, label: 'Import', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
-                { icon: Sparkles, label: 'AI Generate', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400' },
-                { icon: Star, label: 'Premium', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
-                { icon: FileText, label: 'Documents', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
-                { icon: FileSpreadsheet, label: 'Spreadsheets', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' },
-                { icon: Presentation, label: 'Slides', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
-                { icon: Share2, label: 'Share', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400' },
+                { icon: FilePlus, label: 'Create New', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Creating template...', success: 'New template created', error: 'Failed to create template' }) },
+                { icon: Upload, label: 'Import', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Importing template...', success: 'Template imported successfully', error: 'Failed to import template' }) },
+                { icon: Sparkles, label: 'AI Generate', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'AI generating template...', success: 'AI template generated', error: 'Failed to generate template' }) },
+                { icon: Star, label: 'Premium', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading premium templates...', success: 'Showing premium templates', error: 'Failed to load premium' }) },
+                { icon: FileText, label: 'Documents', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Filtering documents...', success: 'Showing document templates', error: 'Failed to filter' }) },
+                { icon: FileSpreadsheet, label: 'Spreadsheets', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Filtering spreadsheets...', success: 'Showing spreadsheet templates', error: 'Failed to filter' }) },
+                { icon: Presentation, label: 'Slides', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Filtering presentations...', success: 'Showing presentation templates', error: 'Failed to filter' }) },
+                { icon: Share2, label: 'Share', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Preparing share...', success: 'Select a template to share', error: 'Failed to prepare share' }) },
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={action.action}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1324,19 +1326,20 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
             {/* Shared Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Users, label: 'Team Files', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400' },
-                { icon: Globe, label: 'Public', color: 'bg-sky-100 text-sky-600 dark:bg-sky-900/30 dark:text-sky-400' },
-                { icon: Link2, label: 'Get Link', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
-                { icon: Mail, label: 'Email', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
-                { icon: Lock, label: 'Private', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
-                { icon: Shield, label: 'Permissions', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
-                { icon: Download, label: 'Download', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400' },
-                { icon: Settings, label: 'Settings', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
+                { icon: Users, label: 'Team Files', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading team files...', success: 'Showing team files', error: 'Failed to load team files' }) },
+                { icon: Globe, label: 'Public', color: 'bg-sky-100 text-sky-600 dark:bg-sky-900/30 dark:text-sky-400', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading public files...', success: 'Showing public files', error: 'Failed to load public files' }) },
+                { icon: Link2, label: 'Get Link', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Generating link...', success: 'Link copied to clipboard', error: 'Failed to generate link' }) },
+                { icon: Mail, label: 'Email', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening email...', success: 'Email composer ready', error: 'Failed to open email' }) },
+                { icon: Lock, label: 'Private', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading private files...', success: 'Showing private files', error: 'Failed to load private files' }) },
+                { icon: Shield, label: 'Permissions', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading permissions...', success: 'Permissions manager ready', error: 'Failed to load permissions' }) },
+                { icon: Download, label: 'Download', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400', action: () => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Preparing download...', success: 'Select files to download', error: 'Failed to prepare download' }) },
+                { icon: Settings, label: 'Settings', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', action: () => setActiveTab('settings') },
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={action.action}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1399,19 +1402,20 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
             {/* Settings Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Settings, label: 'General', color: 'bg-gray-100 text-gray-600 dark:bg-gray-900/30 dark:text-gray-400' },
-                { icon: HardDrive, label: 'Storage', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400' },
-                { icon: Bell, label: 'Alerts', color: 'bg-zinc-100 text-zinc-600 dark:bg-zinc-900/30 dark:text-zinc-400' },
-                { icon: Share2, label: 'Sharing', color: 'bg-neutral-100 text-neutral-600 dark:bg-neutral-900/30 dark:text-neutral-400' },
-                { icon: Zap, label: 'Integrations', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
-                { icon: Lock, label: 'Security', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400' },
-                { icon: RefreshCw, label: 'Sync', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
-                { icon: Download, label: 'Export', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
+                { icon: Settings, label: 'General', color: 'bg-gray-100 text-gray-600 dark:bg-gray-900/30 dark:text-gray-400', action: () => setSettingsTab('general') },
+                { icon: HardDrive, label: 'Storage', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400', action: () => setSettingsTab('storage') },
+                { icon: Bell, label: 'Alerts', color: 'bg-zinc-100 text-zinc-600 dark:bg-zinc-900/30 dark:text-zinc-400', action: () => setSettingsTab('notifications') },
+                { icon: Share2, label: 'Sharing', color: 'bg-neutral-100 text-neutral-600 dark:bg-neutral-900/30 dark:text-neutral-400', action: () => setSettingsTab('sharing') },
+                { icon: Zap, label: 'Integrations', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', action: () => setSettingsTab('integrations') },
+                { icon: Lock, label: 'Security', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', action: () => setSettingsTab('advanced') },
+                { icon: RefreshCw, label: 'Sync', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Syncing documents...', success: 'Documents synced successfully', error: 'Sync failed' }) },
+                { icon: Download, label: 'Export', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: () => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Preparing export...', success: 'Export ready for download', error: 'Export failed' }) },
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={action.action}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1650,11 +1654,11 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
                           </p>
                         </div>
                         <div className="flex gap-3">
-                          <Button variant="outline" className="flex-1">
+                          <Button variant="outline" className="flex-1" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Exporting all documents...', success: 'Export complete! Download started', error: 'Failed to export documents' })}>
                             <Download className="h-4 w-4 mr-2" />
                             Export All
                           </Button>
-                          <Button variant="outline" className="flex-1">
+                          <Button variant="outline" className="flex-1" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Preparing backup...', success: 'Backup ready for download', error: 'Failed to prepare backup' })}>
                             <Archive className="h-4 w-4 mr-2" />
                             Download Backup
                           </Button>
@@ -1878,7 +1882,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
                               </div>
                               <span className="font-medium text-gray-900 dark:text-white">{integration.name}</span>
                             </div>
-                            <Button variant={integration.connected ? 'outline' : 'default'} size="sm">
+                            <Button variant={integration.connected ? 'outline' : 'default'} size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: integration.connected ? `Disconnecting ${integration.name}...` : `Connecting ${integration.name}...`, success: integration.connected ? `${integration.name} disconnected` : `${integration.name} connected successfully`, error: integration.connected ? `Failed to disconnect ${integration.name}` : `Failed to connect ${integration.name}` })}>
                               {integration.connected ? 'Disconnect' : 'Connect'}
                             </Button>
                           </div>
@@ -1902,7 +1906,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
                         <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <div className="flex items-center justify-between mb-2">
                             <Label className="text-gray-900 dark:text-white font-medium">API Token</Label>
-                            <Button variant="outline" size="sm">
+                            <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 400)), { loading: 'Copying token...', success: 'API token copied to clipboard', error: 'Failed to copy token' })}>
                               <Copy className="h-4 w-4 mr-2" />
                               Copy
                             </Button>
@@ -1911,7 +1915,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
                             doc_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
                           </code>
                         </div>
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Regenerating API token...', success: 'New API token generated', error: 'Failed to regenerate token' })}>
                           <RefreshCw className="h-4 w-4 mr-2" />
                           Regenerate Token
                         </Button>
@@ -2017,7 +2021,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
                             <h4 className="font-medium text-gray-900 dark:text-white">Clear Trash</h4>
                             <p className="text-sm text-gray-500 dark:text-gray-400">Permanently delete all trashed documents</p>
                           </div>
-                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-900/20">
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-900/20" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Clearing trash...', success: 'Trash emptied successfully', error: 'Failed to clear trash' })}>
                             <Trash2 className="h-4 w-4 mr-2" />
                             Clear Trash
                           </Button>
@@ -2027,7 +2031,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
                             <h4 className="font-medium text-gray-900 dark:text-white">Delete All Documents</h4>
                             <p className="text-sm text-gray-500 dark:text-gray-400">Permanently remove all documents</p>
                           </div>
-                          <Button variant="destructive">
+                          <Button variant="destructive" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Deleting all documents...', success: 'All documents deleted', error: 'Failed to delete documents' })}>
                             <Trash2 className="h-4 w-4 mr-2" />
                             Delete All
                           </Button>
@@ -2134,7 +2138,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
                           <p className="text-sm text-gray-500">{version.changes}</p>
                           <p className="text-xs text-gray-400 mt-1">{version.createdAt.toLocaleString()}</p>
                         </div>
-                        {i > 0 && <Button variant="ghost" size="sm">Restore</Button>}
+                        {i > 0 && <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: `Restoring version ${version.version}...`, success: `Restored to version ${version.version}`, error: 'Failed to restore version' })}>Restore</Button>}
                       </div>
                     ))}
                   </TabsContent>
@@ -2159,14 +2163,14 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
                   <TabsContent value="sharing" className="mt-4 space-y-4">
                     <div className="flex gap-2">
                       <Input placeholder="Add people or groups" className="flex-1" />
-                      <Button>Share</Button>
+                      <Button onClick={() => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Sharing document...', success: 'Document shared successfully', error: 'Failed to share document' })}>Share</Button>
                     </div>
                     <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <Link2 className="h-4 w-4" />
                         <span className="text-sm">Copy link</span>
                       </div>
-                      <Button variant="ghost" size="sm">
+                      <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 400)), { loading: 'Copying link...', success: 'Link copied to clipboard', error: 'Failed to copy link' })}>
                         <Copy className="h-4 w-4" />
                       </Button>
                     </div>
@@ -2174,7 +2178,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
                 </Tabs>
               </ScrollArea>
               <div className="flex items-center gap-2 pt-4 border-t">
-                <Button className="flex-1 bg-cyan-600 hover:bg-cyan-700">
+                <Button className="flex-1 bg-cyan-600 hover:bg-cyan-700" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening document...', success: 'Document opened in new tab', error: 'Failed to open document' })}>
                   <ExternalLink className="h-4 w-4 mr-2" />
                   Open Document
                 </Button>

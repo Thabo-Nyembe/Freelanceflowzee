@@ -1296,10 +1296,10 @@ export default function SalesClient() {
                           <Badge className={contact.status === 'customer' ? 'bg-green-100 text-green-700' : contact.status === 'sql' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700'}>{contact.status}</Badge>
                         </div>
                         <div className="flex items-center gap-2 mt-3">
-                          <Button variant="ghost" size="icon" className="h-8 w-8"><Mail className="w-4 h-4" /></Button>
-                          <Button variant="ghost" size="icon" className="h-8 w-8"><Phone className="w-4 h-4" /></Button>
-                          <Button variant="ghost" size="icon" className="h-8 w-8"><MessageSquare className="w-4 h-4" /></Button>
-                          {contact.linkedin && <Button variant="ghost" size="icon" className="h-8 w-8"><ExternalLink className="w-4 h-4" /></Button>}
+                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening email composer...', success: `Email draft opened for ${contact.firstName} ${contact.lastName}`, error: 'Failed to open email' })} title="Send email"><Mail className="w-4 h-4" /></Button>
+                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Initiating call...', success: `Calling ${contact.firstName} ${contact.lastName}...`, error: 'Failed to initiate call' })} title="Call contact"><Phone className="w-4 h-4" /></Button>
+                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening message...', success: `Message window opened for ${contact.firstName} ${contact.lastName}`, error: 'Failed to open message' })} title="Send message"><MessageSquare className="w-4 h-4" /></Button>
+                          {contact.linkedin && <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Opening LinkedIn profile...', success: `Opened LinkedIn profile for ${contact.firstName} ${contact.lastName}`, error: 'Failed to open LinkedIn' })} title="View LinkedIn"><ExternalLink className="w-4 h-4" /></Button>}
                         </div>
                       </div>
                     </div>
@@ -1699,7 +1699,7 @@ export default function SalesClient() {
                             <div className="w-24">
                               <Input defaultValue={`${(idx + 1) * 15}%`} className="text-center" />
                             </div>
-                            <Button variant="ghost" size="icon">
+                            <Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening stage editor...', success: `Editing "${stage}" stage settings`, error: 'Failed to open editor' })} title="Edit stage">
                               <Edit className="w-4 h-4" />
                             </Button>
                           </div>

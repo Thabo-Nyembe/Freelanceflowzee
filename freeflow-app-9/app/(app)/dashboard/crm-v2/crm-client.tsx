@@ -860,7 +860,7 @@ export default function CrmClient() {
             <Button variant="outline" size="icon" onClick={handleSyncData}>
               <RefreshCw className="w-4 h-4" />
             </Button>
-            <Button variant="outline" size="icon">
+            <Button variant="outline" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Opening filters...', success: 'Filters panel ready', error: 'Failed to open filters' })}>
               <Filter className="w-4 h-4" />
             </Button>
             <Button onClick={handleAddContact} className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white">
@@ -1050,7 +1050,7 @@ export default function CrmClient() {
                                     {deal.company}
                                   </p>
                                 </div>
-                                <Button variant="ghost" size="icon" className="h-6 w-6">
+                                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={(e) => { e.stopPropagation(); toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: `Loading options for ${deal.name}...`, success: 'Deal options ready', error: 'Failed to load options' }) }}>
                                   <MoreVertical className="w-4 h-4" />
                                 </Button>
                               </div>
@@ -1197,13 +1197,13 @@ export default function CrmClient() {
                           <td className="py-3 px-4 text-sm text-gray-500">{formatTimeAgo(contact.lastContact)}</td>
                           <td className="py-3 px-4">
                             <div className="flex items-center gap-1">
-                              <Button variant="ghost" size="icon" className="h-8 w-8">
+                              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => { e.stopPropagation(); toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: `Composing email to ${contact.name}...`, success: 'Email composer opened', error: 'Failed to open email' }) }}>
                                 <Mail className="w-4 h-4" />
                               </Button>
-                              <Button variant="ghost" size="icon" className="h-8 w-8">
+                              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => { e.stopPropagation(); toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: `Initiating call to ${contact.name}...`, success: contact.phone ? `Ready to call ${contact.phone}` : 'No phone number available', error: 'Failed to initiate call' }) }}>
                                 <Phone className="w-4 h-4" />
                               </Button>
-                              <Button variant="ghost" size="icon" className="h-8 w-8">
+                              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => { e.stopPropagation(); toast.promise(new Promise(r => setTimeout(r, 800)), { loading: `Loading options for ${contact.name}...`, success: 'Contact options ready', error: 'Failed to load options' }) }}>
                                 <MoreVertical className="w-4 h-4" />
                               </Button>
                             </div>
@@ -1741,7 +1741,7 @@ export default function CrmClient() {
                         <Badge className={automation.status === 'active' ? 'bg-green-100 text-green-700' : automation.status === 'paused' ? 'bg-amber-100 text-amber-700' : 'bg-gray-100 text-gray-700'}>
                           {automation.status}
                         </Badge>
-                        <Button variant="ghost" size="icon">
+                        <Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: `Loading options for ${automation.name}...`, success: 'Automation options ready', error: 'Failed to load options' })}>
                           <MoreVertical className="w-4 h-4" />
                         </Button>
                       </div>

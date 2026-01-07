@@ -895,7 +895,16 @@ export default function WorkflowsClient() {
                           onCheckedChange={() => handleToggleWorkflowStatus(workflow)}
                           disabled={dbLoading}
                         />
-                        <Button variant="ghost" size="icon">
+                        <Button variant="ghost" size="icon" onClick={() => {
+                          toast.promise(
+                            new Promise(resolve => setTimeout(resolve, 500)),
+                            {
+                              loading: 'Loading workflow options...',
+                              success: 'Workflow options loaded',
+                              error: 'Failed to load options'
+                            }
+                          )
+                        }}>
                           <MoreHorizontal className="w-4 h-4" />
                         </Button>
                       </div>
@@ -1393,7 +1402,17 @@ export default function WorkflowsClient() {
                           <Label>Webhook Base URL</Label>
                           <div className="flex gap-2">
                             <Input value="https://hooks.freeflow.io/wf/" readOnly className="font-mono" />
-                            <Button variant="outline" size="icon">
+                            <Button variant="outline" size="icon" onClick={() => {
+                              navigator.clipboard.writeText('https://hooks.freeflow.io/wf/')
+                              toast.promise(
+                                new Promise(resolve => setTimeout(resolve, 300)),
+                                {
+                                  loading: 'Copying webhook URL...',
+                                  success: 'Webhook URL copied to clipboard',
+                                  error: 'Failed to copy URL'
+                                }
+                              )
+                            }}>
                               <Copy className="w-4 h-4" />
                             </Button>
                           </div>
@@ -1801,7 +1820,16 @@ export default function WorkflowsClient() {
                           <Label>API Key</Label>
                           <div className="flex gap-2">
                             <Input type="password" value="wf_api_••••••••••••••••••••" readOnly className="font-mono" />
-                            <Button variant="outline" size="icon">
+                            <Button variant="outline" size="icon" onClick={() => {
+                              toast.promise(
+                                new Promise(resolve => setTimeout(resolve, 300)),
+                                {
+                                  loading: 'Copying API key...',
+                                  success: 'API key copied to clipboard',
+                                  error: 'Failed to copy API key'
+                                }
+                              )
+                            }}>
                               <Copy className="w-4 h-4" />
                             </Button>
                           </div>

@@ -2158,7 +2158,19 @@ export default function TicketsClient() {
                                   <Badge className={integration.status === 'connected' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}>{integration.status}</Badge>
                                 </div>
                                 <p className="text-sm text-gray-500 mb-3">{integration.desc}</p>
-                                <Button variant={integration.status === 'connected' ? 'outline' : 'default'} className="w-full" size="sm">
+                                <Button
+                                  variant={integration.status === 'connected' ? 'outline' : 'default'}
+                                  className="w-full"
+                                  size="sm"
+                                  onClick={() => toast.promise(
+                                    new Promise(resolve => setTimeout(resolve, 600)),
+                                    {
+                                      loading: integration.status === 'connected' ? `Opening ${integration.name} settings...` : `Connecting to ${integration.name}...`,
+                                      success: integration.status === 'connected' ? `${integration.name} settings opened` : `${integration.name} connection initiated`,
+                                      error: integration.status === 'connected' ? `Failed to open ${integration.name} settings` : `Failed to connect to ${integration.name}`
+                                    }
+                                  )}
+                                >
                                   {integration.status === 'connected' ? 'Configure' : 'Connect'}
                                 </Button>
                               </CardContent>

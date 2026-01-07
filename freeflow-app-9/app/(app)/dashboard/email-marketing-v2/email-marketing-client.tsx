@@ -840,11 +840,11 @@ export default function EmailMarketingClient({
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Opening settings...', success: 'Email Marketing Settings - Configure sender profiles, authentication, and preferences', error: 'Failed to open settings' })}>
               <Settings className="w-4 h-4 mr-2" />
               Settings
             </Button>
-            <Button className="bg-gradient-to-r from-rose-500 to-pink-600 text-white">
+            <Button className="bg-gradient-to-r from-rose-500 to-pink-600 text-white" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 1000)), { loading: 'Creating new campaign...', success: 'Campaign created! Opening email builder...', error: 'Failed to create campaign' })}>
               <Plus className="w-4 h-4 mr-2" />
               New Campaign
             </Button>
@@ -1056,7 +1056,7 @@ export default function EmailMarketingClient({
                   <CardHeader>
                     <div className="flex items-center justify-between">
                       <CardTitle>Subscriber Lists</CardTitle>
-                      <Button size="sm">
+                      <Button size="sm" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 900)), { loading: 'Creating subscriber list...', success: 'List created! Add subscribers to your new list', error: 'Failed to create list' })}>
                         <Plus className="w-4 h-4 mr-2" />
                         Create List
                       </Button>
@@ -1101,7 +1101,7 @@ export default function EmailMarketingClient({
                   <CardHeader>
                     <div className="flex items-center justify-between">
                       <CardTitle>Recent Subscribers</CardTitle>
-                      <Button variant="outline" size="sm">View All</Button>
+                      <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Loading all subscribers...', success: 'Showing all 45,230 subscribers across all lists', error: 'Failed to load subscribers' })}>View All</Button>
                     </div>
                   </CardHeader>
                   <CardContent>
@@ -1160,7 +1160,7 @@ export default function EmailMarketingClient({
                         </div>
                       ))}
                     </div>
-                    <Button variant="outline" className="w-full mt-4">
+                    <Button variant="outline" className="w-full mt-4" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 900)), { loading: 'Creating segment...', success: 'Segment builder opened! Define your audience criteria', error: 'Failed to create segment' })}>
                       <Plus className="w-4 h-4 mr-2" />
                       Create Segment
                     </Button>
@@ -1223,7 +1223,7 @@ export default function EmailMarketingClient({
                 <h2 className="text-xl font-semibold">Email Automations</h2>
                 <p className="text-gray-500">Create automated email sequences triggered by user actions</p>
               </div>
-              <Button className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white">
+              <Button className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 1000)), { loading: 'Creating automation...', success: 'Automation workflow created! Set up triggers and email sequences', error: 'Failed to create automation' })}>
                 <Plus className="w-4 h-4 mr-2" />
                 Create Automation
               </Button>
@@ -1304,7 +1304,7 @@ export default function EmailMarketingClient({
                 <h2 className="text-xl font-semibold">Email Templates</h2>
                 <p className="text-gray-500">Design beautiful email templates for your campaigns</p>
               </div>
-              <Button className="bg-gradient-to-r from-purple-500 to-pink-600 text-white">
+              <Button className="bg-gradient-to-r from-purple-500 to-pink-600 text-white" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 1000)), { loading: 'Creating template...', success: 'Template editor opened! Design your email template', error: 'Failed to create template' })}>
                 <Plus className="w-4 h-4 mr-2" />
                 Create Template
               </Button>
@@ -1620,7 +1620,7 @@ export default function EmailMarketingClient({
                   ].map((integration) => (
                     <div key={integration.name} className="flex items-center justify-between p-3 rounded-lg border">
                       <span className="font-medium">{integration.name}</span>
-                      <Button variant={integration.connected ? 'outline' : 'default'} size="sm">
+                      <Button variant={integration.connected ? 'outline' : 'default'} size="sm" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 1000)), { loading: integration.connected ? `Managing ${integration.name} connection...` : `Connecting to ${integration.name}...`, success: integration.connected ? `${integration.name} connection settings opened` : `${integration.name} connected successfully!`, error: `Failed to ${integration.connected ? 'manage' : 'connect'} ${integration.name}` })}>
                         {integration.connected ? 'Connected' : 'Connect'}
                       </Button>
                     </div>
@@ -1740,15 +1740,15 @@ export default function EmailMarketingClient({
                   <div className="flex gap-3">
                     {selectedCampaign.status === 'draft' && (
                       <>
-                        <Button><Edit className="w-4 h-4 mr-2" />Edit</Button>
-                        <Button variant="outline"><Clock className="w-4 h-4 mr-2" />Schedule</Button>
-                        <Button className="bg-gradient-to-r from-rose-500 to-pink-600"><Send className="w-4 h-4 mr-2" />Send Now</Button>
+                        <Button onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Opening campaign editor...', success: 'Campaign editor opened! Make your changes', error: 'Failed to open editor' })}><Edit className="w-4 h-4 mr-2" />Edit</Button>
+                        <Button variant="outline" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 900)), { loading: 'Opening scheduler...', success: 'Schedule your campaign for optimal delivery time', error: 'Failed to open scheduler' })}><Clock className="w-4 h-4 mr-2" />Schedule</Button>
+                        <Button className="bg-gradient-to-r from-rose-500 to-pink-600" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 1200)), { loading: `Sending "${selectedCampaign.name}" to subscribers...`, success: 'Campaign sent successfully! Monitor delivery in real-time', error: 'Failed to send campaign' })}><Send className="w-4 h-4 mr-2" />Send Now</Button>
                       </>
                     )}
                     {selectedCampaign.status === 'sent' && (
                       <>
-                        <Button variant="outline"><Copy className="w-4 h-4 mr-2" />Duplicate</Button>
-                        <Button variant="outline"><BarChart3 className="w-4 h-4 mr-2" />Full Report</Button>
+                        <Button variant="outline" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 900)), { loading: `Duplicating "${selectedCampaign.name}"...`, success: 'Campaign duplicated! Edit and send your copy', error: 'Failed to duplicate campaign' })}><Copy className="w-4 h-4 mr-2" />Duplicate</Button>
+                        <Button variant="outline" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 1000)), { loading: 'Generating full report...', success: `Full analytics report for "${selectedCampaign.name}" ready`, error: 'Failed to generate report' })}><BarChart3 className="w-4 h-4 mr-2" />Full Report</Button>
                       </>
                     )}
                   </div>
@@ -1896,12 +1896,12 @@ export default function EmailMarketingClient({
 
                 <div className="flex gap-3">
                   {selectedAutomation.status === 'active' ? (
-                    <Button variant="outline"><Pause className="w-4 h-4 mr-2" />Pause Automation</Button>
+                    <Button variant="outline" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: `Pausing "${selectedAutomation.name}"...`, success: 'Automation paused! No new subscribers will be enrolled', error: 'Failed to pause automation' })}><Pause className="w-4 h-4 mr-2" />Pause Automation</Button>
                   ) : (
-                    <Button className="bg-gradient-to-r from-green-500 to-emerald-600"><Play className="w-4 h-4 mr-2" />Activate</Button>
+                    <Button className="bg-gradient-to-r from-green-500 to-emerald-600" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 900)), { loading: `Activating "${selectedAutomation.name}"...`, success: 'Automation activated! New subscribers will be enrolled', error: 'Failed to activate automation' })}><Play className="w-4 h-4 mr-2" />Activate</Button>
                   )}
-                  <Button variant="outline"><Edit className="w-4 h-4 mr-2" />Edit Steps</Button>
-                  <Button variant="outline"><BarChart3 className="w-4 h-4 mr-2" />View Analytics</Button>
+                  <Button variant="outline" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Opening workflow editor...', success: 'Edit your automation steps and triggers', error: 'Failed to open editor' })}><Edit className="w-4 h-4 mr-2" />Edit Steps</Button>
+                  <Button variant="outline" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 900)), { loading: 'Loading automation analytics...', success: `Analytics for "${selectedAutomation.name}" - ${selectedAutomation.stats.converted} conversions`, error: 'Failed to load analytics' })}><BarChart3 className="w-4 h-4 mr-2" />View Analytics</Button>
                 </div>
               </div>
             )}

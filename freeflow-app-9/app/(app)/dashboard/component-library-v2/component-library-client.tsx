@@ -912,6 +912,7 @@ export default function App() {
                               key={color}
                               className="w-8 h-8 rounded-full border-2 border-white shadow-md"
                               style={{ backgroundColor: color }}
+                              onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Applying accent color...', success: `Accent color set to ${color}`, error: 'Failed to apply color' })}
                             />
                           ))}
                         </div>

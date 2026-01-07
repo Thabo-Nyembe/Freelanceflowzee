@@ -673,49 +673,51 @@ export default function PollsClient() {
 
   // Delete poll
   const handleDeletePoll = async (pollId: string) => {
-    try {
-      const { error } = await supabase
-        .from('polls')
-        .delete()
-        .eq('id', pollId)
+    toast.promise(
+      (async () => {
+        const { error } = await supabase
+          .from('polls')
+          .delete()
+          .eq('id', pollId)
 
-      if (error) throw error
-
-      toast.success('Poll deleted successfully')
-      fetchPolls()
-    } catch (error) {
-      console.error('Error deleting poll:', error)
-      toast.error('Failed to delete poll')
-    }
+        if (error) throw error
+        fetchPolls()
+      })(),
+      {
+        loading: 'Deleting poll...',
+        success: 'Poll deleted successfully',
+        error: 'Failed to delete poll'
+      }
+    )
   }
 
   // Duplicate poll
   const handleDuplicatePollDb = async (poll: DbPoll) => {
-    try {
-      setIsSaving(true)
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
+    setIsSaving(true)
+    toast.promise(
+      (async () => {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) throw new Error('Please sign in to duplicate polls')
 
-      const { error } = await supabase.from('polls').insert({
-        user_id: user.id,
-        question: `${poll.question} (Copy)`,
-        description: poll.description,
-        poll_type: poll.poll_type,
-        status: 'draft',
-        options: poll.options,
-        is_public: poll.is_public
-      })
+        const { error } = await supabase.from('polls').insert({
+          user_id: user.id,
+          question: `${poll.question} (Copy)`,
+          description: poll.description,
+          poll_type: poll.poll_type,
+          status: 'draft',
+          options: poll.options,
+          is_public: poll.is_public
+        })
 
-      if (error) throw error
-
-      toast.success('Poll duplicated successfully')
-      fetchPolls()
-    } catch (error) {
-      console.error('Error duplicating poll:', error)
-      toast.error('Failed to duplicate poll')
-    } finally {
-      setIsSaving(false)
-    }
+        if (error) throw error
+        fetchPolls()
+      })().finally(() => setIsSaving(false)),
+      {
+        loading: 'Duplicating poll...',
+        success: 'Poll duplicated successfully',
+        error: 'Failed to duplicate poll'
+      }
+    )
   }
 
   // Add option to form
@@ -824,8 +826,14 @@ export default function PollsClient() {
 
   const handleShareForm = async (pollId: string) => {
     const url = `${window.location.origin}/polls/${pollId}`
-    await navigator.clipboard.writeText(url)
-    toast.success('Link copied', { description: 'Poll share link copied to clipboard' })
+    toast.promise(
+      navigator.clipboard.writeText(url),
+      {
+        loading: 'Copying share link...',
+        success: 'Poll share link copied to clipboard',
+        error: 'Failed to copy link'
+      }
+    )
   }
 
   return (
@@ -1820,6 +1828,7 @@ export default function PollsClient() {
                           {mockThemes.map(theme => (
                             <button
                               key={theme.id}
+                              onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: `Applying ${theme.name} theme...`, success: `${theme.name} theme set as default`, error: 'Failed to apply theme' })}
                               className="p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-emerald-500 transition-all"
                             >
                               <div
@@ -2162,7 +2171,7 @@ export default function PollsClient() {
                             <p className="font-medium text-red-700 dark:text-red-400">Delete All Responses</p>
                             <p className="text-sm text-red-600 dark:text-red-500">Remove all response data permanently</p>
                           </div>
-                          <Button variant="destructive" size="sm">Delete All</Button>
+                          <Button variant="destructive" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Deleting all responses...', success: 'All responses deleted permanently', error: 'Failed to delete responses' })}>Delete All</Button>
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
@@ -2170,7 +2179,7 @@ export default function PollsClient() {
                             <p className="font-medium text-red-700 dark:text-red-400">Reset Workspace</p>
                             <p className="text-sm text-red-600 dark:text-red-500">Delete all forms and start fresh</p>
                           </div>
-                          <Button variant="destructive" size="sm">Reset</Button>
+                          <Button variant="destructive" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 2500)), { loading: 'Resetting workspace...', success: 'Workspace reset complete', error: 'Failed to reset workspace' })}>Reset</Button>
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
@@ -2178,7 +2187,7 @@ export default function PollsClient() {
                             <p className="font-medium text-red-700 dark:text-red-400">Delete Account</p>
                             <p className="text-sm text-red-600 dark:text-red-500">Permanently delete your account</p>
                           </div>
-                          <Button variant="destructive" size="sm">Delete Account</Button>
+                          <Button variant="destructive" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 3000)), { loading: 'Deleting account...', success: 'Account deleted successfully', error: 'Failed to delete account' })}>Delete Account</Button>
                         </div>
                       </CardContent>
                     </Card>

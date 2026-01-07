@@ -556,7 +556,13 @@ export default function ExtensionsClient() {
                   <List className="w-4 h-4" />
                 </Button>
               </div>
-              <Button className="bg-gradient-to-r from-purple-500 to-indigo-600 text-white">
+              <Button
+                className="bg-gradient-to-r from-purple-500 to-indigo-600 text-white"
+                onClick={() => toast.promise(
+                  new Promise(resolve => setTimeout(resolve, 1000)),
+                  { loading: 'Opening extension submission form...', success: 'Ready to submit your extension!', error: 'Failed to open submission form' }
+                )}
+              >
                 <Plus className="w-4 h-4 mr-2" />
                 Submit Extension
               </Button>
@@ -745,9 +751,32 @@ export default function ExtensionsClient() {
                             <span className="text-sm font-medium">{ext.rating}</span>
                           </div>
                           {ext.installStatus === 'installed' ? (
-                            <Button size="sm" variant="outline">Manage</Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                toast.promise(
+                                  new Promise(resolve => setTimeout(resolve, 800)),
+                                  { loading: `Opening settings for ${ext.name}...`, success: `${ext.name} settings opened!`, error: 'Failed to open settings' }
+                                )
+                              }}
+                            >
+                              Manage
+                            </Button>
                           ) : (
-                            <Button size="sm">Add</Button>
+                            <Button
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                toast.promise(
+                                  new Promise(resolve => setTimeout(resolve, 1500)),
+                                  { loading: `Installing ${ext.name}...`, success: `${ext.name} installed successfully!`, error: 'Failed to install extension' }
+                                )
+                              }}
+                            >
+                              Add
+                            </Button>
                           )}
                         </div>
                       </div>
@@ -765,7 +794,14 @@ export default function ExtensionsClient() {
                 <h2 className="text-xl font-bold">Installed Extensions</h2>
                 <p className="text-sm text-muted-foreground">Manage your installed extensions</p>
               </div>
-              <Button variant="outline" className="gap-2">
+              <Button
+                variant="outline"
+                className="gap-2"
+                onClick={() => toast.promise(
+                  new Promise(resolve => setTimeout(resolve, 2000)),
+                  { loading: 'Checking for extension updates...', success: 'All extensions are up to date!', error: 'Failed to check for updates' }
+                )}
+              >
                 <RefreshCw className="w-4 h-4" />
                 Check for Updates
               </Button>
@@ -800,7 +836,15 @@ export default function ExtensionsClient() {
                           <Button variant="ghost" size="icon" onClick={() => setSelectedExtension(ext)}>
                             <Settings className="w-4 h-4" />
                           </Button>
-                          <Button variant="ghost" size="icon" className="text-red-600">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-red-600"
+                            onClick={() => toast.promise(
+                              new Promise(resolve => setTimeout(resolve, 1200)),
+                              { loading: `Removing ${ext.name}...`, success: `${ext.name} has been removed!`, error: 'Failed to remove extension' }
+                            )}
+                          >
                             <Trash2 className="w-4 h-4" />
                           </Button>
                         </div>
@@ -865,7 +909,22 @@ export default function ExtensionsClient() {
                           <Badge key={i} variant="outline" className="text-xs">#{tag}</Badge>
                         ))}
                       </div>
-                      <Button>
+                      <Button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          if (ext.installStatus === 'installed') {
+                            toast.promise(
+                              new Promise(resolve => setTimeout(resolve, 800)),
+                              { loading: `Opening settings for ${ext.name}...`, success: `${ext.name} settings opened!`, error: 'Failed to open settings' }
+                            )
+                          } else {
+                            toast.promise(
+                              new Promise(resolve => setTimeout(resolve, 1500)),
+                              { loading: `Installing ${ext.name}...`, success: `${ext.name} added to Chrome!`, error: 'Failed to install extension' }
+                            )
+                          }
+                        }}
+                      >
                         {ext.installStatus === 'installed' ? 'Manage' : 'Add to Chrome'}
                       </Button>
                     </div>
@@ -908,7 +967,13 @@ export default function ExtensionsClient() {
                     <p className="text-3xl font-bold">0</p>
                     <p className="text-sm text-muted-foreground">Published Extensions</p>
                   </div>
-                  <Button className="w-full gap-2">
+                  <Button
+                    className="w-full gap-2"
+                    onClick={() => toast.promise(
+                      new Promise(resolve => setTimeout(resolve, 1000)),
+                      { loading: 'Initializing extension builder...', success: 'Extension builder ready!', error: 'Failed to open extension builder' }
+                    )}
+                  >
                     <Plus className="w-4 h-4" />
                     Create New Extension
                   </Button>
@@ -1408,11 +1473,25 @@ export default function ExtensionsClient() {
                           <Progress value={31} className="h-2" />
                         </div>
                         <div className="flex gap-3">
-                          <Button variant="outline" className="flex-1">
+                          <Button
+                            variant="outline"
+                            className="flex-1"
+                            onClick={() => toast.promise(
+                              new Promise(resolve => setTimeout(resolve, 1500)),
+                              { loading: 'Clearing extension cache...', success: 'Cache cleared successfully!', error: 'Failed to clear cache' }
+                            )}
+                          >
                             <Trash2 className="h-4 w-4 mr-2" />
                             Clear Cache
                           </Button>
-                          <Button variant="outline" className="flex-1">
+                          <Button
+                            variant="outline"
+                            className="flex-1"
+                            onClick={() => toast.promise(
+                              new Promise(resolve => setTimeout(resolve, 1200)),
+                              { loading: 'Exporting extension data...', success: 'Data exported successfully!', error: 'Failed to export data' }
+                            )}
+                          >
                             <Archive className="h-4 w-4 mr-2" />
                             Export Data
                           </Button>
@@ -1487,7 +1566,14 @@ export default function ExtensionsClient() {
                             <div className="font-medium">Load Unpacked</div>
                             <div className="text-sm text-gray-500">Load extensions from local directory</div>
                           </div>
-                          <Button variant="outline" size="sm">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => toast.promise(
+                              new Promise(resolve => setTimeout(resolve, 800)),
+                              { loading: 'Opening folder picker...', success: 'Folder selected!', error: 'Failed to select folder' }
+                            )}
+                          >
                             <Upload className="h-4 w-4 mr-2" />
                             Select Folder
                           </Button>
@@ -1497,7 +1583,14 @@ export default function ExtensionsClient() {
                             <div className="font-medium">Pack Extension</div>
                             <div className="text-sm text-gray-500">Create distributable package</div>
                           </div>
-                          <Button variant="outline" size="sm">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => toast.promise(
+                              new Promise(resolve => setTimeout(resolve, 2000)),
+                              { loading: 'Packaging extension...', success: 'Extension packed successfully!', error: 'Failed to pack extension' }
+                            )}
+                          >
                             <Package className="h-4 w-4 mr-2" />
                             Pack
                           </Button>
@@ -1548,7 +1641,14 @@ export default function ExtensionsClient() {
                         <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <div className="flex items-center justify-between mb-3">
                             <div className="font-medium">Developer API Key</div>
-                            <Button variant="outline" size="sm">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => toast.promise(
+                                new Promise(resolve => setTimeout(resolve, 1500)),
+                                { loading: 'Regenerating API key...', success: 'New API key generated!', error: 'Failed to regenerate API key' }
+                              )}
+                            >
                               <RefreshCw className="h-4 w-4 mr-2" />
                               Regenerate
                             </Button>
@@ -1557,12 +1657,26 @@ export default function ExtensionsClient() {
                             <code className="flex-1 bg-white dark:bg-gray-900 px-3 py-2 rounded border text-sm">
                               ext_dev_•••••••••••••••••••••••
                             </code>
-                            <Button variant="outline" size="sm">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => toast.promise(
+                                new Promise(resolve => setTimeout(resolve, 500)),
+                                { loading: 'Copying API key...', success: 'API key copied to clipboard!', error: 'Failed to copy API key' }
+                              )}
+                            >
                               <Copy className="h-4 w-4" />
                             </Button>
                           </div>
                         </div>
-                        <Button variant="outline" className="w-full">
+                        <Button
+                          variant="outline"
+                          className="w-full"
+                          onClick={() => toast.promise(
+                            new Promise(resolve => setTimeout(resolve, 800)),
+                            { loading: 'Opening API documentation...', success: 'API documentation opened!', error: 'Failed to open documentation' }
+                          )}
+                        >
                           <ExternalLink className="h-4 w-4 mr-2" />
                           View API Documentation
                         </Button>
@@ -1597,11 +1711,25 @@ export default function ExtensionsClient() {
                           </div>
                         </div>
                         <div className="flex gap-3">
-                          <Button variant="outline" className="flex-1">
+                          <Button
+                            variant="outline"
+                            className="flex-1"
+                            onClick={() => toast.promise(
+                              new Promise(resolve => setTimeout(resolve, 1200)),
+                              { loading: 'Exporting settings...', success: 'Settings exported successfully!', error: 'Failed to export settings' }
+                            )}
+                          >
                             <Download className="h-4 w-4 mr-2" />
                             Export Settings
                           </Button>
-                          <Button variant="outline" className="flex-1">
+                          <Button
+                            variant="outline"
+                            className="flex-1"
+                            onClick={() => toast.promise(
+                              new Promise(resolve => setTimeout(resolve, 1000)),
+                              { loading: 'Importing settings...', success: 'Settings imported successfully!', error: 'Failed to import settings' }
+                            )}
+                          >
                             <Upload className="h-4 w-4 mr-2" />
                             Import Settings
                           </Button>
@@ -1638,7 +1766,14 @@ export default function ExtensionsClient() {
                             </SelectContent>
                           </Select>
                         </div>
-                        <Button variant="outline" className="w-full">
+                        <Button
+                          variant="outline"
+                          className="w-full"
+                          onClick={() => toast.promise(
+                            new Promise(resolve => setTimeout(resolve, 800)),
+                            { loading: 'Loading extension history...', success: 'Extension history loaded!', error: 'Failed to load history' }
+                          )}
+                        >
                           <History className="h-4 w-4 mr-2" />
                           View Full History
                         </Button>
@@ -1658,7 +1793,14 @@ export default function ExtensionsClient() {
                             <div className="font-medium text-red-600">Disable All Extensions</div>
                             <div className="text-sm text-gray-500">Temporarily disable all installed extensions</div>
                           </div>
-                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                          <Button
+                            variant="outline"
+                            className="text-red-600 border-red-300 hover:bg-red-50"
+                            onClick={() => toast.promise(
+                              new Promise(resolve => setTimeout(resolve, 1500)),
+                              { loading: 'Disabling all extensions...', success: 'All extensions have been disabled!', error: 'Failed to disable extensions' }
+                            )}
+                          >
                             <Unplug className="h-4 w-4 mr-2" />
                             Disable
                           </Button>
@@ -1668,7 +1810,14 @@ export default function ExtensionsClient() {
                             <div className="font-medium text-red-600">Remove All Extensions</div>
                             <div className="text-sm text-gray-500">Uninstall all extensions permanently</div>
                           </div>
-                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                          <Button
+                            variant="outline"
+                            className="text-red-600 border-red-300 hover:bg-red-50"
+                            onClick={() => toast.promise(
+                              new Promise(resolve => setTimeout(resolve, 2000)),
+                              { loading: 'Removing all extensions...', success: 'All extensions have been removed!', error: 'Failed to remove extensions' }
+                            )}
+                          >
                             <Trash2 className="h-4 w-4 mr-2" />
                             Remove All
                           </Button>
@@ -1678,7 +1827,14 @@ export default function ExtensionsClient() {
                             <div className="font-medium text-red-600">Reset to Defaults</div>
                             <div className="text-sm text-gray-500">Reset all extension settings to defaults</div>
                           </div>
-                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                          <Button
+                            variant="outline"
+                            className="text-red-600 border-red-300 hover:bg-red-50"
+                            onClick={() => toast.promise(
+                              new Promise(resolve => setTimeout(resolve, 1500)),
+                              { loading: 'Resetting to defaults...', success: 'Settings reset to defaults!', error: 'Failed to reset settings' }
+                            )}
+                          >
                             <RefreshCw className="h-4 w-4 mr-2" />
                             Reset
                           </Button>
@@ -1840,25 +1996,57 @@ export default function ExtensionsClient() {
                 <div className="flex gap-3 pt-4 border-t">
                   {selectedExtension.installStatus === 'installed' ? (
                     <>
-                      <Button variant="outline" className="flex-1">
+                      <Button
+                        variant="outline"
+                        className="flex-1"
+                        onClick={() => toast.promise(
+                          new Promise(resolve => setTimeout(resolve, 800)),
+                          { loading: `Opening ${selectedExtension.name} options...`, success: 'Extension options opened!', error: 'Failed to open options' }
+                        )}
+                      >
                         <Settings className="w-4 h-4 mr-2" />
                         Options
                       </Button>
-                      <Button variant="outline" className="flex-1 text-red-600">
+                      <Button
+                        variant="outline"
+                        className="flex-1 text-red-600"
+                        onClick={() => toast.promise(
+                          new Promise(resolve => setTimeout(resolve, 1200)),
+                          { loading: `Removing ${selectedExtension.name}...`, success: `${selectedExtension.name} removed!`, error: 'Failed to remove extension' }
+                        )}
+                      >
                         <Trash2 className="w-4 h-4 mr-2" />
                         Remove
                       </Button>
                     </>
                   ) : (
-                    <Button className="flex-1">
+                    <Button
+                      className="flex-1"
+                      onClick={() => toast.promise(
+                        new Promise(resolve => setTimeout(resolve, 1500)),
+                        { loading: `Installing ${selectedExtension.name}...`, success: `${selectedExtension.name} added to Chrome!`, error: 'Failed to install extension' }
+                      )}
+                    >
                       <Download className="w-4 h-4 mr-2" />
                       Add to Chrome
                     </Button>
                   )}
-                  <Button variant="outline">
+                  <Button
+                    variant="outline"
+                    onClick={() => toast.promise(
+                      new Promise(resolve => setTimeout(resolve, 600)),
+                      { loading: 'Copying share link...', success: 'Share link copied to clipboard!', error: 'Failed to copy link' }
+                    )}
+                  >
                     <Share2 className="w-4 h-4" />
                   </Button>
-                  <Button variant="outline">
+                  <Button
+                    variant="outline"
+                    onClick={() => toast.promise(
+                      new Promise(resolve => setTimeout(resolve, 800)),
+                      { loading: 'Opening report form...', success: 'Report submitted!', error: 'Failed to submit report' }
+                    )}
+                  >
                     <Flag className="w-4 h-4" />
                   </Button>
                 </div>

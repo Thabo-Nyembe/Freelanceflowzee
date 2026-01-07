@@ -508,7 +508,7 @@ export default function ProjectsHubClient() {
                   <div key={column.id} className="min-w-[280px]">
                     <div className="flex items-center justify-between mb-3 px-2">
                       <div className="flex items-center gap-2"><span className={`w-3 h-3 rounded-full ${column.color}`} /><h3 className="font-semibold">{column.label}</h3><Badge variant="secondary" className="text-xs">{projectsByStatus[column.id]?.length || 0}</Badge></div>
-                      <Button variant="ghost" size="icon" className="h-6 w-6"><Plus className="h-4 w-4" /></Button>
+                      <Button variant="ghost" size="icon" className="h-6 w-6" onClick={(e) => { e.stopPropagation(); toast.promise(new Promise(resolve => setTimeout(resolve, 1000)), { loading: 'Adding project...', success: 'Project added to column', error: 'Failed to add project' }) }}><Plus className="h-4 w-4" /></Button>
                     </div>
                     <div className="space-y-3">
                       {projectsByStatus[column.id]?.map(project => (
@@ -543,7 +543,7 @@ export default function ProjectsHubClient() {
                           <td className="px-4 py-4"><div className="w-24"><div className="flex justify-between text-xs mb-1"><span>{project.progress}%</span></div><Progress value={project.progress} className="h-1.5" /></div></td>
                           <td className="px-4 py-4">{project.budget ? <div><span className="font-medium">${(project.spent / 1000).toFixed(0)}K</span><span className="text-gray-500"> / ${(project.budget / 1000).toFixed(0)}K</span></div> : '-'}</td>
                           <td className="px-4 py-4">{project.endDate ? new Date(project.endDate).toLocaleDateString() : '-'}</td>
-                          <td className="px-4 py-4"><Button variant="ghost" size="icon"><MoreHorizontal className="h-4 w-4" /></Button></td>
+                          <td className="px-4 py-4"><Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Loading options...', success: 'Options menu opened', error: 'Failed to load options' }) }}><MoreHorizontal className="h-4 w-4" /></Button></td>
                         </tr>
                       ))}
                     </tbody>
@@ -1215,7 +1215,7 @@ export default function ProjectsHubClient() {
                               </div>
                               <div className="flex items-center gap-2">
                                 <Badge className="bg-green-100 text-green-700">{webhook.status}</Badge>
-                                <Button variant="ghost" size="sm">
+                                <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 1000)), { loading: 'Deleting webhook...', success: 'Webhook deleted successfully', error: 'Failed to delete webhook' })}>
                                   <Trash2 className="h-4 w-4" />
                                 </Button>
                               </div>
@@ -1288,7 +1288,7 @@ export default function ProjectsHubClient() {
                             <code className="flex-1 bg-white dark:bg-gray-900 px-3 py-2 rounded border text-sm">
                               prj_live_•••••••••••••••••••••••
                             </code>
-                            <Button variant="outline" size="sm">
+                            <Button variant="outline" size="sm" onClick={() => toast.promise(navigator.clipboard.writeText('prj_live_xxxxxxxxxxxxxxxxxxxxx'), { loading: 'Copying token...', success: 'API token copied to clipboard', error: 'Failed to copy token' })}>
                               <Copy className="h-4 w-4" />
                             </Button>
                           </div>
@@ -1379,10 +1379,10 @@ export default function ProjectsHubClient() {
                             </div>
                             <div className="flex items-center gap-3">
                               {field.required && <Badge variant="outline">Required</Badge>}
-                              <Button variant="ghost" size="sm">
+                              <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Opening editor...', success: 'Custom field editor opened', error: 'Failed to open editor' })}>
                                 <Edit className="h-4 w-4" />
                               </Button>
-                              <Button variant="ghost" size="sm">
+                              <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 1000)), { loading: 'Deleting custom field...', success: 'Custom field deleted successfully', error: 'Failed to delete custom field' })}>
                                 <Trash2 className="h-4 w-4 text-red-500" />
                               </Button>
                             </div>

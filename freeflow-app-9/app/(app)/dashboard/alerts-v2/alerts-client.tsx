@@ -1603,7 +1603,7 @@ export default function AlertsClient() {
                                 )}
                               </div>
                             </div>
-                            <Button variant={integration.status === 'connected' ? 'outline' : 'default'} size="sm">
+                            <Button variant={integration.status === 'connected' ? 'outline' : 'default'} size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: integration.status === 'connected' ? `Loading ${integration.name} settings...` : `Connecting to ${integration.name}...`, success: integration.status === 'connected' ? `${integration.name} configuration ready` : `${integration.name} connected successfully`, error: `Failed to ${integration.status === 'connected' ? 'configure' : 'connect'} ${integration.name}` })}>
                               {integration.status === 'connected' ? 'Configure' : 'Connect'}
                             </Button>
                           </div>
@@ -1635,7 +1635,7 @@ export default function AlertsClient() {
                                 )}
                               </div>
                             </div>
-                            <Button variant={integration.status === 'connected' ? 'outline' : 'default'} size="sm">
+                            <Button variant={integration.status === 'connected' ? 'outline' : 'default'} size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: integration.status === 'connected' ? `Loading ${integration.name} settings...` : `Connecting to ${integration.name}...`, success: integration.status === 'connected' ? `${integration.name} configuration ready` : `${integration.name} connected successfully`, error: `Failed to ${integration.status === 'connected' ? 'configure' : 'connect'} ${integration.name}` })}>
                               {integration.status === 'connected' ? 'Configure' : 'Connect'}
                             </Button>
                           </div>

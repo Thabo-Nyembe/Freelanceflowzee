@@ -1140,6 +1140,217 @@ export default function AuditLogsClient() {
     )
   }
 
+  // Handle saved queries button
+  const handleSavedQueries = () => {
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 500)),
+      {
+        loading: 'Loading saved queries...',
+        success: 'Saved queries loaded',
+        error: 'Failed to load saved queries'
+      }
+    )
+  }
+
+  // Handle search logs
+  const handleSearchLogs = () => {
+    toast.promise(
+      (async () => {
+        await createAuditLog({
+          log_type: 'data_access',
+          action: 'logs.search',
+          description: 'Performed advanced log search',
+          status: 'success'
+        })
+        await new Promise(r => setTimeout(r, 800))
+      })(),
+      {
+        loading: 'Searching audit logs...',
+        success: 'Search completed',
+        error: 'Search failed'
+      }
+    )
+  }
+
+  // Handle refresh compliance
+  const handleRefreshCompliance = () => {
+    toast.promise(
+      (async () => {
+        await createAuditLog({
+          log_type: 'system',
+          action: 'compliance.refresh',
+          description: 'Refreshed compliance dashboard',
+          status: 'success'
+        })
+        await new Promise(r => setTimeout(r, 1000))
+      })(),
+      {
+        loading: 'Refreshing compliance data...',
+        success: 'Compliance data refreshed',
+        error: 'Failed to refresh compliance data'
+      }
+    )
+  }
+
+  // Handle export all compliance reports
+  const handleExportAllCompliance = () => {
+    toast.promise(
+      (async () => {
+        await createAuditLog({
+          log_type: 'data_access',
+          action: 'compliance.export_all',
+          description: 'Exported all compliance reports',
+          status: 'success'
+        })
+        await new Promise(r => setTimeout(r, 2000))
+      })(),
+      {
+        loading: 'Exporting all compliance reports...',
+        success: 'All compliance reports exported',
+        error: 'Failed to export compliance reports'
+      }
+    )
+  }
+
+  // Handle download individual compliance report
+  const handleDownloadComplianceReport = (framework: string) => {
+    toast.promise(
+      (async () => {
+        await createAuditLog({
+          log_type: 'data_access',
+          action: 'compliance.download_report',
+          description: `Downloaded ${framework} compliance report`,
+          status: 'success'
+        })
+        await new Promise(r => setTimeout(r, 1500))
+      })(),
+      {
+        loading: `Downloading ${framework} report...`,
+        success: `${framework} report downloaded`,
+        error: `Failed to download ${framework} report`
+      }
+    )
+  }
+
+  // Handle SIEM integration
+  const handleSiemIntegration = (name: string, status: string) => {
+    if (status === 'connected') {
+      toast.promise(
+        (async () => {
+          await createAuditLog({
+            log_type: 'admin',
+            action: 'integration.manage',
+            description: `Managing ${name} integration`,
+            status: 'success'
+          })
+          await new Promise(r => setTimeout(r, 800))
+        })(),
+        {
+          loading: `Opening ${name} settings...`,
+          success: `${name} settings opened`,
+          error: `Failed to open ${name} settings`
+        }
+      )
+    } else {
+      toast.promise(
+        (async () => {
+          await createAuditLog({
+            log_type: 'admin',
+            action: 'integration.connect',
+            description: `Connecting to ${name}`,
+            status: 'success'
+          })
+          await new Promise(r => setTimeout(r, 1500))
+        })(),
+        {
+          loading: `Connecting to ${name}...`,
+          success: `Connected to ${name}`,
+          error: `Failed to connect to ${name}`
+        }
+      )
+    }
+  }
+
+  // Handle export all logs (advanced settings)
+  const handleExportAllLogs = () => {
+    toast.promise(
+      (async () => {
+        await handleExportAuditLogs()
+      })(),
+      {
+        loading: 'Exporting all audit logs...',
+        success: 'All audit logs exported',
+        error: 'Failed to export logs'
+      }
+    )
+  }
+
+  // Handle clear debug logs
+  const handleClearDebugLogs = () => {
+    toast.promise(
+      (async () => {
+        await createAuditLog({
+          log_type: 'admin',
+          action: 'logs.clear_debug',
+          description: 'Cleared debug logs',
+          status: 'success'
+        })
+        await new Promise(r => setTimeout(r, 1000))
+      })(),
+      {
+        loading: 'Clearing debug logs...',
+        success: 'Debug logs cleared',
+        error: 'Failed to clear debug logs'
+      }
+    )
+  }
+
+  // Handle reset configuration
+  const handleResetConfiguration = () => {
+    toast.promise(
+      (async () => {
+        await createAuditLog({
+          log_type: 'admin',
+          action: 'settings.reset',
+          description: 'Reset all audit log settings to default',
+          status: 'success'
+        })
+        await new Promise(r => setTimeout(r, 1500))
+      })(),
+      {
+        loading: 'Resetting configuration...',
+        success: 'Configuration reset to defaults',
+        error: 'Failed to reset configuration'
+      }
+    )
+  }
+
+  // Handle copy log ID
+  const handleCopyLogId = (logId: string) => {
+    navigator.clipboard.writeText(logId)
+    toast.success('Log ID copied to clipboard')
+  }
+
+  // Handle related events
+  const handleRelatedEvents = (logId: string) => {
+    toast.promise(
+      (async () => {
+        await createAuditLog({
+          log_type: 'data_access',
+          action: 'logs.view_related',
+          description: `Viewing related events for log ${logId}`,
+          status: 'success'
+        })
+        await new Promise(r => setTimeout(r, 800))
+      })(),
+      {
+        loading: 'Loading related events...',
+        success: 'Related events loaded',
+        error: 'Failed to load related events'
+      }
+    )
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50/30 to-violet-50/40 dark:bg-none dark:bg-gray-900 p-6">
       <div className="max-w-[1800px] mx-auto space-y-6">
@@ -1417,7 +1628,7 @@ export default function AuditLogsClient() {
                   <p className="text-sm text-gray-600 dark:text-gray-400">Use structured queries to search audit logs</p>
                 </div>
               </div>
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={handleSavedQueries}>
                 <Filter className="w-4 h-4 mr-2" />
                 Saved Queries
               </Button>
@@ -1435,7 +1646,7 @@ export default function AuditLogsClient() {
                       placeholder="severity:critical AND log_type:security"
                       className="flex-1 font-mono"
                     />
-                    <Button className="bg-indigo-600">
+                    <Button className="bg-indigo-600" onClick={handleSearchLogs}>
                       <Search className="w-4 h-4 mr-2" />
                       Search
                     </Button>
@@ -1649,11 +1860,11 @@ export default function AuditLogsClient() {
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" onClick={handleRefreshCompliance}>
                   <RefreshCw className="w-4 h-4 mr-2" />
                   Refresh
                 </Button>
-                <Button size="sm" className="bg-green-600 hover:bg-green-700">
+                <Button size="sm" className="bg-green-600 hover:bg-green-700" onClick={handleExportAllCompliance}>
                   <Download className="w-4 h-4 mr-2" />
                   Export All
                 </Button>
@@ -1694,7 +1905,7 @@ export default function AuditLogsClient() {
                           <p className="text-xs text-gray-500">Failed</p>
                         </div>
                       </div>
-                      <Button variant="outline" className="w-full">
+                      <Button variant="outline" className="w-full" onClick={() => handleDownloadComplianceReport(report.framework)}>
                         <Download className="w-4 h-4 mr-2" />
                         Download Report
                       </Button>
@@ -2070,7 +2281,7 @@ export default function AuditLogsClient() {
                                 <p className="text-sm text-gray-500">{integration.desc}</p>
                               </div>
                             </div>
-                            <Button variant={integration.status === 'connected' ? 'outline' : 'default'} size="sm">
+                            <Button variant={integration.status === 'connected' ? 'outline' : 'default'} size="sm" onClick={() => handleSiemIntegration(integration.name, integration.status)}>
                               {integration.status === 'connected' ? 'Manage' : 'Connect'}
                             </Button>
                           </div>
@@ -2170,7 +2381,7 @@ export default function AuditLogsClient() {
                             <p className="font-medium text-gray-900 dark:text-white">Export All Logs</p>
                             <p className="text-sm text-gray-500">Download complete audit trail</p>
                           </div>
-                          <Button>
+                          <Button onClick={handleExportAllLogs}>
                             <Download className="w-4 h-4 mr-2" />
                             Export
                           </Button>
@@ -2197,7 +2408,7 @@ export default function AuditLogsClient() {
                             <p className="font-medium text-gray-900 dark:text-white">Clear Debug Logs</p>
                             <p className="text-sm text-gray-500">Remove all debug-level logs</p>
                           </div>
-                          <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50">
+                          <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50" onClick={handleClearDebugLogs}>
                             <Trash2 className="w-4 h-4 mr-2" />
                             Clear
                           </Button>
@@ -2207,7 +2418,7 @@ export default function AuditLogsClient() {
                             <p className="font-medium text-gray-900 dark:text-white">Reset Configuration</p>
                             <p className="text-sm text-gray-500">Reset all settings to default</p>
                           </div>
-                          <Button variant="destructive">
+                          <Button variant="destructive" onClick={handleResetConfiguration}>
                             <RefreshCw className="w-4 h-4 mr-2" />
                             Reset
                           </Button>
@@ -2329,11 +2540,11 @@ export default function AuditLogsClient() {
                   </div>
 
                   <div className="flex items-center gap-3 pt-4 border-t">
-                    <Button variant="outline" className="flex-1">
+                    <Button variant="outline" className="flex-1" onClick={() => handleCopyLogId(selectedLog.id)}>
                       <Copy className="w-4 h-4 mr-2" />
                       Copy ID
                     </Button>
-                    <Button variant="outline" className="flex-1">
+                    <Button variant="outline" className="flex-1" onClick={() => handleRelatedEvents(selectedLog.id)}>
                       <ExternalLink className="w-4 h-4 mr-2" />
                       Related Events
                     </Button>

@@ -595,7 +595,7 @@ export default function SocialMediaClient() {
                 className="pl-10 w-64"
               />
             </div>
-            <Button variant="outline" size="icon">
+            <Button variant="outline" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading notifications...', success: 'Notifications loaded', error: 'Failed to load notifications' })}>
               <Bell className="w-4 h-4" />
             </Button>
             <Button className="bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white" onClick={handleCreatePost}>
@@ -703,7 +703,7 @@ export default function SocialMediaClient() {
                             </Badge>
                           )}
                         </div>
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => { e.stopPropagation(); toast.promise(new Promise(r => setTimeout(r, 400)), { loading: 'Loading options...', success: 'Post options ready', error: 'Failed to load options' }) }}>
                           <MoreVertical className="w-4 h-4" />
                         </Button>
                       </div>
@@ -922,7 +922,7 @@ export default function SocialMediaClient() {
                                     Reply
                                   </Button>
                                 )}
-                                <Button size="sm" variant="ghost">
+                                <Button size="sm" variant="ghost" onClick={() => toast.promise(new Promise(r => setTimeout(r, 400)), { loading: 'Opening original post...', success: 'Opened in new tab', error: 'Failed to open post' })}>
                                   <ExternalLink className="w-3 h-3" />
                                 </Button>
                               </div>

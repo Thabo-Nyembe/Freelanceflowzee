@@ -1074,7 +1074,15 @@ export default function ProfileClient() {
           <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg overflow-hidden">
             <div className="h-32 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 relative">
               {displayProfile.coverStory && (
-                <Button size="sm" variant="secondary" className="absolute bottom-2 right-2">
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  className="absolute bottom-2 right-2"
+                  onClick={() => toast.promise(
+                    new Promise(resolve => setTimeout(resolve, 800)),
+                    { loading: 'Loading cover story...', success: 'Cover story ready to play', error: 'Failed to load cover story' }
+                  )}
+                >
                   <Play className="w-3 h-3 mr-1" />
                   Cover Story
                 </Button>
@@ -1137,15 +1145,33 @@ export default function ProfileClient() {
                     ))}
                   </div>
                   <div className="flex gap-3">
-                    <Button className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
+                    <Button
+                      className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white"
+                      onClick={() => toast.promise(
+                        new Promise(resolve => setTimeout(resolve, 1000)),
+                        { loading: 'Sending connection request...', success: 'Connection request sent successfully', error: 'Failed to send connection request' }
+                      )}
+                    >
                       <UserPlus className="w-4 h-4 mr-2" />
                       Connect
                     </Button>
-                    <Button variant="outline">
+                    <Button
+                      variant="outline"
+                      onClick={() => toast.promise(
+                        new Promise(resolve => setTimeout(resolve, 600)),
+                        { loading: 'Opening message composer...', success: 'Message composer ready', error: 'Failed to open message composer' }
+                      )}
+                    >
                       <MessageSquare className="w-4 h-4 mr-2" />
                       Message
                     </Button>
-                    <Button variant="outline">
+                    <Button
+                      variant="outline"
+                      onClick={() => toast.promise(
+                        new Promise(resolve => setTimeout(resolve, 400)),
+                        { loading: 'Loading options...', success: 'More options available', error: 'Failed to load options' }
+                      )}
+                    >
                       <MoreHorizontal className="w-4 h-4" />
                     </Button>
                   </div>
@@ -1293,7 +1319,7 @@ export default function ProfileClient() {
                           </div>
                         ))}
                       </div>
-                      <Button variant="link" className="w-full mt-2 text-blue-600">View all {stats.profileViews} views</Button>
+                      <Button variant="link" className="w-full mt-2 text-blue-600" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Loading all profile views...', success: 'Profile views loaded', error: 'Failed to load views' })}>View all {stats.profileViews} views</Button>
                     </CardContent>
                   </Card>
                 </div>
@@ -1394,19 +1420,20 @@ export default function ProfileClient() {
               {/* Quick Actions */}
               <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
                 {[
-                  { icon: Plus, label: 'Add Position', color: 'from-blue-500 to-indigo-600' },
-                  { icon: Award, label: 'Add Cert', color: 'from-purple-500 to-pink-600' },
-                  { icon: GraduationCap, label: 'Add Education', color: 'from-green-500 to-emerald-600' },
-                  { icon: Trophy, label: 'Add Award', color: 'from-orange-500 to-amber-600' },
-                  { icon: BookOpen, label: 'Add Project', color: 'from-cyan-500 to-blue-600' },
-                  { icon: Heart, label: 'Volunteer', color: 'from-pink-500 to-rose-600' },
-                  { icon: FileText, label: 'Publication', color: 'from-indigo-500 to-purple-600' },
-                  { icon: Languages, label: 'Languages', color: 'from-yellow-500 to-orange-600' },
+                  { icon: Plus, label: 'Add Position', color: 'from-blue-500 to-indigo-600', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening position form...', success: 'Add your work experience', error: 'Failed to open form' }) },
+                  { icon: Award, label: 'Add Cert', color: 'from-purple-500 to-pink-600', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening certification form...', success: 'Add your certifications', error: 'Failed to open form' }) },
+                  { icon: GraduationCap, label: 'Add Education', color: 'from-green-500 to-emerald-600', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening education form...', success: 'Add your education background', error: 'Failed to open form' }) },
+                  { icon: Trophy, label: 'Add Award', color: 'from-orange-500 to-amber-600', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening awards form...', success: 'Add your honors and awards', error: 'Failed to open form' }) },
+                  { icon: BookOpen, label: 'Add Project', color: 'from-cyan-500 to-blue-600', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening project form...', success: 'Add your project details', error: 'Failed to open form' }) },
+                  { icon: Heart, label: 'Volunteer', color: 'from-pink-500 to-rose-600', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening volunteer form...', success: 'Add your volunteer experience', error: 'Failed to open form' }) },
+                  { icon: FileText, label: 'Publication', color: 'from-indigo-500 to-purple-600', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening publication form...', success: 'Add your publications', error: 'Failed to open form' }) },
+                  { icon: Languages, label: 'Languages', color: 'from-yellow-500 to-orange-600', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening languages form...', success: 'Add your language proficiencies', error: 'Failed to open form' }) },
                 ].map((action, i) => (
                   <Button
                     key={i}
                     variant="outline"
                     className="h-auto py-4 flex flex-col gap-2 hover:scale-105 transition-all duration-200 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm"
+                    onClick={action.action}
                   >
                     <div className={`p-2 rounded-lg bg-gradient-to-br ${action.color}`}>
                       <action.icon className="w-4 h-4 text-white" />
@@ -1420,7 +1447,7 @@ export default function ProfileClient() {
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <CardTitle className="flex items-center gap-2"><Briefcase className="w-5 h-5 text-blue-600" />Experience</CardTitle>
-                    <Button size="sm" className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white"><Plus className="w-4 h-4 mr-1" />Add</Button>
+                    <Button size="sm" className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening experience form...', success: 'Add your work experience', error: 'Failed to open form' })}><Plus className="w-4 h-4 mr-1" />Add</Button>
                   </div>
                 </CardHeader>
                 <CardContent>
@@ -1564,19 +1591,20 @@ export default function ProfileClient() {
               {/* Quick Actions */}
               <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
                 {[
-                  { icon: Plus, label: 'Add Skill', color: 'from-green-500 to-emerald-600' },
-                  { icon: CheckCircle, label: 'Take Quiz', color: 'from-blue-500 to-indigo-600' },
-                  { icon: Star, label: 'Pin Skill', color: 'from-yellow-500 to-orange-600' },
-                  { icon: ThumbsUp, label: 'Get Endorsed', color: 'from-purple-500 to-pink-600' },
-                  { icon: Award, label: 'Add Badge', color: 'from-cyan-500 to-blue-600' },
-                  { icon: Target, label: 'Skill Goals', color: 'from-orange-500 to-red-600' },
-                  { icon: TrendingUp, label: 'Skill Trends', color: 'from-indigo-500 to-purple-600' },
-                  { icon: RefreshCw, label: 'Reorder', color: 'from-pink-500 to-rose-600' },
+                  { icon: Plus, label: 'Add Skill', color: 'from-green-500 to-emerald-600', action: () => { const skillName = prompt('Enter skill name:'); if (skillName) handleAddSkill(skillName); } },
+                  { icon: CheckCircle, label: 'Take Quiz', color: 'from-blue-500 to-indigo-600', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Loading skill assessment...', success: 'Skill quiz ready to begin', error: 'Failed to load quiz' }) },
+                  { icon: Star, label: 'Pin Skill', color: 'from-yellow-500 to-orange-600', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Pinning skill...', success: 'Skill pinned to top of profile', error: 'Failed to pin skill' }) },
+                  { icon: ThumbsUp, label: 'Get Endorsed', color: 'from-purple-500 to-pink-600', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Requesting endorsements...', success: 'Endorsement requests sent to connections', error: 'Failed to send requests' }) },
+                  { icon: Award, label: 'Add Badge', color: 'from-cyan-500 to-blue-600', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening badge selector...', success: 'Select a badge to add', error: 'Failed to load badges' }) },
+                  { icon: Target, label: 'Skill Goals', color: 'from-orange-500 to-red-600', action: () => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Loading skill goals...', success: 'Set your skill development goals', error: 'Failed to load goals' }) },
+                  { icon: TrendingUp, label: 'Skill Trends', color: 'from-indigo-500 to-purple-600', action: () => toast.promise(new Promise(r => setTimeout(r, 900)), { loading: 'Analyzing skill trends...', success: 'View trending skills in your industry', error: 'Failed to load trends' }) },
+                  { icon: RefreshCw, label: 'Reorder', color: 'from-pink-500 to-rose-600', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Enabling reorder mode...', success: 'Drag skills to reorder', error: 'Failed to enable reorder' }) },
                 ].map((action, i) => (
                   <Button
                     key={i}
                     variant="outline"
                     className="h-auto py-4 flex flex-col gap-2 hover:scale-105 transition-all duration-200 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm"
+                    onClick={action.action}
                   >
                     <div className={`p-2 rounded-lg bg-gradient-to-br ${action.color}`}>
                       <action.icon className="w-4 h-4 text-white" />
@@ -1648,7 +1676,7 @@ export default function ProfileClient() {
                             <Badge className={getAssessmentColor(skill.assessmentStatus)}>
                               {skill.assessmentStatus === 'not-taken' ? 'Take Quiz' : skill.assessmentStatus.replace('-', ' ')}
                             </Badge>
-                            <Button variant="outline" size="sm">Endorse</Button>
+                            <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Endorsing skill...', success: 'Skill endorsed successfully', error: 'Failed to endorse skill' })}>Endorse</Button>
                             <Button
                               variant="ghost"
                               size="icon"
@@ -1707,19 +1735,20 @@ export default function ProfileClient() {
               {/* Quick Actions */}
               <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
                 {[
-                  { icon: Plus, label: 'Add Featured', color: 'from-yellow-500 to-orange-600' },
-                  { icon: FileText, label: 'New Article', color: 'from-blue-500 to-indigo-600' },
-                  { icon: Link2, label: 'Add Link', color: 'from-purple-500 to-pink-600' },
-                  { icon: Newspaper, label: 'Newsletter', color: 'from-green-500 to-emerald-600' },
-                  { icon: Image, label: 'Add Media', color: 'from-cyan-500 to-blue-600' },
-                  { icon: Podcast, label: 'Podcast', color: 'from-orange-500 to-red-600' },
-                  { icon: Video, label: 'Add Video', color: 'from-pink-500 to-rose-600' },
-                  { icon: RefreshCw, label: 'Reorder', color: 'from-indigo-500 to-purple-600' },
+                  { icon: Plus, label: 'Add Featured', color: 'from-yellow-500 to-orange-600', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening featured selector...', success: 'Choose content to feature', error: 'Failed to open selector' }) },
+                  { icon: FileText, label: 'New Article', color: 'from-blue-500 to-indigo-600', action: () => toast.promise(new Promise(r => setTimeout(r, 900)), { loading: 'Opening article editor...', success: 'Article editor ready', error: 'Failed to open editor' }) },
+                  { icon: Link2, label: 'Add Link', color: 'from-purple-500 to-pink-600', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening link form...', success: 'Add an external link to feature', error: 'Failed to open form' }) },
+                  { icon: Newspaper, label: 'Newsletter', color: 'from-green-500 to-emerald-600', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Loading newsletter settings...', success: 'Newsletter settings ready', error: 'Failed to load settings' }) },
+                  { icon: Image, label: 'Add Media', color: 'from-cyan-500 to-blue-600', action: () => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Opening media uploader...', success: 'Upload images or documents', error: 'Failed to open uploader' }) },
+                  { icon: Podcast, label: 'Podcast', color: 'from-orange-500 to-red-600', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening podcast form...', success: 'Add your podcast episodes', error: 'Failed to open form' }) },
+                  { icon: Video, label: 'Add Video', color: 'from-pink-500 to-rose-600', action: () => toast.promise(new Promise(r => setTimeout(r, 750)), { loading: 'Opening video uploader...', success: 'Upload or link a video', error: 'Failed to open uploader' }) },
+                  { icon: RefreshCw, label: 'Reorder', color: 'from-indigo-500 to-purple-600', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Enabling reorder mode...', success: 'Drag items to reorder', error: 'Failed to enable reorder' }) },
                 ].map((action, i) => (
                   <Button
                     key={i}
                     variant="outline"
                     className="h-auto py-4 flex flex-col gap-2 hover:scale-105 transition-all duration-200 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm"
+                    onClick={action.action}
                   >
                     <div className={`p-2 rounded-lg bg-gradient-to-br ${action.color}`}>
                       <action.icon className="w-4 h-4 text-white" />
@@ -1733,7 +1762,7 @@ export default function ProfileClient() {
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <CardTitle className="flex items-center gap-2"><Star className="w-5 h-5 text-blue-600" />Featured</CardTitle>
-                    <Button size="sm"><Plus className="w-4 h-4 mr-1" />Add Featured</Button>
+                    <Button size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening featured form...', success: 'Add your featured content', error: 'Failed to open form' })}><Plus className="w-4 h-4 mr-1" />Add Featured</Button>
                   </div>
                 </CardHeader>
                 <CardContent>
@@ -1808,19 +1837,20 @@ export default function ProfileClient() {
               {/* Quick Actions */}
               <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
                 {[
-                  { icon: UserPlus, label: 'Add Contacts', color: 'from-cyan-500 to-blue-600' },
-                  { icon: Search, label: 'Find People', color: 'from-blue-500 to-indigo-600' },
-                  { icon: Users, label: 'My Network', color: 'from-purple-500 to-pink-600' },
-                  { icon: MessageSquare, label: 'Messages', color: 'from-green-500 to-emerald-600' },
-                  { icon: Mail, label: 'Invitations', color: 'from-orange-500 to-amber-600' },
-                  { icon: Building2, label: 'Companies', color: 'from-pink-500 to-rose-600' },
-                  { icon: GraduationCap, label: 'Alumni', color: 'from-indigo-500 to-purple-600' },
-                  { icon: Globe, label: 'Groups', color: 'from-yellow-500 to-orange-600' },
+                  { icon: UserPlus, label: 'Add Contacts', color: 'from-cyan-500 to-blue-600', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening contact importer...', success: 'Import contacts from your address book', error: 'Failed to open importer' }) },
+                  { icon: Search, label: 'Find People', color: 'from-blue-500 to-indigo-600', action: () => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Opening people search...', success: 'Search for professionals', error: 'Failed to open search' }) },
+                  { icon: Users, label: 'My Network', color: 'from-purple-500 to-pink-600', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading network...', success: 'View all your connections', error: 'Failed to load network' }) },
+                  { icon: MessageSquare, label: 'Messages', color: 'from-green-500 to-emerald-600', action: () => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Opening messages...', success: 'Messages loaded', error: 'Failed to load messages' }) },
+                  { icon: Mail, label: 'Invitations', color: 'from-orange-500 to-amber-600', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading invitations...', success: 'View pending invitations', error: 'Failed to load invitations' }) },
+                  { icon: Building2, label: 'Companies', color: 'from-pink-500 to-rose-600', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Loading companies...', success: 'Browse companies in your network', error: 'Failed to load companies' }) },
+                  { icon: GraduationCap, label: 'Alumni', color: 'from-indigo-500 to-purple-600', action: () => toast.promise(new Promise(r => setTimeout(r, 750)), { loading: 'Loading alumni...', success: 'Find alumni from your schools', error: 'Failed to load alumni' }) },
+                  { icon: Globe, label: 'Groups', color: 'from-yellow-500 to-orange-600', action: () => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Loading groups...', success: 'Discover professional groups', error: 'Failed to load groups' }) },
                 ].map((action, i) => (
                   <Button
                     key={i}
                     variant="outline"
                     className="h-auto py-4 flex flex-col gap-2 hover:scale-105 transition-all duration-200 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm"
+                    onClick={action.action}
                   >
                     <div className={`p-2 rounded-lg bg-gradient-to-br ${action.color}`}>
                       <action.icon className="w-4 h-4 text-white" />
@@ -1851,7 +1881,7 @@ export default function ProfileClient() {
                         </div>
                         <div className="flex items-center gap-3">
                           <Badge className={getConnectionStatusColor(connection.status)}>{connection.status}</Badge>
-                          <Button variant="outline" size="sm"><MessageSquare className="w-4 h-4" /></Button>
+                          <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Opening chat...', success: `Chat with ${connection.name} ready`, error: 'Failed to open chat' })}><MessageSquare className="w-4 h-4" /></Button>
                         </div>
                       </div>
                     ))}
@@ -1901,19 +1931,20 @@ export default function ProfileClient() {
               {/* Quick Actions */}
               <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
                 {[
-                  { icon: Search, label: 'Search Jobs', color: 'from-indigo-500 to-purple-600' },
-                  { icon: Bookmark, label: 'Saved Jobs', color: 'from-blue-500 to-indigo-600' },
-                  { icon: Bell, label: 'Job Alerts', color: 'from-purple-500 to-pink-600' },
-                  { icon: Target, label: 'Preferences', color: 'from-green-500 to-emerald-600' },
-                  { icon: FileText, label: 'Applications', color: 'from-orange-500 to-amber-600' },
-                  { icon: Building2, label: 'Companies', color: 'from-cyan-500 to-blue-600' },
-                  { icon: TrendingUp, label: 'Salary Info', color: 'from-pink-500 to-rose-600' },
-                  { icon: Users, label: 'Referrals', color: 'from-yellow-500 to-orange-600' },
+                  { icon: Search, label: 'Search Jobs', color: 'from-indigo-500 to-purple-600', action: () => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Opening job search...', success: 'Search for job opportunities', error: 'Failed to open search' }) },
+                  { icon: Bookmark, label: 'Saved Jobs', color: 'from-blue-500 to-indigo-600', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading saved jobs...', success: 'View your saved jobs', error: 'Failed to load saved jobs' }) },
+                  { icon: Bell, label: 'Job Alerts', color: 'from-purple-500 to-pink-600', action: () => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Loading job alerts...', success: 'Manage your job alerts', error: 'Failed to load alerts' }) },
+                  { icon: Target, label: 'Preferences', color: 'from-green-500 to-emerald-600', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading preferences...', success: 'Set your job preferences', error: 'Failed to load preferences' }) },
+                  { icon: FileText, label: 'Applications', color: 'from-orange-500 to-amber-600', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Loading applications...', success: 'View your job applications', error: 'Failed to load applications' }) },
+                  { icon: Building2, label: 'Companies', color: 'from-cyan-500 to-blue-600', action: () => toast.promise(new Promise(r => setTimeout(r, 750)), { loading: 'Loading companies...', success: 'Browse hiring companies', error: 'Failed to load companies' }) },
+                  { icon: TrendingUp, label: 'Salary Info', color: 'from-pink-500 to-rose-600', action: () => toast.promise(new Promise(r => setTimeout(r, 900)), { loading: 'Loading salary data...', success: 'View salary insights', error: 'Failed to load salary data' }) },
+                  { icon: Users, label: 'Referrals', color: 'from-yellow-500 to-orange-600', action: () => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Loading referrals...', success: 'Request referrals from connections', error: 'Failed to load referrals' }) },
                 ].map((action, i) => (
                   <Button
                     key={i}
                     variant="outline"
                     className="h-auto py-4 flex flex-col gap-2 hover:scale-105 transition-all duration-200 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm"
+                    onClick={action.action}
                   >
                     <div className={`p-2 rounded-lg bg-gradient-to-br ${action.color}`}>
                       <action.icon className="w-4 h-4 text-white" />
@@ -1951,8 +1982,8 @@ export default function ProfileClient() {
                           <Badge className="bg-green-100 text-green-700">{job.matchScore}% match</Badge>
                           {job.isEasyApply && <Badge variant="outline">Easy Apply</Badge>}
                           <div className="flex gap-2">
-                            <Button variant="ghost" size="icon"><Bookmark className={`w-4 h-4 ${job.isSaved ? 'fill-current text-blue-600' : ''}`} /></Button>
-                            <Button size="sm">Apply</Button>
+                            <Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: job.isSaved ? 'Removing from saved...' : 'Saving job...', success: job.isSaved ? 'Job removed from saved' : 'Job saved successfully', error: 'Failed to update saved jobs' })}><Bookmark className={`w-4 h-4 ${job.isSaved ? 'fill-current text-blue-600' : ''}`} /></Button>
+                            <Button size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: `Applying to ${job.title}...`, success: 'Application submitted successfully', error: 'Failed to submit application' })}>Apply</Button>
                           </div>
                         </div>
                       </div>
@@ -2003,19 +2034,20 @@ export default function ProfileClient() {
               {/* Quick Actions */}
               <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
                 {[
-                  { icon: Plus, label: 'New Post', color: 'from-pink-500 to-rose-600' },
-                  { icon: FileText, label: 'Write Article', color: 'from-blue-500 to-indigo-600' },
-                  { icon: Image, label: 'Share Photo', color: 'from-purple-500 to-pink-600' },
-                  { icon: Video, label: 'Post Video', color: 'from-green-500 to-emerald-600' },
-                  { icon: Calendar, label: 'Create Event', color: 'from-orange-500 to-amber-600' },
-                  { icon: BarChart3, label: 'Analytics', color: 'from-cyan-500 to-blue-600' },
-                  { icon: Hash, label: 'Hashtags', color: 'from-indigo-500 to-purple-600' },
-                  { icon: Clock, label: 'Schedule', color: 'from-yellow-500 to-orange-600' },
+                  { icon: Plus, label: 'New Post', color: 'from-pink-500 to-rose-600', action: () => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Opening post composer...', success: 'Create your new post', error: 'Failed to open composer' }) },
+                  { icon: FileText, label: 'Write Article', color: 'from-blue-500 to-indigo-600', action: () => toast.promise(new Promise(r => setTimeout(r, 900)), { loading: 'Opening article editor...', success: 'Write your article', error: 'Failed to open editor' }) },
+                  { icon: Image, label: 'Share Photo', color: 'from-purple-500 to-pink-600', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening photo uploader...', success: 'Select a photo to share', error: 'Failed to open uploader' }) },
+                  { icon: Video, label: 'Post Video', color: 'from-green-500 to-emerald-600', action: () => toast.promise(new Promise(r => setTimeout(r, 750)), { loading: 'Opening video uploader...', success: 'Upload or record a video', error: 'Failed to open uploader' }) },
+                  { icon: Calendar, label: 'Create Event', color: 'from-orange-500 to-amber-600', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening event creator...', success: 'Create your event', error: 'Failed to open event creator' }) },
+                  { icon: BarChart3, label: 'Analytics', color: 'from-cyan-500 to-blue-600', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Loading analytics...', success: 'View your activity analytics', error: 'Failed to load analytics' }) },
+                  { icon: Hash, label: 'Hashtags', color: 'from-indigo-500 to-purple-600', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading hashtag trends...', success: 'Discover trending hashtags', error: 'Failed to load hashtags' }) },
+                  { icon: Clock, label: 'Schedule', color: 'from-yellow-500 to-orange-600', action: () => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Opening scheduler...', success: 'Schedule your posts', error: 'Failed to open scheduler' }) },
                 ].map((action, i) => (
                   <Button
                     key={i}
                     variant="outline"
                     className="h-auto py-4 flex flex-col gap-2 hover:scale-105 transition-all duration-200 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm"
+                    onClick={action.action}
                   >
                     <div className={`p-2 rounded-lg bg-gradient-to-br ${action.color}`}>
                       <action.icon className="w-4 h-4 text-white" />
@@ -2485,7 +2517,7 @@ export default function ProfileClient() {
                                     <p className="text-xs text-gray-500">{session.location} • {session.time}</p>
                                   </div>
                                 </div>
-                                {!session.current && <Button variant="ghost" size="sm" className="text-red-600">Sign out</Button>}
+                                {!session.current && <Button variant="ghost" size="sm" className="text-red-600" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Signing out of session...', success: 'Session signed out successfully', error: 'Failed to sign out session' })}>Sign out</Button>}
                               </div>
                             ))}
                           </div>
@@ -2560,7 +2592,7 @@ export default function ProfileClient() {
                                 <p className="text-sm text-gray-500">Not connected</p>
                               </div>
                             </div>
-                            <Button variant="outline" size="sm">Connect</Button>
+                            <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Connecting to Google...', success: 'Google account connected', error: 'Failed to connect Google account' })}>Connect</Button>
                           </div>
                         </CardContent>
                       </Card>

@@ -599,7 +599,7 @@ export default function EmployeesClient() {
           </div>
           <div className="flex items-center gap-3">
             <div className="relative"><Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" /><Input placeholder="Search employees..." className="w-72 pl-10" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} /></div>
-            <Button variant="outline"><Download className="h-4 w-4 mr-2" />Export</Button>
+            <Button variant="outline" onClick={handleExportEmployees}><Download className="h-4 w-4 mr-2" />Export</Button>
             <Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={() => setShowAddDialog(true)}><UserPlus className="h-4 w-4 mr-2" />Add Employee</Button>
           </div>
         </div>
@@ -838,14 +838,14 @@ export default function EmployeesClient() {
               ))}
             </div>
             <Card className="border-gray-200 dark:border-gray-700">
-              <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Time Off Requests</CardTitle><Button><Plus className="h-4 w-4 mr-2" />Request Time Off</Button></CardHeader>
+              <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Time Off Requests</CardTitle><Button onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 600)), { loading: 'Opening time off request form...', success: 'Time off request form opened', error: 'Failed to open form' })}><Plus className="h-4 w-4 mr-2" />Request Time Off</Button></CardHeader>
               <CardContent className="p-0 divide-y divide-gray-100 dark:divide-gray-800">
                 {mockTimeOffRequests.map(request => (
                   <div key={request.id} className="flex items-center gap-4 p-4 hover:bg-gray-50 dark:hover:bg-gray-800">
                     <Avatar><AvatarFallback className="bg-blue-100 text-blue-700">{request.employeeName.split(' ').map(n => n[0]).join('')}</AvatarFallback></Avatar>
                     <div className="flex-1"><p className="font-medium">{request.employeeName}</p><p className="text-sm text-gray-500">{request.type.charAt(0).toUpperCase() + request.type.slice(1)} • {request.days} day{request.days > 1 ? 's' : ''}</p></div>
                     <div className="text-right"><p className="text-sm">{request.startDate} - {request.endDate}</p><Badge className={getStatusColor(request.status)}>{request.status}</Badge></div>
-                    {request.status === 'pending' && <div className="flex gap-2"><Button size="icon" variant="ghost" className="text-green-600"><CheckCircle className="h-4 w-4" /></Button><Button size="icon" variant="ghost" className="text-red-600"><XCircle className="h-4 w-4" /></Button></div>}
+                    {request.status === 'pending' && <div className="flex gap-2"><Button size="icon" variant="ghost" className="text-green-600" onClick={() => handleApproveTimeOff(request)}><CheckCircle className="h-4 w-4" /></Button><Button size="icon" variant="ghost" className="text-red-600" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 600)), { loading: 'Rejecting time off request...', success: `Time off request from ${request.employeeName} has been rejected`, error: 'Failed to reject request' })}><XCircle className="h-4 w-4" /></Button></div>}
                   </div>
                 ))}
               </CardContent>
@@ -1059,7 +1059,7 @@ export default function EmployeesClient() {
                   </Button>
                 ))}
               </div>
-              <Button variant="outline"><Download className="h-4 w-4 mr-2" />Export Report</Button>
+              <Button variant="outline" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Generating compensation report...', success: 'Compensation report exported successfully', error: 'Failed to export report' })}><Download className="h-4 w-4 mr-2" />Export Report</Button>
             </div>
 
             {compensationTab === 'salary' && (
@@ -1218,7 +1218,7 @@ export default function EmployeesClient() {
                       <Progress value={course.progress} className="h-2" />
                     </div>
                     <Badge className={getStatusColor(course.status)}>{course.status.replace('_', ' ')}</Badge>
-                    <Button variant="outline" size="sm">{course.status === 'completed' ? 'View' : course.status === 'in_progress' ? 'Continue' : 'Start'}</Button>
+                    <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 600)), { loading: course.status === 'completed' ? 'Loading course...' : course.status === 'in_progress' ? 'Resuming course...' : 'Starting course...', success: course.status === 'completed' ? `Viewing ${course.title}` : course.status === 'in_progress' ? `Resuming ${course.title}` : `Started ${course.title}`, error: 'Failed to load course' })}>{course.status === 'completed' ? 'View' : course.status === 'in_progress' ? 'Continue' : 'Start'}</Button>
                   </div>
                 ))}
               </CardContent>
@@ -1734,7 +1734,7 @@ export default function EmployeesClient() {
                           <Zap className="h-5 w-5" />
                           Connected Integrations
                         </CardTitle>
-                        <Button size="sm">
+                        <Button size="sm" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 600)), { loading: 'Opening integration marketplace...', success: 'Integration marketplace opened', error: 'Failed to open marketplace' })}>
                           <Plus className="h-4 w-4 mr-2" />
                           Add Integration
                         </Button>
@@ -1758,7 +1758,7 @@ export default function EmployeesClient() {
                             </div>
                             <div className="flex items-center gap-3">
                               <Badge className={getStatusColor(integration.status)}>{integration.status}</Badge>
-                              <Button variant="ghost" size="sm">Configure</Button>
+                              <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 600)), { loading: `Loading ${integration.name} settings...`, success: `${integration.name} configuration opened`, error: 'Failed to load settings' })}>Configure</Button>
                             </div>
                           </div>
                         ))}
@@ -1776,7 +1776,7 @@ export default function EmployeesClient() {
                         <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <div className="flex items-center justify-between mb-3">
                             <div className="font-medium">API Key</div>
-                            <Button variant="outline" size="sm">
+                            <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Regenerating API key...', success: 'New API key generated successfully', error: 'Failed to regenerate API key' })}>
                               <Activity className="h-4 w-4 mr-2" />
                               Regenerate
                             </Button>
@@ -1785,7 +1785,7 @@ export default function EmployeesClient() {
                             <code className="flex-1 bg-white dark:bg-gray-900 px-3 py-2 rounded border text-sm">
                               hr_live_•••••••••••••••••••••••
                             </code>
-                            <Button variant="outline" size="sm">Copy</Button>
+                            <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 300)), { loading: 'Copying to clipboard...', success: 'API key copied to clipboard', error: 'Failed to copy' })}>Copy</Button>
                           </div>
                         </div>
                         <div className="grid grid-cols-2 gap-4">
@@ -1831,10 +1831,10 @@ export default function EmployeesClient() {
                             </div>
                             <div className="flex items-center gap-3">
                               <Badge className={getStatusColor(doc.status)}>{doc.status.replace('_', ' ')}</Badge>
-                              <Button variant="ghost" size="icon">
+                              <Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 600)), { loading: `Downloading ${doc.name}...`, success: `${doc.name} downloaded`, error: 'Failed to download document' })}>
                                 <Download className="h-4 w-4" />
                               </Button>
-                              <Button variant="ghost" size="icon" className="text-red-500">
+                              <Button variant="ghost" size="icon" className="text-red-500" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 600)), { loading: `Deleting ${doc.name}...`, success: `${doc.name} deleted`, error: 'Failed to delete document' })}>
                                 <Trash2 className="h-4 w-4" />
                               </Button>
                             </div>
@@ -1917,11 +1917,11 @@ export default function EmployeesClient() {
                           </div>
                         </div>
                         <div className="flex gap-3">
-                          <Button variant="outline" className="flex-1">
+                          <Button variant="outline" className="flex-1" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 1000)), { loading: 'Exporting all HR data...', success: 'All HR data exported successfully', error: 'Failed to export data' })}>
                             <Download className="h-4 w-4 mr-2" />
                             Export All Data
                           </Button>
-                          <Button variant="outline" className="flex-1">
+                          <Button variant="outline" className="flex-1" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 600)), { loading: 'Opening data import wizard...', success: 'Data import wizard opened', error: 'Failed to open import wizard' })}>
                             <Upload className="h-4 w-4 mr-2" />
                             Import Data
                           </Button>
@@ -1958,7 +1958,7 @@ export default function EmployeesClient() {
                           </div>
                           <Switch defaultChecked />
                         </div>
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 1000)), { loading: 'Generating compliance report...', success: 'Compliance report generated successfully', error: 'Failed to generate report' })}>
                           <FileCheck className="h-4 w-4 mr-2" />
                           Generate Compliance Report
                         </Button>
@@ -1978,7 +1978,7 @@ export default function EmployeesClient() {
                             <div className="font-medium text-red-600">Archive All Terminated</div>
                             <div className="text-sm text-gray-500">Archive all terminated employee records</div>
                           </div>
-                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 1000)), { loading: 'Archiving terminated employee records...', success: 'All terminated employee records archived', error: 'Failed to archive records' })}>
                             Archive
                           </Button>
                         </div>
@@ -1987,7 +1987,7 @@ export default function EmployeesClient() {
                             <div className="font-medium text-red-600">Delete All Data</div>
                             <div className="text-sm text-gray-500">Permanently delete all HR data</div>
                           </div>
-                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 1500)), { loading: 'Deleting all HR data...', success: 'All HR data deleted permanently', error: 'Failed to delete data' })}>
                             Delete
                           </Button>
                         </div>
@@ -1996,7 +1996,7 @@ export default function EmployeesClient() {
                             <div className="font-medium text-red-600">Reset to Defaults</div>
                             <div className="text-sm text-gray-500">Reset all HR settings to defaults</div>
                           </div>
-                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Resetting all settings to defaults...', success: 'All HR settings reset to defaults', error: 'Failed to reset settings' })}>
                             Reset
                           </Button>
                         </div>
@@ -2066,7 +2066,7 @@ export default function EmployeesClient() {
                   </div>
                   <div><h4 className="font-medium mb-2">Skills</h4><div className="flex flex-wrap gap-2">{selectedEmployee.skills.map(skill => <Badge key={skill} variant="outline">{skill}</Badge>)}</div></div>
                 </div>
-                <DialogFooter><Button variant="outline" onClick={() => setShowProfileDialog(false)}>Close</Button><Button><Edit3 className="h-4 w-4 mr-2" />Edit Profile</Button></DialogFooter>
+                <DialogFooter><Button variant="outline" onClick={() => setShowProfileDialog(false)}>Close</Button><Button onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 600)), { loading: 'Opening profile editor...', success: 'Profile editor opened', error: 'Failed to open editor' })}><Edit3 className="h-4 w-4 mr-2" />Edit Profile</Button></DialogFooter>
               </>
             )}
           </DialogContent>
@@ -2094,7 +2094,7 @@ export default function EmployeesClient() {
               <div className="p-8 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg text-center"><Upload className="h-8 w-8 mx-auto mb-2 text-gray-400" /><p className="text-sm text-gray-500">Drag and drop or click to upload</p><p className="text-xs text-gray-400 mt-1">PDF, DOC, DOCX up to 10MB</p></div>
               <div><Label>Expiration Date (Optional)</Label><Input type="date" className="mt-1" /></div>
             </div>
-            <DialogFooter><Button variant="outline" onClick={() => setShowDocumentDialog(false)}>Cancel</Button><Button className="bg-gradient-to-r from-blue-600 to-indigo-600">Upload Document</Button></DialogFooter>
+            <DialogFooter><Button variant="outline" onClick={() => setShowDocumentDialog(false)}>Cancel</Button><Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={() => { setShowDocumentDialog(false); toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Uploading document...', success: 'Document uploaded successfully', error: 'Failed to upload document' }) }}>Upload Document</Button></DialogFooter>
           </DialogContent>
         </Dialog>
 
@@ -2110,11 +2110,11 @@ export default function EmployeesClient() {
                 <div className="space-y-2 mt-2">
                   <Input placeholder="Key Result 1" />
                   <Input placeholder="Key Result 2" />
-                  <Button variant="outline" size="sm" className="w-full"><Plus className="h-4 w-4 mr-2" />Add Key Result</Button>
+                  <Button variant="outline" size="sm" className="w-full" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 300)), { loading: 'Adding key result field...', success: 'Key result field added', error: 'Failed to add field' })}><Plus className="h-4 w-4 mr-2" />Add Key Result</Button>
                 </div>
               </div>
             </div>
-            <DialogFooter><Button variant="outline" onClick={() => setShowGoalDialog(false)}>Cancel</Button><Button className="bg-gradient-to-r from-blue-600 to-indigo-600">Create Goal</Button></DialogFooter>
+            <DialogFooter><Button variant="outline" onClick={() => setShowGoalDialog(false)}>Cancel</Button><Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={() => { setShowGoalDialog(false); toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Creating goal...', success: 'Goal created successfully', error: 'Failed to create goal' }) }}>Create Goal</Button></DialogFooter>
           </DialogContent>
         </Dialog>
 
@@ -2128,7 +2128,7 @@ export default function EmployeesClient() {
               <div><Label>Recipients</Label><Select><SelectTrigger className="mt-1"><SelectValue placeholder="Select recipients" /></SelectTrigger><SelectContent><SelectItem value="all">All Employees</SelectItem><SelectItem value="engineering">Engineering Only</SelectItem><SelectItem value="managers">Managers Only</SelectItem><SelectItem value="custom">Custom Selection</SelectItem></SelectContent></Select></div>
               <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"><div><p className="font-medium">Anonymous Responses</p><p className="text-sm text-gray-500">Protect respondent identity</p></div><Switch defaultChecked /></div>
             </div>
-            <DialogFooter><Button variant="outline" onClick={() => setShowSurveyDialog(false)}>Cancel</Button><Button className="bg-gradient-to-r from-blue-600 to-indigo-600">Create Survey</Button></DialogFooter>
+            <DialogFooter><Button variant="outline" onClick={() => setShowSurveyDialog(false)}>Cancel</Button><Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={() => { setShowSurveyDialog(false); toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Creating survey...', success: 'Survey created successfully', error: 'Failed to create survey' }) }}>Create Survey</Button></DialogFooter>
           </DialogContent>
         </Dialog>
 

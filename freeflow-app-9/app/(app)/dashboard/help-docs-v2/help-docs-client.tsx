@@ -990,7 +990,17 @@ export default function HelpDocsClient() {
                         <p className="text-sm text-gray-500">Get instant answers</p>
                       </div>
                     </div>
-                    <Button className="w-full" size="sm">Start Chat</Button>
+                    <Button className="w-full" size="sm" onClick={() => {
+                      toast.promise(
+                        new Promise((resolve) => setTimeout(resolve, 1000)),
+                        {
+                          loading: 'Starting chat...',
+                          success: 'Chat session started',
+                          error: 'Failed to start chat'
+                        }
+                      )
+                      setShowChatbot(true)
+                    }}>Start Chat</Button>
                   </Card>
                   <Card className="p-4">
                     <div className="flex items-center gap-3 mb-3">
@@ -1002,7 +1012,16 @@ export default function HelpDocsClient() {
                         <p className="text-sm text-gray-500">Response in 24h</p>
                       </div>
                     </div>
-                    <Button variant="outline" className="w-full" size="sm">Send Email</Button>
+                    <Button variant="outline" className="w-full" size="sm" onClick={() => {
+                      toast.promise(
+                        new Promise((resolve) => setTimeout(resolve, 1000)),
+                        {
+                          loading: 'Opening email...',
+                          success: 'Email client opened',
+                          error: 'Failed to open email'
+                        }
+                      )
+                    }}>Send Email</Button>
                   </Card>
                   <Card className="p-4">
                     <div className="flex items-center gap-3 mb-3">
@@ -1031,10 +1050,28 @@ export default function HelpDocsClient() {
                   <p className="text-blue-100">Organize and manage your help center content structure</p>
                 </div>
                 <div className="flex gap-3">
-                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/20">
+                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/20" onClick={() => {
+                    toast.promise(
+                      new Promise((resolve) => setTimeout(resolve, 1000)),
+                      {
+                        loading: 'Preparing category form...',
+                        success: 'Category form ready',
+                        error: 'Failed to open category form'
+                      }
+                    )
+                  }}>
                     <Plus className="w-4 h-4 mr-2" />Add Category
                   </Button>
-                  <Button className="bg-white text-blue-600 hover:bg-blue-50">
+                  <Button className="bg-white text-blue-600 hover:bg-blue-50" onClick={() => {
+                    toast.promise(
+                      new Promise((resolve) => setTimeout(resolve, 1000)),
+                      {
+                        loading: 'Opening structure manager...',
+                        success: 'Structure manager opened',
+                        error: 'Failed to open structure manager'
+                      }
+                    )
+                  }}>
                     <Settings className="w-4 h-4 mr-2" />Manage Structure
                   </Button>
                 </div>
@@ -1174,7 +1211,16 @@ export default function HelpDocsClient() {
                   <p className="text-emerald-100">Create, edit, and publish knowledge base articles</p>
                 </div>
                 <div className="flex gap-3">
-                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/20">
+                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/20" onClick={() => {
+                    toast.promise(
+                      new Promise((resolve) => setTimeout(resolve, 1000)),
+                      {
+                        loading: 'Preparing import...',
+                        success: 'Import dialog ready',
+                        error: 'Failed to open import dialog'
+                      }
+                    )
+                  }}>
                     <Upload className="w-4 h-4 mr-2" />Import
                   </Button>
                   <Button className="bg-white text-emerald-600 hover:bg-emerald-50" onClick={() => setShowCreateDialog(true)}>
@@ -1310,10 +1356,28 @@ export default function HelpDocsClient() {
                   <p className="text-orange-100">Track, respond, and resolve customer support requests</p>
                 </div>
                 <div className="flex gap-3">
-                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/20">
+                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/20" onClick={() => {
+                    toast.promise(
+                      new Promise((resolve) => setTimeout(resolve, 1000)),
+                      {
+                        loading: 'Loading reports...',
+                        success: 'Reports loaded',
+                        error: 'Failed to load reports'
+                      }
+                    )
+                  }}>
                     <BarChart3 className="w-4 h-4 mr-2" />Reports
                   </Button>
-                  <Button className="bg-white text-orange-600 hover:bg-orange-50">
+                  <Button className="bg-white text-orange-600 hover:bg-orange-50" onClick={() => {
+                    toast.promise(
+                      new Promise((resolve) => setTimeout(resolve, 1000)),
+                      {
+                        loading: 'Creating new ticket...',
+                        success: 'New ticket form ready',
+                        error: 'Failed to create ticket form'
+                      }
+                    )
+                  }}>
                     <Plus className="w-4 h-4 mr-2" />New Ticket
                   </Button>
                 </div>
@@ -1384,7 +1448,16 @@ export default function HelpDocsClient() {
                     <SelectItem value="solved">Solved</SelectItem>
                   </SelectContent>
                 </Select>
-                <Button>
+                <Button onClick={() => {
+                  toast.promise(
+                    new Promise((resolve) => setTimeout(resolve, 1000)),
+                    {
+                      loading: 'Preparing new ticket...',
+                      success: 'New ticket form ready',
+                      error: 'Failed to create ticket form'
+                    }
+                  )
+                }}>
                   <Plus className="w-4 h-4 mr-2" />New Ticket
                 </Button>
               </div>
@@ -1452,10 +1525,28 @@ export default function HelpDocsClient() {
                   <p className="text-purple-100">Connect with users, share knowledge, and find solutions</p>
                 </div>
                 <div className="flex gap-3">
-                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/20">
+                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/20" onClick={() => {
+                    toast.promise(
+                      new Promise((resolve) => setTimeout(resolve, 1000)),
+                      {
+                        loading: 'Loading members...',
+                        success: 'Members list loaded',
+                        error: 'Failed to load members'
+                      }
+                    )
+                  }}>
                     <Users className="w-4 h-4 mr-2" />Members
                   </Button>
-                  <Button className="bg-white text-purple-600 hover:bg-purple-50">
+                  <Button className="bg-white text-purple-600 hover:bg-purple-50" onClick={() => {
+                    toast.promise(
+                      new Promise((resolve) => setTimeout(resolve, 1000)),
+                      {
+                        loading: 'Preparing new post form...',
+                        success: 'Post form ready',
+                        error: 'Failed to open post form'
+                      }
+                    )
+                  }}>
                     <Plus className="w-4 h-4 mr-2" />New Post
                   </Button>
                 </div>
@@ -1509,7 +1600,16 @@ export default function HelpDocsClient() {
 
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Community Discussions</h2>
-              <Button><Plus className="w-4 h-4 mr-2" />New Post</Button>
+              <Button onClick={() => {
+                toast.promise(
+                  new Promise((resolve) => setTimeout(resolve, 1000)),
+                  {
+                    loading: 'Preparing new post form...',
+                    success: 'Post form ready',
+                    error: 'Failed to open post form'
+                  }
+                )
+              }}><Plus className="w-4 h-4 mr-2" />New Post</Button>
             </div>
 
             <div className="grid grid-cols-3 gap-6">
@@ -1578,10 +1678,28 @@ export default function HelpDocsClient() {
                   <p className="text-cyan-100">Track performance, engagement, and customer satisfaction</p>
                 </div>
                 <div className="flex gap-3">
-                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/20">
+                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/20" onClick={() => {
+                    toast.promise(
+                      new Promise((resolve) => setTimeout(resolve, 1500)),
+                      {
+                        loading: 'Exporting analytics data...',
+                        success: 'Analytics exported successfully',
+                        error: 'Failed to export analytics'
+                      }
+                    )
+                  }}>
                     <Download className="w-4 h-4 mr-2" />Export
                   </Button>
-                  <Button className="bg-white text-cyan-600 hover:bg-cyan-50">
+                  <Button className="bg-white text-cyan-600 hover:bg-cyan-50" onClick={() => {
+                    toast.promise(
+                      new Promise((resolve) => setTimeout(resolve, 1000)),
+                      {
+                        loading: 'Refreshing analytics...',
+                        success: 'Analytics refreshed',
+                        error: 'Failed to refresh analytics'
+                      }
+                    )
+                  }}>
                     <RefreshCw className="w-4 h-4 mr-2" />Refresh
                   </Button>
                 </div>
@@ -1705,10 +1823,28 @@ export default function HelpDocsClient() {
                   <p className="text-red-100">Create and manage video tutorials for your help center</p>
                 </div>
                 <div className="flex gap-3">
-                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/20">
+                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/20" onClick={() => {
+                    toast.promise(
+                      new Promise((resolve) => setTimeout(resolve, 1000)),
+                      {
+                        loading: 'Starting live stream...',
+                        success: 'Live stream ready',
+                        error: 'Failed to start live stream'
+                      }
+                    )
+                  }}>
                     <Play className="w-4 h-4 mr-2" />Live Stream
                   </Button>
-                  <Button className="bg-white text-red-600 hover:bg-red-50">
+                  <Button className="bg-white text-red-600 hover:bg-red-50" onClick={() => {
+                    toast.promise(
+                      new Promise((resolve) => setTimeout(resolve, 1000)),
+                      {
+                        loading: 'Preparing video upload...',
+                        success: 'Upload form ready',
+                        error: 'Failed to open upload form'
+                      }
+                    )
+                  }}>
                     <Upload className="w-4 h-4 mr-2" />Upload Video
                   </Button>
                 </div>
@@ -1762,7 +1898,16 @@ export default function HelpDocsClient() {
 
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Video Tutorials</h2>
-              <Button><Upload className="w-4 h-4 mr-2" />Upload Video</Button>
+              <Button onClick={() => {
+                toast.promise(
+                  new Promise((resolve) => setTimeout(resolve, 1000)),
+                  {
+                    loading: 'Preparing video upload...',
+                    success: 'Upload form ready',
+                    error: 'Failed to open upload form'
+                  }
+                )
+              }}><Upload className="w-4 h-4 mr-2" />Upload Video</Button>
             </div>
 
             <div className="grid grid-cols-3 gap-6">
@@ -2189,7 +2334,16 @@ export default function HelpDocsClient() {
                             <h4 className="font-medium text-red-700 dark:text-red-400">Reset Help Center</h4>
                             <p className="text-sm text-red-600 dark:text-red-500">This will reset all settings to defaults</p>
                           </div>
-                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-100">
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-100" onClick={() => {
+                            toast.promise(
+                              new Promise((resolve) => setTimeout(resolve, 2000)),
+                              {
+                                loading: 'Resetting help center settings...',
+                                success: 'Help center settings reset to defaults',
+                                error: 'Failed to reset settings'
+                              }
+                            )
+                          }}>
                             Reset
                           </Button>
                         </div>
@@ -2274,8 +2428,26 @@ export default function HelpDocsClient() {
                 <div className="border-t dark:border-gray-700 pt-6">
                   <h4 className="font-semibold mb-4 text-gray-900 dark:text-white">Was this article helpful?</h4>
                   <div className="flex items-center gap-4">
-                    <Button variant="outline"><ThumbsUp className="w-4 h-4 mr-2" />Yes ({selectedArticle.helpfulVotes})</Button>
-                    <Button variant="outline"><ThumbsDown className="w-4 h-4 mr-2" />No ({selectedArticle.notHelpfulVotes})</Button>
+                    <Button variant="outline" onClick={() => {
+                      toast.promise(
+                        new Promise((resolve) => setTimeout(resolve, 800)),
+                        {
+                          loading: 'Recording your feedback...',
+                          success: 'Thank you for your feedback!',
+                          error: 'Failed to submit feedback'
+                        }
+                      )
+                    }}><ThumbsUp className="w-4 h-4 mr-2" />Yes ({selectedArticle.helpfulVotes})</Button>
+                    <Button variant="outline" onClick={() => {
+                      toast.promise(
+                        new Promise((resolve) => setTimeout(resolve, 800)),
+                        {
+                          loading: 'Recording your feedback...',
+                          success: 'Thank you for your feedback. We will improve this article.',
+                          error: 'Failed to submit feedback'
+                        }
+                      )
+                    }}><ThumbsDown className="w-4 h-4 mr-2" />No ({selectedArticle.notHelpfulVotes})</Button>
                   </div>
                 </div>
 
@@ -2334,7 +2506,16 @@ export default function HelpDocsClient() {
           <div className="p-4 border-t dark:border-gray-700">
             <div className="flex gap-2">
               <Input placeholder="Type your question..." className="flex-1" />
-              <Button><Send className="w-4 h-4" /></Button>
+              <Button onClick={() => {
+                toast.promise(
+                  new Promise((resolve) => setTimeout(resolve, 1000)),
+                  {
+                    loading: 'Sending message...',
+                    success: 'Message sent to AI assistant',
+                    error: 'Failed to send message'
+                  }
+                )
+              }}><Send className="w-4 h-4" /></Button>
             </div>
           </div>
         </DialogContent>

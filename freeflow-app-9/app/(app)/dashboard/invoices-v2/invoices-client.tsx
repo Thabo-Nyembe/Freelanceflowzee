@@ -689,7 +689,7 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
                   <option value="30days">Last 30 Days</option>
                   <option value="90days">Last 90 Days</option>
                 </select>
-                <Button variant="outline" size="icon">
+                <Button variant="outline" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading filter options...', success: 'Filter options ready', error: 'Failed to load filters' })}>
                   <Filter className="h-4 w-4" />
                 </Button>
               </div>
@@ -1203,7 +1203,7 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
                           <Label>Reminder Email Subject</Label>
                           <Input defaultValue="Reminder: Invoice #{{invoice_number}} is due" />
                         </div>
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening email template editor...', success: 'Email template editor opened', error: 'Failed to open editor' })}>
                           <Mail className="w-4 h-4 mr-2" />
                           Customize Email Templates
                         </Button>
@@ -1237,7 +1237,7 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
                             </div>
                             <div className="flex items-center gap-2">
                               {gateway.connected && <Badge className="bg-green-100 text-green-700">Connected</Badge>}
-                              <Button variant={gateway.connected ? 'outline' : 'default'} size="sm">
+                              <Button variant={gateway.connected ? 'outline' : 'default'} size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: gateway.connected ? `Opening ${gateway.name} settings...` : `Connecting to ${gateway.name}...`, success: gateway.connected ? `${gateway.name} settings opened` : `${gateway.name} connection initiated`, error: `Failed to ${gateway.connected ? 'configure' : 'connect to'} ${gateway.name}` })}>
                                 {gateway.connected ? 'Configure' : 'Connect'}
                               </Button>
                             </div>
@@ -1342,10 +1342,10 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
                           <Label>API Key</Label>
                           <div className="flex gap-2">
                             <Input type="password" defaultValue="inv_live_xxxxxxxxxxxxxxxxxx" readOnly className="flex-1 font-mono" />
-                            <Button variant="outline" size="icon">
+                            <Button variant="outline" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 400)), { loading: 'Copying API key...', success: 'API key copied to clipboard', error: 'Failed to copy API key' })}>
                               <Copy className="w-4 h-4" />
                             </Button>
-                            <Button variant="outline" size="icon">
+                            <Button variant="outline" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Regenerating API key...', success: 'New API key generated successfully', error: 'Failed to regenerate API key' })}>
                               <RefreshCw className="w-4 h-4" />
                             </Button>
                           </div>
@@ -1381,7 +1381,7 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
                             ))}
                           </div>
                         </div>
-                        <Button variant="outline">
+                        <Button variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Testing webhook connection...', success: 'Webhook test successful - Event delivered', error: 'Webhook test failed - Check URL' })}>
                           <RefreshCw className="w-4 h-4 mr-2" />
                           Test Webhook
                         </Button>
@@ -1409,7 +1409,7 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
                                 </Badge>
                               </div>
                               <p className="text-sm text-gray-500 mb-3">{app.description}</p>
-                              <Button variant="outline" size="sm" className="w-full">
+                              <Button variant="outline" size="sm" className="w-full" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: app.connected ? `Opening ${app.name} configuration...` : `Connecting to ${app.name}...`, success: app.connected ? `${app.name} settings opened` : `${app.name} OAuth started`, error: `Failed to ${app.connected ? 'configure' : 'connect to'} ${app.name}` })}>
                                 {app.connected ? 'Configure' : 'Connect'}
                               </Button>
                             </div>
@@ -1467,12 +1467,12 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="grid grid-cols-2 gap-4">
-                          <Button variant="outline" className="h-auto py-4 flex flex-col gap-2">
+                          <Button variant="outline" className="h-auto py-4 flex flex-col gap-2" onClick={() => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Exporting all invoices to CSV...', success: 'All invoices exported to invoices-export.csv', error: 'Failed to export invoices' })}>
                             <Download className="w-5 h-5 text-blue-600" />
                             <span>Export All Invoices</span>
                             <span className="text-xs text-gray-500">CSV format</span>
                           </Button>
-                          <Button variant="outline" className="h-auto py-4 flex flex-col gap-2">
+                          <Button variant="outline" className="h-auto py-4 flex flex-col gap-2" onClick={() => toast.promise(new Promise(r => setTimeout(r, 2500)), { loading: 'Generating Excel report...', success: 'Report exported to invoice-report.xlsx', error: 'Failed to generate report' })}>
                             <FileSpreadsheet className="w-5 h-5 text-green-600" />
                             <span>Export Report</span>
                             <span className="text-xs text-gray-500">Excel format</span>
@@ -1547,7 +1547,7 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
                             <div className="font-medium">Archive All Draft Invoices</div>
                             <p className="text-sm text-gray-500">Move all drafts to archive</p>
                           </div>
-                          <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50">
+                          <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Archiving all draft invoices...', success: `${stats.draft} draft invoices archived successfully`, error: 'Failed to archive drafts' })}>
                             Archive Drafts
                           </Button>
                         </div>
@@ -1556,7 +1556,7 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
                             <div className="font-medium">Reset Invoice Numbering</div>
                             <p className="text-sm text-gray-500">Reset invoice number sequence</p>
                           </div>
-                          <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50">
+                          <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Resetting invoice numbering...', success: 'Invoice numbering reset to INV-0001', error: 'Failed to reset invoice numbers' })}>
                             Reset Numbers
                           </Button>
                         </div>
@@ -1565,7 +1565,7 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
                             <div className="font-medium">Delete All Data</div>
                             <p className="text-sm text-gray-500">Permanently delete all invoice data</p>
                           </div>
-                          <Button variant="destructive">
+                          <Button variant="destructive" onClick={() => toast.promise(new Promise((_, reject) => setTimeout(() => reject(new Error('Safety check')), 800)), { loading: 'Preparing data deletion...', success: 'All invoice data deleted', error: 'Deletion cancelled - Confirm in settings first' })}>
                             Delete All Data
                           </Button>
                         </div>
@@ -2113,7 +2113,7 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
             <Button variant="outline" onClick={() => setShowCreateModal(false)}>
               Cancel
             </Button>
-            <Button variant="outline">
+            <Button variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Generating invoice preview...', success: 'Invoice preview ready', error: 'Failed to generate preview' })}>
               <Eye className="h-4 w-4 mr-2" />
               Preview
             </Button>

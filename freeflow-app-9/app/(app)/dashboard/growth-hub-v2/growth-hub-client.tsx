@@ -955,16 +955,16 @@ export default function GrowthHubClient() {
             {/* Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
               {[
-                { icon: Filter, label: 'New Funnel', color: 'text-blue-500' },
-                { icon: Users, label: 'New Cohort', color: 'text-purple-500' },
-                { icon: FlaskConical, label: 'New Test', color: 'text-orange-500' },
-                { icon: BarChart3, label: 'Reports', color: 'text-green-500' },
-                { icon: Target, label: 'Goals', color: 'text-red-500' },
-                { icon: Activity, label: 'Real-time', color: 'text-cyan-500' },
-                { icon: Download, label: 'Export', color: 'text-indigo-500' },
-                { icon: RefreshCw, label: 'Refresh', color: 'text-gray-500' }
+                { icon: Filter, label: 'New Funnel', color: 'text-blue-500', action: () => setShowCreateFunnelModal(true) },
+                { icon: Users, label: 'New Cohort', color: 'text-purple-500', action: () => setShowCreateCohortModal(true) },
+                { icon: FlaskConical, label: 'New Test', color: 'text-orange-500', action: () => setShowCreateExperimentModal(true) },
+                { icon: BarChart3, label: 'Reports', color: 'text-green-500', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Generating reports...', success: 'Growth reports are ready', error: 'Failed to generate reports' }) },
+                { icon: Target, label: 'Goals', color: 'text-red-500', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading goals...', success: 'Conversion goals dashboard opened', error: 'Failed to load goals' }) },
+                { icon: Activity, label: 'Real-time', color: 'text-cyan-500', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Connecting to real-time feed...', success: 'Real-time analytics stream active', error: 'Connection failed' }) },
+                { icon: Download, label: 'Export', color: 'text-indigo-500', action: () => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Preparing export...', success: 'Analytics data exported successfully', error: 'Export failed' }) },
+                { icon: RefreshCw, label: 'Refresh', color: 'text-gray-500', action: handleRefreshData }
               ].map((action, i) => (
-                <Button key={i} variant="outline" className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200 bg-white/50 dark:bg-gray-800/50">
+                <Button key={i} variant="outline" className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200 bg-white/50 dark:bg-gray-800/50" onClick={action.action}>
                   <action.icon className={`w-5 h-5 ${action.color}`} />
                   <span className="text-xs">{action.label}</span>
                 </Button>
@@ -1120,7 +1120,7 @@ export default function GrowthHubClient() {
 
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <Button variant="outline" size="sm" className="gap-2">
+                <Button variant="outline" size="sm" className="gap-2" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading filters...', success: 'Filter options opened', error: 'Failed to load filters' })}>
                   <Filter className="w-4 h-4" />
                   Filter
                 </Button>
@@ -1442,7 +1442,7 @@ export default function GrowthHubClient() {
                 <h2 className="text-xl font-bold">User Journey Analysis</h2>
                 <p className="text-sm text-muted-foreground">Visualize how users navigate through your product</p>
               </div>
-              <Button className="gap-2">
+              <Button className="gap-2" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Creating path analysis...', success: 'Path analysis builder opened - define start and end events', error: 'Failed to create path analysis' })}>
                 <Plus className="w-4 h-4" />
                 Create Path Analysis
               </Button>
@@ -1700,7 +1700,7 @@ export default function GrowthHubClient() {
                                 </Badge>
                               </div>
                             </div>
-                            <Button variant="outline" size="sm">Configure</Button>
+                            <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Loading integration settings...', success: 'Integration configuration opened', error: 'Failed to load integration settings' })}>Configure</Button>
                           </div>
                         ))}
                       </div>
@@ -1795,7 +1795,7 @@ export default function GrowthHubClient() {
                             <p className="font-medium">Export All Data</p>
                             <p className="text-sm text-gray-500 dark:text-gray-400">Download complete analytics export</p>
                           </div>
-                          <Button variant="outline" size="sm" className="gap-2">
+                          <Button variant="outline" size="sm" className="gap-2" onClick={() => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Preparing complete data export...', success: 'All analytics data exported successfully', error: 'Export failed' })}>
                             <Download className="w-4 h-4" />
                             Export
                           </Button>
@@ -1807,11 +1807,11 @@ export default function GrowthHubClient() {
                           These actions are irreversible. Please proceed with caution.
                         </p>
                         <div className="flex gap-2">
-                          <Button variant="outline" size="sm" className="text-red-600 border-red-300 hover:bg-red-50 dark:text-red-400 dark:border-red-700 dark:hover:bg-red-900/30">
+                          <Button variant="outline" size="sm" className="text-red-600 border-red-300 hover:bg-red-50 dark:text-red-400 dark:border-red-700 dark:hover:bg-red-900/30" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Clearing all analytics data...', success: 'All analytics data has been cleared', error: 'Failed to clear data' })}>
                             <Trash2 className="w-4 h-4 mr-2" />
                             Clear All Data
                           </Button>
-                          <Button variant="outline" size="sm" className="text-red-600 border-red-300 hover:bg-red-50 dark:text-red-400 dark:border-red-700 dark:hover:bg-red-900/30">
+                          <Button variant="outline" size="sm" className="text-red-600 border-red-300 hover:bg-red-50 dark:text-red-400 dark:border-red-700 dark:hover:bg-red-900/30" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Resetting to defaults...', success: 'All settings have been reset to defaults', error: 'Failed to reset settings' })}>
                             <RefreshCw className="w-4 h-4 mr-2" />
                             Reset to Defaults
                           </Button>

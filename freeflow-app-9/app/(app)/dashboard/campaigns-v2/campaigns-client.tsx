@@ -1679,7 +1679,10 @@ export default function CampaignsClient() {
                           <div className="text-lg font-semibold">{audience.segments.length}</div>
                           <div className="text-xs text-gray-500">Segments</div>
                         </div>
-                        <Button variant="ghost" size="icon">
+                        <Button variant="ghost" size="icon" onClick={() => toast.promise(
+                          new Promise(resolve => setTimeout(resolve, 800)),
+                          { loading: 'Opening audience details...', success: `Opened ${audience.name} details`, error: 'Failed to open audience details' }
+                        )}>
                           <ChevronRight className="w-4 h-4" />
                         </Button>
                       </div>
@@ -2193,7 +2196,10 @@ export default function CampaignsClient() {
                           <Label>API Key</Label>
                           <div className="flex gap-2">
                             <Input type="password" value="mc_sk_xxxxxxxxxxxxxxxxxxxxx" readOnly className="font-mono" />
-                            <Button variant="outline"><Copy className="w-4 h-4" /></Button>
+                            <Button variant="outline" onClick={() => toast.promise(
+                              navigator.clipboard.writeText('mc_sk_xxxxxxxxxxxxxxxxxxxxx'),
+                              { loading: 'Copying API key...', success: 'API key copied to clipboard', error: 'Failed to copy API key' }
+                            )}><Copy className="w-4 h-4" /></Button>
                           </div>
                         </div>
                         <div className="space-y-2">

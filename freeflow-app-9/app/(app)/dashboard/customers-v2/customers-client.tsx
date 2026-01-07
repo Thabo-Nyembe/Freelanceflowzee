@@ -807,7 +807,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
               <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />Refresh
             </Button>
             <Button variant="outline" onClick={handleExportCustomers}><Download className="h-4 w-4 mr-2" />Export</Button>
-            <Button variant="outline"><Upload className="h-4 w-4 mr-2" />Import</Button>
+            <Button variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening import wizard...', success: 'Import wizard ready - select your CSV or Excel file', error: 'Failed to open import wizard' })}><Upload className="h-4 w-4 mr-2" />Import</Button>
             <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white" onClick={() => setShowAddContact(true)}>
               <UserPlus className="h-4 w-4 mr-2" />Add Contact
             </Button>
@@ -962,9 +962,9 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
                       </div>
                       <div className="flex flex-col items-end gap-2">
                         <div className="flex items-center gap-2">
-                          <Button size="sm" variant="ghost"><Mail className="h-4 w-4" /></Button>
-                          <Button size="sm" variant="ghost"><PhoneCall className="h-4 w-4" /></Button>
-                          <Button size="sm" variant="ghost"><Calendar className="h-4 w-4" /></Button>
+                          <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); toast.promise(new Promise(r => setTimeout(r, 600)), { loading: `Opening email composer for ${contact.email}...`, success: 'Email composer opened', error: 'Failed to open email composer' }) }}><Mail className="h-4 w-4" /></Button>
+                          <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening call log form...', success: 'Call log form opened', error: 'Failed to open call log form' }) }}><PhoneCall className="h-4 w-4" /></Button>
+                          <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening calendar...', success: 'Schedule a meeting with this contact', error: 'Failed to open calendar' }) }}><Calendar className="h-4 w-4" /></Button>
                         </div>
                         <span className="text-xs text-gray-500">Last activity: {formatTimeAgo(contact.lastActivityDate)}</span>
                       </div>
@@ -1109,7 +1109,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
           {/* Activities Tab */}
           <TabsContent value="activities" className="space-y-4">
             <div className="flex justify-end">
-              <Button><Plus className="h-4 w-4 mr-2" />Log Activity</Button>
+              <Button onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening activity logger...', success: 'Record calls, meetings, emails, and notes', error: 'Failed to open activity logger' })}><Plus className="h-4 w-4 mr-2" />Log Activity</Button>
             </div>
             <div className="space-y-3">
               {MOCK_ACTIVITIES.map(activity => {
@@ -1156,7 +1156,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
           {/* Tasks Tab */}
           <TabsContent value="tasks" className="space-y-4">
             <div className="flex justify-end">
-              <Button><Plus className="h-4 w-4 mr-2" />New Task</Button>
+              <Button onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening task form...', success: 'Create a new task for your CRM workflow', error: 'Failed to open task form' })}><Plus className="h-4 w-4 mr-2" />New Task</Button>
             </div>
             <div className="space-y-3">
               {MOCK_TASKS.map(task => (
@@ -1179,7 +1179,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
                           <span>Owner: {task.ownerName}</span>
                         </div>
                       </div>
-                      <Button size="sm" variant="ghost"><MoreHorizontal className="h-4 w-4" /></Button>
+                      <Button size="sm" variant="ghost" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading task options...', success: 'Edit, reassign, or mark task complete', error: 'Failed to load options' })}><MoreHorizontal className="h-4 w-4" /></Button>
                     </div>
                   </CardContent>
                 </Card>
@@ -1190,7 +1190,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
           {/* Campaigns Tab */}
           <TabsContent value="campaigns" className="space-y-4">
             <div className="flex justify-end">
-              <Button><Plus className="h-4 w-4 mr-2" />New Campaign</Button>
+              <Button onClick={() => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Opening campaign builder...', success: 'Create email, webinar, or social campaigns', error: 'Failed to open campaign builder' })}><Plus className="h-4 w-4 mr-2" />New Campaign</Button>
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               {MOCK_CAMPAIGNS.map(campaign => {
@@ -1563,10 +1563,10 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
                               <Input type="number" defaultValue={stage.probability} min={0} max={100} className="text-center" />
                             </div>
                             <span className="text-sm text-gray-500">% Probability</span>
-                            <Button size="sm" variant="ghost"><MoreHorizontal className="h-4 w-4" /></Button>
+                            <Button size="sm" variant="ghost" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading stage options...', success: 'Edit stage name, probability, or reorder', error: 'Failed to load options' })}><MoreHorizontal className="h-4 w-4" /></Button>
                           </div>
                         ))}
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Adding new pipeline stage...', success: 'New stage added - configure name and probability', error: 'Failed to add stage' })}>
                           <Plus className="h-4 w-4 mr-2" />
                           Add Stage
                         </Button>
@@ -1736,7 +1736,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
                               <Switch defaultChecked />
                             </div>
                           </div>
-                          <Button variant="outline" className="w-full">
+                          <Button variant="outline" className="w-full" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening rule builder...', success: 'Create a new lead scoring rule based on field values', error: 'Failed to open rule builder' })}>
                             <Plus className="h-4 w-4 mr-2" />
                             Add Scoring Rule
                           </Button>
@@ -1944,7 +1944,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
                               <div className="text-sm text-gray-500">Team notifications</div>
                             </div>
                           </div>
-                          <Button size="sm">Connect</Button>
+                          <Button size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Connecting to Slack...', success: 'Redirecting to Slack authorization', error: 'Failed to connect to Slack' })}>Connect</Button>
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
@@ -1955,7 +1955,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
                               <div className="text-sm text-gray-500">Workflow automation</div>
                             </div>
                           </div>
-                          <Button size="sm">Connect</Button>
+                          <Button size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Connecting to Zapier...', success: 'Redirecting to Zapier authorization', error: 'Failed to connect to Zapier' })}>Connect</Button>
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
@@ -1966,7 +1966,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
                               <div className="text-sm text-gray-500">Social selling integration</div>
                             </div>
                           </div>
-                          <Button size="sm">Connect</Button>
+                          <Button size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Connecting to LinkedIn...', success: 'Redirecting to LinkedIn authorization', error: 'Failed to connect to LinkedIn' })}>Connect</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -1986,7 +1986,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
                               <Label className="text-base">API Key</Label>
                               <p className="text-xs text-gray-500">Use this key for API access</p>
                             </div>
-                            <Button size="sm" variant="outline">
+                            <Button size="sm" variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Regenerating API key...', success: 'New API key generated - update your integrations', error: 'Failed to regenerate API key' })}>
                               <RefreshCw className="h-4 w-4 mr-2" />
                               Regenerate
                             </Button>
@@ -1998,7 +1998,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
                               readOnly
                               className="font-mono"
                             />
-                            <Button size="sm" variant="ghost">
+                            <Button size="sm" variant="ghost" onClick={() => toast.promise(new Promise(r => setTimeout(r, 300)), { loading: 'Copying to clipboard...', success: 'API key copied to clipboard', error: 'Failed to copy' })}>
                               <Copy className="h-4 w-4" />
                             </Button>
                           </div>
@@ -2098,11 +2098,11 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
                         </div>
 
                         <div className="flex gap-2">
-                          <Button variant="outline" className="flex-1">
+                          <Button variant="outline" className="flex-1" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Preparing data export...', success: 'Download started - all CRM data exported', error: 'Failed to export data' })}>
                             <Download className="h-4 w-4 mr-2" />
                             Export All Data
                           </Button>
-                          <Button variant="outline" className="flex-1">
+                          <Button variant="outline" className="flex-1" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening import wizard...', success: 'Select CSV or JSON file to import', error: 'Failed to open import wizard' })}>
                             <Upload className="h-4 w-4 mr-2" />
                             Import Data
                           </Button>
@@ -2125,7 +2125,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
                             <Label className="text-base text-red-700 dark:text-red-400">Delete All Contacts</Label>
                             <p className="text-sm text-red-600/70 dark:text-red-400/70">Permanently remove all contacts</p>
                           </div>
-                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50 dark:border-red-700 dark:text-red-400">
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50 dark:border-red-700 dark:text-red-400" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Preparing delete confirmation...', success: 'Please confirm this destructive action in the dialog', error: 'Failed to initiate delete' })}>
                             <Trash2 className="h-4 w-4 mr-2" />
                             Delete All
                           </Button>
@@ -2136,7 +2136,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
                             <Label className="text-base text-red-700 dark:text-red-400">Clear Activity History</Label>
                             <p className="text-sm text-red-600/70 dark:text-red-400/70">Delete all activity logs and history</p>
                           </div>
-                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50 dark:border-red-700 dark:text-red-400">
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50 dark:border-red-700 dark:text-red-400" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Preparing history clear...', success: 'Please confirm clearing all activity history', error: 'Failed to initiate clear' })}>
                             <Archive className="h-4 w-4 mr-2" />
                             Clear History
                           </Button>
@@ -2147,7 +2147,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
                             <Label className="text-base text-red-700 dark:text-red-400">Reset CRM</Label>
                             <p className="text-sm text-red-600/70 dark:text-red-400/70">Reset all settings to defaults</p>
                           </div>
-                          <Button variant="destructive">
+                          <Button variant="destructive" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Preparing factory reset...', success: 'Please confirm this will reset ALL CRM settings', error: 'Failed to initiate reset' })}>
                             <AlertOctagon className="h-4 w-4 mr-2" />
                             Factory Reset
                           </Button>
@@ -2253,9 +2253,9 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
                   </div>
 
                   <div className="flex gap-2 pt-4 border-t">
-                    <Button className="flex-1"><Mail className="h-4 w-4 mr-2" />Send Email</Button>
-                    <Button variant="outline"><PhoneCall className="h-4 w-4 mr-2" />Log Call</Button>
-                    <Button variant="outline"><Calendar className="h-4 w-4 mr-2" />Schedule</Button>
+                    <Button className="flex-1" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: `Opening email composer for ${selectedContact.email}...`, success: 'Email composer opened', error: 'Failed to open email composer' })}><Mail className="h-4 w-4 mr-2" />Send Email</Button>
+                    <Button variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening call log form...', success: 'Log your call details and outcome', error: 'Failed to open call log form' })}><PhoneCall className="h-4 w-4 mr-2" />Log Call</Button>
+                    <Button variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening calendar...', success: 'Schedule a meeting with this contact', error: 'Failed to open calendar' })}><Calendar className="h-4 w-4 mr-2" />Schedule</Button>
                   </div>
                 </div>
               </ScrollArea>

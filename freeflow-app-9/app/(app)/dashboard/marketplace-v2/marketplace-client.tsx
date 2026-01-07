@@ -703,8 +703,8 @@ export default function MarketplaceClient() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input placeholder="Search apps..." className="w-72 pl-10" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
             </div>
-            <Button variant="outline"><Heart className="h-4 w-4 mr-2" />Wishlist ({wishlist.length})</Button>
-            <Button className="bg-gradient-to-r from-violet-600 to-purple-600"><Plus className="h-4 w-4 mr-2" />Submit App</Button>
+            <Button variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening wishlist...', success: 'Wishlist opened', error: 'Failed to open wishlist' })}><Heart className="h-4 w-4 mr-2" />Wishlist ({wishlist.length})</Button>
+            <Button className="bg-gradient-to-r from-violet-600 to-purple-600" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Preparing submission form...', success: 'App submission form ready', error: 'Failed to open submission form' })}><Plus className="h-4 w-4 mr-2" />Submit App</Button>
           </div>
         </div>
 
@@ -796,7 +796,7 @@ export default function MarketplaceClient() {
                   <TrendingUp className="w-5 h-5 text-violet-600" />
                   Trending This Week
                 </CardTitle>
-                <Button variant="ghost" size="sm">View All</Button>
+                <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading all trending apps...', success: 'Showing all trending apps', error: 'Failed to load' })}>View All</Button>
               </CardHeader>
               <CardContent>
                 <div className="flex gap-4 overflow-x-auto pb-2">
@@ -935,8 +935,8 @@ export default function MarketplaceClient() {
                     <span className="text-white">4.9 (2,847 reviews)</span>
                   </div>
                   <div className="flex gap-3">
-                    <Button className="bg-white text-violet-600 hover:bg-violet-50"><Download className="h-4 w-4 mr-2" />Install Now</Button>
-                    <Button variant="outline" className="border-white/50 text-white hover:bg-white/10">Learn More</Button>
+                    <Button className="bg-white text-violet-600 hover:bg-violet-50" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Installing Analytics Pro Suite...', success: 'Analytics Pro Suite installed successfully!', error: 'Installation failed' })}><Download className="h-4 w-4 mr-2" />Install Now</Button>
+                    <Button variant="outline" className="border-white/50 text-white hover:bg-white/10" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading details...', success: 'Opening product details', error: 'Failed to load details' })}>Learn More</Button>
                   </div>
                 </div>
                 <div className="p-8">
@@ -986,7 +986,7 @@ export default function MarketplaceClient() {
                           <span className="flex items-center gap-1 text-gray-500"><Download className="h-4 w-4" />{(product.downloads / 1000).toFixed(0)}K</span>
                           <span className="flex items-center gap-1 text-gray-500"><Zap className="h-4 w-4" />{(product.activeInstalls / 1000).toFixed(0)}K active</span>
                         </div>
-                        <Button className="bg-gradient-to-r from-violet-600 to-purple-600"><Download className="h-4 w-4 mr-2" />Install</Button>
+                        <Button className="bg-gradient-to-r from-violet-600 to-purple-600" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Installing app...', success: 'App installed successfully!', error: 'Installation failed' })}><Download className="h-4 w-4 mr-2" />Install</Button>
                       </div>
                     </div>
                   </CardContent>
@@ -1020,9 +1020,9 @@ export default function MarketplaceClient() {
                       <div className="text-center"><p className="text-xl font-bold">&lt;2hr</p><p className="text-xs text-gray-500">Response</p></div>
                     </div>
                     <div className="flex gap-3">
-                      <Button><ExternalLink className="h-4 w-4 mr-2" />Visit Store</Button>
-                      <Button variant="outline"><Mail className="h-4 w-4 mr-2" />Contact</Button>
-                      <Button variant="outline"><Heart className="h-4 w-4 mr-2" />Follow</Button>
+                      <Button onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening vendor store...', success: 'Vendor store opened', error: 'Failed to open store' })}><ExternalLink className="h-4 w-4 mr-2" />Visit Store</Button>
+                      <Button variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening contact form...', success: 'Contact form ready', error: 'Failed to open contact form' })}><Mail className="h-4 w-4 mr-2" />Contact</Button>
+                      <Button variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Following vendor...', success: 'Now following TechPro Solutions', error: 'Failed to follow vendor' })}><Heart className="h-4 w-4 mr-2" />Follow</Button>
                     </div>
                   </div>
                 </div>
@@ -1200,8 +1200,8 @@ export default function MarketplaceClient() {
                           </div>
                         </div>
                         <div className="flex gap-2">
-                          <Button variant="outline" size="sm"><Mail className="h-4 w-4" /></Button>
-                          <Button size="sm"><ExternalLink className="h-4 w-4 mr-1" />Store</Button>
+                          <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening contact...', success: 'Contact form opened', error: 'Failed to open contact' })}><Mail className="h-4 w-4" /></Button>
+                          <Button size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening store...', success: 'Store opened', error: 'Failed to open store' })}><ExternalLink className="h-4 w-4 mr-1" />Store</Button>
                         </div>
                       </div>
                     </div>
@@ -1256,8 +1256,8 @@ export default function MarketplaceClient() {
                   <p className="text-amber-100 text-sm">Monitor and respond to customer feedback</p>
                 </div>
                 <div className="flex gap-2">
-                  <Button variant="outline" className="border-white/50 text-white hover:bg-white/10"><Download className="h-4 w-4 mr-2" />Export</Button>
-                  <Button className="bg-white text-amber-700 hover:bg-amber-50"><MessageSquare className="h-4 w-4 mr-2" />Respond All</Button>
+                  <Button variant="outline" className="border-white/50 text-white hover:bg-white/10" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Exporting reviews...', success: 'Reviews exported to CSV', error: 'Export failed' })}><Download className="h-4 w-4 mr-2" />Export</Button>
+                  <Button className="bg-white text-amber-700 hover:bg-amber-50" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening bulk response editor...', success: 'Bulk response editor ready', error: 'Failed to open editor' })}><MessageSquare className="h-4 w-4 mr-2" />Respond All</Button>
                 </div>
               </div>
               <div className="grid grid-cols-6 gap-4">
@@ -1351,8 +1351,8 @@ export default function MarketplaceClient() {
                   <p className="text-emerald-200 text-sm">Track and manage all marketplace transactions</p>
                 </div>
                 <div className="flex gap-2">
-                  <Button variant="outline" className="border-white/50 text-white hover:bg-white/10"><Download className="h-4 w-4 mr-2" />Export</Button>
-                  <Button className="bg-white text-emerald-700 hover:bg-emerald-50"><FileText className="h-4 w-4 mr-2" />Generate Report</Button>
+                  <Button variant="outline" className="border-white/50 text-white hover:bg-white/10" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Exporting orders...', success: 'Orders exported to CSV', error: 'Export failed' })}><Download className="h-4 w-4 mr-2" />Export</Button>
+                  <Button className="bg-white text-emerald-700 hover:bg-emerald-50" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Generating order report...', success: 'Order report generated', error: 'Report generation failed' })}><FileText className="h-4 w-4 mr-2" />Generate Report</Button>
                 </div>
               </div>
               <div className="grid grid-cols-6 gap-4">
@@ -1414,8 +1414,8 @@ export default function MarketplaceClient() {
                     <Input type="date" className="w-[150px]" />
                   </div>
                   <div className="flex gap-2">
-                    <Button variant="outline" size="sm"><RefreshCw className="h-4 w-4" /></Button>
-                    <Button variant="outline" size="sm"><Filter className="h-4 w-4 mr-1" />Filters</Button>
+                    <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Refreshing orders...', success: 'Orders refreshed', error: 'Refresh failed' })}><RefreshCw className="h-4 w-4" /></Button>
+                    <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 400)), { loading: 'Loading filters...', success: 'Filter panel opened', error: 'Failed to open filters' })}><Filter className="h-4 w-4 mr-1" />Filters</Button>
                   </div>
                 </div>
               </CardContent>
@@ -1466,8 +1466,8 @@ export default function MarketplaceClient() {
                           <td className="px-4 py-4">
                             <div className="flex items-center justify-end gap-1">
                               <Button variant="ghost" size="sm" onClick={() => { setSelectedOrder(order); setShowOrderDialog(true) }}><Eye className="h-4 w-4" /></Button>
-                              <Button variant="ghost" size="sm"><FileText className="h-4 w-4" /></Button>
-                              <Button variant="ghost" size="sm"><MoreHorizontal className="h-4 w-4" /></Button>
+                              <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Generating invoice...', success: `Invoice generated for ${order.orderNumber}`, error: 'Failed to generate invoice' })}><FileText className="h-4 w-4" /></Button>
+                              <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 300)), { loading: 'Loading options...', success: 'More options available', error: 'Failed to load options' })}><MoreHorizontal className="h-4 w-4" /></Button>
                             </div>
                           </td>
                         </tr>
@@ -1479,10 +1479,10 @@ export default function MarketplaceClient() {
                   <p className="text-sm text-gray-500">Showing 1-{mockOrders.length} of {mockOrders.length} orders</p>
                   <div className="flex gap-1">
                     <Button variant="outline" size="sm" disabled>Previous</Button>
-                    <Button variant="outline" size="sm" className="bg-violet-50 text-violet-700">1</Button>
-                    <Button variant="outline" size="sm">2</Button>
-                    <Button variant="outline" size="sm">3</Button>
-                    <Button variant="outline" size="sm">Next</Button>
+                    <Button variant="outline" size="sm" className="bg-violet-50 text-violet-700" onClick={() => toast.promise(new Promise(r => setTimeout(r, 300)), { loading: 'Loading page 1...', success: 'Page 1 loaded', error: 'Failed to load page' })}>1</Button>
+                    <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 300)), { loading: 'Loading page 2...', success: 'Page 2 loaded', error: 'Failed to load page' })}>2</Button>
+                    <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 300)), { loading: 'Loading page 3...', success: 'Page 3 loaded', error: 'Failed to load page' })}>3</Button>
+                    <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 300)), { loading: 'Loading next page...', success: 'Next page loaded', error: 'Failed to load page' })}>Next</Button>
                   </div>
                 </div>
               </CardContent>
@@ -1535,11 +1535,11 @@ export default function MarketplaceClient() {
               <Card className="border-gray-200 dark:border-gray-700">
                 <CardHeader><CardTitle className="text-sm">Quick Actions</CardTitle></CardHeader>
                 <CardContent className="space-y-2">
-                  <Button variant="outline" className="w-full justify-start"><RefreshCw className="h-4 w-4 mr-2" />Process Pending Orders</Button>
-                  <Button variant="outline" className="w-full justify-start"><FileText className="h-4 w-4 mr-2" />Generate Invoices</Button>
-                  <Button variant="outline" className="w-full justify-start"><DollarSign className="h-4 w-4 mr-2" />Process Payouts</Button>
-                  <Button variant="outline" className="w-full justify-start"><Send className="h-4 w-4 mr-2" />Send Notifications</Button>
-                  <Button variant="outline" className="w-full justify-start"><Download className="h-4 w-4 mr-2" />Export to CSV</Button>
+                  <Button variant="outline" className="w-full justify-start" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Processing pending orders...', success: 'All pending orders processed', error: 'Failed to process orders' })}><RefreshCw className="h-4 w-4 mr-2" />Process Pending Orders</Button>
+                  <Button variant="outline" className="w-full justify-start" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Generating invoices...', success: 'Invoices generated for all orders', error: 'Failed to generate invoices' })}><FileText className="h-4 w-4 mr-2" />Generate Invoices</Button>
+                  <Button variant="outline" className="w-full justify-start" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Processing payouts...', success: 'Payouts processed successfully', error: 'Failed to process payouts' })}><DollarSign className="h-4 w-4 mr-2" />Process Payouts</Button>
+                  <Button variant="outline" className="w-full justify-start" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Sending notifications...', success: 'Notifications sent to all customers', error: 'Failed to send notifications' })}><Send className="h-4 w-4 mr-2" />Send Notifications</Button>
+                  <Button variant="outline" className="w-full justify-start" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Exporting to CSV...', success: 'Data exported to CSV file', error: 'Export failed' })}><Download className="h-4 w-4 mr-2" />Export to CSV</Button>
                 </CardContent>
               </Card>
             </div>
@@ -1814,7 +1814,7 @@ export default function MarketplaceClient() {
                 )}
                 {settingsTab === 'payments' && (
                   <Card className="border-gray-200 dark:border-gray-700">
-                    <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Payment Providers</CardTitle><Button><Plus className="h-4 w-4 mr-2" />Add Provider</Button></CardHeader>
+                    <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Payment Providers</CardTitle><Button onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening provider setup...', success: 'Payment provider setup ready', error: 'Failed to open setup' })}><Plus className="h-4 w-4 mr-2" />Add Provider</Button></CardHeader>
                     <CardContent className="space-y-4">
                       {mockPaymentProviders.map(provider => (
                         <div key={provider.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
@@ -1853,7 +1853,7 @@ export default function MarketplaceClient() {
                             </div>
                             <div className="flex items-center gap-4">
                               <div className="text-right"><p className="font-medium">{coupon.times_redeemed || 0}/{coupon.max_redemptions || 'Unlimited'}</p><Progress value={coupon.max_redemptions ? ((coupon.times_redeemed || 0) / coupon.max_redemptions) * 100 : 0} className="w-20 h-2" /></div>
-                              <Button variant="ghost" size="icon"><Edit className="h-4 w-4" /></Button>
+                              <Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening coupon editor...', success: `Editing coupon ${coupon.code}`, error: 'Failed to open editor' })}><Edit className="h-4 w-4" /></Button>
                             </div>
                           </div>
                         ))}
@@ -1870,7 +1870,7 @@ export default function MarketplaceClient() {
                             </div>
                             <div className="flex items-center gap-4">
                               <div className="text-right"><p className="font-medium">{coupon.usedCount}/{coupon.usageLimit}</p><Progress value={(coupon.usedCount / coupon.usageLimit) * 100} className="w-20 h-2" /></div>
-                              <Button variant="ghost" size="icon"><Edit className="h-4 w-4" /></Button>
+                              <Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening coupon editor...', success: `Editing coupon ${coupon.code}`, error: 'Failed to open editor' })}><Edit className="h-4 w-4" /></Button>
                             </div>
                           </div>
                         ))}
@@ -1921,8 +1921,8 @@ export default function MarketplaceClient() {
                             </div>
                             <div className="flex items-center gap-4">
                               <div className="text-right text-sm text-gray-500"><p>Last used: {apiKey.lastUsed}</p><p>Created: {apiKey.createdAt}</p></div>
-                              <Button variant="ghost" size="icon"><Copy className="h-4 w-4" /></Button>
-                              <Button variant="ghost" size="icon" className="text-red-500"><Trash2 className="h-4 w-4" /></Button>
+                              <Button variant="ghost" size="icon" onClick={() => toast.promise(navigator.clipboard.writeText(apiKey.key), { loading: 'Copying key...', success: 'API key copied to clipboard', error: 'Failed to copy key' })}><Copy className="h-4 w-4" /></Button>
+                              <Button variant="ghost" size="icon" className="text-red-500" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Revoking API key...', success: `API key "${apiKey.name}" revoked`, error: 'Failed to revoke key' })}><Trash2 className="h-4 w-4" /></Button>
                             </div>
                           </div>
                         ))}
@@ -1953,7 +1953,7 @@ export default function MarketplaceClient() {
                             <div className="flex items-center gap-4">
                               <div className="text-right"><p className="text-sm"><span className={webhook.successRate >= 95 ? 'text-green-600' : 'text-amber-600'}>{webhook.successRate}%</span> success</p>{webhook.lastTriggered && <p className="text-xs text-gray-500">Last: {webhook.lastTriggered}</p>}</div>
                               <Badge className={getStatusColor(webhook.status)}>{webhook.status}</Badge>
-                              <Button variant="ghost" size="icon"><RefreshCw className="h-4 w-4" /></Button>
+                              <Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Testing webhook...', success: 'Webhook test successful', error: 'Webhook test failed' })}><RefreshCw className="h-4 w-4" /></Button>
                             </div>
                           </div>
                         ))}
@@ -2032,7 +2032,7 @@ export default function MarketplaceClient() {
                 </div>
                 <DialogFooter className="gap-2">
                   <Button variant="outline" onClick={() => toggleWishlist(selectedProduct.id)}><Heart className={`h-4 w-4 mr-2 ${wishlist.includes(selectedProduct.id) ? 'fill-red-500 text-red-500' : ''}`} />Wishlist</Button>
-                  <Button className="bg-gradient-to-r from-violet-600 to-purple-600"><Download className="h-4 w-4 mr-2" />Install Now</Button>
+                  <Button className="bg-gradient-to-r from-violet-600 to-purple-600" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: `Installing ${selectedProduct.name}...`, success: `${selectedProduct.name} installed successfully!`, error: 'Installation failed' })}><Download className="h-4 w-4 mr-2" />Install Now</Button>
                 </DialogFooter>
               </>
             )}
@@ -2089,7 +2089,7 @@ export default function MarketplaceClient() {
                   </div>
                 </div>
                 <DialogFooter className="gap-2">
-                  {selectedOrder.invoice && <Button variant="outline"><FileText className="h-4 w-4 mr-2" />Download Invoice</Button>}
+                  {selectedOrder.invoice && <Button variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Downloading invoice...', success: `Invoice ${selectedOrder.invoice} downloaded`, error: 'Failed to download invoice' })}><FileText className="h-4 w-4 mr-2" />Download Invoice</Button>}
                   <Button variant="outline" onClick={() => setShowOrderDialog(false)}>Close</Button>
                 </DialogFooter>
               </>
@@ -2127,7 +2127,7 @@ export default function MarketplaceClient() {
               </div>
               <div className="grid grid-cols-2 gap-4"><div><Label>Discount %</Label><Input type="number" placeholder="25" className="mt-1" /></div><div><Label>Bundle Price</Label><Input type="number" placeholder="99" className="mt-1" /></div></div>
             </div>
-            <DialogFooter><Button variant="outline" onClick={() => setShowBundleDialog(false)}>Cancel</Button><Button className="bg-gradient-to-r from-violet-600 to-purple-600">Create Bundle</Button></DialogFooter>
+            <DialogFooter><Button variant="outline" onClick={() => setShowBundleDialog(false)}>Cancel</Button><Button className="bg-gradient-to-r from-violet-600 to-purple-600" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Creating bundle...', success: 'Bundle created successfully!', error: 'Failed to create bundle' })}> Create Bundle</Button></DialogFooter>
           </DialogContent>
         </Dialog>
 

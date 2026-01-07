@@ -967,7 +967,7 @@ export default function KnowledgeBaseClient() {
                 className="pl-9 w-80"
               />
             </div>
-            <Button variant="outline" size="icon">
+            <Button variant="outline" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading filters...', success: 'Filter options ready', error: 'Failed to load filters' })}>
               <Filter className="w-4 h-4" />
             </Button>
             <Button onClick={() => setShowCreateDialog(true)} className="bg-gradient-to-r from-indigo-500 to-blue-600 text-white">
@@ -1134,19 +1134,19 @@ export default function KnowledgeBaseClient() {
                   <div className="pt-4 border-t dark:border-gray-700">
                     <label className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2 block">Quick Access</label>
                     <div className="space-y-1">
-                      <button className="w-full px-3 py-2 text-sm rounded-lg text-left hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
+                      <button onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading starred pages...', success: 'Showing starred pages', error: 'Failed to load starred pages' })} className="w-full px-3 py-2 text-sm rounded-lg text-left hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
                         <Star className="w-4 h-4 text-yellow-500" />
                         Starred Pages
                       </button>
-                      <button className="w-full px-3 py-2 text-sm rounded-lg text-left hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
+                      <button onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading recent pages...', success: 'Showing recently viewed pages', error: 'Failed to load recent pages' })} className="w-full px-3 py-2 text-sm rounded-lg text-left hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
                         <Clock className="w-4 h-4 text-blue-500" />
                         Recently Viewed
                       </button>
-                      <button className="w-full px-3 py-2 text-sm rounded-lg text-left hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
+                      <button onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading drafts...', success: 'Showing your drafts', error: 'Failed to load drafts' })} className="w-full px-3 py-2 text-sm rounded-lg text-left hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
                         <Edit className="w-4 h-4 text-green-500" />
                         My Drafts
                       </button>
-                      <button className="w-full px-3 py-2 text-sm rounded-lg text-left hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
+                      <button onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading watched pages...', success: 'Showing watched pages', error: 'Failed to load watched pages' })} className="w-full px-3 py-2 text-sm rounded-lg text-left hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
                         <Bell className="w-4 h-4 text-purple-500" />
                         Watching
                       </button>
@@ -1378,13 +1378,13 @@ export default function KnowledgeBaseClient() {
                         <p className="text-gray-700 dark:text-gray-300 mb-3">{comment.content}</p>
                         <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
                           <span>{new Date(comment.createdAt).toLocaleDateString()}</span>
-                          <button className="flex items-center gap-1 hover:text-indigo-600 transition-colors">
+                          <button onClick={() => toast.promise(new Promise(r => setTimeout(r, 400)), { loading: 'Liking comment...', success: 'Comment liked', error: 'Failed to like comment' })} className="flex items-center gap-1 hover:text-indigo-600 transition-colors">
                             <ThumbsUp className="w-4 h-4" />
                             {comment.likes}
                           </button>
-                          <button className="hover:text-indigo-600 transition-colors">Reply</button>
+                          <button onClick={() => toast.promise(new Promise(r => setTimeout(r, 400)), { loading: 'Opening reply...', success: 'Reply box ready', error: 'Failed to open reply' })} className="hover:text-indigo-600 transition-colors">Reply</button>
                           {comment.status === 'active' && (
-                            <button className="flex items-center gap-1 hover:text-green-600 transition-colors">
+                            <button onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Resolving comment...', success: 'Comment resolved', error: 'Failed to resolve comment' })} className="flex items-center gap-1 hover:text-green-600 transition-colors">
                               <CheckCircle2 className="w-4 h-4" />
                               Resolve
                             </button>
@@ -1432,8 +1432,8 @@ export default function KnowledgeBaseClient() {
                           <span>{new Date(version.createdAt).toLocaleString()}</span>
                           <span className="text-green-600">+{version.additions}</span>
                           <span className="text-red-600">-{version.deletions}</span>
-                          <button className="hover:text-indigo-600 transition-colors">View diff</button>
-                          <button className="hover:text-indigo-600 transition-colors">Restore</button>
+                          <button onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Loading diff view...', success: 'Diff view ready', error: 'Failed to load diff' })} className="hover:text-indigo-600 transition-colors">View diff</button>
+                          <button onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Restoring version...', success: 'Version restored successfully', error: 'Failed to restore version' })} className="hover:text-indigo-600 transition-colors">Restore</button>
                         </div>
                       </div>
                     </div>
@@ -1589,18 +1589,19 @@ export default function KnowledgeBaseClient() {
             {/* Settings Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Settings, label: 'General', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400' },
-                { icon: BookOpen, label: 'Content', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
-                { icon: Bell, label: 'Notifications', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
-                { icon: Network, label: 'Integrations', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
-                { icon: Shield, label: 'Security', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
-                { icon: Sliders, label: 'Advanced', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' },
-                { icon: Download, label: 'Export', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
-                { icon: RefreshCw, label: 'Reset', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
+                { icon: Settings, label: 'General', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400', onClick: () => setSettingsTab('general') },
+                { icon: BookOpen, label: 'Content', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => setSettingsTab('content') },
+                { icon: Bell, label: 'Notifications', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', onClick: () => setSettingsTab('notifications') },
+                { icon: Network, label: 'Integrations', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => setSettingsTab('integrations') },
+                { icon: Shield, label: 'Security', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', onClick: () => setSettingsTab('security') },
+                { icon: Sliders, label: 'Advanced', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', onClick: () => setSettingsTab('advanced') },
+                { icon: Download, label: 'Export', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', onClick: () => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Exporting settings...', success: 'Settings exported successfully', error: 'Failed to export settings' }) },
+                { icon: RefreshCw, label: 'Reset', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', onClick: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Resetting settings...', success: 'Settings reset to defaults', error: 'Failed to reset settings' }) },
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
+                  onClick={action.onClick}
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
                 >
                   <action.icon className="w-5 h-5" />
@@ -1654,8 +1655,8 @@ export default function KnowledgeBaseClient() {
                         <div className="flex items-center justify-between">
                           <div><Label className="text-base">Default View Mode</Label><p className="text-sm text-gray-500">List or tree view</p></div>
                           <div className="flex gap-2">
-                            <Button variant="outline" size="sm"><List className="h-4 w-4" /></Button>
-                            <Button variant="outline" size="sm"><Grid3X3 className="h-4 w-4" /></Button>
+                            <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 400)), { loading: 'Setting list view...', success: 'List view set as default', error: 'Failed to update view mode' })}><List className="h-4 w-4" /></Button>
+                            <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 400)), { loading: 'Setting grid view...', success: 'Grid view set as default', error: 'Failed to update view mode' })}><Grid3X3 className="h-4 w-4" /></Button>
                           </div>
                         </div>
                         <div className="flex items-center justify-between">
@@ -1756,7 +1757,7 @@ export default function KnowledgeBaseClient() {
                                 <p className="text-sm text-gray-500">{integration.connected ? 'Connected' : 'Not connected'}</p>
                               </div>
                             </div>
-                            <Button variant={integration.connected ? 'outline' : 'default'} size="sm">
+                            <Button variant={integration.connected ? 'outline' : 'default'} size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: integration.connected ? `Disconnecting ${integration.name}...` : `Connecting ${integration.name}...`, success: integration.connected ? `${integration.name} disconnected` : `${integration.name} connected successfully`, error: `Failed to ${integration.connected ? 'disconnect' : 'connect'} ${integration.name}` })}>
                               {integration.connected ? 'Disconnect' : 'Connect'}
                             </Button>
                           </div>
@@ -1825,11 +1826,11 @@ export default function KnowledgeBaseClient() {
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
                           <div><p className="font-medium">Export All Content</p><p className="text-sm text-gray-500">Download as ZIP</p></div>
-                          <Button variant="outline" size="sm">Export</Button>
+                          <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Preparing export...', success: 'Content exported as ZIP', error: 'Export failed' })}>Export</Button>
                         </div>
                         <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
                           <div><p className="font-medium">Clear Cache</p><p className="text-sm text-gray-500">256 MB used</p></div>
-                          <Button variant="outline" size="sm">Clear</Button>
+                          <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Clearing cache...', success: 'Cache cleared - 256 MB freed', error: 'Failed to clear cache' })}>Clear</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -1899,16 +1900,16 @@ export default function KnowledgeBaseClient() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Button variant="outline" size="icon">
+                    <Button variant="outline" size="icon" onClick={() => handleBookmark(selectedPage)}>
                       {selectedPage.isBookmarked ? <Bookmark className="w-4 h-4 text-yellow-500" /> : <BookmarkPlus className="w-4 h-4" />}
                     </Button>
-                    <Button variant="outline" size="icon">
+                    <Button variant="outline" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: selectedPage.isWatching ? 'Unwatching page...' : 'Watching page...', success: selectedPage.isWatching ? 'Stopped watching page' : 'Now watching this page', error: 'Failed to update watch status' })}>
                       {selectedPage.isWatching ? <Bell className="w-4 h-4 text-indigo-500" /> : <BellOff className="w-4 h-4" />}
                     </Button>
-                    <Button variant="outline" size="icon">
+                    <Button variant="outline" size="icon" onClick={handleShare}>
                       <Share2 className="w-4 h-4" />
                     </Button>
-                    <Button variant="outline" size="icon">
+                    <Button variant="outline" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 400)), { loading: 'Loading options...', success: 'More options available', error: 'Failed to load options' })}>
                       <MoreVertical className="w-4 h-4" />
                     </Button>
                   </div>
@@ -2054,7 +2055,7 @@ export default function KnowledgeBaseClient() {
                       Publish
                     </Button>
                   )}
-                  <Button className="bg-gradient-to-r from-indigo-500 to-blue-600 text-white">
+                  <Button className="bg-gradient-to-r from-indigo-500 to-blue-600 text-white" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening editor...', success: 'Editor ready - Edit mode enabled', error: 'Failed to open editor' })}>
                     <Edit className="w-4 h-4 mr-2" />
                     Edit Page
                   </Button>

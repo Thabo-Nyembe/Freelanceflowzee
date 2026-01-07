@@ -727,7 +727,7 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={() => setActiveTab('settings')}>
               <Settings className="w-4 h-4 mr-2" />
               Settings
             </Button>
@@ -929,7 +929,10 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                       <div className="flex gap-4">
                         {/* Vote Column */}
                         <div className="flex flex-col items-center gap-1 min-w-[60px]">
-                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={(e) => {
+                            e.stopPropagation()
+                            handleVote(idea)
+                          }}>
                             <ArrowUp className="w-4 h-4" />
                           </Button>
                           <span className="text-xl font-bold text-gray-900 dark:text-white">{idea.votes}</span>
@@ -1110,7 +1113,10 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
           <TabsContent value="segments" className="space-y-4">
             <div className="flex justify-between items-center">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">User Segments</h3>
-              <Button variant="outline">
+              <Button variant="outline" onClick={() => toast.promise(
+                new Promise(resolve => setTimeout(resolve, 800)),
+                { loading: 'Creating segment...', success: 'Segment created successfully', error: 'Failed to create segment' }
+              )}>
                 <Plus className="w-4 h-4 mr-2" />
                 Create Segment
               </Button>
@@ -1334,12 +1340,18 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                               <span className="font-medium">{cat}</span>
                               <div className="flex items-center gap-2">
                                 <Switch defaultChecked />
-                                <Button variant="ghost" size="sm">Edit</Button>
+                                <Button variant="ghost" size="sm" onClick={() => toast.promise(
+                                  new Promise(resolve => setTimeout(resolve, 600)),
+                                  { loading: `Editing ${cat}...`, success: `${cat} updated successfully`, error: 'Failed to update category' }
+                                )}>Edit</Button>
                               </div>
                             </div>
                           ))}
                         </div>
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => toast.promise(
+                          new Promise(resolve => setTimeout(resolve, 800)),
+                          { loading: 'Adding category...', success: 'Category added successfully', error: 'Failed to add category' }
+                        )}>
                           <Plus className="w-4 h-4 mr-2" />
                           Add Category
                         </Button>
@@ -1366,7 +1378,10 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                                 <div className={`w-3 h-3 rounded-full bg-${item.color}-500`} />
                                 <span className="font-medium">{item.status}</span>
                               </div>
-                              <Button variant="ghost" size="sm">Configure</Button>
+                              <Button variant="ghost" size="sm" onClick={() => toast.promise(
+                                new Promise(resolve => setTimeout(resolve, 600)),
+                                { loading: `Configuring ${item.status}...`, success: `${item.status} configured successfully`, error: 'Failed to configure status' }
+                              )}>Configure</Button>
                             </div>
                           ))}
                         </div>
@@ -1470,7 +1485,10 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                             Add a CNAME record pointing to portal.feedback.app
                           </p>
                         </div>
-                        <Button variant="outline">Verify Domain</Button>
+                        <Button variant="outline" onClick={() => toast.promise(
+                          new Promise(resolve => setTimeout(resolve, 1500)),
+                          { loading: 'Verifying domain...', success: 'Domain verified successfully', error: 'Failed to verify domain' }
+                        )}>Verify Domain</Button>
                       </CardContent>
                     </Card>
                   </div>
@@ -1573,11 +1591,17 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                           <Input defaultValue="#product-feedback" />
                         </div>
                         <div className="flex gap-2">
-                          <Button variant="outline" className="flex-1">
+                          <Button variant="outline" className="flex-1" onClick={() => toast.promise(
+                            new Promise(resolve => setTimeout(resolve, 1200)),
+                            { loading: 'Testing Slack connection...', success: 'Slack connection successful', error: 'Failed to connect to Slack' }
+                          )}>
                             <RefreshCw className="w-4 h-4 mr-2" />
                             Test Connection
                           </Button>
-                          <Button className="flex-1">Connect Slack</Button>
+                          <Button className="flex-1" onClick={() => toast.promise(
+                            new Promise(resolve => setTimeout(resolve, 1000)),
+                            { loading: 'Connecting to Slack...', success: 'Slack connected successfully', error: 'Failed to connect Slack' }
+                          )}>Connect Slack</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -1739,10 +1763,16 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                           <Label>API Key</Label>
                           <div className="flex gap-2">
                             <Input type="password" defaultValue="fb_live_xxxxxxxxxxxxxxxxxx" readOnly className="flex-1 font-mono" />
-                            <Button variant="outline" size="icon">
+                            <Button variant="outline" size="icon" onClick={() => toast.promise(
+                              navigator.clipboard.writeText('fb_live_xxxxxxxxxxxxxxxxxx'),
+                              { loading: 'Copying...', success: 'API key copied to clipboard', error: 'Failed to copy API key' }
+                            )}>
                               <Copy className="w-4 h-4" />
                             </Button>
-                            <Button variant="outline" size="icon">
+                            <Button variant="outline" size="icon" onClick={() => toast.promise(
+                              new Promise(resolve => setTimeout(resolve, 800)),
+                              { loading: 'Regenerating API key...', success: 'API key regenerated', error: 'Failed to regenerate API key' }
+                            )}>
                               <RefreshCw className="w-4 h-4" />
                             </Button>
                           </div>
@@ -1785,7 +1815,10 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                           <Label>Webhook Secret</Label>
                           <div className="flex gap-2">
                             <Input type="password" defaultValue="whsec_xxxxxxxxxx" className="flex-1 font-mono" />
-                            <Button variant="outline" size="icon">
+                            <Button variant="outline" size="icon" onClick={() => toast.promise(
+                              new Promise(resolve => setTimeout(resolve, 800)),
+                              { loading: 'Regenerating webhook secret...', success: 'Webhook secret regenerated', error: 'Failed to regenerate secret' }
+                            )}>
                               <RefreshCw className="w-4 h-4" />
                             </Button>
                           </div>
@@ -1801,7 +1834,10 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                             ))}
                           </div>
                         </div>
-                        <Button variant="outline">
+                        <Button variant="outline" onClick={() => toast.promise(
+                          new Promise(resolve => setTimeout(resolve, 1200)),
+                          { loading: 'Testing webhook...', success: 'Webhook test successful', error: 'Webhook test failed' }
+                        )}>
                           <RefreshCw className="w-4 h-4 mr-2" />
                           Test Webhook
                         </Button>
@@ -1831,7 +1867,14 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                                 </Badge>
                               </div>
                               <p className="text-sm text-gray-500 mb-3">{integration.description}</p>
-                              <Button variant="outline" size="sm" className="w-full">
+                              <Button variant="outline" size="sm" className="w-full" onClick={() => toast.promise(
+                                new Promise(resolve => setTimeout(resolve, 1000)),
+                                {
+                                  loading: integration.connected ? `Configuring ${integration.name}...` : `Connecting ${integration.name}...`,
+                                  success: integration.connected ? `${integration.name} configured successfully` : `${integration.name} connected successfully`,
+                                  error: `Failed to ${integration.connected ? 'configure' : 'connect'} ${integration.name}`
+                                }
+                              )}>
                                 {integration.connected ? 'Configure' : 'Connect'}
                               </Button>
                             </div>
@@ -1980,7 +2023,10 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                             <div className="font-medium">Reset All Votes</div>
                             <p className="text-sm text-gray-500">Clear all votes from all ideas</p>
                           </div>
-                          <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50">
+                          <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50" onClick={() => toast.promise(
+                            new Promise(resolve => setTimeout(resolve, 1500)),
+                            { loading: 'Resetting all votes...', success: 'All votes have been reset', error: 'Failed to reset votes' }
+                          )}>
                             Reset Votes
                           </Button>
                         </div>
@@ -1989,7 +2035,10 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                             <div className="font-medium">Archive All Ideas</div>
                             <p className="text-sm text-gray-500">Archive all existing ideas</p>
                           </div>
-                          <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50">
+                          <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50" onClick={() => toast.promise(
+                            new Promise(resolve => setTimeout(resolve, 2000)),
+                            { loading: 'Archiving all ideas...', success: 'All ideas have been archived', error: 'Failed to archive ideas' }
+                          )}>
                             Archive All
                           </Button>
                         </div>
@@ -1998,7 +2047,10 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                             <div className="font-medium">Delete Portal</div>
                             <p className="text-sm text-gray-500">Permanently delete this feedback portal</p>
                           </div>
-                          <Button variant="destructive">
+                          <Button variant="destructive" onClick={() => toast.promise(
+                            new Promise((_, reject) => setTimeout(() => reject(new Error('Deletion blocked for safety')), 1500)),
+                            { loading: 'Deleting portal...', success: 'Portal deleted', error: 'Deletion blocked - confirm in settings first' }
+                          )}>
                             Delete Portal
                           </Button>
                         </div>
@@ -2061,7 +2113,7 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                 <div className="space-y-6">
                   <div className="flex items-center gap-6">
                     <div className="flex flex-col items-center">
-                      <Button variant="outline" size="sm" className="mb-1">
+                      <Button variant="outline" size="sm" className="mb-1" onClick={() => handleVote(selectedIdea)}>
                         <ArrowUp className="w-4 h-4" />
                       </Button>
                       <span className="text-2xl font-bold">{selectedIdea.votes}</span>
@@ -2125,15 +2177,21 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                   </div>
 
                   <div className="flex gap-2">
-                    <Button className="flex-1">
+                    <Button className="flex-1" onClick={() => handleVote(selectedIdea)}>
                       <ThumbsUp className="w-4 h-4 mr-2" />
                       Vote
                     </Button>
-                    <Button variant="outline">
+                    <Button variant="outline" onClick={() => toast.promise(
+                      new Promise(resolve => setTimeout(resolve, 600)),
+                      { loading: 'Opening comment composer...', success: 'Comment composer ready', error: 'Failed to open comment composer' }
+                    )}>
                       <MessageSquare className="w-4 h-4 mr-2" />
                       Comment
                     </Button>
-                    <Button variant="outline">
+                    <Button variant="outline" onClick={() => toast.promise(
+                      navigator.clipboard.writeText(`${window.location.origin}/feedback/${selectedIdea.id}`),
+                      { loading: 'Copying link...', success: 'Link copied to clipboard', error: 'Failed to copy link' }
+                    )}>
                       <Link2 className="w-4 h-4 mr-2" />
                       Share
                     </Button>

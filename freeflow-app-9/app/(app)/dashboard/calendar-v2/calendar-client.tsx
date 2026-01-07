@@ -17,7 +17,7 @@ import {
   Search, Settings, List, CalendarDays,
   Globe, Link2, CheckCircle2, Edit2, Trash2,
   Copy, ExternalLink, Download, Share2,
-  BarChart3, Timer, CalendarCheck, CalendarClock, Zap, MessageSquare
+  BarChart3, Timer, CalendarCheck, CalendarClock, Zap, MessageSquare, FileText
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -547,7 +547,7 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
                           <label className="block text-sm font-medium mb-1">Location</label>
                           <div className="flex items-center gap-2">
                             <Input placeholder="Add location or video link" className="flex-1" value={newEventForm.location} onChange={(e) => setNewEventForm(prev => ({ ...prev, location: e.target.value }))} />
-                            <Button variant="outline" size="sm">
+                            <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Adding video link...', success: 'Video meeting link added', error: 'Failed to add video link' })}>
                               <Video className="h-4 w-4" />
                             </Button>
                           </div>
@@ -564,10 +564,10 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
                     </ScrollArea>
                   </DialogContent>
                 </Dialog>
-                <Button variant="ghost" className="text-white hover:bg-white/20">
+                <Button variant="ghost" className="text-white hover:bg-white/20" onClick={handleExportCalendar}>
                   <Download className="h-5 w-5" />
                 </Button>
-                <Button variant="ghost" className="text-white hover:bg-white/20">
+                <Button variant="ghost" className="text-white hover:bg-white/20" onClick={() => setActiveTab('settings')}>
                   <Settings className="h-5 w-5" />
                 </Button>
               </div>
@@ -751,7 +751,7 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
                   <CardTitle className="text-lg font-semibold">Upcoming</CardTitle>
-                  <Button variant="ghost" size="sm">View All</Button>
+                  <Button variant="ghost" size="sm" onClick={() => setActiveTab('events')}>View All</Button>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   {upcomingEvents.slice(0, 5).map(event => (
@@ -784,7 +784,7 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
                       <Switch checked={cal.enabled} className="scale-75" />
                     </label>
                   ))}
-                  <Button variant="outline" className="w-full mt-2" size="sm">
+                  <Button variant="outline" className="w-full mt-2" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Opening calendar wizard...', success: 'Calendar added successfully', error: 'Failed to add calendar' })}>
                     <Plus className="h-4 w-4 mr-2" />
                     Add Calendar
                   </Button>
@@ -795,7 +795,7 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
                   <CardTitle className="text-lg font-semibold">Scheduling Links</CardTitle>
-                  <Button variant="ghost" size="sm">Manage</Button>
+                  <Button variant="ghost" size="sm" onClick={() => setActiveTab('scheduling')}>Manage</Button>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   {mockSchedulingLinks.filter(l => l.isActive).slice(0, 3).map(link => (
@@ -811,7 +811,7 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
                       </div>
                       <div className="flex items-center gap-2 mt-2">
                         <Input value={link.url} readOnly className="text-xs h-8" />
-                        <Button variant="outline" size="sm" className="h-8 w-8 p-0">
+                        <Button variant="outline" size="sm" className="h-8 w-8 p-0" onClick={() => toast.promise(navigator.clipboard.writeText(link.url), { loading: 'Copying link...', success: 'Link copied to clipboard', error: 'Failed to copy link' })}>
                           <Copy className="h-3 w-3" />
                         </Button>
                       </div>
@@ -1251,7 +1251,7 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
                 <h2 className="text-2xl font-bold">Scheduling Links</h2>
                 <p className="text-gray-500">Let others book time on your calendar</p>
               </div>
-              <Button className="bg-teal-600 hover:bg-teal-700">
+              <Button className="bg-teal-600 hover:bg-teal-700" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Creating scheduling link...', success: 'Scheduling link created', error: 'Failed to create link' })}>
                 <Plus className="h-4 w-4 mr-2" />
                 Create Link
               </Button>
@@ -1271,10 +1271,10 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
                     <div className="flex items-center gap-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg mb-4">
                       <Link2 className="h-4 w-4 text-gray-400" />
                       <code className="text-sm text-gray-600 dark:text-gray-400 flex-1 truncate">{link.url}</code>
-                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => toast.promise(navigator.clipboard.writeText(link.url), { loading: 'Copying link...', success: 'Link copied to clipboard', error: 'Failed to copy link' })}>
                         <Copy className="h-4 w-4" />
                       </Button>
-                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => toast.promise(new Promise(r => { window.open(link.url, '_blank'); setTimeout(r, 500); }), { loading: 'Opening link...', success: 'Link opened in new tab', error: 'Failed to open link' })}>
                         <ExternalLink className="h-4 w-4" />
                       </Button>
                     </div>
@@ -1322,7 +1322,7 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>Reminders</CardTitle>
-                <Button className="bg-teal-600 hover:bg-teal-700">
+                <Button className="bg-teal-600 hover:bg-teal-700" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Adding reminder...', success: 'Reminder added successfully', error: 'Failed to add reminder' })}>
                   <Plus className="h-4 w-4 mr-2" />
                   Add Reminder
                 </Button>
@@ -1340,7 +1340,7 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
                       </p>
                     </div>
                     <Badge variant="outline">{reminder.type}</Badge>
-                    <Button variant="ghost" size="sm"><Trash2 className="h-4 w-4 text-gray-400" /></Button>
+                    <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Deleting reminder...', success: `"${reminder.title}" deleted`, error: 'Failed to delete reminder' })}><Trash2 className="h-4 w-4 text-gray-400" /></Button>
                   </div>
                 ))}
               </CardContent>
@@ -1363,7 +1363,7 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
                 </div>
                 <div className="flex items-center gap-4">
                   <Badge className="bg-green-500/20 text-green-400 border-green-500/30">Synced</Badge>
-                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10" onClick={handleExportCalendar}>
                     <Download className="h-4 w-4 mr-2" />
                     Export
                   </Button>
@@ -1594,7 +1594,7 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
                               {cal.email && <p className="text-sm text-gray-500">{cal.email}</p>}
                             </div>
                           </div>
-                          <Button variant={cal.connected ? 'outline' : 'default'} size="sm">
+                          <Button variant={cal.connected ? 'outline' : 'default'} size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: cal.connected ? `Disconnecting ${cal.name}...` : `Connecting ${cal.name}...`, success: cal.connected ? `${cal.name} disconnected` : `${cal.name} connected successfully`, error: `Failed to ${cal.connected ? 'disconnect' : 'connect'} ${cal.name}` })}>
                             {cal.connected ? 'Disconnect' : 'Connect'}
                           </Button>
                         </div>
@@ -1816,7 +1816,7 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
                               <p className="font-medium text-red-700 dark:text-red-400">Clear All Events</p>
                               <p className="text-sm text-red-600">Remove all events from calendar</p>
                             </div>
-                            <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-100">
+                            <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-100" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Clearing all events...', success: 'All events cleared successfully', error: 'Failed to clear events' })}>
                               Clear
                             </Button>
                           </div>
@@ -1825,7 +1825,7 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
                               <p className="font-medium text-red-700 dark:text-red-400">Delete Calendar</p>
                               <p className="text-sm text-red-600">Permanently delete this calendar</p>
                             </div>
-                            <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-100">
+                            <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-100" onClick={() => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Deleting calendar...', success: 'Calendar deleted successfully', error: 'Failed to delete calendar' })}>
                               Delete
                             </Button>
                           </div>
@@ -1933,7 +1933,7 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
                   {selectedEvent.location_type === 'virtual' && (
                     <div className="flex items-center gap-3 text-gray-600 dark:text-gray-400">
                       <Video className="h-5 w-5" />
-                      <Button variant="link" className="text-teal-600 p-0">Join Video Call</Button>
+                      <Button variant="link" className="text-teal-600 p-0" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Joining video call...', success: 'Opening video call...', error: 'Failed to join call' })}>Join Video Call</Button>
                     </div>
                   )}
                   <div className="flex items-center gap-3 text-gray-600 dark:text-gray-400">

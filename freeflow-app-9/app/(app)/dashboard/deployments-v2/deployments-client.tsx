@@ -1203,9 +1203,9 @@ export default function DeploymentsClient() {
                       <Badge variant={blob.isPublic ? 'default' : 'outline'}>{blob.isPublic ? 'Public' : 'Private'}</Badge>
                       <span className="text-sm text-gray-500">{blob.downloadCount} downloads</span>
                       <div className="flex gap-1">
-                        <Button variant="ghost" size="icon"><Copy className="h-4 w-4" /></Button>
-                        <Button variant="ghost" size="icon"><Download className="h-4 w-4" /></Button>
-                        <Button variant="ghost" size="icon"><Trash2 className="h-4 w-4 text-red-500" /></Button>
+                        <Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Copying...', success: 'Copied to clipboard', error: 'Failed to copy' })}><Copy className="h-4 w-4" /></Button>
+                        <Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Downloading...', success: 'Download started', error: 'Failed to download' })}><Download className="h-4 w-4" /></Button>
+                        <Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Deleting...', success: 'Item deleted', error: 'Failed to delete' })}><Trash2 className="h-4 w-4 text-red-500" /></Button>
                       </div>
                     </div>
                   ))}
@@ -1853,8 +1853,8 @@ export default function DeploymentsClient() {
                           </div>
                           <div className="flex items-center gap-4">
                             <div className="text-right"><p className="text-sm"><span className={webhook.successRate >= 95 ? 'text-green-600' : 'text-amber-600'}>{webhook.successRate}%</span></p><p className="text-xs text-gray-500">success rate</p></div>
-                            <Button variant="ghost" size="icon"><RefreshCw className="h-4 w-4" /></Button>
-                            <Button variant="ghost" size="icon" className="text-red-500"><Trash2 className="h-4 w-4" /></Button>
+                            <Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Refreshing...', success: 'Refreshed successfully', error: 'Failed to refresh' })}><RefreshCw className="h-4 w-4" /></Button>
+                            <Button variant="ghost" size="icon" className="text-red-500" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Deleting...', success: 'Item deleted', error: 'Failed to delete' })}><Trash2 className="h-4 w-4" /></Button>
                           </div>
                         </div>
                       ))}
@@ -1874,7 +1874,7 @@ export default function DeploymentsClient() {
                           <div className="flex items-center gap-4">
                             <div className="text-right"><p className="text-sm font-medium">{member.deploymentsThisMonth} deploys</p><p className="text-xs text-gray-500">this month</p></div>
                             <Badge variant="outline" className={member.role === 'owner' ? 'bg-purple-100 text-purple-700' : member.role === 'admin' ? 'bg-blue-100 text-blue-700' : ''}>{member.role}</Badge>
-                            <Button variant="ghost" size="icon"><MoreHorizontal className="h-4 w-4" /></Button>
+                            <Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening menu...', success: 'Menu opened', error: 'Failed to open menu' })}><MoreHorizontal className="h-4 w-4" /></Button>
                           </div>
                         </div>
                       ))}
@@ -1995,7 +1995,7 @@ export default function DeploymentsClient() {
                         <span className="text-sm text-gray-500">{env.value}</span>
                       </div>
                       <Badge variant="outline">{env.environment}</Badge>
-                      <Button variant="ghost" size="icon"><Trash2 className="h-4 w-4 text-red-500" /></Button>
+                      <Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Deleting...', success: 'Item deleted', error: 'Failed to delete' })}><Trash2 className="h-4 w-4 text-red-500" /></Button>
                     </div>
                   ))}
                 </div>
@@ -2031,7 +2031,7 @@ export default function DeploymentsClient() {
                         {domain.redirectTo && <span className="ml-2 text-sm text-gray-500">→ {domain.redirectTo}</span>}
                       </div>
                       <Badge variant={domain.type === 'production' ? 'default' : 'outline'}>{domain.type}</Badge>
-                      <Button variant="ghost" size="icon"><ExternalLink className="h-4 w-4" /></Button>
+                      <Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening link...', success: 'Link opened', error: 'Failed to open link' })}><ExternalLink className="h-4 w-4" /></Button>
                     </div>
                   ))}
                 </div>

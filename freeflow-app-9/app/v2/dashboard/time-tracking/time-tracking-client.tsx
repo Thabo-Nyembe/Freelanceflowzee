@@ -1284,7 +1284,7 @@ export default function TimeTrackingClient() {
                           <td className="px-4 py-4 text-gray-500">{request.startDate} - {request.endDate}</td>
                           <td className="px-4 py-4 font-medium">{request.hours}h</td>
                           <td className="px-4 py-4"><Badge className={getStatusColor(request.status)}>{request.status}</Badge></td>
-                          <td className="px-4 py-4">{request.status === 'pending' && <div className="flex gap-1"><Button variant="ghost" size="icon" className="text-green-600"><Check className="h-4 w-4" /></Button><Button variant="ghost" size="icon" className="text-red-600"><X className="h-4 w-4" /></Button></div>}</td>
+                          <td className="px-4 py-4">{request.status === 'pending' && <div className="flex gap-1"><Button variant="ghost" size="icon" className="text-green-600" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Approving time off request...', success: 'Time off request approved', error: 'Failed to approve request' })} title="Approve request"><Check className="h-4 w-4" /></Button><Button variant="ghost" size="icon" className="text-red-600" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Rejecting time off request...', success: 'Time off request rejected', error: 'Failed to reject request' })} title="Reject request"><X className="h-4 w-4" /></Button></div>}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -1447,7 +1447,7 @@ export default function TimeTrackingClient() {
                         <td className="px-4 py-4"><div><span className="font-bold">${invoice.amount.toLocaleString()}</span><span className="text-xs text-gray-500 ml-1">({invoice.hours}h)</span></div></td>
                         <td className="px-4 py-4">{invoice.dueDate}</td>
                         <td className="px-4 py-4"><Badge className={getStatusColor(invoice.status)}>{invoice.status}</Badge></td>
-                        <td className="px-4 py-4"><div className="flex gap-1"><Button variant="ghost" size="icon"><Eye className="h-4 w-4" /></Button><Button variant="ghost" size="icon"><Send className="h-4 w-4" /></Button></div></td>
+                        <td className="px-4 py-4"><div className="flex gap-1"><Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading invoice preview...', success: 'Invoice preview opened', error: 'Failed to load preview' })} title="View invoice"><Eye className="h-4 w-4" /></Button><Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Sending invoice...', success: 'Invoice sent successfully', error: 'Failed to send invoice' })} title="Send invoice"><Send className="h-4 w-4" /></Button></div></td>
                       </tr>
                     ))}
                   </tbody>

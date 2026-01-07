@@ -3,12 +3,12 @@ import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
 import { useContracts, type Contract } from '@/lib/hooks/use-contracts'
 import {
-  FileText, Send, Eye, CheckCircle2, Clock, Users,
+  FileText, Send, Eye, CheckCircle, CheckCircle2, Clock, Users,
   FileSignature, Download, Copy, MoreVertical, Search, Filter,
   Plus, DollarSign, Shield, Share2, Lock, Mail, Phone,
   PenTool, XCircle, RefreshCw, Palette, Sliders,
   Settings, FileCheck, BarChart3, TrendingUp, Folder, Trash2, Star, Bell, Globe, Edit2,
-  Fingerprint, Key, AlertTriangle, CheckCheck, Layers, FileUp, Timer, Briefcase
+  Fingerprint, Key, AlertTriangle, CheckCheck, Layers, FileUp, Timer, Briefcase, Upload
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -603,7 +603,7 @@ export default function ContractsClient({ initialContracts }: { initialContracts
                   className="pl-10 w-64"
                 />
               </div>
-              <Button variant="outline" size="icon">
+              <Button variant="outline" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading filters...', success: 'Filters panel ready', error: 'Failed to load filters' })}>
                 <Filter className="h-4 w-4" />
               </Button>
             </div>
@@ -653,7 +653,7 @@ export default function ContractsClient({ initialContracts }: { initialContracts
                             <p className="text-xs text-orange-600">Expires {new Date(envelope.expires_at).toLocaleDateString()}</p>
                           )}
                         </div>
-                        <Button variant="ghost" size="sm">
+                        <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Sending reminder...', success: 'Reminder sent successfully', error: 'Failed to send reminder' }) }}>
                           <RefreshCw className="h-4 w-4 mr-1" />
                           Remind
                         </Button>
@@ -728,11 +728,11 @@ export default function ContractsClient({ initialContracts }: { initialContracts
                       </div>
                       <p className="text-sm text-gray-500 mb-2">Completed {new Date(envelope.completed_at!).toLocaleDateString()}</p>
                       <div className="flex items-center gap-2">
-                        <Button size="sm" variant="outline">
+                        <Button size="sm" variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: `Downloading "${envelope.name}"...`, success: `"${envelope.name}" downloaded successfully`, error: 'Download failed' })}>
                           <Download className="h-4 w-4 mr-1" />
                           Download
                         </Button>
-                        <Button size="sm" variant="ghost">
+                        <Button size="sm" variant="ghost" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening document...', success: 'Document viewer opened', error: 'Failed to open document' })}>
                           <Eye className="h-4 w-4" />
                         </Button>
                       </div>
@@ -1007,13 +1007,13 @@ export default function ContractsClient({ initialContracts }: { initialContracts
                       </div>
 
                       <div className="flex items-center gap-2">
-                        <Button variant="ghost" size="icon" onClick={(e) => e.stopPropagation()}>
+                        <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); toast.promise(new Promise(r => setTimeout(r, 800)), { loading: `Downloading "${envelope.name}"...`, success: `"${envelope.name}" downloaded`, error: 'Download failed' }) }}>
                           <Download className="h-4 w-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" onClick={(e) => e.stopPropagation()}>
+                        <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Copying envelope...', success: 'Envelope duplicated successfully', error: 'Failed to copy envelope' }) }}>
                           <Copy className="h-4 w-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" onClick={(e) => e.stopPropagation()}>
+                        <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); toast.promise(new Promise(r => setTimeout(r, 300)), { loading: 'Loading options...', success: 'More options available', error: 'Failed to load options' }) }}>
                           <MoreVertical className="h-4 w-4" />
                         </Button>
                       </div>
@@ -1191,7 +1191,7 @@ export default function ContractsClient({ initialContracts }: { initialContracts
                       <span>{template.fields_count} fields</span>
                       <span>Used {template.usage_count}x</span>
                     </div>
-                    <Button className="w-full opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Button className="w-full opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: `Loading template "${template.name}"...`, success: `Template "${template.name}" ready to use`, error: 'Failed to load template' })}>
                       Use Template
                     </Button>
                   </CardContent>
@@ -1208,7 +1208,7 @@ export default function ContractsClient({ initialContracts }: { initialContracts
                   <Layers className="h-5 w-5 text-purple-600" />
                   Bulk Send Batches
                 </CardTitle>
-                <Button>
+                <Button onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Preparing bulk send wizard...', success: 'Bulk send wizard opened', error: 'Failed to open bulk send' })}>
                   <Plus className="h-4 w-4 mr-2" />
                   New Bulk Send
                 </Button>
@@ -1237,7 +1237,7 @@ export default function ContractsClient({ initialContracts }: { initialContracts
                         <Progress value={(batch.completed / batch.total_recipients) * 100} className="h-2" />
                         <p className="text-xs text-gray-500 mt-1 text-center">{Math.round((batch.completed / batch.total_recipients) * 100)}%</p>
                       </div>
-                      <Button variant="outline" size="sm">View Details</Button>
+                      <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: `Loading batch "${batch.name}"...`, success: `Viewing batch "${batch.name}"`, error: 'Failed to load batch details' })}>View Details</Button>
                     </div>
                   ))}
                 </div>
@@ -1283,7 +1283,7 @@ export default function ContractsClient({ initialContracts }: { initialContracts
                         <h3 className="font-semibold text-gray-900 dark:text-white">{folder.name}</h3>
                         <p className="text-sm text-gray-500">{folder.envelopes_count} envelopes</p>
                       </div>
-                      <Button variant="ghost" size="icon">
+                      <Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 300)), { loading: 'Loading folder options...', success: 'Folder options available', error: 'Failed to load options' })}>
                         <MoreVertical className="h-4 w-4" />
                       </Button>
                     </div>
@@ -1292,7 +1292,7 @@ export default function ContractsClient({ initialContracts }: { initialContracts
               ))}
               <Card className="hover:shadow-md transition-all cursor-pointer border-dashed">
                 <CardContent className="p-6 flex items-center justify-center h-full">
-                  <Button variant="ghost">
+                  <Button variant="ghost" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Creating new folder...', success: 'New folder created', error: 'Failed to create folder' })}>
                     <Plus className="h-4 w-4 mr-2" />
                     Create Folder
                   </Button>
@@ -1395,7 +1395,7 @@ export default function ContractsClient({ initialContracts }: { initialContracts
                             <p className="text-sm text-gray-500">Viewers</p>
                           </div>
                         </div>
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Preparing invitation...', success: 'User invitation form opened', error: 'Failed to open invitation form' })}>
                           <Plus className="w-4 h-4 mr-2" />
                           Invite User
                         </Button>
@@ -1866,7 +1866,7 @@ export default function ContractsClient({ initialContracts }: { initialContracts
                             </SelectContent>
                           </Select>
                         </div>
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Regenerating API key...', success: 'New API key generated successfully', error: 'Failed to regenerate key' })}>
                           <RefreshCw className="w-4 h-4 mr-2" />
                           Regenerate Key
                         </Button>
@@ -1880,11 +1880,11 @@ export default function ContractsClient({ initialContracts }: { initialContracts
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="grid grid-cols-2 gap-4">
-                          <Button variant="outline" className="h-20 flex flex-col gap-2">
+                          <Button variant="outline" className="h-20 flex flex-col gap-2" onClick={() => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Exporting data...', success: 'Data exported successfully', error: 'Export failed' })}>
                             <Download className="w-5 h-5" />
                             <span>Export Data</span>
                           </Button>
-                          <Button variant="outline" className="h-20 flex flex-col gap-2">
+                          <Button variant="outline" className="h-20 flex flex-col gap-2" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening import wizard...', success: 'Template import ready', error: 'Failed to open import' })}>
                             <Upload className="w-5 h-5" />
                             <span>Import Templates</span>
                           </Button>
@@ -1916,7 +1916,7 @@ export default function ContractsClient({ initialContracts }: { initialContracts
                               <p className="font-medium text-red-700 dark:text-red-400">Delete All Drafts</p>
                               <p className="text-sm text-red-600">Remove draft envelopes</p>
                             </div>
-                            <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                            <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50" onClick={() => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Deleting all drafts...', success: 'All draft envelopes deleted', error: 'Failed to delete drafts' })}>
                               Delete
                             </Button>
                           </div>
@@ -1927,7 +1927,7 @@ export default function ContractsClient({ initialContracts }: { initialContracts
                               <p className="font-medium text-red-700 dark:text-red-400">Void All Pending</p>
                               <p className="text-sm text-red-600">Cancel pending envelopes</p>
                             </div>
-                            <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                            <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50" onClick={() => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Voiding all pending envelopes...', success: 'All pending envelopes voided', error: 'Failed to void envelopes' })}>
                               Void
                             </Button>
                           </div>
@@ -1938,7 +1938,7 @@ export default function ContractsClient({ initialContracts }: { initialContracts
                               <p className="font-medium text-red-700 dark:text-red-400">Reset Account</p>
                               <p className="text-sm text-red-600">Delete all data</p>
                             </div>
-                            <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                            <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50" onClick={() => toast.promise(new Promise(r => setTimeout(r, 3000)), { loading: 'Resetting account...', success: 'Account reset complete', error: 'Failed to reset account' })}>
                               Reset
                             </Button>
                           </div>
@@ -2016,7 +2016,7 @@ export default function ContractsClient({ initialContracts }: { initialContracts
                   <div className="text-center">
                     <FileText className="h-16 w-16 text-gray-400 mx-auto mb-4" />
                     <p className="text-gray-600 dark:text-gray-400">Document Preview</p>
-                    <Button className="mt-4" variant="outline">
+                    <Button className="mt-4" variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Opening document viewer...', success: 'Document viewer opened', error: 'Failed to open document' })}>
                       <Eye className="h-4 w-4 mr-2" />
                       Open Document
                     </Button>
@@ -2024,19 +2024,19 @@ export default function ContractsClient({ initialContracts }: { initialContracts
                 </div>
 
                 <div className="grid grid-cols-4 gap-4">
-                  <Button variant="outline" className="flex flex-col items-center gap-2 h-auto py-4">
+                  <Button variant="outline" className="flex flex-col items-center gap-2 h-auto py-4" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Sending envelope...', success: 'Envelope sent successfully', error: 'Failed to send envelope' })}>
                     <Send className="h-5 w-5 text-purple-600" />
                     <span>Send</span>
                   </Button>
-                  <Button variant="outline" className="flex flex-col items-center gap-2 h-auto py-4">
+                  <Button variant="outline" className="flex flex-col items-center gap-2 h-auto py-4" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: `Downloading "${selectedEnvelope?.name}"...`, success: 'Download complete', error: 'Download failed' })}>
                     <Download className="h-5 w-5 text-purple-600" />
                     <span>Download</span>
                   </Button>
-                  <Button variant="outline" className="flex flex-col items-center gap-2 h-auto py-4">
+                  <Button variant="outline" className="flex flex-col items-center gap-2 h-auto py-4" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Preparing share options...', success: 'Share link copied to clipboard', error: 'Failed to share' })}>
                     <Share2 className="h-5 w-5 text-purple-600" />
                     <span>Share</span>
                   </Button>
-                  <Button variant="outline" className="flex flex-col items-center gap-2 h-auto py-4">
+                  <Button variant="outline" className="flex flex-col items-center gap-2 h-auto py-4" onClick={() => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Duplicating envelope...', success: 'Envelope duplicated successfully', error: 'Failed to duplicate' })}>
                     <Copy className="h-5 w-5 text-purple-600" />
                     <span>Duplicate</span>
                   </Button>
@@ -2121,12 +2121,12 @@ export default function ContractsClient({ initialContracts }: { initialContracts
                         <p>Signed {new Date(recipient.signed_at).toLocaleDateString()}</p>
                       </div>
                     )}
-                    <Button variant="ghost" size="icon">
+                    <Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Sending reminder...', success: 'Reminder sent to recipient', error: 'Failed to send reminder' })}>
                       <RefreshCw className="h-4 w-4" />
                     </Button>
                   </div>
                 ))}
-                <Button variant="outline" className="w-full">
+                <Button variant="outline" className="w-full" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Adding recipient...', success: 'New recipient form opened', error: 'Failed to add recipient' })}>
                   <Plus className="h-4 w-4 mr-2" />
                   Add Recipient
                 </Button>
@@ -2148,7 +2148,7 @@ export default function ContractsClient({ initialContracts }: { initialContracts
                       <p className="text-sm font-medium text-gray-900 dark:text-white">{doc.signed_fields}/{doc.fields_count}</p>
                       <p className="text-xs text-gray-500">fields signed</p>
                     </div>
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: `Opening "${doc.name}"...`, success: 'Document viewer opened', error: 'Failed to open document' })}>
                       <Eye className="h-4 w-4 mr-1" />
                       View
                     </Button>

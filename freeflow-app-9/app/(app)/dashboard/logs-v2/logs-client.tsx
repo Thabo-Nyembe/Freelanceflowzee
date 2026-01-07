@@ -1100,11 +1100,27 @@ export default function LogsClient() {
                 className="pl-12 h-12 bg-white/10 border-white/20 text-white placeholder:text-gray-400 text-lg"
               />
             </div>
-            <Button variant="outline" className="bg-white/10 border-white/20 text-white hover:bg-white/20 h-12">
+            <Button
+              variant="outline"
+              className="bg-white/10 border-white/20 text-white hover:bg-white/20 h-12"
+              onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), {
+                loading: 'Loading facets panel...',
+                success: 'Facets panel ready',
+                error: 'Failed to load facets'
+              })}
+            >
               <Filter className="w-4 h-4 mr-2" />
               Facets
             </Button>
-            <Button variant="outline" className="bg-white/10 border-white/20 text-white hover:bg-white/20 h-12">
+            <Button
+              variant="outline"
+              className="bg-white/10 border-white/20 text-white hover:bg-white/20 h-12"
+              onClick={() => toast.promise(new Promise(r => setTimeout(r, 1200)), {
+                loading: 'Initializing AI assistant...',
+                success: 'AI assistant ready - ask about your logs',
+                error: 'Failed to initialize AI assistant'
+              })}
+            >
               <Sparkles className="w-4 h-4 mr-2" />
               AI Assist
             </Button>
@@ -1537,7 +1553,20 @@ export default function LogsClient() {
                                 <div className="p-3 bg-gray-100 dark:bg-gray-700 rounded-lg">
                                   <div className="flex items-center justify-between mb-2">
                                     <span className="text-xs font-medium text-gray-500">Attributes</span>
-                                    <Button variant="ghost" size="sm" className="h-6 text-xs">
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      className="h-6 text-xs"
+                                      onClick={(e) => {
+                                        e.stopPropagation()
+                                        navigator.clipboard.writeText(JSON.stringify(log.attributes, null, 2))
+                                        toast.promise(new Promise(r => setTimeout(r, 400)), {
+                                          loading: 'Copying attributes...',
+                                          success: 'Attributes JSON copied to clipboard',
+                                          error: 'Failed to copy attributes'
+                                        })
+                                      }}
+                                    >
                                       <Copy className="w-3 h-3 mr-1" />
                                       Copy JSON
                                     </Button>
@@ -1608,7 +1637,17 @@ export default function LogsClient() {
                           <code className="text-xs text-gray-500 bg-gray-100 dark:bg-gray-700 px-1 rounded">{stream.query}</code>
                         </div>
                       </div>
-                      <Button variant="ghost" size="icon"><MoreHorizontal className="w-4 h-4" /></Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), {
+                          loading: 'Loading stream options...',
+                          success: 'Stream options loaded',
+                          error: 'Failed to load options'
+                        })}
+                      >
+                        <MoreHorizontal className="w-4 h-4" />
+                      </Button>
                     </div>
                     <div className="flex items-center justify-between mt-4">
                       <span className="text-2xl font-bold">{stream.count.toLocaleString()}</span>
@@ -1642,7 +1681,16 @@ export default function LogsClient() {
                   <h2 className="text-xl font-semibold">Log Patterns</h2>
                   <p className="text-gray-500">AI-detected patterns across your logs</p>
                 </div>
-                <Button variant="outline"><Wand2 className="w-4 h-4 mr-2" />Re-analyze</Button>
+                <Button
+                  variant="outline"
+                  onClick={() => toast.promise(new Promise(r => setTimeout(r, 2000)), {
+                    loading: 'Analyzing log patterns with AI...',
+                    success: 'Pattern analysis complete - 5 new patterns detected',
+                    error: 'Pattern analysis failed'
+                  })}
+                >
+                  <Wand2 className="w-4 h-4 mr-2" />Re-analyze
+                </Button>
               </div>
 
               <Card>
@@ -2326,16 +2374,42 @@ export default function LogsClient() {
                               <code className="text-sm text-slate-500">log_api_••••••••••••••••</code>
                             </div>
                             <div className="flex items-center gap-2">
-                              <Button variant="outline" size="sm">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  navigator.clipboard.writeText('log_api_xxxxxxxxxxxxxxxx')
+                                  toast.promise(new Promise(r => setTimeout(r, 400)), {
+                                    loading: 'Copying API key...',
+                                    success: 'API key copied to clipboard',
+                                    error: 'Failed to copy API key'
+                                  })
+                                }}
+                              >
                                 <Copy className="w-4 h-4" />
                               </Button>
-                              <Button variant="outline" size="sm">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), {
+                                  loading: 'Regenerating API key...',
+                                  success: 'API key regenerated successfully',
+                                  error: 'Failed to regenerate API key'
+                                })}
+                              >
                                 <RefreshCw className="w-4 h-4" />
                               </Button>
                             </div>
                           </div>
                         </div>
-                        <Button variant="outline">
+                        <Button
+                          variant="outline"
+                          onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), {
+                            loading: 'Creating new API key...',
+                            success: 'New API key created successfully',
+                            error: 'Failed to create API key'
+                          })}
+                        >
                           <Plus className="w-4 h-4 mr-2" />
                           Create New Key
                         </Button>

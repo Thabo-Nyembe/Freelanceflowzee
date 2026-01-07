@@ -1681,8 +1681,27 @@ export default function FilesHubClient() {
                         <Label className="text-sm font-medium">API Key</Label>
                         <div className="flex gap-2">
                           <Input value="fh_live_xxxxxxxxxxxxxxxxxxxxx" readOnly className="flex-1 font-mono text-sm" type="password" />
-                          <Button variant="outline" size="icon"><Eye className="w-4 h-4" /></Button>
-                          <Button variant="outline" size="icon"><Copy className="w-4 h-4" /></Button>
+                          <Button variant="outline" size="icon" onClick={() => {
+                            toast.promise(
+                              new Promise(resolve => setTimeout(resolve, 500)),
+                              {
+                                loading: 'Revealing API key...',
+                                success: 'API key revealed',
+                                error: 'Failed to reveal API key'
+                              }
+                            )
+                          }}><Eye className="w-4 h-4" /></Button>
+                          <Button variant="outline" size="icon" onClick={() => {
+                            navigator.clipboard.writeText('fh_live_xxxxxxxxxxxxxxxxxxxxx')
+                            toast.promise(
+                              new Promise(resolve => setTimeout(resolve, 300)),
+                              {
+                                loading: 'Copying API key...',
+                                success: 'API key copied to clipboard',
+                                error: 'Failed to copy API key'
+                              }
+                            )
+                          }}><Copy className="w-4 h-4" /></Button>
                         </div>
                       </div>
                       <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
@@ -1783,7 +1802,16 @@ export default function FilesHubClient() {
                         <Label className="text-sm font-medium">Encryption Key</Label>
                         <div className="flex gap-2">
                           <Input value="•••••••••••••••••••••" readOnly className="flex-1 font-mono" />
-                          <Button variant="outline" size="icon"><Eye className="w-4 h-4" /></Button>
+                          <Button variant="outline" size="icon" onClick={() => {
+                            toast.promise(
+                              new Promise(resolve => setTimeout(resolve, 500)),
+                              {
+                                loading: 'Revealing encryption key...',
+                                success: 'Encryption key revealed',
+                                error: 'Failed to reveal encryption key'
+                              }
+                            )
+                          }}><Eye className="w-4 h-4" /></Button>
                         </div>
                       </div>
                     </CardContent>

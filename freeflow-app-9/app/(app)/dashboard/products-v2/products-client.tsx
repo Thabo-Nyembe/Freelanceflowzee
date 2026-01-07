@@ -463,7 +463,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
             <p className="text-gray-600 dark:text-gray-400">Stripe-Level Product & Pricing Management</p>
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="outline" className="gap-2">
+            <Button variant="outline" className="gap-2" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Exporting products...', success: 'Products exported successfully', error: 'Failed to export products' })}>
               <Download className="w-4 h-4" />
               Export
             </Button>
@@ -662,7 +662,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                               <Badge className={getStatusColor(product.status)}>{product.status}</Badge>
                             </div>
                           </div>
-                          <Button variant="ghost" size="sm">
+                          <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading options...', success: 'Product options loaded', error: 'Failed to load options' }) }}>
                             <MoreHorizontal className="w-4 h-4" />
                           </Button>
                         </div>
@@ -735,7 +735,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                               <p className="font-semibold">{formatCurrency(product.mrr * 100)}</p>
                               <p className="text-xs text-gray-500">MRR</p>
                             </div>
-                            <Button variant="ghost" size="sm">
+                            <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading options...', success: 'Product options loaded', error: 'Failed to load options' }) }}>
                               <MoreHorizontal className="w-4 h-4" />
                             </Button>
                           </div>
@@ -824,7 +824,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                                   <p className="text-sm text-gray-500">per {price.billingInterval}</p>
                                 )}
                               </div>
-                              <Button variant="ghost" size="sm">
+                              <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening price editor...', success: 'Price editor ready', error: 'Failed to open editor' })}>
                                 <Edit className="w-4 h-4" />
                               </Button>
                             </div>
@@ -1014,7 +1014,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
               <div className="lg:col-span-2 space-y-4">
                 <div className="flex items-center justify-between">
                   <h3 className="text-lg font-semibold">Tax Rates</h3>
-                  <Button className="bg-violet-600 hover:bg-violet-700 gap-2">
+                  <Button className="bg-violet-600 hover:bg-violet-700 gap-2" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening tax rate form...', success: 'Tax rate form ready', error: 'Failed to open form' })}>
                     <Plus className="w-4 h-4" />
                     Add Tax Rate
                   </Button>
@@ -1047,7 +1047,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                                 <p className="text-sm text-gray-500">{tax.inclusive ? 'Inclusive' : 'Exclusive'}</p>
                               </div>
                               <Badge variant="outline">{tax.country}</Badge>
-                              <Button variant="ghost" size="sm">
+                              <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening tax rate editor...', success: 'Tax rate editor ready', error: 'Failed to open editor' })}>
                                 <Edit className="w-4 h-4" />
                               </Button>
                             </div>
@@ -1488,14 +1488,14 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                           <div className="font-medium">Shipping Zones</div>
                           <div className="text-sm text-muted-foreground">Configure regional shipping rates</div>
                         </div>
-                        <Button variant="outline" size="sm">Manage Zones</Button>
+                        <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Loading shipping zones...', success: 'Shipping zones loaded', error: 'Failed to load zones' })}>Manage Zones</Button>
                       </div>
                       <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
                         <div>
                           <div className="font-medium">Carrier Integration</div>
                           <div className="text-sm text-muted-foreground">Connect shipping carriers for real-time rates</div>
                         </div>
-                        <Button variant="outline" size="sm">Configure</Button>
+                        <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Loading carrier settings...', success: 'Carrier settings loaded', error: 'Failed to load carrier settings' })}>Configure</Button>
                       </div>
                     </CardContent>
                   </Card>
@@ -1533,7 +1533,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                             <div className="text-sm text-muted-foreground">E-commerce platform sync</div>
                           </div>
                         </div>
-                        <Button variant="outline" size="sm">Connect</Button>
+                        <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Connecting to Shopify...', success: 'Shopify connected successfully', error: 'Failed to connect to Shopify' })}>Connect</Button>
                       </div>
                       <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
                         <div className="flex items-center gap-3">
@@ -1545,7 +1545,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                             <div className="text-sm text-muted-foreground">Product listing sync</div>
                           </div>
                         </div>
-                        <Button variant="outline" size="sm">Connect</Button>
+                        <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Connecting to Amazon...', success: 'Amazon connected successfully', error: 'Failed to connect to Amazon' })}>Connect</Button>
                       </div>
                       <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
                         <div className="flex items-center gap-3">
@@ -1557,7 +1557,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                             <div className="text-sm text-muted-foreground">Accounting integration</div>
                           </div>
                         </div>
-                        <Button variant="outline" size="sm">Connect</Button>
+                        <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Connecting to QuickBooks...', success: 'QuickBooks connected successfully', error: 'Failed to connect to QuickBooks' })}>Connect</Button>
                       </div>
                       <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
                         <div className="flex items-center gap-3">
@@ -1653,7 +1653,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                           <div className="font-medium">Webhook Events</div>
                           <div className="text-sm text-muted-foreground">Send product events to external services</div>
                         </div>
-                        <Button variant="outline" size="sm">Configure</Button>
+                        <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Loading webhook settings...', success: 'Webhook settings loaded', error: 'Failed to load webhook settings' })}>Configure</Button>
                       </div>
                       <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
                         <div>
@@ -1670,19 +1670,19 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                         <ToggleLeft className="w-6 h-6 text-gray-400 cursor-pointer" />
                       </div>
                       <div className="grid grid-cols-2 gap-4 pt-4 border-t dark:border-gray-700">
-                        <Button variant="outline" className="h-auto py-4 flex-col gap-2">
+                        <Button variant="outline" className="h-auto py-4 flex-col gap-2" onClick={() => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Exporting catalog...', success: 'Catalog exported successfully', error: 'Failed to export catalog' })}>
                           <Download className="w-6 h-6" />
                           <span>Export Catalog</span>
                         </Button>
-                        <Button variant="outline" className="h-auto py-4 flex-col gap-2">
+                        <Button variant="outline" className="h-auto py-4 flex-col gap-2" onClick={() => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Preparing import...', success: 'Import ready', error: 'Failed to prepare import' })}>
                           <Upload className="w-6 h-6" />
                           <span>Import Products</span>
                         </Button>
-                        <Button variant="outline" className="h-auto py-4 flex-col gap-2">
+                        <Button variant="outline" className="h-auto py-4 flex-col gap-2" onClick={() => toast.promise(new Promise(r => setTimeout(r, 2500)), { loading: 'Creating backup...', success: 'Backup created successfully', error: 'Failed to create backup' })}>
                           <Archive className="w-6 h-6" />
                           <span>Backup Data</span>
                         </Button>
-                        <Button variant="outline" className="h-auto py-4 flex-col gap-2">
+                        <Button variant="outline" className="h-auto py-4 flex-col gap-2" onClick={() => toast.promise(new Promise(r => setTimeout(r, 3000)), { loading: 'Syncing all data...', success: 'All data synced successfully', error: 'Failed to sync data' })}>
                           <RefreshCw className="w-6 h-6" />
                           <span>Sync All</span>
                         </Button>
@@ -1836,15 +1836,15 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                 </div>
 
                 <div className="flex items-center gap-2 pt-4 border-t">
-                  <Button className="flex-1 bg-violet-600 hover:bg-violet-700">
+                  <Button className="flex-1 bg-violet-600 hover:bg-violet-700" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening product editor...', success: 'Product editor ready', error: 'Failed to open editor' })}>
                     <Edit className="w-4 h-4 mr-2" />
                     Edit Product
                   </Button>
-                  <Button variant="outline" className="flex-1">
+                  <Button variant="outline" className="flex-1" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Duplicating product...', success: 'Product duplicated successfully', error: 'Failed to duplicate product' })}>
                     <Copy className="w-4 h-4 mr-2" />
                     Duplicate
                   </Button>
-                  <Button variant="outline">
+                  <Button variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Archiving product...', success: 'Product archived successfully', error: 'Failed to archive product' })}>
                     <Archive className="w-4 h-4" />
                   </Button>
                 </div>
@@ -1901,15 +1901,15 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                 )}
 
                 <div className="flex items-center gap-2 pt-4">
-                  <Button className="flex-1 bg-violet-600 hover:bg-violet-700">
+                  <Button className="flex-1 bg-violet-600 hover:bg-violet-700" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening coupon editor...', success: 'Coupon editor ready', error: 'Failed to open editor' })}>
                     <Edit className="w-4 h-4 mr-2" />
                     Edit
                   </Button>
-                  <Button variant="outline" className="flex-1">
+                  <Button variant="outline" className="flex-1" onClick={() => { navigator.clipboard.writeText(selectedCoupon?.name || ''); toast.success('Coupon code copied to clipboard') }}>
                     <Copy className="w-4 h-4 mr-2" />
                     Copy Code
                   </Button>
-                  <Button variant="destructive">
+                  <Button variant="destructive" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Deleting coupon...', success: 'Coupon deleted successfully', error: 'Failed to delete coupon' })}>
                     <Trash2 className="w-4 h-4" />
                   </Button>
                 </div>

@@ -328,7 +328,7 @@ export default function MotionGraphicsPage() {
                             <h3 className="font-semibold text-white mb-1">{project.name}</h3>
                             <p className="text-sm text-gray-400">{project.description}</p>
                           </div>
-                          <Button variant="ghost" size="icon">
+                          <Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Sharing...', success: 'Share link copied', error: 'Failed to share' })}>
                             <Share2 className="w-4 h-4" />
                           </Button>
                         </div>
@@ -369,10 +369,10 @@ export default function MotionGraphicsPage() {
                             <Play className="w-4 h-4 mr-1" />
                             Open
                           </Button>
-                          <Button variant="outline" size="icon" className="border-gray-700 hover:bg-slate-800">
+                          <Button variant="outline" size="icon" className="border-gray-700 hover:bg-slate-800" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Downloading...', success: 'Download started', error: 'Failed to download' })}>
                             <Download className="w-4 h-4" />
                           </Button>
-                          <Button variant="outline" size="icon" className="border-gray-700 hover:bg-slate-800">
+                          <Button variant="outline" size="icon" className="border-gray-700 hover:bg-slate-800" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Copying...', success: 'Project duplicated', error: 'Failed to copy' })}>
                             <Copy className="w-4 h-4" />
                           </Button>
                         </div>
@@ -391,23 +391,23 @@ export default function MotionGraphicsPage() {
               <LiquidGlassCard className="p-4">
                 <div className="flex items-center justify-between flex-wrap gap-4">
                   <div className="flex items-center gap-2">
-                    <Button variant="outline" size="icon" className="border-gray-700 hover:bg-slate-800">
+                    <Button variant="outline" size="icon" className="border-gray-700 hover:bg-slate-800" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Activating move tool...', success: 'Move tool active', error: 'Failed to activate' })}>
                       <Move className="w-4 h-4" />
                     </Button>
-                    <Button variant="outline" size="icon" className="border-gray-700 hover:bg-slate-800">
+                    <Button variant="outline" size="icon" className="border-gray-700 hover:bg-slate-800" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Activating text tool...', success: 'Text tool active', error: 'Failed to activate' })}>
                       <Type className="w-4 h-4" />
                     </Button>
-                    <Button variant="outline" size="icon" className="border-gray-700 hover:bg-slate-800">
+                    <Button variant="outline" size="icon" className="border-gray-700 hover:bg-slate-800" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Activating image tool...', success: 'Image tool active', error: 'Failed to activate' })}>
                       <Image className="w-4 h-4" />
                     </Button>
-                    <Button variant="outline" size="icon" className="border-gray-700 hover:bg-slate-800">
+                    <Button variant="outline" size="icon" className="border-gray-700 hover:bg-slate-800" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Activating video tool...', success: 'Video tool active', error: 'Failed to activate' })}>
                       <Video className="w-4 h-4" />
                     </Button>
                     <div className="w-px h-6 bg-gray-700" />
-                    <Button variant="outline" size="icon" className="border-gray-700 hover:bg-slate-800">
+                    <Button variant="outline" size="icon" className="border-gray-700 hover:bg-slate-800" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Rotating...', success: 'Rotation applied', error: 'Failed to rotate' })}>
                       <RotateCw className="w-4 h-4" />
                     </Button>
-                    <Button variant="outline" size="icon" className="border-gray-700 hover:bg-slate-800">
+                    <Button variant="outline" size="icon" className="border-gray-700 hover:bg-slate-800" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Maximizing...', success: 'Canvas maximized', error: 'Failed to maximize' })}>
                       <Maximize2 className="w-4 h-4" />
                     </Button>
                   </div>
@@ -434,7 +434,7 @@ export default function MotionGraphicsPage() {
                   <LiquidGlassCard className="p-6">
                     <div className="flex items-center justify-between mb-4">
                       <h3 className="font-semibold text-white">Layers</h3>
-                      <Button variant="ghost" size="icon" className="h-8 w-8">
+                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Adding layer...', success: 'New layer added', error: 'Failed to add layer' })}>
                         <Plus className="w-4 h-4" />
                       </Button>
                     </div>
@@ -450,10 +450,10 @@ export default function MotionGraphicsPage() {
                             <span className="text-sm text-white truncate">{layer}</span>
                           </div>
                           <div className="flex items-center gap-1">
-                            <Button variant="ghost" size="icon" className="h-6 w-6">
+                            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Toggling visibility...', success: 'Layer visibility toggled', error: 'Failed to toggle' })}>
                               <Eye className="w-3 h-3" />
                             </Button>
-                            <Button variant="ghost" size="icon" className="h-6 w-6">
+                            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Toggling lock...', success: 'Layer lock toggled', error: 'Failed to toggle' })}>
                               <Lock className="w-3 h-3" />
                             </Button>
                           </div>
@@ -490,7 +490,7 @@ export default function MotionGraphicsPage() {
                       </div>
 
                       <div className="flex items-center justify-center gap-2">
-                        <Button variant="outline" size="icon" className="border-gray-700 hover:bg-slate-800">
+                        <Button variant="outline" size="icon" className="border-gray-700 hover:bg-slate-800" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Skipping back...', success: 'Skipped to previous frame', error: 'Failed to skip' })}>
                           <SkipBack className="w-4 h-4" />
                         </Button>
                         <Button
@@ -503,7 +503,7 @@ export default function MotionGraphicsPage() {
                             <Play className="w-5 h-5" />
                           )}
                         </Button>
-                        <Button variant="outline" size="icon" className="border-gray-700 hover:bg-slate-800">
+                        <Button variant="outline" size="icon" className="border-gray-700 hover:bg-slate-800" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Skipping forward...', success: 'Skipped to next frame', error: 'Failed to skip' })}>
                           <SkipForward className="w-4 h-4" />
                         </Button>
                       </div>

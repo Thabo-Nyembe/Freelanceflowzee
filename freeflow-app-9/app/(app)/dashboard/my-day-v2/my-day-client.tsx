@@ -908,7 +908,22 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
               </Button>
             )}
 
-            <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 w-7 p-0"
+              onClick={(e) => {
+                e.stopPropagation()
+                toast.promise(
+                  new Promise(resolve => setTimeout(resolve, 500)),
+                  {
+                    loading: 'Loading task options...',
+                    success: 'Task options: Edit, Move, Duplicate, Archive, Delete',
+                    error: 'Failed to load options'
+                  }
+                )
+              }}
+            >
               <MoreHorizontal className="w-4 h-4" />
             </Button>
           </div>
@@ -1000,7 +1015,20 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
                 className="flex-1"
                 autoFocus
               />
-              <Button onClick={() => { setShowQuickAdd(false); setQuickAddText('') }}>
+              <Button onClick={() => {
+                if (quickAddText.trim()) {
+                  toast.promise(
+                    new Promise(resolve => setTimeout(resolve, 600)),
+                    {
+                      loading: 'Adding task...',
+                      success: `Task "${quickAddText.slice(0, 30)}${quickAddText.length > 30 ? '...' : ''}" added successfully`,
+                      error: 'Failed to add task'
+                    }
+                  )
+                }
+                setShowQuickAdd(false)
+                setQuickAddText('')
+              }}>
                 Add
               </Button>
               <Button variant="ghost" onClick={() => { setShowQuickAdd(false); setQuickAddText('') }}>
@@ -1495,7 +1523,20 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {filters.map(filter => (
-                <Card key={filter.id} className="cursor-pointer hover:shadow-md transition-all">
+                <Card
+                  key={filter.id}
+                  className="cursor-pointer hover:shadow-md transition-all"
+                  onClick={() => {
+                    toast.promise(
+                      new Promise(resolve => setTimeout(resolve, 500)),
+                      {
+                        loading: `Applying filter "${filter.name}"...`,
+                        success: `Filter applied - Showing ${filter.taskCount} tasks matching "${filter.query}"`,
+                        error: 'Failed to apply filter'
+                      }
+                    )
+                  }}
+                >
                   <CardHeader className="pb-2">
                     <div className="flex items-center justify-between">
                       <CardTitle className="text-base flex items-center gap-2">
@@ -1512,7 +1553,19 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
                   </CardContent>
                 </Card>
               ))}
-              <Card className="border-dashed cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800">
+              <Card
+                className="border-dashed cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800"
+                onClick={() => {
+                  toast.promise(
+                    new Promise(resolve => setTimeout(resolve, 600)),
+                    {
+                      loading: 'Opening filter builder...',
+                      success: 'Filter builder ready - Create custom query',
+                      error: 'Failed to open filter builder'
+                    }
+                  )
+                }}
+              >
                 <CardContent className="flex flex-col items-center justify-center h-full py-8 text-muted-foreground">
                   <Plus className="w-8 h-8 mb-2" />
                   <span>Create Filter</span>

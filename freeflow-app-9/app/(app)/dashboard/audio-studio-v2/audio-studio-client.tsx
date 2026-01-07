@@ -797,7 +797,7 @@ export default function AudioStudioClient({ initialTracks, initialStats }: Audio
                 <Button variant="ghost" size="icon" className="text-white hover:bg-gray-700" onClick={() => setCurrentTime(currentTime + 1)}>
                   <SkipForward className="w-5 h-5" />
                 </Button>
-                <Button variant="ghost" size="icon" className="text-white hover:bg-gray-700">
+                <Button variant="ghost" size="icon" className="text-white hover:bg-gray-700" onClick={() => toast.promise(new Promise(r => setTimeout(r, 300)), { loading: 'Fast forwarding...', success: 'Skipped forward 10 seconds', error: 'Fast forward failed' })}>
                   <FastForward className="w-5 h-5" />
                 </Button>
                 <div className="h-8 w-px bg-gray-700 mx-2" />

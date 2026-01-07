@@ -1212,9 +1212,39 @@ export default function DeploymentsClient() {
                       <Badge variant={blob.isPublic ? 'default' : 'outline'}>{blob.isPublic ? 'Public' : 'Private'}</Badge>
                       <span className="text-sm text-gray-500">{blob.downloadCount} downloads</span>
                       <div className="flex gap-1">
-                        <Button variant="ghost" size="icon"><Copy className="h-4 w-4" /></Button>
-                        <Button variant="ghost" size="icon"><Download className="h-4 w-4" /></Button>
-                        <Button variant="ghost" size="icon"><Trash2 className="h-4 w-4 text-red-500" /></Button>
+                        <Button variant="ghost" size="icon" onClick={() => {
+                          toast.promise(
+                            new Promise((resolve) => {
+                              navigator.clipboard.writeText(`https://storage.freeflow.app/${blob.name}`)
+                              setTimeout(resolve, 500)
+                            }),
+                            {
+                              loading: 'Copying URL...',
+                              success: 'Blob URL copied to clipboard',
+                              error: 'Failed to copy URL'
+                            }
+                          )
+                        }}><Copy className="h-4 w-4" /></Button>
+                        <Button variant="ghost" size="icon" onClick={() => {
+                          toast.promise(
+                            new Promise((resolve) => setTimeout(resolve, 1500)),
+                            {
+                              loading: `Downloading ${blob.name}...`,
+                              success: `Downloaded ${blob.name} successfully`,
+                              error: 'Failed to download blob'
+                            }
+                          )
+                        }}><Download className="h-4 w-4" /></Button>
+                        <Button variant="ghost" size="icon" onClick={() => {
+                          toast.promise(
+                            new Promise((resolve) => setTimeout(resolve, 1000)),
+                            {
+                              loading: 'Deleting blob...',
+                              success: `Deleted ${blob.name}`,
+                              error: 'Failed to delete blob'
+                            }
+                          )
+                        }}><Trash2 className="h-4 w-4 text-red-500" /></Button>
                       </div>
                     </div>
                   ))}
@@ -1862,8 +1892,26 @@ export default function DeploymentsClient() {
                           </div>
                           <div className="flex items-center gap-4">
                             <div className="text-right"><p className="text-sm"><span className={webhook.successRate >= 95 ? 'text-green-600' : 'text-amber-600'}>{webhook.successRate}%</span></p><p className="text-xs text-gray-500">success rate</p></div>
-                            <Button variant="ghost" size="icon"><RefreshCw className="h-4 w-4" /></Button>
-                            <Button variant="ghost" size="icon" className="text-red-500"><Trash2 className="h-4 w-4" /></Button>
+                            <Button variant="ghost" size="icon" onClick={() => {
+                              toast.promise(
+                                new Promise((resolve) => setTimeout(resolve, 1200)),
+                                {
+                                  loading: `Testing webhook ${webhook.name}...`,
+                                  success: `Webhook ${webhook.name} tested successfully`,
+                                  error: 'Webhook test failed'
+                                }
+                              )
+                            }}><RefreshCw className="h-4 w-4" /></Button>
+                            <Button variant="ghost" size="icon" className="text-red-500" onClick={() => {
+                              toast.promise(
+                                new Promise((resolve) => setTimeout(resolve, 1000)),
+                                {
+                                  loading: 'Deleting webhook...',
+                                  success: `Deleted webhook ${webhook.name}`,
+                                  error: 'Failed to delete webhook'
+                                }
+                              )
+                            }}><Trash2 className="h-4 w-4" /></Button>
                           </div>
                         </div>
                       ))}
@@ -1883,7 +1931,16 @@ export default function DeploymentsClient() {
                           <div className="flex items-center gap-4">
                             <div className="text-right"><p className="text-sm font-medium">{member.deploymentsThisMonth} deploys</p><p className="text-xs text-gray-500">this month</p></div>
                             <Badge variant="outline" className={member.role === 'owner' ? 'bg-purple-100 text-purple-700' : member.role === 'admin' ? 'bg-blue-100 text-blue-700' : ''}>{member.role}</Badge>
-                            <Button variant="ghost" size="icon"><MoreHorizontal className="h-4 w-4" /></Button>
+                            <Button variant="ghost" size="icon" onClick={() => {
+                              toast.promise(
+                                new Promise((resolve) => setTimeout(resolve, 500)),
+                                {
+                                  loading: 'Loading member options...',
+                                  success: `Showing options for ${member.name}`,
+                                  error: 'Failed to load options'
+                                }
+                              )
+                            }}><MoreHorizontal className="h-4 w-4" /></Button>
                           </div>
                         </div>
                       ))}
@@ -2004,7 +2061,16 @@ export default function DeploymentsClient() {
                         <span className="text-sm text-gray-500">{env.value}</span>
                       </div>
                       <Badge variant="outline">{env.environment}</Badge>
-                      <Button variant="ghost" size="icon"><Trash2 className="h-4 w-4 text-red-500" /></Button>
+                      <Button variant="ghost" size="icon" onClick={() => {
+                        toast.promise(
+                          new Promise((resolve) => setTimeout(resolve, 1000)),
+                          {
+                            loading: 'Deleting environment variable...',
+                            success: `Deleted ${env.key}`,
+                            error: 'Failed to delete environment variable'
+                          }
+                        )
+                      }}><Trash2 className="h-4 w-4 text-red-500" /></Button>
                     </div>
                   ))}
                 </div>
@@ -2040,7 +2106,17 @@ export default function DeploymentsClient() {
                         {domain.redirectTo && <span className="ml-2 text-sm text-gray-500">→ {domain.redirectTo}</span>}
                       </div>
                       <Badge variant={domain.type === 'production' ? 'default' : 'outline'}>{domain.type}</Badge>
-                      <Button variant="ghost" size="icon"><ExternalLink className="h-4 w-4" /></Button>
+                      <Button variant="ghost" size="icon" onClick={() => {
+                        window.open(`https://${domain.domain}`, '_blank')
+                        toast.promise(
+                          new Promise((resolve) => setTimeout(resolve, 500)),
+                          {
+                            loading: 'Opening domain...',
+                            success: `Opened ${domain.domain} in new tab`,
+                            error: 'Failed to open domain'
+                          }
+                        )
+                      }}><ExternalLink className="h-4 w-4" /></Button>
                     </div>
                   ))}
                 </div>

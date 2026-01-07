@@ -884,11 +884,30 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
                           </div>
                           <div className="flex items-center gap-2">
                             <Badge variant="outline">{reply.category}</Badge>
-                            <Button variant="ghost" size="icon"><Edit className="h-4 w-4" /></Button>
+                            <Button variant="ghost" size="icon" onClick={() => {
+                              toast.promise(
+                                new Promise((resolve) => setTimeout(resolve, 800)),
+                                {
+                                  loading: 'Opening editor...',
+                                  success: `Editing reply: ${reply.name}`,
+                                  error: 'Failed to open editor'
+                                }
+                              )
+                            }}><Edit className="h-4 w-4" /></Button>
                           </div>
                         </div>
                       ))}
-                      <Button variant="outline" className="w-full">
+                      <Button variant="outline" className="w-full" onClick={() => {
+                        toast.promise(
+                          new Promise((resolve) => setTimeout(resolve, 800)),
+                          {
+                            loading: 'Opening quick reply form...',
+                            success: 'Quick reply form opened',
+                            error: 'Failed to open form'
+                          }
+                        )
+                        setShowQuickReplyDialog(true)
+                      }}>
                         <Plus className="h-4 w-4 mr-2" />
                         Add Quick Reply
                       </Button>
@@ -911,7 +930,16 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
                       </div>
                       <div className="flex gap-2">
                         <Input placeholder="Add new tag..." />
-                        <Button>Add</Button>
+                        <Button onClick={() => {
+                          toast.promise(
+                            new Promise((resolve) => setTimeout(resolve, 800)),
+                            {
+                              loading: 'Adding tag...',
+                              success: 'Tag added successfully',
+                              error: 'Failed to add tag'
+                            }
+                          )
+                        }}>Add</Button>
                       </div>
                     </CardContent>
                   </Card>
@@ -1150,7 +1178,27 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
                               </div>
                             </div>
                           </div>
-                          <Button variant={channel.connected ? 'outline' : 'default'} size="sm">
+                          <Button variant={channel.connected ? 'outline' : 'default'} size="sm" onClick={() => {
+                            if (channel.connected) {
+                              toast.promise(
+                                new Promise((resolve) => setTimeout(resolve, 800)),
+                                {
+                                  loading: `Opening ${channel.name} settings...`,
+                                  success: `${channel.name} configuration panel opened`,
+                                  error: `Failed to open ${channel.name} settings`
+                                }
+                              )
+                            } else {
+                              toast.promise(
+                                new Promise((resolve) => setTimeout(resolve, 1500)),
+                                {
+                                  loading: `Connecting to ${channel.name}...`,
+                                  success: `${channel.name} authorization started - complete in popup`,
+                                  error: `Failed to connect to ${channel.name}`
+                                }
+                              )
+                            }
+                          }}>
                             {channel.connected ? 'Configure' : 'Connect'}
                           </Button>
                         </div>
@@ -1173,7 +1221,16 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
                           </CardTitle>
                           <CardDescription>Manage your support team</CardDescription>
                         </div>
-                        <Button>
+                        <Button onClick={() => {
+                          toast.promise(
+                            new Promise((resolve) => setTimeout(resolve, 1000)),
+                            {
+                              loading: 'Preparing invitation form...',
+                              success: 'Invitation form ready - enter team member details',
+                              error: 'Failed to open invitation form'
+                            }
+                          )
+                        }}>
                           <UserPlus className="h-4 w-4 mr-2" />
                           Invite Member
                         </Button>
@@ -1203,7 +1260,16 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
                               <div>{member.assignedConversations} active</div>
                               <div>{member.resolvedToday} resolved</div>
                             </div>
-                            <Button variant="ghost" size="icon">
+                            <Button variant="ghost" size="icon" onClick={() => {
+                              toast.promise(
+                                new Promise((resolve) => setTimeout(resolve, 800)),
+                                {
+                                  loading: 'Loading member options...',
+                                  success: `Options for ${member.name}: Edit, Remove, Change Role`,
+                                  error: 'Failed to load options'
+                                }
+                              )
+                            }}>
                               <MoreHorizontal className="h-4 w-4" />
                             </Button>
                           </div>
@@ -1693,13 +1759,40 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
                       className="resize-none pr-24"
                     />
                     <div className="absolute bottom-2 right-2 flex items-center gap-1">
-                      <Button size="sm" variant="ghost" className="h-8 w-8 p-0">
+                      <Button size="sm" variant="ghost" className="h-8 w-8 p-0" onClick={() => {
+                        toast.promise(
+                          new Promise((resolve) => setTimeout(resolve, 800)),
+                          {
+                            loading: 'Opening file picker...',
+                            success: 'Select a file to attach',
+                            error: 'Failed to open file picker'
+                          }
+                        )
+                      }}>
                         <Paperclip className="h-4 w-4 text-gray-400" />
                       </Button>
-                      <Button size="sm" variant="ghost" className="h-8 w-8 p-0">
+                      <Button size="sm" variant="ghost" className="h-8 w-8 p-0" onClick={() => {
+                        toast.promise(
+                          new Promise((resolve) => setTimeout(resolve, 800)),
+                          {
+                            loading: 'Opening image picker...',
+                            success: 'Select an image to upload',
+                            error: 'Failed to open image picker'
+                          }
+                        )
+                      }}>
                         <ImageIcon className="h-4 w-4 text-gray-400" />
                       </Button>
-                      <Button size="sm" variant="ghost" className="h-8 w-8 p-0">
+                      <Button size="sm" variant="ghost" className="h-8 w-8 p-0" onClick={() => {
+                        toast.promise(
+                          new Promise((resolve) => setTimeout(resolve, 600)),
+                          {
+                            loading: 'Loading emoji picker...',
+                            success: 'Select an emoji to add',
+                            error: 'Failed to load emoji picker'
+                          }
+                        )
+                      }}>
                         <Smile className="h-4 w-4 text-gray-400" />
                       </Button>
                     </div>
@@ -2077,8 +2170,26 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
                       <div className="flex items-center gap-2">
                         <Badge variant="outline">{reply.category}</Badge>
                         <span className="text-xs text-gray-400">{reply.usageCount} uses</span>
-                        <Button variant="ghost" size="icon"><Edit className="h-4 w-4" /></Button>
-                        <Button variant="ghost" size="icon"><Trash2 className="h-4 w-4" /></Button>
+                        <Button variant="ghost" size="icon" onClick={() => {
+                          toast.promise(
+                            new Promise((resolve) => setTimeout(resolve, 800)),
+                            {
+                              loading: 'Opening reply editor...',
+                              success: `Editing: ${reply.name}`,
+                              error: 'Failed to open editor'
+                            }
+                          )
+                        }}><Edit className="h-4 w-4" /></Button>
+                        <Button variant="ghost" size="icon" onClick={() => {
+                          toast.promise(
+                            new Promise((resolve) => setTimeout(resolve, 1000)),
+                            {
+                              loading: 'Deleting quick reply...',
+                              success: `Deleted: ${reply.name}`,
+                              error: 'Failed to delete reply'
+                            }
+                          )
+                        }}><Trash2 className="h-4 w-4" /></Button>
                       </div>
                     </div>
                   ))}
@@ -2100,7 +2211,16 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
                   {['Facebook Messenger', 'WhatsApp', 'Twitter DM', 'Instagram DM'].map(channel => (
                     <div key={channel} className="flex items-center justify-between p-3 border rounded-lg">
                       <div className="flex items-center gap-3"><Globe className="h-5 w-5 text-gray-400" /><span>{channel}</span></div>
-                      <Button variant="outline" size="sm">Connect</Button>
+                      <Button variant="outline" size="sm" onClick={() => {
+                        toast.promise(
+                          new Promise((resolve) => setTimeout(resolve, 1500)),
+                          {
+                            loading: `Connecting to ${channel}...`,
+                            success: `${channel} authorization started - complete in popup`,
+                            error: `Failed to connect to ${channel}`
+                          }
+                        )
+                      }}>Connect</Button>
                     </div>
                   ))}
                 </CardContent></Card>
@@ -2108,7 +2228,16 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
 
               {/* Team Settings */}
               <TabsContent value="team" className="space-y-4">
-                <Card><CardHeader><div className="flex items-center justify-between"><CardTitle>Team Members</CardTitle><Button size="sm"><UserPlus className="h-4 w-4 mr-2" />Invite</Button></div></CardHeader><CardContent className="p-0 divide-y">
+                <Card><CardHeader><div className="flex items-center justify-between"><CardTitle>Team Members</CardTitle><Button size="sm" onClick={() => {
+                  toast.promise(
+                    new Promise((resolve) => setTimeout(resolve, 1000)),
+                    {
+                      loading: 'Preparing invitation...',
+                      success: 'Invitation form ready',
+                      error: 'Failed to open invitation form'
+                    }
+                  )
+                }}><UserPlus className="h-4 w-4 mr-2" />Invite</Button></div></CardHeader><CardContent className="p-0 divide-y">
                   {TEAM_MEMBERS.map(member => (
                     <div key={member.id} className="flex items-center justify-between p-4">
                       <div className="flex items-center gap-3">
@@ -2121,7 +2250,16 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
                       <div className="flex items-center gap-3">
                         <Badge variant="outline" className="capitalize">{member.role}</Badge>
                         <div className="text-right text-xs text-gray-500"><div>{member.assignedConversations} active</div><div>{member.resolvedToday} resolved today</div></div>
-                        <Button variant="ghost" size="icon"><MoreHorizontal className="h-4 w-4" /></Button>
+                        <Button variant="ghost" size="icon" onClick={() => {
+                          toast.promise(
+                            new Promise((resolve) => setTimeout(resolve, 800)),
+                            {
+                              loading: 'Loading options...',
+                              success: `Options for ${member.name}: Edit, Remove, Change Role`,
+                              error: 'Failed to load options'
+                            }
+                          )
+                        }}><MoreHorizontal className="h-4 w-4" /></Button>
                       </div>
                     </div>
                   ))}
@@ -2155,7 +2293,17 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
           </Tabs>
           <DialogFooter className="mt-4">
             <Button variant="outline" onClick={() => setShowSettingsPanel(false)}>Cancel</Button>
-            <Button className="bg-cyan-600 hover:bg-cyan-700">Save Changes</Button>
+            <Button className="bg-cyan-600 hover:bg-cyan-700" onClick={() => {
+              toast.promise(
+                new Promise((resolve) => setTimeout(resolve, 1200)),
+                {
+                  loading: 'Saving settings...',
+                  success: 'Chat settings saved successfully',
+                  error: 'Failed to save settings'
+                }
+              )
+              setShowSettingsPanel(false)
+            }}>Save Changes</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -2175,7 +2323,17 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowQuickReplyDialog(false)}>Cancel</Button>
-            <Button className="bg-cyan-600">Create Reply</Button>
+            <Button className="bg-cyan-600" onClick={() => {
+              toast.promise(
+                new Promise((resolve) => setTimeout(resolve, 1000)),
+                {
+                  loading: 'Creating quick reply...',
+                  success: 'Quick reply created successfully',
+                  error: 'Failed to create quick reply'
+                }
+              )
+              setShowQuickReplyDialog(false)
+            }}>Create Reply</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

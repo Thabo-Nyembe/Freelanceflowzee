@@ -712,11 +712,36 @@ export default function OrdersClient() {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="outline" size="sm">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                toast.promise(
+                  new Promise(resolve => setTimeout(resolve, 1500)),
+                  {
+                    loading: 'Syncing orders...',
+                    success: 'Orders synced successfully',
+                    error: 'Failed to sync orders'
+                  }
+                )
+              }}
+            >
               <RefreshCw className="w-4 h-4 mr-2" />
               Sync
             </Button>
-            <Button className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white">
+            <Button
+              className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white"
+              onClick={() => {
+                toast.promise(
+                  new Promise(resolve => setTimeout(resolve, 1000)),
+                  {
+                    loading: 'Creating order...',
+                    success: 'Order created successfully',
+                    error: 'Failed to create order'
+                  }
+                )
+              }}
+            >
               <Plus className="w-4 h-4 mr-2" />
               Create Order
             </Button>
@@ -825,6 +850,16 @@ export default function OrdersClient() {
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={() => {
+                    toast.promise(
+                      new Promise(resolve => setTimeout(resolve, 1200)),
+                      {
+                        loading: `Processing ${action.label}...`,
+                        success: `${action.label} completed successfully`,
+                        error: `Failed to complete ${action.label}`
+                      }
+                    )
+                  }}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -971,6 +1006,16 @@ export default function OrdersClient() {
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={() => {
+                    toast.promise(
+                      new Promise(resolve => setTimeout(resolve, 1200)),
+                      {
+                        loading: `Processing ${action.label}...`,
+                        success: `${action.label} completed successfully`,
+                        error: `Failed to complete ${action.label}`
+                      }
+                    )
+                  }}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1007,11 +1052,37 @@ export default function OrdersClient() {
                             ))}
                           </div>
                           <div className="flex items-center gap-2 pt-3 border-t">
-                            <Button size="sm" className="bg-blue-600">
+                            <Button
+                              size="sm"
+                              className="bg-blue-600"
+                              onClick={() => {
+                                toast.promise(
+                                  new Promise(resolve => setTimeout(resolve, 1500)),
+                                  {
+                                    loading: `Fulfilling order ${order.order_number}...`,
+                                    success: `Order ${order.order_number} fulfilled successfully`,
+                                    error: 'Failed to fulfill order'
+                                  }
+                                )
+                              }}
+                            >
                               <Package className="w-3 h-3 mr-1" />
                               Fulfill
                             </Button>
-                            <Button variant="outline" size="sm">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                toast.promise(
+                                  new Promise(resolve => setTimeout(resolve, 1000)),
+                                  {
+                                    loading: 'Generating shipping label...',
+                                    success: 'Shipping label generated',
+                                    error: 'Failed to generate label'
+                                  }
+                                )
+                              }}
+                            >
                               <Printer className="w-3 h-3 mr-1" />
                               Print Label
                             </Button>
@@ -1100,7 +1171,19 @@ export default function OrdersClient() {
                     <CardTitle>Return Requests</CardTitle>
                     <CardDescription>Manage customer returns and refunds</CardDescription>
                   </div>
-                  <Button variant="outline">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      toast.promise(
+                        new Promise(resolve => setTimeout(resolve, 1500)),
+                        {
+                          loading: 'Exporting returns data...',
+                          success: 'Returns data exported successfully',
+                          error: 'Failed to export returns data'
+                        }
+                      )
+                    }}
+                  >
                     <Download className="w-4 h-4 mr-2" />
                     Export
                   </Button>
@@ -1137,24 +1220,77 @@ export default function OrdersClient() {
                       <div className="flex items-center gap-2 pt-3 border-t">
                         {ret.status === 'requested' && (
                           <>
-                            <Button size="sm" className="bg-green-600">
+                            <Button
+                              size="sm"
+                              className="bg-green-600"
+                              onClick={() => {
+                                toast.promise(
+                                  new Promise(resolve => setTimeout(resolve, 1200)),
+                                  {
+                                    loading: `Approving return for ${ret.order_number}...`,
+                                    success: `Return for ${ret.order_number} approved`,
+                                    error: 'Failed to approve return'
+                                  }
+                                )
+                              }}
+                            >
                               <CheckCircle className="w-3 h-3 mr-1" />
                               Approve
                             </Button>
-                            <Button variant="outline" size="sm" className="text-red-600">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="text-red-600"
+                              onClick={() => {
+                                toast.promise(
+                                  new Promise(resolve => setTimeout(resolve, 1200)),
+                                  {
+                                    loading: `Rejecting return for ${ret.order_number}...`,
+                                    success: `Return for ${ret.order_number} rejected`,
+                                    error: 'Failed to reject return'
+                                  }
+                                )
+                              }}
+                            >
                               <XCircle className="w-3 h-3 mr-1" />
                               Reject
                             </Button>
                           </>
                         )}
                         {ret.shipping_label && (
-                          <Button variant="outline" size="sm">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              toast.promise(
+                                new Promise(resolve => setTimeout(resolve, 1000)),
+                                {
+                                  loading: 'Generating return label...',
+                                  success: 'Return label generated',
+                                  error: 'Failed to generate label'
+                                }
+                              )
+                            }}
+                          >
                             <Printer className="w-3 h-3 mr-1" />
                             Label
                           </Button>
                         )}
                         {ret.tracking_number && (
-                          <Button variant="outline" size="sm">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              toast.promise(
+                                new Promise(resolve => setTimeout(resolve, 800)),
+                                {
+                                  loading: 'Loading tracking info...',
+                                  success: `Tracking: ${ret.tracking_number}`,
+                                  error: 'Failed to load tracking'
+                                }
+                              )
+                            }}
+                          >
                             <Truck className="w-3 h-3 mr-1" />
                             Track
                           </Button>
@@ -1677,7 +1813,20 @@ export default function OrdersClient() {
                             <p className="font-medium text-red-700 dark:text-red-400">Archive Old Orders</p>
                             <p className="text-sm text-red-600 dark:text-red-400/80">Archive orders older than 1 year</p>
                           </div>
-                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-100">
+                          <Button
+                            variant="outline"
+                            className="border-red-300 text-red-600 hover:bg-red-100"
+                            onClick={() => {
+                              toast.promise(
+                                new Promise(resolve => setTimeout(resolve, 2000)),
+                                {
+                                  loading: 'Archiving old orders...',
+                                  success: 'Old orders archived successfully',
+                                  error: 'Failed to archive orders'
+                                }
+                              )
+                            }}
+                          >
                             <History className="w-4 h-4 mr-2" />
                             Archive
                           </Button>
@@ -1687,7 +1836,20 @@ export default function OrdersClient() {
                             <p className="font-medium text-red-700 dark:text-red-400">Delete Test Orders</p>
                             <p className="text-sm text-red-600 dark:text-red-400/80">Remove all test/sandbox orders</p>
                           </div>
-                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-100">
+                          <Button
+                            variant="outline"
+                            className="border-red-300 text-red-600 hover:bg-red-100"
+                            onClick={() => {
+                              toast.promise(
+                                new Promise(resolve => setTimeout(resolve, 1500)),
+                                {
+                                  loading: 'Deleting test orders...',
+                                  success: 'Test orders deleted successfully',
+                                  error: 'Failed to delete test orders'
+                                }
+                              )
+                            }}
+                          >
                             <Trash2 className="w-4 h-4 mr-2" />
                             Delete
                           </Button>
@@ -1875,15 +2037,53 @@ export default function OrdersClient() {
                   )}
 
                   <div className="flex items-center gap-3 pt-4 border-t">
-                    <Button variant="outline" className="flex-1">
+                    <Button
+                      variant="outline"
+                      className="flex-1"
+                      onClick={() => {
+                        toast.promise(
+                          new Promise(resolve => setTimeout(resolve, 1000)),
+                          {
+                            loading: 'Opening order editor...',
+                            success: 'Order editor opened',
+                            error: 'Failed to open editor'
+                          }
+                        )
+                      }}
+                    >
                       <Edit className="w-4 h-4 mr-2" />
                       Edit Order
                     </Button>
-                    <Button variant="outline" className="flex-1">
+                    <Button
+                      variant="outline"
+                      className="flex-1"
+                      onClick={() => {
+                        toast.promise(
+                          new Promise(resolve => setTimeout(resolve, 1200)),
+                          {
+                            loading: 'Preparing print preview...',
+                            success: 'Print preview ready',
+                            error: 'Failed to generate print preview'
+                          }
+                        )
+                      }}
+                    >
                       <Printer className="w-4 h-4 mr-2" />
                       Print
                     </Button>
-                    <Button className="flex-1 bg-gradient-to-r from-blue-500 to-indigo-600 text-white">
+                    <Button
+                      className="flex-1 bg-gradient-to-r from-blue-500 to-indigo-600 text-white"
+                      onClick={() => {
+                        toast.promise(
+                          new Promise(resolve => setTimeout(resolve, 1500)),
+                          {
+                            loading: 'Sending order update...',
+                            success: 'Order update sent to customer',
+                            error: 'Failed to send update'
+                          }
+                        )
+                      }}
+                    >
                       <Send className="w-4 h-4 mr-2" />
                       Send Update
                     </Button>

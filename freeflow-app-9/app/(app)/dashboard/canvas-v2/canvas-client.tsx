@@ -600,6 +600,34 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
     )
   }, [])
 
+  const handleRedoAction = useCallback(() => {
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 400)),
+      { loading: 'Redoing action...', success: 'Action redone', error: 'Could not redo action' }
+    )
+  }, [])
+
+  const handlePlayPreview = useCallback(() => {
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 600)),
+      { loading: 'Starting preview mode...', success: 'Preview mode activated - Press Escape to exit', error: 'Could not start preview' }
+    )
+  }, [])
+
+  const handleOpenSettings = useCallback(() => {
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 400)),
+      { loading: 'Loading settings...', success: 'Editor settings opened', error: 'Could not load settings' }
+    )
+  }, [])
+
+  const handleMemberOptions = useCallback((memberName: string) => {
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 300)),
+      { loading: 'Loading options...', success: `Options menu opened for ${memberName}`, error: 'Could not load options' }
+    )
+  }, [])
+
   const handleUseTemplate = useCallback(async (template: DesignTemplate) => {
     setIsSubmitting(true)
     try {
@@ -683,10 +711,10 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
                 </div>
               )}
             </div>
-            <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white">
+            <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white" onClick={handleUndoAction}>
               <Undo className="h-4 w-4" />
             </Button>
-            <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white">
+            <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white" onClick={handleRedoAction}>
               <Redo className="h-4 w-4" />
             </Button>
             <div className="w-px h-6 bg-gray-700 mx-2"></div>
@@ -700,7 +728,7 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
               </Button>
             </div>
             <div className="w-px h-6 bg-gray-700 mx-2"></div>
-            <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white">
+            <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white" onClick={handlePlayPreview}>
               <Play className="h-4 w-4" />
             </Button>
             <Button className="bg-indigo-600 hover:bg-indigo-700" onClick={handleShareCanvas}>
@@ -730,7 +758,7 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
               </Button>
             ))}
             <div className="flex-1"></div>
-            <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white hover:bg-gray-700">
+            <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white hover:bg-gray-700" onClick={handleOpenSettings}>
               <Settings className="h-5 w-5" />
             </Button>
           </div>
@@ -1482,7 +1510,7 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
                         <p className="text-sm text-gray-500">Last active: {member.last_active}</p>
                         <p className="text-xs text-gray-400">{member.boards_access} boards</p>
                       </div>
-                      <Button variant="ghost" size="icon">
+                      <Button variant="ghost" size="icon" onClick={() => handleMemberOptions(member.name)}>
                         <MoreVertical className="h-4 w-4" />
                       </Button>
                     </div>

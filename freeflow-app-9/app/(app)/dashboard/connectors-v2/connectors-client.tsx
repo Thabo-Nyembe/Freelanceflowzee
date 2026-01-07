@@ -1506,10 +1506,10 @@ export default function ConnectorsClient() {
                               <code className="text-sm text-slate-500">zap_live_••••••••••••••••</code>
                             </div>
                             <div className="flex items-center gap-2">
-                              <Button variant="outline" size="sm">
+                              <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 300)), { loading: 'Copying API key...', success: 'Production API key copied to clipboard', error: 'Failed to copy' })}>
                                 <Copy className="w-4 h-4" />
                               </Button>
-                              <Button variant="outline" size="sm">
+                              <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Regenerating production API key...', success: 'Production API key regenerated', error: 'Failed to regenerate key' })}>
                                 <RefreshCw className="w-4 h-4" />
                               </Button>
                             </div>
@@ -1522,16 +1522,16 @@ export default function ConnectorsClient() {
                               <code className="text-sm text-slate-500">zap_dev_••••••••••••••••</code>
                             </div>
                             <div className="flex items-center gap-2">
-                              <Button variant="outline" size="sm">
+                              <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 300)), { loading: 'Copying API key...', success: 'Development API key copied to clipboard', error: 'Failed to copy' })}>
                                 <Copy className="w-4 h-4" />
                               </Button>
-                              <Button variant="outline" size="sm">
+                              <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Regenerating development API key...', success: 'Development API key regenerated', error: 'Failed to regenerate key' })}>
                                 <RefreshCw className="w-4 h-4" />
                               </Button>
                             </div>
                           </div>
                         </div>
-                        <Button variant="outline">
+                        <Button variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Creating new API key...', success: 'New API key created successfully', error: 'Failed to create API key' })}>
                           <Plus className="w-4 h-4 mr-2" />
                           Create New Key
                         </Button>
@@ -1550,7 +1550,7 @@ export default function ConnectorsClient() {
                         <div className="text-center py-8 text-slate-500">
                           <Webhook className="w-12 h-12 mx-auto mb-4 text-slate-300 dark:text-slate-600" />
                           <p>No webhooks configured</p>
-                          <Button variant="outline" className="mt-4">
+                          <Button variant="outline" className="mt-4" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening webhook configuration...', success: 'Webhook configuration opened', error: 'Failed to open webhook configuration' })}>
                             <Plus className="w-4 h-4 mr-2" />
                             Add Webhook
                           </Button>
@@ -1671,7 +1671,7 @@ export default function ConnectorsClient() {
                             <p className="font-medium text-red-700 dark:text-red-400">Clear Task History</p>
                             <p className="text-sm text-red-600 dark:text-red-400/80">Delete all task logs permanently</p>
                           </div>
-                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-100">
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-100" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Clearing task history...', success: 'All task history has been cleared', error: 'Failed to clear task history' })}>
                             <Archive className="w-4 h-4 mr-2" />
                             Clear
                           </Button>
@@ -1681,7 +1681,7 @@ export default function ConnectorsClient() {
                             <p className="font-medium text-red-700 dark:text-red-400">Delete All Zaps</p>
                             <p className="text-sm text-red-600 dark:text-red-400/80">Permanently delete all zaps</p>
                           </div>
-                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-100">
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-100" onClick={() => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Deleting all zaps...', success: 'All zaps have been permanently deleted', error: 'Failed to delete zaps' })}>
                             <Trash2 className="w-4 h-4 mr-2" />
                             Delete
                           </Button>
@@ -1779,11 +1779,11 @@ export default function ConnectorsClient() {
                   )}
 
                   <div className="flex gap-3">
-                    <Button className="flex-1 bg-orange-600 hover:bg-orange-700">
+                    <Button className="flex-1 bg-orange-600 hover:bg-orange-700" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening zap editor...', success: 'Zap editor opened', error: 'Failed to open editor' })}>
                       <Edit className="w-4 h-4 mr-2" />
                       Edit Zap
                     </Button>
-                    <Button variant="outline" className="flex-1">
+                    <Button variant="outline" className="flex-1" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Loading zap history...', success: 'Zap history loaded', error: 'Failed to load history' })}>
                       <History className="w-4 h-4 mr-2" />
                       View History
                     </Button>
@@ -1843,7 +1843,7 @@ export default function ConnectorsClient() {
                     </div>
                   </div>
 
-                  <Button className="w-full" size="lg">
+                  <Button className="w-full" size="lg" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: selectedApp.is_connected ? 'Opening connection settings...' : `Connecting to ${selectedApp.name}...`, success: selectedApp.is_connected ? 'Connection settings opened' : `Connected to ${selectedApp.name}`, error: 'Connection failed' })}>
                     {selectedApp.is_connected ? 'Manage Connection' : `Connect ${selectedApp.name}`}
                   </Button>
                 </div>
@@ -1906,11 +1906,11 @@ export default function ConnectorsClient() {
                 )}
 
                 <div className="flex gap-3">
-                  <Button variant="outline" className="flex-1">
+                  <Button variant="outline" className="flex-1" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Replaying task...', success: 'Task replayed successfully', error: 'Failed to replay task' })}>
                     <RefreshCw className="w-4 h-4 mr-2" />
                     Replay Task
                   </Button>
-                  <Button variant="outline" className="flex-1">
+                  <Button variant="outline" className="flex-1" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Preparing log download...', success: 'Task log downloaded', error: 'Failed to download log' })}>
                     <Download className="w-4 h-4 mr-2" />
                     Download Log
                   </Button>

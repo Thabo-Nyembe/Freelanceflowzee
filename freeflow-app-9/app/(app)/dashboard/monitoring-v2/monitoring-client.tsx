@@ -1074,7 +1074,16 @@ export default function MonitoringClient() {
                   <CardTitle>Log Stream</CardTitle>
                   <div className="flex items-center gap-3">
                     <Input placeholder="Search logs..." className="w-64" />
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" onClick={() => {
+                      toast.promise(
+                        new Promise(resolve => setTimeout(resolve, 800)),
+                        {
+                          loading: 'Applying log filters...',
+                          success: 'Filters applied successfully',
+                          error: 'Failed to apply filters'
+                        }
+                      )
+                    }}>
                       <Filter className="w-4 h-4 mr-2" />
                       Filter
                     </Button>
@@ -1506,10 +1515,28 @@ export default function MonitoringClient() {
                           <Label>API Key</Label>
                           <div className="flex gap-2">
                             <Input type="password" defaultValue="dd_api_xxxxxxxxxxxxxxxxxx" readOnly className="flex-1 font-mono" />
-                            <Button variant="outline" size="icon">
+                            <Button variant="outline" size="icon" onClick={() => {
+                              toast.promise(
+                                navigator.clipboard.writeText('dd_api_xxxxxxxxxxxxxxxxxx'),
+                                {
+                                  loading: 'Copying API key...',
+                                  success: 'API key copied to clipboard',
+                                  error: 'Failed to copy API key'
+                                }
+                              )
+                            }}>
                               <Copy className="w-4 h-4" />
                             </Button>
-                            <Button variant="outline" size="icon">
+                            <Button variant="outline" size="icon" onClick={() => {
+                              toast.promise(
+                                new Promise(resolve => setTimeout(resolve, 1000)),
+                                {
+                                  loading: 'Regenerating API key...',
+                                  success: 'API key regenerated successfully',
+                                  error: 'Failed to regenerate API key'
+                                }
+                              )
+                            }}>
                               <RefreshCw className="w-4 h-4" />
                             </Button>
                           </div>
@@ -1518,7 +1545,16 @@ export default function MonitoringClient() {
                           <Label>Application Key</Label>
                           <div className="flex gap-2">
                             <Input type="password" defaultValue="dd_app_xxxxxxxxxxxxxxxxxx" readOnly className="flex-1 font-mono" />
-                            <Button variant="outline" size="icon">
+                            <Button variant="outline" size="icon" onClick={() => {
+                              toast.promise(
+                                navigator.clipboard.writeText('dd_app_xxxxxxxxxxxxxxxxxx'),
+                                {
+                                  loading: 'Copying application key...',
+                                  success: 'Application key copied to clipboard',
+                                  error: 'Failed to copy application key'
+                                }
+                              )
+                            }}>
                               <Copy className="w-4 h-4" />
                             </Button>
                           </div>
@@ -1559,11 +1595,29 @@ export default function MonitoringClient() {
                             </div>
                             <div className="flex items-center gap-2">
                               <Switch defaultChecked={channel.enabled} />
-                              <Button variant="ghost" size="sm">Configure</Button>
+                              <Button variant="ghost" size="sm" onClick={() => {
+                                toast.promise(
+                                  new Promise(resolve => setTimeout(resolve, 800)),
+                                  {
+                                    loading: `Configuring ${channel.name}...`,
+                                    success: `${channel.name} configuration opened`,
+                                    error: `Failed to configure ${channel.name}`
+                                  }
+                                )
+                              }}>Configure</Button>
                             </div>
                           </div>
                         ))}
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => {
+                          toast.promise(
+                            new Promise(resolve => setTimeout(resolve, 800)),
+                            {
+                              loading: 'Opening add channel dialog...',
+                              success: 'Add channel dialog opened',
+                              error: 'Failed to open add channel dialog'
+                            }
+                          )
+                        }}>
                           <Plus className="w-4 h-4 mr-2" />
                           Add Channel
                         </Button>
@@ -1807,7 +1861,16 @@ export default function MonitoringClient() {
                                 </Badge>
                               </div>
                               <p className="text-sm text-gray-500 mb-3">{integration.description}</p>
-                              <Button variant="outline" size="sm" className="w-full">
+                              <Button variant="outline" size="sm" className="w-full" onClick={() => {
+                                toast.promise(
+                                  new Promise(resolve => setTimeout(resolve, 1000)),
+                                  {
+                                    loading: integration.connected ? `Opening ${integration.name} configuration...` : `Connecting to ${integration.name}...`,
+                                    success: integration.connected ? `${integration.name} settings opened` : `${integration.name} connected successfully`,
+                                    error: integration.connected ? `Failed to open ${integration.name} settings` : `Failed to connect to ${integration.name}`
+                                  }
+                                )
+                              }}>
                                 {integration.connected ? 'Configure' : 'Connect'}
                               </Button>
                             </div>
@@ -1844,7 +1907,16 @@ export default function MonitoringClient() {
                                   Connected
                                 </Badge>
                               ) : (
-                                <Button variant="outline" size="sm">Connect</Button>
+                                <Button variant="outline" size="sm" onClick={() => {
+                                  toast.promise(
+                                    new Promise(resolve => setTimeout(resolve, 1200)),
+                                    {
+                                      loading: `Connecting to ${db.name}...`,
+                                      success: `${db.name} connected successfully`,
+                                      error: `Failed to connect to ${db.name}`
+                                    }
+                                  )
+                                }}>Connect</Button>
                               )}
                             </div>
                           </div>
@@ -2033,7 +2105,16 @@ export default function MonitoringClient() {
                             <div className="font-medium">Reset All Alerts</div>
                             <p className="text-sm text-gray-500">Clear all alert history</p>
                           </div>
-                          <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50">
+                          <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50" onClick={() => {
+                            toast.promise(
+                              new Promise(resolve => setTimeout(resolve, 1200)),
+                              {
+                                loading: 'Resetting all alerts...',
+                                success: 'All alerts have been reset',
+                                error: 'Failed to reset alerts'
+                              }
+                            )
+                          }}>
                             Reset Alerts
                           </Button>
                         </div>
@@ -2042,7 +2123,16 @@ export default function MonitoringClient() {
                             <div className="font-medium">Remove All Hosts</div>
                             <p className="text-sm text-gray-500">Unregister all monitored hosts</p>
                           </div>
-                          <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50">
+                          <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50" onClick={() => {
+                            toast.promise(
+                              new Promise(resolve => setTimeout(resolve, 1500)),
+                              {
+                                loading: 'Removing all hosts...',
+                                success: 'All hosts have been removed',
+                                error: 'Failed to remove hosts'
+                              }
+                            )
+                          }}>
                             Remove Hosts
                           </Button>
                         </div>
@@ -2051,7 +2141,16 @@ export default function MonitoringClient() {
                             <div className="font-medium">Delete Organization</div>
                             <p className="text-sm text-gray-500">Permanently delete this organization</p>
                           </div>
-                          <Button variant="destructive">
+                          <Button variant="destructive" onClick={() => {
+                            toast.promise(
+                              new Promise(resolve => setTimeout(resolve, 2000)),
+                              {
+                                loading: 'Deleting organization...',
+                                success: 'Organization deleted successfully',
+                                error: 'Failed to delete organization'
+                              }
+                            )
+                          }}>
                             Delete Organization
                           </Button>
                         </div>
@@ -2175,15 +2274,42 @@ export default function MonitoringClient() {
                 </div>
 
                 <div className="flex items-center gap-3 pt-4 border-t">
-                  <Button variant="outline" className="flex-1">
+                  <Button variant="outline" className="flex-1" onClick={() => {
+                    toast.promise(
+                      new Promise(resolve => setTimeout(resolve, 1000)),
+                      {
+                        loading: `Connecting to ${selectedHost.name} via SSH...`,
+                        success: `SSH session opened for ${selectedHost.name}`,
+                        error: `Failed to connect to ${selectedHost.name}`
+                      }
+                    )
+                  }}>
                     <Terminal className="w-4 h-4 mr-2" />
                     SSH
                   </Button>
-                  <Button variant="outline" className="flex-1">
+                  <Button variant="outline" className="flex-1" onClick={() => {
+                    toast.promise(
+                      new Promise(resolve => setTimeout(resolve, 800)),
+                      {
+                        loading: `Loading metrics for ${selectedHost.name}...`,
+                        success: `Metrics dashboard opened for ${selectedHost.name}`,
+                        error: `Failed to load metrics for ${selectedHost.name}`
+                      }
+                    )
+                  }}>
                     <BarChart3 className="w-4 h-4 mr-2" />
                     Metrics
                   </Button>
-                  <Button variant="outline" className="flex-1">
+                  <Button variant="outline" className="flex-1" onClick={() => {
+                    toast.promise(
+                      new Promise(resolve => setTimeout(resolve, 800)),
+                      {
+                        loading: `Loading logs for ${selectedHost.name}...`,
+                        success: `Logs viewer opened for ${selectedHost.name}`,
+                        error: `Failed to load logs for ${selectedHost.name}`
+                      }
+                    )
+                  }}>
                     <FileText className="w-4 h-4 mr-2" />
                     Logs
                   </Button>

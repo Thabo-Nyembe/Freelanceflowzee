@@ -766,7 +766,16 @@ export default function AnalyticsClient() {
                     <p className="text-2xl font-bold">$285K</p>
                     <p className="text-indigo-100 text-sm">Total Revenue</p>
                   </div>
-                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10" onClick={() => {
+                    toast.promise(
+                      new Promise(resolve => setTimeout(resolve, 1500)),
+                      {
+                        loading: 'Exporting analytics overview...',
+                        success: 'Analytics overview exported successfully',
+                        error: 'Failed to export analytics overview'
+                      }
+                    )
+                  }}>
                     <Download className="h-4 w-4 mr-2" />
                     Export
                   </Button>
@@ -804,13 +813,19 @@ export default function AnalyticsClient() {
                       <CardDescription>Visitors and page views over time</CardDescription>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Button size="sm" variant="ghost" className="bg-indigo-100 text-indigo-600">
+                      <Button size="sm" variant="ghost" className="bg-indigo-100 text-indigo-600" onClick={() => {
+                        toast.success('Line chart view', { description: 'Switched to line chart visualization' })
+                      }}>
                         <LineChart className="h-4 w-4" />
                       </Button>
-                      <Button size="sm" variant="ghost">
+                      <Button size="sm" variant="ghost" onClick={() => {
+                        toast.success('Bar chart view', { description: 'Switched to bar chart visualization' })
+                      }}>
                         <BarChart3 className="h-4 w-4" />
                       </Button>
-                      <Button size="sm" variant="ghost">
+                      <Button size="sm" variant="ghost" onClick={() => {
+                        toast.success('Area chart view', { description: 'Switched to area chart visualization' })
+                      }}>
                         <AreaChart className="h-4 w-4" />
                       </Button>
                     </div>
@@ -843,7 +858,10 @@ export default function AnalyticsClient() {
                       <CardTitle>Conversion Funnel</CardTitle>
                       <CardDescription>User journey to conversion</CardDescription>
                     </div>
-                    <Button variant="link" className="text-indigo-600">
+                    <Button variant="link" className="text-indigo-600" onClick={() => {
+                      setActiveTab('funnels')
+                      toast.success('Viewing funnel details', { description: 'Switched to funnels tab' })
+                    }}>
                       View Details <ChevronRight className="h-4 w-4" />
                     </Button>
                   </div>
@@ -944,7 +962,16 @@ export default function AnalyticsClient() {
                     <p className="text-blue-100">{filteredMetrics.length} active metrics tracked</p>
                   </div>
                 </div>
-                <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                <Button variant="outline" className="border-white/20 text-white hover:bg-white/10" onClick={() => {
+                  toast.promise(
+                    new Promise(resolve => setTimeout(resolve, 800)),
+                    {
+                      loading: 'Opening metric creator...',
+                      success: 'Metric creator ready',
+                      error: 'Failed to open metric creator'
+                    }
+                  )
+                }}>
                   <Plus className="h-4 w-4 mr-2" />
                   Add Metric
                 </Button>
@@ -973,7 +1000,16 @@ export default function AnalyticsClient() {
                     <SelectItem value="engagement">Engagement</SelectItem>
                   </SelectContent>
                 </Select>
-                <Button>
+                <Button onClick={() => {
+                  toast.promise(
+                    new Promise(resolve => setTimeout(resolve, 800)),
+                    {
+                      loading: 'Opening metric creator...',
+                      success: 'Metric creator ready',
+                      error: 'Failed to open metric creator'
+                    }
+                  )
+                }}>
                   <Plus className="h-4 w-4 mr-2" />
                   Add Metric
                 </Button>
@@ -1001,7 +1037,10 @@ export default function AnalyticsClient() {
                     <div className="mt-4 pt-4 border-t">
                       <div className="flex items-center justify-between text-xs text-gray-500">
                         <span>Previous: {formatValue(metric.previousValue, metric.type)}</span>
-                        <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 h-6 px-2">
+                        <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 h-6 px-2" onClick={(e) => {
+                          e.stopPropagation()
+                          toast.success('Metric options', { description: 'Options menu opened' })
+                        }}>
                           <MoreVertical className="h-3 w-3" />
                         </Button>
                       </div>
@@ -1134,7 +1173,16 @@ export default function AnalyticsClient() {
                 </div>
                 <div className="flex items-center gap-3">
                   <Badge className="bg-white/20 text-white border-white/30">{cohortType}</Badge>
-                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10" onClick={() => {
+                    toast.promise(
+                      new Promise(resolve => setTimeout(resolve, 1500)),
+                      {
+                        loading: 'Exporting cohort data...',
+                        success: 'Cohort data exported successfully',
+                        error: 'Failed to export cohort data'
+                      }
+                    )
+                  }}>
                     <Download className="h-4 w-4 mr-2" />
                     Export
                   </Button>
@@ -1158,7 +1206,16 @@ export default function AnalyticsClient() {
                     <SelectItem value="engagement">Engagement</SelectItem>
                   </SelectContent>
                 </Select>
-                <Button>
+                <Button onClick={() => {
+                  toast.promise(
+                    new Promise(resolve => setTimeout(resolve, 800)),
+                    {
+                      loading: 'Opening cohort creator...',
+                      success: 'Cohort creator ready',
+                      error: 'Failed to open cohort creator'
+                    }
+                  )
+                }}>
                   <Plus className="h-4 w-4 mr-2" />
                   Create Cohort
                 </Button>
@@ -1447,7 +1504,16 @@ export default function AnalyticsClient() {
                         <Play className="h-4 w-4 mr-1" />
                         Run Now
                       </Button>
-                      <Button variant="outline" size="sm">
+                      <Button variant="outline" size="sm" onClick={() => {
+                        toast.promise(
+                          new Promise(resolve => setTimeout(resolve, 800)),
+                          {
+                            loading: 'Opening report editor...',
+                            success: 'Report editor opened',
+                            error: 'Failed to open report editor'
+                          }
+                        )
+                      }}>
                         <Edit3 className="h-4 w-4" />
                       </Button>
                       <Button
@@ -1559,7 +1625,16 @@ export default function AnalyticsClient() {
                       </div>
                     </div>
                     <div className="mt-4 pt-4 border-t flex items-center gap-2">
-                      <Button variant="default" size="sm" className="flex-1">
+                      <Button variant="default" size="sm" className="flex-1" onClick={() => {
+                        toast.promise(
+                          new Promise(resolve => setTimeout(resolve, 800)),
+                          {
+                            loading: 'Loading dashboard...',
+                            success: 'Dashboard loaded',
+                            error: 'Failed to load dashboard'
+                          }
+                        )
+                      }}>
                         <Eye className="h-4 w-4 mr-1" />
                         View
                       </Button>
@@ -1601,7 +1676,16 @@ export default function AnalyticsClient() {
                 </div>
                 <div className="flex items-center gap-4">
                   <Badge className="bg-green-500/20 text-green-300 border-green-500/30">Active</Badge>
-                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10" onClick={() => {
+                    toast.promise(
+                      new Promise(resolve => setTimeout(resolve, 1500)),
+                      {
+                        loading: 'Exporting configuration...',
+                        success: 'Configuration exported successfully',
+                        error: 'Failed to export configuration'
+                      }
+                    )
+                  }}>
                     <Download className="h-4 w-4 mr-2" />
                     Export Config
                   </Button>
@@ -1785,11 +1869,34 @@ export default function AnalyticsClient() {
 </script>`}</pre>
                         </div>
                         <div className="mt-4 flex items-center gap-2">
-                          <Button variant="outline" size="sm">
+                          <Button variant="outline" size="sm" onClick={async () => {
+                            try {
+                              await navigator.clipboard.writeText(`<!-- Kazi Analytics Tracking Code -->
+<script>
+  (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+  'https://analytics.kazi.app/track.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+  })(window,document,'script','kaziLayer','KAZI-XXXXXXXX');
+</script>`)
+                              toast.success('Code copied', { description: 'Tracking code copied to clipboard' })
+                            } catch (err) {
+                              toast.error('Failed to copy', { description: 'Please try again' })
+                            }
+                          }}>
                             <Copy className="h-4 w-4 mr-2" />
                             Copy Code
                           </Button>
-                          <Button variant="outline" size="sm">
+                          <Button variant="outline" size="sm" onClick={() => {
+                            toast.promise(
+                              new Promise(resolve => setTimeout(resolve, 1000)),
+                              {
+                                loading: 'Preparing email...',
+                                success: 'Email client opened',
+                                error: 'Failed to open email client'
+                              }
+                            )
+                          }}>
                             <Mail className="h-4 w-4 mr-2" />
                             Email to Developer
                           </Button>
@@ -1898,7 +2005,16 @@ export default function AnalyticsClient() {
                                 <p className="text-xs text-gray-500">{integration.connected ? 'Connected' : 'Not connected'}</p>
                               </div>
                             </div>
-                            <Button variant={integration.connected ? 'outline' : 'default'} size="sm">
+                            <Button variant={integration.connected ? 'outline' : 'default'} size="sm" onClick={() => {
+                              toast.promise(
+                                new Promise(resolve => setTimeout(resolve, 1500)),
+                                {
+                                  loading: integration.connected ? `Disconnecting ${integration.name}...` : `Connecting to ${integration.name}...`,
+                                  success: integration.connected ? `${integration.name} disconnected` : `${integration.name} connected successfully`,
+                                  error: integration.connected ? `Failed to disconnect ${integration.name}` : `Failed to connect to ${integration.name}`
+                                }
+                              )
+                            }}>
                               {integration.connected ? 'Disconnect' : 'Connect'}
                             </Button>
                           </div>
@@ -1914,7 +2030,16 @@ export default function AnalyticsClient() {
                           <Label>API Key</Label>
                           <div className="flex gap-2 mt-1">
                             <Input value="ak_••••••••••••" readOnly className="font-mono" />
-                            <Button variant="outline">Regenerate</Button>
+                            <Button variant="outline" onClick={() => {
+                              toast.promise(
+                                new Promise(resolve => setTimeout(resolve, 2000)),
+                                {
+                                  loading: 'Regenerating API key...',
+                                  success: 'New API key generated successfully',
+                                  error: 'Failed to regenerate API key'
+                                }
+                              )
+                            }}>Regenerate</Button>
                           </div>
                         </div>
                         <div className="flex items-center justify-between p-4 border rounded-lg">
@@ -2044,7 +2169,16 @@ export default function AnalyticsClient() {
                             <Label>Export All Data</Label>
                             <p className="text-sm text-gray-500">Download complete analytics data</p>
                           </div>
-                          <Button variant="outline">
+                          <Button variant="outline" onClick={() => {
+                            toast.promise(
+                              new Promise(resolve => setTimeout(resolve, 2000)),
+                              {
+                                loading: 'Preparing data export...',
+                                success: 'All analytics data exported successfully',
+                                error: 'Failed to export data'
+                              }
+                            )
+                          }}>
                             <Download className="h-4 w-4 mr-2" />
                             Export
                           </Button>
@@ -2090,7 +2224,16 @@ export default function AnalyticsClient() {
                             <Label>Event Schema</Label>
                             <p className="text-sm text-gray-500">Define event structure</p>
                           </div>
-                          <Button variant="outline" size="sm">Configure</Button>
+                          <Button variant="outline" size="sm" onClick={() => {
+                            toast.promise(
+                              new Promise(resolve => setTimeout(resolve, 800)),
+                              {
+                                loading: 'Opening event schema editor...',
+                                success: 'Event schema editor opened',
+                                error: 'Failed to open event schema editor'
+                              }
+                            )
+                          }}>Configure</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -2133,21 +2276,48 @@ export default function AnalyticsClient() {
                             <Label>Reset All Data</Label>
                             <p className="text-sm text-gray-500">Permanently delete all analytics</p>
                           </div>
-                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50">Reset Data</Button>
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50" onClick={() => {
+                            toast.promise(
+                              new Promise(resolve => setTimeout(resolve, 2000)),
+                              {
+                                loading: 'Resetting all analytics data...',
+                                success: 'All analytics data has been reset',
+                                error: 'Failed to reset analytics data'
+                              }
+                            )
+                          }}>Reset Data</Button>
                         </div>
                         <div className="flex items-center justify-between">
                           <div>
                             <Label>Delete Tracking Code</Label>
                             <p className="text-sm text-gray-500">Remove tracking from all sites</p>
                           </div>
-                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50">Delete</Button>
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50" onClick={() => {
+                            toast.promise(
+                              new Promise(resolve => setTimeout(resolve, 2000)),
+                              {
+                                loading: 'Deleting tracking code...',
+                                success: 'Tracking code deleted from all sites',
+                                error: 'Failed to delete tracking code'
+                              }
+                            )
+                          }}>Delete</Button>
                         </div>
                         <div className="flex items-center justify-between">
                           <div>
                             <Label>Revoke All API Keys</Label>
                             <p className="text-sm text-gray-500">Invalidate all existing keys</p>
                           </div>
-                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50">Revoke</Button>
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50" onClick={() => {
+                            toast.promise(
+                              new Promise(resolve => setTimeout(resolve, 2000)),
+                              {
+                                loading: 'Revoking all API keys...',
+                                success: 'All API keys have been revoked',
+                                error: 'Failed to revoke API keys'
+                              }
+                            )
+                          }}>Revoke</Button>
                         </div>
                       </CardContent>
                     </Card>

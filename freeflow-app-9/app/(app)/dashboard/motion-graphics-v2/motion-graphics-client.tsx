@@ -998,7 +998,17 @@ export default function MotionGraphicsClient({
                       <div className={`aspect-video rounded-t-lg bg-gradient-to-br ${getTypeColor(animation.type)} flex items-center justify-center relative overflow-hidden`}>
                         <Film className="w-12 h-12 text-white/80" />
                         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
-                          <Button size="icon" variant="secondary" className="w-12 h-12 rounded-full">
+                          <Button size="icon" variant="secondary" className="w-12 h-12 rounded-full" onClick={(e) => {
+                            e.stopPropagation()
+                            toast.promise(
+                              new Promise(resolve => setTimeout(resolve, 800)),
+                              {
+                                loading: `Loading preview for "${animation.title}"...`,
+                                success: `Playing "${animation.title}" preview`,
+                                error: 'Failed to load preview'
+                              }
+                            )
+                          }}>
                             <Play className="w-6 h-6" />
                           </Button>
                         </div>
@@ -1131,19 +1141,59 @@ export default function MotionGraphicsClient({
                     </Button>
                     <div className="absolute bottom-4 left-4 right-4">
                       <div className="flex items-center gap-2 mb-2">
-                        <Button size="icon" variant="ghost" className="w-8 h-8 text-white">
+                        <Button size="icon" variant="ghost" className="w-8 h-8 text-white" onClick={() => {
+                          setCurrentTime(0)
+                          toast.promise(
+                            new Promise(resolve => setTimeout(resolve, 300)),
+                            {
+                              loading: 'Jumping to start...',
+                              success: 'Jumped to beginning',
+                              error: 'Failed to navigate'
+                            }
+                          )
+                        }}>
                           <SkipBack className="w-4 h-4" />
                         </Button>
-                        <Button size="icon" variant="ghost" className="w-8 h-8 text-white">
+                        <Button size="icon" variant="ghost" className="w-8 h-8 text-white" onClick={() => {
+                          setCurrentTime(Math.max(0, currentTime - 5))
+                          toast.promise(
+                            new Promise(resolve => setTimeout(resolve, 200)),
+                            {
+                              loading: 'Rewinding...',
+                              success: 'Rewound 5 seconds',
+                              error: 'Failed to rewind'
+                            }
+                          )
+                        }}>
                           <Rewind className="w-4 h-4" />
                         </Button>
                         <Button size="icon" variant="ghost" className="w-8 h-8 text-white" onClick={() => setIsPlaying(!isPlaying)}>
                           {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
                         </Button>
-                        <Button size="icon" variant="ghost" className="w-8 h-8 text-white">
+                        <Button size="icon" variant="ghost" className="w-8 h-8 text-white" onClick={() => {
+                          setCurrentTime(Math.min(8.5, currentTime + 5))
+                          toast.promise(
+                            new Promise(resolve => setTimeout(resolve, 200)),
+                            {
+                              loading: 'Fast forwarding...',
+                              success: 'Skipped forward 5 seconds',
+                              error: 'Failed to fast forward'
+                            }
+                          )
+                        }}>
                           <FastForward className="w-4 h-4" />
                         </Button>
-                        <Button size="icon" variant="ghost" className="w-8 h-8 text-white">
+                        <Button size="icon" variant="ghost" className="w-8 h-8 text-white" onClick={() => {
+                          setCurrentTime(8.5)
+                          toast.promise(
+                            new Promise(resolve => setTimeout(resolve, 300)),
+                            {
+                              loading: 'Jumping to end...',
+                              success: 'Jumped to end',
+                              error: 'Failed to navigate'
+                            }
+                          )
+                        }}>
                           <SkipForward className="w-4 h-4" />
                         </Button>
                         <span className="text-white text-sm ml-2">{formatDuration(currentTime)}</span>
@@ -1151,10 +1201,28 @@ export default function MotionGraphicsClient({
                           <div className="h-full bg-cyan-500 rounded-full" style={{ width: '35%' }} />
                         </div>
                         <span className="text-white text-sm">{formatDuration(8.5)}</span>
-                        <Button size="icon" variant="ghost" className="w-8 h-8 text-white">
+                        <Button size="icon" variant="ghost" className="w-8 h-8 text-white" onClick={() => {
+                          toast.promise(
+                            new Promise(resolve => setTimeout(resolve, 300)),
+                            {
+                              loading: 'Adjusting volume...',
+                              success: 'Volume controls opened',
+                              error: 'Failed to open volume controls'
+                            }
+                          )
+                        }}>
                           <Volume2 className="w-4 h-4" />
                         </Button>
-                        <Button size="icon" variant="ghost" className="w-8 h-8 text-white">
+                        <Button size="icon" variant="ghost" className="w-8 h-8 text-white" onClick={() => {
+                          toast.promise(
+                            new Promise(resolve => setTimeout(resolve, 500)),
+                            {
+                              loading: 'Entering fullscreen...',
+                              success: 'Fullscreen mode activated',
+                              error: 'Failed to enter fullscreen'
+                            }
+                          )
+                        }}>
                           <Maximize2 className="w-4 h-4" />
                         </Button>
                       </div>
@@ -1180,10 +1248,28 @@ export default function MotionGraphicsClient({
                       {mockLayers.map((layer) => (
                         <div key={layer.id} className="flex items-center gap-2 h-10">
                           <div className="w-40 flex items-center gap-2 text-sm">
-                            <Button size="icon" variant="ghost" className="w-6 h-6">
+                            <Button size="icon" variant="ghost" className="w-6 h-6" onClick={() => {
+                              toast.promise(
+                                new Promise(resolve => setTimeout(resolve, 300)),
+                                {
+                                  loading: `${layer.visible ? 'Hiding' : 'Showing'} layer "${layer.name}"...`,
+                                  success: `Layer "${layer.name}" ${layer.visible ? 'hidden' : 'visible'}`,
+                                  error: 'Failed to toggle visibility'
+                                }
+                              )
+                            }}>
                               {layer.visible ? <Eye className="w-3 h-3" /> : <Eye className="w-3 h-3 opacity-30" />}
                             </Button>
-                            <Button size="icon" variant="ghost" className="w-6 h-6">
+                            <Button size="icon" variant="ghost" className="w-6 h-6" onClick={() => {
+                              toast.promise(
+                                new Promise(resolve => setTimeout(resolve, 300)),
+                                {
+                                  loading: `${layer.locked ? 'Unlocking' : 'Locking'} layer "${layer.name}"...`,
+                                  success: `Layer "${layer.name}" ${layer.locked ? 'unlocked' : 'locked'}`,
+                                  error: 'Failed to toggle lock'
+                                }
+                              )
+                            }}>
                               {layer.locked ? <Lock className="w-3 h-3" /> : <Unlock className="w-3 h-3 opacity-30" />}
                             </Button>
                             {getLayerIcon(layer.type)}
@@ -2112,6 +2198,16 @@ export default function MotionGraphicsClient({
                       size="icon"
                       variant="secondary"
                       className="w-16 h-16 rounded-full"
+                      onClick={() => {
+                        toast.promise(
+                          new Promise(resolve => setTimeout(resolve, 1000)),
+                          {
+                            loading: `Loading preview for "${selectedAnimation.title}"...`,
+                            success: `Playing "${selectedAnimation.title}"`,
+                            error: 'Failed to play animation'
+                          }
+                        )
+                      }}
                     >
                       <Play className="w-8 h-8 ml-1" />
                     </Button>

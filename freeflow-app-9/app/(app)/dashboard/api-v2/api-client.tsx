@@ -744,7 +744,20 @@ export default function ApiClient() {
                 className="pl-10 w-64"
               />
             </div>
-            <Button variant="outline" size="icon">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => {
+                toast.promise(
+                  new Promise((resolve) => setTimeout(resolve, 500)),
+                  {
+                    loading: 'Loading filters...',
+                    success: 'Filters panel opened',
+                    error: 'Failed to load filters'
+                  }
+                )
+              }}
+            >
               <Filter className="w-4 h-4" />
             </Button>
             <Button className="bg-gradient-to-r from-indigo-500 to-blue-500 text-white" onClick={() => setShowCreateEndpointDialog(true)}>
@@ -898,7 +911,21 @@ export default function ApiClient() {
                           <code className="text-sm font-mono text-gray-900 dark:text-white">{endpoint.path}</code>
                           <Badge className={getStatusColor(endpoint.status)}>{endpoint.status}</Badge>
                         </div>
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8"
+                          onClick={() => {
+                            toast.promise(
+                              new Promise((resolve) => setTimeout(resolve, 500)),
+                              {
+                                loading: 'Loading endpoint options...',
+                                success: `Options for ${endpoint.name} loaded`,
+                                error: 'Failed to load options'
+                              }
+                            )
+                          }}
+                        >
                           <MoreVertical className="w-4 h-4" />
                         </Button>
                       </div>
@@ -1069,7 +1096,20 @@ export default function ApiClient() {
                           </div>
                         </div>
                       </div>
-                      <Button variant="ghost" size="icon">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => {
+                          toast.promise(
+                            new Promise((resolve) => setTimeout(resolve, 500)),
+                            {
+                              loading: 'Loading key options...',
+                              success: `Options for ${key.name} loaded`,
+                              error: 'Failed to load options'
+                            }
+                          )
+                        }}
+                      >
                         <MoreVertical className="w-4 h-4" />
                       </Button>
                     </div>
@@ -1081,7 +1121,22 @@ export default function ApiClient() {
                       <Button variant="ghost" size="icon" onClick={() => setShowApiKey({ ...showApiKey, [key.id]: !showApiKey[key.id] })}>
                         {showApiKey[key.id] ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                       </Button>
-                      <Button variant="ghost" size="icon">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => {
+                          const keyToCopy = key.keyPrefix + '••••••••••••••••'
+                          navigator.clipboard.writeText(keyToCopy)
+                          toast.promise(
+                            new Promise((resolve) => setTimeout(resolve, 300)),
+                            {
+                              loading: 'Copying API key...',
+                              success: 'API key copied to clipboard',
+                              error: 'Failed to copy API key'
+                            }
+                          )
+                        }}
+                      >
                         <Copy className="w-4 h-4" />
                       </Button>
                     </div>

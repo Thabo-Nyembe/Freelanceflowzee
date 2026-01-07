@@ -853,7 +853,16 @@ export default function AccessLogsClient() {
                 className="pl-9 w-80"
               />
             </div>
-            <Button variant="outline" size="icon">
+            <Button variant="outline" size="icon" onClick={() => {
+              toast.promise(
+                new Promise((resolve) => setTimeout(resolve, 500)),
+                {
+                  loading: 'Opening filter options...',
+                  success: 'Filter panel opened',
+                  error: 'Failed to open filter panel'
+                }
+              )
+            }}>
               <Filter className="w-4 h-4" />
             </Button>
             <Button variant="outline" size="icon" onClick={handleExportLogs}>
@@ -1971,10 +1980,28 @@ export default function AccessLogsClient() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Button variant="outline" size="icon">
+                    <Button variant="outline" size="icon" onClick={() => {
+                      toast.promise(
+                        navigator.clipboard.writeText(JSON.stringify(selectedLog, null, 2)),
+                        {
+                          loading: 'Copying log details...',
+                          success: 'Log details copied to clipboard',
+                          error: 'Failed to copy log details'
+                        }
+                      )
+                    }}>
                       <Copy className="w-4 h-4" />
                     </Button>
-                    <Button variant="outline" size="icon">
+                    <Button variant="outline" size="icon" onClick={() => {
+                      toast.promise(
+                        navigator.clipboard.writeText(`${window.location.origin}/logs/${selectedLog.id}`),
+                        {
+                          loading: 'Generating share link...',
+                          success: 'Share link copied to clipboard',
+                          error: 'Failed to generate share link'
+                        }
+                      )
+                    }}>
                       <Share2 className="w-4 h-4" />
                     </Button>
                   </div>

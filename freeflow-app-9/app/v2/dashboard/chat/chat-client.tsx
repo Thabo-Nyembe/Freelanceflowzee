@@ -805,6 +805,16 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
                                 key={color}
                                 className="w-8 h-8 rounded-full border-2 border-gray-200 hover:scale-110 transition-transform"
                                 style={{ backgroundColor: color }}
+                                onClick={() => {
+                                  toast.promise(
+                                    new Promise((resolve) => setTimeout(resolve, 500)),
+                                    {
+                                      loading: 'Applying accent color...',
+                                      success: `Accent color set to ${color}`,
+                                      error: 'Failed to apply color'
+                                    }
+                                  )
+                                }}
                               />
                             ))}
                           </div>
@@ -875,11 +885,29 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
                           </div>
                           <div className="flex items-center gap-2">
                             <Badge variant="outline">{reply.category}</Badge>
-                            <Button variant="ghost" size="icon"><Edit className="h-4 w-4" /></Button>
+                            <Button variant="ghost" size="icon" onClick={() => {
+                              toast.promise(
+                                new Promise((resolve) => setTimeout(resolve, 800)),
+                                {
+                                  loading: 'Opening reply editor...',
+                                  success: `Editing "${reply.name}" quick reply`,
+                                  error: 'Failed to open editor'
+                                }
+                              )
+                            }}><Edit className="h-4 w-4" /></Button>
                           </div>
                         </div>
                       ))}
-                      <Button variant="outline" className="w-full">
+                      <Button variant="outline" className="w-full" onClick={() => {
+                        toast.promise(
+                          new Promise((resolve) => setTimeout(resolve, 600)),
+                          {
+                            loading: 'Preparing quick reply form...',
+                            success: 'Ready to create new quick reply',
+                            error: 'Failed to open form'
+                          }
+                        )
+                      }}>
                         <Plus className="h-4 w-4 mr-2" />
                         Add Quick Reply
                       </Button>
@@ -1087,6 +1115,16 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
                               key={color}
                               className="w-10 h-10 rounded-lg border-2 border-gray-200 hover:scale-110 transition-transform"
                               style={{ backgroundColor: color }}
+                              onClick={() => {
+                                toast.promise(
+                                  new Promise((resolve) => setTimeout(resolve, 500)),
+                                  {
+                                    loading: 'Applying widget color...',
+                                    success: `Widget color set to ${color}`,
+                                    error: 'Failed to apply color'
+                                  }
+                                )
+                              }}
                             />
                           ))}
                         </div>
@@ -1194,7 +1232,16 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
                               <div>{member.assignedConversations} active</div>
                               <div>{member.resolvedToday} resolved</div>
                             </div>
-                            <Button variant="ghost" size="icon">
+                            <Button variant="ghost" size="icon" onClick={() => {
+                              toast.promise(
+                                new Promise((resolve) => setTimeout(resolve, 600)),
+                                {
+                                  loading: 'Loading team member options...',
+                                  success: `Options for ${member.name}`,
+                                  error: 'Failed to load options'
+                                }
+                              )
+                            }}>
                               <MoreHorizontal className="h-4 w-4" />
                             </Button>
                           </div>
@@ -1684,13 +1731,40 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
                       className="resize-none pr-24"
                     />
                     <div className="absolute bottom-2 right-2 flex items-center gap-1">
-                      <Button size="sm" variant="ghost" className="h-8 w-8 p-0">
+                      <Button size="sm" variant="ghost" className="h-8 w-8 p-0" onClick={() => {
+                        toast.promise(
+                          new Promise((resolve) => setTimeout(resolve, 800)),
+                          {
+                            loading: 'Opening file picker...',
+                            success: 'Select a file to attach',
+                            error: 'Failed to open file picker'
+                          }
+                        )
+                      }}>
                         <Paperclip className="h-4 w-4 text-gray-400" />
                       </Button>
-                      <Button size="sm" variant="ghost" className="h-8 w-8 p-0">
+                      <Button size="sm" variant="ghost" className="h-8 w-8 p-0" onClick={() => {
+                        toast.promise(
+                          new Promise((resolve) => setTimeout(resolve, 800)),
+                          {
+                            loading: 'Opening image picker...',
+                            success: 'Select an image to attach',
+                            error: 'Failed to open image picker'
+                          }
+                        )
+                      }}>
                         <ImageIcon className="h-4 w-4 text-gray-400" />
                       </Button>
-                      <Button size="sm" variant="ghost" className="h-8 w-8 p-0">
+                      <Button size="sm" variant="ghost" className="h-8 w-8 p-0" onClick={() => {
+                        toast.promise(
+                          new Promise((resolve) => setTimeout(resolve, 500)),
+                          {
+                            loading: 'Loading emoji picker...',
+                            success: 'Emoji picker ready',
+                            error: 'Failed to load emoji picker'
+                          }
+                        )
+                      }}>
                         <Smile className="h-4 w-4 text-gray-400" />
                       </Button>
                     </div>
@@ -2068,8 +2142,26 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
                       <div className="flex items-center gap-2">
                         <Badge variant="outline">{reply.category}</Badge>
                         <span className="text-xs text-gray-400">{reply.usageCount} uses</span>
-                        <Button variant="ghost" size="icon"><Edit className="h-4 w-4" /></Button>
-                        <Button variant="ghost" size="icon"><Trash2 className="h-4 w-4" /></Button>
+                        <Button variant="ghost" size="icon" onClick={() => {
+                          toast.promise(
+                            new Promise((resolve) => setTimeout(resolve, 700)),
+                            {
+                              loading: 'Loading quick reply editor...',
+                              success: `Editing "${reply.name}"`,
+                              error: 'Failed to load editor'
+                            }
+                          )
+                        }}><Edit className="h-4 w-4" /></Button>
+                        <Button variant="ghost" size="icon" onClick={() => {
+                          toast.promise(
+                            new Promise((resolve) => setTimeout(resolve, 600)),
+                            {
+                              loading: 'Deleting quick reply...',
+                              success: `"${reply.name}" deleted successfully`,
+                              error: 'Failed to delete quick reply'
+                            }
+                          )
+                        }}><Trash2 className="h-4 w-4" /></Button>
                       </div>
                     </div>
                   ))}
@@ -2081,7 +2173,16 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
                 <Card><CardHeader><CardTitle>Chat Widget</CardTitle></CardHeader><CardContent className="space-y-4">
                   <div className="flex items-center justify-between"><div><p className="font-medium">Enable Chat Widget</p><p className="text-sm text-gray-500">Show widget on website</p></div><Switch defaultChecked /></div>
                   <div><Label>Widget Position</Label><Select defaultValue="right"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="left">Bottom Left</SelectItem><SelectItem value="right">Bottom Right</SelectItem></SelectContent></Select></div>
-                  <div><Label>Widget Color</Label><div className="flex gap-2 mt-2">{['#06B6D4', '#3B82F6', '#8B5CF6', '#10B981', '#F59E0B'].map(c => (<button key={c} className="w-8 h-8 rounded-full border-2" style={{ backgroundColor: c }} />))}</div></div>
+                  <div><Label>Widget Color</Label><div className="flex gap-2 mt-2">{['#06B6D4', '#3B82F6', '#8B5CF6', '#10B981', '#F59E0B'].map(c => (<button key={c} className="w-8 h-8 rounded-full border-2" style={{ backgroundColor: c }} onClick={() => {
+                          toast.promise(
+                            new Promise((resolve) => setTimeout(resolve, 500)),
+                            {
+                              loading: 'Applying widget color...',
+                              success: `Widget color set to ${c}`,
+                              error: 'Failed to apply color'
+                            }
+                          )
+                        }} />))}</div></div>
                 </CardContent></Card>
                 <Card><CardHeader><CardTitle>Email Channel</CardTitle></CardHeader><CardContent className="space-y-4">
                   <div className="flex items-center justify-between"><div><p className="font-medium">Forward to Chat</p><p className="text-sm text-gray-500">Convert emails to conversations</p></div><Switch defaultChecked /></div>
@@ -2112,7 +2213,16 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
                       <div className="flex items-center gap-3">
                         <Badge variant="outline" className="capitalize">{member.role}</Badge>
                         <div className="text-right text-xs text-gray-500"><div>{member.assignedConversations} active</div><div>{member.resolvedToday} resolved today</div></div>
-                        <Button variant="ghost" size="icon"><MoreHorizontal className="h-4 w-4" /></Button>
+                        <Button variant="ghost" size="icon" onClick={() => {
+                          toast.promise(
+                            new Promise((resolve) => setTimeout(resolve, 600)),
+                            {
+                              loading: 'Loading member options...',
+                              success: `Options for ${member.name}`,
+                              error: 'Failed to load options'
+                            }
+                          )
+                        }}><MoreHorizontal className="h-4 w-4" /></Button>
                       </div>
                     </div>
                   ))}

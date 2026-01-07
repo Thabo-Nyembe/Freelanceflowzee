@@ -833,7 +833,16 @@ export default function SecurityClient() {
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
-              <Button variant="outline" size="icon">
+              <Button variant="outline" size="icon" onClick={() => {
+                toast.promise(
+                  new Promise((resolve) => setTimeout(resolve, 1500)),
+                  {
+                    loading: 'Refreshing vault...',
+                    success: 'Vault refreshed successfully',
+                    error: 'Failed to refresh vault'
+                  }
+                )
+              }}>
                 <RefreshCw className="w-4 h-4" />
               </Button>
               <Button className="bg-gradient-to-r from-red-500 to-rose-600 text-white">
@@ -1098,7 +1107,16 @@ export default function SecurityClient() {
                             <Badge key={i} variant="outline" className="text-xs">{tag}</Badge>
                           ))}
                         </div>
-                        <Button variant="ghost" size="icon">
+                        <Button variant="ghost" size="icon" onClick={() => {
+                          toast.promise(
+                            new Promise((resolve) => setTimeout(resolve, 800)),
+                            {
+                              loading: 'Loading options...',
+                              success: 'Item options loaded',
+                              error: 'Failed to load options'
+                            }
+                          )
+                        }}>
                           <MoreHorizontal className="w-4 h-4" />
                         </Button>
                       </div>
@@ -1406,7 +1424,16 @@ export default function SecurityClient() {
                           </div>
                           <div className="flex items-center gap-2 mt-1">
                             <code className="text-sm bg-muted px-2 py-0.5 rounded">{key.prefix}</code>
-                            <Button variant="ghost" size="icon" className="h-6 w-6">
+                            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => {
+                              toast.promise(
+                                navigator.clipboard.writeText(key.prefix).then(() => new Promise(resolve => setTimeout(resolve, 300))),
+                                {
+                                  loading: 'Copying key...',
+                                  success: 'Secret key copied to clipboard',
+                                  error: 'Failed to copy key'
+                                }
+                              )
+                            }}>
                               <Copy className="w-3 h-3" />
                             </Button>
                           </div>
@@ -1964,7 +1991,16 @@ export default function SecurityClient() {
                         <p className="text-xs text-muted-foreground">Username</p>
                         <p className="font-medium">{selectedItem.username}</p>
                       </div>
-                      <Button variant="ghost" size="icon">
+                      <Button variant="ghost" size="icon" onClick={() => {
+                        toast.promise(
+                          navigator.clipboard.writeText(selectedItem.username || '').then(() => new Promise(resolve => setTimeout(resolve, 300))),
+                          {
+                            loading: 'Copying username...',
+                            success: 'Username copied to clipboard',
+                            error: 'Failed to copy username'
+                          }
+                        )
+                      }}>
                         <Copy className="w-4 h-4" />
                       </Button>
                     </div>
@@ -1980,7 +2016,16 @@ export default function SecurityClient() {
                       <Button variant="ghost" size="icon" onClick={() => setShowPassword(!showPassword)}>
                         {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                       </Button>
-                      <Button variant="ghost" size="icon">
+                      <Button variant="ghost" size="icon" onClick={() => {
+                        toast.promise(
+                          navigator.clipboard.writeText('**********').then(() => new Promise(resolve => setTimeout(resolve, 300))),
+                          {
+                            loading: 'Copying password...',
+                            success: 'Password copied to clipboard',
+                            error: 'Failed to copy password'
+                          }
+                        )
+                      }}>
                         <Copy className="w-4 h-4" />
                       </Button>
                     </div>
@@ -1991,7 +2036,19 @@ export default function SecurityClient() {
                         <p className="text-xs text-muted-foreground">Website</p>
                         <p className="font-medium">{selectedItem.website}</p>
                       </div>
-                      <Button variant="ghost" size="icon">
+                      <Button variant="ghost" size="icon" onClick={() => {
+                        toast.promise(
+                          new Promise((resolve) => {
+                            window.open(`https://${selectedItem.website}`, '_blank')
+                            setTimeout(resolve, 500)
+                          }),
+                          {
+                            loading: 'Opening website...',
+                            success: 'Website opened in new tab',
+                            error: 'Failed to open website'
+                          }
+                        )
+                      }}>
                         <ExternalLink className="w-4 h-4" />
                       </Button>
                     </div>

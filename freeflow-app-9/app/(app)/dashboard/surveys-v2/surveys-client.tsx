@@ -692,7 +692,20 @@ export default function SurveysClient() {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="outline" size="sm">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                toast.promise(
+                  new Promise((resolve) => setTimeout(resolve, 1500)),
+                  {
+                    loading: 'Importing survey...',
+                    success: 'Survey imported successfully',
+                    error: 'Failed to import survey'
+                  }
+                )
+              }}
+            >
               <Upload className="w-4 h-4 mr-2" />
               Import
             </Button>
@@ -1083,7 +1096,21 @@ export default function SurveysClient() {
                         <Button variant="outline" size="sm" onClick={() => setSelectedSurvey(survey)}>
                           <Eye className="w-4 h-4" />
                         </Button>
-                        <Button variant="outline" size="sm">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            toast.promise(
+                              new Promise((resolve) => setTimeout(resolve, 1000)),
+                              {
+                                loading: 'Opening survey editor...',
+                                success: 'Survey editor opened',
+                                error: 'Failed to open editor'
+                              }
+                            )
+                          }}
+                        >
                           <Edit className="w-4 h-4" />
                         </Button>
                         <Button
@@ -1189,7 +1216,14 @@ export default function SurveysClient() {
                               <p className="font-medium">{response.answers.length}</p>
                               <p className="text-xs text-muted-foreground">answers</p>
                             </div>
-                            <Button variant="ghost" size="sm">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                setSelectedResponse(response)
+                              }}
+                            >
                               <ChevronRight className="w-4 h-4" />
                             </Button>
                           </div>
@@ -1215,7 +1249,20 @@ export default function SurveysClient() {
                   <p className="text-sm text-gray-600 dark:text-gray-400">Start with professionally designed templates</p>
                 </div>
               </div>
-              <Button variant="outline" size="sm">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  toast.promise(
+                    new Promise((resolve) => setTimeout(resolve, 1200)),
+                    {
+                      loading: 'Creating template...',
+                      success: 'Template created successfully',
+                      error: 'Failed to create template'
+                    }
+                  )
+                }}
+              >
                 <Plus className="w-4 h-4 mr-2" />
                 Create Template
               </Button>
@@ -1245,7 +1292,19 @@ export default function SurveysClient() {
                     </div>
                     <div className="flex items-center justify-between mt-3 pt-3 border-t dark:border-gray-700">
                       <span className="text-xs text-muted-foreground">{template.uses.toLocaleString()} uses</span>
-                      <Button size="sm">
+                      <Button
+                        size="sm"
+                        onClick={() => {
+                          toast.promise(
+                            new Promise((resolve) => setTimeout(resolve, 1000)),
+                            {
+                              loading: `Applying ${template.name} template...`,
+                              success: `${template.name} template applied successfully`,
+                              error: 'Failed to apply template'
+                            }
+                          )
+                        }}
+                      >
                         Use Template
                       </Button>
                     </div>
@@ -1584,7 +1643,19 @@ export default function SurveysClient() {
                             <p className="font-medium text-gray-900 dark:text-white">Logo</p>
                             <p className="text-sm text-gray-500">Upload your brand logo</p>
                           </div>
-                          <Button variant="outline">
+                          <Button
+                            variant="outline"
+                            onClick={() => {
+                              toast.promise(
+                                new Promise((resolve) => setTimeout(resolve, 1500)),
+                                {
+                                  loading: 'Uploading logo...',
+                                  success: 'Logo uploaded successfully',
+                                  error: 'Failed to upload logo'
+                                }
+                              )
+                            }}
+                          >
                             <Upload className="w-4 h-4 mr-2" />
                             Upload
                           </Button>
@@ -1706,7 +1777,31 @@ export default function SurveysClient() {
                                 <p className="text-sm text-gray-500">{integration.desc}</p>
                               </div>
                             </div>
-                            <Button variant={integration.status === 'connected' ? 'outline' : 'default'} size="sm">
+                            <Button
+                              variant={integration.status === 'connected' ? 'outline' : 'default'}
+                              size="sm"
+                              onClick={() => {
+                                if (integration.status === 'connected') {
+                                  toast.promise(
+                                    new Promise((resolve) => setTimeout(resolve, 1000)),
+                                    {
+                                      loading: `Managing ${integration.name} integration...`,
+                                      success: `${integration.name} settings opened`,
+                                      error: `Failed to manage ${integration.name}`
+                                    }
+                                  )
+                                } else {
+                                  toast.promise(
+                                    new Promise((resolve) => setTimeout(resolve, 1500)),
+                                    {
+                                      loading: `Connecting to ${integration.name}...`,
+                                      success: `${integration.name} connected successfully`,
+                                      error: `Failed to connect to ${integration.name}`
+                                    }
+                                  )
+                                }
+                              }}
+                            >
                               {integration.status === 'connected' ? 'Manage' : 'Connect'}
                             </Button>
                           </div>
@@ -1724,7 +1819,19 @@ export default function SurveysClient() {
                           <Label htmlFor="apiKey">API Key</Label>
                           <div className="mt-1 flex gap-2">
                             <Input id="apiKey" type="password" className="flex-1" defaultValue="STRIPE_KEY_PLACEHOLDER" readOnly />
-                            <Button variant="outline">
+                            <Button
+                              variant="outline"
+                              onClick={() => {
+                                toast.promise(
+                                  new Promise((resolve) => setTimeout(resolve, 500)),
+                                  {
+                                    loading: 'Copying API key...',
+                                    success: 'API key copied to clipboard',
+                                    error: 'Failed to copy API key'
+                                  }
+                                )
+                              }}
+                            >
                               <Copy className="w-4 h-4" />
                             </Button>
                           </div>
@@ -1822,7 +1929,18 @@ export default function SurveysClient() {
                             <p className="font-medium text-gray-900 dark:text-white">Export All Data</p>
                             <p className="text-sm text-gray-500">Download all surveys and responses</p>
                           </div>
-                          <Button>
+                          <Button
+                            onClick={() => {
+                              toast.promise(
+                                new Promise((resolve) => setTimeout(resolve, 2000)),
+                                {
+                                  loading: 'Exporting all data...',
+                                  success: 'All data exported successfully',
+                                  error: 'Failed to export data'
+                                }
+                              )
+                            }}
+                          >
                             <Download className="w-4 h-4 mr-2" />
                             Export
                           </Button>
@@ -1832,7 +1950,19 @@ export default function SurveysClient() {
                             <p className="font-medium text-gray-900 dark:text-white">Import Surveys</p>
                             <p className="text-sm text-gray-500">Upload surveys from other platforms</p>
                           </div>
-                          <Button variant="outline">
+                          <Button
+                            variant="outline"
+                            onClick={() => {
+                              toast.promise(
+                                new Promise((resolve) => setTimeout(resolve, 1500)),
+                                {
+                                  loading: 'Importing surveys...',
+                                  success: 'Surveys imported successfully',
+                                  error: 'Failed to import surveys'
+                                }
+                              )
+                            }}
+                          >
                             <Upload className="w-4 h-4 mr-2" />
                             Import
                           </Button>
@@ -1882,8 +2012,37 @@ export default function SurveysClient() {
                               </div>
                             </div>
                             <div className="flex gap-3">
-                              <Button variant="outline" className="flex-1">View Invoices</Button>
-                              <Button className="flex-1 bg-gradient-to-r from-emerald-500 to-teal-600">Upgrade</Button>
+                              <Button
+                                variant="outline"
+                                className="flex-1"
+                                onClick={() => {
+                                  toast.promise(
+                                    new Promise((resolve) => setTimeout(resolve, 1000)),
+                                    {
+                                      loading: 'Loading invoices...',
+                                      success: 'Invoices loaded',
+                                      error: 'Failed to load invoices'
+                                    }
+                                  )
+                                }}
+                              >
+                                View Invoices
+                              </Button>
+                              <Button
+                                className="flex-1 bg-gradient-to-r from-emerald-500 to-teal-600"
+                                onClick={() => {
+                                  toast.promise(
+                                    new Promise((resolve) => setTimeout(resolve, 1200)),
+                                    {
+                                      loading: 'Loading upgrade options...',
+                                      success: 'Upgrade options loaded',
+                                      error: 'Failed to load upgrade options'
+                                    }
+                                  )
+                                }}
+                              >
+                                Upgrade
+                              </Button>
                             </div>
                           </div>
                         </div>
@@ -1901,7 +2060,20 @@ export default function SurveysClient() {
                             <p className="font-medium text-gray-900 dark:text-white">Delete All Responses</p>
                             <p className="text-sm text-gray-500">Remove all collected data</p>
                           </div>
-                          <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50">
+                          <Button
+                            variant="outline"
+                            className="text-red-600 border-red-200 hover:bg-red-50"
+                            onClick={() => {
+                              toast.promise(
+                                new Promise((resolve) => setTimeout(resolve, 2000)),
+                                {
+                                  loading: 'Deleting all responses...',
+                                  success: 'All responses deleted',
+                                  error: 'Failed to delete responses'
+                                }
+                              )
+                            }}
+                          >
                             <Trash2 className="w-4 h-4 mr-2" />
                             Delete
                           </Button>
@@ -1911,7 +2083,19 @@ export default function SurveysClient() {
                             <p className="font-medium text-gray-900 dark:text-white">Close Account</p>
                             <p className="text-sm text-gray-500">Permanently delete your account</p>
                           </div>
-                          <Button variant="destructive">
+                          <Button
+                            variant="destructive"
+                            onClick={() => {
+                              toast.promise(
+                                new Promise((resolve) => setTimeout(resolve, 2500)),
+                                {
+                                  loading: 'Processing account deletion...',
+                                  success: 'Account deletion initiated',
+                                  error: 'Failed to delete account'
+                                }
+                              )
+                            }}
+                          >
                             <Trash2 className="w-4 h-4 mr-2" />
                             Delete Account
                           </Button>
@@ -2030,11 +2214,35 @@ export default function SurveysClient() {
                     <Share2 className="w-4 h-4 mr-2" />
                     Share
                   </Button>
-                  <Button className="flex-1">
+                  <Button
+                    className="flex-1"
+                    onClick={() => {
+                      toast.promise(
+                        new Promise((resolve) => setTimeout(resolve, 1000)),
+                        {
+                          loading: 'Opening survey editor...',
+                          success: 'Survey editor opened',
+                          error: 'Failed to open editor'
+                        }
+                      )
+                    }}
+                  >
                     <Edit className="w-4 h-4 mr-2" />
                     Edit Survey
                   </Button>
-                  <Button variant="outline">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      toast.promise(
+                        new Promise((resolve) => setTimeout(resolve, 1500)),
+                        {
+                          loading: 'Downloading survey...',
+                          success: 'Survey downloaded successfully',
+                          error: 'Failed to download survey'
+                        }
+                      )
+                    }}
+                  >
                     <Download className="w-4 h-4" />
                   </Button>
                 </div>
@@ -2128,26 +2336,91 @@ export default function SurveysClient() {
                     value={`https://survey.app/s/${sharingSurvey?.id}`}
                     className="text-sm"
                   />
-                  <Button variant="outline" size="sm">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      toast.promise(
+                        new Promise((resolve) => setTimeout(resolve, 500)),
+                        {
+                          loading: 'Copying link...',
+                          success: 'Survey link copied to clipboard',
+                          error: 'Failed to copy link'
+                        }
+                      )
+                    }}
+                  >
                     <Copy className="w-4 h-4" />
                   </Button>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
-                <Button variant="outline" className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  className="flex items-center gap-2"
+                  onClick={() => {
+                    toast.promise(
+                      new Promise((resolve) => setTimeout(resolve, 1000)),
+                      {
+                        loading: 'Opening email composer...',
+                        success: 'Email composer opened',
+                        error: 'Failed to open email composer'
+                      }
+                    )
+                  }}
+                >
                   <Mail className="w-4 h-4" />
                   Email
                 </Button>
-                <Button variant="outline" className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  className="flex items-center gap-2"
+                  onClick={() => {
+                    toast.promise(
+                      new Promise((resolve) => setTimeout(resolve, 800)),
+                      {
+                        loading: 'Generating QR code...',
+                        success: 'QR code generated',
+                        error: 'Failed to generate QR code'
+                      }
+                    )
+                  }}
+                >
                   <QrCode className="w-4 h-4" />
                   QR Code
                 </Button>
-                <Button variant="outline" className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  className="flex items-center gap-2"
+                  onClick={() => {
+                    toast.promise(
+                      new Promise((resolve) => setTimeout(resolve, 700)),
+                      {
+                        loading: 'Generating embed code...',
+                        success: 'Embed code copied to clipboard',
+                        error: 'Failed to generate embed code'
+                      }
+                    )
+                  }}
+                >
                   <Globe className="w-4 h-4" />
                   Embed
                 </Button>
-                <Button variant="outline" className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  className="flex items-center gap-2"
+                  onClick={() => {
+                    toast.promise(
+                      new Promise((resolve) => setTimeout(resolve, 600)),
+                      {
+                        loading: 'Opening preview...',
+                        success: 'Preview opened in new tab',
+                        error: 'Failed to open preview'
+                      }
+                    )
+                  }}
+                >
                   <ExternalLink className="w-4 h-4" />
                   Preview
                 </Button>

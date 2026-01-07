@@ -1624,6 +1624,7 @@ export default function SettingsClient() {
                         key={color}
                         className="w-10 h-10 rounded-full ring-2 ring-offset-2 ring-transparent hover:ring-gray-300"
                         style={{ backgroundColor: color }}
+                        onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Applying accent color...', success: `Accent color set to ${color}`, error: 'Failed to apply accent color' })}
                       />
                     ))}
                   </div>
@@ -1636,9 +1637,9 @@ export default function SettingsClient() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {[
-                    { label: 'Reduce motion', desc: 'Minimize animations', icon: MousePointer },
-                    { label: 'High contrast', desc: 'Increase text contrast', icon: Contrast },
-                    { label: 'Large text', desc: 'Increase font size', icon: Type }
+                    { label: 'Reduce motion', desc: 'Minimize animations', icon: MousePointer, loadingMsg: 'Toggling reduce motion...', successMsg: 'Reduce motion toggled' },
+                    { label: 'High contrast', desc: 'Increase text contrast', icon: Contrast, loadingMsg: 'Toggling high contrast...', successMsg: 'High contrast toggled' },
+                    { label: 'Large text', desc: 'Increase font size', icon: Type, loadingMsg: 'Toggling large text...', successMsg: 'Large text toggled' }
                   ].map((item, i) => (
                     <div key={i} className="flex items-center justify-between p-3 rounded-lg border border-gray-200 dark:border-gray-700">
                       <div className="flex items-center gap-3">
@@ -1648,7 +1649,10 @@ export default function SettingsClient() {
                           <p className="text-sm text-gray-500">{item.desc}</p>
                         </div>
                       </div>
-                      <button className="w-10 h-6 rounded-full bg-gray-300">
+                      <button
+                        className="w-10 h-6 rounded-full bg-gray-300"
+                        onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: item.loadingMsg, success: item.successMsg, error: 'Failed to toggle setting' })}
+                      >
                         <div className="w-5 h-5 rounded-full bg-white transform translate-x-0.5" />
                       </button>
                     </div>

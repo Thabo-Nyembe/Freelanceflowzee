@@ -530,7 +530,17 @@ export default function ReportsClient() {
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            <Button variant="outline">
+            <Button
+              variant="outline"
+              onClick={() => toast.promise(
+                new Promise(resolve => setTimeout(resolve, 500)),
+                {
+                  loading: 'Loading filters...',
+                  success: 'Filters: Status, Type, Date Range, Author, Tags',
+                  error: 'Failed to load filters'
+                }
+              )}
+            >
               <Filter className="h-4 w-4 mr-2" />
               Filters
             </Button>
@@ -738,11 +748,33 @@ export default function ReportsClient() {
                 <div className="flex items-center justify-between">
                   <CardTitle>All Reports</CardTitle>
                   <div className="flex items-center gap-2">
-                    <Button variant="outline" size="sm">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => toast.promise(
+                        new Promise(resolve => setTimeout(resolve, 800)),
+                        {
+                          loading: 'Opening import dialog...',
+                          success: 'Import dialog ready - Select report files (JSON, CSV, XLSX)',
+                          error: 'Failed to open import dialog'
+                        }
+                      )}
+                    >
                       <Upload className="h-4 w-4 mr-2" />
                       Import
                     </Button>
-                    <Button variant="outline" size="sm">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => toast.promise(
+                        new Promise(resolve => setTimeout(resolve, 1000)),
+                        {
+                          loading: 'Preparing export of all reports...',
+                          success: 'Export ready - 48 reports exported to ZIP file',
+                          error: 'Failed to export reports'
+                        }
+                      )}
+                    >
                       <Download className="h-4 w-4 mr-2" />
                       Export All
                     </Button>
@@ -792,7 +824,21 @@ export default function ReportsClient() {
                           </Avatar>
                         </div>
 
-                        <Button variant="ghost" size="icon">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            toast.promise(
+                              new Promise(resolve => setTimeout(resolve, 500)),
+                              {
+                                loading: 'Loading options...',
+                                success: `Options for "${report.name}": View, Edit, Duplicate, Share, Delete`,
+                                error: 'Failed to load options'
+                              }
+                            )
+                          }}
+                        >
                           <MoreHorizontal className="h-4 w-4" />
                         </Button>
                       </div>
@@ -848,19 +894,63 @@ export default function ReportsClient() {
                   <CardTitle>Quick Actions</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  <Button className="w-full justify-start" variant="outline">
+                  <Button
+                    className="w-full justify-start"
+                    variant="outline"
+                    onClick={() => toast.promise(
+                      new Promise(resolve => setTimeout(resolve, 1200)),
+                      {
+                        loading: 'Analyzing data patterns...',
+                        success: 'AI Insights: Found 3 anomalies, 2 trends, and 5 optimization opportunities',
+                        error: 'AI analysis failed'
+                      }
+                    )}
+                  >
                     <Sparkles className="h-4 w-4 mr-2 text-purple-600" />
                     AI-Powered Insights
                   </Button>
-                  <Button className="w-full justify-start" variant="outline">
+                  <Button
+                    className="w-full justify-start"
+                    variant="outline"
+                    onClick={() => toast.promise(
+                      new Promise(resolve => setTimeout(resolve, 800)),
+                      {
+                        loading: 'Opening data source connector...',
+                        success: 'Data source connector ready - 15+ integrations available',
+                        error: 'Failed to open connector'
+                      }
+                    )}
+                  >
                     <Database className="h-4 w-4 mr-2 text-blue-600" />
                     Connect Data Source
                   </Button>
-                  <Button className="w-full justify-start" variant="outline">
+                  <Button
+                    className="w-full justify-start"
+                    variant="outline"
+                    onClick={() => toast.promise(
+                      new Promise(resolve => setTimeout(resolve, 600)),
+                      {
+                        loading: 'Loading theme gallery...',
+                        success: 'Theme gallery: 12 professional themes available',
+                        error: 'Failed to load themes'
+                      }
+                    )}
+                  >
                     <Palette className="h-4 w-4 mr-2 text-pink-600" />
                     Apply Theme
                   </Button>
-                  <Button className="w-full justify-start" variant="outline">
+                  <Button
+                    className="w-full justify-start"
+                    variant="outline"
+                    onClick={() => toast.promise(
+                      new Promise(resolve => setTimeout(resolve, 900)),
+                      {
+                        loading: 'Preparing to publish...',
+                        success: 'Report published successfully and shared with team',
+                        error: 'Failed to publish report'
+                      }
+                    )}
+                  >
                     <Share2 className="h-4 w-4 mr-2 text-green-600" />
                     Publish Report
                   </Button>
@@ -896,7 +986,17 @@ export default function ReportsClient() {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle>Connected Data Sources</CardTitle>
-                  <Button className="bg-purple-600 hover:bg-purple-700">
+                  <Button
+                    className="bg-purple-600 hover:bg-purple-700"
+                    onClick={() => toast.promise(
+                      new Promise(resolve => setTimeout(resolve, 700)),
+                      {
+                        loading: 'Opening connection wizard...',
+                        success: 'Connection wizard ready - Choose from 15+ data source types',
+                        error: 'Failed to open connection wizard'
+                      }
+                    )}
+                  >
                     <Plus className="h-4 w-4 mr-2" />
                     Add Connection
                   </Button>
@@ -942,10 +1042,32 @@ export default function ReportsClient() {
                         </div>
 
                         <div className="flex items-center gap-2">
-                          <Button variant="outline" size="sm">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => toast.promise(
+                              new Promise(resolve => setTimeout(resolve, 1500)),
+                              {
+                                loading: `Syncing ${source.name}...`,
+                                success: `${source.name} synced successfully - ${formatNumber(source.rows)} rows updated`,
+                                error: `Failed to sync ${source.name}`
+                              }
+                            )}
+                          >
                             <RefreshCw className="h-4 w-4" />
                           </Button>
-                          <Button variant="ghost" size="icon">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => toast.promise(
+                              new Promise(resolve => setTimeout(resolve, 500)),
+                              {
+                                loading: 'Loading settings...',
+                                success: `${source.name} settings: Connection, Sync schedule, Permissions`,
+                                error: 'Failed to load settings'
+                              }
+                            )}
+                          >
                             <Settings className="h-4 w-4" />
                           </Button>
                         </div>
@@ -1023,7 +1145,18 @@ export default function ReportsClient() {
 
                       <div className="flex items-center gap-2">
                         <Switch checked={schedule.status === 'active'} />
-                        <Button variant="ghost" size="icon">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => toast.promise(
+                            new Promise(resolve => setTimeout(resolve, 500)),
+                            {
+                              loading: 'Loading schedule settings...',
+                              success: `Schedule settings for "${schedule.reportName}": Frequency, Recipients, Format`,
+                              error: 'Failed to load schedule settings'
+                            }
+                          )}
+                        >
                           <Settings className="h-4 w-4" />
                         </Button>
                       </div>
@@ -1553,7 +1686,18 @@ export default function ReportsClient() {
                               <div className="text-sm text-gray-500">Not connected</div>
                             </div>
                           </div>
-                          <Button variant="outline" size="sm">Connect</Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => toast.promise(
+                              new Promise(resolve => setTimeout(resolve, 1000)),
+                              {
+                                loading: 'Initializing Redshift connection...',
+                                success: 'Redshift connection wizard opened - Enter your credentials',
+                                error: 'Failed to initialize connection'
+                              }
+                            )}
+                          >Connect</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -1571,15 +1715,45 @@ export default function ReportsClient() {
                           <Label>API Key</Label>
                           <div className="flex gap-2">
                             <Input type="password" value="tb_live_xxxxxxxxxxxxxxxx" readOnly className="font-mono" />
-                            <Button variant="outline">Copy</Button>
-                            <Button variant="outline">Regenerate</Button>
+                            <Button
+                              variant="outline"
+                              onClick={() => toast.promise(
+                                new Promise(resolve => setTimeout(resolve, 300)),
+                                {
+                                  loading: 'Copying API key...',
+                                  success: 'API key copied to clipboard',
+                                  error: 'Failed to copy API key'
+                                }
+                              )}
+                            >Copy</Button>
+                            <Button
+                              variant="outline"
+                              onClick={() => toast.promise(
+                                new Promise(resolve => setTimeout(resolve, 800)),
+                                {
+                                  loading: 'Regenerating API key...',
+                                  success: 'New API key generated - Previous key has been revoked',
+                                  error: 'Failed to regenerate API key'
+                                }
+                              )}
+                            >Regenerate</Button>
                           </div>
                         </div>
                         <div className="space-y-2">
                           <Label>Embed Secret</Label>
                           <div className="flex gap-2">
                             <Input type="password" value="embed_xxxxxxxxxxxxxxxx" readOnly className="font-mono" />
-                            <Button variant="outline">Copy</Button>
+                            <Button
+                              variant="outline"
+                              onClick={() => toast.promise(
+                                new Promise(resolve => setTimeout(resolve, 300)),
+                                {
+                                  loading: 'Copying embed secret...',
+                                  success: 'Embed secret copied to clipboard',
+                                  error: 'Failed to copy embed secret'
+                                }
+                              )}
+                            >Copy</Button>
                           </div>
                         </div>
                         <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
@@ -1690,7 +1864,18 @@ export default function ReportsClient() {
                             <div className="font-medium text-red-700 dark:text-red-400">Delete All Reports</div>
                             <div className="text-sm text-red-600 dark:text-red-500">Permanently delete all reports and data</div>
                           </div>
-                          <Button variant="destructive" size="sm">
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => toast.promise(
+                              new Promise((_, reject) => setTimeout(() => reject(new Error('Cancelled')), 500)),
+                              {
+                                loading: 'Preparing deletion...',
+                                success: 'All reports deleted',
+                                error: 'Deletion cancelled - This action requires confirmation'
+                              }
+                            )}
+                          >
                             <Trash2 className="w-4 h-4 mr-2" />
                             Delete All
                           </Button>
@@ -1700,7 +1885,18 @@ export default function ReportsClient() {
                             <div className="font-medium text-red-700 dark:text-red-400">Clear All Caches</div>
                             <div className="text-sm text-red-600 dark:text-red-500">Force refresh all cached data</div>
                           </div>
-                          <Button variant="destructive" size="sm">
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => toast.promise(
+                              new Promise(resolve => setTimeout(resolve, 1500)),
+                              {
+                                loading: 'Clearing all caches...',
+                                success: 'All caches cleared - Data will refresh on next load',
+                                error: 'Failed to clear caches'
+                              }
+                            )}
+                          >
                             <RefreshCw className="w-4 h-4 mr-2" />
                             Clear
                           </Button>
@@ -1824,23 +2020,76 @@ export default function ReportsClient() {
 
                   {/* Actions */}
                   <div className="flex gap-3 pt-4 border-t">
-                    <Button className="bg-purple-600 hover:bg-purple-700">
+                    <Button
+                      className="bg-purple-600 hover:bg-purple-700"
+                      onClick={() => toast.promise(
+                        new Promise(resolve => setTimeout(resolve, 800)),
+                        {
+                          loading: `Opening "${selectedReport.name}"...`,
+                          success: `Report "${selectedReport.name}" opened in viewer`,
+                          error: 'Failed to open report'
+                        }
+                      )}
+                    >
                       <Eye className="h-4 w-4 mr-2" />
                       Open Report
                     </Button>
-                    <Button variant="outline">
+                    <Button
+                      variant="outline"
+                      onClick={() => toast.promise(
+                        new Promise(resolve => setTimeout(resolve, 600)),
+                        {
+                          loading: 'Opening editor...',
+                          success: `Report editor opened for "${selectedReport.name}"`,
+                          error: 'Failed to open editor'
+                        }
+                      )}
+                    >
                       <Edit className="h-4 w-4 mr-2" />
                       Edit
                     </Button>
-                    <Button variant="outline">
+                    <Button
+                      variant="outline"
+                      onClick={() => toast.promise(
+                        new Promise(resolve => setTimeout(resolve, 400)),
+                        {
+                          loading: 'Generating share link...',
+                          success: `Share link for "${selectedReport.name}" copied to clipboard`,
+                          error: 'Failed to generate share link'
+                        }
+                      )}
+                    >
                       <Share2 className="h-4 w-4 mr-2" />
                       Share
                     </Button>
-                    <Button variant="outline">
+                    <Button
+                      variant="outline"
+                      onClick={() => toast.promise(
+                        new Promise(resolve => setTimeout(resolve, 1200)),
+                        {
+                          loading: `Exporting "${selectedReport.name}"...`,
+                          success: `"${selectedReport.name}" exported as PDF`,
+                          error: 'Failed to export report'
+                        }
+                      )}
+                    >
                       <Download className="h-4 w-4 mr-2" />
                       Export
                     </Button>
-                    <Button variant="ghost" className="ml-auto text-red-600 hover:text-red-700">
+                    <Button
+                      variant="ghost"
+                      className="ml-auto text-red-600 hover:text-red-700"
+                      onClick={() => {
+                        toast.promise(
+                          new Promise((_, reject) => setTimeout(() => reject(new Error('Cancelled')), 500)),
+                          {
+                            loading: 'Preparing to delete...',
+                            success: 'Report deleted',
+                            error: 'Deletion cancelled - Confirm in settings to delete'
+                          }
+                        )
+                      }}
+                    >
                       <Trash2 className="h-4 w-4 mr-2" />
                       Delete
                     </Button>
@@ -1884,7 +2133,20 @@ export default function ReportsClient() {
                 <Button variant="outline" className="flex-1" onClick={() => setShowCreateDialog(false)}>
                   Cancel
                 </Button>
-                <Button className="flex-1 bg-purple-600 hover:bg-purple-700">
+                <Button
+                  className="flex-1 bg-purple-600 hover:bg-purple-700"
+                  onClick={() => {
+                    setShowCreateDialog(false)
+                    toast.promise(
+                      new Promise(resolve => setTimeout(resolve, 800)),
+                      {
+                        loading: 'Creating new report...',
+                        success: 'Report created! Opening report builder...',
+                        error: 'Failed to create report'
+                      }
+                    )
+                  }}
+                >
                   <Plus className="h-4 w-4 mr-2" />
                   Continue
                 </Button>

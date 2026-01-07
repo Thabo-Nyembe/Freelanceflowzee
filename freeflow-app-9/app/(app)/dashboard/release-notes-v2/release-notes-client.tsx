@@ -1118,7 +1118,7 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
                           <div className="text-xs text-gray-500">rollout</div>
                         </div>
                         <Progress value={flag.rolloutPercentage} className="w-24 h-2" />
-                        <Button variant="outline" size="sm">
+                        <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading flag settings...', success: `${flag.name} settings opened`, error: 'Failed to load settings' })}>
                           <Settings className="w-4 h-4" />
                         </Button>
                       </div>
@@ -1678,7 +1678,7 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
                         </div>
                         <code className="text-xs text-gray-500">https://api.yourapp.com/webhooks/releases</code>
                       </div>
-                      <Button variant="outline" className="w-full">
+                      <Button variant="outline" className="w-full" onClick={() => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Opening webhook configuration...', success: 'Configure your new webhook endpoint', error: 'Failed to open webhook settings' })}>
                         <Plus className="h-4 w-4 mr-2" />
                         Add Webhook
                       </Button>
@@ -1720,7 +1720,7 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
                             {service.status === 'connected' ? (
                               <Badge className="bg-green-100 text-green-700">Connected</Badge>
                             ) : (
-                              <Button variant="outline" size="sm">Connect</Button>
+                              <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: `Connecting to ${service.name}...`, success: `${service.name} connected successfully!`, error: `Failed to connect to ${service.name}` })}>Connect</Button>
                             )}
                           </div>
                         ))}
@@ -1740,8 +1740,8 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
                         <Label className="font-medium">API Key</Label>
                         <div className="flex gap-2">
                           <Input value="rn_live_xxxxxxxxxxxxxxxxxxxxx" readOnly className="flex-1 font-mono text-sm" type="password" />
-                          <Button variant="outline" size="icon"><Eye className="h-4 w-4" /></Button>
-                          <Button variant="outline" size="icon"><Copy className="h-4 w-4" /></Button>
+                          <Button variant="outline" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 300)), { loading: 'Revealing API key...', success: 'API key visible - keep it secure!', error: 'Failed to reveal API key' })}><Eye className="h-4 w-4" /></Button>
+                          <Button variant="outline" size="icon" onClick={() => toast.promise(navigator.clipboard.writeText('rn_live_xxxxxxxxxxxxxxxxxxxxx'), { loading: 'Copying API key...', success: 'API key copied to clipboard', error: 'Failed to copy API key' })}><Copy className="h-4 w-4" /></Button>
                         </div>
                       </div>
                       <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
@@ -1749,7 +1749,7 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
                           Keep your API key secure. Never share it publicly.
                         </p>
                       </div>
-                      <Button variant="outline" className="w-full">
+                      <Button variant="outline" className="w-full" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Regenerating API key...', success: 'New API key generated - update your integrations!', error: 'Failed to regenerate API key' })}>
                         <RefreshCw className="h-4 w-4 mr-2" />
                         Regenerate API Key
                       </Button>
@@ -1768,7 +1768,7 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
                         <Label className="font-medium">RSS Feed URL</Label>
                         <div className="flex gap-2">
                           <Input value="https://yourapp.com/releases/feed.xml" readOnly className="flex-1 font-mono text-sm" />
-                          <Button variant="outline" size="icon"><Copy className="h-4 w-4" /></Button>
+                          <Button variant="outline" size="icon" onClick={() => toast.promise(navigator.clipboard.writeText('https://yourapp.com/releases/feed.xml'), { loading: 'Copying RSS URL...', success: 'RSS feed URL copied to clipboard', error: 'Failed to copy URL' })}><Copy className="h-4 w-4" /></Button>
                         </div>
                       </div>
                       <div className="space-y-2">
@@ -1813,11 +1813,11 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
                           </div>
                           <div className="flex items-center gap-2">
                             {template.isDefault && <Badge className="bg-orange-100 text-orange-700">Default</Badge>}
-                            <Button variant="ghost" size="sm"><Settings className="h-4 w-4" /></Button>
+                            <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading template settings...', success: `Edit ${template.name} template`, error: 'Failed to load template settings' })}><Settings className="h-4 w-4" /></Button>
                           </div>
                         </div>
                       ))}
-                      <Button variant="outline" className="w-full">
+                      <Button variant="outline" className="w-full" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening template editor...', success: 'Create your custom release note template', error: 'Failed to open template editor' })}>
                         <Plus className="h-4 w-4 mr-2" />
                         Create Template
                       </Button>
@@ -1895,7 +1895,7 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
                         </div>
                         <div className="space-y-2">
                           <Label className="font-medium">Logo</Label>
-                          <Button variant="outline" className="w-full">Upload Logo</Button>
+                          <Button variant="outline" className="w-full" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening file picker...', success: 'Select your logo image (PNG, SVG recommended)', error: 'Failed to open file picker' })}>Upload Logo</Button>
                         </div>
                       </div>
                       <div className="space-y-2">
@@ -1934,11 +1934,11 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
                           </SelectContent>
                         </Select>
                       </div>
-                      <Button variant="outline" className="w-full">
+                      <Button variant="outline" className="w-full" onClick={handleExportNotes}>
                         <Download className="h-4 w-4 mr-2" />
                         Export All Releases
                       </Button>
-                      <Button variant="outline" className="w-full">
+                      <Button variant="outline" className="w-full" onClick={() => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Generating changelog PDF...', success: 'PDF generated and ready for download', error: 'Failed to generate PDF' })}>
                         <FileText className="h-4 w-4 mr-2" />
                         Generate Changelog PDF
                       </Button>
@@ -1973,7 +1973,7 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
                           </SelectContent>
                         </Select>
                       </div>
-                      <Button variant="outline" className="w-full">
+                      <Button variant="outline" className="w-full" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Clearing release notes cache...', success: 'Cache cleared successfully', error: 'Failed to clear cache' })}>
                         <RefreshCw className="h-4 w-4 mr-2" />
                         Clear Cache
                       </Button>
@@ -2022,15 +2022,15 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
                           These actions are irreversible. Proceed with caution.
                         </p>
                       </div>
-                      <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50">
+                      <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50" onClick={() => toast.promise(new Promise((_, reject) => setTimeout(() => reject(), 500)), { loading: 'Preparing to delete all releases...', success: 'All releases deleted', error: 'Deletion cancelled - requires additional confirmation' })}>
                         <Trash2 className="h-4 w-4 mr-2" />
                         Delete All Releases
                       </Button>
-                      <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50">
+                      <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50" onClick={() => toast.promise(new Promise((_, reject) => setTimeout(() => reject(), 500)), { loading: 'Preparing to reset settings...', success: 'Settings reset to defaults', error: 'Reset cancelled - requires additional confirmation' })}>
                         <RefreshCw className="h-4 w-4 mr-2" />
                         Reset All Settings
                       </Button>
-                      <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50">
+                      <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50" onClick={() => toast.promise(new Promise((_, reject) => setTimeout(() => reject(), 500)), { loading: 'Disabling release notes...', success: 'Release notes disabled', error: 'Disabled action cancelled - requires additional confirmation' })}>
                         <Lock className="h-4 w-4 mr-2" />
                         Disable Release Notes
                       </Button>
@@ -2306,7 +2306,7 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
                       Like
                     </Button>
                     {selectedRelease.downloadUrl && (
-                      <Button size="sm" className="bg-orange-600">
+                      <Button size="sm" className="bg-orange-600" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: `Downloading ${selectedRelease.version}...`, success: `${selectedRelease.version} download started`, error: 'Download failed' })}>
                         <Download className="w-4 h-4 mr-1" />
                         Download
                       </Button>

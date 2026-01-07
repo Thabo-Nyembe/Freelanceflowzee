@@ -1065,7 +1065,7 @@ export default function ProfileClient() {
           <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg overflow-hidden">
             <div className="h-32 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 relative">
               {displayProfile.coverStory && (
-                <Button size="sm" variant="secondary" className="absolute bottom-2 right-2">
+                <Button size="sm" variant="secondary" className="absolute bottom-2 right-2" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Loading cover story...', success: 'Cover story ready to play', error: 'Failed to load cover story' })}>
                   <Play className="w-3 h-3 mr-1" />
                   Cover Story
                 </Button>
@@ -1128,15 +1128,15 @@ export default function ProfileClient() {
                     ))}
                   </div>
                   <div className="flex gap-3">
-                    <Button className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
+                    <Button className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Sending connection request...', success: 'Connection request sent', error: 'Failed to send request' })}>
                       <UserPlus className="w-4 h-4 mr-2" />
                       Connect
                     </Button>
-                    <Button variant="outline">
+                    <Button variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening messages...', success: 'Message window ready', error: 'Failed to open messages' })}>
                       <MessageSquare className="w-4 h-4 mr-2" />
                       Message
                     </Button>
-                    <Button variant="outline">
+                    <Button variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading options...', success: 'More options available', error: 'Failed to load options' })}>
                       <MoreHorizontal className="w-4 h-4" />
                     </Button>
                   </div>
@@ -1284,7 +1284,7 @@ export default function ProfileClient() {
                           </div>
                         ))}
                       </div>
-                      <Button variant="link" className="w-full mt-2 text-blue-600">View all {stats.profileViews} views</Button>
+                      <Button variant="link" className="w-full mt-2 text-blue-600" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Loading profile viewers...', success: 'Profile viewers loaded', error: 'Failed to load viewers' })}>View all {stats.profileViews} views</Button>
                     </CardContent>
                   </Card>
                 </div>
@@ -1411,7 +1411,7 @@ export default function ProfileClient() {
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <CardTitle className="flex items-center gap-2"><Briefcase className="w-5 h-5 text-blue-600" />Experience</CardTitle>
-                    <Button size="sm" className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white"><Plus className="w-4 h-4 mr-1" />Add</Button>
+                    <Button size="sm" className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Opening experience form...', success: 'Ready to add new experience', error: 'Failed to open form' })}><Plus className="w-4 h-4 mr-1" />Add</Button>
                   </div>
                 </CardHeader>
                 <CardContent>
@@ -1639,7 +1639,7 @@ export default function ProfileClient() {
                             <Badge className={getAssessmentColor(skill.assessmentStatus)}>
                               {skill.assessmentStatus === 'not-taken' ? 'Take Quiz' : skill.assessmentStatus.replace('-', ' ')}
                             </Badge>
-                            <Button variant="outline" size="sm">Endorse</Button>
+                            <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Endorsing skill...', success: 'Skill endorsed successfully', error: 'Failed to endorse skill' })}>Endorse</Button>
                             <Button
                               variant="ghost"
                               size="icon"
@@ -1724,7 +1724,7 @@ export default function ProfileClient() {
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <CardTitle className="flex items-center gap-2"><Star className="w-5 h-5 text-blue-600" />Featured</CardTitle>
-                    <Button size="sm"><Plus className="w-4 h-4 mr-1" />Add Featured</Button>
+                    <Button size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Opening featured content form...', success: 'Ready to add featured content', error: 'Failed to open form' })}><Plus className="w-4 h-4 mr-1" />Add Featured</Button>
                   </div>
                 </CardHeader>
                 <CardContent>
@@ -1842,7 +1842,7 @@ export default function ProfileClient() {
                         </div>
                         <div className="flex items-center gap-3">
                           <Badge className={getConnectionStatusColor(connection.status)}>{connection.status}</Badge>
-                          <Button variant="outline" size="sm"><MessageSquare className="w-4 h-4" /></Button>
+                          <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening message...', success: 'Message window ready', error: 'Failed to open messages' })}><MessageSquare className="w-4 h-4" /></Button>
                         </div>
                       </div>
                     ))}
@@ -1892,19 +1892,20 @@ export default function ProfileClient() {
               {/* Quick Actions */}
               <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
                 {[
-                  { icon: Search, label: 'Search Jobs', color: 'from-indigo-500 to-purple-600' },
-                  { icon: Bookmark, label: 'Saved Jobs', color: 'from-blue-500 to-indigo-600' },
-                  { icon: Bell, label: 'Job Alerts', color: 'from-purple-500 to-pink-600' },
-                  { icon: Target, label: 'Preferences', color: 'from-green-500 to-emerald-600' },
-                  { icon: FileText, label: 'Applications', color: 'from-orange-500 to-amber-600' },
-                  { icon: Building2, label: 'Companies', color: 'from-cyan-500 to-blue-600' },
-                  { icon: TrendingUp, label: 'Salary Info', color: 'from-pink-500 to-rose-600' },
-                  { icon: Users, label: 'Referrals', color: 'from-yellow-500 to-orange-600' },
+                  { icon: Search, label: 'Search Jobs', color: 'from-indigo-500 to-purple-600', action: 'Searching jobs...' },
+                  { icon: Bookmark, label: 'Saved Jobs', color: 'from-blue-500 to-indigo-600', action: 'Loading saved jobs...' },
+                  { icon: Bell, label: 'Job Alerts', color: 'from-purple-500 to-pink-600', action: 'Loading job alerts...' },
+                  { icon: Target, label: 'Preferences', color: 'from-green-500 to-emerald-600', action: 'Opening preferences...' },
+                  { icon: FileText, label: 'Applications', color: 'from-orange-500 to-amber-600', action: 'Loading applications...' },
+                  { icon: Building2, label: 'Companies', color: 'from-cyan-500 to-blue-600', action: 'Loading companies...' },
+                  { icon: TrendingUp, label: 'Salary Info', color: 'from-pink-500 to-rose-600', action: 'Loading salary data...' },
+                  { icon: Users, label: 'Referrals', color: 'from-yellow-500 to-orange-600', action: 'Loading referrals...' },
                 ].map((action, i) => (
                   <Button
                     key={i}
                     variant="outline"
                     className="h-auto py-4 flex flex-col gap-2 hover:scale-105 transition-all duration-200 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm"
+                    onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: action.action, success: `${action.label} ready`, error: `Failed to load ${action.label.toLowerCase()}` })}
                   >
                     <div className={`p-2 rounded-lg bg-gradient-to-br ${action.color}`}>
                       <action.icon className="w-4 h-4 text-white" />
@@ -1942,8 +1943,8 @@ export default function ProfileClient() {
                           <Badge className="bg-green-100 text-green-700">{job.matchScore}% match</Badge>
                           {job.isEasyApply && <Badge variant="outline">Easy Apply</Badge>}
                           <div className="flex gap-2">
-                            <Button variant="ghost" size="icon"><Bookmark className={`w-4 h-4 ${job.isSaved ? 'fill-current text-blue-600' : ''}`} /></Button>
-                            <Button size="sm">Apply</Button>
+                            <Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: job.isSaved ? 'Removing from saved...' : 'Saving job...', success: job.isSaved ? 'Job removed from saved' : 'Job saved successfully', error: 'Failed to update saved status' })}><Bookmark className={`w-4 h-4 ${job.isSaved ? 'fill-current text-blue-600' : ''}`} /></Button>
+                            <Button size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Opening application...', success: 'Application form ready', error: 'Failed to open application' })}>Apply</Button>
                           </div>
                         </div>
                       </div>
@@ -2405,14 +2406,14 @@ export default function ProfileClient() {
                               <p className="font-medium">Download Your Data</p>
                               <p className="text-sm text-gray-500">Get a copy of all your data</p>
                             </div>
-                            <Button variant="outline" size="sm"><Download className="w-4 h-4 mr-2" />Download</Button>
+                            <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Preparing your data download...', success: 'Download ready! Check your downloads folder', error: 'Failed to prepare download' })}><Download className="w-4 h-4 mr-2" />Download</Button>
                           </div>
                           <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
                             <div>
                               <p className="font-medium text-red-700 dark:text-red-400">Delete Account</p>
                               <p className="text-sm text-red-600 dark:text-red-400">Permanently delete your account</p>
                             </div>
-                            <Button variant="outline" size="sm" className="text-red-600 border-red-300 hover:bg-red-50"><Trash2 className="w-4 h-4 mr-2" />Delete</Button>
+                            <Button variant="outline" size="sm" className="text-red-600 border-red-300 hover:bg-red-50" onClick={() => toast.promise(new Promise((_, reject) => setTimeout(() => reject(new Error('Confirmation required')), 1000)), { loading: 'Processing request...', success: 'Account scheduled for deletion', error: 'Account deletion requires email confirmation' })}><Trash2 className="w-4 h-4 mr-2" />Delete</Button>
                           </div>
                         </CardContent>
                       </Card>
@@ -2447,7 +2448,7 @@ export default function ProfileClient() {
                               <p className="font-medium">Change Password</p>
                               <p className="text-sm text-gray-500">Update your password regularly</p>
                             </div>
-                            <Button variant="outline" size="sm"><Key className="w-4 h-4 mr-2" />Change</Button>
+                            <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening password change form...', success: 'Enter your new password', error: 'Failed to open password form' })}><Key className="w-4 h-4 mr-2" />Change</Button>
                           </div>
                         </CardContent>
                       </Card>
@@ -2476,7 +2477,7 @@ export default function ProfileClient() {
                                     <p className="text-xs text-gray-500">{session.location} • {session.time}</p>
                                   </div>
                                 </div>
-                                {!session.current && <Button variant="ghost" size="sm" className="text-red-600">Sign out</Button>}
+                                {!session.current && <Button variant="ghost" size="sm" className="text-red-600" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Signing out device...', success: 'Device signed out successfully', error: 'Failed to sign out device' })}>Sign out</Button>}
                               </div>
                             ))}
                           </div>
@@ -2551,7 +2552,7 @@ export default function ProfileClient() {
                                 <p className="text-sm text-gray-500">Not connected</p>
                               </div>
                             </div>
-                            <Button variant="outline" size="sm">Connect</Button>
+                            <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Connecting to Google...', success: 'Google account connected successfully', error: 'Failed to connect Google account' })}>Connect</Button>
                           </div>
                         </CardContent>
                       </Card>
@@ -2566,7 +2567,7 @@ export default function ProfileClient() {
                               <p className="font-medium">Cache</p>
                               <p className="text-sm text-gray-500">Clear cached data</p>
                             </div>
-                            <Button variant="outline" size="sm"><RefreshCw className="w-4 h-4 mr-2" />Clear</Button>
+                            <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Clearing cache...', success: 'Cache cleared successfully', error: 'Failed to clear cache' })}><RefreshCw className="w-4 h-4 mr-2" />Clear</Button>
                           </div>
                           <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                             <div>

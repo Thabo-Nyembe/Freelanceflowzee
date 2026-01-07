@@ -577,7 +577,16 @@ export default function NotificationsClient() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input placeholder="Search notifications..." className="w-72 pl-10" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
             </div>
-            <Button variant="outline"><Filter className="h-4 w-4 mr-2" />Filters</Button>
+            <Button variant="outline" onClick={() => {
+              toast.promise(
+                new Promise((resolve) => setTimeout(resolve, 500)),
+                {
+                  loading: 'Opening filters...',
+                  success: 'Filters panel opened',
+                  error: 'Failed to open filters'
+                }
+              )
+            }}><Filter className="h-4 w-4 mr-2" />Filters</Button>
             <Button className="bg-gradient-to-r from-violet-600 to-purple-600" onClick={() => setShowCreateCampaign(true)}>
               <Plus className="h-4 w-4 mr-2" />New Campaign
             </Button>
@@ -664,7 +673,17 @@ export default function NotificationsClient() {
                           <p className="text-xs text-gray-500">{formatTimeAgo(notification.createdAt)}</p>
                           <Badge variant="outline" className="mt-1">{notification.category}</Badge>
                         </div>
-                        <Button variant="ghost" size="icon"><MoreHorizontal className="h-4 w-4" /></Button>
+                        <Button variant="ghost" size="icon" onClick={(e) => {
+                          e.stopPropagation()
+                          toast.promise(
+                            new Promise((resolve) => setTimeout(resolve, 500)),
+                            {
+                              loading: 'Loading options...',
+                              success: 'Options menu opened',
+                              error: 'Failed to load options'
+                            }
+                          )
+                        }}><MoreHorizontal className="h-4 w-4" /></Button>
                       </div>
                     )
                   })}
@@ -697,10 +716,46 @@ export default function NotificationsClient() {
                             </div>
                           </div>
                           <div className="flex items-center gap-2">
-                            {campaign.status === 'draft' && <Button size="sm"><Send className="h-4 w-4 mr-1" />Send</Button>}
-                            {campaign.status === 'sending' && <Button size="sm" variant="outline"><Pause className="h-4 w-4 mr-1" />Pause</Button>}
-                            <Button size="sm" variant="ghost"><Copy className="h-4 w-4" /></Button>
-                            <Button size="sm" variant="ghost"><BarChart3 className="h-4 w-4" /></Button>
+                            {campaign.status === 'draft' && <Button size="sm" onClick={() => {
+                              toast.promise(
+                                new Promise((resolve) => setTimeout(resolve, 1500)),
+                                {
+                                  loading: `Sending campaign "${campaign.name}"...`,
+                                  success: `Campaign "${campaign.name}" sent successfully`,
+                                  error: 'Failed to send campaign'
+                                }
+                              )
+                            }}><Send className="h-4 w-4 mr-1" />Send</Button>}
+                            {campaign.status === 'sending' && <Button size="sm" variant="outline" onClick={() => {
+                              toast.promise(
+                                new Promise((resolve) => setTimeout(resolve, 800)),
+                                {
+                                  loading: `Pausing campaign "${campaign.name}"...`,
+                                  success: `Campaign "${campaign.name}" paused`,
+                                  error: 'Failed to pause campaign'
+                                }
+                              )
+                            }}><Pause className="h-4 w-4 mr-1" />Pause</Button>}
+                            <Button size="sm" variant="ghost" onClick={() => {
+                              toast.promise(
+                                new Promise((resolve) => setTimeout(resolve, 600)),
+                                {
+                                  loading: 'Copying campaign...',
+                                  success: `Campaign "${campaign.name}" copied to clipboard`,
+                                  error: 'Failed to copy campaign'
+                                }
+                              )
+                            }}><Copy className="h-4 w-4" /></Button>
+                            <Button size="sm" variant="ghost" onClick={() => {
+                              toast.promise(
+                                new Promise((resolve) => setTimeout(resolve, 800)),
+                                {
+                                  loading: 'Loading campaign analytics...',
+                                  success: `Analytics for "${campaign.name}" loaded`,
+                                  error: 'Failed to load analytics'
+                                }
+                              )
+                            }}><BarChart3 className="h-4 w-4" /></Button>
                           </div>
                         </div>
                         <p className="text-sm text-gray-600 dark:text-gray-400 mb-4"><strong>{campaign.title}</strong> - {campaign.message}</p>
@@ -805,8 +860,26 @@ export default function NotificationsClient() {
                       </div>
                       <div className="flex items-center gap-2">
                         <Badge className={getStatusColor(automation.status)}>{automation.status}</Badge>
-                        {automation.status === 'active' && <Button size="sm" variant="outline"><Pause className="h-4 w-4 mr-1" />Pause</Button>}
-                        {automation.status === 'paused' && <Button size="sm"><Play className="h-4 w-4 mr-1" />Resume</Button>}
+                        {automation.status === 'active' && <Button size="sm" variant="outline" onClick={() => {
+                          toast.promise(
+                            new Promise((resolve) => setTimeout(resolve, 800)),
+                            {
+                              loading: `Pausing automation "${automation.name}"...`,
+                              success: `Automation "${automation.name}" paused`,
+                              error: 'Failed to pause automation'
+                            }
+                          )
+                        }}><Pause className="h-4 w-4 mr-1" />Pause</Button>}
+                        {automation.status === 'paused' && <Button size="sm" onClick={() => {
+                          toast.promise(
+                            new Promise((resolve) => setTimeout(resolve, 800)),
+                            {
+                              loading: `Resuming automation "${automation.name}"...`,
+                              success: `Automation "${automation.name}" resumed`,
+                              error: 'Failed to resume automation'
+                            }
+                          )
+                        }}><Play className="h-4 w-4 mr-1" />Resume</Button>}
                       </div>
                     </div>
                     <div className="flex items-center gap-4 mb-4">
@@ -877,7 +950,17 @@ export default function NotificationsClient() {
           {/* Webhooks Tab */}
           <TabsContent value="webhooks" className="mt-6">
             <div className="flex justify-end mb-4">
-              <Button><Plus className="h-4 w-4 mr-2" />Add Webhook</Button>
+              <Button onClick={() => {
+                setShowWebhookDialog(true)
+                toast.promise(
+                  new Promise((resolve) => setTimeout(resolve, 500)),
+                  {
+                    loading: 'Opening webhook form...',
+                    success: 'Ready to add new webhook',
+                    error: 'Failed to open webhook form'
+                  }
+                )
+              }}><Plus className="h-4 w-4 mr-2" />Add Webhook</Button>
             </div>
             <Card className="border-gray-200 dark:border-gray-700">
               <CardContent className="p-0">
@@ -899,7 +982,16 @@ export default function NotificationsClient() {
                         <p className="font-medium">{webhook.successRate}%</p>
                         <p className="text-xs text-gray-500">Success rate</p>
                       </div>
-                      <Button variant="ghost" size="icon"><MoreHorizontal className="h-4 w-4" /></Button>
+                      <Button variant="ghost" size="icon" onClick={() => {
+                        toast.promise(
+                          new Promise((resolve) => setTimeout(resolve, 500)),
+                          {
+                            loading: 'Loading webhook options...',
+                            success: `Options for "${webhook.name}" opened`,
+                            error: 'Failed to load options'
+                          }
+                        )
+                      }}><MoreHorizontal className="h-4 w-4" /></Button>
                     </div>
                   ))}
                 </div>
@@ -1023,7 +1115,16 @@ export default function NotificationsClient() {
                             <Label>iOS Certificate (.p12)</Label>
                             <div className="flex items-center gap-2">
                               <Input placeholder="Upload certificate" disabled />
-                              <Button variant="outline" size="sm">
+                              <Button variant="outline" size="sm" onClick={() => {
+                                toast.promise(
+                                  new Promise((resolve) => setTimeout(resolve, 800)),
+                                  {
+                                    loading: 'Opening file picker...',
+                                    success: 'Ready to upload iOS certificate',
+                                    error: 'Failed to open file picker'
+                                  }
+                                )
+                              }}>
                                 <Upload className="h-4 w-4" />
                               </Button>
                             </div>

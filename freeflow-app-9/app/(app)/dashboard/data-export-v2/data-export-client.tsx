@@ -650,11 +650,11 @@ export default function DataExportClient() {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <Button variant="outline" className="bg-white/10 border-white/20 text-white hover:bg-white/20">
+              <Button variant="outline" className="bg-white/10 border-white/20 text-white hover:bg-white/20" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading job history...', success: 'Job history loaded', error: 'Failed to load history' })}>
                 <History className="w-4 h-4 mr-2" />
                 Job History
               </Button>
-              <Button className="bg-white text-green-600 hover:bg-green-50">
+              <Button className="bg-white text-green-600 hover:bg-green-50" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Creating new pipeline...', success: 'Pipeline wizard opened', error: 'Failed to create pipeline' })}>
                 <Plus className="w-4 h-4 mr-2" />
                 New Pipeline
               </Button>
@@ -809,11 +809,11 @@ export default function DataExportClient() {
                 />
               </div>
               <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 400)), { loading: 'Loading filters...', success: 'Filter options opened', error: 'Failed to load filters' })}>
                   <Filter className="w-4 h-4 mr-2" />
                   Filter
                 </Button>
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Refreshing pipelines...', success: 'Pipelines refreshed', error: 'Failed to refresh' })}>
                   <RefreshCw className="w-4 h-4 mr-2" />
                   Refresh
                 </Button>
@@ -837,7 +837,7 @@ export default function DataExportClient() {
                       <Badge className={getPipelineStatusColor(pipeline.status)}>
                         {pipeline.status}
                       </Badge>
-                      <Button variant="ghost" size="icon">
+                      <Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading pipeline options...', success: 'Pipeline menu opened', error: 'Failed to load options' })}>
                         <MoreHorizontal className="w-4 h-4" />
                       </Button>
                     </div>
@@ -913,21 +913,21 @@ export default function DataExportClient() {
                       </Badge>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Button variant="outline" size="sm">
+                      <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: `Loading logs for ${pipeline.name}...`, success: 'Pipeline logs opened', error: 'Failed to load logs' })}>
                         <Eye className="w-4 h-4 mr-2" />
                         View Logs
                       </Button>
-                      <Button variant="outline" size="sm">
+                      <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: `Loading configuration for ${pipeline.name}...`, success: 'Pipeline configuration opened', error: 'Failed to load configuration' })}>
                         <Settings className="w-4 h-4 mr-2" />
                         Configure
                       </Button>
                       {pipeline.status === 'active' ? (
-                        <Button variant="outline" size="sm">
+                        <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: `Pausing ${pipeline.name}...`, success: `${pipeline.name} has been paused`, error: 'Failed to pause pipeline' })}>
                           <Pause className="w-4 h-4 mr-2" />
                           Pause
                         </Button>
                       ) : (
-                        <Button size="sm" className="bg-green-600 hover:bg-green-700">
+                        <Button size="sm" className="bg-green-600 hover:bg-green-700" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: `Running ${pipeline.name}...`, success: `${pipeline.name} is now running`, error: 'Failed to start pipeline' })}>
                           <Play className="w-4 h-4 mr-2" />
                           Run Now
                         </Button>
@@ -981,7 +981,7 @@ export default function DataExportClient() {
 
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold">Connected Data Sources</h2>
-              <Button>
+              <Button onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening source wizard...', success: 'Add new data source', error: 'Failed to open wizard' })}>
                 <Plus className="w-4 h-4 mr-2" />
                 Add Source
               </Button>
@@ -1030,11 +1030,11 @@ export default function DataExportClient() {
                   </div>
 
                   <div className="flex items-center gap-2 mt-4">
-                    <Button variant="outline" size="sm" className="flex-1">
+                    <Button variant="outline" size="sm" className="flex-1" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: `Syncing ${source.name}...`, success: `${source.name} synced successfully`, error: 'Sync failed' })}>
                       <RefreshCw className="w-4 h-4 mr-2" />
                       Sync
                     </Button>
-                    <Button variant="outline" size="sm" className="flex-1">
+                    <Button variant="outline" size="sm" className="flex-1" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: `Loading ${source.name} configuration...`, success: 'Source configuration opened', error: 'Failed to load configuration' })}>
                       <Settings className="w-4 h-4 mr-2" />
                       Configure
                     </Button>
@@ -1239,15 +1239,15 @@ export default function DataExportClient() {
                       <div className="text-sm text-gray-500 truncate">{job.destination}</div>
                       <div className="flex items-center gap-1">
                         {job.status === 'completed' && (
-                          <Button variant="ghost" size="icon">
+                          <Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: `Downloading ${job.name}...`, success: 'Download started successfully', error: 'Download failed' })}>
                             <Download className="w-4 h-4" />
                           </Button>
                         )}
-                        <Button variant="ghost" size="icon">
+                        <Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading job details...', success: `Viewing ${job.name}`, error: 'Failed to load details' })}>
                           <Eye className="w-4 h-4" />
                         </Button>
                         {job.status === 'running' && (
-                          <Button variant="ghost" size="icon">
+                          <Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Cancelling job...', success: `${job.name} cancelled`, error: 'Failed to cancel job' })}>
                             <XCircle className="w-4 h-4 text-red-500" />
                           </Button>
                         )}
@@ -1301,7 +1301,7 @@ export default function DataExportClient() {
 
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold">Data Transformations</h2>
-              <Button>
+              <Button onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening transform wizard...', success: 'Create new data transformation', error: 'Failed to open wizard' })}>
                 <Plus className="w-4 h-4 mr-2" />
                 Create Transform
               </Button>
@@ -1375,11 +1375,11 @@ export default function DataExportClient() {
                 <p className="text-sm text-gray-500">Configure how source columns map to destination</p>
               </div>
               <div className="flex items-center gap-2">
-                <Button variant="outline">
+                <Button variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Auto-detecting schema...', success: 'Schema detected successfully', error: 'Failed to detect schema' })}>
                   <RefreshCw className="w-4 h-4 mr-2" />
                   Auto-detect Schema
                 </Button>
-                <Button>
+                <Button onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening mapping wizard...', success: 'Add new column mapping', error: 'Failed to open wizard' })}>
                   <Plus className="w-4 h-4 mr-2" />
                   Add Mapping
                 </Button>
@@ -1428,10 +1428,10 @@ export default function DataExportClient() {
                         )}
                       </div>
                       <div className="flex items-center gap-1">
-                        <Button variant="ghost" size="icon">
+                        <Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading mapping settings...', success: `Configure mapping: ${mapping.sourceColumn} -> ${mapping.destinationColumn}`, error: 'Failed to load settings' })}>
                           <Settings className="w-4 h-4" />
                         </Button>
-                        <Button variant="ghost" size="icon">
+                        <Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Deleting mapping...', success: `Mapping ${mapping.sourceColumn} deleted`, error: 'Failed to delete mapping' })}>
                           <Trash2 className="w-4 h-4 text-red-500" />
                         </Button>
                       </div>
@@ -1625,7 +1625,7 @@ export default function DataExportClient() {
                 <h2 className="text-lg font-semibold">Data Destinations</h2>
                 <p className="text-sm text-gray-500">Configure where your data flows to</p>
               </div>
-              <Button className="bg-green-600 hover:bg-green-700">
+              <Button className="bg-green-600 hover:bg-green-700" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening destination wizard...', success: 'Add new data destination', error: 'Failed to open wizard' })}>
                 <Plus className="w-4 h-4 mr-2" />
                 Add Destination
               </Button>
@@ -1672,11 +1672,11 @@ export default function DataExportClient() {
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Button variant="outline" size="sm" className="flex-1">
+                      <Button variant="outline" size="sm" className="flex-1" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: `Loading ${dest.name}...`, success: `Viewing ${dest.name} details`, error: 'Failed to load destination' })}>
                         <Eye className="w-4 h-4 mr-2" />
                         View
                       </Button>
-                      <Button variant="outline" size="sm" className="flex-1">
+                      <Button variant="outline" size="sm" className="flex-1" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: `Loading ${dest.name} configuration...`, success: 'Destination configuration opened', error: 'Failed to load configuration' })}>
                         <Settings className="w-4 h-4 mr-2" />
                         Configure
                       </Button>
@@ -1694,7 +1694,7 @@ export default function DataExportClient() {
                   <p className="text-sm text-gray-500">Send data to your favorite tools</p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Button variant="outline" size="sm">
+                  <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 400)), { loading: 'Loading filter options...', success: 'Integration filters opened', error: 'Failed to load filters' })}>
                     <Filter className="w-4 h-4 mr-2" />
                     Filter
                   </Button>
@@ -1856,7 +1856,7 @@ export default function DataExportClient() {
                           <p className="font-medium text-gray-900 dark:text-white">IP Allowlist</p>
                           <p className="text-sm text-gray-500">Restrict access to specific IPs</p>
                         </div>
-                        <Button variant="outline" size="sm">Configure</Button>
+                        <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading IP allowlist...', success: 'IP allowlist configuration opened', error: 'Failed to load configuration' })}>Configure</Button>
                       </div>
                       <div className="flex items-center justify-between py-3">
                         <div>
@@ -1912,7 +1912,7 @@ export default function DataExportClient() {
                       <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
                         <div className="flex items-center justify-between mb-2">
                           <p className="font-medium text-gray-900 dark:text-white">API Key</p>
-                          <Button variant="outline" size="sm">
+                          <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 300)), { loading: 'Copying API key...', success: 'API key copied to clipboard', error: 'Failed to copy' })}>
                             <Copy className="w-4 h-4 mr-2" />
                             Copy
                           </Button>
@@ -1933,7 +1933,7 @@ export default function DataExportClient() {
                           <p className="font-medium text-gray-900 dark:text-white">Webhook URL</p>
                           <p className="text-sm text-gray-500">Receive pipeline events</p>
                         </div>
-                        <Button variant="outline" size="sm">Configure</Button>
+                        <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading webhook configuration...', success: 'Webhook URL configuration opened', error: 'Failed to load configuration' })}>Configure</Button>
                       </div>
                       <div className="flex items-center justify-between py-3">
                         <div>
@@ -2040,7 +2040,7 @@ export default function DataExportClient() {
                               <p className="text-sm text-gray-500">2.4 GB of log files</p>
                             </div>
                           </div>
-                          <Button variant="outline" size="sm">Clear</Button>
+                          <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Clearing job logs...', success: 'Job logs cleared successfully (2.4 GB freed)', error: 'Failed to clear logs' })}>Clear</Button>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
                           <div className="flex items-center gap-3">
@@ -2050,7 +2050,7 @@ export default function DataExportClient() {
                               <p className="text-sm text-gray-500">15.8 GB archived exports</p>
                             </div>
                           </div>
-                          <Button variant="outline" size="sm">Manage</Button>
+                          <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading archive manager...', success: 'Archive manager opened', error: 'Failed to load archive manager' })}>Manage</Button>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
                           <div className="flex items-center gap-3">
@@ -2060,7 +2060,7 @@ export default function DataExportClient() {
                               <p className="text-sm text-gray-500">890 MB cached schemas</p>
                             </div>
                           </div>
-                          <Button variant="outline" size="sm">Purge</Button>
+                          <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Purging cache storage...', success: 'Cache purged successfully (890 MB freed)', error: 'Failed to purge cache' })}>Purge</Button>
                         </div>
                       </div>
                     </div>
@@ -2072,21 +2072,21 @@ export default function DataExportClient() {
                             <p className="font-medium text-gray-900 dark:text-white">Reset All Pipelines</p>
                             <p className="text-sm text-gray-500">Delete all pipeline configurations</p>
                           </div>
-                          <Button variant="destructive" size="sm">Reset</Button>
+                          <Button variant="destructive" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Resetting all pipelines...', success: 'All pipelines have been reset', error: 'Failed to reset pipelines' })}>Reset</Button>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
                           <div>
                             <p className="font-medium text-gray-900 dark:text-white">Delete All Data</p>
                             <p className="text-sm text-gray-500">Permanently remove all exported data</p>
                           </div>
-                          <Button variant="destructive" size="sm">Delete</Button>
+                          <Button variant="destructive" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 2500)), { loading: 'Deleting all exported data...', success: 'All exported data has been permanently deleted', error: 'Failed to delete data' })}>Delete</Button>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
                           <div>
                             <p className="font-medium text-gray-900 dark:text-white">Disconnect All Sources</p>
                             <p className="text-sm text-gray-500">Remove all data source connections</p>
                           </div>
-                          <Button variant="destructive" size="sm">Disconnect</Button>
+                          <Button variant="destructive" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Disconnecting all data sources...', success: 'All data sources have been disconnected', error: 'Failed to disconnect sources' })}>Disconnect</Button>
                         </div>
                       </div>
                     </div>

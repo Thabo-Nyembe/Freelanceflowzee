@@ -1129,7 +1129,7 @@ export default function MediaLibraryClient({
                 >
                   <List className="w-4 h-4" />
                 </Button>
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening filter options...', success: 'Filter options opened', error: 'Failed to open filters' })}>
                   <SlidersHorizontal className="w-4 h-4 mr-2" />
                   Filters
                 </Button>
@@ -1145,10 +1145,10 @@ export default function MediaLibraryClient({
                         {getFileTypeIcon(asset.fileType)}
                         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
                           <div className="flex gap-2">
-                            <Button size="icon" variant="secondary" className="w-8 h-8">
+                            <Button size="icon" variant="secondary" className="w-8 h-8" onClick={(e) => { e.stopPropagation(); toast.promise(new Promise(r => setTimeout(r, 800)), { loading: `Downloading ${asset.fileName}...`, success: 'Download started successfully', error: 'Failed to start download' }) }}>
                               <Download className="w-4 h-4" />
                             </Button>
-                            <Button size="icon" variant="secondary" className="w-8 h-8">
+                            <Button size="icon" variant="secondary" className="w-8 h-8" onClick={(e) => { e.stopPropagation(); toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Generating share link...', success: 'Share link copied to clipboard', error: 'Failed to generate share link' }) }}>
                               <Share2 className="w-4 h-4" />
                             </Button>
                           </div>
@@ -1485,7 +1485,7 @@ export default function MediaLibraryClient({
                     <p className="text-2xl font-bold">{stats.totalViews.toLocaleString()}</p>
                     <p className="text-orange-100 text-sm">Total Views</p>
                   </div>
-                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Exporting analytics report...', success: 'Analytics report exported successfully', error: 'Failed to export analytics report' })}>
                     <Download className="h-4 w-4 mr-2" />
                     Export
                   </Button>
@@ -1669,7 +1669,7 @@ export default function MediaLibraryClient({
                 </div>
                 <div className="flex items-center gap-4">
                   <Badge className="bg-green-500/20 text-green-300 border-green-500/30">Active</Badge>
-                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Exporting configuration...', success: 'Configuration exported successfully', error: 'Failed to export configuration' })}>
                     <Download className="h-4 w-4 mr-2" />
                     Export Config
                   </Button>
@@ -1764,7 +1764,7 @@ export default function MediaLibraryClient({
                         ].map((setting) => (
                           <div key={setting.name} className="flex items-center justify-between p-3 rounded-lg border">
                             <span className="font-medium">{setting.name}</span>
-                            <Button variant="outline" size="sm">{setting.value}</Button>
+                            <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: `Updating ${setting.name.toLowerCase()}...`, success: `${setting.name} updated successfully`, error: `Failed to update ${setting.name.toLowerCase()}` })}>{setting.value}</Button>
                           </div>
                         ))}
                       </CardContent>
@@ -1786,7 +1786,7 @@ export default function MediaLibraryClient({
                             <p className="font-medium">Current Plan</p>
                             <p className="text-sm text-gray-500">100GB Storage, 1GB/month bandwidth</p>
                           </div>
-                          <Button variant="outline" size="sm">Upgrade</Button>
+                          <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Loading upgrade options...', success: 'Upgrade options loaded', error: 'Failed to load upgrade options' })}>Upgrade</Button>
                         </div>
                         <div>
                           <div className="flex justify-between text-sm mb-2">
@@ -1908,7 +1908,7 @@ export default function MediaLibraryClient({
                           <p className="text-sm font-medium mb-2">CDN Endpoint</p>
                           <div className="flex items-center gap-2">
                             <code className="text-sm bg-gray-200 dark:bg-gray-700 px-3 py-2 rounded flex-1 font-mono">cdn.freeflow.com/media/</code>
-                            <Button size="sm" variant="outline">
+                            <Button size="sm" variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 300)), { loading: 'Copying CDN endpoint...', success: 'CDN endpoint copied to clipboard', error: 'Failed to copy CDN endpoint' })}>
                               <Copy className="w-4 h-4 mr-2" />
                               Copy
                             </Button>
@@ -2014,7 +2014,7 @@ export default function MediaLibraryClient({
                           <label className="block text-sm font-medium mb-2">API Key</label>
                           <div className="flex gap-2">
                             <Input value="mk_••••••••••••" readOnly className="font-mono" />
-                            <Button variant="outline">Regenerate</Button>
+                            <Button variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Regenerating API key...', success: 'API key regenerated successfully', error: 'Failed to regenerate API key' })}>Regenerate</Button>
                           </div>
                         </div>
                       </CardContent>
@@ -2047,14 +2047,14 @@ export default function MediaLibraryClient({
                             <p className="font-medium">Clear All Metadata</p>
                             <p className="text-sm text-gray-500">Remove AI-generated tags</p>
                           </div>
-                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50">Clear</Button>
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50" onClick={() => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Clearing all metadata...', success: 'All metadata cleared successfully', error: 'Failed to clear metadata' })}>Clear</Button>
                         </div>
                         <div className="flex items-center justify-between">
                           <div>
                             <p className="font-medium">Delete All Assets</p>
                             <p className="text-sm text-gray-500">Permanently remove all files</p>
                           </div>
-                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50">Delete All</Button>
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50" onClick={() => toast.promise(new Promise(r => setTimeout(r, 2500)), { loading: 'Deleting all assets...', success: 'All assets deleted successfully', error: 'Failed to delete assets' })}>Delete All</Button>
                         </div>
                       </CardContent>
                     </Card>

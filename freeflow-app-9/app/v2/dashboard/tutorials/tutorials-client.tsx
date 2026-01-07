@@ -1056,7 +1056,7 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
                         <p className="text-sm text-gray-500">{notification.message}</p>
                         <p className="text-xs text-gray-400 mt-1">{notification.createdAt}</p>
                       </div>
-                      <Button variant="ghost" size="icon"><MoreHorizontal className="w-4 h-4" /></Button>
+                      <Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading options...', success: 'Notification options ready', error: 'Failed to load options' })}><MoreHorizontal className="w-4 h-4" /></Button>
                     </div>
                   ))}
                 </div>

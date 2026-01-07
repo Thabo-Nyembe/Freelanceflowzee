@@ -751,7 +751,10 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
                       <option value="suspended">Suspended</option>
                       <option value="locked">Locked</option>
                     </select>
-                    <Button variant="outline" className="gap-2">
+                    <Button variant="outline" className="gap-2" onClick={() => toast.promise(
+                      new Promise(resolve => setTimeout(resolve, 800)),
+                      { loading: 'Loading advanced filters...', success: 'Filters panel ready', error: 'Failed to load filters' }
+                    )}>
                       <Filter className="w-4 h-4" />
                       More Filters
                     </Button>
@@ -806,7 +809,13 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
                               <p className="text-xs text-gray-500">Last login</p>
                               <p className="text-sm">{user.lastLogin ? formatTimeAgo(user.lastLogin) : 'Never'}</p>
                             </div>
-                            <Button variant="ghost" size="sm">
+                            <Button variant="ghost" size="sm" onClick={(e) => {
+                              e.stopPropagation()
+                              toast.promise(
+                                new Promise(resolve => setTimeout(resolve, 600)),
+                                { loading: 'Loading user options...', success: 'Options menu ready', error: 'Failed to load options' }
+                              )
+                            }}>
                               <MoreHorizontal className="w-4 h-4" />
                             </Button>
                           </div>
@@ -915,7 +924,10 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold">Security Policies</h3>
-                <Button className="bg-purple-600 hover:bg-purple-700 gap-2">
+                <Button className="bg-purple-600 hover:bg-purple-700 gap-2" onClick={() => toast.promise(
+                  new Promise(resolve => setTimeout(resolve, 900)),
+                  { loading: 'Opening policy creator...', success: 'Policy creator ready', error: 'Failed to open policy creator' }
+                )}>
                   <Plus className="w-4 h-4" />
                   Create Policy
                 </Button>
@@ -961,7 +973,10 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold">Applications</h3>
-                <Button className="bg-purple-600 hover:bg-purple-700 gap-2">
+                <Button className="bg-purple-600 hover:bg-purple-700 gap-2" onClick={() => toast.promise(
+                  new Promise(resolve => setTimeout(resolve, 1000)),
+                  { loading: 'Opening application wizard...', success: 'Application wizard ready', error: 'Failed to open wizard' }
+                )}>
                   <Plus className="w-4 h-4" />
                   Add Application
                 </Button>
@@ -1022,7 +1037,10 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold">System Logs</h3>
-                <Button variant="outline" className="gap-2">
+                <Button variant="outline" className="gap-2" onClick={() => toast.promise(
+                  new Promise(resolve => setTimeout(resolve, 1500)),
+                  { loading: 'Exporting audit logs...', success: 'Audit logs exported successfully', error: 'Failed to export logs' }
+                )}>
                   <Download className="w-4 h-4" />
                   Export Logs
                 </Button>
@@ -1483,10 +1501,16 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
                           <Label>Bearer Token</Label>
                           <div className="flex items-center gap-2 mt-1">
                             <Input type="password" value="STRIPE_KEY_PLACEHOLDER" disabled className="font-mono" />
-                            <Button variant="outline" size="sm"><Copy className="w-4 h-4" /></Button>
+                            <Button variant="outline" size="sm" onClick={() => toast.promise(
+                              new Promise(resolve => setTimeout(resolve, 500)),
+                              { loading: 'Copying token...', success: 'Bearer token copied to clipboard', error: 'Failed to copy token' }
+                            )}><Copy className="w-4 h-4" /></Button>
                           </div>
                         </div>
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => toast.promise(
+                          new Promise(resolve => setTimeout(resolve, 1200)),
+                          { loading: 'Regenerating SCIM token...', success: 'New token generated successfully', error: 'Failed to regenerate token' }
+                        )}>
                           <RefreshCw className="w-4 h-4 mr-2" />
                           Regenerate Token
                         </Button>
@@ -1513,7 +1537,10 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
                             {mapping.required && <Badge variant="outline" className="flex-shrink-0">Required</Badge>}
                           </div>
                         ))}
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => toast.promise(
+                          new Promise(resolve => setTimeout(resolve, 700)),
+                          { loading: 'Opening attribute mapper...', success: 'Ready to add new mapping', error: 'Failed to open mapper' }
+                        )}>
                           <Plus className="w-4 h-4 mr-2" />
                           Add Mapping
                         </Button>
@@ -1559,7 +1586,10 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
                                   <p className="text-gray-400">Created: {key.created}</p>
                                 </div>
                                 <Badge className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">{key.status}</Badge>
-                                <Button variant="ghost" size="icon"><MoreHorizontal className="w-4 h-4" /></Button>
+                                <Button variant="ghost" size="icon" onClick={() => toast.promise(
+                                  new Promise(resolve => setTimeout(resolve, 600)),
+                                  { loading: 'Loading API key options...', success: 'Options menu ready', error: 'Failed to load options' }
+                                )}><MoreHorizontal className="w-4 h-4" /></Button>
                               </div>
                             </div>
                           ))}
@@ -1613,7 +1643,10 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
                           </div>
                           <p className="text-xs text-gray-500">Events: user.created, user.updated, user.deleted</p>
                         </div>
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => toast.promise(
+                          new Promise(resolve => setTimeout(resolve, 800)),
+                          { loading: 'Opening webhook configuration...', success: 'Webhook form ready', error: 'Failed to open webhook form' }
+                        )}>
                           <Plus className="w-4 h-4 mr-2" />
                           Add Webhook
                         </Button>
@@ -1653,7 +1686,12 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
                               <Badge className={integration.status === 'connected' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400'}>
                                 {integration.status}
                               </Badge>
-                              <Button variant="outline" size="sm">
+                              <Button variant="outline" size="sm" onClick={() => toast.promise(
+                                new Promise(resolve => setTimeout(resolve, 1000)),
+                                integration.status === 'connected'
+                                  ? { loading: `Loading ${integration.name} configuration...`, success: `${integration.name} settings ready`, error: 'Failed to load configuration' }
+                                  : { loading: `Connecting to ${integration.name}...`, success: `${integration.name} connected successfully`, error: 'Connection failed' }
+                              )}>
                                 {integration.status === 'connected' ? 'Configure' : 'Connect'}
                               </Button>
                             </div>
@@ -1676,7 +1714,12 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
                         ].map(hr => (
                           <div key={hr.name} className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
                             <span className="font-medium">{hr.name}</span>
-                            <Button variant={hr.connected ? 'outline' : 'default'} size="sm">
+                            <Button variant={hr.connected ? 'outline' : 'default'} size="sm" onClick={() => toast.promise(
+                              new Promise(resolve => setTimeout(resolve, 1100)),
+                              hr.connected
+                                ? { loading: `Opening ${hr.name} settings...`, success: `${hr.name} configuration ready`, error: 'Failed to open settings' }
+                                : { loading: `Connecting to ${hr.name}...`, success: `${hr.name} connected successfully`, error: 'Connection failed' }
+                            )}>
                               {hr.connected ? 'Configure' : 'Connect'}
                             </Button>
                           </div>
@@ -1792,7 +1835,10 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
                             </SelectContent>
                           </Select>
                         </div>
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => toast.promise(
+                          new Promise(resolve => setTimeout(resolve, 2000)),
+                          { loading: 'Exporting all encrypted data...', success: 'Data export complete - check downloads', error: 'Export failed' }
+                        )}>
                           <Download className="w-4 h-4 mr-2" />
                           Export All Data
                         </Button>
@@ -1811,7 +1857,10 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
                               <h4 className="font-medium text-red-800 dark:text-red-400">Reset All Permissions</h4>
                               <p className="text-sm text-red-600 dark:text-red-400/80">This will reset all custom permissions to defaults</p>
                             </div>
-                            <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50 dark:hover:bg-red-900/30">
+                            <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50 dark:hover:bg-red-900/30" onClick={() => toast.promise(
+                              new Promise(resolve => setTimeout(resolve, 1500)),
+                              { loading: 'Resetting all permissions to defaults...', success: 'All permissions reset successfully', error: 'Failed to reset permissions' }
+                            )}>
                               Reset
                             </Button>
                           </div>
@@ -1822,7 +1871,10 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
                               <h4 className="font-medium text-red-800 dark:text-red-400">Revoke All Sessions</h4>
                               <p className="text-sm text-red-600 dark:text-red-400/80">Force all users to re-authenticate</p>
                             </div>
-                            <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50 dark:hover:bg-red-900/30">
+                            <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50 dark:hover:bg-red-900/30" onClick={() => toast.promise(
+                              new Promise(resolve => setTimeout(resolve, 1800)),
+                              { loading: 'Revoking all active sessions...', success: 'All sessions revoked - users must re-authenticate', error: 'Failed to revoke sessions' }
+                            )}>
                               Revoke
                             </Button>
                           </div>
@@ -1833,7 +1885,10 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
                               <h4 className="font-medium text-red-800 dark:text-red-400">Delete All API Keys</h4>
                               <p className="text-sm text-red-600 dark:text-red-400/80">Revoke all API access immediately</p>
                             </div>
-                            <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50 dark:hover:bg-red-900/30">
+                            <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50 dark:hover:bg-red-900/30" onClick={() => toast.promise(
+                              new Promise(resolve => setTimeout(resolve, 1200)),
+                              { loading: 'Deleting all API keys...', success: 'All API keys deleted successfully', error: 'Failed to delete API keys' }
+                            )}>
                               Delete
                             </Button>
                           </div>
@@ -2057,15 +2112,24 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
                 )}
 
                 <div className="flex items-center gap-2 pt-4 border-t">
-                  <Button className="flex-1 bg-purple-600 hover:bg-purple-700">
+                  <Button className="flex-1 bg-purple-600 hover:bg-purple-700" onClick={() => toast.promise(
+                    new Promise(resolve => setTimeout(resolve, 800)),
+                    { loading: 'Opening user editor...', success: 'User editor ready', error: 'Failed to open editor' }
+                  )}>
                     <Edit className="w-4 h-4 mr-2" />
                     Edit User
                   </Button>
-                  <Button variant="outline" className="flex-1">
+                  <Button variant="outline" className="flex-1" onClick={() => toast.promise(
+                    new Promise(resolve => setTimeout(resolve, 1000)),
+                    { loading: 'Sending password reset email...', success: 'Password reset email sent', error: 'Failed to send reset email' }
+                  )}>
                     <KeyRound className="w-4 h-4 mr-2" />
                     Reset Password
                   </Button>
-                  <Button variant="outline">
+                  <Button variant="outline" onClick={() => toast.promise(
+                    new Promise(resolve => setTimeout(resolve, 600)),
+                    { loading: 'Locking user account...', success: 'User account locked', error: 'Failed to lock account' }
+                  )}>
                     <LockKeyhole className="w-4 h-4" />
                   </Button>
                 </div>
@@ -2103,11 +2167,17 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
                 </div>
 
                 <div className="flex items-center gap-2 pt-4 border-t">
-                  <Button className="flex-1 bg-purple-600 hover:bg-purple-700">
+                  <Button className="flex-1 bg-purple-600 hover:bg-purple-700" onClick={() => toast.promise(
+                    new Promise(resolve => setTimeout(resolve, 700)),
+                    { loading: 'Opening member selection...', success: 'Ready to add members', error: 'Failed to open member selector' }
+                  )}>
                     <UserPlus className="w-4 h-4 mr-2" />
                     Add Members
                   </Button>
-                  <Button variant="outline" className="flex-1">
+                  <Button variant="outline" className="flex-1" onClick={() => toast.promise(
+                    new Promise(resolve => setTimeout(resolve, 600)),
+                    { loading: 'Opening group editor...', success: 'Group editor ready', error: 'Failed to open editor' }
+                  )}>
                     <Edit className="w-4 h-4 mr-2" />
                     Edit
                   </Button>
@@ -2149,12 +2219,18 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
                 </div>
 
                 <div className="flex items-center gap-2 pt-4 border-t">
-                  <Button className="flex-1 bg-purple-600 hover:bg-purple-700">
+                  <Button className="flex-1 bg-purple-600 hover:bg-purple-700" onClick={() => toast.promise(
+                    new Promise(resolve => setTimeout(resolve, 800)),
+                    { loading: 'Opening user assignment...', success: 'Ready to assign users', error: 'Failed to open assignment' }
+                  )}>
                     <UserPlus className="w-4 h-4 mr-2" />
                     Assign Users
                   </Button>
                   {selectedRole.isEditable && (
-                    <Button variant="outline" className="flex-1">
+                    <Button variant="outline" className="flex-1" onClick={() => toast.promise(
+                      new Promise(resolve => setTimeout(resolve, 700)),
+                      { loading: 'Opening role editor...', success: 'Role editor ready', error: 'Failed to open editor' }
+                    )}>
                       <Edit className="w-4 h-4 mr-2" />
                       Edit
                     </Button>

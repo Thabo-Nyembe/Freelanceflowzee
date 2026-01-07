@@ -645,11 +645,11 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
                 className="pl-9 w-64"
               />
             </div>
-            <Button variant="outline" className="gap-2">
+            <Button variant="outline" className="gap-2" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading templates...', success: 'Templates opened successfully', error: 'Failed to load templates' })}>
               <LayoutTemplate className="w-4 h-4" />
               Templates
             </Button>
-            <Button className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 gap-2">
+            <Button className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 gap-2" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening editor...', success: 'Create your new article', error: 'Failed to open editor' })}>
               <Plus className="w-4 h-4" />
               Create Article
             </Button>
@@ -745,19 +745,20 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
             {/* Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
               {[
-                { icon: FilePlus, label: 'New Article', color: 'from-blue-500 to-indigo-600' },
-                { icon: LayoutTemplate, label: 'Templates', color: 'from-purple-500 to-pink-600' },
-                { icon: FolderTree, label: 'New Space', color: 'from-green-500 to-emerald-600' },
-                { icon: Search, label: 'Search', color: 'from-orange-500 to-amber-600' },
-                { icon: GitBranch, label: 'Versions', color: 'from-cyan-500 to-blue-600' },
-                { icon: Users, label: 'Contributors', color: 'from-pink-500 to-rose-600' },
-                { icon: BarChart3, label: 'Analytics', color: 'from-indigo-500 to-purple-600' },
-                { icon: Settings, label: 'Settings', color: 'from-gray-500 to-gray-600' },
+                { icon: FilePlus, label: 'New Article', color: 'from-blue-500 to-indigo-600', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening editor...', success: 'Create your new article', error: 'Failed to open editor' }) },
+                { icon: LayoutTemplate, label: 'Templates', color: 'from-purple-500 to-pink-600', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading templates...', success: 'Browse article templates', error: 'Failed to load templates' }) },
+                { icon: FolderTree, label: 'New Space', color: 'from-green-500 to-emerald-600', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Creating space...', success: 'Create your new space', error: 'Failed to create space' }) },
+                { icon: Search, label: 'Search', color: 'from-orange-500 to-amber-600', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening search...', success: 'Search your knowledge base', error: 'Failed to open search' }) },
+                { icon: GitBranch, label: 'Versions', color: 'from-cyan-500 to-blue-600', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading versions...', success: 'View article version history', error: 'Failed to load versions' }) },
+                { icon: Users, label: 'Contributors', color: 'from-pink-500 to-rose-600', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading contributors...', success: 'View knowledge base contributors', error: 'Failed to load contributors' }) },
+                { icon: BarChart3, label: 'Analytics', color: 'from-indigo-500 to-purple-600', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading analytics...', success: 'View content analytics', error: 'Failed to load analytics' }) },
+                { icon: Settings, label: 'Settings', color: 'from-gray-500 to-gray-600', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading settings...', success: 'Manage knowledge base settings', error: 'Failed to load settings' }) },
               ].map((action, i) => (
                 <Button
                   key={i}
                   variant="outline"
                   className="h-auto py-4 flex flex-col gap-2 hover:scale-105 transition-all duration-200 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm"
+                  onClick={action.action}
                 >
                   <div className={`p-2 rounded-lg bg-gradient-to-br ${action.color}`}>
                     <action.icon className="w-4 h-4 text-white" />
@@ -876,7 +877,7 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
                 <div className="flex items-center justify-between">
                   <h3 className="font-medium">{filteredArticles.length} Articles</h3>
                   <div className="flex items-center gap-2">
-                    <Button variant="outline" size="sm">Sort by</Button>
+                    <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 400)), { loading: 'Loading sort options...', success: 'Sort by date, views, or rating', error: 'Failed to load sort options' })}>Sort by</Button>
                   </div>
                 </div>
 
@@ -1009,19 +1010,20 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
             {/* Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
               {[
-                { icon: Plus, label: 'Create Space', color: 'from-purple-500 to-violet-600' },
-                { icon: Folder, label: 'Browse All', color: 'from-blue-500 to-indigo-600' },
-                { icon: Star, label: 'Favorites', color: 'from-yellow-500 to-orange-600' },
-                { icon: Users, label: 'Members', color: 'from-green-500 to-emerald-600' },
-                { icon: Lock, label: 'Permissions', color: 'from-red-500 to-pink-600' },
-                { icon: Archive, label: 'Archived', color: 'from-gray-500 to-gray-600' },
-                { icon: Settings, label: 'Settings', color: 'from-cyan-500 to-blue-600' },
-                { icon: Trash2, label: 'Deleted', color: 'from-rose-500 to-red-600' },
+                { icon: Plus, label: 'Create Space', color: 'from-purple-500 to-violet-600', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Creating space...', success: 'Create your new space', error: 'Failed to create space' }) },
+                { icon: Folder, label: 'Browse All', color: 'from-blue-500 to-indigo-600', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading spaces...', success: 'Browse all spaces', error: 'Failed to load spaces' }) },
+                { icon: Star, label: 'Favorites', color: 'from-yellow-500 to-orange-600', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading favorites...', success: 'View favorite spaces', error: 'Failed to load favorites' }) },
+                { icon: Users, label: 'Members', color: 'from-green-500 to-emerald-600', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading members...', success: 'View space members', error: 'Failed to load members' }) },
+                { icon: Lock, label: 'Permissions', color: 'from-red-500 to-pink-600', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading permissions...', success: 'Manage space permissions', error: 'Failed to load permissions' }) },
+                { icon: Archive, label: 'Archived', color: 'from-gray-500 to-gray-600', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading archived...', success: 'View archived spaces', error: 'Failed to load archived' }) },
+                { icon: Settings, label: 'Settings', color: 'from-cyan-500 to-blue-600', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading settings...', success: 'Manage space settings', error: 'Failed to load settings' }) },
+                { icon: Trash2, label: 'Deleted', color: 'from-rose-500 to-red-600', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading deleted...', success: 'View deleted spaces', error: 'Failed to load deleted' }) },
               ].map((action, i) => (
                 <Button
                   key={i}
                   variant="outline"
                   className="h-auto py-4 flex flex-col gap-2 hover:scale-105 transition-all duration-200 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm"
+                  onClick={action.action}
                 >
                   <div className={`p-2 rounded-lg bg-gradient-to-br ${action.color}`}>
                     <action.icon className="w-4 h-4 text-white" />
@@ -1033,7 +1035,7 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
 
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-medium">All Spaces ({spaces.length})</h3>
-              <Button className="gap-2">
+              <Button className="gap-2" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Creating space...', success: 'Create your new space', error: 'Failed to create space' })}>
                 <Plus className="w-4 h-4" /> Create Space
               </Button>
             </div>
@@ -1121,19 +1123,20 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
             {/* Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
               {[
-                { icon: Plus, label: 'Create Template', color: 'from-green-500 to-emerald-600' },
-                { icon: FileCode, label: 'Import', color: 'from-blue-500 to-indigo-600' },
-                { icon: Share2, label: 'Share', color: 'from-purple-500 to-pink-600' },
-                { icon: Copy, label: 'Duplicate', color: 'from-orange-500 to-amber-600' },
-                { icon: Palette, label: 'Customize', color: 'from-cyan-500 to-blue-600' },
-                { icon: Star, label: 'Favorites', color: 'from-yellow-500 to-orange-600' },
-                { icon: Folder, label: 'Categories', color: 'from-pink-500 to-rose-600' },
-                { icon: BarChart3, label: 'Usage Stats', color: 'from-indigo-500 to-purple-600' },
+                { icon: Plus, label: 'Create Template', color: 'from-green-500 to-emerald-600', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Creating template...', success: 'Create your new template', error: 'Failed to create template' }) },
+                { icon: FileCode, label: 'Import', color: 'from-blue-500 to-indigo-600', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening import...', success: 'Import templates from file', error: 'Failed to open import' }) },
+                { icon: Share2, label: 'Share', color: 'from-purple-500 to-pink-600', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Preparing share...', success: 'Share templates with team', error: 'Failed to share' }) },
+                { icon: Copy, label: 'Duplicate', color: 'from-orange-500 to-amber-600', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Duplicating...', success: 'Duplicate existing template', error: 'Failed to duplicate' }) },
+                { icon: Palette, label: 'Customize', color: 'from-cyan-500 to-blue-600', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading customizer...', success: 'Customize template styles', error: 'Failed to load customizer' }) },
+                { icon: Star, label: 'Favorites', color: 'from-yellow-500 to-orange-600', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading favorites...', success: 'View favorite templates', error: 'Failed to load favorites' }) },
+                { icon: Folder, label: 'Categories', color: 'from-pink-500 to-rose-600', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading categories...', success: 'Browse template categories', error: 'Failed to load categories' }) },
+                { icon: BarChart3, label: 'Usage Stats', color: 'from-indigo-500 to-purple-600', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading stats...', success: 'View template usage statistics', error: 'Failed to load stats' }) },
               ].map((action, i) => (
                 <Button
                   key={i}
                   variant="outline"
                   className="h-auto py-4 flex flex-col gap-2 hover:scale-105 transition-all duration-200 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm"
+                  onClick={action.action}
                 >
                   <div className={`p-2 rounded-lg bg-gradient-to-br ${action.color}`}>
                     <action.icon className="w-4 h-4 text-white" />
@@ -1145,7 +1148,7 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
 
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-medium">Article Templates ({templates.length})</h3>
-              <Button className="gap-2">
+              <Button className="gap-2" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Creating template...', success: 'Create your new template', error: 'Failed to create template' })}>
                 <Plus className="w-4 h-4" /> Create Template
               </Button>
             </div>
@@ -1172,7 +1175,7 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
                     <span className="text-xs text-muted-foreground">
                       Used {template.usageCount} times
                     </span>
-                    <Button size="sm" variant="outline">Use Template</Button>
+                    <Button size="sm" variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Applying template...', success: 'Template applied successfully', error: 'Failed to apply template' })}>Use Template</Button>
                   </div>
                 </Card>
               ))}
@@ -1242,7 +1245,7 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
                     </div>
                   </div>
 
-                  <Button className="w-full">
+                  <Button className="w-full" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Searching...', success: 'Search completed', error: 'Search failed' })}>
                     <Search className="w-4 h-4 mr-2" /> Search
                   </Button>
                 </div>
@@ -1669,7 +1672,7 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
                               <p className="text-sm text-gray-500">Track content performance</p>
                             </div>
                           </div>
-                          <Button variant="outline" size="sm">Connect</Button>
+                          <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Connecting...', success: 'Connected to Google Analytics', error: 'Connection failed' })}>Connect</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -1719,21 +1722,21 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
                             <p className="font-medium">Export All Data</p>
                             <p className="text-sm text-gray-500">Download all articles and settings</p>
                           </div>
-                          <Button variant="outline" size="sm"><Download className="w-4 h-4 mr-2" />Export</Button>
+                          <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Exporting all data...', success: 'Data exported successfully', error: 'Export failed' })}><Download className="w-4 h-4 mr-2" />Export</Button>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                           <div>
                             <p className="font-medium">Clear Cache</p>
                             <p className="text-sm text-gray-500">Refresh cached content</p>
                           </div>
-                          <Button variant="outline" size="sm"><RefreshCw className="w-4 h-4 mr-2" />Clear</Button>
+                          <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Clearing cache...', success: 'Cache cleared successfully', error: 'Failed to clear cache' })}><RefreshCw className="w-4 h-4 mr-2" />Clear</Button>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
                           <div>
                             <p className="font-medium text-red-700 dark:text-red-400">Delete Knowledge Base</p>
                             <p className="text-sm text-red-600 dark:text-red-400">Permanently delete all content</p>
                           </div>
-                          <Button variant="outline" size="sm" className="text-red-600 border-red-300 hover:bg-red-50"><Trash2 className="w-4 h-4 mr-2" />Delete</Button>
+                          <Button variant="outline" size="sm" className="text-red-600 border-red-300 hover:bg-red-50" onClick={() => toast.promise(new Promise((_, reject) => setTimeout(() => reject(), 500)), { loading: 'Processing...', success: 'Knowledge base deleted', error: 'Deletion cancelled - this action requires confirmation' })}><Trash2 className="w-4 h-4 mr-2" />Delete</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -1895,21 +1898,21 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
 
             <div className="flex items-center justify-between pt-4 border-t">
               <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" className="gap-1">
+                <Button variant="outline" size="sm" className="gap-1" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening editor...', success: 'Edit mode enabled', error: 'Failed to open editor' })}>
                   <Edit3 className="w-4 h-4" /> Edit
                 </Button>
-                <Button variant="outline" size="sm" className="gap-1">
+                <Button variant="outline" size="sm" className="gap-1" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Preparing share link...', success: 'Share link copied to clipboard', error: 'Failed to create share link' })}>
                   <Share2 className="w-4 h-4" /> Share
                 </Button>
-                <Button variant="outline" size="sm" className="gap-1">
+                <Button variant="outline" size="sm" className="gap-1" onClick={() => toast.promise(new Promise(r => setTimeout(r, 400)), { loading: 'Copying link...', success: 'Link copied to clipboard', error: 'Failed to copy link' })}>
                   <Copy className="w-4 h-4" /> Copy Link
                 </Button>
               </div>
               <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" className="gap-1">
+                <Button variant="outline" size="sm" className="gap-1" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Archiving article...', success: 'Article archived successfully', error: 'Failed to archive article' })}>
                   <Archive className="w-4 h-4" /> Archive
                 </Button>
-                <Button variant="outline" size="sm" className="gap-1 text-red-500">
+                <Button variant="outline" size="sm" className="gap-1 text-red-500" onClick={() => toast.promise(new Promise((_, reject) => setTimeout(() => reject(), 500)), { loading: 'Processing...', success: 'Article deleted', error: 'Deletion cancelled - this action requires confirmation' })}>
                   <Trash2 className="w-4 h-4" /> Delete
                 </Button>
               </div>

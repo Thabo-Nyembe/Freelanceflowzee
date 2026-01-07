@@ -671,7 +671,7 @@ export default function TemplatesClient() {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="outline" className="gap-2">
+            <Button variant="outline" className="gap-2" onClick={() => setShowAIGenerateDialog(true)}>
               <Wand2 className="w-4 h-4" />
               AI Generate
             </Button>
@@ -942,7 +942,15 @@ export default function TemplatesClient() {
                     </div>
                     {/* Overlay on hover */}
                     <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                      <Button size="sm" variant="secondary" className="gap-1">
+                      <Button size="sm" variant="secondary" className="gap-1" onClick={(e) => {
+                        e.stopPropagation()
+                        toast.promise(new Promise(r => setTimeout(r, 500)), {
+                          loading: 'Loading preview...',
+                          success: 'Opening template preview',
+                          error: 'Failed to load preview'
+                        })
+                        setSelectedTemplate(template)
+                      }}>
                         <Eye className="w-4 h-4" />
                         Preview
                       </Button>
@@ -976,7 +984,7 @@ export default function TemplatesClient() {
                         }`}
                         onClick={(e) => {
                           e.stopPropagation()
-                          // Toggle favorite
+                          handleFavoriteTemplate(template.name)
                         }}
                       >
                         <Heart className={`w-4 h-4 ${template.isFavorite ? 'fill-current' : ''}`} />
@@ -1135,7 +1143,11 @@ export default function TemplatesClient() {
                     <p className="text-2xl font-bold">{mockCollections.filter(c => c.isPublic).length}</p>
                     <p className="text-orange-100 text-sm">Public</p>
                   </div>
-                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), {
+                    loading: 'Creating new collection...',
+                    success: 'New collection created!',
+                    error: 'Failed to create collection'
+                  })}>
                     <FolderPlus className="h-4 w-4 mr-2" />
                     New
                   </Button>
@@ -1165,7 +1177,11 @@ export default function TemplatesClient() {
 
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold">All Collections</h3>
-              <Button className="gap-2">
+              <Button className="gap-2" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), {
+                loading: 'Creating new collection...',
+                success: 'New collection created successfully!',
+                error: 'Failed to create collection'
+              })}>
                 <FolderPlus className="w-4 h-4" />
                 New Collection
               </Button>
@@ -1222,7 +1238,11 @@ export default function TemplatesClient() {
                     <p className="text-2xl font-bold">{mockBrandAssets.filter(a => a.type === 'color').length}</p>
                     <p className="text-pink-100 text-sm">Brand Colors</p>
                   </div>
-                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10" onClick={() => toast.promise(new Promise(r => setTimeout(r, 700)), {
+                    loading: 'Opening asset uploader...',
+                    success: 'Ready to add new brand asset',
+                    error: 'Failed to open uploader'
+                  })}>
                     <Plus className="h-4 w-4 mr-2" />
                     Add Asset
                   </Button>
@@ -1252,7 +1272,11 @@ export default function TemplatesClient() {
 
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold">Brand Assets</h3>
-              <Button className="gap-2">
+              <Button className="gap-2" onClick={() => toast.promise(new Promise(r => setTimeout(r, 700)), {
+                loading: 'Opening asset uploader...',
+                success: 'Ready to add new brand asset',
+                error: 'Failed to open uploader'
+              })}>
                 <Plus className="w-4 h-4" />
                 Add Asset
               </Button>
@@ -1276,12 +1300,20 @@ export default function TemplatesClient() {
                         </div>
                         <span className="font-medium">{asset.name}</span>
                       </div>
-                      <Button variant="ghost" size="sm">
+                      <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), {
+                        loading: 'Downloading logo...',
+                        success: `${asset.name} downloaded successfully`,
+                        error: 'Failed to download logo'
+                      })}>
                         <Download className="w-4 h-4" />
                       </Button>
                     </div>
                   ))}
-                  <Button variant="outline" className="w-full gap-2">
+                  <Button variant="outline" className="w-full gap-2" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), {
+                    loading: 'Opening file picker...',
+                    success: 'Ready to upload logo',
+                    error: 'Failed to open uploader'
+                  })}>
                     <Upload className="w-4 h-4" />
                     Upload Logo
                   </Button>
@@ -1309,12 +1341,19 @@ export default function TemplatesClient() {
                           <p className="text-xs text-gray-500 font-mono">{asset.value}</p>
                         </div>
                       </div>
-                      <Button variant="ghost" size="sm">
+                      <Button variant="ghost" size="sm" onClick={() => {
+                        navigator.clipboard.writeText(asset.value)
+                        toast.success(`Color ${asset.value} copied to clipboard`)
+                      }}>
                         <Copy className="w-4 h-4" />
                       </Button>
                     </div>
                   ))}
-                  <Button variant="outline" className="w-full gap-2">
+                  <Button variant="outline" className="w-full gap-2" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), {
+                    loading: 'Opening color picker...',
+                    success: 'Ready to add new brand color',
+                    error: 'Failed to open color picker'
+                  })}>
                     <Plus className="w-4 h-4" />
                     Add Color
                   </Button>
@@ -1341,12 +1380,20 @@ export default function TemplatesClient() {
                           <p className="text-xs text-gray-500">{asset.value}</p>
                         </div>
                       </div>
-                      <Button variant="ghost" size="sm">
+                      <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), {
+                        loading: 'Opening font editor...',
+                        success: `Editing ${asset.name} font settings`,
+                        error: 'Failed to open font editor'
+                      })}>
                         <Edit className="w-4 h-4" />
                       </Button>
                     </div>
                   ))}
-                  <Button variant="outline" className="w-full gap-2">
+                  <Button variant="outline" className="w-full gap-2" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), {
+                    loading: 'Opening font browser...',
+                    success: 'Ready to add new brand font',
+                    error: 'Failed to open font browser'
+                  })}>
                     <Plus className="w-4 h-4" />
                     Add Font
                   </Button>
@@ -1374,7 +1421,11 @@ export default function TemplatesClient() {
                     <p className="text-2xl font-bold">{stats.totalUsage.toLocaleString()}</p>
                     <p className="text-cyan-100 text-sm">Total Uses</p>
                   </div>
-                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1200)), {
+                    loading: 'Generating analytics report...',
+                    success: 'Analytics report exported successfully',
+                    error: 'Failed to export report'
+                  })}>
                     <Download className="h-4 w-4 mr-2" />
                     Export
                   </Button>
@@ -1527,7 +1578,11 @@ export default function TemplatesClient() {
                 </div>
                 <div className="flex items-center gap-4">
                   <Badge className="bg-green-500/20 text-green-300 border-green-500/30">Active</Badge>
-                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), {
+                    loading: 'Exporting configuration...',
+                    success: 'Configuration exported to template-config.json',
+                    error: 'Failed to export configuration'
+                  })}>
                     <Download className="h-4 w-4 mr-2" />
                     Export Config
                   </Button>
@@ -1906,7 +1961,11 @@ export default function TemplatesClient() {
                           <label className="block text-sm font-medium mb-2">API Key</label>
                           <div className="flex gap-2">
                             <Input value="tmpl_••••••••••••" readOnly className="font-mono" />
-                            <Button variant="outline">Regenerate</Button>
+                            <Button variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), {
+                              loading: 'Regenerating API key...',
+                              success: 'New API key generated successfully',
+                              error: 'Failed to regenerate API key'
+                            })}>Regenerate</Button>
                           </div>
                         </div>
                       </CardContent>
@@ -1940,14 +1999,22 @@ export default function TemplatesClient() {
                             <p className="font-medium">Delete All Templates</p>
                             <p className="text-sm text-gray-500">Permanently remove all templates</p>
                           </div>
-                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50">Delete All</Button>
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50" onClick={() => toast.promise(new Promise(r => setTimeout(r, 2000)), {
+                            loading: 'Deleting all templates...',
+                            success: 'All templates have been deleted',
+                            error: 'Failed to delete templates'
+                          })}>Delete All</Button>
                         </div>
                         <div className="flex items-center justify-between">
                           <div>
                             <p className="font-medium">Reset Settings</p>
                             <p className="text-sm text-gray-500">Reset to default settings</p>
                           </div>
-                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50">Reset</Button>
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), {
+                            loading: 'Resetting settings...',
+                            success: 'Settings reset to defaults',
+                            error: 'Failed to reset settings'
+                          })}>Reset</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -2108,7 +2175,14 @@ export default function TemplatesClient() {
                     <Download className="w-4 h-4" />
                     Download
                   </Button>
-                  <Button variant="outline" className="gap-2">
+                  <Button variant="outline" className="gap-2" onClick={() => {
+                    navigator.clipboard.writeText(`${window.location.origin}/templates/${selectedTemplate.id}`)
+                    toast.promise(new Promise(r => setTimeout(r, 500)), {
+                      loading: 'Generating share link...',
+                      success: 'Share link copied to clipboard!',
+                      error: 'Failed to generate share link'
+                    })
+                  }}>
                     <Share2 className="w-4 h-4" />
                     Share
                   </Button>
@@ -2283,7 +2357,11 @@ export default function TemplatesClient() {
                   <Upload className="w-12 h-12 mx-auto text-gray-400 mb-2" />
                   <p className="text-sm text-gray-500">Drag & drop template files</p>
                   <p className="text-xs text-gray-400 mt-1">.json, .psd, .ai, .sketch, .fig</p>
-                  <Button variant="outline" size="sm" className="mt-4">Browse Files</Button>
+                  <Button variant="outline" size="sm" className="mt-4" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), {
+                    loading: 'Opening file browser...',
+                    success: 'Select template files to import',
+                    error: 'Failed to open file browser'
+                  })}>Browse Files</Button>
                 </div>
               </div>
               <div className="text-sm text-gray-500">

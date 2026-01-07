@@ -1036,9 +1036,9 @@ export default function CommunityClient() {
               <p className="text-xs text-gray-500">Online</p>
             </div>
             <div className="flex items-center gap-0.5">
-              <Button variant="ghost" size="icon" className="h-8 w-8"><Mic className="w-4 h-4" /></Button>
-              <Button variant="ghost" size="icon" className="h-8 w-8"><Headphones className="w-4 h-4" /></Button>
-              <Button variant="ghost" size="icon" className="h-8 w-8"><Settings className="w-4 h-4" /></Button>
+              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Toggling microphone...', success: 'Microphone toggled', error: 'Failed to toggle microphone' })}><Mic className="w-4 h-4" /></Button>
+              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Toggling audio...', success: 'Audio toggled', error: 'Failed to toggle audio' })}><Headphones className="w-4 h-4" /></Button>
+              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Opening user settings...', success: 'User settings opened', error: 'Failed to open settings' })}><Settings className="w-4 h-4" /></Button>
             </div>
           </div>
         </div>
@@ -1061,9 +1061,9 @@ export default function CommunityClient() {
             )}
           </div>
           <div className="flex items-center gap-1">
-            <Button variant="ghost" size="icon"><Bell className="w-4 h-4" /></Button>
-            <Button variant="ghost" size="icon"><Pin className="w-4 h-4" /></Button>
-            <Button variant="ghost" size="icon"><Users className="w-4 h-4" /></Button>
+            <Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Updating notifications...', success: 'Notification settings updated', error: 'Failed to update notifications' })}><Bell className="w-4 h-4" /></Button>
+            <Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Loading pinned messages...', success: 'Pinned messages loaded', error: 'Failed to load pinned messages' })}><Pin className="w-4 h-4" /></Button>
+            <Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Loading member list...', success: 'Member list loaded', error: 'Failed to load members' })}><Users className="w-4 h-4" /></Button>
             <div className="relative w-40 ml-2">
               <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
               <Input placeholder="Search" className="pl-8 h-8 text-sm" />
@@ -1124,9 +1124,9 @@ export default function CommunityClient() {
                         )}
                       </div>
                       <div className="opacity-0 group-hover:opacity-100 flex items-start gap-1">
-                        <Button variant="ghost" size="icon" className="h-7 w-7"><Smile className="w-4 h-4" /></Button>
-                        <Button variant="ghost" size="icon" className="h-7 w-7"><Reply className="w-4 h-4" /></Button>
-                        <Button variant="ghost" size="icon" className="h-7 w-7"><MoreHorizontal className="w-4 h-4" /></Button>
+                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Adding reaction...', success: 'Reaction added', error: 'Failed to add reaction' })}><Smile className="w-4 h-4" /></Button>
+                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Preparing reply...', success: 'Reply mode activated', error: 'Failed to prepare reply' })}><Reply className="w-4 h-4" /></Button>
+                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Loading message options...', success: 'Message options loaded', error: 'Failed to load options' })}><MoreHorizontal className="w-4 h-4" /></Button>
                       </div>
                     </div>
                   ))}
@@ -1136,7 +1136,7 @@ export default function CommunityClient() {
               {/* Message Input */}
               <div className="p-4 border-t">
                 <div className="flex items-center gap-2 bg-gray-100 dark:bg-gray-800 rounded-lg p-2">
-                  <Button variant="ghost" size="icon"><Plus className="w-5 h-5" /></Button>
+                  <Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Opening attachment picker...', success: 'Attachment picker opened', error: 'Failed to open attachment picker' })}><Plus className="w-5 h-5" /></Button>
                   <Input
                     placeholder={`Message #${selectedChannel.name}`}
                     value={messageInput}
@@ -1144,9 +1144,9 @@ export default function CommunityClient() {
                     onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
                     className="flex-1 border-0 bg-transparent focus-visible:ring-0"
                   />
-                  <Button variant="ghost" size="icon"><Gift className="w-5 h-5" /></Button>
-                  <Button variant="ghost" size="icon"><ImageIcon className="w-5 h-5" /></Button>
-                  <Button variant="ghost" size="icon"><Smile className="w-5 h-5" /></Button>
+                  <Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Opening gift menu...', success: 'Gift menu opened', error: 'Failed to open gift menu' })}><Gift className="w-5 h-5" /></Button>
+                  <Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Opening image picker...', success: 'Image picker opened', error: 'Failed to open image picker' })}><ImageIcon className="w-5 h-5" /></Button>
+                  <Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Opening emoji picker...', success: 'Emoji picker opened', error: 'Failed to open emoji picker' })}><Smile className="w-5 h-5" /></Button>
                 </div>
               </div>
             </div>
@@ -1305,7 +1305,7 @@ export default function CommunityClient() {
                         {role.isMentionable && <Badge variant="outline">Mentionable</Badge>}
                         {role.isManaged && <Badge variant="outline">Managed</Badge>}
                       </div>
-                      <Button variant="ghost" size="icon"><Settings className="w-4 h-4" /></Button>
+                      <Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Opening role settings...', success: 'Role settings opened', error: 'Failed to open role settings' })}><Settings className="w-4 h-4" /></Button>
                     </div>
                   </CardContent>
                 </Card>
@@ -1935,7 +1935,7 @@ export default function CommunityClient() {
                             </div>
                             <div className="flex items-center gap-2">
                               <span className="text-sm text-gray-500">{role.memberCount} members</span>
-                              <Button variant="ghost" size="icon"><Settings className="w-4 h-4" /></Button>
+                              <Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Opening role settings...', success: 'Role settings opened', error: 'Failed to open role settings' })}><Settings className="w-4 h-4" /></Button>
                             </div>
                           </div>
                         ))}

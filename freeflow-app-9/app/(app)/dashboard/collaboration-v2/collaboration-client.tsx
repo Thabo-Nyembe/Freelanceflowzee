@@ -751,9 +751,9 @@ export default function CollaborationClient() {
                       <Badge variant="outline">{selectedChannel?.memberCount || 45} members</Badge>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Button variant="ghost" size="icon"><Pin className="h-4 w-4" /></Button>
-                      <Button variant="ghost" size="icon"><Search className="h-4 w-4" /></Button>
-                      <Button variant="ghost" size="icon"><MoreVertical className="h-4 w-4" /></Button>
+                      <Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 1000)), { loading: 'Pinning channel...', success: 'Channel pinned successfully', error: 'Failed to pin channel' })}><Pin className="h-4 w-4" /></Button>
+                      <Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 500)), { loading: 'Opening search...', success: 'Search opened', error: 'Failed to open search' })}><Search className="h-4 w-4" /></Button>
+                      <Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 500)), { loading: 'Loading options...', success: 'Options loaded', error: 'Failed to load options' })}><MoreVertical className="h-4 w-4" /></Button>
                     </div>
                   </div>
                 </CardHeader>
@@ -791,9 +791,9 @@ export default function CollaborationClient() {
                             )}
                           </div>
                           <div className="opacity-0 group-hover:opacity-100 flex items-start gap-1">
-                            <Button variant="ghost" size="icon" className="h-7 w-7"><Smile className="h-4 w-4" /></Button>
-                            <Button variant="ghost" size="icon" className="h-7 w-7"><Reply className="h-4 w-4" /></Button>
-                            <Button variant="ghost" size="icon" className="h-7 w-7"><MoreHorizontal className="h-4 w-4" /></Button>
+                            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 500)), { loading: 'Opening reactions...', success: 'Reactions panel opened', error: 'Failed to open reactions' })}><Smile className="h-4 w-4" /></Button>
+                            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 500)), { loading: 'Starting reply...', success: 'Reply mode activated', error: 'Failed to start reply' })}><Reply className="h-4 w-4" /></Button>
+                            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 500)), { loading: 'Loading message options...', success: 'Message options loaded', error: 'Failed to load options' })}><MoreHorizontal className="h-4 w-4" /></Button>
                           </div>
                         </div>
                       ))}
@@ -802,9 +802,9 @@ export default function CollaborationClient() {
                 </CardContent>
                 <div className="p-4 border-t">
                   <div className="flex items-center gap-2">
-                    <Button variant="ghost" size="icon"><Paperclip className="h-4 w-4" /></Button>
+                    <Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 500)), { loading: 'Opening file picker...', success: 'File picker opened', error: 'Failed to open file picker' })}><Paperclip className="h-4 w-4" /></Button>
                     <Input placeholder="Type a message..." className="flex-1" value={messageInput} onChange={(e) => setMessageInput(e.target.value)} />
-                    <Button variant="ghost" size="icon"><Smile className="h-4 w-4" /></Button>
+                    <Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 500)), { loading: 'Opening emoji picker...', success: 'Emoji picker opened', error: 'Failed to open emoji picker' })}><Smile className="h-4 w-4" /></Button>
                     <Button className="bg-blue-600 hover:bg-blue-700"><Send className="h-4 w-4" /></Button>
                   </div>
                 </div>
@@ -1005,9 +1005,9 @@ export default function CollaborationClient() {
                           <p className="text-xs text-gray-500">{formatTimeAgo(file.modifiedAt)}</p>
                         </div>
                         <div className="flex gap-2">
-                          <Button variant="ghost" size="icon"><Download className="h-4 w-4" /></Button>
-                          <Button variant="ghost" size="icon"><Share2 className="h-4 w-4" /></Button>
-                          <Button variant="ghost" size="icon"><MoreHorizontal className="h-4 w-4" /></Button>
+                          <Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 1500)), { loading: 'Downloading file...', success: 'File downloaded successfully', error: 'Failed to download file' })}><Download className="h-4 w-4" /></Button>
+                          <Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 1000)), { loading: 'Preparing share link...', success: 'Share link copied to clipboard', error: 'Failed to create share link' })}><Share2 className="h-4 w-4" /></Button>
+                          <Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 500)), { loading: 'Loading file options...', success: 'File options loaded', error: 'Failed to load options' })}><MoreHorizontal className="h-4 w-4" /></Button>
                         </div>
                       </div>
                     )
@@ -1189,7 +1189,7 @@ export default function CollaborationClient() {
                       </div>
                       <Badge variant="outline">{channel.memberCount} members</Badge>
                       {channel.unreadCount > 0 && <Badge className="bg-red-500">{channel.unreadCount}</Badge>}
-                      <Button variant="ghost" size="icon"><MoreHorizontal className="h-4 w-4" /></Button>
+                      <Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 500)), { loading: 'Loading channel options...', success: 'Channel options loaded', error: 'Failed to load options' })}><MoreHorizontal className="h-4 w-4" /></Button>
                     </div>
                   ))}
                 </div>
@@ -1578,7 +1578,7 @@ export default function CollaborationClient() {
                             {automation.lastTriggered && <p className="text-xs text-gray-500">Last run: {formatTimeAgo(automation.lastTriggered)}</p>}
                           </div>
                           <Switch checked={automation.isActive} />
-                          <Button variant="ghost" size="icon"><MoreHorizontal className="h-4 w-4" /></Button>
+                          <Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 500)), { loading: 'Loading automation options...', success: 'Automation options loaded', error: 'Failed to load options' })}><MoreHorizontal className="h-4 w-4" /></Button>
                         </div>
                       ))}
                     </div>

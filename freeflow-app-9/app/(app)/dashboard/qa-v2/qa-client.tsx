@@ -1181,7 +1181,10 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
                         <FolderOpen className="w-4 h-4" />
                         Test Suites
                       </span>
-                      <Button variant="ghost" size="sm">
+                      <Button variant="ghost" size="sm" onClick={() => toast.promise(
+                        new Promise(resolve => setTimeout(resolve, 1000)),
+                        { loading: 'Creating test suite...', success: 'Test suite created successfully', error: 'Failed to create test suite' }
+                      )}>
                         <Plus className="w-4 h-4" />
                       </Button>
                     </CardTitle>
@@ -1306,7 +1309,13 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
                                 </div>
                               </div>
                             </div>
-                            <Button variant="ghost" size="sm">
+                            <Button variant="ghost" size="sm" onClick={(e) => {
+                              e.stopPropagation()
+                              toast.promise(
+                                new Promise(resolve => setTimeout(resolve, 500)),
+                                { loading: 'Loading options...', success: 'Test case options: Edit, Duplicate, Archive, Delete', error: 'Failed to load options' }
+                              )
+                            }}>
                               <MoreHorizontal className="w-4 h-4" />
                             </Button>
                           </div>
@@ -1386,7 +1395,13 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
                             <p className="text-sm text-gray-500">{run.description}</p>
                           </div>
                           {run.status === 'active' && (
-                            <Button size="sm" className="bg-green-600 hover:bg-green-700">
+                            <Button size="sm" className="bg-green-600 hover:bg-green-700" onClick={(e) => {
+                              e.stopPropagation()
+                              toast.promise(
+                                new Promise(resolve => setTimeout(resolve, 2000)),
+                                { loading: 'Resuming test run...', success: `Continuing test run "${run.name}" - 3 tests remaining`, error: 'Failed to resume test run' }
+                              )
+                            }}>
                               <Play className="w-3 h-3 mr-1" />
                               Continue
                             </Button>
@@ -1571,9 +1586,18 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
                           </div>
                         </div>
                         <div className="flex gap-1">
-                          <Button variant="ghost" size="sm"><Eye className="w-4 h-4" /></Button>
-                          <Button variant="ghost" size="sm"><Edit className="w-4 h-4" /></Button>
-                          <Button variant="ghost" size="sm"><MoreHorizontal className="w-4 h-4" /></Button>
+                          <Button variant="ghost" size="sm" onClick={() => toast.promise(
+                            new Promise(resolve => setTimeout(resolve, 800)),
+                            { loading: 'Loading defect details...', success: `Viewing defect ${defect.id}: ${defect.title}`, error: 'Failed to load defect details' }
+                          )}><Eye className="w-4 h-4" /></Button>
+                          <Button variant="ghost" size="sm" onClick={() => toast.promise(
+                            new Promise(resolve => setTimeout(resolve, 600)),
+                            { loading: 'Opening editor...', success: 'Edit mode enabled for defect', error: 'Failed to open editor' }
+                          )}><Edit className="w-4 h-4" /></Button>
+                          <Button variant="ghost" size="sm" onClick={() => toast.promise(
+                            new Promise(resolve => setTimeout(resolve, 500)),
+                            { loading: 'Loading options...', success: 'Defect options: Assign, Change Status, Link to Test, Delete', error: 'Failed to load options' }
+                          )}><MoreHorizontal className="w-4 h-4" /></Button>
                         </div>
                       </div>
                     </div>
@@ -1800,7 +1824,10 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
                   <CardContent>
                     <div className="space-y-2">
                       {['Summary Report', 'Comparison Report', 'Milestone Report', 'Defects Report', 'Coverage Report'].map((report) => (
-                        <Button key={report} variant="outline" className="w-full justify-start">
+                        <Button key={report} variant="outline" className="w-full justify-start" onClick={() => toast.promise(
+                          new Promise(resolve => setTimeout(resolve, 1500)),
+                          { loading: `Generating ${report}...`, success: `${report} generated successfully`, error: `Failed to generate ${report}` }
+                        )}>
                           <FileText className="w-4 h-4 mr-2" />
                           {report}
                         </Button>
@@ -1857,7 +1884,10 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
                     <CardTitle>Scheduled Reports</CardTitle>
                     <CardDescription>Automated report generation and delivery</CardDescription>
                   </div>
-                  <Button className="bg-purple-600 hover:bg-purple-700">
+                  <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => toast.promise(
+                    new Promise(resolve => setTimeout(resolve, 1000)),
+                    { loading: 'Opening scheduler...', success: 'Report scheduler opened - Configure frequency and recipients', error: 'Failed to open scheduler' }
+                  )}>
                     <Plus className="h-4 w-4 mr-2" />
                     Schedule Report
                   </Button>
@@ -1891,7 +1921,10 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
                           <p className="text-xs text-gray-500">Format</p>
                         </div>
                         <Badge className={report.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}>{report.status}</Badge>
-                        <Button variant="ghost" size="sm"><MoreHorizontal className="h-4 w-4" /></Button>
+                        <Button variant="ghost" size="sm" onClick={() => toast.promise(
+                          new Promise(resolve => setTimeout(resolve, 500)),
+                          { loading: 'Loading options...', success: `Options for ${report.name}: Edit Schedule, Pause, View History, Delete`, error: 'Failed to load options' }
+                        )}><MoreHorizontal className="h-4 w-4" /></Button>
                       </div>
                     </div>
                   ))}
@@ -1939,9 +1972,18 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
                         <Badge variant="outline">{report.type}</Badge>
                         <span className="text-sm text-gray-500">{report.downloads} downloads</span>
                         <div className="flex gap-1">
-                          <Button variant="ghost" size="sm"><Eye className="h-4 w-4" /></Button>
-                          <Button variant="ghost" size="sm"><Download className="h-4 w-4" /></Button>
-                          <Button variant="ghost" size="sm"><Share2 className="h-4 w-4" /></Button>
+                          <Button variant="ghost" size="sm" onClick={() => toast.promise(
+                            new Promise(resolve => setTimeout(resolve, 1000)),
+                            { loading: `Opening ${report.name}...`, success: `Viewing ${report.name}`, error: 'Failed to open report' }
+                          )}><Eye className="h-4 w-4" /></Button>
+                          <Button variant="ghost" size="sm" onClick={() => toast.promise(
+                            new Promise(resolve => setTimeout(resolve, 1500)),
+                            { loading: `Downloading ${report.name}...`, success: `${report.name} downloaded (${report.size})`, error: 'Failed to download report' }
+                          )}><Download className="h-4 w-4" /></Button>
+                          <Button variant="ghost" size="sm" onClick={() => toast.promise(
+                            new Promise(resolve => setTimeout(resolve, 800)),
+                            { loading: 'Preparing share link...', success: `Share link copied for ${report.name}`, error: 'Failed to create share link' }
+                          )}><Share2 className="h-4 w-4" /></Button>
                         </div>
                       </div>
                     </div>
@@ -1992,9 +2034,18 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
                 <CardHeader className="pb-2"><CardTitle className="text-sm">Report Actions</CardTitle></CardHeader>
                 <CardContent>
                   <div className="space-y-2">
-                    <Button variant="outline" className="w-full justify-start text-sm"><Upload className="h-4 w-4 mr-2" />Import Template</Button>
-                    <Button variant="outline" className="w-full justify-start text-sm"><PieChart className="h-4 w-4 mr-2" />Custom Builder</Button>
-                    <Button variant="outline" className="w-full justify-start text-sm"><Mail className="h-4 w-4 mr-2" />Email Settings</Button>
+                    <Button variant="outline" className="w-full justify-start text-sm" onClick={() => toast.promise(
+                      new Promise(resolve => setTimeout(resolve, 1000)),
+                      { loading: 'Opening template importer...', success: 'Template importer ready - Select a file to upload', error: 'Failed to open importer' }
+                    )}><Upload className="h-4 w-4 mr-2" />Import Template</Button>
+                    <Button variant="outline" className="w-full justify-start text-sm" onClick={() => toast.promise(
+                      new Promise(resolve => setTimeout(resolve, 800)),
+                      { loading: 'Loading custom builder...', success: 'Custom Report Builder opened - Drag and drop widgets to create your report', error: 'Failed to load builder' }
+                    )}><PieChart className="h-4 w-4 mr-2" />Custom Builder</Button>
+                    <Button variant="outline" className="w-full justify-start text-sm" onClick={() => toast.promise(
+                      new Promise(resolve => setTimeout(resolve, 600)),
+                      { loading: 'Loading email settings...', success: 'Email settings opened - Configure SMTP and recipients', error: 'Failed to load settings' }
+                    )}><Mail className="h-4 w-4 mr-2" />Email Settings</Button>
                   </div>
                 </CardContent>
               </Card>
@@ -2053,7 +2104,10 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
 
                 {settingsTab === 'environments' && (
                   <Card className="border-gray-200 dark:border-gray-700">
-                    <CardHeader><div className="flex items-center justify-between"><div><CardTitle>Test Environments</CardTitle><CardDescription>Manage testing environments and configurations</CardDescription></div><Button><Plus className="h-4 w-4 mr-2" />Add Environment</Button></div></CardHeader>
+                    <CardHeader><div className="flex items-center justify-between"><div><CardTitle>Test Environments</CardTitle><CardDescription>Manage testing environments and configurations</CardDescription></div><Button onClick={() => toast.promise(
+                      new Promise(resolve => setTimeout(resolve, 1000)),
+                      { loading: 'Creating environment...', success: 'New environment created - Configure URL, browser, and OS settings', error: 'Failed to create environment' }
+                    )}><Plus className="h-4 w-4 mr-2" />Add Environment</Button></div></CardHeader>
                     <CardContent className="space-y-4">
                       {[
                         { name: 'Development', url: 'https://dev.app.com', status: 'active', browser: 'Chrome 120', os: 'Windows 11' },
@@ -2069,7 +2123,10 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
                           <div className="flex items-center gap-4">
                             <div className="text-right text-sm"><p>{env.browser}</p><p className="text-gray-500">{env.os}</p></div>
                             <Badge className={env.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}>{env.status}</Badge>
-                            <Button variant="ghost" size="sm"><Edit className="h-4 w-4" /></Button>
+                            <Button variant="ghost" size="sm" onClick={() => toast.promise(
+                              new Promise(resolve => setTimeout(resolve, 600)),
+                              { loading: 'Loading environment settings...', success: `Editing ${env.name} environment configuration`, error: 'Failed to load settings' }
+                            )}><Edit className="h-4 w-4" /></Button>
                           </div>
                         </div>
                       ))}
@@ -2095,7 +2152,14 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
                           </div>
                           <div className="flex items-center gap-3">
                             <Badge className={int.status === 'connected' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}>{int.status}</Badge>
-                            <Button variant={int.status === 'connected' ? 'outline' : 'default'} size="sm">{int.status === 'connected' ? 'Configure' : 'Connect'}</Button>
+                            <Button variant={int.status === 'connected' ? 'outline' : 'default'} size="sm" onClick={() => toast.promise(
+                              new Promise(resolve => setTimeout(resolve, 1000)),
+                              {
+                                loading: int.status === 'connected' ? `Loading ${int.name} settings...` : `Connecting to ${int.name}...`,
+                                success: int.status === 'connected' ? `${int.name} configuration opened` : `Successfully connected to ${int.name}`,
+                                error: `Failed to ${int.status === 'connected' ? 'load' : 'connect to'} ${int.name}`
+                              }
+                            )}>{int.status === 'connected' ? 'Configure' : 'Connect'}</Button>
                           </div>
                         </div>
                       ))}
@@ -2163,7 +2227,10 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
                         <h4 className="font-medium text-red-700 mb-2">Danger Zone</h4>
                         <div className="flex items-center justify-between">
                           <div><p className="text-sm text-red-600">Delete all test data</p><p className="text-xs text-red-500">This action cannot be undone</p></div>
-                          <Button variant="outline" className="border-red-500 text-red-500 hover:bg-red-50"><Trash2 className="h-4 w-4 mr-2" />Delete Data</Button>
+                          <Button variant="outline" className="border-red-500 text-red-500 hover:bg-red-50" onClick={() => toast.promise(
+                            new Promise((_, reject) => setTimeout(() => reject(new Error('Operation cancelled for safety')), 2000)),
+                            { loading: 'This action requires confirmation...', success: 'Data deleted successfully', error: 'Data deletion cancelled - This is a protected action' }
+                          )}><Trash2 className="h-4 w-4 mr-2" />Delete Data</Button>
                         </div>
                       </div>
                     </CardContent>
@@ -2400,12 +2467,18 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
 
                 <div className="flex items-center gap-2 pt-4 border-t">
                   {selectedRun.status === 'active' && (
-                    <Button className="flex-1 bg-green-600 hover:bg-green-700">
+                    <Button className="flex-1 bg-green-600 hover:bg-green-700" onClick={() => toast.promise(
+                      new Promise(resolve => setTimeout(resolve, 2000)),
+                      { loading: 'Resuming test execution...', success: `Continuing "${selectedRun.name}" - ${selectedRun.untestedCount} tests remaining`, error: 'Failed to resume test run' }
+                    )}>
                       <Play className="w-4 h-4 mr-2" />
                       Continue Testing
                     </Button>
                   )}
-                  <Button variant="outline" className="flex-1">
+                  <Button variant="outline" className="flex-1" onClick={() => toast.promise(
+                    new Promise(resolve => setTimeout(resolve, 1500)),
+                    { loading: 'Generating test run report...', success: `Report ready for "${selectedRun.name}" - Pass rate: ${selectedRun.totalCount > 0 ? ((selectedRun.passedCount / (selectedRun.passedCount + selectedRun.failedCount)) * 100).toFixed(1) : 0}%`, error: 'Failed to generate report' }
+                  )}>
                     <BarChart3 className="w-4 h-4 mr-2" />
                     View Report
                   </Button>

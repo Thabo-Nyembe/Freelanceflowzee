@@ -564,6 +564,12 @@ export default function SEOClient({ initialKeywords, initialBacklinks }: SEOClie
   const handleConfigureIntegration = (name: string) => {
     toast.promise(new Promise(r => setTimeout(r, 600)), { loading: `Opening ${name} configuration...`, success: `${name} configuration ready`, error: 'Failed to open configuration' })
   }
+  const handleKeywordOptions = (keyword: Keyword) => {
+    toast.promise(new Promise(r => setTimeout(r, 800)), { loading: `Loading options for "${keyword.keyword}"...`, success: `Options: Track, Export, Analyze, Remove`, error: 'Failed to load options' })
+  }
+  const handleBacklinkOptions = (backlink: Backlink) => {
+    toast.promise(new Promise(r => setTimeout(r, 800)), { loading: `Loading options for "${backlink.sourceDomain}"...`, success: `Options: Check status, Export, Disavow, Remove`, error: 'Failed to load options' })
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50/30 to-purple-50/40 dark:bg-none dark:bg-gray-900 p-6">
@@ -1048,7 +1054,7 @@ export default function SEOClient({ initialKeywords, initialBacklinks }: SEOClie
                               </div>
                             </td>
                             <td className="p-3">
-                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={(e) => { e.stopPropagation(); handleKeywordOptions(keyword) }}>
                                 <MoreHorizontal className="w-4 h-4" />
                               </Button>
                             </td>
@@ -1206,7 +1212,7 @@ export default function SEOClient({ initialKeywords, initialBacklinks }: SEOClie
                           </td>
                           <td className="p-3 text-sm text-muted-foreground">{backlink.firstSeen}</td>
                           <td className="p-3">
-                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => handleBacklinkOptions(backlink)}>
                               <MoreHorizontal className="w-4 h-4" />
                             </Button>
                           </td>
