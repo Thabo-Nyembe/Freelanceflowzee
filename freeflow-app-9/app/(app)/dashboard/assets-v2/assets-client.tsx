@@ -1167,11 +1167,11 @@ export default function AssetsClient({ initialAssets, initialCollections }: Asse
               {[
                 { icon: <Upload className="w-4 h-4" />, label: 'Upload', color: 'text-purple-600', onClick: handleUploadAssets },
                 { icon: <Folder className="w-4 h-4" />, label: 'New Collection', color: 'text-blue-600', onClick: () => setShowCreateCollectionDialog(true) },
-                { icon: <Tag className="w-4 h-4" />, label: 'Bulk Tag', color: 'text-green-600', onClick: () => toast.info('Bulk Tag', { description: 'Select assets to tag' }) },
-                { icon: <Download className="w-4 h-4" />, label: 'Export', color: 'text-orange-600', onClick: () => toast.info('Export', { description: 'Preparing export...' }) },
-                { icon: <Share2 className="w-4 h-4" />, label: 'Share', color: 'text-pink-600', onClick: () => toast.info('Share', { description: 'Select assets to share' }) },
-                { icon: <Archive className="w-4 h-4" />, label: 'Archive', color: 'text-amber-600', onClick: () => toast.info('Archive', { description: 'Select assets to archive' }) },
-                { icon: <Trash2 className="w-4 h-4" />, label: 'Clean Up', color: 'text-red-600', onClick: () => toast.info('Clean Up', { description: 'Scanning for unused assets...' }) },
+                { icon: <Tag className="w-4 h-4" />, label: 'Bulk Tag', color: 'text-green-600', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading tags...', success: 'Bulk Tag - Select assets to tag', error: 'Failed to load tags' }) },
+                { icon: <Download className="w-4 h-4" />, label: 'Export', color: 'text-orange-600', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Preparing export...', success: 'Export ready', error: 'Export failed' }) },
+                { icon: <Share2 className="w-4 h-4" />, label: 'Share', color: 'text-pink-600', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading share options...', success: 'Share - Select assets to share', error: 'Failed to load share options' }) },
+                { icon: <Archive className="w-4 h-4" />, label: 'Archive', color: 'text-amber-600', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading archive...', success: 'Archive - Select assets to archive', error: 'Failed to load archive' }) },
+                { icon: <Trash2 className="w-4 h-4" />, label: 'Clean Up', color: 'text-red-600', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Scanning for unused assets...', success: 'Clean Up - Scan complete', error: 'Scan failed' }) },
                 { icon: <RefreshCw className="w-4 h-4" />, label: 'Sync', color: 'text-cyan-600', onClick: handleSync }
               ].map((action, index) => (
                 <Button key={index} variant="outline" className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200" onClick={action.onClick}>

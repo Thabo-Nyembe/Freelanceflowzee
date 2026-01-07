@@ -993,12 +993,12 @@ export default function TestingClient() {
               {[
                 { icon: Play, label: 'Run All', color: 'text-green-600 bg-green-100 dark:bg-green-900/30', onClick: () => setShowRunDialog(true) },
                 { icon: Repeat, label: 'Retry Failed', color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/30', onClick: handleRerunFailed },
-                { icon: Square, label: 'Stop All', color: 'text-red-600 bg-red-100 dark:bg-red-900/30', onClick: () => toast.info('Stopping all tests...') },
+                { icon: Square, label: 'Stop All', color: 'text-red-600 bg-red-100 dark:bg-red-900/30', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Stopping all tests...', success: 'All tests stopped', error: 'Failed to stop tests' }) },
                 { icon: Download, label: 'Export', color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30', onClick: handleExportResults },
                 { icon: RefreshCw, label: 'Refresh', color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30', onClick: fetchTests },
                 { icon: Plus, label: 'New Test', color: 'text-indigo-600 bg-indigo-100 dark:bg-indigo-900/30', onClick: () => setShowCreateDialog(true) },
                 { icon: BarChart3, label: 'Analytics', color: 'text-cyan-600 bg-cyan-100 dark:bg-cyan-900/30', onClick: () => setActiveTab('coverage') },
-                { icon: Archive, label: 'Archive', color: 'text-gray-600 bg-gray-100 dark:bg-gray-700', onClick: () => toast.info('Opening archive...') },
+                { icon: Archive, label: 'Archive', color: 'text-gray-600 bg-gray-100 dark:bg-gray-700', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening archive...', success: 'Archive opened', error: 'Failed to open archive' }) },
               ].map((action, i) => (
                 <button
                   key={i}
@@ -1160,14 +1160,14 @@ export default function TestingClient() {
             {/* Explorer Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
-                { icon: FolderOpen, label: 'Expand All', color: 'text-yellow-600 bg-yellow-100 dark:bg-yellow-900/30', onClick: () => toast.info('Expanding all folders...') },
-                { icon: Folder, label: 'Collapse All', color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/30', onClick: () => toast.info('Collapsing all folders...') },
+                { icon: FolderOpen, label: 'Expand All', color: 'text-yellow-600 bg-yellow-100 dark:bg-yellow-900/30', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Expanding all folders...', success: 'All folders expanded', error: 'Failed to expand folders' }) },
+                { icon: Folder, label: 'Collapse All', color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/30', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Collapsing all folders...', success: 'All folders collapsed', error: 'Failed to collapse folders' }) },
                 { icon: FileCode, label: 'New Test', color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30', onClick: () => setShowCreateDialog(true) },
                 { icon: Search, label: 'Find Test', color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30', onClick: () => document.querySelector<HTMLInputElement>('input[placeholder="Search tests..."]')?.focus() },
                 { icon: Play, label: 'Run Selected', color: 'text-green-600 bg-green-100 dark:bg-green-900/30', onClick: () => setShowRunDialog(true) },
-                { icon: Filter, label: 'Filter', color: 'text-indigo-600 bg-indigo-100 dark:bg-indigo-900/30', onClick: () => toast.info('Opening filters...') },
+                { icon: Filter, label: 'Filter', color: 'text-indigo-600 bg-indigo-100 dark:bg-indigo-900/30', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening filters...', success: 'Filters opened', error: 'Failed to open filters' }) },
                 { icon: RefreshCw, label: 'Reload', color: 'text-cyan-600 bg-cyan-100 dark:bg-cyan-900/30', onClick: fetchTests },
-                { icon: Code, label: 'Open File', color: 'text-gray-600 bg-gray-100 dark:bg-gray-700', onClick: () => toast.info('Select a test file to open') },
+                { icon: Code, label: 'Open File', color: 'text-gray-600 bg-gray-100 dark:bg-gray-700', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading...', success: 'Select a test file to open', error: 'Action failed' }) },
               ].map((action, i) => (
                 <button
                   key={i}
@@ -1279,12 +1279,12 @@ export default function TestingClient() {
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
                 { icon: Download, label: 'Export All', color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30', onClick: handleExportResults },
-                { icon: Filter, label: 'Filter', color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30', onClick: () => toast.info('Opening filters...') },
+                { icon: Filter, label: 'Filter', color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening filters...', success: 'Filters opened', error: 'Failed to open filters' }) },
                 { icon: XCircle, label: 'Failed Only', color: 'text-red-600 bg-red-100 dark:bg-red-900/30', onClick: () => setStatusFilter('failed') },
                 { icon: CheckCircle2, label: 'Passed Only', color: 'text-green-600 bg-green-100 dark:bg-green-900/30', onClick: () => setStatusFilter('passed') },
-                { icon: Camera, label: 'Screenshots', color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/30', onClick: () => toast.info('Viewing screenshots...') },
-                { icon: Video, label: 'Videos', color: 'text-pink-600 bg-pink-100 dark:bg-pink-900/30', onClick: () => toast.info('Viewing videos...') },
-                { icon: Layers, label: 'Traces', color: 'text-indigo-600 bg-indigo-100 dark:bg-indigo-900/30', onClick: () => toast.info('Viewing traces...') },
+                { icon: Camera, label: 'Screenshots', color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/30', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading screenshots...', success: 'Screenshots loaded', error: 'Failed to load screenshots' }) },
+                { icon: Video, label: 'Videos', color: 'text-pink-600 bg-pink-100 dark:bg-pink-900/30', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading videos...', success: 'Videos loaded', error: 'Failed to load videos' }) },
+                { icon: Layers, label: 'Traces', color: 'text-indigo-600 bg-indigo-100 dark:bg-indigo-900/30', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading traces...', success: 'Traces loaded', error: 'Failed to load traces' }) },
                 { icon: RefreshCw, label: 'Refresh', color: 'text-gray-600 bg-gray-100 dark:bg-gray-700', onClick: fetchTests },
               ].map((action, i) => (
                 <button

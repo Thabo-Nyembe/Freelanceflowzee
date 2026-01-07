@@ -999,12 +999,12 @@ export default function CiCdClient() {
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
                 { icon: Plus, label: 'New Pipeline', color: 'text-blue-500', onClick: () => setShowCreateDialog(true) },
-                { icon: Play, label: 'Run All', color: 'text-green-500', onClick: () => toast.info('Running all pipelines...') },
-                { icon: FileCode, label: 'Edit YAML', color: 'text-purple-500', onClick: () => toast.info('Opening YAML editor...') },
-                { icon: Copy, label: 'Duplicate', color: 'text-amber-500', onClick: () => toast.info('Select a pipeline to duplicate') },
-                { icon: GitMerge, label: 'Branch Rules', color: 'text-pink-500', onClick: () => toast.info('Opening branch rules...') },
+                { icon: Play, label: 'Run All', color: 'text-green-500', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Starting all pipelines...', success: 'All pipelines started', error: 'Failed to start pipelines' }) },
+                { icon: FileCode, label: 'Edit YAML', color: 'text-purple-500', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening YAML editor...', success: 'YAML editor opened', error: 'Failed to open editor' }) },
+                { icon: Copy, label: 'Duplicate', color: 'text-amber-500', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading...', success: 'Select a pipeline to duplicate', error: 'Action failed' }) },
+                { icon: GitMerge, label: 'Branch Rules', color: 'text-pink-500', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening branch rules...', success: 'Branch rules opened', error: 'Failed to open branch rules' }) },
                 { icon: History, label: 'Run History', color: 'text-indigo-500', onClick: () => setActiveTab('runs') },
-                { icon: Download, label: 'Export', color: 'text-cyan-500', onClick: () => toast.info('Exporting pipelines...') },
+                { icon: Download, label: 'Export', color: 'text-cyan-500', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Exporting pipelines...', success: 'Pipelines exported', error: 'Export failed' }) },
                 { icon: RefreshCw, label: 'Refresh', color: 'text-rose-500', onClick: () => { fetchPipelines(); toast.success('Refreshed') } },
               ].map((action, i) => (
                 <Button

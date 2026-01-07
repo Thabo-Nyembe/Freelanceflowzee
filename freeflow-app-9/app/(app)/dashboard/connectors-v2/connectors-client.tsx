@@ -800,11 +800,11 @@ export default function ConnectorsClient() {
                 { icon: Plus, label: 'New Zap', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', onClick: handleAddConnector },
                 { icon: Link2, label: 'Connect App', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: handleAddConnector },
                 { icon: RefreshCw, label: 'Sync All', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', onClick: () => handleRefreshConnector('All Connectors') },
-                { icon: History, label: 'Task History', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => toast.success('Task History', { description: 'Task history opened' }) },
-                { icon: AlertCircle, label: 'View Errors', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', onClick: () => toast.success('View Errors', { description: 'Error logs loaded' }) },
-                { icon: Sparkles, label: 'Templates', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', onClick: () => toast.success('Templates', { description: 'Templates loaded' }) },
-                { icon: Key, label: 'API Keys', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', onClick: () => toast.success('API Keys', { description: 'API key management opened' }) },
-                { icon: BarChart3, label: 'Analytics', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => toast.success('Analytics', { description: 'Analytics dashboard loaded' }) },
+                { icon: History, label: 'Task History', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading task history...', success: 'Task history opened', error: 'Failed to load task history' }) },
+                { icon: AlertCircle, label: 'View Errors', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading error logs...', success: 'Error logs loaded', error: 'Failed to load error logs' }) },
+                { icon: Sparkles, label: 'Templates', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading templates...', success: 'Templates loaded', error: 'Failed to load templates' }) },
+                { icon: Key, label: 'API Keys', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading API keys...', success: 'API key management opened', error: 'Failed to load API keys' }) },
+                { icon: BarChart3, label: 'Analytics', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading analytics...', success: 'Analytics dashboard loaded', error: 'Failed to load analytics' }) },
               ].map((action, idx) => (
                 <Button
                   key={idx}

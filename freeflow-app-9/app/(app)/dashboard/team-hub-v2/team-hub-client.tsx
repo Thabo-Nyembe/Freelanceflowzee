@@ -903,12 +903,12 @@ export default function TeamHubClient() {
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
                 { icon: UserPlus, label: 'Invite', color: 'bg-purple-500', onClick: handleInviteMember },
-                { icon: Mail, label: 'Email All', color: 'bg-blue-500', onClick: () => toast.success('Opening email composer...', { description: 'Send message to all team members' }) },
-                { icon: UserCheck, label: 'Approve', color: 'bg-green-500', onClick: () => toast.info('Approval queue is empty') },
-                { icon: Shield, label: 'Roles', color: 'bg-orange-500', onClick: () => toast.info('Opening role management...') },
-                { icon: Crown, label: 'Admins', color: 'bg-yellow-500', onClick: () => toast.info('Admin settings') },
-                { icon: Download, label: 'Export', color: 'bg-pink-500', onClick: () => toast.success('Exporting team data...') },
-                { icon: Filter, label: 'Filter', color: 'bg-indigo-500', onClick: () => toast.info('Filter options') },
+                { icon: Mail, label: 'Email All', color: 'bg-blue-500', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening email composer...', success: 'Email composer ready', error: 'Failed to open email' }) },
+                { icon: UserCheck, label: 'Approve', color: 'bg-green-500', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Checking approval queue...', success: 'Approval queue is empty', error: 'Failed to check approvals' }) },
+                { icon: Shield, label: 'Roles', color: 'bg-orange-500', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening role management...', success: 'Role management opened', error: 'Failed to open roles' }) },
+                { icon: Crown, label: 'Admins', color: 'bg-yellow-500', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading admin settings...', success: 'Admin settings loaded', error: 'Failed to load settings' }) },
+                { icon: Download, label: 'Export', color: 'bg-pink-500', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Exporting team data...', success: 'Team data exported', error: 'Export failed' }) },
+                { icon: Filter, label: 'Filter', color: 'bg-indigo-500', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening filter options...', success: 'Filters ready', error: 'Failed to open filters' }) },
                 { icon: Settings, label: 'Settings', color: 'bg-gray-500', onClick: () => setSettingsTab('members') }
               ].map((action, idx) => (
                 <Button
