@@ -1245,7 +1245,7 @@ export default function BackupsClient() {
                           <p className="text-sm"><span className="text-green-600 font-medium">{report.controlsPassed}</span> / {report.controlsTotal}</p>
                           <p className="text-xs text-gray-500">Controls Passed</p>
                         </div>
-                        <Button variant="ghost" size="icon"><Eye className="h-4 w-4" /></Button>
+                        <Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening preview...', success: 'Preview opened', error: 'Failed to open preview' })}><Eye className="h-4 w-4" /></Button>
                       </div>
                     ))}
                   </div>

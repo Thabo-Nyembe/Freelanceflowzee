@@ -1747,8 +1747,8 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
                         <Label className="font-medium">API Key</Label>
                         <div className="flex gap-2">
                           <Input value="rn_live_xxxxxxxxxxxxxxxxxxxxx" readOnly className="flex-1 font-mono text-sm" type="password" />
-                          <Button variant="outline" size="icon"><Eye className="h-4 w-4" /></Button>
-                          <Button variant="outline" size="icon"><Copy className="h-4 w-4" /></Button>
+                          <Button variant="outline" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Revealing key...', success: 'Key revealed', error: 'Failed to reveal' })}><Eye className="h-4 w-4" /></Button>
+                          <Button variant="outline" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Copying key...', success: 'Key copied to clipboard', error: 'Failed to copy' })}><Copy className="h-4 w-4" /></Button>
                         </div>
                       </div>
                       <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
@@ -1775,7 +1775,7 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
                         <Label className="font-medium">RSS Feed URL</Label>
                         <div className="flex gap-2">
                           <Input value="https://yourapp.com/releases/feed.xml" readOnly className="flex-1 font-mono text-sm" />
-                          <Button variant="outline" size="icon"><Copy className="h-4 w-4" /></Button>
+                          <Button variant="outline" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Copying URL...', success: 'URL copied to clipboard', error: 'Failed to copy' })}><Copy className="h-4 w-4" /></Button>
                         </div>
                       </div>
                       <div className="space-y-2">

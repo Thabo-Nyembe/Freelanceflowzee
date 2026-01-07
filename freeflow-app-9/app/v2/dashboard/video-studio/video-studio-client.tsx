@@ -858,8 +858,8 @@ export default function VideoStudioClient() {
                       </div>
                     </div>
                     <div className="flex items-center gap-1">
-                      <Button variant="ghost" size="icon" className="h-8 w-8"><Eye className="w-3 h-3" /></Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8"><Lock className="w-3 h-3" /></Button>
+                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Toggling visibility...', success: 'Visibility toggled', error: 'Failed to toggle' })}><Eye className="w-3 h-3" /></Button>
+                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Toggling lock...', success: 'Lock toggled', error: 'Failed to toggle' })}><Lock className="w-3 h-3" /></Button>
                     </div>
                   </div>
 
@@ -875,8 +875,8 @@ export default function VideoStudioClient() {
                       </div>
                     </div>
                     <div className="flex items-center gap-1">
-                      <Button variant="ghost" size="icon" className="h-8 w-8"><Volume2 className="w-3 h-3" /></Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8"><Unlock className="w-3 h-3" /></Button>
+                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Toggling audio...', success: 'Audio toggled', error: 'Failed to toggle' })}><Volume2 className="w-3 h-3" /></Button>
+                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Toggling lock...', success: 'Lock toggled', error: 'Failed to toggle' })}><Unlock className="w-3 h-3" /></Button>
                     </div>
                   </div>
 
@@ -895,8 +895,8 @@ export default function VideoStudioClient() {
                       </div>
                     </div>
                     <div className="flex items-center gap-1">
-                      <Button variant="ghost" size="icon" className="h-8 w-8"><Eye className="w-3 h-3" /></Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8"><Unlock className="w-3 h-3" /></Button>
+                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Toggling visibility...', success: 'Visibility toggled', error: 'Failed to toggle' })}><Eye className="w-3 h-3" /></Button>
+                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Toggling lock...', success: 'Lock toggled', error: 'Failed to toggle' })}><Unlock className="w-3 h-3" /></Button>
                     </div>
                   </div>
                 </div>

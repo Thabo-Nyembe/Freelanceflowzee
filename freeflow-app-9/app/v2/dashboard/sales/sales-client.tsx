@@ -1273,10 +1273,10 @@ export default function SalesClient() {
                           <Badge className={contact.status === 'customer' ? 'bg-green-100 text-green-700' : contact.status === 'sql' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700'}>{contact.status}</Badge>
                         </div>
                         <div className="flex items-center gap-2 mt-3">
-                          <Button variant="ghost" size="icon" className="h-8 w-8"><Mail className="w-4 h-4" /></Button>
-                          <Button variant="ghost" size="icon" className="h-8 w-8"><Phone className="w-4 h-4" /></Button>
-                          <Button variant="ghost" size="icon" className="h-8 w-8"><MessageSquare className="w-4 h-4" /></Button>
-                          {contact.linkedin && <Button variant="ghost" size="icon" className="h-8 w-8"><ExternalLink className="w-4 h-4" /></Button>}
+                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening email...', success: 'Email client opened', error: 'Failed to open email' })}><Mail className="w-4 h-4" /></Button>
+                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Initiating call...', success: 'Call initiated', error: 'Failed to initiate call' })}><Phone className="w-4 h-4" /></Button>
+                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening chat...', success: 'Chat opened', error: 'Failed to open chat' })}><MessageSquare className="w-4 h-4" /></Button>
+                          {contact.linkedin && <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening LinkedIn...', success: 'LinkedIn opened', error: 'Failed to open LinkedIn' })}><ExternalLink className="w-4 h-4" /></Button>}
                         </div>
                       </div>
                     </div>

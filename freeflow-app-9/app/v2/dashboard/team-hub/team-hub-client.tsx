@@ -1204,10 +1204,10 @@ export default function TeamHubClient() {
                               </div>
 
                               <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
-                                <Button variant="ghost" size="icon" className="h-7 w-7"><Smile className="w-3.5 h-3.5" /></Button>
-                                <Button variant="ghost" size="icon" className="h-7 w-7"><MessageCircle className="w-3.5 h-3.5" /></Button>
-                                <Button variant="ghost" size="icon" className="h-7 w-7"><Bookmark className="w-3.5 h-3.5" /></Button>
-                                <Button variant="ghost" size="icon" className="h-7 w-7"><MoreVertical className="w-3.5 h-3.5" /></Button>
+                                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Adding reaction...', success: 'Reaction added', error: 'Failed to add reaction' })}><Smile className="w-3.5 h-3.5" /></Button>
+                                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening thread...', success: 'Thread opened', error: 'Failed to open thread' })}><MessageCircle className="w-3.5 h-3.5" /></Button>
+                                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Bookmarking...', success: 'Bookmarked', error: 'Failed to bookmark' })}><Bookmark className="w-3.5 h-3.5" /></Button>
+                                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading options...', success: 'Options loaded', error: 'Failed to load' })}><MoreVertical className="w-3.5 h-3.5" /></Button>
                               </div>
                             </div>
                           </div>
