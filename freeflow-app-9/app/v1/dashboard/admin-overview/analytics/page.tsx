@@ -436,16 +436,6 @@ export default function AnalyticsPage() {
     announce(willShow ? 'Revenue details shown' : 'Revenue details hidden', 'polite')
   }
 
-  // PLACEHOLDER_DELETE_ME
-  const handleViewDetailedRevenue = () => {
-    logger.info('Opening detailed revenue view')
-    setShowRevenueDetails(!showRevenueDetails)
-    toast.info('Revenue Details', {
-      description: showRevenueDetails ? 'Hiding detailed breakdown' : 'Showing detailed breakdown'
-    })
-    announce(showRevenueDetails ? 'Revenue details hidden' : 'Revenue details shown', 'polite')
-  }
-
   // Button 9: View Conversion Details
   const handleViewConversionDetails = () => {
     logger.info('Opening conversion details modal')

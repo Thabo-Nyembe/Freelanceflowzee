@@ -499,18 +499,6 @@ export default function ComplianceClient() {
     activeAudits: mockAudits.filter(a => a.status === 'in_progress').length
   }), [])
 
-  // Dialog states
-  const [showControlDialog, setShowControlDialog] = useState(false)
-  const [showRiskDialog, setShowRiskDialog] = useState(false)
-  const [showPolicyDialog, setShowPolicyDialog] = useState(false)
-  const [showEvidenceDialog, setShowEvidenceDialog] = useState(false)
-  const [showFrameworkDialog, setShowFrameworkDialog] = useState(false)
-  const [showFilterDialog, setShowFilterDialog] = useState(false)
-  const [showAuditViewDialog, setShowAuditViewDialog] = useState(false)
-  const [selectedFramework, setSelectedFramework] = useState<string | null>(null)
-  const [selectedControl, setSelectedControl] = useState<string | null>(null)
-  const [selectedPolicy, setSelectedPolicy] = useState<string | null>(null)
-
   // Handlers
   const handleRunAudit = () => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Running compliance audit...', success: 'Audit completed successfully!', error: 'Audit failed' })
   const handleGenerateReport = () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Generating report...', success: 'Report generated and ready for download', error: 'Failed to generate report' })
