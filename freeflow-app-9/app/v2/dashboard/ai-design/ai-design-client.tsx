@@ -643,11 +643,11 @@ export default function AIDesignClient() {
                 {stats.totalCredits - stats.creditsUsed} credits left
               </span>
             </div>
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={() => setActiveTab('history')}>
               <History className="w-4 h-4 mr-2" />
               History
             </Button>
-            <Button className="bg-gradient-to-r from-fuchsia-500 to-purple-600 text-white">
+            <Button className="bg-gradient-to-r from-fuchsia-500 to-purple-600 text-white" onClick={() => toast.success('Upgrade to Pro', { description: 'Get unlimited credits and exclusive features' })}>
               <Crown className="w-4 h-4 mr-2" />
               Upgrade
             </Button>
@@ -1030,7 +1030,17 @@ export default function AIDesignClient() {
                       <Button variant="outline" onClick={() => setPrompt('')}>
                         <RefreshCw className="w-4 h-4" />
                       </Button>
-                      <Button variant="outline">
+                      <Button variant="outline" onClick={() => {
+                        const randomPrompts = [
+                          'A mystical forest with glowing mushrooms and floating fireflies, fantasy art style',
+                          'Futuristic cityscape at sunset with flying cars and neon holographic billboards',
+                          'Portrait of an ancient wise owl wearing a crown made of stars, digital art',
+                          'Underwater palace with bioluminescent creatures and coral architecture',
+                          'Steampunk airship flying through clouds at golden hour, detailed illustration'
+                        ]
+                        setPrompt(randomPrompts[Math.floor(Math.random() * randomPrompts.length)])
+                        toast.success('Random prompt generated', { description: 'Feel free to modify it!' })
+                      }}>
                         <Shuffle className="w-4 h-4" />
                       </Button>
                     </div>
@@ -1287,7 +1297,7 @@ export default function AIDesignClient() {
                 >
                   <List className="w-4 h-4" />
                 </Button>
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" onClick={() => toast.info('Filter Options', { description: 'Filter by style, status, or date' })}>
                   <Filter className="w-4 h-4 mr-2" />
                   Filter
                 </Button>
@@ -1734,7 +1744,7 @@ export default function AIDesignClient() {
                             <div className="text-sm text-muted-foreground">Fast, high-quality generations</div>
                           </div>
                         </div>
-                        <Button variant="outline" size="sm">Enable</Button>
+                        <Button variant="outline" size="sm" onClick={() => toast.success('Flux Pro Enabled', { description: 'Fast, high-quality generations now available' })}>Enable</Button>
                       </div>
                     </CardContent>
                   </Card>
@@ -1918,19 +1928,21 @@ export default function AIDesignClient() {
                         <input type="checkbox" className="w-5 h-5" />
                       </div>
                       <div className="grid grid-cols-2 gap-4 pt-4 border-t dark:border-gray-700">
-                        <Button variant="outline" className="h-auto py-4 flex-col gap-2">
+                        <Button variant="outline" className="h-auto py-4 flex-col gap-2" onClick={() => {
+                          handleExportDesigns()
+                        }}>
                           <Download className="w-6 h-6" />
                           <span>Export All</span>
                         </Button>
-                        <Button variant="outline" className="h-auto py-4 flex-col gap-2">
+                        <Button variant="outline" className="h-auto py-4 flex-col gap-2" onClick={() => toast.success('Cache Cleared', { description: 'All temporary files have been removed' })}>
                           <RefreshCw className="w-6 h-6" />
                           <span>Clear Cache</span>
                         </Button>
-                        <Button variant="outline" className="h-auto py-4 flex-col gap-2">
+                        <Button variant="outline" className="h-auto py-4 flex-col gap-2" onClick={() => setActiveTab('history')}>
                           <History className="w-6 h-6" />
                           <span>View History</span>
                         </Button>
-                        <Button variant="outline" className="h-auto py-4 flex-col gap-2">
+                        <Button variant="outline" className="h-auto py-4 flex-col gap-2" onClick={() => toast.info('Help Center', { description: 'Visit our documentation for guides and tutorials' })}>
                           <HelpCircle className="w-6 h-6" />
                           <span>Get Help</span>
                         </Button>

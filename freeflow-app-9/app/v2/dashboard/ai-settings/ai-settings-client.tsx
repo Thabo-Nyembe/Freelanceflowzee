@@ -293,6 +293,37 @@ export default function AiSettingsClient() {
   const [newPrimaryProvider, setNewPrimaryProvider] = useState('')
   const [newFallbackProvider, setNewFallbackProvider] = useState('')
 
+  // Feature Toggle States (for Features tab)
+  const [featureToggles, setFeatureToggles] = useState<Record<string, boolean>>({
+    'text-gen': true,
+    'image-gen': true,
+    'code-assist': false,
+    'voice-synth': true,
+    'auto-translate': false
+  })
+
+  // Model Preference States
+  const [textGenModel, setTextGenModel] = useState('gpt-4-turbo')
+  const [imageGenModel, setImageGenModel] = useState('dall-e-3')
+  const [responseTemperature, setResponseTemperature] = useState('0.7')
+  const [maxTokens, setMaxTokens] = useState('4096')
+
+  // Add Provider Dialog States
+  const [newProviderSelection, setNewProviderSelection] = useState('')
+  const [newProviderApiKey, setNewProviderApiKey] = useState('')
+
+  // Advanced Settings Dialog States
+  const [advancedTemperature, setAdvancedTemperature] = useState('0.7')
+  const [advancedMaxTokens, setAdvancedMaxTokens] = useState('4096')
+  const [streamResponses, setStreamResponses] = useState(true)
+  const [autoRetry, setAutoRetry] = useState(true)
+  const [cacheResponses, setCacheResponses] = useState(false)
+
+  // Export Config Dialog States
+  const [exportProviderSettings, setExportProviderSettings] = useState(true)
+  const [exportFeatureConfig, setExportFeatureConfig] = useState(true)
+  const [exportUsageData, setExportUsageData] = useState(true)
+
   // Quick Actions Dialog States
   const [showAddProviderDialog, setShowAddProviderDialog] = useState(false)
   const [showExportConfigDialog, setShowExportConfigDialog] = useState(false)
@@ -1395,11 +1426,11 @@ export default function AiSettingsClient() {
                 </h3>
                 <div className="space-y-4">
                   {[
-                    { id: 'text-gen', name: 'Text Generation', description: 'Enable AI-powered text generation across the platform', icon: FileText, enabled: true },
-                    { id: 'image-gen', name: 'Image Generation', description: 'Generate images using DALL-E and Stable Diffusion', icon: Camera, enabled: true },
-                    { id: 'code-assist', name: 'Code Assistant', description: 'AI-powered code completion and suggestions', icon: Code, enabled: false },
-                    { id: 'voice-synth', name: 'Voice Synthesis', description: 'Text-to-speech with natural voices', icon: Mic, enabled: true },
-                    { id: 'auto-translate', name: 'Auto Translation', description: 'Automatic content translation to 50+ languages', icon: Globe, enabled: false }
+                    { id: 'text-gen', name: 'Text Generation', description: 'Enable AI-powered text generation across the platform', icon: FileText },
+                    { id: 'image-gen', name: 'Image Generation', description: 'Generate images using DALL-E and Stable Diffusion', icon: Camera },
+                    { id: 'code-assist', name: 'Code Assistant', description: 'AI-powered code completion and suggestions', icon: Code },
+                    { id: 'voice-synth', name: 'Voice Synthesis', description: 'Text-to-speech with natural voices', icon: Mic },
+                    { id: 'auto-translate', name: 'Auto Translation', description: 'Automatic content translation to 50+ languages', icon: Globe }
                   ].map((feature) => (
                     <div key={feature.id} className="flex items-center justify-between p-4 rounded-lg border bg-card hover:bg-accent/50 transition-colors">
                       <div className="flex items-center gap-3">
@@ -1411,7 +1442,14 @@ export default function AiSettingsClient() {
                           <div className="text-sm text-muted-foreground">{feature.description}</div>
                         </div>
                       </div>
-                      <Switch defaultChecked={feature.enabled} />
+                      <Switch
+                        checked={featureToggles[feature.id]}
+                        onCheckedChange={(checked) => {
+                          setFeatureToggles(prev => ({ ...prev, [feature.id]: checked }))
+                          toast.success(`${feature.name} ${checked ? 'enabled' : 'disabled'}`)
+                          logger.info('Feature toggle changed', { featureId: feature.id, enabled: checked })
+                        }}
+                      />
                     </div>
                   ))}
                 </div>
@@ -1427,7 +1465,12 @@ export default function AiSettingsClient() {
                   <div className="space-y-2">
                     <Label>Text Generation Model</Label>
                     <select
-                      defaultValue="gpt-4-turbo"
+                      value={textGenModel}
+                      onChange={(e) => {
+                        setTextGenModel(e.target.value)
+                        toast.success(`Text generation model set to ${e.target.value}`)
+                        logger.info('Text generation model changed', { model: e.target.value })
+                      }}
                       className="w-full px-3 py-2 bg-background border border-input rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                     >
                       <option value="gpt-4-turbo">GPT-4 Turbo (Recommended)</option>
@@ -1438,7 +1481,12 @@ export default function AiSettingsClient() {
                   <div className="space-y-2">
                     <Label>Image Generation Model</Label>
                     <select
-                      defaultValue="dall-e-3"
+                      value={imageGenModel}
+                      onChange={(e) => {
+                        setImageGenModel(e.target.value)
+                        toast.success(`Image generation model set to ${e.target.value}`)
+                        logger.info('Image generation model changed', { model: e.target.value })
+                      }}
                       className="w-full px-3 py-2 bg-background border border-input rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                     >
                       <option value="dall-e-3">DALL-E 3</option>
@@ -1449,7 +1497,12 @@ export default function AiSettingsClient() {
                   <div className="space-y-2">
                     <Label>Response Temperature</Label>
                     <select
-                      defaultValue="0.7"
+                      value={responseTemperature}
+                      onChange={(e) => {
+                        setResponseTemperature(e.target.value)
+                        toast.success(`Response temperature set to ${e.target.value}`)
+                        logger.info('Response temperature changed', { temperature: e.target.value })
+                      }}
                       className="w-full px-3 py-2 bg-background border border-input rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                     >
                       <option value="0.3">Conservative (0.3)</option>
@@ -1460,7 +1513,12 @@ export default function AiSettingsClient() {
                   <div className="space-y-2">
                     <Label>Max Tokens</Label>
                     <select
-                      defaultValue="4096"
+                      value={maxTokens}
+                      onChange={(e) => {
+                        setMaxTokens(e.target.value)
+                        toast.success(`Max tokens set to ${e.target.value}`)
+                        logger.info('Max tokens changed', { maxTokens: e.target.value })
+                      }}
                       className="w-full px-3 py-2 bg-background border border-input rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                     >
                       <option value="1024">1,024 tokens</option>
@@ -1898,7 +1956,10 @@ export default function AiSettingsClient() {
           <div className="space-y-4 py-4">
             <div className="space-y-2">
               <Label htmlFor="providerSelect">Select Provider</Label>
-              <Select>
+              <Select value={newProviderSelection} onValueChange={(value) => {
+                setNewProviderSelection(value)
+                logger.info('New provider selection changed', { provider: value })
+              }}>
                 <SelectTrigger>
                   <SelectValue placeholder="Choose a provider" />
                 </SelectTrigger>
@@ -1917,17 +1978,38 @@ export default function AiSettingsClient() {
                 id="newProviderKey"
                 type="password"
                 placeholder="Enter your API key"
+                value={newProviderApiKey}
+                onChange={(e) => setNewProviderApiKey(e.target.value)}
               />
               <p className="text-xs text-muted-foreground">Your API key will be securely stored</p>
             </div>
           </div>
           <DialogFooter className="gap-2">
-            <Button variant="outline" onClick={() => setShowAddProviderDialog(false)}>
+            <Button variant="outline" onClick={() => {
+              setNewProviderSelection('')
+              setNewProviderApiKey('')
+              setShowAddProviderDialog(false)
+            }}>
               Cancel
             </Button>
             <Button
               onClick={() => {
-                toast.success('Provider added successfully')
+                if (!newProviderSelection) {
+                  toast.error('Please select a provider')
+                  return
+                }
+                if (!newProviderApiKey) {
+                  toast.error('Please enter an API key')
+                  return
+                }
+                // Save the API key
+                saveApiKey(newProviderSelection, newProviderApiKey)
+                toast.success('Provider added successfully', {
+                  description: `${newProviderSelection} has been configured`
+                })
+                logger.info('New provider added', { provider: newProviderSelection })
+                setNewProviderSelection('')
+                setNewProviderApiKey('')
                 setShowAddProviderDialog(false)
               }}
               className="bg-purple-600 hover:bg-purple-700"
@@ -1957,21 +2039,39 @@ export default function AiSettingsClient() {
                   <div className="font-medium">Provider Settings</div>
                   <div className="text-sm text-muted-foreground">API keys and connection status</div>
                 </div>
-                <Switch defaultChecked />
+                <Switch
+                  checked={exportProviderSettings}
+                  onCheckedChange={(checked) => {
+                    setExportProviderSettings(checked)
+                    logger.info('Export provider settings toggled', { enabled: checked })
+                  }}
+                />
               </div>
               <div className="flex items-center justify-between p-3 border rounded-lg">
                 <div>
                   <div className="font-medium">Feature Configuration</div>
                   <div className="text-sm text-muted-foreground">Enabled features and model preferences</div>
                 </div>
-                <Switch defaultChecked />
+                <Switch
+                  checked={exportFeatureConfig}
+                  onCheckedChange={(checked) => {
+                    setExportFeatureConfig(checked)
+                    logger.info('Export feature config toggled', { enabled: checked })
+                  }}
+                />
               </div>
               <div className="flex items-center justify-between p-3 border rounded-lg">
                 <div>
                   <div className="font-medium">Usage & Billing Data</div>
                   <div className="text-sm text-muted-foreground">Budget limits and rate limits</div>
                 </div>
-                <Switch defaultChecked />
+                <Switch
+                  checked={exportUsageData}
+                  onCheckedChange={(checked) => {
+                    setExportUsageData(checked)
+                    logger.info('Export usage data toggled', { enabled: checked })
+                  }}
+                />
               </div>
             </div>
           </div>
@@ -1982,6 +2082,9 @@ export default function AiSettingsClient() {
             <Button
               onClick={() => {
                 handleBackupSettings()
+                toast.success('Configuration exported', {
+                  description: `Exported: ${exportProviderSettings ? 'Providers' : ''}${exportFeatureConfig ? ', Features' : ''}${exportUsageData ? ', Usage' : ''}`
+                })
                 setShowExportConfigDialog(false)
               }}
               className="bg-blue-600 hover:bg-blue-700"
@@ -2008,7 +2111,10 @@ export default function AiSettingsClient() {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Default Temperature</Label>
-                <Select defaultValue="0.7">
+                <Select value={advancedTemperature} onValueChange={(value) => {
+                  setAdvancedTemperature(value)
+                  logger.info('Advanced temperature changed', { temperature: value })
+                }}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -2021,7 +2127,10 @@ export default function AiSettingsClient() {
               </div>
               <div className="space-y-2">
                 <Label>Max Tokens</Label>
-                <Select defaultValue="4096">
+                <Select value={advancedMaxTokens} onValueChange={(value) => {
+                  setAdvancedMaxTokens(value)
+                  logger.info('Advanced max tokens changed', { maxTokens: value })
+                }}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -2039,21 +2148,39 @@ export default function AiSettingsClient() {
                   <div className="font-medium">Stream Responses</div>
                   <div className="text-sm text-muted-foreground">Enable real-time streaming</div>
                 </div>
-                <Switch defaultChecked />
+                <Switch
+                  checked={streamResponses}
+                  onCheckedChange={(checked) => {
+                    setStreamResponses(checked)
+                    logger.info('Stream responses toggled', { enabled: checked })
+                  }}
+                />
               </div>
               <div className="flex items-center justify-between p-3 border rounded-lg">
                 <div>
                   <div className="font-medium">Auto-Retry Failed Requests</div>
                   <div className="text-sm text-muted-foreground">Automatically retry on errors</div>
                 </div>
-                <Switch defaultChecked />
+                <Switch
+                  checked={autoRetry}
+                  onCheckedChange={(checked) => {
+                    setAutoRetry(checked)
+                    logger.info('Auto-retry toggled', { enabled: checked })
+                  }}
+                />
               </div>
               <div className="flex items-center justify-between p-3 border rounded-lg">
                 <div>
                   <div className="font-medium">Cache Responses</div>
                   <div className="text-sm text-muted-foreground">Cache identical requests</div>
                 </div>
-                <Switch />
+                <Switch
+                  checked={cacheResponses}
+                  onCheckedChange={(checked) => {
+                    setCacheResponses(checked)
+                    logger.info('Cache responses toggled', { enabled: checked })
+                  }}
+                />
               </div>
             </div>
           </div>
@@ -2063,7 +2190,16 @@ export default function AiSettingsClient() {
             </Button>
             <Button
               onClick={() => {
-                toast.success('Advanced settings saved')
+                toast.success('Advanced settings saved', {
+                  description: `Temperature: ${advancedTemperature}, Max Tokens: ${advancedMaxTokens}`
+                })
+                logger.info('Advanced settings saved', {
+                  temperature: advancedTemperature,
+                  maxTokens: advancedMaxTokens,
+                  streamResponses,
+                  autoRetry,
+                  cacheResponses
+                })
                 setShowAdvancedSettingsDialog(false)
               }}
               className="bg-green-600 hover:bg-green-700"

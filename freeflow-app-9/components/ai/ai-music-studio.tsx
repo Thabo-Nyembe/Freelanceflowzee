@@ -4,9 +4,21 @@ import { useState, useRef, useEffect } from 'react'
 import {
   Music, Play, Pause, Download, RefreshCw, Sparkles, Mic, FileText, Zap, Settings2, Volume2, SkipBack, SkipForward, Loader2,
   Trash2, Heart, Share2, Sliders, ListMusic, Layers, ChevronDown, Plus, Crown,
-  Music2, Radio, Repeat, Shuffle, Waves, BookmarkPlus, User
+  Music2, Radio, Repeat, Shuffle, Waves, BookmarkPlus, User, X, Copy, Check
 } from 'lucide-react'
 import { useSunoMusic, type SunoModel, promptTemplates } from '@/lib/hooks/use-suno-music'
+import { toast } from 'sonner'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 
 const sunoModels: { value: SunoModel; label: string; badge?: string; description: string; quality: string }[] = [
   { value: 'V5', label: 'Suno V5', badge: 'Latest', description: 'Best quality, studio sound', quality: 'Ultra' },
@@ -92,6 +104,11 @@ export default function AIMusicStudio() {
   const [repeat, setRepeat] = useState(false)
   const [shuffle, setShuffle] = useState(false)
   const [activeTab, setActiveTab] = useState<'create' | 'extend' | 'remix' | 'vocals'>('create')
+  const [showLibraryDialog, setShowLibraryDialog] = useState(false)
+  const [showShareDialog, setShowShareDialog] = useState(false)
+  const [savedTracks, setSavedTracks] = useState<string[]>([])
+  const [currentTrackIndex, setCurrentTrackIndex] = useState(0)
+  const [linkCopied, setLinkCopied] = useState(false)
   const audioRef = useRef<HTMLAudioElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const audioContextRef = useRef<AudioContext | null>(null)
@@ -305,6 +322,93 @@ export default function AIMusicStudio() {
     setPrompt(persona.description)
   }
 
+  const handleSkipBack = () => {
+    if (tracks.length === 0) {
+      toast.info('No tracks in playlist')
+      return
+    }
+    const newIndex = currentTrackIndex > 0 ? currentTrackIndex - 1 : tracks.length - 1
+    setCurrentTrackIndex(newIndex)
+    const track = tracks[newIndex]
+    if (audioRef.current && track) {
+      audioRef.current.src = track.audioUrl
+      audioRef.current.play()
+      setIsPlaying(true)
+      toast.success(`Playing: ${track.title}`)
+    }
+  }
+
+  const handleSkipForward = () => {
+    if (tracks.length === 0) {
+      toast.info('No tracks in playlist')
+      return
+    }
+    const newIndex = currentTrackIndex < tracks.length - 1 ? currentTrackIndex + 1 : 0
+    setCurrentTrackIndex(newIndex)
+    const track = tracks[newIndex]
+    if (audioRef.current && track) {
+      audioRef.current.src = track.audioUrl
+      audioRef.current.play()
+      setIsPlaying(true)
+      toast.success(`Playing: ${track.title}`)
+    }
+  }
+
+  const handleSaveTrack = () => {
+    if (!currentTrack) {
+      toast.error('No track to save')
+      return
+    }
+    if (savedTracks.includes(currentTrack.id)) {
+      setSavedTracks(prev => prev.filter(id => id !== currentTrack.id))
+      toast.success('Track removed from favorites')
+    } else {
+      setSavedTracks(prev => [...prev, currentTrack.id])
+      toast.success('Track saved to favorites!')
+    }
+  }
+
+  const handleShareTrack = () => {
+    if (!currentTrack) {
+      toast.error('No track to share')
+      return
+    }
+    setShowShareDialog(true)
+  }
+
+  const handleCopyShareLink = () => {
+    if (!currentTrack) return
+    const shareUrl = `${window.location.origin}/shared/music/${currentTrack.id}`
+    navigator.clipboard.writeText(shareUrl)
+    setLinkCopied(true)
+    toast.success('Link copied to clipboard!')
+    setTimeout(() => setLinkCopied(false), 2000)
+  }
+
+  const handleSocialShare = (platform: string) => {
+    if (!currentTrack) return
+    const shareUrl = `${window.location.origin}/shared/music/${currentTrack.id}`
+    const text = `Check out this AI-generated track: ${currentTrack.title}`
+
+    let url = ''
+    switch (platform) {
+      case 'twitter':
+        url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(shareUrl)}`
+        break
+      case 'facebook':
+        url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`
+        break
+      case 'linkedin':
+        url = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`
+        break
+    }
+
+    if (url) {
+      window.open(url, '_blank', 'width=600,height=400')
+      toast.success(`Sharing to ${platform}`)
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-fuchsia-50 dark:bg-none dark:bg-gray-900">
       {/* Hero Header */}
@@ -331,7 +435,10 @@ export default function AIMusicStudio() {
                 <User className="w-5 h-5" />
                 Personas ({personas.length})
               </button>
-              <button className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-xl transition-colors">
+              <button
+                onClick={() => setShowLibraryDialog(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-xl transition-colors"
+              >
                 <ListMusic className="w-5 h-5" />
                 Library ({tracks.length})
               </button>
@@ -764,7 +871,10 @@ export default function AIMusicStudio() {
                     >
                       <Shuffle className="w-4 h-4" />
                     </button>
-                    <button className="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white transition-colors">
+                    <button
+                      onClick={handleSkipBack}
+                      className="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white transition-colors"
+                    >
                       <SkipBack className="w-5 h-5" />
                     </button>
                     <button
@@ -773,7 +883,10 @@ export default function AIMusicStudio() {
                     >
                       {isPlaying ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6 ml-0.5" />}
                     </button>
-                    <button className="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white transition-colors">
+                    <button
+                      onClick={handleSkipForward}
+                      className="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white transition-colors"
+                    >
                       <SkipForward className="w-5 h-5" />
                     </button>
                     <button
@@ -807,11 +920,17 @@ export default function AIMusicStudio() {
                       <Download className="w-5 h-5 text-gray-600 dark:text-gray-400" />
                       <span className="text-xs text-gray-600 dark:text-gray-400">Download</span>
                     </button>
-                    <button className="flex flex-col items-center gap-1 p-3 bg-gray-100 dark:bg-gray-700 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
-                      <Heart className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+                    <button
+                      onClick={handleSaveTrack}
+                      className="flex flex-col items-center gap-1 p-3 bg-gray-100 dark:bg-gray-700 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                    >
+                      <Heart className={`w-5 h-5 ${currentTrack && savedTracks.includes(currentTrack.id) ? 'text-rose-500 fill-rose-500' : 'text-gray-600 dark:text-gray-400'}`} />
                       <span className="text-xs text-gray-600 dark:text-gray-400">Save</span>
                     </button>
-                    <button className="flex flex-col items-center gap-1 p-3 bg-gray-100 dark:bg-gray-700 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
+                    <button
+                      onClick={handleShareTrack}
+                      className="flex flex-col items-center gap-1 p-3 bg-gray-100 dark:bg-gray-700 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                    >
                       <Share2 className="w-5 h-5 text-gray-600 dark:text-gray-400" />
                       <span className="text-xs text-gray-600 dark:text-gray-400">Share</span>
                     </button>
@@ -905,6 +1024,164 @@ export default function AIMusicStudio() {
           </div>
         </div>
       </div>
+
+      {/* Library Dialog */}
+      <Dialog open={showLibraryDialog} onOpenChange={setShowLibraryDialog}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <ListMusic className="w-5 h-5 text-rose-500" />
+              Music Library
+            </DialogTitle>
+            <DialogDescription>
+              Your generated tracks and favorites
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            {tracks.length === 0 ? (
+              <div className="text-center py-8 text-gray-500">
+                <Music className="w-12 h-12 mx-auto mb-3 opacity-40" />
+                <p>No tracks yet. Generate your first track!</p>
+              </div>
+            ) : (
+              <div className="space-y-2 max-h-[400px] overflow-y-auto">
+                {tracks.map((track) => (
+                  <div
+                    key={track.id}
+                    className={`flex items-center gap-3 p-3 rounded-xl transition-colors cursor-pointer ${
+                      currentTrack?.id === track.id
+                        ? 'bg-rose-50 dark:bg-rose-900/30 border border-rose-200 dark:border-rose-800'
+                        : 'hover:bg-gray-50 dark:hover:bg-gray-700/50 border border-transparent'
+                    }`}
+                    onClick={() => {
+                      if (audioRef.current) {
+                        audioRef.current.src = track.audioUrl
+                        audioRef.current.play()
+                        setIsPlaying(true)
+                      }
+                      setShowLibraryDialog(false)
+                    }}
+                  >
+                    {track.imageUrl ? (
+                      <img src={track.imageUrl} alt={track.title} className="w-12 h-12 rounded-lg object-cover" />
+                    ) : (
+                      <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-rose-500 to-fuchsia-500 flex items-center justify-center">
+                        <Music className="w-6 h-6 text-white" />
+                      </div>
+                    )}
+                    <div className="flex-1">
+                      <p className="font-medium dark:text-white truncate">{track.title}</p>
+                      <p className="text-xs text-gray-500">{track.style || track.model}</p>
+                    </div>
+                    {savedTracks.includes(track.id) && (
+                      <Heart className="w-4 h-4 text-rose-500 fill-rose-500" />
+                    )}
+                    <Play className="w-4 h-4 text-gray-400" />
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowLibraryDialog(false)}>
+              Close
+            </Button>
+            {tracks.length > 0 && (
+              <Button
+                variant="destructive"
+                onClick={() => {
+                  clearTracks()
+                  setShowLibraryDialog(false)
+                  toast.success('Library cleared')
+                }}
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                Clear All
+              </Button>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Share Dialog */}
+      <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Share2 className="w-5 h-5 text-rose-500" />
+              Share Track
+            </DialogTitle>
+            <DialogDescription>
+              Share "{currentTrack?.title}" with others
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Share Link</Label>
+              <div className="flex gap-2">
+                <Input
+                  readOnly
+                  value={currentTrack ? `${typeof window !== 'undefined' ? window.location.origin : ''}/shared/music/${currentTrack.id}` : ''}
+                  className="bg-gray-50 dark:bg-gray-900"
+                />
+                <Button onClick={handleCopyShareLink} variant="outline">
+                  {linkCopied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                </Button>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Share on Social Media</Label>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => handleSocialShare('twitter')}
+                >
+                  Twitter / X
+                </Button>
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => handleSocialShare('facebook')}
+                >
+                  Facebook
+                </Button>
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => handleSocialShare('linkedin')}
+                >
+                  LinkedIn
+                </Button>
+              </div>
+            </div>
+
+            {currentTrack && (
+              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-xl">
+                <div className="flex items-center gap-3">
+                  {currentTrack.imageUrl ? (
+                    <img src={currentTrack.imageUrl} alt={currentTrack.title} className="w-16 h-16 rounded-lg object-cover" />
+                  ) : (
+                    <div className="w-16 h-16 rounded-lg bg-gradient-to-br from-rose-500 to-fuchsia-500 flex items-center justify-center">
+                      <Music className="w-8 h-8 text-white" />
+                    </div>
+                  )}
+                  <div>
+                    <p className="font-semibold dark:text-white">{currentTrack.title}</p>
+                    <p className="text-sm text-gray-500">{currentTrack.style || 'AI Generated'}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowShareDialog(false)}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

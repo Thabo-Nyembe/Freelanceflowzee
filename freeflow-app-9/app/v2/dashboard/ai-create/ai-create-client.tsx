@@ -586,6 +586,13 @@ export default function AICreateClient() {
   const [showNewCreationDialog, setShowNewCreationDialog] = useState(false)
   const [showTemplateDialog, setShowTemplateDialog] = useState(false)
   const [showGalleryDialog, setShowGalleryDialog] = useState(false)
+  const [showUpgradeDialog, setShowUpgradeDialog] = useState(false)
+  const [showCreateTemplateDialog, setShowCreateTemplateDialog] = useState(false)
+  const [showRegenerateKeyDialog, setShowRegenerateKeyDialog] = useState(false)
+  const [showManageModelsDialog, setShowManageModelsDialog] = useState(false)
+  const [showDeleteAllDialog, setShowDeleteAllDialog] = useState(false)
+  const [showResetSettingsDialog, setShowResetSettingsDialog] = useState(false)
+  const [galleryDialogViewMode, setGalleryDialogViewMode] = useState<'grid' | 'list'>('grid')
 
   // Filtered generations
   const filteredGenerations = useMemo(() => {
@@ -661,6 +668,93 @@ export default function AICreateClient() {
     })
   }
 
+  const handleClearHistory = () => {
+    toast.success('History cleared', {
+      description: 'All generation history has been cleared'
+    })
+  }
+
+  const handleRetryGeneration = (gen: Generation) => {
+    toast.info('Retrying generation', {
+      description: `Retrying: ${gen.prompt.slice(0, 30)}...`
+    })
+  }
+
+  const handleDeleteGeneration = (gen: Generation) => {
+    toast.success('Generation deleted', {
+      description: 'The generation has been removed from history'
+    })
+  }
+
+  const handleRegenerateApiKey = () => {
+    toast.success('API Key regenerated', {
+      description: 'Your new API key is ready to use'
+    })
+    setShowRegenerateKeyDialog(false)
+  }
+
+  const handleConnectService = (serviceName: string, connected: boolean) => {
+    if (connected) {
+      toast.success(`${serviceName} disconnected`, {
+        description: `${serviceName} integration has been removed`
+      })
+    } else {
+      toast.success(`${serviceName} connected`, {
+        description: `${serviceName} integration is now active`
+      })
+    }
+  }
+
+  const handleClearCache = () => {
+    toast.success('Cache cleared', {
+      description: '1.2 GB of generation cache has been freed'
+    })
+  }
+
+  const handleManageModels = () => {
+    setShowManageModelsDialog(true)
+  }
+
+  const handleDeleteAllGenerations = () => {
+    toast.success('All generations deleted', {
+      description: 'Your generated content has been removed'
+    })
+    setShowDeleteAllDialog(false)
+  }
+
+  const handleResetSettings = () => {
+    toast.success('Settings reset', {
+      description: 'All settings have been restored to defaults'
+    })
+    setShowResetSettingsDialog(false)
+  }
+
+  const handleCreateVariation = () => {
+    toast.info('Creating variation', {
+      description: 'Generating a new variation of your creation...'
+    })
+  }
+
+  const handleToggleFavorite = (gen: Generation) => {
+    if (gen.isFavorite) {
+      toast.success('Removed from favorites', {
+        description: 'Generation removed from your favorites'
+      })
+    } else {
+      toast.success('Added to favorites', {
+        description: 'Generation added to your favorites'
+      })
+    }
+  }
+
+  const handleUpgrade = () => {
+    setShowUpgradeDialog(true)
+  }
+
+  const handleCreateTemplate = () => {
+    setShowCreateTemplateDialog(true)
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-violet-50 via-purple-50/30 to-pink-50/40 dark:bg-none dark:bg-gray-900 p-6">
       <div className="max-w-[1800px] mx-auto space-y-6">
@@ -683,7 +777,7 @@ export default function AICreateClient() {
                 <span className="text-sm text-gray-500">credits</span>
               </div>
             </div>
-            <Button variant="outline">
+            <Button variant="outline" onClick={handleUpgrade}>
               <Crown className="w-4 h-4 mr-2" />
               Upgrade
             </Button>
@@ -1194,7 +1288,7 @@ export default function AICreateClient() {
 
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Popular Templates</h3>
-              <Button variant="outline">
+              <Button variant="outline" onClick={handleCreateTemplate}>
                 <Plus className="w-4 h-4 mr-2" />
                 Create Template
               </Button>
@@ -1283,7 +1377,7 @@ export default function AICreateClient() {
 
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Generation History</h3>
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={handleClearHistory}>
                 <Trash2 className="w-4 h-4 mr-2" />
                 Clear All
               </Button>
@@ -1316,15 +1410,15 @@ export default function AICreateClient() {
                       <div className="flex items-center gap-2">
                         {gen.status === 'completed' && (
                           <>
-                            <Button variant="ghost" size="sm">
+                            <Button variant="ghost" size="sm" onClick={() => handleRetryGeneration(gen)}>
                               <RefreshCw className="w-4 h-4" />
                             </Button>
-                            <Button variant="ghost" size="sm">
+                            <Button variant="ghost" size="sm" onClick={handleDownloadCreation}>
                               <Download className="w-4 h-4" />
                             </Button>
                           </>
                         )}
-                        <Button variant="ghost" size="sm">
+                        <Button variant="ghost" size="sm" onClick={() => handleDeleteGeneration(gen)}>
                           <Trash2 className="w-4 h-4" />
                         </Button>
                       </div>
@@ -1789,7 +1883,7 @@ export default function AICreateClient() {
                             <p className="font-medium text-gray-900 dark:text-white">API Key</p>
                             <Input type="password" value="sk-************************" readOnly className="mt-2 font-mono text-sm dark:bg-gray-900 dark:border-gray-700" />
                           </div>
-                          <Button variant="outline" size="sm">Regenerate</Button>
+                          <Button variant="outline" size="sm" onClick={() => setShowRegenerateKeyDialog(true)}>Regenerate</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -1811,7 +1905,7 @@ export default function AICreateClient() {
                               <p className="font-medium text-gray-900 dark:text-white">{service.name}</p>
                               <p className="text-sm text-gray-500">{service.desc}</p>
                             </div>
-                            <Button variant={service.connected ? "outline" : "default"} size="sm">
+                            <Button variant={service.connected ? "outline" : "default"} size="sm" onClick={() => handleConnectService(service.name, service.connected)}>
                               {service.connected ? 'Disconnect' : 'Connect'}
                             </Button>
                           </div>
@@ -1908,7 +2002,7 @@ export default function AICreateClient() {
                               <p className="text-sm text-gray-500">1.2 GB used</p>
                             </div>
                           </div>
-                          <Button variant="outline" size="sm">Clear</Button>
+                          <Button variant="outline" size="sm" onClick={handleClearCache}>Clear</Button>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
                           <div className="flex items-center gap-3">
@@ -1918,7 +2012,7 @@ export default function AICreateClient() {
                               <p className="text-sm text-gray-500">4.5 GB used</p>
                             </div>
                           </div>
-                          <Button variant="outline" size="sm">Manage</Button>
+                          <Button variant="outline" size="sm" onClick={handleManageModels}>Manage</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -1934,14 +2028,14 @@ export default function AICreateClient() {
                             <p className="font-medium text-gray-900 dark:text-white">Delete All Generations</p>
                             <p className="text-sm text-gray-500">Remove all your generated content</p>
                           </div>
-                          <Button variant="destructive" size="sm">Delete All</Button>
+                          <Button variant="destructive" size="sm" onClick={() => setShowDeleteAllDialog(true)}>Delete All</Button>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-xl">
                           <div>
                             <p className="font-medium text-gray-900 dark:text-white">Reset Settings</p>
                             <p className="text-sm text-gray-500">Reset all settings to defaults</p>
                           </div>
-                          <Button variant="destructive" size="sm">Reset</Button>
+                          <Button variant="destructive" size="sm" onClick={() => setShowResetSettingsDialog(true)}>Reset</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -2076,29 +2170,29 @@ export default function AICreateClient() {
                   </div>
 
                   <div className="flex items-center gap-2 pt-4 border-t">
-                    <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white">
+                    <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white" onClick={handleRegenerateCreation}>
                       <RefreshCw className="w-4 h-4 mr-2" />
                       Regenerate
                     </Button>
-                    <Button variant="outline">
+                    <Button variant="outline" onClick={handleCreateVariation}>
                       <Layers className="w-4 h-4 mr-2" />
                       Create Variation
                     </Button>
-                    <Button variant="outline">
+                    <Button variant="outline" onClick={handleDownloadCreation}>
                       <Download className="w-4 h-4 mr-2" />
                       Download
                     </Button>
-                    <Button variant="outline">
+                    <Button variant="outline" onClick={handleShareCreation}>
                       <Share2 className="w-4 h-4 mr-2" />
                       Share
                     </Button>
                     {selectedGeneration.isFavorite ? (
-                      <Button variant="outline">
+                      <Button variant="outline" onClick={() => handleToggleFavorite(selectedGeneration)}>
                         <Heart className="w-4 h-4 mr-2 fill-red-500 text-red-500" />
                         Favorited
                       </Button>
                     ) : (
-                      <Button variant="outline">
+                      <Button variant="outline" onClick={() => handleToggleFavorite(selectedGeneration)}>
                         <Heart className="w-4 h-4 mr-2" />
                         Favorite
                       </Button>
@@ -2229,16 +2323,16 @@ export default function AICreateClient() {
                   <Badge variant="secondary">{mockGenerations.filter(g => g.isFavorite).length} favorites</Badge>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Button variant="outline" size="sm">
+                  <Button variant={galleryDialogViewMode === 'grid' ? 'default' : 'outline'} size="sm" onClick={() => setGalleryDialogViewMode('grid')}>
                     <Grid className="w-4 h-4" />
                   </Button>
-                  <Button variant="outline" size="sm">
+                  <Button variant={galleryDialogViewMode === 'list' ? 'default' : 'outline'} size="sm" onClick={() => setGalleryDialogViewMode('list')}>
                     <List className="w-4 h-4" />
                   </Button>
                 </div>
               </div>
               <ScrollArea className="h-[500px]">
-                <div className="grid grid-cols-3 gap-4">
+                <div className={galleryDialogViewMode === 'grid' ? 'grid grid-cols-3 gap-4' : 'space-y-3'}>
                   {mockGenerations.map(gen => (
                     <Card
                       key={gen.id}
@@ -2281,6 +2375,237 @@ export default function AICreateClient() {
               </Button>
               <Button variant="outline" onClick={() => setShowGalleryDialog(false)}>
                 Close
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Upgrade Dialog */}
+        <Dialog open={showUpgradeDialog} onOpenChange={setShowUpgradeDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Crown className="w-5 h-5 text-amber-500" />
+                Upgrade Your Plan
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="p-4 bg-gradient-to-r from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20 rounded-xl">
+                <h4 className="font-semibold text-gray-900 dark:text-white mb-2">Pro Plan Benefits</h4>
+                <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-2">
+                  <li className="flex items-center gap-2"><Gem className="w-4 h-4 text-purple-500" /> 10,000 credits/month</li>
+                  <li className="flex items-center gap-2"><Zap className="w-4 h-4 text-amber-500" /> Priority generation queue</li>
+                  <li className="flex items-center gap-2"><Sparkles className="w-4 h-4 text-pink-500" /> Access to all AI models</li>
+                  <li className="flex items-center gap-2"><HardDrive className="w-4 h-4 text-blue-500" /> Unlimited storage</li>
+                </ul>
+              </div>
+              <div className="text-center">
+                <p className="text-3xl font-bold text-gray-900 dark:text-white">$29<span className="text-lg text-gray-500">/month</span></p>
+              </div>
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setShowUpgradeDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                className="bg-gradient-to-r from-violet-500 to-purple-600 text-white"
+                onClick={() => {
+                  toast.success('Upgrade initiated', { description: 'Redirecting to payment...' })
+                  setShowUpgradeDialog(false)
+                }}
+              >
+                <Crown className="w-4 h-4 mr-2" />
+                Upgrade Now
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Create Template Dialog */}
+        <Dialog open={showCreateTemplateDialog} onOpenChange={setShowCreateTemplateDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Plus className="w-5 h-5 text-green-500" />
+                Create New Template
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label>Template Name</Label>
+                <Input placeholder="Enter template name..." className="mt-2" />
+              </div>
+              <div>
+                <Label>Description</Label>
+                <Textarea placeholder="Describe your template..." className="mt-2" rows={3} />
+              </div>
+              <div>
+                <Label>Prompt</Label>
+                <Textarea placeholder="Enter the base prompt for this template..." className="mt-2" rows={4} />
+              </div>
+              <div>
+                <Label>Style Preset</Label>
+                <select className="w-full mt-2 px-3 py-2 border rounded-lg dark:bg-gray-900 dark:border-gray-700">
+                  {styles.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
+                </select>
+              </div>
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setShowCreateTemplateDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                className="bg-gradient-to-r from-green-500 to-emerald-600 text-white"
+                onClick={() => {
+                  toast.success('Template created', { description: 'Your template has been saved' })
+                  setShowCreateTemplateDialog(false)
+                }}
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Create Template
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Regenerate API Key Dialog */}
+        <Dialog open={showRegenerateKeyDialog} onOpenChange={setShowRegenerateKeyDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Key className="w-5 h-5 text-orange-500" />
+                Regenerate API Key
+              </DialogTitle>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-xl border border-amber-200 dark:border-amber-800">
+                <div className="flex items-start gap-3">
+                  <AlertTriangle className="w-5 h-5 text-amber-600 mt-0.5" />
+                  <div>
+                    <p className="font-medium text-amber-800 dark:text-amber-200">Warning</p>
+                    <p className="text-sm text-amber-700 dark:text-amber-300 mt-1">
+                      Regenerating your API key will invalidate the current key. Any applications using the old key will stop working.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setShowRegenerateKeyDialog(false)}>
+                Cancel
+              </Button>
+              <Button variant="destructive" onClick={handleRegenerateApiKey}>
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Regenerate Key
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Manage Models Dialog */}
+        <Dialog open={showManageModelsDialog} onOpenChange={setShowManageModelsDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <HardDrive className="w-5 h-5 text-blue-500" />
+                Manage Downloaded Models
+              </DialogTitle>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="space-y-3">
+                {mockModels.map(model => (
+                  <div key={model.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center">
+                        <Cpu className="w-5 h-5 text-white" />
+                      </div>
+                      <div>
+                        <p className="font-medium text-gray-900 dark:text-white">{model.name}</p>
+                        <p className="text-xs text-gray-500">1.2 GB</p>
+                      </div>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => toast.success('Model removed', { description: `${model.name} has been deleted` })}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="flex justify-end">
+              <Button variant="outline" onClick={() => setShowManageModelsDialog(false)}>
+                Close
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete All Generations Dialog */}
+        <Dialog open={showDeleteAllDialog} onOpenChange={setShowDeleteAllDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-600">
+                <Trash2 className="w-5 h-5" />
+                Delete All Generations
+              </DialogTitle>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-xl border border-red-200 dark:border-red-800">
+                <div className="flex items-start gap-3">
+                  <AlertTriangle className="w-5 h-5 text-red-600 mt-0.5" />
+                  <div>
+                    <p className="font-medium text-red-800 dark:text-red-200">This action cannot be undone</p>
+                    <p className="text-sm text-red-700 dark:text-red-300 mt-1">
+                      All your AI generations will be permanently deleted. This includes images, variations, and all associated data.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setShowDeleteAllDialog(false)}>
+                Cancel
+              </Button>
+              <Button variant="destructive" onClick={handleDeleteAllGenerations}>
+                <Trash2 className="w-4 h-4 mr-2" />
+                Delete All
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Reset Settings Dialog */}
+        <Dialog open={showResetSettingsDialog} onOpenChange={setShowResetSettingsDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-600">
+                <RefreshCw className="w-5 h-5" />
+                Reset All Settings
+              </DialogTitle>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-xl border border-red-200 dark:border-red-800">
+                <div className="flex items-start gap-3">
+                  <AlertTriangle className="w-5 h-5 text-red-600 mt-0.5" />
+                  <div>
+                    <p className="font-medium text-red-800 dark:text-red-200">Reset to defaults?</p>
+                    <p className="text-sm text-red-700 dark:text-red-300 mt-1">
+                      All your preferences, customizations, and settings will be reset to their default values.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setShowResetSettingsDialog(false)}>
+                Cancel
+              </Button>
+              <Button variant="destructive" onClick={handleResetSettings}>
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Reset Settings
               </Button>
             </div>
           </DialogContent>

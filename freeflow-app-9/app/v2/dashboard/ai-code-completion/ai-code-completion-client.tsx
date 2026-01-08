@@ -1256,7 +1256,10 @@ export default function AiCodeCompletionClient() {
                                   <CheckCircle className="w-3 h-3" />
                                   Accept
                                 </button>
-                                <button className="px-3 py-1.5 border border-input bg-background hover:bg-accent hover:text-accent-foreground rounded-md text-sm flex items-center gap-2">
+                                <button
+                                  className="px-3 py-1.5 border border-input bg-background hover:bg-accent hover:text-accent-foreground rounded-md text-sm flex items-center gap-2"
+                                  onClick={handleDownloadCode}
+                                >
                                   <Download className="w-3 h-3" />
                                   Download
                                 </button>

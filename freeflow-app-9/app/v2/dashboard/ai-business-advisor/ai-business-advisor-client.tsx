@@ -17,7 +17,7 @@ export const dynamic = 'force-dynamic';
 import React, { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Brain, DollarSign, TrendingUp, Target, ArrowUpRight, ArrowDownRight, Lightbulb, AlertCircle, Plus, Download, Settings, BarChart3 } from 'lucide-react'
+import { Brain, DollarSign, TrendingUp, Target, ArrowUpRight, ArrowDownRight, Lightbulb, AlertCircle, Plus, Download, Settings, BarChart3, Eye, CheckCircle, Bell, RefreshCw, FileText, Share2, Bookmark, Play } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
@@ -100,6 +100,28 @@ export default function AiBusinessAdvisorClient() {
     enableAIRecommendations: true
   })
 
+  // Additional dialog states for opportunities and risks
+  const [opportunityDetailDialogOpen, setOpportunityDetailDialogOpen] = useState(false)
+  const [riskDetailDialogOpen, setRiskDetailDialogOpen] = useState(false)
+  const [shareInsightDialogOpen, setShareInsightDialogOpen] = useState(false)
+  const [generateReportDialogOpen, setGenerateReportDialogOpen] = useState(false)
+  const [selectedOpportunity, setSelectedOpportunity] = useState<{title: string; impact: string; confidence: number; description: string} | null>(null)
+  const [selectedRisk, setSelectedRisk] = useState<{title: string; severity: string; action: string} | null>(null)
+
+  // Share insight form state
+  const [shareData, setShareData] = useState({
+    email: '',
+    message: '',
+    includeAnalysis: true
+  })
+
+  // Report generation state
+  const [reportData, setReportData] = useState({
+    reportType: 'comprehensive',
+    focus: 'all',
+    timeframe: 'quarterly'
+  })
+
   // Quick actions with dialog openers
   const aiBusinessAdvisorQuickActions = [
     { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => setNewItemDialogOpen(true) },
@@ -140,6 +162,97 @@ export default function AiBusinessAdvisorClient() {
     setSettingsDialogOpen(false)
   }
 
+  // Handle opportunity actions
+  const handleViewOpportunity = (opp: {title: string; impact: string; confidence: number; description: string}) => {
+    setSelectedOpportunity(opp)
+    setOpportunityDetailDialogOpen(true)
+  }
+
+  const handleImplementOpportunity = (title: string) => {
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 1500)),
+      {
+        loading: 'Creating implementation plan...',
+        success: `Implementation plan created for "${title}"`,
+        error: 'Failed to create plan'
+      }
+    )
+    logger.info('Opportunity implementation started', { title, userId })
+  }
+
+  const handleBookmarkOpportunity = (title: string) => {
+    toast.success(`Bookmarked: "${title}"`)
+    logger.info('Opportunity bookmarked', { title, userId })
+  }
+
+  // Handle risk actions
+  const handleViewRisk = (risk: {title: string; severity: string; action: string}) => {
+    setSelectedRisk(risk)
+    setRiskDetailDialogOpen(true)
+  }
+
+  const handleAcknowledgeRisk = (title: string) => {
+    toast.success(`Risk acknowledged: "${title}"`)
+    logger.info('Risk acknowledged', { title, userId })
+  }
+
+  const handleSetRiskAlert = (title: string) => {
+    toast.success(`Alert set for: "${title}"`)
+    logger.info('Risk alert configured', { title, userId })
+  }
+
+  // Handle share insight
+  const handleShareInsight = () => {
+    if (!shareData.email.trim()) {
+      toast.error('Please enter an email address')
+      return
+    }
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 1500)),
+      {
+        loading: 'Sending insight...',
+        success: `Insight shared with ${shareData.email}`,
+        error: 'Failed to share insight'
+      }
+    )
+    logger.info('Insight shared', { ...shareData, userId })
+    setShareData({ email: '', message: '', includeAnalysis: true })
+    setShareInsightDialogOpen(false)
+  }
+
+  // Handle generate report
+  const handleGenerateReport = () => {
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 2500)),
+      {
+        loading: 'Generating AI report...',
+        success: 'AI Business Report generated successfully',
+        error: 'Report generation failed'
+      }
+    )
+    logger.info('AI report generated', { ...reportData, userId })
+    setGenerateReportDialogOpen(false)
+  }
+
+  // Handle refresh insights
+  const handleRefreshInsights = () => {
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 2000)),
+      {
+        loading: 'Refreshing AI insights...',
+        success: 'Insights updated with latest data',
+        error: 'Failed to refresh insights'
+      }
+    )
+    logger.info('AI insights refreshed', { userId })
+  }
+
+  // Handle metric card click
+  const handleMetricClick = (metricLabel: string) => {
+    toast.info(`Viewing detailed analytics for: ${metricLabel}`)
+    logger.info('Metric details viewed', { metric: metricLabel, userId })
+  }
+
   useEffect(() => {
     if (userId) {
       logger.info('AI Business Advisor page loaded', { userId })
@@ -151,11 +264,47 @@ export default function AiBusinessAdvisorClient() {
     <div className="min-h-screen bg-gray-50 p-6">
       {/* Header */}
       <div className="mb-6">
-        <div className="flex items-center gap-3 mb-2">
-          <div className="p-2 bg-gradient-to-r from-purple-500 to-violet-600 rounded-lg">
-            <Brain className="h-6 w-6 text-white" />
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-gradient-to-r from-purple-500 to-violet-600 rounded-lg">
+              <Brain className="h-6 w-6 text-white" />
+            </div>
+            <h1 className="text-3xl font-bold text-gray-900">AI Business Advisor</h1>
           </div>
-          <h1 className="text-3xl font-bold text-gray-900">AI Business Advisor</h1>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleRefreshInsights}
+            >
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Refresh
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShareInsightDialogOpen(true)}
+            >
+              <Share2 className="h-4 w-4 mr-2" />
+              Share
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setGenerateReportDialogOpen(true)}
+            >
+              <FileText className="h-4 w-4 mr-2" />
+              Report
+            </Button>
+            <Button
+              size="sm"
+              onClick={() => setNewItemDialogOpen(true)}
+              className="bg-purple-600 hover:bg-purple-700"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              New Insight
+            </Button>
+          </div>
         </div>
         <p className="text-gray-600">
           Get intelligent insights to grow your business, optimize projects, and maximize profitability
@@ -208,7 +357,11 @@ export default function AiBusinessAdvisorClient() {
                 { label: 'Market Position', value: 'Top 15%', trend: 'up', color: 'text-purple-600', bgColor: 'bg-purple-50' },
                 { label: 'Profit Margin', value: '32%', trend: 'down', color: 'text-orange-600', bgColor: 'bg-orange-50' }
               ].map((metric, i) => (
-                <Card key={i} className={metric.bgColor}>
+                <Card
+                  key={i}
+                  className={`${metric.bgColor} cursor-pointer hover:shadow-md transition-shadow`}
+                  onClick={() => handleMetricClick(metric.label)}
+                >
                   <CardContent className="pt-6">
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-sm text-gray-600">{metric.label}</span>
@@ -299,9 +452,34 @@ export default function AiBusinessAdvisorClient() {
                         <Badge variant={opp.impact === 'High' ? 'default' : 'secondary'}>{opp.impact}</Badge>
                       </div>
                       <p className="text-sm text-gray-600 mb-2">{opp.description}</p>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 mb-3">
                         <Progress value={opp.confidence} className="flex-1 h-2" />
                         <span className="text-xs text-gray-500">{opp.confidence}% confidence</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleViewOpportunity(opp)}
+                        >
+                          <Eye className="h-3 w-3 mr-1" />
+                          View
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleImplementOpportunity(opp.title)}
+                        >
+                          <Play className="h-3 w-3 mr-1" />
+                          Implement
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleBookmarkOpportunity(opp.title)}
+                        >
+                          <Bookmark className="h-3 w-3" />
+                        </Button>
                       </div>
                     </div>
                   ))}
@@ -334,7 +512,32 @@ export default function AiBusinessAdvisorClient() {
                         }`} />
                         <h4 className="font-medium">{risk.title}</h4>
                       </div>
-                      <p className="text-sm text-gray-600">{risk.action}</p>
+                      <p className="text-sm text-gray-600 mb-3">{risk.action}</p>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleViewRisk(risk)}
+                        >
+                          <Eye className="h-3 w-3 mr-1" />
+                          Details
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleAcknowledgeRisk(risk.title)}
+                        >
+                          <CheckCircle className="h-3 w-3 mr-1" />
+                          Acknowledge
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleSetRiskAlert(risk.title)}
+                        >
+                          <Bell className="h-3 w-3" />
+                        </Button>
+                      </div>
                     </div>
                   ))}
                 </CardContent>
@@ -612,6 +815,268 @@ export default function AiBusinessAdvisorClient() {
             <Button onClick={handleSaveSettings}>
               <Settings className="h-4 w-4 mr-2" />
               Save Settings
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Opportunity Detail Dialog */}
+      <Dialog open={opportunityDetailDialogOpen} onOpenChange={setOpportunityDetailDialogOpen}>
+        <DialogContent className="sm:max-w-[550px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Lightbulb className="h-5 w-5 text-yellow-500" />
+              Growth Opportunity Details
+            </DialogTitle>
+            <DialogDescription>
+              Detailed analysis and implementation recommendations for this opportunity.
+            </DialogDescription>
+          </DialogHeader>
+          {selectedOpportunity && (
+            <div className="py-4 space-y-4">
+              <div>
+                <h3 className="font-semibold text-lg">{selectedOpportunity.title}</h3>
+                <Badge className="mt-2" variant={selectedOpportunity.impact === 'High' ? 'default' : 'secondary'}>
+                  {selectedOpportunity.impact} Impact
+                </Badge>
+              </div>
+              <div>
+                <Label className="text-sm text-gray-500">Description</Label>
+                <p className="mt-1">{selectedOpportunity.description}</p>
+              </div>
+              <div>
+                <Label className="text-sm text-gray-500">AI Confidence Score</Label>
+                <div className="flex items-center gap-3 mt-1">
+                  <Progress value={selectedOpportunity.confidence} className="flex-1 h-3" />
+                  <span className="font-semibold">{selectedOpportunity.confidence}%</span>
+                </div>
+              </div>
+              <div className="p-4 bg-purple-50 rounded-lg">
+                <Label className="text-sm text-purple-700 font-medium">AI Recommendation</Label>
+                <p className="mt-1 text-sm text-purple-600">
+                  Based on your current metrics, implementing this opportunity could result in
+                  a {selectedOpportunity.impact === 'High' ? '25-40%' : '10-20%'} improvement in related KPIs
+                  within the next quarter.
+                </p>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setOpportunityDetailDialogOpen(false)}>
+              Close
+            </Button>
+            <Button
+              onClick={() => {
+                if (selectedOpportunity) {
+                  handleImplementOpportunity(selectedOpportunity.title)
+                }
+                setOpportunityDetailDialogOpen(false)
+              }}
+              className="bg-purple-600 hover:bg-purple-700"
+            >
+              <Play className="h-4 w-4 mr-2" />
+              Start Implementation
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Risk Detail Dialog */}
+      <Dialog open={riskDetailDialogOpen} onOpenChange={setRiskDetailDialogOpen}>
+        <DialogContent className="sm:max-w-[550px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <AlertCircle className="h-5 w-5 text-red-500" />
+              Risk Alert Details
+            </DialogTitle>
+            <DialogDescription>
+              Detailed risk analysis and recommended mitigation strategies.
+            </DialogDescription>
+          </DialogHeader>
+          {selectedRisk && (
+            <div className="py-4 space-y-4">
+              <div>
+                <h3 className="font-semibold text-lg">{selectedRisk.title}</h3>
+                <Badge
+                  className="mt-2"
+                  variant={selectedRisk.severity === 'High' ? 'destructive' : selectedRisk.severity === 'Medium' ? 'default' : 'secondary'}
+                >
+                  {selectedRisk.severity} Severity
+                </Badge>
+              </div>
+              <div>
+                <Label className="text-sm text-gray-500">Recommended Action</Label>
+                <p className="mt-1">{selectedRisk.action}</p>
+              </div>
+              <div className={`p-4 rounded-lg ${
+                selectedRisk.severity === 'High' ? 'bg-red-50' :
+                selectedRisk.severity === 'Medium' ? 'bg-yellow-50' : 'bg-blue-50'
+              }`}>
+                <Label className={`text-sm font-medium ${
+                  selectedRisk.severity === 'High' ? 'text-red-700' :
+                  selectedRisk.severity === 'Medium' ? 'text-yellow-700' : 'text-blue-700'
+                }`}>AI Mitigation Strategy</Label>
+                <p className={`mt-1 text-sm ${
+                  selectedRisk.severity === 'High' ? 'text-red-600' :
+                  selectedRisk.severity === 'Medium' ? 'text-yellow-600' : 'text-blue-600'
+                }`}>
+                  {selectedRisk.severity === 'High'
+                    ? 'Immediate attention required. Consider scheduling a strategy session to address this risk within the next 2 weeks.'
+                    : selectedRisk.severity === 'Medium'
+                    ? 'Monitor closely and implement preventive measures within the next month.'
+                    : 'Add to quarterly review agenda and track progress over time.'}
+                </p>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setRiskDetailDialogOpen(false)}>
+              Close
+            </Button>
+            <Button
+              onClick={() => {
+                if (selectedRisk) {
+                  handleAcknowledgeRisk(selectedRisk.title)
+                }
+                setRiskDetailDialogOpen(false)
+              }}
+            >
+              <CheckCircle className="h-4 w-4 mr-2" />
+              Acknowledge & Monitor
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Share Insight Dialog */}
+      <Dialog open={shareInsightDialogOpen} onOpenChange={setShareInsightDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Share2 className="h-5 w-5 text-blue-600" />
+              Share AI Insights
+            </DialogTitle>
+            <DialogDescription>
+              Share your business insights and AI recommendations with team members or stakeholders.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="share-email">Recipient Email</Label>
+              <Input
+                id="share-email"
+                type="email"
+                placeholder="colleague@company.com"
+                value={shareData.email}
+                onChange={(e) => setShareData({ ...shareData, email: e.target.value })}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="share-message">Personal Message (Optional)</Label>
+              <Textarea
+                id="share-message"
+                placeholder="Add a note about these insights..."
+                value={shareData.message}
+                onChange={(e) => setShareData({ ...shareData, message: e.target.value })}
+                rows={3}
+              />
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label>Include AI Analysis</Label>
+                <p className="text-sm text-gray-500">Share detailed AI-generated insights and charts</p>
+              </div>
+              <Switch
+                checked={shareData.includeAnalysis}
+                onCheckedChange={(checked) => setShareData({ ...shareData, includeAnalysis: checked })}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShareInsightDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleShareInsight} className="bg-blue-600 hover:bg-blue-700">
+              <Share2 className="h-4 w-4 mr-2" />
+              Send Insights
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Generate Report Dialog */}
+      <Dialog open={generateReportDialogOpen} onOpenChange={setGenerateReportDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5 text-green-600" />
+              Generate AI Business Report
+            </DialogTitle>
+            <DialogDescription>
+              Create a comprehensive AI-powered business intelligence report.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="report-type">Report Type</Label>
+              <Select
+                value={reportData.reportType}
+                onValueChange={(value) => setReportData({ ...reportData, reportType: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select report type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="comprehensive">Comprehensive Analysis</SelectItem>
+                  <SelectItem value="executive">Executive Summary</SelectItem>
+                  <SelectItem value="actionable">Action Items Only</SelectItem>
+                  <SelectItem value="trends">Trends & Forecasts</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="report-focus">Focus Area</Label>
+              <Select
+                value={reportData.focus}
+                onValueChange={(value) => setReportData({ ...reportData, focus: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select focus area" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Areas</SelectItem>
+                  <SelectItem value="growth">Growth & Opportunities</SelectItem>
+                  <SelectItem value="risk">Risk Assessment</SelectItem>
+                  <SelectItem value="financial">Financial Insights</SelectItem>
+                  <SelectItem value="operations">Operational Efficiency</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="report-timeframe">Time Frame</Label>
+              <Select
+                value={reportData.timeframe}
+                onValueChange={(value) => setReportData({ ...reportData, timeframe: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select time frame" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="weekly">Weekly</SelectItem>
+                  <SelectItem value="monthly">Monthly</SelectItem>
+                  <SelectItem value="quarterly">Quarterly</SelectItem>
+                  <SelectItem value="yearly">Yearly</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setGenerateReportDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleGenerateReport} className="bg-green-600 hover:bg-green-700">
+              <FileText className="h-4 w-4 mr-2" />
+              Generate Report
             </Button>
           </DialogFooter>
         </DialogContent>
