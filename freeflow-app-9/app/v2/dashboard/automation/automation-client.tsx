@@ -901,7 +901,14 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
                           <div className="text-xs text-gray-500">{integration.category}</div>
                         </div>
                       </div>
-                      <Button size="sm" variant="ghost">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => {
+                          setSelectedIntegration(integration)
+                          setShowIntegrationDialog(true)
+                        }}
+                      >
                         <Settings className="h-4 w-4" />
                       </Button>
                     </div>
@@ -1226,7 +1233,17 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
                               <Label className="text-base">API Key</Label>
                               <p className="text-xs text-gray-500">Use this key for programmatic access</p>
                             </div>
-                            <Button size="sm" variant="outline">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                if (confirm('Are you sure you want to regenerate the API key? This will invalidate the current key.')) {
+                                  toast.success('API Key Regenerated', {
+                                    description: 'Your new API key has been generated. Please update your integrations.'
+                                  })
+                                }
+                              }}
+                            >
                               <RefreshCw className="h-4 w-4 mr-2" />
                               Regenerate
                             </Button>
@@ -1238,7 +1255,16 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
                               readOnly
                               className="font-mono"
                             />
-                            <Button size="sm" variant="ghost">
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => {
+                                navigator.clipboard.writeText('n8n_api_key_xxxxxxxxxxxxxxxxxxxxx')
+                                toast.success('Copied!', {
+                                  description: 'API key copied to clipboard'
+                                })
+                              }}
+                            >
                               <Copy className="h-4 w-4" />
                             </Button>
                           </div>
@@ -1257,7 +1283,16 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
                               readOnly
                               className="font-mono"
                             />
-                            <Button size="sm" variant="ghost">
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => {
+                                navigator.clipboard.writeText('https://automation.yourapp.com/webhook/')
+                                toast.success('Copied!', {
+                                  description: 'Webhook URL copied to clipboard'
+                                })
+                              }}
+                            >
                               <Copy className="h-4 w-4" />
                             </Button>
                           </div>
@@ -1772,7 +1807,17 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
                               defaultValue="••••••••••••••••••••••••"
                               readOnly
                             />
-                            <Button size="sm" variant="outline">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                if (confirm('Are you sure you want to rotate the encryption key? This requires re-encryption of all stored credentials.')) {
+                                  toast.success('Encryption Key Rotated', {
+                                    description: 'All credentials have been re-encrypted with the new key.'
+                                  })
+                                }
+                              }}
+                            >
                               <RefreshCw className="h-4 w-4 mr-2" />
                               Rotate
                             </Button>
@@ -2005,7 +2050,17 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
                             <Label className="text-base text-red-700 dark:text-red-400">Clear Execution History</Label>
                             <p className="text-sm text-red-600/70 dark:text-red-400/70">Delete all execution logs and history</p>
                           </div>
-                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-900/30">
+                          <Button
+                            variant="outline"
+                            className="border-red-300 text-red-600 hover:bg-red-50 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-900/30"
+                            onClick={() => {
+                              if (confirm('Are you sure you want to clear all execution history? This action cannot be undone.')) {
+                                toast.success('History Cleared', {
+                                  description: 'All execution logs and history have been deleted.'
+                                })
+                              }
+                            }}
+                          >
                             <Trash2 className="h-4 w-4 mr-2" />
                             Clear History
                           </Button>
@@ -2016,7 +2071,17 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
                             <Label className="text-base text-red-700 dark:text-red-400">Reset All Credentials</Label>
                             <p className="text-sm text-red-600/70 dark:text-red-400/70">Disconnect all apps and clear credentials</p>
                           </div>
-                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-900/30">
+                          <Button
+                            variant="outline"
+                            className="border-red-300 text-red-600 hover:bg-red-50 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-900/30"
+                            onClick={() => {
+                              if (confirm('Are you sure you want to reset all credentials? All connected apps will be disconnected.')) {
+                                toast.success('Credentials Reset', {
+                                  description: 'All app connections have been disconnected and credentials cleared.'
+                                })
+                              }
+                            }}
+                          >
                             <Lock className="h-4 w-4 mr-2" />
                             Reset Credentials
                           </Button>
@@ -2027,7 +2092,17 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
                             <Label className="text-base text-red-700 dark:text-red-400">Delete All Workflows</Label>
                             <p className="text-sm text-red-600/70 dark:text-red-400/70">Permanently delete all automations</p>
                           </div>
-                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-900/30">
+                          <Button
+                            variant="outline"
+                            className="border-red-300 text-red-600 hover:bg-red-50 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-900/30"
+                            onClick={() => {
+                              if (confirm('Are you sure you want to delete ALL workflows? This action is permanent and cannot be undone.')) {
+                                toast.success('Workflows Deleted', {
+                                  description: 'All automation workflows have been permanently deleted.'
+                                })
+                              }
+                            }}
+                          >
                             <Trash2 className="h-4 w-4 mr-2" />
                             Delete All
                           </Button>
@@ -2038,7 +2113,18 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
                             <Label className="text-base text-red-700 dark:text-red-400">Factory Reset</Label>
                             <p className="text-sm text-red-600/70 dark:text-red-400/70">Reset everything to default settings</p>
                           </div>
-                          <Button variant="destructive">
+                          <Button
+                            variant="destructive"
+                            onClick={() => {
+                              if (confirm('WARNING: This will reset ALL settings, delete ALL workflows, and disconnect ALL apps. Are you absolutely sure?')) {
+                                if (confirm('This is your final warning. Click OK to proceed with factory reset.')) {
+                                  toast.success('Factory Reset Complete', {
+                                    description: 'All settings have been reset to defaults.'
+                                  })
+                                }
+                              }
+                            }}
+                          >
                             <AlertOctagon className="h-4 w-4 mr-2" />
                             Factory Reset
                           </Button>

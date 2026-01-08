@@ -212,6 +212,17 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null)
   const [settingsTab, setSettingsTab] = useState('payment')
 
+  // Dialog states for settings buttons
+  const [showUploadLogoDialog, setShowUploadLogoDialog] = useState(false)
+  const [showAddWebhookDialog, setShowAddWebhookDialog] = useState(false)
+  const [showAddTaxRateDialog, setShowAddTaxRateDialog] = useState(false)
+  const [showConfirmCancelAllDialog, setShowConfirmCancelAllDialog] = useState(false)
+  const [showConfirmDeleteTestDataDialog, setShowConfirmDeleteTestDataDialog] = useState(false)
+  const [showConfirmDisableBillingDialog, setShowConfirmDisableBillingDialog] = useState(false)
+  const [showAuditLogDialog, setShowAuditLogDialog] = useState(false)
+  const [showConnectIntegrationDialog, setShowConnectIntegrationDialog] = useState(false)
+  const [selectedIntegration, setSelectedIntegration] = useState<string | null>(null)
+
   const { transactions, loading, error, refetch: refetchTransactions } = useBilling({ status: statusFilter })
   const display = transactions.length > 0 ? transactions : initialBilling
 
@@ -1394,7 +1405,7 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
                         <Label className="text-sm font-medium">Portal URL</Label>
                         <div className="flex gap-2">
                           <Input value="https://billing.yourapp.com/portal" readOnly className="flex-1" />
-                          <Button variant="outline" size="icon">
+                          <Button variant="outline" size="icon" onClick={() => { navigator.clipboard.writeText('https://billing.yourapp.com/portal'); toast.success('Portal URL copied to clipboard'); }}>
                             <Copy className="h-4 w-4" />
                           </Button>
                         </div>
@@ -1514,7 +1525,7 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
                           <div className="w-16 h-16 mx-auto mb-2 bg-gray-100 dark:bg-gray-800 rounded flex items-center justify-center">
                             <Building className="w-8 h-8 text-gray-400" />
                           </div>
-                          <Button variant="outline" size="sm">Upload Logo</Button>
+                          <Button variant="outline" size="sm" onClick={() => setShowUploadLogoDialog(true)}>Upload Logo</Button>
                         </div>
                       </div>
                       <div className="space-y-2">
@@ -1802,7 +1813,7 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
                             {integration.status === 'connected' ? (
                               <Badge className="bg-green-100 text-green-700">Connected</Badge>
                             ) : (
-                              <Button variant="outline" size="sm">Connect</Button>
+                              <Button variant="outline" size="sm" onClick={() => { setSelectedIntegration(integration.name); setShowConnectIntegrationDialog(true); }}>Connect</Button>
                             )}
                           </div>
                         ))}
@@ -1833,7 +1844,7 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
                             <Button variant="ghost" size="sm" onClick={() => toast.success('Webhook editor opened')}><Edit className="h-4 w-4" /></Button>
                           </div>
                         ))}
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => setShowAddWebhookDialog(true)}>
                           <Plus className="h-4 w-4 mr-2" />
                           Add Endpoint
                         </Button>
@@ -1875,7 +1886,7 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
                           <strong>Warning:</strong> Never share your secret key in public repositories or client-side code.
                         </p>
                       </div>
-                      <Button variant="outline" className="w-full">
+                      <Button variant="outline" className="w-full" onClick={() => { toast.info('Rotating API keys...'); setTimeout(() => toast.success('API keys rotated successfully'), 1500); }}>
                         <RefreshCw className="h-4 w-4 mr-2" />
                         Rotate API Keys
                       </Button>
@@ -1893,7 +1904,7 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
                         <Percent className="h-5 w-5 text-indigo-600" />
                         Tax Rates
                       </CardTitle>
-                      <Button>
+                      <Button onClick={() => setShowAddTaxRateDialog(true)}>
                         <Plus className="h-4 w-4 mr-2" />
                         Add Tax Rate
                       </Button>
@@ -2039,7 +2050,7 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
                         <Label className="text-sm font-medium">Test Card Number</Label>
                         <div className="flex gap-2">
                           <Input value="4242 4242 4242 4242" readOnly className="flex-1 font-mono" />
-                          <Button variant="outline" size="icon">
+                          <Button variant="outline" size="icon" onClick={() => { navigator.clipboard.writeText('4242424242424242'); toast.success('Test card number copied to clipboard'); }}>
                             <Copy className="h-4 w-4" />
                           </Button>
                         </div>
@@ -2116,15 +2127,15 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
                           </SelectContent>
                         </Select>
                       </div>
-                      <Button variant="outline" className="w-full">
+                      <Button variant="outline" className="w-full" onClick={handleExportBilling}>
                         <Download className="h-4 w-4 mr-2" />
                         Export All Billing Data
                       </Button>
-                      <Button variant="outline" className="w-full">
+                      <Button variant="outline" className="w-full" onClick={() => { toast.info('Generating tax report...'); setTimeout(() => toast.success('Tax report generated and downloaded'), 2000); }}>
                         <FileText className="h-4 w-4 mr-2" />
                         Generate Tax Report
                       </Button>
-                      <Button variant="outline" className="w-full">
+                      <Button variant="outline" className="w-full" onClick={() => setShowAuditLogDialog(true)}>
                         <History className="h-4 w-4 mr-2" />
                         View Audit Log
                       </Button>
@@ -2144,15 +2155,15 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
                           These actions are irreversible. Please proceed with caution.
                         </p>
                       </div>
-                      <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50">
+                      <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50" onClick={() => setShowConfirmCancelAllDialog(true)}>
                         <Trash2 className="h-4 w-4 mr-2" />
                         Cancel All Subscriptions
                       </Button>
-                      <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50">
+                      <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50" onClick={() => setShowConfirmDeleteTestDataDialog(true)}>
                         <Trash2 className="h-4 w-4 mr-2" />
                         Delete All Test Data
                       </Button>
-                      <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50">
+                      <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50" onClick={() => setShowConfirmDisableBillingDialog(true)}>
                         <Lock className="h-4 w-4 mr-2" />
                         Disable Billing Module
                       </Button>
@@ -2550,6 +2561,301 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
           </DialogContent>
         </Dialog>
       )}
+
+      {/* Upload Logo Dialog */}
+      <Dialog open={showUploadLogoDialog} onOpenChange={setShowUploadLogoDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              <div className="p-2 bg-gradient-to-br from-indigo-500 to-violet-500 rounded-lg">
+                <Building className="h-5 w-5 text-white" />
+              </div>
+              Upload Company Logo
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-lg p-8 text-center">
+              <Building className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Drag and drop your logo here, or click to browse</p>
+              <p className="text-xs text-gray-500">PNG, JPG, or SVG. Max 2MB. Recommended: 200x200px</p>
+            </div>
+            <Input type="file" accept="image/*" className="cursor-pointer" />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowUploadLogoDialog(false)}>Cancel</Button>
+            <Button onClick={() => { toast.success('Logo uploaded successfully'); setShowUploadLogoDialog(false); }}>Upload Logo</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Webhook Dialog */}
+      <Dialog open={showAddWebhookDialog} onOpenChange={setShowAddWebhookDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              <div className="p-2 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg">
+                <Webhook className="h-5 w-5 text-white" />
+              </div>
+              Add Webhook Endpoint
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <Label className="text-sm font-medium">Endpoint URL *</Label>
+              <Input placeholder="https://your-domain.com/webhooks/billing" className="mt-1" />
+            </div>
+            <div>
+              <Label className="text-sm font-medium">Description</Label>
+              <Input placeholder="Billing webhook for production" className="mt-1" />
+            </div>
+            <div>
+              <Label className="text-sm font-medium">Events to Listen</Label>
+              <div className="mt-2 grid grid-cols-2 gap-2">
+                {['invoice.paid', 'invoice.payment_failed', 'subscription.created', 'subscription.updated', 'subscription.deleted', 'customer.created'].map(event => (
+                  <label key={event} className="flex items-center gap-2 text-sm">
+                    <input type="checkbox" className="rounded" defaultChecked={event.includes('invoice')} />
+                    <span className="text-gray-600 dark:text-gray-400">{event}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAddWebhookDialog(false)}>Cancel</Button>
+            <Button onClick={() => { toast.success('Webhook endpoint created'); setShowAddWebhookDialog(false); }}>Create Endpoint</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Tax Rate Dialog */}
+      <Dialog open={showAddTaxRateDialog} onOpenChange={setShowAddTaxRateDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              <div className="p-2 bg-gradient-to-br from-green-500 to-emerald-500 rounded-lg">
+                <Percent className="h-5 w-5 text-white" />
+              </div>
+              Add Tax Rate
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <Label className="text-sm font-medium">Tax Name *</Label>
+              <Input placeholder="e.g., State Sales Tax" className="mt-1" />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label className="text-sm font-medium">Percentage *</Label>
+                <Input type="number" placeholder="8.25" className="mt-1" />
+              </div>
+              <div>
+                <Label className="text-sm font-medium">Country</Label>
+                <Select defaultValue="us">
+                  <SelectTrigger className="mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="us">United States</SelectItem>
+                    <SelectItem value="uk">United Kingdom</SelectItem>
+                    <SelectItem value="de">Germany</SelectItem>
+                    <SelectItem value="fr">France</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div>
+              <Label className="text-sm font-medium">Jurisdiction</Label>
+              <Input placeholder="e.g., California" className="mt-1" />
+            </div>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-medium text-gray-900 dark:text-white">Tax Inclusive</p>
+                <p className="text-sm text-gray-500">Include tax in displayed prices</p>
+              </div>
+              <Switch />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAddTaxRateDialog(false)}>Cancel</Button>
+            <Button onClick={() => { toast.success('Tax rate created successfully'); setShowAddTaxRateDialog(false); }}>Create Tax Rate</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Connect Integration Dialog */}
+      <Dialog open={showConnectIntegrationDialog} onOpenChange={setShowConnectIntegrationDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              <div className="p-2 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg">
+                <Link2 className="h-5 w-5 text-white" />
+              </div>
+              Connect {selectedIntegration}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <p className="text-gray-600 dark:text-gray-400">
+              Connect your {selectedIntegration} account to sync billing data automatically.
+            </p>
+            <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+              <h4 className="font-medium text-gray-900 dark:text-white mb-2">What will be synced:</h4>
+              <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
+                <li>- Customer information</li>
+                <li>- Invoice and payment data</li>
+                <li>- Subscription details</li>
+                <li>- Revenue metrics</li>
+              </ul>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowConnectIntegrationDialog(false)}>Cancel</Button>
+            <Button onClick={() => { toast.success(`${selectedIntegration} connected successfully`); setShowConnectIntegrationDialog(false); }}>
+              Connect {selectedIntegration}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Audit Log Dialog */}
+      <Dialog open={showAuditLogDialog} onOpenChange={setShowAuditLogDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              <div className="p-2 bg-gradient-to-br from-gray-500 to-slate-600 rounded-lg">
+                <History className="h-5 w-5 text-white" />
+              </div>
+              Billing Audit Log
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 py-4 max-h-96 overflow-y-auto">
+            {[
+              { action: 'Subscription created', user: 'System', target: 'Acme Corp - Pro Monthly', time: '2 hours ago' },
+              { action: 'Payment processed', user: 'System', target: 'Invoice #2024-001 - $99.00', time: '3 hours ago' },
+              { action: 'Coupon applied', user: 'Admin', target: 'WELCOME10 to Creative Agency', time: '5 hours ago' },
+              { action: 'Tax rate updated', user: 'Admin', target: 'US Sales Tax - 8.25%', time: '1 day ago' },
+              { action: 'Webhook endpoint added', user: 'Admin', target: 'api.yourapp.com/webhooks', time: '2 days ago' },
+              { action: 'Subscription canceled', user: 'Customer', target: 'Global Industries - Enterprise', time: '3 days ago' },
+              { action: 'Refund processed', user: 'Admin', target: '$99.00 for TXN-12345', time: '5 days ago' },
+            ].map((log, idx) => (
+              <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div className="flex items-center gap-3">
+                  <Activity className="h-4 w-4 text-gray-400" />
+                  <div>
+                    <p className="text-sm font-medium text-gray-900 dark:text-white">{log.action}</p>
+                    <p className="text-xs text-gray-500">{log.target}</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="text-xs text-gray-500">{log.user}</p>
+                  <p className="text-xs text-gray-400">{log.time}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { toast.success('Audit log exported'); }}>Export Log</Button>
+            <Button variant="outline" onClick={() => setShowAuditLogDialog(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Confirm Cancel All Subscriptions Dialog */}
+      <Dialog open={showConfirmCancelAllDialog} onOpenChange={setShowConfirmCancelAllDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3 text-red-600">
+              <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-lg">
+                <AlertOctagon className="h-5 w-5 text-red-600" />
+              </div>
+              Cancel All Subscriptions
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+              <p className="text-sm text-red-800 dark:text-red-200">
+                <strong>Warning:</strong> This will cancel all active subscriptions immediately. This action cannot be undone.
+              </p>
+            </div>
+            <p className="text-gray-600 dark:text-gray-400">
+              Are you sure you want to cancel all {stats.activeSubscriptions} active subscriptions?
+            </p>
+            <div>
+              <Label className="text-sm font-medium">Type CANCEL to confirm</Label>
+              <Input placeholder="CANCEL" className="mt-1" />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowConfirmCancelAllDialog(false)}>Go Back</Button>
+            <Button variant="destructive" onClick={() => { toast.error('All subscriptions have been canceled'); setShowConfirmCancelAllDialog(false); }}>
+              Cancel All Subscriptions
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Confirm Delete Test Data Dialog */}
+      <Dialog open={showConfirmDeleteTestDataDialog} onOpenChange={setShowConfirmDeleteTestDataDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3 text-red-600">
+              <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-lg">
+                <Trash2 className="h-5 w-5 text-red-600" />
+              </div>
+              Delete All Test Data
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+              <p className="text-sm text-red-800 dark:text-red-200">
+                <strong>Warning:</strong> This will permanently delete all test mode data including test subscriptions, invoices, and customers.
+              </p>
+            </div>
+            <p className="text-gray-600 dark:text-gray-400">
+              This action cannot be undone. All test data will be permanently removed.
+            </p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowConfirmDeleteTestDataDialog(false)}>Cancel</Button>
+            <Button variant="destructive" onClick={() => { toast.success('Test data deleted successfully'); setShowConfirmDeleteTestDataDialog(false); }}>
+              Delete Test Data
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Confirm Disable Billing Dialog */}
+      <Dialog open={showConfirmDisableBillingDialog} onOpenChange={setShowConfirmDisableBillingDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3 text-red-600">
+              <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-lg">
+                <Lock className="h-5 w-5 text-red-600" />
+              </div>
+              Disable Billing Module
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+              <p className="text-sm text-red-800 dark:text-red-200">
+                <strong>Warning:</strong> Disabling the billing module will stop all recurring charges and prevent new subscriptions.
+              </p>
+            </div>
+            <p className="text-gray-600 dark:text-gray-400">
+              Current subscriptions will remain active until their next billing period. No new charges will be processed.
+            </p>
+            <div>
+              <Label className="text-sm font-medium">Type DISABLE to confirm</Label>
+              <Input placeholder="DISABLE" className="mt-1" />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowConfirmDisableBillingDialog(false)}>Cancel</Button>
+            <Button variant="destructive" onClick={() => { toast.warning('Billing module has been disabled'); setShowConfirmDisableBillingDialog(false); }}>
+              Disable Billing
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

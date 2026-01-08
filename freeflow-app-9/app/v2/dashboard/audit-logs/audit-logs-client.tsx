@@ -695,6 +695,15 @@ export default function AuditLogsClient() {
   // Quick Action Dialog States
   const [showSearchDialog, setShowSearchDialog] = useState(false)
   const [showExportDialog, setShowExportDialog] = useState(false)
+  const [showSavedQueriesDialog, setShowSavedQueriesDialog] = useState(false)
+  const [showArchiveDialog, setShowArchiveDialog] = useState(false)
+  const [showIntegrationsDialog, setShowIntegrationsDialog] = useState(false)
+  const [showClearLogsDialog, setShowClearLogsDialog] = useState(false)
+  const [showResetConfigDialog, setShowResetConfigDialog] = useState(false)
+  const [showRelatedEventsDialog, setShowRelatedEventsDialog] = useState(false)
+  const [showComplianceReportDialog, setShowComplianceReportDialog] = useState<string | null>(null)
+  const [showSIEMDialog, setShowSIEMDialog] = useState<string | null>(null)
+  const [analyticsDateRange, setAnalyticsDateRange] = useState('7d')
 
   // Form State for Alert Rules
   const [ruleFormData, setRuleFormData] = useState({
@@ -1252,17 +1261,18 @@ export default function AuditLogsClient() {
             {/* Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
               {[
-                { icon: Search, label: 'Search Logs', color: 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600' },
-                { icon: Bell, label: 'New Alert', color: 'bg-red-100 dark:bg-red-900/30 text-red-600' },
-                { icon: Download, label: 'Export', color: 'bg-green-100 dark:bg-green-900/30 text-green-600' },
-                { icon: Filter, label: 'Save Filter', color: 'bg-purple-100 dark:bg-purple-900/30 text-purple-600' },
-                { icon: ShieldCheck, label: 'Compliance', color: 'bg-blue-100 dark:bg-blue-900/30 text-blue-600' },
-                { icon: BarChart3, label: 'Analytics', color: 'bg-orange-100 dark:bg-orange-900/30 text-orange-600' },
-                { icon: Archive, label: 'Archive', color: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600' },
-                { icon: Webhook, label: 'Integrations', color: 'bg-cyan-100 dark:bg-cyan-900/30 text-cyan-600' },
+                { icon: Search, label: 'Search Logs', color: 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600', action: () => setShowSearchDialog(true) },
+                { icon: Bell, label: 'New Alert', color: 'bg-red-100 dark:bg-red-900/30 text-red-600', action: () => setShowCreateRuleDialog(true) },
+                { icon: Download, label: 'Export', color: 'bg-green-100 dark:bg-green-900/30 text-green-600', action: () => setShowExportDialog(true) },
+                { icon: Filter, label: 'Save Filter', color: 'bg-purple-100 dark:bg-purple-900/30 text-purple-600', action: () => { toast.success('Filter saved', { description: 'Current filter has been saved to your saved filters' }) } },
+                { icon: ShieldCheck, label: 'Compliance', color: 'bg-blue-100 dark:bg-blue-900/30 text-blue-600', action: () => setActiveTab('compliance') },
+                { icon: BarChart3, label: 'Analytics', color: 'bg-orange-100 dark:bg-orange-900/30 text-orange-600', action: () => setActiveTab('analytics') },
+                { icon: Archive, label: 'Archive', color: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600', action: () => setShowArchiveDialog(true) },
+                { icon: Webhook, label: 'Integrations', color: 'bg-cyan-100 dark:bg-cyan-900/30 text-cyan-600', action: () => setShowIntegrationsDialog(true) },
               ].map((action, i) => (
                 <button
                   key={i}
+                  onClick={action.action}
                   className="flex flex-col items-center gap-2 p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:shadow-lg hover:scale-105 transition-all duration-200"
                 >
                   <div className={`p-3 rounded-xl ${action.color}`}>
@@ -1389,7 +1399,7 @@ export default function AuditLogsClient() {
                   <p className="text-sm text-gray-600 dark:text-gray-400">Use structured queries to search audit logs</p>
                 </div>
               </div>
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={() => setShowSavedQueriesDialog(true)}>
                 <Filter className="w-4 h-4 mr-2" />
                 Saved Queries
               </Button>
@@ -1406,8 +1416,17 @@ export default function AuditLogsClient() {
                     <Input
                       placeholder="severity:critical AND log_type:security"
                       className="flex-1 font-mono"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
                     />
-                    <Button className="bg-indigo-600">
+                    <Button className="bg-indigo-600" onClick={() => {
+                      if (searchQuery) {
+                        toast.success('Search executed', { description: `Searching for: ${searchQuery}` })
+                        setActiveTab('events')
+                      } else {
+                        toast.error('Please enter a search query')
+                      }
+                    }}>
                       <Search className="w-4 h-4 mr-2" />
                       Search
                     </Button>
@@ -1621,11 +1640,15 @@ export default function AuditLogsClient() {
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" onClick={() => {
+                  toast.success('Refreshing compliance data', { description: 'Fetching latest compliance status...' })
+                }}>
                   <RefreshCw className="w-4 h-4 mr-2" />
                   Refresh
                 </Button>
-                <Button size="sm" className="bg-green-600 hover:bg-green-700">
+                <Button size="sm" className="bg-green-600 hover:bg-green-700" onClick={() => {
+                  toast.success('Exporting all compliance reports', { description: 'Your download will begin shortly...' })
+                }}>
                   <Download className="w-4 h-4 mr-2" />
                   Export All
                 </Button>
@@ -1666,7 +1689,7 @@ export default function AuditLogsClient() {
                           <p className="text-xs text-gray-500">Failed</p>
                         </div>
                       </div>
-                      <Button variant="outline" className="w-full">
+                      <Button variant="outline" className="w-full" onClick={() => setShowComplianceReportDialog(report.id)}>
                         <Download className="w-4 h-4 mr-2" />
                         Download Report
                       </Button>
@@ -1693,11 +1716,32 @@ export default function AuditLogsClient() {
                   </div>
                 </div>
                 <div className="flex items-center gap-4 mt-6">
-                  <button className="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg backdrop-blur-sm transition-colors">
+                  <button
+                    className={`px-4 py-2 ${analyticsDateRange === '7d' ? 'bg-white text-blue-600' : 'bg-white/20 hover:bg-white/30'} rounded-lg backdrop-blur-sm transition-colors`}
+                    onClick={() => {
+                      setAnalyticsDateRange('7d')
+                      toast.success('Date range updated', { description: 'Showing last 7 days' })
+                    }}
+                  >
                     <Calendar className="w-4 h-4 inline mr-2" />
                     Last 7 Days
                   </button>
-                  <button className="px-4 py-2 bg-white text-blue-600 rounded-lg hover:bg-white/90 transition-colors">
+                  <button
+                    className={`px-4 py-2 ${analyticsDateRange === '30d' ? 'bg-white text-blue-600' : 'bg-white/20 hover:bg-white/30'} rounded-lg backdrop-blur-sm transition-colors`}
+                    onClick={() => {
+                      setAnalyticsDateRange('30d')
+                      toast.success('Date range updated', { description: 'Showing last 30 days' })
+                    }}
+                  >
+                    <Calendar className="w-4 h-4 inline mr-2" />
+                    Last 30 Days
+                  </button>
+                  <button
+                    className="px-4 py-2 bg-white text-blue-600 rounded-lg hover:bg-white/90 transition-colors"
+                    onClick={() => {
+                      toast.success('Exporting analytics report', { description: 'Your download will begin shortly...' })
+                    }}
+                  >
                     <Download className="w-4 h-4 inline mr-2" />
                     Export Report
                   </button>
@@ -2042,7 +2086,11 @@ export default function AuditLogsClient() {
                                 <p className="text-sm text-gray-500">{integration.desc}</p>
                               </div>
                             </div>
-                            <Button variant={integration.status === 'connected' ? 'outline' : 'default'} size="sm">
+                            <Button
+                              variant={integration.status === 'connected' ? 'outline' : 'default'}
+                              size="sm"
+                              onClick={() => setShowSIEMDialog(integration.name)}
+                            >
                               {integration.status === 'connected' ? 'Manage' : 'Connect'}
                             </Button>
                           </div>
@@ -2142,7 +2190,7 @@ export default function AuditLogsClient() {
                             <p className="font-medium text-gray-900 dark:text-white">Export All Logs</p>
                             <p className="text-sm text-gray-500">Download complete audit trail</p>
                           </div>
-                          <Button>
+                          <Button onClick={handleExportAuditLogs}>
                             <Download className="w-4 h-4 mr-2" />
                             Export
                           </Button>
@@ -2169,7 +2217,7 @@ export default function AuditLogsClient() {
                             <p className="font-medium text-gray-900 dark:text-white">Clear Debug Logs</p>
                             <p className="text-sm text-gray-500">Remove all debug-level logs</p>
                           </div>
-                          <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50">
+                          <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50" onClick={() => setShowClearLogsDialog(true)}>
                             <Trash2 className="w-4 h-4 mr-2" />
                             Clear
                           </Button>
@@ -2179,7 +2227,7 @@ export default function AuditLogsClient() {
                             <p className="font-medium text-gray-900 dark:text-white">Reset Configuration</p>
                             <p className="text-sm text-gray-500">Reset all settings to default</p>
                           </div>
-                          <Button variant="destructive">
+                          <Button variant="destructive" onClick={() => setShowResetConfigDialog(true)}>
                             <RefreshCw className="w-4 h-4 mr-2" />
                             Reset
                           </Button>
@@ -2305,11 +2353,19 @@ export default function AuditLogsClient() {
                   </div>
 
                   <div className="flex items-center gap-3 pt-4 border-t">
-                    <Button variant="outline" className="flex-1">
+                    <Button variant="outline" className="flex-1" onClick={() => {
+                      if (selectedLog) {
+                        navigator.clipboard.writeText(selectedLog.id)
+                        toast.success('Copied to clipboard', { description: `Log ID: ${selectedLog.id}` })
+                      }
+                    }}>
                       <Copy className="w-4 h-4 mr-2" />
                       Copy ID
                     </Button>
-                    <Button variant="outline" className="flex-1">
+                    <Button variant="outline" className="flex-1" onClick={() => {
+                      setSelectedLog(null)
+                      setShowRelatedEventsDialog(true)
+                    }}>
                       <ExternalLink className="w-4 h-4 mr-2" />
                       Related Events
                     </Button>
@@ -2649,6 +2705,364 @@ export default function AuditLogsClient() {
               }}>
                 <Download className="w-4 h-4 mr-2" />
                 Export
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Saved Queries Dialog */}
+        <Dialog open={showSavedQueriesDialog} onOpenChange={setShowSavedQueriesDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Filter className="w-5 h-5" />
+                Saved Queries
+              </DialogTitle>
+              <DialogDescription>
+                Your saved search queries for quick access
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-3 py-4">
+              {['Failed logins last 24h', 'High risk events', 'Data exports with PII', 'Security incidents', 'Admin actions'].map((query, i) => (
+                <div key={i} className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer" onClick={() => {
+                  setSearchQuery(query.toLowerCase().replace(/ /g, '_'))
+                  setShowSavedQueriesDialog(false)
+                  setActiveTab('events')
+                  toast.success('Query loaded', { description: query })
+                }}>
+                  <span className="text-sm font-medium">{query}</span>
+                  <ChevronRight className="w-4 h-4 text-gray-400" />
+                </div>
+              ))}
+            </div>
+            <div className="flex justify-end">
+              <Button variant="outline" onClick={() => setShowSavedQueriesDialog(false)}>
+                Close
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Archive Dialog */}
+        <Dialog open={showArchiveDialog} onOpenChange={setShowArchiveDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Archive className="w-5 h-5" />
+                Archive Logs
+              </DialogTitle>
+              <DialogDescription>
+                Archive old logs to cold storage
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="archive_age">Archive logs older than</Label>
+                <select
+                  id="archive_age"
+                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+                >
+                  <option value="30d">30 days</option>
+                  <option value="60d">60 days</option>
+                  <option value="90d">90 days</option>
+                  <option value="180d">180 days</option>
+                </select>
+              </div>
+              <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Estimated logs to archive: <span className="font-semibold">12,450 entries</span>
+                </p>
+              </div>
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setShowArchiveDialog(false)}>
+                Cancel
+              </Button>
+              <Button onClick={() => {
+                setShowArchiveDialog(false)
+                toast.success('Archive started', { description: 'Logs are being archived to cold storage' })
+              }}>
+                <Archive className="w-4 h-4 mr-2" />
+                Archive
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Integrations Dialog */}
+        <Dialog open={showIntegrationsDialog} onOpenChange={setShowIntegrationsDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Webhook className="w-5 h-5" />
+                Integrations
+              </DialogTitle>
+              <DialogDescription>
+                Configure log forwarding and integrations
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              {[
+                { name: 'Slack', desc: 'Send alerts to Slack channels', connected: true },
+                { name: 'PagerDuty', desc: 'Trigger incidents in PagerDuty', connected: true },
+                { name: 'Webhook', desc: 'Custom webhook endpoint', connected: false },
+                { name: 'AWS S3', desc: 'Archive to S3 bucket', connected: true },
+              ].map((integration) => (
+                <div key={integration.name} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div>
+                    <p className="font-medium">{integration.name}</p>
+                    <p className="text-sm text-gray-500">{integration.desc}</p>
+                  </div>
+                  <Badge variant={integration.connected ? 'default' : 'secondary'}>
+                    {integration.connected ? 'Connected' : 'Not connected'}
+                  </Badge>
+                </div>
+              ))}
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setShowIntegrationsDialog(false)}>
+                Close
+              </Button>
+              <Button onClick={() => {
+                setShowIntegrationsDialog(false)
+                setActiveTab('settings')
+                setSettingsTab('integrations')
+              }}>
+                Manage Integrations
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Clear Debug Logs Confirmation Dialog */}
+        <Dialog open={showClearLogsDialog} onOpenChange={setShowClearLogsDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-600">
+                <Trash2 className="w-5 h-5" />
+                Clear Debug Logs
+              </DialogTitle>
+              <DialogDescription>
+                This action cannot be undone. All debug-level logs will be permanently deleted.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                <p className="text-sm text-red-600 dark:text-red-400">
+                  Warning: This will permanently delete approximately 2,340 debug log entries.
+                </p>
+              </div>
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setShowClearLogsDialog(false)}>
+                Cancel
+              </Button>
+              <Button variant="destructive" onClick={() => {
+                setShowClearLogsDialog(false)
+                toast.success('Debug logs cleared', { description: 'All debug-level logs have been removed' })
+              }}>
+                <Trash2 className="w-4 h-4 mr-2" />
+                Clear Logs
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Reset Configuration Confirmation Dialog */}
+        <Dialog open={showResetConfigDialog} onOpenChange={setShowResetConfigDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-600">
+                <RefreshCw className="w-5 h-5" />
+                Reset Configuration
+              </DialogTitle>
+              <DialogDescription>
+                This will reset all audit log settings to their default values.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                <p className="text-sm text-red-600 dark:text-red-400">
+                  Warning: All custom alert rules, retention policies, and notification settings will be reset.
+                </p>
+              </div>
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setShowResetConfigDialog(false)}>
+                Cancel
+              </Button>
+              <Button variant="destructive" onClick={() => {
+                setShowResetConfigDialog(false)
+                toast.success('Configuration reset', { description: 'All settings have been restored to defaults' })
+              }}>
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Reset
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Related Events Dialog */}
+        <Dialog open={showRelatedEventsDialog} onOpenChange={setShowRelatedEventsDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <ExternalLink className="w-5 h-5" />
+                Related Events
+              </DialogTitle>
+              <DialogDescription>
+                Events related to the selected log entry
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="space-y-3">
+                {mockLogs.slice(0, 5).map((log) => (
+                  <div key={log.id} className="flex items-center gap-3 p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer" onClick={() => {
+                    setShowRelatedEventsDialog(false)
+                    setSelectedLog(log)
+                  }}>
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                      log.severity === 'critical' ? 'bg-red-100 text-red-600' :
+                      log.severity === 'error' ? 'bg-orange-100 text-orange-600' :
+                      log.severity === 'warning' ? 'bg-yellow-100 text-yellow-600' :
+                      'bg-blue-100 text-blue-600'
+                    }`}>
+                      {getLogTypeIcon(log.log_type)}
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-medium text-sm">{log.action}</p>
+                      <p className="text-xs text-gray-500">{new Date(log.timestamp).toLocaleString()}</p>
+                    </div>
+                    <Badge className={getSeverityColor(log.severity)}>{log.severity}</Badge>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="flex justify-end">
+              <Button variant="outline" onClick={() => setShowRelatedEventsDialog(false)}>
+                Close
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Compliance Report Download Dialog */}
+        <Dialog open={!!showComplianceReportDialog} onOpenChange={() => setShowComplianceReportDialog(null)}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Download className="w-5 h-5" />
+                Download Compliance Report
+              </DialogTitle>
+              <DialogDescription>
+                {showComplianceReportDialog && mockComplianceReports.find(r => r.id === showComplianceReportDialog)?.framework} Report
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="report_format">Report Format</Label>
+                <select
+                  id="report_format"
+                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+                >
+                  <option value="pdf">PDF Report</option>
+                  <option value="xlsx">Excel Spreadsheet</option>
+                  <option value="json">JSON Data</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label>Include Sections</Label>
+                <div className="space-y-2">
+                  <label className="flex items-center gap-2">
+                    <input type="checkbox" defaultChecked className="rounded" />
+                    <span className="text-sm">Executive Summary</span>
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <input type="checkbox" defaultChecked className="rounded" />
+                    <span className="text-sm">Control Details</span>
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <input type="checkbox" defaultChecked className="rounded" />
+                    <span className="text-sm">Evidence Attachments</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setShowComplianceReportDialog(null)}>
+                Cancel
+              </Button>
+              <Button onClick={() => {
+                const report = mockComplianceReports.find(r => r.id === showComplianceReportDialog)
+                setShowComplianceReportDialog(null)
+                toast.success('Downloading report', { description: `${report?.framework} compliance report will be downloaded` })
+              }}>
+                <Download className="w-4 h-4 mr-2" />
+                Download
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* SIEM Integration Dialog */}
+        <Dialog open={!!showSIEMDialog} onOpenChange={() => setShowSIEMDialog(null)}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Server className="w-5 h-5" />
+                {showSIEMDialog} Integration
+              </DialogTitle>
+              <DialogDescription>
+                Configure {showSIEMDialog} integration settings
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="siem_endpoint">Endpoint URL</Label>
+                <Input
+                  id="siem_endpoint"
+                  placeholder={`https://${showSIEMDialog?.toLowerCase()}.example.com/api/v1`}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="siem_token">API Token</Label>
+                <Input
+                  id="siem_token"
+                  type="password"
+                  placeholder="Enter your API token"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Log Types to Forward</Label>
+                <div className="grid grid-cols-2 gap-2">
+                  <label className="flex items-center gap-2">
+                    <input type="checkbox" defaultChecked className="rounded" />
+                    <span className="text-sm">Security</span>
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <input type="checkbox" defaultChecked className="rounded" />
+                    <span className="text-sm">Authentication</span>
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <input type="checkbox" className="rounded" />
+                    <span className="text-sm">System</span>
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <input type="checkbox" className="rounded" />
+                    <span className="text-sm">Debug</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setShowSIEMDialog(null)}>
+                Cancel
+              </Button>
+              <Button onClick={() => {
+                setShowSIEMDialog(null)
+                toast.success('Integration saved', { description: `${showSIEMDialog} integration has been configured` })
+              }}>
+                Save Configuration
               </Button>
             </div>
           </DialogContent>

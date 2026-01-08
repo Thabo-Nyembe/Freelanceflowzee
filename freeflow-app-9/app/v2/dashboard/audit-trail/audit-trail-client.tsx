@@ -92,11 +92,15 @@ export default function AuditTrailClient() {
     entityTypes: EntityType[]
     severityLevels: SeverityLevel[]
     searchQuery: string
+    userFilter: string
+    dateRange: string
   }>({
     activityTypes: [],
     entityTypes: [],
     severityLevels: [],
-    searchQuery: ''
+    searchQuery: '',
+    userFilter: '',
+    dateRange: ''
   })
 
   // DIALOG STATES FOR QUICK ACTIONS
@@ -121,7 +125,9 @@ export default function AuditTrailClient() {
     includeUserInfo: true,
     includeIpAddresses: true,
     includeChangeDetails: true,
-    includeMetadata: false
+    includeMetadata: false,
+    startDate: '',
+    endDate: ''
   })
   const [isExporting, setIsExporting] = useState(false)
 
@@ -452,7 +458,10 @@ export default function AuditTrailClient() {
                 Complete activity logs and compliance reporting
               </p>
             </div>
-            <button className="px-4 py-2 bg-gradient-to-r from-red-500 to-orange-500 text-white rounded-lg text-sm font-medium hover:from-red-600 hover:to-orange-600 transition-colors">
+            <button
+              onClick={() => setShowExportDialog(true)}
+              className="px-4 py-2 bg-gradient-to-r from-red-500 to-orange-500 text-white rounded-lg text-sm font-medium hover:from-red-600 hover:to-orange-600 transition-colors"
+            >
               Export Logs
             </button>
           </div>
@@ -669,7 +678,7 @@ export default function AuditTrailClient() {
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="font-semibold">Filters</h3>
                     <button
-                      onClick={() => setFilters({ activityTypes: [], entityTypes: [], severityLevels: [], searchQuery: '' })}
+                      onClick={() => setFilters({ activityTypes: [], entityTypes: [], severityLevels: [], searchQuery: '', userFilter: '', dateRange: '' })}
                       className="text-sm text-red-500 hover:text-red-600 font-medium"
                     >
                       Clear All
@@ -696,17 +705,35 @@ export default function AuditTrailClient() {
                       <option value="medium">Medium</option>
                       <option value="low">Low</option>
                     </select>
-                    <select className="px-4 py-2 rounded-lg bg-muted">
-                      <option>All Users</option>
-                      <option>John Doe</option>
-                      <option>Jane Smith</option>
-                      <option>Admin User</option>
+                    <select
+                      value={filters.userFilter}
+                      onChange={(e) => {
+                        setFilters({ ...filters, userFilter: e.target.value })
+                        if (e.target.value) {
+                          toast.info(`Filtering by user: ${e.target.value}`)
+                        }
+                      }}
+                      className="px-4 py-2 rounded-lg bg-muted"
+                    >
+                      <option value="">All Users</option>
+                      <option value="John Doe">John Doe</option>
+                      <option value="Jane Smith">Jane Smith</option>
+                      <option value="Admin User">Admin User</option>
                     </select>
-                    <select className="px-4 py-2 rounded-lg bg-muted">
-                      <option>All Time</option>
-                      <option>Today</option>
-                      <option>This Week</option>
-                      <option>This Month</option>
+                    <select
+                      value={filters.dateRange}
+                      onChange={(e) => {
+                        setFilters({ ...filters, dateRange: e.target.value })
+                        if (e.target.value) {
+                          toast.info(`Filtering by: ${e.target.value}`)
+                        }
+                      }}
+                      className="px-4 py-2 rounded-lg bg-muted"
+                    >
+                      <option value="">All Time</option>
+                      <option value="today">Today</option>
+                      <option value="week">This Week</option>
+                      <option value="month">This Month</option>
                     </select>
                   </div>
                 </div>
@@ -853,37 +880,80 @@ export default function AuditTrailClient() {
                   <div className="space-y-4">
                     <div>
                       <label className="block text-sm font-medium mb-2">Export Format</label>
-                      <select className="w-full px-4 py-2 rounded-lg bg-muted">
-                        <option>CSV</option>
-                        <option>JSON</option>
-                        <option>PDF</option>
-                        <option>Excel</option>
+                      <select
+                        value={exportOptions.format}
+                        onChange={(e) => setExportOptions({ ...exportOptions, format: e.target.value as 'csv' | 'json' | 'pdf' })}
+                        className="w-full px-4 py-2 rounded-lg bg-muted"
+                      >
+                        <option value="csv">CSV</option>
+                        <option value="json">JSON</option>
+                        <option value="pdf">PDF</option>
                       </select>
                     </div>
                     <div>
                       <label className="block text-sm font-medium mb-2">Date Range</label>
                       <div className="grid grid-cols-2 gap-2">
-                        <input type="date" className="px-4 py-2 rounded-lg bg-muted" />
-                        <input type="date" className="px-4 py-2 rounded-lg bg-muted" />
+                        <input
+                          type="date"
+                          value={exportOptions.startDate}
+                          onChange={(e) => {
+                            setExportOptions({ ...exportOptions, startDate: e.target.value })
+                            if (e.target.value) {
+                              toast.info(`Start date: ${e.target.value}`)
+                            }
+                          }}
+                          className="px-4 py-2 rounded-lg bg-muted"
+                        />
+                        <input
+                          type="date"
+                          value={exportOptions.endDate}
+                          onChange={(e) => {
+                            setExportOptions({ ...exportOptions, endDate: e.target.value })
+                            if (e.target.value) {
+                              toast.info(`End date: ${e.target.value}`)
+                            }
+                          }}
+                          className="px-4 py-2 rounded-lg bg-muted"
+                        />
                       </div>
                     </div>
                     <div>
                       <label className="block text-sm font-medium mb-2">Include</label>
                       <div className="space-y-2">
-                        <label className="flex items-center gap-2">
-                          <input type="checkbox" defaultChecked />
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={exportOptions.includeUserInfo}
+                            onChange={(e) => setExportOptions({ ...exportOptions, includeUserInfo: e.target.checked })}
+                            className="w-4 h-4 rounded border-gray-300 text-red-500 focus:ring-red-500"
+                          />
                           <span className="text-sm">User Information</span>
                         </label>
-                        <label className="flex items-center gap-2">
-                          <input type="checkbox" defaultChecked />
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={exportOptions.includeIpAddresses}
+                            onChange={(e) => setExportOptions({ ...exportOptions, includeIpAddresses: e.target.checked })}
+                            className="w-4 h-4 rounded border-gray-300 text-red-500 focus:ring-red-500"
+                          />
                           <span className="text-sm">IP Addresses</span>
                         </label>
-                        <label className="flex items-center gap-2">
-                          <input type="checkbox" defaultChecked />
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={exportOptions.includeChangeDetails}
+                            onChange={(e) => setExportOptions({ ...exportOptions, includeChangeDetails: e.target.checked })}
+                            className="w-4 h-4 rounded border-gray-300 text-red-500 focus:ring-red-500"
+                          />
                           <span className="text-sm">Change Details</span>
                         </label>
-                        <label className="flex items-center gap-2">
-                          <input type="checkbox" />
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={exportOptions.includeMetadata}
+                            onChange={(e) => setExportOptions({ ...exportOptions, includeMetadata: e.target.checked })}
+                            className="w-4 h-4 rounded border-gray-300 text-red-500 focus:ring-red-500"
+                          />
                           <span className="text-sm">Metadata</span>
                         </label>
                       </div>
@@ -915,7 +985,16 @@ export default function AuditTrailClient() {
                             <div className="text-xs text-muted-foreground">{file.size} • {file.date}</div>
                           </div>
                         </div>
-                        <button className="px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded text-xs font-medium transition-colors">
+                        <button
+                          onClick={() => {
+                            toast.success(`Downloading ${file.name}...`)
+                            // Simulate download - in real app this would fetch and download the file
+                            setTimeout(() => {
+                              toast.success(`${file.name} downloaded successfully`)
+                            }, 1500)
+                          }}
+                          className="px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded text-xs font-medium transition-colors"
+                        >
                           Download
                         </button>
                       </div>

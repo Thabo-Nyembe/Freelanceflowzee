@@ -1490,7 +1490,15 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
                               </span>
                             </div>
                           </div>
-                          <Button variant="ghost" size="sm" className="text-slate-400">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-slate-400"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              setSelectedAlert(alert)
+                            }}
+                          >
                             <MoreHorizontal className="w-4 h-4" />
                           </Button>
                         </div>
