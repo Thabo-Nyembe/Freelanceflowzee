@@ -536,6 +536,32 @@ export default function MotionGraphicsClient({
   const [showTemplatesDialog, setShowTemplatesDialog] = useState(false)
   const [formState, setFormState] = useState<ProjectFormState>(initialFormState)
 
+  // Additional dialog states for all button actions
+  const [showSettingsDialog, setShowSettingsDialog] = useState(false)
+  const [showAddLayerDialog, setShowAddLayerDialog] = useState(false)
+  const [showAddEffectDialog, setShowAddEffectDialog] = useState(false)
+  const [showCreatePresetDialog, setShowCreatePresetDialog] = useState(false)
+  const [showExportAnalyticsDialog, setShowExportAnalyticsDialog] = useState(false)
+  const [showExportConfigDialog, setShowExportConfigDialog] = useState(false)
+  const [showClearCacheDialog, setShowClearCacheDialog] = useState(false)
+  const [showRegenerateApiKeyDialog, setShowRegenerateApiKeyDialog] = useState(false)
+  const [showResetSettingsDialog, setShowResetSettingsDialog] = useState(false)
+  const [showDeleteAllDialog, setShowDeleteAllDialog] = useState(false)
+  const [showEditProjectDialog, setShowEditProjectDialog] = useState(false)
+  const [showShareDialog, setShowShareDialog] = useState(false)
+  const [showUploadAssetsDialog, setShowUploadAssetsDialog] = useState(false)
+  const [selectedRenderJobId, setSelectedRenderJobId] = useState<string | null>(null)
+  const [showDownloadDialog, setShowDownloadDialog] = useState(false)
+  const [showDeleteJobDialog, setShowDeleteJobDialog] = useState(false)
+
+  // Form states for new dialogs
+  const [newLayerType, setNewLayerType] = useState<LayerType>('video')
+  const [newLayerName, setNewLayerName] = useState('')
+  const [newEffectType, setNewEffectType] = useState('glow')
+  const [presetFormState, setPresetFormState] = useState({ name: '', category: 'motion', description: '' })
+  const [shareEmail, setShareEmail] = useState('')
+  const [sharePermission, setSharePermission] = useState<'viewer' | 'editor'>('viewer')
+
   // Quick actions with proper dialog handlers
   const quickActions = useMemo(() => [
     { ...mockMotionGraphicsQuickActionsBase[0], action: () => setShowCreateDialog(true) },

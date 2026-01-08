@@ -524,6 +524,44 @@ export default function DeploymentsClient() {
   const [isQuickRollingBack, setIsQuickRollingBack] = useState(false)
   const [expandedLogs, setExpandedLogs] = useState<string[]>(['clone', 'install', 'build', 'deploy'])
 
+  // Additional dialogs state
+  const [showFiltersDialog, setShowFiltersDialog] = useState(false)
+  const [showInspectDialog, setShowInspectDialog] = useState(false)
+  const [showNewFunctionDialog, setShowNewFunctionDialog] = useState(false)
+  const [showEdgeConfigDialog, setShowEdgeConfigDialog] = useState(false)
+  const [showEdgeConfigViewDialog, setShowEdgeConfigViewDialog] = useState(false)
+  const [showEdgeConfigEditDialog, setShowEdgeConfigEditDialog] = useState(false)
+  const [showNewFolderDialog, setShowNewFolderDialog] = useState(false)
+  const [showUploadDialog, setShowUploadDialog] = useState(false)
+  const [showExportLogsDialog, setShowExportLogsDialog] = useState(false)
+  const [showLiveTailDialog, setShowLiveTailDialog] = useState(false)
+  const [showLogAnalyticsDialog, setShowLogAnalyticsDialog] = useState(false)
+  const [showErrorsDialog, setShowErrorsDialog] = useState(false)
+  const [showAlertsDialog, setShowAlertsDialog] = useState(false)
+  const [showAnalyticsExportDialog, setShowAnalyticsExportDialog] = useState(false)
+  const [showSecurityAuditDialog, setShowSecurityAuditDialog] = useState(false)
+  const [showAddRuleDialog, setShowAddRuleDialog] = useState(false)
+  const [showCreateHookDialog, setShowCreateHookDialog] = useState(false)
+  const [showMarketplaceDialog, setShowMarketplaceDialog] = useState(false)
+  const [showDeleteAllDeploymentsDialog, setShowDeleteAllDeploymentsDialog] = useState(false)
+  const [showResetSettingsDialog, setShowResetSettingsDialog] = useState(false)
+  const [showDisableDeploymentsDialog, setShowDisableDeploymentsDialog] = useState(false)
+  const [showDeleteProjectDialog, setShowDeleteProjectDialog] = useState(false)
+  const [selectedEdgeConfig, setSelectedEdgeConfig] = useState<EdgeConfig | null>(null)
+  const [inspectedDeployment, setInspectedDeployment] = useState<Deployment | null>(null)
+
+  // Form states for new dialogs
+  const [newFunctionForm, setNewFunctionForm] = useState({ name: '', runtime: 'Node.js 20', region: 'iad1', memory: '256' })
+  const [newEdgeConfigForm, setNewEdgeConfigForm] = useState({ name: '' })
+  const [newFolderName, setNewFolderName] = useState('')
+  const [newDomainName, setNewDomainName] = useState('')
+  const [newRuleForm, setNewRuleForm] = useState({ name: '', type: 'password' as 'password' | 'vercel_auth' | 'trusted_ips', enabled: true })
+  const [newHookForm, setNewHookForm] = useState({ name: '', branch: 'main' })
+  const [webhookFormData, setWebhookFormData] = useState({ name: '', url: '', events: [] as string[], secret: '' })
+  const [teamInviteForm, setTeamInviteForm] = useState({ email: '', role: '' })
+  const [isProcessing, setIsProcessing] = useState(false)
+  const [filterOptions, setFilterOptions] = useState({ status: 'all', dateRange: 'all', author: 'all' })
+
   // Quick deploy handler
   const handleQuickDeploy = async () => {
     setIsQuickDeploying(true)
@@ -840,7 +878,7 @@ export default function DeploymentsClient() {
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                   <Input placeholder="Search deployments..." className="pl-10 w-64" />
                 </div>
-                <Button variant="outline" size="sm"><Filter className="h-4 w-4 mr-1" />Filters</Button>
+                <Button variant="outline" size="sm" onClick={() => setShowFiltersDialog(true)}><Filter className="h-4 w-4 mr-1" />Filters</Button>
               </div>
             </div>
 
@@ -918,7 +956,7 @@ export default function DeploymentsClient() {
                           <a href={deployment.previewUrl} target="_blank" className="text-sm text-purple-600 hover:underline flex items-center gap-1">{deployment.previewUrl}<ExternalLink className="h-3 w-3" /></a>
                         </div>
                         <Button variant="outline" size="sm" onClick={() => { setSelectedDeployment(deployment); setShowLogsDialog(true); }}><Terminal className="h-4 w-4 mr-1" />Logs</Button>
-                        <Button variant="outline" size="sm"><Eye className="h-4 w-4 mr-1" />Inspect</Button>
+                        <Button variant="outline" size="sm" onClick={() => { setInspectedDeployment(deployment); setShowInspectDialog(true); }}><Eye className="h-4 w-4 mr-1" />Inspect</Button>
                         {deployment.environment === 'production' && <Button variant="outline" size="sm" onClick={() => { setSelectedDeployment(deployment); setShowRollbackDialog(true); }}><RotateCcw className="h-4 w-4 mr-1" />Rollback</Button>}
                       </div>
                     )}
@@ -947,8 +985,8 @@ export default function DeploymentsClient() {
                   <p className="text-yellow-100 text-sm">Edge and serverless compute performance</p>
                 </div>
                 <div className="flex gap-2">
-                  <Button variant="outline" className="border-white/50 text-white hover:bg-white/10"><RefreshCw className="h-4 w-4 mr-2" />Refresh</Button>
-                  <Button className="bg-white text-orange-700 hover:bg-orange-50"><Plus className="h-4 w-4 mr-2" />New Function</Button>
+                  <Button variant="outline" className="border-white/50 text-white hover:bg-white/10" onClick={() => { toast.loading('Refreshing functions...'); setTimeout(() => toast.success('Functions refreshed'), 500); }}><RefreshCw className="h-4 w-4 mr-2" />Refresh</Button>
+                  <Button className="bg-white text-orange-700 hover:bg-orange-50" onClick={() => setShowNewFunctionDialog(true)}><Plus className="h-4 w-4 mr-2" />New Function</Button>
                 </div>
               </div>
               <div className="grid grid-cols-6 gap-4">
@@ -1113,8 +1151,8 @@ export default function DeploymentsClient() {
                   <p className="text-cyan-100 text-sm">Global key-value storage at the edge</p>
                 </div>
                 <div className="flex gap-2">
-                  <Button variant="outline" className="border-white/50 text-white hover:bg-white/10"><RefreshCw className="h-4 w-4 mr-2" />Sync</Button>
-                  <Button className="bg-white text-cyan-700 hover:bg-cyan-50"><Plus className="h-4 w-4 mr-2" />Create Config</Button>
+                  <Button variant="outline" className="border-white/50 text-white hover:bg-white/10" onClick={() => { toast.loading('Syncing edge configs...'); setTimeout(() => toast.success('Edge configs synced'), 800); }}><RefreshCw className="h-4 w-4 mr-2" />Sync</Button>
+                  <Button className="bg-white text-cyan-700 hover:bg-cyan-50" onClick={() => setShowEdgeConfigDialog(true)}><Plus className="h-4 w-4 mr-2" />Create Config</Button>
                 </div>
               </div>
               <div className="grid grid-cols-5 gap-4">
@@ -1174,8 +1212,8 @@ export default function DeploymentsClient() {
                       <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"><p className="text-lg font-bold">{config.writes}</p><p className="text-xs text-gray-500">Writes</p></div>
                     </div>
                     <div className="flex gap-2 mt-4">
-                      <Button variant="outline" size="sm" className="flex-1"><Eye className="h-3 w-3 mr-1" />View</Button>
-                      <Button variant="outline" size="sm" className="flex-1"><Settings className="h-3 w-3 mr-1" />Edit</Button>
+                      <Button variant="outline" size="sm" className="flex-1" onClick={() => { setSelectedEdgeConfig(config); setShowEdgeConfigViewDialog(true); }}><Eye className="h-3 w-3 mr-1" />View</Button>
+                      <Button variant="outline" size="sm" className="flex-1" onClick={() => { setSelectedEdgeConfig(config); setShowEdgeConfigEditDialog(true); }}><Settings className="h-3 w-3 mr-1" />Edit</Button>
                     </div>
                   </CardContent>
                 </Card>
@@ -1193,8 +1231,8 @@ export default function DeploymentsClient() {
                   <p className="text-indigo-100 text-sm">File storage and CDN distribution</p>
                 </div>
                 <div className="flex gap-2">
-                  <Button variant="outline" className="border-white/50 text-white hover:bg-white/10"><Folder className="h-4 w-4 mr-2" />New Folder</Button>
-                  <Button className="bg-white text-indigo-700 hover:bg-indigo-50"><Upload className="h-4 w-4 mr-2" />Upload</Button>
+                  <Button variant="outline" className="border-white/50 text-white hover:bg-white/10" onClick={() => setShowNewFolderDialog(true)}><Folder className="h-4 w-4 mr-2" />New Folder</Button>
+                  <Button className="bg-white text-indigo-700 hover:bg-indigo-50" onClick={() => setShowUploadDialog(true)}><Upload className="h-4 w-4 mr-2" />Upload</Button>
                 </div>
               </div>
               <div className="grid grid-cols-5 gap-4">
@@ -1333,8 +1371,8 @@ export default function DeploymentsClient() {
                   <p className="text-gray-400 text-sm">Real-time application logs and monitoring</p>
                 </div>
                 <div className="flex gap-2">
-                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/10"><Download className="h-4 w-4 mr-2" />Export</Button>
-                  <Button className="bg-green-600 text-white hover:bg-green-700"><Play className="h-4 w-4 mr-2" />Live Tail</Button>
+                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/10" onClick={() => setShowExportLogsDialog(true)}><Download className="h-4 w-4 mr-2" />Export</Button>
+                  <Button className="bg-green-600 text-white hover:bg-green-700" onClick={() => setShowLiveTailDialog(true)}><Play className="h-4 w-4 mr-2" />Live Tail</Button>
                 </div>
               </div>
               <div className="grid grid-cols-5 gap-4">
@@ -1392,7 +1430,7 @@ export default function DeploymentsClient() {
                   </div>
                   <div className="flex gap-2">
                     <Button variant="outline" size="sm" onClick={() => { toast.loading('Refreshing logs...'); setTimeout(() => toast.success('Logs refreshed'), 300); }}><RefreshCw className="h-4 w-4" /></Button>
-                    <Button variant="outline" size="sm"><Filter className="h-4 w-4 mr-1" />More Filters</Button>
+                    <Button variant="outline" size="sm" onClick={() => setShowFiltersDialog(true)}><Filter className="h-4 w-4 mr-1" />More Filters</Button>
                   </div>
                 </div>
               </CardContent>
@@ -1497,10 +1535,10 @@ export default function DeploymentsClient() {
               <Card className="border-gray-200 dark:border-gray-700">
                 <CardHeader><CardTitle className="text-sm">Quick Actions</CardTitle></CardHeader>
                 <CardContent className="space-y-2">
-                  <Button variant="outline" className="w-full justify-start"><AlertCircle className="h-4 w-4 mr-2" />View All Errors</Button>
-                  <Button variant="outline" className="w-full justify-start"><Bell className="h-4 w-4 mr-2" />Set Up Alerts</Button>
-                  <Button variant="outline" className="w-full justify-start"><BarChart3 className="h-4 w-4 mr-2" />Log Analytics</Button>
-                  <Button variant="outline" className="w-full justify-start"><Download className="h-4 w-4 mr-2" />Export Logs</Button>
+                  <Button variant="outline" className="w-full justify-start" onClick={() => setShowErrorsDialog(true)}><AlertCircle className="h-4 w-4 mr-2" />View All Errors</Button>
+                  <Button variant="outline" className="w-full justify-start" onClick={() => setShowAlertsDialog(true)}><Bell className="h-4 w-4 mr-2" />Set Up Alerts</Button>
+                  <Button variant="outline" className="w-full justify-start" onClick={() => setShowLogAnalyticsDialog(true)}><BarChart3 className="h-4 w-4 mr-2" />Log Analytics</Button>
+                  <Button variant="outline" className="w-full justify-start" onClick={() => setShowExportLogsDialog(true)}><Download className="h-4 w-4 mr-2" />Export Logs</Button>
                 </CardContent>
               </Card>
             </div>
@@ -1520,7 +1558,7 @@ export default function DeploymentsClient() {
                     <SelectTrigger className="w-[150px] bg-white/20 border-white/30 text-white"><SelectValue placeholder="Last 30 Days" /></SelectTrigger>
                     <SelectContent><SelectItem value="7">Last 7 Days</SelectItem><SelectItem value="30">Last 30 Days</SelectItem><SelectItem value="90">Last 90 Days</SelectItem></SelectContent>
                   </Select>
-                  <Button className="bg-white text-blue-700 hover:bg-blue-50"><Download className="h-4 w-4 mr-2" />Export</Button>
+                  <Button className="bg-white text-blue-700 hover:bg-blue-50" onClick={() => setShowAnalyticsExportDialog(true)}><Download className="h-4 w-4 mr-2" />Export</Button>
                 </div>
               </div>
               <div className="grid grid-cols-6 gap-4">
@@ -1697,7 +1735,7 @@ export default function DeploymentsClient() {
                   <h2 className="text-xl font-bold">Deployment Protection</h2>
                   <p className="text-red-100 text-sm">Security and access control for your deployments</p>
                 </div>
-                <Button className="bg-white text-red-700 hover:bg-red-50"><Shield className="h-4 w-4 mr-2" />Security Audit</Button>
+                <Button className="bg-white text-red-700 hover:bg-red-50" onClick={() => setShowSecurityAuditDialog(true)}><Shield className="h-4 w-4 mr-2" />Security Audit</Button>
               </div>
               <div className="grid grid-cols-5 gap-4">
                 <div className="bg-white/20 rounded-lg p-3 text-center">
@@ -1751,7 +1789,7 @@ export default function DeploymentsClient() {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle>Protection Rules</CardTitle>
-                  <Button variant="outline"><Plus className="h-4 w-4 mr-2" />Add Rule</Button>
+                  <Button variant="outline" onClick={() => setShowAddRuleDialog(true)}><Plus className="h-4 w-4 mr-2" />Add Rule</Button>
                 </div>
               </CardHeader>
               <CardContent className="p-0">
@@ -1875,10 +1913,10 @@ export default function DeploymentsClient() {
                         <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
                           <p className="text-sm text-red-800 dark:text-red-200">These actions are irreversible. Proceed with caution.</p>
                         </div>
-                        <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50"><Trash2 className="h-4 w-4 mr-2" />Delete All Deployments</Button>
-                        <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50"><RefreshCw className="h-4 w-4 mr-2" />Reset Project Settings</Button>
-                        <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50"><Lock className="h-4 w-4 mr-2" />Disable Deployments</Button>
-                        <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50"><Trash2 className="h-4 w-4 mr-2" />Delete Project</Button>
+                        <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50" onClick={() => setShowDeleteAllDeploymentsDialog(true)}><Trash2 className="h-4 w-4 mr-2" />Delete All Deployments</Button>
+                        <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50" onClick={() => setShowResetSettingsDialog(true)}><RefreshCw className="h-4 w-4 mr-2" />Reset Project Settings</Button>
+                        <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50" onClick={() => setShowDisableDeploymentsDialog(true)}><Lock className="h-4 w-4 mr-2" />Disable Deployments</Button>
+                        <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50" onClick={() => setShowDeleteProjectDialog(true)}><Trash2 className="h-4 w-4 mr-2" />Delete Project</Button>
                       </CardContent>
                     </Card>
                   </>
@@ -1915,7 +1953,7 @@ export default function DeploymentsClient() {
                       </CardContent>
                     </Card>
                     <Card className="border-gray-200 dark:border-gray-700">
-                      <CardHeader className="flex flex-row items-center justify-between"><CardTitle className="flex items-center gap-2"><Webhook className="h-5 w-5 text-purple-600" />Deploy Hooks</CardTitle><Button size="sm"><Plus className="h-4 w-4 mr-2" />Create Hook</Button></CardHeader>
+                      <CardHeader className="flex flex-row items-center justify-between"><CardTitle className="flex items-center gap-2"><Webhook className="h-5 w-5 text-purple-600" />Deploy Hooks</CardTitle><Button size="sm" onClick={() => setShowCreateHookDialog(true)}><Plus className="h-4 w-4 mr-2" />Create Hook</Button></CardHeader>
                       <CardContent className="space-y-4">
                         <p className="text-sm text-gray-500">Deploy hooks allow you to trigger deployments from external services via HTTP POST requests.</p>
                         <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
@@ -1925,8 +1963,8 @@ export default function DeploymentsClient() {
                           </div>
                           <code className="text-xs text-gray-500 break-all">https://api.vercel.com/v1/integrations/deploy/xxxxx</code>
                           <div className="flex gap-2 mt-2">
-                            <Button variant="outline" size="sm"><Copy className="h-3 w-3 mr-1" />Copy</Button>
-                            <Button variant="outline" size="sm" className="text-red-600"><Trash2 className="h-3 w-3 mr-1" />Delete</Button>
+                            <Button variant="outline" size="sm" onClick={() => { navigator.clipboard.writeText('https://api.vercel.com/v1/integrations/deploy/xxxxx'); toast.success('Production hook URL copied'); }}><Copy className="h-3 w-3 mr-1" />Copy</Button>
+                            <Button variant="outline" size="sm" className="text-red-600" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Deleting hook...', success: 'Production hook deleted', error: 'Failed to delete' })}><Trash2 className="h-3 w-3 mr-1" />Delete</Button>
                           </div>
                         </div>
                         <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
@@ -1936,8 +1974,8 @@ export default function DeploymentsClient() {
                           </div>
                           <code className="text-xs text-gray-500 break-all">https://api.vercel.com/v1/integrations/deploy/yyyyy</code>
                           <div className="flex gap-2 mt-2">
-                            <Button variant="outline" size="sm"><Copy className="h-3 w-3 mr-1" />Copy</Button>
-                            <Button variant="outline" size="sm" className="text-red-600"><Trash2 className="h-3 w-3 mr-1" />Delete</Button>
+                            <Button variant="outline" size="sm" onClick={() => { navigator.clipboard.writeText('https://api.vercel.com/v1/integrations/deploy/yyyyy'); toast.success('Staging hook URL copied'); }}><Copy className="h-3 w-3 mr-1" />Copy</Button>
+                            <Button variant="outline" size="sm" className="text-red-600" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Deleting hook...', success: 'Staging hook deleted', error: 'Failed to delete' })}><Trash2 className="h-3 w-3 mr-1" />Delete</Button>
                           </div>
                         </div>
                       </CardContent>
@@ -2045,7 +2083,7 @@ export default function DeploymentsClient() {
                 )}
                 {settingsTab === 'plugins' && (
                   <Card className="border-gray-200 dark:border-gray-700">
-                    <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Build Plugins</CardTitle><Button variant="outline"><Search className="h-4 w-4 mr-2" />Browse Marketplace</Button></CardHeader>
+                    <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Build Plugins</CardTitle><Button variant="outline" onClick={() => setShowMarketplaceDialog(true)}><Search className="h-4 w-4 mr-2" />Browse Marketplace</Button></CardHeader>
                     <CardContent className="space-y-4">
                       {mockBuildPlugins.map(plugin => (
                         <div key={plugin.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
@@ -2127,7 +2165,19 @@ export default function DeploymentsClient() {
             </ScrollArea>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowLogsDialog(false)}>Close</Button>
-              <Button><Download className="h-4 w-4 mr-2" />Download Logs</Button>
+              <Button onClick={() => {
+                const logsText = mockBuildLogs.map(log => `[${log.timestamp}] ${log.level.toUpperCase()} [${log.step}] ${log.message}`).join('\n');
+                const blob = new Blob([logsText], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `build-logs-${selectedDeployment?.commit || 'unknown'}.txt`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                toast.success('Logs downloaded');
+              }}><Download className="h-4 w-4 mr-2" />Download Logs</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -2184,7 +2234,7 @@ export default function DeploymentsClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowEnvDialog(false)}>Cancel</Button>
-              <Button>Save Changes</Button>
+              <Button onClick={() => { toast.success('Environment variables saved'); setShowEnvDialog(false); }}>Save Changes</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -2198,8 +2248,15 @@ export default function DeploymentsClient() {
             </DialogHeader>
             <div className="space-y-4">
               <div className="flex items-center gap-2">
-                <Input placeholder="example.com" className="flex-1" />
-                <Button>Add Domain</Button>
+                <Input placeholder="example.com" className="flex-1" value={newDomainName} onChange={(e) => setNewDomainName(e.target.value)} />
+                <Button onClick={() => {
+                  if (!newDomainName.trim()) {
+                    toast.error('Validation Error', { description: 'Domain name is required' });
+                    return;
+                  }
+                  toast.success('Domain added', { description: `${newDomainName} has been added. DNS verification pending.` });
+                  setNewDomainName('');
+                }}>Add Domain</Button>
               </div>
               <ScrollArea className="h-[300px]">
                 <div className="space-y-2">
@@ -2268,7 +2325,10 @@ export default function DeploymentsClient() {
               </div>
               <div><Label>Secret (Optional)</Label><Input placeholder="whsec_xxxxxxxxx" className="mt-1 font-mono" /></div>
             </div>
-            <DialogFooter><Button variant="outline" onClick={() => setShowWebhookDialog(false)}>Cancel</Button><Button className="bg-gradient-to-r from-purple-600 to-indigo-600">Add Webhook</Button></DialogFooter>
+            <DialogFooter><Button variant="outline" onClick={() => setShowWebhookDialog(false)}>Cancel</Button><Button className="bg-gradient-to-r from-purple-600 to-indigo-600" onClick={() => {
+              toast.success('Webhook added', { description: 'Your webhook endpoint has been configured' });
+              setShowWebhookDialog(false);
+            }}>Add Webhook</Button></DialogFooter>
           </DialogContent>
         </Dialog>
 
@@ -2282,7 +2342,10 @@ export default function DeploymentsClient() {
                 <p className="text-sm text-purple-700">Team members will receive an email invitation to join your project.</p>
               </div>
             </div>
-            <DialogFooter><Button variant="outline" onClick={() => setShowTeamDialog(false)}>Cancel</Button><Button className="bg-gradient-to-r from-purple-600 to-indigo-600">Send Invitation</Button></DialogFooter>
+            <DialogFooter><Button variant="outline" onClick={() => setShowTeamDialog(false)}>Cancel</Button><Button className="bg-gradient-to-r from-purple-600 to-indigo-600" onClick={() => {
+              toast.success('Invitation sent', { description: 'Team member will receive an email invitation' });
+              setShowTeamDialog(false);
+            }}>Send Invitation</Button></DialogFooter>
           </DialogContent>
         </Dialog>
 
@@ -2641,7 +2704,7 @@ export default function DeploymentsClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowQuickLogsDialog(false)}>Close</Button>
-              <Button className="bg-green-600 hover:bg-green-700">
+              <Button className="bg-green-600 hover:bg-green-700" onClick={() => { setShowQuickLogsDialog(false); setShowLiveTailDialog(true); }}>
                 <Play className="h-4 w-4 mr-2" />Live Tail
               </Button>
             </DialogFooter>
@@ -2725,6 +2788,878 @@ export default function DeploymentsClient() {
             </CardContent>
           </Card>
         )}
+
+        {/* Filters Dialog */}
+        <Dialog open={showFiltersDialog} onOpenChange={setShowFiltersDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2"><Filter className="h-5 w-5" />Advanced Filters</DialogTitle>
+              <DialogDescription>Filter deployments by various criteria</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label>Status</Label>
+                <Select value={filterOptions.status} onValueChange={(v) => setFilterOptions(prev => ({ ...prev, status: v }))}>
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Statuses</SelectItem>
+                    <SelectItem value="success">Success</SelectItem>
+                    <SelectItem value="failed">Failed</SelectItem>
+                    <SelectItem value="in_progress">In Progress</SelectItem>
+                    <SelectItem value="pending">Pending</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Date Range</Label>
+                <Select value={filterOptions.dateRange} onValueChange={(v) => setFilterOptions(prev => ({ ...prev, dateRange: v }))}>
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Time</SelectItem>
+                    <SelectItem value="today">Today</SelectItem>
+                    <SelectItem value="week">Last 7 Days</SelectItem>
+                    <SelectItem value="month">Last 30 Days</SelectItem>
+                    <SelectItem value="quarter">Last 90 Days</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Author</Label>
+                <Select value={filterOptions.author} onValueChange={(v) => setFilterOptions(prev => ({ ...prev, author: v }))}>
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Authors</SelectItem>
+                    <SelectItem value="me">My Deployments</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => { setFilterOptions({ status: 'all', dateRange: 'all', author: 'all' }); }}>Clear Filters</Button>
+              <Button onClick={() => { toast.success('Filters applied'); setShowFiltersDialog(false); }}>Apply Filters</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Inspect Dialog */}
+        <Dialog open={showInspectDialog} onOpenChange={setShowInspectDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2"><Eye className="h-5 w-5" />Deployment Details - {inspectedDeployment?.name}</DialogTitle>
+              <DialogDescription>Detailed inspection of deployment configuration and metrics</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <p className="text-sm text-gray-500">Environment</p>
+                  <p className="font-semibold">{inspectedDeployment?.environment}</p>
+                </div>
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <p className="text-sm text-gray-500">Status</p>
+                  <p className="font-semibold capitalize">{inspectedDeployment?.status}</p>
+                </div>
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <p className="text-sm text-gray-500">Commit</p>
+                  <p className="font-mono text-sm">{inspectedDeployment?.commit}</p>
+                </div>
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <p className="text-sm text-gray-500">Duration</p>
+                  <p className="font-semibold">{inspectedDeployment?.duration}</p>
+                </div>
+              </div>
+              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <p className="text-sm text-gray-500 mb-2">Commit Message</p>
+                <p>{inspectedDeployment?.commitMessage}</p>
+              </div>
+              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <p className="text-sm text-gray-500 mb-2">Preview URL</p>
+                {inspectedDeployment?.previewUrl ? (
+                  <a href={inspectedDeployment.previewUrl} target="_blank" className="text-purple-600 hover:underline flex items-center gap-1">
+                    {inspectedDeployment.previewUrl}<ExternalLink className="h-3 w-3" />
+                  </a>
+                ) : <span className="text-gray-400">Not available</span>}
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowInspectDialog(false)}>Close</Button>
+              <Button onClick={() => { setSelectedDeployment(inspectedDeployment); setShowInspectDialog(false); setShowLogsDialog(true); }}>
+                <Terminal className="h-4 w-4 mr-2" />View Logs
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* New Function Dialog */}
+        <Dialog open={showNewFunctionDialog} onOpenChange={setShowNewFunctionDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2"><Plus className="h-5 w-5" />Create New Function</DialogTitle>
+              <DialogDescription>Deploy a new serverless function</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label>Function Name</Label>
+                <Input placeholder="my-function" className="mt-1 font-mono" value={newFunctionForm.name} onChange={(e) => setNewFunctionForm(prev => ({ ...prev, name: e.target.value }))} />
+              </div>
+              <div>
+                <Label>Runtime</Label>
+                <Select value={newFunctionForm.runtime} onValueChange={(v) => setNewFunctionForm(prev => ({ ...prev, runtime: v }))}>
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Node.js 20">Node.js 20</SelectItem>
+                    <SelectItem value="Node.js 18">Node.js 18</SelectItem>
+                    <SelectItem value="Python 3.12">Python 3.12</SelectItem>
+                    <SelectItem value="Go 1.21">Go 1.21</SelectItem>
+                    <SelectItem value="Ruby 3.2">Ruby 3.2</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Region</Label>
+                <Select value={newFunctionForm.region} onValueChange={(v) => setNewFunctionForm(prev => ({ ...prev, region: v }))}>
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="iad1">Washington, D.C. (iad1)</SelectItem>
+                    <SelectItem value="sfo1">San Francisco (sfo1)</SelectItem>
+                    <SelectItem value="hnd1">Tokyo (hnd1)</SelectItem>
+                    <SelectItem value="cdg1">Paris (cdg1)</SelectItem>
+                    <SelectItem value="syd1">Sydney (syd1)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Memory</Label>
+                <Select value={newFunctionForm.memory} onValueChange={(v) => setNewFunctionForm(prev => ({ ...prev, memory: v }))}>
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="128">128 MB</SelectItem>
+                    <SelectItem value="256">256 MB</SelectItem>
+                    <SelectItem value="512">512 MB</SelectItem>
+                    <SelectItem value="1024">1024 MB</SelectItem>
+                    <SelectItem value="2048">2048 MB</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowNewFunctionDialog(false)}>Cancel</Button>
+              <Button className="bg-gradient-to-r from-yellow-500 to-orange-500" onClick={() => {
+                if (!newFunctionForm.name.trim()) {
+                  toast.error('Function name is required');
+                  return;
+                }
+                toast.success('Function created', { description: `${newFunctionForm.name} has been deployed` });
+                setNewFunctionForm({ name: '', runtime: 'Node.js 20', region: 'iad1', memory: '256' });
+                setShowNewFunctionDialog(false);
+              }}>Create Function</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Create Edge Config Dialog */}
+        <Dialog open={showEdgeConfigDialog} onOpenChange={setShowEdgeConfigDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2"><Database className="h-5 w-5" />Create Edge Config</DialogTitle>
+              <DialogDescription>Create a new edge configuration store</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label>Config Name</Label>
+                <Input placeholder="my-edge-config" className="mt-1 font-mono" value={newEdgeConfigForm.name} onChange={(e) => setNewEdgeConfigForm({ name: e.target.value })} />
+              </div>
+              <div className="p-4 bg-cyan-50 dark:bg-cyan-900/20 rounded-lg">
+                <p className="text-sm text-cyan-700 dark:text-cyan-300">Edge configs are globally distributed key-value stores optimized for read-heavy workloads.</p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowEdgeConfigDialog(false)}>Cancel</Button>
+              <Button className="bg-gradient-to-r from-cyan-600 to-teal-600" onClick={() => {
+                if (!newEdgeConfigForm.name.trim()) {
+                  toast.error('Config name is required');
+                  return;
+                }
+                toast.success('Edge config created', { description: `${newEdgeConfigForm.name} is now available` });
+                setNewEdgeConfigForm({ name: '' });
+                setShowEdgeConfigDialog(false);
+              }}>Create Config</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* View Edge Config Dialog */}
+        <Dialog open={showEdgeConfigViewDialog} onOpenChange={setShowEdgeConfigViewDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2"><Eye className="h-5 w-5" />Edge Config - {selectedEdgeConfig?.name}</DialogTitle>
+              <DialogDescription>View configuration values</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <p className="text-sm text-gray-500">Items</p>
+                  <p className="font-semibold">{selectedEdgeConfig?.items}</p>
+                </div>
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <p className="text-sm text-gray-500">Size</p>
+                  <p className="font-semibold">{selectedEdgeConfig?.size}</p>
+                </div>
+              </div>
+              <div className="p-4 bg-gray-900 rounded-lg font-mono text-sm">
+                <pre className="text-green-400">{`{
+  "feature_flags": {
+    "dark_mode": true,
+    "beta_features": false
+  },
+  "api_keys": ["***", "***"],
+  "rate_limits": {
+    "default": 100,
+    "premium": 1000
+  }
+}`}</pre>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowEdgeConfigViewDialog(false)}>Close</Button>
+              <Button onClick={() => { setShowEdgeConfigViewDialog(false); setShowEdgeConfigEditDialog(true); }}>
+                <Settings className="h-4 w-4 mr-2" />Edit Config
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Edge Config Dialog */}
+        <Dialog open={showEdgeConfigEditDialog} onOpenChange={setShowEdgeConfigEditDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2"><Settings className="h-5 w-5" />Edit Edge Config - {selectedEdgeConfig?.name}</DialogTitle>
+              <DialogDescription>Modify configuration values</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label>Configuration JSON</Label>
+                <Textarea className="mt-1 font-mono h-64" defaultValue={`{
+  "feature_flags": {
+    "dark_mode": true,
+    "beta_features": false
+  },
+  "api_keys": ["***", "***"],
+  "rate_limits": {
+    "default": 100,
+    "premium": 1000
+  }
+}`} />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowEdgeConfigEditDialog(false)}>Cancel</Button>
+              <Button onClick={() => { toast.success('Config updated'); setShowEdgeConfigEditDialog(false); }}>Save Changes</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* New Folder Dialog */}
+        <Dialog open={showNewFolderDialog} onOpenChange={setShowNewFolderDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2"><Folder className="h-5 w-5" />Create New Folder</DialogTitle>
+              <DialogDescription>Create a new folder in blob storage</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label>Folder Name</Label>
+                <Input placeholder="my-folder" className="mt-1" value={newFolderName} onChange={(e) => setNewFolderName(e.target.value)} />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowNewFolderDialog(false)}>Cancel</Button>
+              <Button onClick={() => {
+                if (!newFolderName.trim()) {
+                  toast.error('Folder name is required');
+                  return;
+                }
+                toast.success('Folder created', { description: `/${newFolderName} has been created` });
+                setNewFolderName('');
+                setShowNewFolderDialog(false);
+              }}>Create Folder</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Upload Dialog */}
+        <Dialog open={showUploadDialog} onOpenChange={setShowUploadDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2"><Upload className="h-5 w-5" />Upload Files</DialogTitle>
+              <DialogDescription>Upload files to blob storage</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg p-8 text-center">
+                <Upload className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+                <p className="text-sm text-gray-500 mb-2">Drag and drop files here or click to browse</p>
+                <input type="file" className="hidden" id="file-upload" multiple />
+                <Button variant="outline" onClick={() => document.getElementById('file-upload')?.click()}>Browse Files</Button>
+              </div>
+              <div className="text-xs text-gray-500">
+                <p>Supported formats: Images, PDFs, Videos, Documents</p>
+                <p>Maximum file size: 100MB</p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowUploadDialog(false)}>Cancel</Button>
+              <Button onClick={() => { toast.success('Files uploaded'); setShowUploadDialog(false); }}>Upload</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Export Logs Dialog */}
+        <Dialog open={showExportLogsDialog} onOpenChange={setShowExportLogsDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2"><Download className="h-5 w-5" />Export Logs</DialogTitle>
+              <DialogDescription>Download logs in your preferred format</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label>Time Range</Label>
+                <Select defaultValue="24h">
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1h">Last 1 Hour</SelectItem>
+                    <SelectItem value="24h">Last 24 Hours</SelectItem>
+                    <SelectItem value="7d">Last 7 Days</SelectItem>
+                    <SelectItem value="30d">Last 30 Days</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Format</Label>
+                <Select defaultValue="json">
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="json">JSON</SelectItem>
+                    <SelectItem value="csv">CSV</SelectItem>
+                    <SelectItem value="txt">Plain Text</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex items-center gap-2">
+                <input type="checkbox" id="include-errors" defaultChecked />
+                <label htmlFor="include-errors" className="text-sm">Include error logs only</label>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowExportLogsDialog(false)}>Cancel</Button>
+              <Button onClick={() => {
+                const logsText = buildLogs.map(log => `[${log.timestamp}] ${log.level.toUpperCase()} [${log.step}] ${log.message}`).join('\n');
+                const blob = new Blob([logsText], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `logs-export-${new Date().toISOString().split('T')[0]}.txt`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                toast.success('Logs exported');
+                setShowExportLogsDialog(false);
+              }}>Export Logs</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Live Tail Dialog */}
+        <Dialog open={showLiveTailDialog} onOpenChange={setShowLiveTailDialog}>
+          <DialogContent className="max-w-4xl max-h-[80vh]">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Play className="h-5 w-5 text-green-600" />
+                Live Log Tail
+                <Badge className="bg-green-100 text-green-700 animate-pulse">Streaming</Badge>
+              </DialogTitle>
+              <DialogDescription>Real-time log stream from your deployments</DialogDescription>
+            </DialogHeader>
+            <ScrollArea className="h-[400px] bg-gray-900 rounded-lg p-4 font-mono text-sm">
+              {buildLogs.map(log => (
+                <div key={log.id} className="flex items-start gap-3 mb-1">
+                  <span className="text-gray-500 text-xs">{log.timestamp}</span>
+                  <span className={getLogColor(log.level)}>{log.message}</span>
+                </div>
+              ))}
+              <div className="flex items-center gap-2 text-green-400 mt-2">
+                <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+                <span>Waiting for new logs...</span>
+              </div>
+            </ScrollArea>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowLiveTailDialog(false)}>Stop Streaming</Button>
+              <Button variant="outline" onClick={() => {
+                const logsText = buildLogs.map(log => `[${log.timestamp}] ${log.level.toUpperCase()} ${log.message}`).join('\n');
+                navigator.clipboard.writeText(logsText);
+                toast.success('Logs copied to clipboard');
+              }}><Copy className="h-4 w-4 mr-2" />Copy Logs</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Log Analytics Dialog */}
+        <Dialog open={showLogAnalyticsDialog} onOpenChange={setShowLogAnalyticsDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2"><BarChart3 className="h-5 w-5" />Log Analytics</DialogTitle>
+              <DialogDescription>Analyze patterns and trends in your logs</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-3 gap-4">
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                  <p className="text-2xl font-bold">{buildLogs.length}</p>
+                  <p className="text-sm text-gray-500">Total Logs</p>
+                </div>
+                <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg text-center">
+                  <p className="text-2xl font-bold text-red-600">{buildLogs.filter(l => l.level === 'error').length}</p>
+                  <p className="text-sm text-gray-500">Errors</p>
+                </div>
+                <div className="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg text-center">
+                  <p className="text-2xl font-bold text-amber-600">{buildLogs.filter(l => l.level === 'warn').length}</p>
+                  <p className="text-sm text-gray-500">Warnings</p>
+                </div>
+              </div>
+              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <p className="font-medium mb-2">Log Distribution by Step</p>
+                <div className="space-y-2">
+                  {Object.entries(groupedLogs).map(([step, logs]) => (
+                    <div key={step} className="flex items-center gap-2">
+                      <span className="text-sm capitalize w-20">{step}</span>
+                      <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-4">
+                        <div className="bg-purple-600 h-4 rounded-full" style={{ width: `${(logs.length / buildLogs.length) * 100}%` }}></div>
+                      </div>
+                      <span className="text-sm text-gray-500">{logs.length}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowLogAnalyticsDialog(false)}>Close</Button>
+              <Button onClick={() => { setShowLogAnalyticsDialog(false); setShowExportLogsDialog(true); }}>
+                <Download className="h-4 w-4 mr-2" />Export Report
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Errors Dialog */}
+        <Dialog open={showErrorsDialog} onOpenChange={setShowErrorsDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-600"><AlertCircle className="h-5 w-5" />Error Logs</DialogTitle>
+              <DialogDescription>All error logs from your deployments</DialogDescription>
+            </DialogHeader>
+            <ScrollArea className="h-[400px]">
+              <div className="space-y-2">
+                {buildLogs.filter(l => l.level === 'error').map(log => (
+                  <div key={log.id} className="p-3 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                    <div className="flex items-center gap-2 text-sm text-red-600 mb-1">
+                      <AlertCircle className="h-4 w-4" />
+                      <span>{log.timestamp}</span>
+                      <Badge className="bg-red-100 text-red-700">{log.step}</Badge>
+                    </div>
+                    <p className="text-red-800 dark:text-red-200">{log.message}</p>
+                  </div>
+                ))}
+                {buildLogs.filter(l => l.level === 'error').length === 0 && (
+                  <div className="text-center py-8 text-gray-500">
+                    <CheckCircle2 className="h-12 w-12 mx-auto mb-2 text-green-500" />
+                    <p>No errors found!</p>
+                  </div>
+                )}
+              </div>
+            </ScrollArea>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowErrorsDialog(false)}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Alerts Dialog */}
+        <Dialog open={showAlertsDialog} onOpenChange={setShowAlertsDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2"><Bell className="h-5 w-5" />Set Up Alerts</DialogTitle>
+              <DialogDescription>Configure alert notifications for log events</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <AlertCircle className="h-4 w-4 text-red-500" />
+                  <span>Error Alerts</span>
+                </div>
+                <Switch defaultChecked />
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <AlertTriangle className="h-4 w-4 text-amber-500" />
+                  <span>Warning Alerts</span>
+                </div>
+                <Switch />
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <Rocket className="h-4 w-4 text-purple-500" />
+                  <span>Deployment Alerts</span>
+                </div>
+                <Switch defaultChecked />
+              </div>
+              <div>
+                <Label>Notification Email</Label>
+                <Input placeholder="alerts@example.com" className="mt-1" />
+              </div>
+              <div>
+                <Label>Slack Webhook URL (Optional)</Label>
+                <Input placeholder="https://hooks.slack.com/..." className="mt-1 font-mono" />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowAlertsDialog(false)}>Cancel</Button>
+              <Button onClick={() => { toast.success('Alert settings saved'); setShowAlertsDialog(false); }}>Save Settings</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Analytics Export Dialog */}
+        <Dialog open={showAnalyticsExportDialog} onOpenChange={setShowAnalyticsExportDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2"><Download className="h-5 w-5" />Export Analytics</DialogTitle>
+              <DialogDescription>Download analytics data</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label>Date Range</Label>
+                <Select defaultValue="30">
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="7">Last 7 Days</SelectItem>
+                    <SelectItem value="30">Last 30 Days</SelectItem>
+                    <SelectItem value="90">Last 90 Days</SelectItem>
+                    <SelectItem value="365">Last Year</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Format</Label>
+                <Select defaultValue="csv">
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="csv">CSV</SelectItem>
+                    <SelectItem value="json">JSON</SelectItem>
+                    <SelectItem value="xlsx">Excel (XLSX)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Include</Label>
+                <div className="flex items-center gap-2">
+                  <input type="checkbox" id="include-bandwidth" defaultChecked />
+                  <label htmlFor="include-bandwidth" className="text-sm">Bandwidth metrics</label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <input type="checkbox" id="include-executions" defaultChecked />
+                  <label htmlFor="include-executions" className="text-sm">Execution metrics</label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <input type="checkbox" id="include-cache" defaultChecked />
+                  <label htmlFor="include-cache" className="text-sm">Cache statistics</label>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowAnalyticsExportDialog(false)}>Cancel</Button>
+              <Button onClick={() => { toast.success('Analytics exported'); setShowAnalyticsExportDialog(false); }}>Export</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Security Audit Dialog */}
+        <Dialog open={showSecurityAuditDialog} onOpenChange={setShowSecurityAuditDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2"><Shield className="h-5 w-5 text-red-600" />Security Audit</DialogTitle>
+              <DialogDescription>Security status and recommendations</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+                <div className="flex items-center gap-2 mb-2">
+                  <CheckCircle2 className="h-5 w-5 text-green-600" />
+                  <span className="font-semibold text-green-700">Security Score: A+</span>
+                </div>
+                <p className="text-sm text-green-600">Your deployment is well protected</p>
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <Lock className="h-4 w-4 text-green-500" />
+                    <span>SSL/TLS Certificate</span>
+                  </div>
+                  <Badge className="bg-green-100 text-green-700">Valid</Badge>
+                </div>
+                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <Shield className="h-4 w-4 text-green-500" />
+                    <span>DDoS Protection</span>
+                  </div>
+                  <Badge className="bg-green-100 text-green-700">Active</Badge>
+                </div>
+                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <Key className="h-4 w-4 text-green-500" />
+                    <span>Password Protection</span>
+                  </div>
+                  <Badge className="bg-green-100 text-green-700">Enabled</Badge>
+                </div>
+                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <AlertTriangle className="h-4 w-4 text-amber-500" />
+                    <span>Security Headers</span>
+                  </div>
+                  <Badge className="bg-amber-100 text-amber-700">Partial</Badge>
+                </div>
+              </div>
+              <div className="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
+                <p className="font-medium text-amber-700 mb-2">Recommendations</p>
+                <ul className="text-sm text-amber-600 space-y-1">
+                  <li>- Enable strict Content-Security-Policy header</li>
+                  <li>- Add X-Frame-Options header to prevent clickjacking</li>
+                </ul>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowSecurityAuditDialog(false)}>Close</Button>
+              <Button onClick={() => { toast.success('Full security report generated'); setShowSecurityAuditDialog(false); }}>
+                <Download className="h-4 w-4 mr-2" />Download Report
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Rule Dialog */}
+        <Dialog open={showAddRuleDialog} onOpenChange={setShowAddRuleDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2"><Plus className="h-5 w-5" />Add Protection Rule</DialogTitle>
+              <DialogDescription>Create a new security rule for your deployments</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label>Rule Name</Label>
+                <Input placeholder="My protection rule" className="mt-1" value={newRuleForm.name} onChange={(e) => setNewRuleForm(prev => ({ ...prev, name: e.target.value }))} />
+              </div>
+              <div>
+                <Label>Protection Type</Label>
+                <Select value={newRuleForm.type} onValueChange={(v) => setNewRuleForm(prev => ({ ...prev, type: v as any }))}>
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="password">Password Protection</SelectItem>
+                    <SelectItem value="vercel_auth">Vercel Authentication</SelectItem>
+                    <SelectItem value="trusted_ips">Trusted IPs Only</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch checked={newRuleForm.enabled} onCheckedChange={(v) => setNewRuleForm(prev => ({ ...prev, enabled: v }))} />
+                <span>Enable rule immediately</span>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowAddRuleDialog(false)}>Cancel</Button>
+              <Button onClick={() => {
+                if (!newRuleForm.name.trim()) {
+                  toast.error('Rule name is required');
+                  return;
+                }
+                toast.success('Protection rule added', { description: `${newRuleForm.name} is now ${newRuleForm.enabled ? 'active' : 'inactive'}` });
+                setNewRuleForm({ name: '', type: 'password', enabled: true });
+                setShowAddRuleDialog(false);
+              }}>Add Rule</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Create Hook Dialog */}
+        <Dialog open={showCreateHookDialog} onOpenChange={setShowCreateHookDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2"><Webhook className="h-5 w-5" />Create Deploy Hook</DialogTitle>
+              <DialogDescription>Generate a webhook URL to trigger deployments</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label>Hook Name</Label>
+                <Input placeholder="Production Deploy Hook" className="mt-1" value={newHookForm.name} onChange={(e) => setNewHookForm(prev => ({ ...prev, name: e.target.value }))} />
+              </div>
+              <div>
+                <Label>Branch</Label>
+                <Select value={newHookForm.branch} onValueChange={(v) => setNewHookForm(prev => ({ ...prev, branch: v }))}>
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="main">main</SelectItem>
+                    <SelectItem value="develop">develop</SelectItem>
+                    <SelectItem value="staging">staging</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                <p className="text-sm text-purple-700 dark:text-purple-300">
+                  Deploy hooks allow you to trigger deployments from external services using HTTP POST requests.
+                </p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowCreateHookDialog(false)}>Cancel</Button>
+              <Button className="bg-gradient-to-r from-purple-600 to-indigo-600" onClick={() => {
+                if (!newHookForm.name.trim()) {
+                  toast.error('Hook name is required');
+                  return;
+                }
+                toast.success('Deploy hook created', { description: `${newHookForm.name} hook is ready` });
+                setNewHookForm({ name: '', branch: 'main' });
+                setShowCreateHookDialog(false);
+              }}>Create Hook</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Marketplace Dialog */}
+        <Dialog open={showMarketplaceDialog} onOpenChange={setShowMarketplaceDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2"><Search className="h-5 w-5" />Build Plugin Marketplace</DialogTitle>
+              <DialogDescription>Browse and install plugins for your build process</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <Input placeholder="Search plugins..." />
+              <div className="space-y-3">
+                {[
+                  { name: 'TypeScript Optimizer', description: 'Optimize TypeScript builds', installs: '120k' },
+                  { name: 'Image Compressor', description: 'Automatically compress images', installs: '89k' },
+                  { name: 'Bundle Analyzer', description: 'Analyze bundle size', installs: '76k' },
+                  { name: 'Security Scanner', description: 'Scan for vulnerabilities', installs: '54k' },
+                ].map(plugin => (
+                  <div key={plugin.name} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <Package className="h-8 w-8 text-indigo-600" />
+                      <div>
+                        <p className="font-medium">{plugin.name}</p>
+                        <p className="text-sm text-gray-500">{plugin.description}</p>
+                        <p className="text-xs text-gray-400">{plugin.installs} installs</p>
+                      </div>
+                    </div>
+                    <Button variant="outline" onClick={() => { toast.success(`${plugin.name} installed`); }}>Install</Button>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowMarketplaceDialog(false)}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete All Deployments Dialog */}
+        <Dialog open={showDeleteAllDeploymentsDialog} onOpenChange={setShowDeleteAllDeploymentsDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-600"><AlertOctagon className="h-5 w-5" />Delete All Deployments</DialogTitle>
+              <DialogDescription>This action cannot be undone</DialogDescription>
+            </DialogHeader>
+            <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+              <p className="text-sm text-red-800 dark:text-red-200">
+                This will permanently delete all deployments from this project. This action cannot be undone.
+              </p>
+            </div>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label>Type "DELETE ALL" to confirm</Label>
+                <Input placeholder="DELETE ALL" className="mt-1" />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowDeleteAllDeploymentsDialog(false)}>Cancel</Button>
+              <Button className="bg-red-600 hover:bg-red-700" onClick={() => { toast.success('All deployments deleted'); setShowDeleteAllDeploymentsDialog(false); }}>
+                <Trash2 className="h-4 w-4 mr-2" />Delete All
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Reset Settings Dialog */}
+        <Dialog open={showResetSettingsDialog} onOpenChange={setShowResetSettingsDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-600"><RefreshCw className="h-5 w-5" />Reset Project Settings</DialogTitle>
+              <DialogDescription>Reset all settings to their defaults</DialogDescription>
+            </DialogHeader>
+            <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+              <p className="text-sm text-red-800 dark:text-red-200">
+                This will reset all project settings including environment variables, build settings, and domain configurations.
+              </p>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowResetSettingsDialog(false)}>Cancel</Button>
+              <Button className="bg-red-600 hover:bg-red-700" onClick={() => { toast.success('Project settings reset'); setShowResetSettingsDialog(false); }}>
+                <RefreshCw className="h-4 w-4 mr-2" />Reset Settings
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Disable Deployments Dialog */}
+        <Dialog open={showDisableDeploymentsDialog} onOpenChange={setShowDisableDeploymentsDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-600"><Lock className="h-5 w-5" />Disable Deployments</DialogTitle>
+              <DialogDescription>Prevent new deployments to this project</DialogDescription>
+            </DialogHeader>
+            <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+              <p className="text-sm text-red-800 dark:text-red-200">
+                Disabling deployments will prevent any new deployments from being created. Existing deployments will remain active.
+              </p>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowDisableDeploymentsDialog(false)}>Cancel</Button>
+              <Button className="bg-red-600 hover:bg-red-700" onClick={() => { toast.success('Deployments disabled'); setShowDisableDeploymentsDialog(false); }}>
+                <Lock className="h-4 w-4 mr-2" />Disable Deployments
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Project Dialog */}
+        <Dialog open={showDeleteProjectDialog} onOpenChange={setShowDeleteProjectDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-600"><Trash2 className="h-5 w-5" />Delete Project</DialogTitle>
+              <DialogDescription>Permanently delete this project and all data</DialogDescription>
+            </DialogHeader>
+            <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+              <p className="text-sm text-red-800 dark:text-red-200">
+                This will permanently delete the entire project including all deployments, environment variables, domains, and settings. This action cannot be undone.
+              </p>
+            </div>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label>Type the project name to confirm</Label>
+                <Input placeholder="freeflow-app" className="mt-1" />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowDeleteProjectDialog(false)}>Cancel</Button>
+              <Button className="bg-red-600 hover:bg-red-700" onClick={() => { toast.success('Project deleted'); setShowDeleteProjectDialog(false); }}>
+                <Trash2 className="h-4 w-4 mr-2" />Delete Project
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   )

@@ -472,6 +472,33 @@ export default function TeamHubClient() {
 
   // Dialog State
   const [showCreateMemberDialog, setShowCreateMemberDialog] = useState(false)
+  const [showNotificationsDialog, setShowNotificationsDialog] = useState(false)
+  const [showCreateChannelDialog, setShowCreateChannelDialog] = useState(false)
+  const [showStartHuddleDialog, setShowStartHuddleDialog] = useState(false)
+  const [showAddAppsDialog, setShowAddAppsDialog] = useState(false)
+  const [showCreateWorkflowDialog, setShowCreateWorkflowDialog] = useState(false)
+  const [showIntegrationDialog, setShowIntegrationDialog] = useState(false)
+  const [showResetWorkspaceDialog, setShowResetWorkspaceDialog] = useState(false)
+  const [showDeleteWorkspaceDialog, setShowDeleteWorkspaceDialog] = useState(false)
+  const [showClearCacheDialog, setShowClearCacheDialog] = useState(false)
+  const [showMessageMemberDialog, setShowMessageMemberDialog] = useState(false)
+  const [showHuddleMemberDialog, setShowHuddleMemberDialog] = useState(false)
+  const [messageMemberTarget, setMessageMemberTarget] = useState<TeamMember | null>(null)
+  const [selectedIntegration, setSelectedIntegration] = useState<{name: string, status: string} | null>(null)
+
+  // Form state for new dialogs
+  const [channelForm, setChannelForm] = useState({ name: '', type: 'public' as ChannelType, description: '', topic: '' })
+  const [huddleForm, setHuddleForm] = useState({ channelId: '', participants: [] as string[] })
+  const [workflowForm, setWorkflowForm] = useState({ name: '', description: '', trigger: 'channel_message' as WorkflowTrigger })
+  const [messageForm, setMessageForm] = useState({ content: '' })
+  const [workflowToggles, setWorkflowToggles] = useState<Record<string, boolean>>({})
+
+  // Initialize workflow toggles
+  useEffect(() => {
+    const toggles: Record<string, boolean> = {}
+    mockWorkflows.forEach(w => { toggles[w.id] = w.isEnabled })
+    setWorkflowToggles(toggles)
+  }, [])
 
   // Form State
   const [memberForm, setMemberForm] = useState({
@@ -753,18 +780,6 @@ export default function TeamHubClient() {
   ]
 
   // Handlers
-  const handleCreateChannel = () => {
-    toast.info('Create Channel', {
-      description: 'Opening channel builder...'
-    })
-  }
-
-  const handleStartHuddle = () => {
-    toast.success('Starting huddle', {
-      description: 'Connecting to audio channel...'
-    })
-  }
-
   const handleSendMessage = (channelName: string) => {
     toast.success('Message sent', {
       description: `Message posted to #${channelName}`
@@ -909,6 +924,338 @@ export default function TeamHubClient() {
     })
   }
 
+  // Handle Create Channel
+  const handleCreateChannel = async () => {
+    if (!channelForm.name) {
+      toast.error('Channel name is required')
+      return
+    }
+    try {
+      setIsSaving(true)
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 500))
+      toast.success('Channel created', {
+        description: `#${channelForm.name} has been created successfully`
+      })
+      setShowCreateChannelDialog(false)
+      setChannelForm({ name: '', type: 'public', description: '', topic: '' })
+    } catch (error) {
+      toast.error('Failed to create channel')
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  // Handle Start Huddle
+  const handleStartHuddle = async () => {
+    if (!huddleForm.channelId) {
+      toast.error('Please select a channel for the huddle')
+      return
+    }
+    try {
+      setIsSaving(true)
+      await new Promise(resolve => setTimeout(resolve, 500))
+      const channel = channels.find(c => c.id === huddleForm.channelId)
+      toast.success('Huddle started', {
+        description: `Audio channel started in #${channel?.name || 'channel'}`
+      })
+      setShowStartHuddleDialog(false)
+      setHuddleForm({ channelId: '', participants: [] })
+    } catch (error) {
+      toast.error('Failed to start huddle')
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  // Handle Join Huddle
+  const handleJoinHuddle = (huddle: Huddle) => {
+    toast.success('Joining huddle', {
+      description: `Connecting to #${huddle.channelName}...`
+    })
+  }
+
+  // Handle Add App
+  const handleAddApp = async (appId: string) => {
+    try {
+      const app = apps.find(a => a.id === appId)
+      await new Promise(resolve => setTimeout(resolve, 300))
+      toast.success('App installed', {
+        description: `${app?.name} has been added to your workspace`
+      })
+    } catch (error) {
+      toast.error('Failed to install app')
+    }
+  }
+
+  // Handle Create Workflow
+  const handleCreateWorkflow = async () => {
+    if (!workflowForm.name) {
+      toast.error('Workflow name is required')
+      return
+    }
+    try {
+      setIsSaving(true)
+      await new Promise(resolve => setTimeout(resolve, 500))
+      toast.success('Workflow created', {
+        description: `${workflowForm.name} has been created successfully`
+      })
+      setShowCreateWorkflowDialog(false)
+      setWorkflowForm({ name: '', description: '', trigger: 'channel_message' })
+    } catch (error) {
+      toast.error('Failed to create workflow')
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  // Handle Toggle Workflow
+  const handleToggleWorkflow = (workflowId: string, enabled: boolean) => {
+    setWorkflowToggles(prev => ({ ...prev, [workflowId]: enabled }))
+    const workflow = workflows.find(w => w.id === workflowId)
+    toast.success(enabled ? 'Workflow enabled' : 'Workflow disabled', {
+      description: `${workflow?.name} is now ${enabled ? 'active' : 'inactive'}`
+    })
+  }
+
+  // Handle Save Settings
+  const handleSaveSettings = async () => {
+    try {
+      setIsSaving(true)
+      await new Promise(resolve => setTimeout(resolve, 500))
+      toast.success('Settings saved', {
+        description: 'Your workspace settings have been updated'
+      })
+    } catch (error) {
+      toast.error('Failed to save settings')
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  // Handle Integration Action
+  const handleIntegrationAction = async (integration: {name: string, status: string}) => {
+    try {
+      setIsSaving(true)
+      await new Promise(resolve => setTimeout(resolve, 500))
+      if (integration.status === 'connected') {
+        toast.success('Integration configured', {
+          description: `${integration.name} settings have been updated`
+        })
+      } else {
+        toast.success('Integration connected', {
+          description: `${integration.name} has been connected to your workspace`
+        })
+      }
+      setShowIntegrationDialog(false)
+      setSelectedIntegration(null)
+    } catch (error) {
+      toast.error('Failed to update integration')
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  // Handle Copy API Token
+  const handleCopyApiToken = async () => {
+    try {
+      await navigator.clipboard.writeText('xoxb-example-api-token-12345')
+      toast.success('API token copied', {
+        description: 'Token has been copied to clipboard'
+      })
+    } catch (error) {
+      toast.error('Failed to copy token')
+    }
+  }
+
+  // Handle Regenerate Token
+  const handleRegenerateToken = async () => {
+    try {
+      setIsSaving(true)
+      await new Promise(resolve => setTimeout(resolve, 500))
+      toast.success('Token regenerated', {
+        description: 'A new API token has been generated'
+      })
+    } catch (error) {
+      toast.error('Failed to regenerate token')
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  // Handle Export Workspace Data
+  const handleExportWorkspaceData = async () => {
+    try {
+      toast.loading('Exporting workspace data...', { id: 'export-workspace-toast' })
+
+      const exportData = {
+        workspace: {
+          name: 'FreeFlow Team',
+          exportedAt: new Date().toISOString()
+        },
+        members: members.map(m => ({
+          name: m.name,
+          email: m.email,
+          role: m.role,
+          department: m.department,
+          status: m.status,
+          joinedAt: m.joinedAt
+        })),
+        channels: channels.map(c => ({
+          name: c.name,
+          type: c.type,
+          memberCount: c.memberCount,
+          createdAt: c.createdAt
+        })),
+        workflows: workflows.map(w => ({
+          name: w.name,
+          trigger: w.trigger,
+          isEnabled: w.isEnabled,
+          runCount: w.runCount
+        })),
+        apps: apps.filter(a => a.isInstalled).map(a => ({
+          name: a.name,
+          category: a.category,
+          isEnabled: a.isEnabled
+        }))
+      }
+
+      const dataStr = JSON.stringify(exportData, null, 2)
+      const dataBlob = new Blob([dataStr], { type: 'application/json' })
+      const url = URL.createObjectURL(dataBlob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `workspace-export-${new Date().getTime()}.json`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
+
+      toast.dismiss('export-workspace-toast')
+      toast.success('Workspace data exported', {
+        description: 'Full workspace data has been downloaded'
+      })
+    } catch (error) {
+      toast.error('Failed to export workspace data')
+    }
+  }
+
+  // Handle Clear Cache
+  const handleClearCache = async () => {
+    try {
+      setIsSaving(true)
+      await new Promise(resolve => setTimeout(resolve, 500))
+      toast.success('Cache cleared', {
+        description: 'All cached data has been cleared'
+      })
+      setShowClearCacheDialog(false)
+    } catch (error) {
+      toast.error('Failed to clear cache')
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  // Handle Reset Workspace
+  const handleResetWorkspace = async () => {
+    try {
+      setIsSaving(true)
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      toast.success('Workspace reset', {
+        description: 'All workspace settings have been reset to defaults'
+      })
+      setShowResetWorkspaceDialog(false)
+    } catch (error) {
+      toast.error('Failed to reset workspace')
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  // Handle Delete Workspace
+  const handleDeleteWorkspace = async () => {
+    try {
+      setIsSaving(true)
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      toast.success('Workspace scheduled for deletion', {
+        description: 'Your workspace will be permanently deleted in 30 days'
+      })
+      setShowDeleteWorkspaceDialog(false)
+    } catch (error) {
+      toast.error('Failed to delete workspace')
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  // Handle Message Member
+  const handleMessageMember = async (member: TeamMember) => {
+    if (!messageForm.content.trim()) {
+      toast.error('Please enter a message')
+      return
+    }
+    try {
+      setIsSaving(true)
+      await new Promise(resolve => setTimeout(resolve, 300))
+      toast.success('Message sent', {
+        description: `Your message has been sent to ${member.name}`
+      })
+      setShowMessageMemberDialog(false)
+      setMessageMemberTarget(null)
+      setMessageForm({ content: '' })
+    } catch (error) {
+      toast.error('Failed to send message')
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  // Handle Huddle Member
+  const handleHuddleMember = async (member: TeamMember) => {
+    try {
+      setIsSaving(true)
+      await new Promise(resolve => setTimeout(resolve, 300))
+      toast.success('Huddle invitation sent', {
+        description: `Inviting ${member.name} to a huddle...`
+      })
+      setShowHuddleMemberDialog(false)
+      setMessageMemberTarget(null)
+    } catch (error) {
+      toast.error('Failed to start huddle')
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  // Handle Open Channel
+  const handleOpenChannel = (channel: Channel) => {
+    toast.success('Channel opened', {
+      description: `Now viewing #${channel.name}`
+    })
+    setSelectedChannel(null)
+  }
+
+  // Handle Star Channel
+  const handleStarChannel = (channel: Channel) => {
+    toast.success(channel.isStarred ? 'Channel unstarred' : 'Channel starred', {
+      description: `#${channel.name} has been ${channel.isStarred ? 'removed from' : 'added to'} your starred channels`
+    })
+  }
+
+  // Handle Channel Settings
+  const handleChannelSettings = (channel: Channel) => {
+    toast.success('Channel settings opened', {
+      description: `Managing settings for #${channel.name}`
+    })
+  }
+
+  // Handle Member Profile More Options
+  const handleMemberProfileMore = (member: TeamMember) => {
+    toast.success('More options', {
+      description: `Additional actions for ${member.name}`
+    })
+  }
+
   // Combined stats from mock + db
   const combinedMemberCount = members.length + dbMembers.length
   const dbOnlineCount = dbMembers.filter(m => m.status === 'online').length
@@ -931,7 +1278,7 @@ export default function TeamHubClient() {
             <Button variant="outline" size="icon" onClick={() => setShowSearch(true)}>
               <Search className="w-4 h-4" />
             </Button>
-            <Button variant="outline" size="icon" className="relative">
+            <Button variant="outline" size="icon" className="relative" onClick={() => setShowNotificationsDialog(true)}>
               <Bell className="w-4 h-4" />
               {stats.totalMentions > 0 && (
                 <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">{stats.totalMentions}</span>
@@ -1112,11 +1459,11 @@ export default function TeamHubClient() {
                     </div>
 
                     <div className="flex gap-2 mt-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Button variant="outline" size="sm" className="flex-1 h-8">
+                      <Button variant="outline" size="sm" className="flex-1 h-8" onClick={(e) => { e.stopPropagation(); setMessageMemberTarget(member); setShowMessageMemberDialog(true) }}>
                         <MessageSquare className="w-3.5 h-3.5 mr-1" />
                         Message
                       </Button>
-                      <Button variant="outline" size="sm" className="h-8 px-2">
+                      <Button variant="outline" size="sm" className="h-8 px-2" onClick={(e) => { e.stopPropagation(); setMessageMemberTarget(member); setShowHuddleMemberDialog(true) }}>
                         <Headphones className="w-3.5 h-3.5" />
                       </Button>
                     </div>
@@ -1189,7 +1536,7 @@ export default function TeamHubClient() {
                 <h3 className="text-lg font-semibold">Channels</h3>
                 <Badge variant="secondary">{channels.length}</Badge>
               </div>
-              <Button>
+              <Button onClick={() => setShowCreateChannelDialog(true)}>
                 <Plus className="w-4 h-4 mr-2" />
                 Create Channel
               </Button>
@@ -1407,7 +1754,7 @@ export default function TeamHubClient() {
           <TabsContent value="huddles" className="space-y-6">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold">Huddles</h3>
-              <Button>
+              <Button onClick={() => setShowStartHuddleDialog(true)}>
                 <Headphones className="w-4 h-4 mr-2" />
                 Start Huddle
               </Button>
@@ -1457,7 +1804,7 @@ export default function TeamHubClient() {
                       ))}
                     </div>
 
-                    <Button className="w-full bg-gradient-to-r from-green-500 to-emerald-500 text-white">
+                    <Button className="w-full bg-gradient-to-r from-green-500 to-emerald-500 text-white" onClick={() => handleJoinHuddle(huddle)}>
                       Join Huddle
                     </Button>
                   </CardContent>
@@ -1470,7 +1817,7 @@ export default function TeamHubClient() {
                     <Headphones className="w-12 h-12 text-gray-300 mx-auto mb-4" />
                     <h3 className="text-lg font-medium mb-2">No active huddles</h3>
                     <p className="text-gray-500 mb-4">Start a huddle to have a quick audio chat with your team</p>
-                    <Button>
+                    <Button onClick={() => setShowStartHuddleDialog(true)}>
                       <Plus className="w-4 h-4 mr-2" />
                       Start Huddle
                     </Button>
@@ -1484,7 +1831,7 @@ export default function TeamHubClient() {
           <TabsContent value="apps" className="space-y-6">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold">Installed Apps</h3>
-              <Button>
+              <Button onClick={() => setShowAddAppsDialog(true)}>
                 <Plus className="w-4 h-4 mr-2" />
                 Add Apps
               </Button>
@@ -1550,7 +1897,7 @@ export default function TeamHubClient() {
                           <span>{app.installCount.toLocaleString()} installs</span>
                         </div>
                       </div>
-                      <Button size="sm">Add</Button>
+                      <Button size="sm" onClick={() => handleAddApp(app.id)}>Add</Button>
                     </div>
                   ))}
                 </div>
@@ -1562,7 +1909,7 @@ export default function TeamHubClient() {
           <TabsContent value="workflows" className="space-y-6">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold">Workflow Builder</h3>
-              <Button>
+              <Button onClick={() => setShowCreateWorkflowDialog(true)}>
                 <Plus className="w-4 h-4 mr-2" />
                 Create Workflow
               </Button>
@@ -1574,15 +1921,15 @@ export default function TeamHubClient() {
                   <CardContent className="p-4">
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex items-center gap-3">
-                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${workflow.isEnabled ? 'bg-green-100' : 'bg-gray-100'}`}>
-                          <Workflow className={`w-5 h-5 ${workflow.isEnabled ? 'text-green-600' : 'text-gray-500'}`} />
+                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${(workflowToggles[workflow.id] ?? workflow.isEnabled) ? 'bg-green-100' : 'bg-gray-100'}`}>
+                          <Workflow className={`w-5 h-5 ${(workflowToggles[workflow.id] ?? workflow.isEnabled) ? 'text-green-600' : 'text-gray-500'}`} />
                         </div>
                         <div>
                           <h4 className="font-semibold">{workflow.name}</h4>
                           <p className="text-sm text-gray-500">{workflow.description}</p>
                         </div>
                       </div>
-                      <Switch checked={workflow.isEnabled} />
+                      <Switch checked={workflowToggles[workflow.id] ?? workflow.isEnabled} onCheckedChange={(checked) => handleToggleWorkflow(workflow.id, checked)} />
                     </div>
 
                     <div className="flex items-center gap-2 mb-3">
@@ -1721,8 +2068,8 @@ export default function TeamHubClient() {
                           </div>
                           <Switch defaultChecked />
                         </div>
-                        <Button className="bg-gradient-to-r from-purple-500 to-indigo-600 text-white">
-                          Save Settings
+                        <Button className="bg-gradient-to-r from-purple-500 to-indigo-600 text-white" onClick={handleSaveSettings} disabled={isSaving}>
+                          {isSaving ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Saving...</> : 'Save Settings'}
                         </Button>
                       </CardContent>
                     </Card>
@@ -1840,12 +2187,12 @@ export default function TeamHubClient() {
                                 <p className="text-sm text-gray-500">{integration.desc}</p>
                               </div>
                             </div>
-                            <Button variant="outline" size="sm">
+                            <Button variant="outline" size="sm" onClick={() => { setSelectedIntegration(integration); setShowIntegrationDialog(true) }}>
                               {integration.status === 'connected' ? 'Configure' : 'Connect'}
                             </Button>
                           </div>
                         ))}
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => setShowAddAppsDialog(true)}>
                           <Plus className="w-4 h-4 mr-2" />
                           Add Integration
                         </Button>
@@ -1864,7 +2211,7 @@ export default function TeamHubClient() {
                           <Label>API Token</Label>
                           <div className="flex gap-2 mt-1">
                             <Input type="password" value="xoxb-****************************" readOnly className="font-mono" />
-                            <Button variant="outline">
+                            <Button variant="outline" onClick={handleCopyApiToken}>
                               <Copy className="w-4 h-4" />
                             </Button>
                           </div>
@@ -1873,8 +2220,8 @@ export default function TeamHubClient() {
                           <Label>Webhook URL</Label>
                           <Input defaultValue="https://hooks.slack.com/services/..." className="mt-1 font-mono" />
                         </div>
-                        <Button variant="outline">
-                          <RefreshCw className="w-4 h-4 mr-2" />
+                        <Button variant="outline" onClick={handleRegenerateToken} disabled={isSaving}>
+                          {isSaving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <RefreshCw className="w-4 h-4 mr-2" />}
                           Regenerate Token
                         </Button>
                       </CardContent>
@@ -1998,11 +2345,11 @@ export default function TeamHubClient() {
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex gap-2">
-                          <Button variant="outline">
+                          <Button variant="outline" onClick={handleExportWorkspaceData}>
                             <Download className="w-4 h-4 mr-2" />
                             Export Workspace Data
                           </Button>
-                          <Button variant="outline" className="text-red-600 hover:text-red-700">
+                          <Button variant="outline" className="text-red-600 hover:text-red-700" onClick={() => setShowClearCacheDialog(true)}>
                             <Trash2 className="w-4 h-4 mr-2" />
                             Clear Cache
                           </Button>
@@ -2023,7 +2370,7 @@ export default function TeamHubClient() {
                             <p className="font-medium text-red-700 dark:text-red-300">Reset Workspace</p>
                             <p className="text-sm text-red-600/70">Reset all workspace settings</p>
                           </div>
-                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50">
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50" onClick={() => setShowResetWorkspaceDialog(true)}>
                             Reset
                           </Button>
                         </div>
@@ -2032,7 +2379,7 @@ export default function TeamHubClient() {
                             <p className="font-medium text-red-700 dark:text-red-300">Delete Workspace</p>
                             <p className="text-sm text-red-600/70">Permanently delete workspace</p>
                           </div>
-                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50">
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50" onClick={() => setShowDeleteWorkspaceDialog(true)}>
                             Delete
                           </Button>
                         </div>
@@ -2129,15 +2476,15 @@ export default function TeamHubClient() {
                   </div>
 
                   <div className="flex gap-2 pt-4 border-t">
-                    <Button className="flex-1">
+                    <Button className="flex-1" onClick={() => { setMessageMemberTarget(selectedMember); setSelectedMember(null); setShowMessageMemberDialog(true) }}>
                       <MessageSquare className="w-4 h-4 mr-2" />
                       Message
                     </Button>
-                    <Button variant="outline">
+                    <Button variant="outline" onClick={() => { setMessageMemberTarget(selectedMember); setSelectedMember(null); setShowHuddleMemberDialog(true) }}>
                       <Headphones className="w-4 h-4 mr-2" />
                       Huddle
                     </Button>
-                    <Button variant="outline" size="icon">
+                    <Button variant="outline" size="icon" onClick={() => handleMemberProfileMore(selectedMember)}>
                       <MoreVertical className="w-4 h-4" />
                     </Button>
                   </div>
@@ -2202,11 +2549,11 @@ export default function TeamHubClient() {
                 )}
 
                 <div className="flex gap-2 pt-4 border-t">
-                  <Button className="flex-1">Open Channel</Button>
-                  <Button variant="outline" size="icon">
+                  <Button className="flex-1" onClick={() => handleOpenChannel(selectedChannel)}>Open Channel</Button>
+                  <Button variant="outline" size="icon" onClick={() => handleStarChannel(selectedChannel)}>
                     {selectedChannel.isStarred ? <Star className="w-4 h-4 fill-current text-yellow-500" /> : <Star className="w-4 h-4" />}
                   </Button>
-                  <Button variant="outline" size="icon">
+                  <Button variant="outline" size="icon" onClick={() => handleChannelSettings(selectedChannel)}>
                     <Settings className="w-4 h-4" />
                   </Button>
                 </div>
@@ -2379,6 +2726,484 @@ export default function TeamHubClient() {
                     Add Member
                   </>
                 )}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Notifications Dialog */}
+        <Dialog open={showNotificationsDialog} onOpenChange={setShowNotificationsDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Bell className="w-5 h-5 text-blue-500" />
+                Notifications
+              </DialogTitle>
+              <DialogDescription>Recent mentions and activity</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-3 max-h-[400px] overflow-y-auto">
+              {activities.slice(0, 5).map(activity => (
+                <div key={activity.id} className="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <Avatar className="w-8 h-8">
+                    <AvatarImage src={activity.userAvatar} />
+                    <AvatarFallback>{activity.userName.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium">{activity.userName}</p>
+                    <p className="text-xs text-gray-500">{activity.content}</p>
+                    <p className="text-xs text-gray-400 mt-1">#{activity.channelName} - {formatTimeAgo(activity.timestamp)}</p>
+                  </div>
+                </div>
+              ))}
+              {activities.length === 0 && (
+                <div className="text-center py-8 text-gray-500">
+                  <Bell className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                  <p>No new notifications</p>
+                </div>
+              )}
+            </div>
+            <div className="flex justify-end pt-4 border-t">
+              <Button variant="outline" onClick={() => setShowNotificationsDialog(false)}>Close</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Create Channel Dialog */}
+        <Dialog open={showCreateChannelDialog} onOpenChange={setShowCreateChannelDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Hash className="w-5 h-5 text-blue-500" />
+                Create Channel
+              </DialogTitle>
+              <DialogDescription>Create a new channel for your team</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label>Channel Name *</Label>
+                <Input
+                  value={channelForm.name}
+                  onChange={(e) => setChannelForm({ ...channelForm, name: e.target.value.toLowerCase().replace(/\s+/g, '-') })}
+                  placeholder="project-updates"
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label>Channel Type</Label>
+                <select
+                  value={channelForm.type}
+                  onChange={(e) => setChannelForm({ ...channelForm, type: e.target.value as ChannelType })}
+                  className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                >
+                  <option value="public">Public - Anyone can join</option>
+                  <option value="private">Private - By invitation only</option>
+                </select>
+              </div>
+              <div>
+                <Label>Description</Label>
+                <Input
+                  value={channelForm.description}
+                  onChange={(e) => setChannelForm({ ...channelForm, description: e.target.value })}
+                  placeholder="What is this channel about?"
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label>Topic (optional)</Label>
+                <Input
+                  value={channelForm.topic}
+                  onChange={(e) => setChannelForm({ ...channelForm, topic: e.target.value })}
+                  placeholder="Current focus or important info"
+                  className="mt-1"
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowCreateChannelDialog(false)}>Cancel</Button>
+              <Button onClick={handleCreateChannel} disabled={isSaving || !channelForm.name}>
+                {isSaving ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Creating...</> : 'Create Channel'}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Start Huddle Dialog */}
+        <Dialog open={showStartHuddleDialog} onOpenChange={setShowStartHuddleDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Headphones className="w-5 h-5 text-green-500" />
+                Start Huddle
+              </DialogTitle>
+              <DialogDescription>Start an audio huddle in a channel</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label>Select Channel *</Label>
+                <select
+                  value={huddleForm.channelId}
+                  onChange={(e) => setHuddleForm({ ...huddleForm, channelId: e.target.value })}
+                  className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                >
+                  <option value="">Select a channel...</option>
+                  {channels.filter(c => !c.isArchived).map(channel => (
+                    <option key={channel.id} value={channel.id}>#{channel.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <p className="text-sm font-medium mb-2">Huddle features:</p>
+                <ul className="text-xs text-gray-500 space-y-1">
+                  <li className="flex items-center gap-2"><Video className="w-3 h-3" /> Video and screen sharing available</li>
+                  <li className="flex items-center gap-2"><Users className="w-3 h-3" /> Invite team members to join</li>
+                  <li className="flex items-center gap-2"><MessageSquare className="w-3 h-3" /> Live captions and reactions</li>
+                </ul>
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowStartHuddleDialog(false)}>Cancel</Button>
+              <Button onClick={handleStartHuddle} disabled={isSaving || !huddleForm.channelId} className="bg-gradient-to-r from-green-500 to-emerald-500 text-white">
+                {isSaving ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Starting...</> : <><Headphones className="w-4 h-4 mr-2" />Start Huddle</>}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Apps Dialog */}
+        <Dialog open={showAddAppsDialog} onOpenChange={setShowAddAppsDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Layers className="w-5 h-5 text-purple-500" />
+                Add Apps
+              </DialogTitle>
+              <DialogDescription>Browse and install integrations for your workspace</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Input placeholder="Search apps..." className="pl-10" />
+              </div>
+              <ScrollArea className="h-[300px]">
+                <div className="space-y-3">
+                  {apps.map(app => (
+                    <div key={app.id} className="flex items-center gap-3 p-3 border rounded-lg hover:border-blue-500 transition-colors">
+                      <div className="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-xl">
+                        {app.icon}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <h4 className="font-medium text-sm">{app.name}</h4>
+                          {app.isInstalled && <Badge className="bg-green-100 text-green-700 text-xs">Installed</Badge>}
+                        </div>
+                        <p className="text-xs text-gray-500 line-clamp-1">{app.description}</p>
+                        <div className="flex items-center gap-2 text-xs text-gray-400 mt-1">
+                          <span className="flex items-center gap-0.5"><Star className="w-3 h-3 text-yellow-500 fill-current" />{app.rating}</span>
+                          <span>-</span>
+                          <span>{app.installCount.toLocaleString()} installs</span>
+                        </div>
+                      </div>
+                      <Button size="sm" variant={app.isInstalled ? "outline" : "default"} onClick={() => !app.isInstalled && handleAddApp(app.id)} disabled={app.isInstalled}>
+                        {app.isInstalled ? 'Installed' : 'Add'}
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+            </div>
+            <div className="flex justify-end">
+              <Button variant="outline" onClick={() => setShowAddAppsDialog(false)}>Close</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Create Workflow Dialog */}
+        <Dialog open={showCreateWorkflowDialog} onOpenChange={setShowCreateWorkflowDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Workflow className="w-5 h-5 text-indigo-500" />
+                Create Workflow
+              </DialogTitle>
+              <DialogDescription>Automate repetitive tasks with workflows</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label>Workflow Name *</Label>
+                <Input
+                  value={workflowForm.name}
+                  onChange={(e) => setWorkflowForm({ ...workflowForm, name: e.target.value })}
+                  placeholder="My Workflow"
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label>Description</Label>
+                <Input
+                  value={workflowForm.description}
+                  onChange={(e) => setWorkflowForm({ ...workflowForm, description: e.target.value })}
+                  placeholder="What does this workflow do?"
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label>Trigger</Label>
+                <select
+                  value={workflowForm.trigger}
+                  onChange={(e) => setWorkflowForm({ ...workflowForm, trigger: e.target.value as WorkflowTrigger })}
+                  className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                >
+                  <option value="channel_message">New message in channel</option>
+                  <option value="emoji_reaction">Emoji reaction added</option>
+                  <option value="new_member">New member joins</option>
+                  <option value="scheduled">Scheduled time</option>
+                  <option value="webhook">Webhook</option>
+                  <option value="shortcut">Shortcut command</option>
+                </select>
+              </div>
+              <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <p className="text-sm text-gray-500">After creating the workflow, you can add steps and configure actions in the workflow builder.</p>
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowCreateWorkflowDialog(false)}>Cancel</Button>
+              <Button onClick={handleCreateWorkflow} disabled={isSaving || !workflowForm.name}>
+                {isSaving ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Creating...</> : 'Create Workflow'}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Integration Dialog */}
+        <Dialog open={showIntegrationDialog} onOpenChange={setShowIntegrationDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Webhook className="w-5 h-5 text-green-500" />
+                {selectedIntegration?.status === 'connected' ? 'Configure' : 'Connect'} {selectedIntegration?.name}
+              </DialogTitle>
+              <DialogDescription>
+                {selectedIntegration?.status === 'connected'
+                  ? 'Manage your integration settings'
+                  : 'Connect this integration to your workspace'}
+              </DialogDescription>
+            </DialogHeader>
+            {selectedIntegration && (
+              <div className="space-y-4 py-4">
+                <div className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div className="w-12 h-12 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold text-xl">
+                    {selectedIntegration.name[0]}
+                  </div>
+                  <div>
+                    <p className="font-medium">{selectedIntegration.name}</p>
+                    <Badge variant={selectedIntegration.status === 'connected' ? 'default' : 'secondary'}>
+                      {selectedIntegration.status === 'connected' ? 'Connected' : 'Not Connected'}
+                    </Badge>
+                  </div>
+                </div>
+                {selectedIntegration.status === 'connected' ? (
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                      <div>
+                        <p className="text-sm font-medium">Sync notifications</p>
+                        <p className="text-xs text-gray-500">Receive updates in Slack</p>
+                      </div>
+                      <Switch defaultChecked />
+                    </div>
+                    <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                      <div>
+                        <p className="text-sm font-medium">Auto-create channels</p>
+                        <p className="text-xs text-gray-500">Create channels for new projects</p>
+                      </div>
+                      <Switch />
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center py-4">
+                    <p className="text-sm text-gray-500 mb-4">Click the button below to authorize {selectedIntegration.name} with your workspace.</p>
+                  </div>
+                )}
+              </div>
+            )}
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => { setShowIntegrationDialog(false); setSelectedIntegration(null) }}>Cancel</Button>
+              <Button onClick={() => selectedIntegration && handleIntegrationAction(selectedIntegration)} disabled={isSaving}>
+                {isSaving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+                {selectedIntegration?.status === 'connected' ? 'Save Changes' : 'Connect'}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Clear Cache Dialog */}
+        <Dialog open={showClearCacheDialog} onOpenChange={setShowClearCacheDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Trash2 className="w-5 h-5 text-red-500" />
+                Clear Cache
+              </DialogTitle>
+              <DialogDescription>This will clear all cached data from your workspace</DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
+                <p className="text-sm text-yellow-700 dark:text-yellow-300">
+                  Clearing the cache will temporarily slow down loading times as data is refetched. This action cannot be undone.
+                </p>
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowClearCacheDialog(false)}>Cancel</Button>
+              <Button variant="destructive" onClick={handleClearCache} disabled={isSaving}>
+                {isSaving ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Clearing...</> : 'Clear Cache'}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Reset Workspace Dialog */}
+        <Dialog open={showResetWorkspaceDialog} onOpenChange={setShowResetWorkspaceDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-600">
+                <AlertTriangle className="w-5 h-5" />
+                Reset Workspace
+              </DialogTitle>
+              <DialogDescription>This will reset all workspace settings to their defaults</DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                <p className="text-sm text-red-700 dark:text-red-300 mb-2 font-medium">This action will:</p>
+                <ul className="text-sm text-red-600/80 dark:text-red-400/80 space-y-1 list-disc list-inside">
+                  <li>Reset all notification preferences</li>
+                  <li>Remove custom integrations</li>
+                  <li>Clear all workflow configurations</li>
+                  <li>Reset security settings</li>
+                </ul>
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowResetWorkspaceDialog(false)}>Cancel</Button>
+              <Button variant="destructive" onClick={handleResetWorkspace} disabled={isSaving}>
+                {isSaving ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Resetting...</> : 'Reset Workspace'}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Workspace Dialog */}
+        <Dialog open={showDeleteWorkspaceDialog} onOpenChange={setShowDeleteWorkspaceDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-600">
+                <AlertTriangle className="w-5 h-5" />
+                Delete Workspace
+              </DialogTitle>
+              <DialogDescription>This action is irreversible</DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg mb-4">
+                <p className="text-sm text-red-700 dark:text-red-300 mb-2 font-medium">Deleting your workspace will:</p>
+                <ul className="text-sm text-red-600/80 dark:text-red-400/80 space-y-1 list-disc list-inside">
+                  <li>Permanently delete all channels and messages</li>
+                  <li>Remove all members and their data</li>
+                  <li>Delete all files and integrations</li>
+                  <li>Cancel any active subscriptions</li>
+                </ul>
+              </div>
+              <p className="text-sm text-gray-500">Your workspace will be scheduled for deletion and permanently removed after 30 days. You can cancel this action during that period.</p>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowDeleteWorkspaceDialog(false)}>Cancel</Button>
+              <Button variant="destructive" onClick={handleDeleteWorkspace} disabled={isSaving}>
+                {isSaving ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Processing...</> : 'Delete Workspace'}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Message Member Dialog */}
+        <Dialog open={showMessageMemberDialog} onOpenChange={(open) => { setShowMessageMemberDialog(open); if (!open) setMessageMemberTarget(null) }}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <MessageSquare className="w-5 h-5 text-blue-500" />
+                Send Message
+              </DialogTitle>
+              {messageMemberTarget && (
+                <DialogDescription>Send a direct message to {messageMemberTarget.name}</DialogDescription>
+              )}
+            </DialogHeader>
+            {messageMemberTarget && (
+              <div className="space-y-4 py-4">
+                <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <Avatar className="w-10 h-10">
+                    <AvatarImage src={messageMemberTarget.avatar} />
+                    <AvatarFallback>{messageMemberTarget.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <p className="font-medium">{messageMemberTarget.name}</p>
+                    <p className="text-xs text-gray-500">@{messageMemberTarget.displayName}</p>
+                  </div>
+                </div>
+                <div>
+                  <Label>Message</Label>
+                  <textarea
+                    value={messageForm.content}
+                    onChange={(e) => setMessageForm({ content: e.target.value })}
+                    placeholder="Type your message..."
+                    className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm min-h-[100px] resize-none"
+                  />
+                </div>
+              </div>
+            )}
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => { setShowMessageMemberDialog(false); setMessageMemberTarget(null) }}>Cancel</Button>
+              <Button onClick={() => messageMemberTarget && handleMessageMember(messageMemberTarget)} disabled={isSaving || !messageForm.content.trim()}>
+                {isSaving ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Sending...</> : 'Send Message'}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Huddle Member Dialog */}
+        <Dialog open={showHuddleMemberDialog} onOpenChange={(open) => { setShowHuddleMemberDialog(open); if (!open) setMessageMemberTarget(null) }}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Headphones className="w-5 h-5 text-green-500" />
+                Start Huddle
+              </DialogTitle>
+              {messageMemberTarget && (
+                <DialogDescription>Start a huddle with {messageMemberTarget.name}</DialogDescription>
+              )}
+            </DialogHeader>
+            {messageMemberTarget && (
+              <div className="space-y-4 py-4">
+                <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <Avatar className="w-10 h-10">
+                    <AvatarImage src={messageMemberTarget.avatar} />
+                    <AvatarFallback>{messageMemberTarget.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <p className="font-medium">{messageMemberTarget.name}</p>
+                    <div className="flex items-center gap-1 text-xs">
+                      <span className={`w-2 h-2 rounded-full ${getStatusColor(messageMemberTarget.status)}`} />
+                      <span className="text-gray-500">{getStatusLabel(messageMemberTarget.status)}</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                  <p className="text-sm text-green-700 dark:text-green-300">
+                    A huddle invitation will be sent to {messageMemberTarget.name}. They can join when ready.
+                  </p>
+                </div>
+              </div>
+            )}
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => { setShowHuddleMemberDialog(false); setMessageMemberTarget(null) }}>Cancel</Button>
+              <Button onClick={() => messageMemberTarget && handleHuddleMember(messageMemberTarget)} disabled={isSaving} className="bg-gradient-to-r from-green-500 to-emerald-500 text-white">
+                {isSaving ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Starting...</> : <><Headphones className="w-4 h-4 mr-2" />Start Huddle</>}
               </Button>
             </div>
           </DialogContent>

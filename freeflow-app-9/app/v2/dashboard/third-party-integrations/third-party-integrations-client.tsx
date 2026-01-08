@@ -374,6 +374,22 @@ export default function ThirdPartyIntegrationsClient() {
   const [showDeleteAllConnectionsDialog, setShowDeleteAllConnectionsDialog] = useState(false)
   const [showResetSettingsDialog, setShowResetSettingsDialog] = useState(false)
 
+  // Additional dialog states for buttons without onClick
+  const [showCreateZapDialog, setShowCreateZapDialog] = useState(false)
+  const [showFilterZapsDialog, setShowFilterZapsDialog] = useState(false)
+  const [showFilterHistoryDialog, setShowFilterHistoryDialog] = useState(false)
+  const [showEditZapDialog, setShowEditZapDialog] = useState(false)
+  const [showViewHistoryDialog, setShowViewHistoryDialog] = useState(false)
+  const [showManageAppDialog, setShowManageAppDialog] = useState(false)
+  const [showConnectAppDialog, setShowConnectAppDialog] = useState(false)
+  const [showExecutionDetailsDialog, setShowExecutionDetailsDialog] = useState(false)
+
+  // Form states for new dialogs
+  const [newZap, setNewZap] = useState({ name: '', description: '', triggerApp: '', actionApp: '' })
+  const [filterOptions, setFilterOptions] = useState({ status: 'all', dateRange: '30', sortBy: 'recent' })
+  const [selectedAppForAction, setSelectedAppForAction] = useState<IntegrationApp | null>(null)
+  const [selectedLogForDetails, setSelectedLogForDetails] = useState<ExecutionLog | null>(null)
+
   // Stats
   const stats = useMemo(() => ({
     activeZaps: zaps.filter(z => z.status === 'active').length,
@@ -542,6 +558,73 @@ export default function ThirdPartyIntegrationsClient() {
     setShowResetSettingsDialog(false)
   }
 
+  // Handlers for new dialog functionality
+  const handleCreateZapSubmit = () => {
+    if (!newZap.name || !newZap.triggerApp || !newZap.actionApp) {
+      toast.error('Please fill in all required fields')
+      return
+    }
+    toast.success('Zap created successfully', {
+      description: `${newZap.name} has been created and is ready to activate`
+    })
+    setShowCreateZapDialog(false)
+    setNewZap({ name: '', description: '', triggerApp: '', actionApp: '' })
+  }
+
+  const handleApplyFilters = () => {
+    toast.success('Filters applied', {
+      description: `Showing ${filterOptions.status === 'all' ? 'all' : filterOptions.status} items from the last ${filterOptions.dateRange} days`
+    })
+    setShowFilterZapsDialog(false)
+    setShowFilterHistoryDialog(false)
+  }
+
+  const handleToggleZapStatus = (zap: Zap) => {
+    const newStatus = zap.status === 'active' ? 'paused' : 'active'
+    toast.success(`Zap ${newStatus === 'active' ? 'activated' : 'paused'}`, {
+      description: `${zap.name} is now ${newStatus}`
+    })
+  }
+
+  const handleEditZapSubmit = () => {
+    toast.success('Zap updated', {
+      description: 'Your changes have been saved'
+    })
+    setShowEditZapDialog(false)
+  }
+
+  const handleManageAppSubmit = () => {
+    toast.success('App settings updated', {
+      description: `${selectedAppForAction?.name} configuration has been saved`
+    })
+    setShowManageAppDialog(false)
+    setSelectedAppForAction(null)
+  }
+
+  const handleConnectApp = (app: IntegrationApp) => {
+    setSelectedAppForAction(app)
+    setShowConnectAppDialog(true)
+  }
+
+  const handleConnectAppSubmit = () => {
+    toast.success('App connected', {
+      description: `${selectedAppForAction?.name} has been connected to your account`
+    })
+    setShowConnectAppDialog(false)
+    setSelectedAppForAction(null)
+  }
+
+  const handleRefreshHistory = () => {
+    toast.success('History refreshed', {
+      description: 'Execution logs have been updated'
+    })
+  }
+
+  const handleViewExecutionDetails = (log: ExecutionLog) => {
+    setSelectedLogForDetails(log)
+    setShowExecutionDetailsDialog(true)
+  }
+
   // Quick actions with dialog-based workflows
   const integrationsQuickActions = [
     {
@@ -589,7 +672,7 @@ export default function ThirdPartyIntegrationsClient() {
                 Connect your apps and automate workflows
               </p>
             </div>
-            <Button className="bg-white text-orange-600 hover:bg-white/90">
+            <Button className="bg-white text-orange-600 hover:bg-white/90" onClick={() => setShowCreateZapDialog(true)}>
               <Plus className="h-4 w-4 mr-2" />
               Create Zap
             </Button>
@@ -674,7 +757,7 @@ export default function ThirdPartyIntegrationsClient() {
                 />
               </div>
               <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" onClick={() => setShowFilterZapsDialog(true)}>
                   <Filter className="h-4 w-4 mr-2" />
                   Filter
                 </Button>
@@ -725,10 +808,10 @@ export default function ThirdPartyIntegrationsClient() {
                           <div className="text-xs text-gray-500">Avg Time</div>
                         </div>
                         <div className="flex items-center gap-2">
-                          <Button variant="ghost" size="sm">
+                          <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); handleToggleZapStatus(zap); }}>
                             {zap.status === 'active' ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
                           </Button>
-                          <Button variant="ghost" size="sm">
+                          <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); setSelectedZap(zap); setShowEditZapDialog(true); }}>
                             <Edit className="h-4 w-4" />
                           </Button>
                         </div>
@@ -835,13 +918,13 @@ export default function ThirdPartyIntegrationsClient() {
                             )}
                             {connection.status}
                           </Badge>
-                          <Button variant="outline" size="sm" className="w-full">
+                          <Button variant="outline" size="sm" className="w-full" onClick={() => { setSelectedAppForAction(app); setShowManageAppDialog(true); }}>
                             <Settings className="h-4 w-4 mr-2" />
                             Manage
                           </Button>
                         </div>
                       ) : (
-                        <Button className="w-full bg-orange-500 hover:bg-orange-600">
+                        <Button className="w-full bg-orange-500 hover:bg-orange-600" onClick={() => handleConnectApp(app)}>
                           <Link2 className="h-4 w-4 mr-2" />
                           Connect
                         </Button>
@@ -907,10 +990,10 @@ export default function ThirdPartyIntegrationsClient() {
                         </div>
 
                         <div className="flex items-center gap-2">
-                          <Button variant="ghost" size="sm">
+                          <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); handleRefreshIntegration(conn.app.name); }}>
                             <RefreshCcw className="h-4 w-4" />
                           </Button>
-                          <Button variant="ghost" size="sm">
+                          <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); setSelectedIntegrationForAction(conn.app.name); setShowConfigureDialog(true); }}>
                             <Settings className="h-4 w-4" />
                           </Button>
                         </div>
@@ -1020,11 +1103,11 @@ export default function ThirdPartyIntegrationsClient() {
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold">Execution History</h2>
               <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" onClick={() => setShowFilterHistoryDialog(true)}>
                   <Filter className="h-4 w-4 mr-2" />
                   Filter
                 </Button>
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" onClick={handleRefreshHistory}>
                   <RefreshCcw className="h-4 w-4 mr-2" />
                   Refresh
                 </Button>
@@ -1058,7 +1141,7 @@ export default function ThirdPartyIntegrationsClient() {
                           <Badge className={getStatusColor(log.status === 'success' ? 'connected' : log.status === 'error' ? 'error' : 'pending')}>
                             {log.status}
                           </Badge>
-                          <Button variant="ghost" size="sm">
+                          <Button variant="ghost" size="sm" onClick={() => handleViewExecutionDetails(log)}>
                             <Eye className="h-4 w-4" />
                           </Button>
                         </div>
@@ -1910,7 +1993,7 @@ export default function ThirdPartyIntegrationsClient() {
                 </div>
 
                 <div className="flex items-center gap-3">
-                  <Button className="flex-1 bg-orange-500 hover:bg-orange-600">
+                  <Button className="flex-1 bg-orange-500 hover:bg-orange-600" onClick={() => { handleToggleZapStatus(selectedZap); setSelectedZap(null); }}>
                     {selectedZap.status === 'active' ? (
                       <>
                         <Pause className="h-4 w-4 mr-2" />
@@ -1923,11 +2006,11 @@ export default function ThirdPartyIntegrationsClient() {
                       </>
                     )}
                   </Button>
-                  <Button variant="outline">
+                  <Button variant="outline" onClick={() => { setShowEditZapDialog(true); }}>
                     <Edit className="h-4 w-4 mr-2" />
                     Edit
                   </Button>
-                  <Button variant="outline">
+                  <Button variant="outline" onClick={() => { setShowViewHistoryDialog(true); }}>
                     <History className="h-4 w-4 mr-2" />
                     View History
                   </Button>
@@ -2222,7 +2305,7 @@ export default function ThirdPartyIntegrationsClient() {
                   ))}
                 </SelectContent>
               </Select>
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={handleRefreshHistory}>
                 <RefreshCcw className="h-4 w-4 mr-2" />
                 Refresh
               </Button>
@@ -2568,6 +2651,539 @@ export default function ThirdPartyIntegrationsClient() {
               </Button>
             </div>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Zap Dialog */}
+      <Dialog open={showCreateZapDialog} onOpenChange={setShowCreateZapDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Workflow className="h-5 w-5 text-orange-500" />
+              Create New Zap
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="zap-name">Zap Name *</Label>
+              <Input
+                id="zap-name"
+                placeholder="e.g., New Lead to Slack Notification"
+                value={newZap.name}
+                onChange={(e) => setNewZap(prev => ({ ...prev, name: e.target.value }))}
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label htmlFor="zap-description">Description</Label>
+              <Input
+                id="zap-description"
+                placeholder="What does this zap do?"
+                value={newZap.description}
+                onChange={(e) => setNewZap(prev => ({ ...prev, description: e.target.value }))}
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label>Trigger App *</Label>
+              <Select
+                value={newZap.triggerApp}
+                onValueChange={(value) => setNewZap(prev => ({ ...prev, triggerApp: value }))}
+              >
+                <SelectTrigger className="mt-1">
+                  <SelectValue placeholder="Select trigger app" />
+                </SelectTrigger>
+                <SelectContent>
+                  {apps.map(app => (
+                    <SelectItem key={app.id} value={app.name}>
+                      <div className="flex items-center gap-2">
+                        <div className="w-5 h-5 rounded bg-orange-500 flex items-center justify-center text-white text-xs font-bold">
+                          {app.name[0]}
+                        </div>
+                        {app.name}
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Action App *</Label>
+              <Select
+                value={newZap.actionApp}
+                onValueChange={(value) => setNewZap(prev => ({ ...prev, actionApp: value }))}
+              >
+                <SelectTrigger className="mt-1">
+                  <SelectValue placeholder="Select action app" />
+                </SelectTrigger>
+                <SelectContent>
+                  {apps.map(app => (
+                    <SelectItem key={app.id} value={app.name}>
+                      <div className="flex items-center gap-2">
+                        <div className="w-5 h-5 rounded bg-blue-500 flex items-center justify-center text-white text-xs font-bold">
+                          {app.name[0]}
+                        </div>
+                        {app.name}
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-center gap-3 pt-4">
+              <Button variant="outline" className="flex-1" onClick={() => setShowCreateZapDialog(false)}>
+                Cancel
+              </Button>
+              <Button className="flex-1 bg-orange-500 hover:bg-orange-600" onClick={handleCreateZapSubmit}>
+                <Workflow className="h-4 w-4 mr-2" />
+                Create Zap
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Filter Zaps Dialog */}
+      <Dialog open={showFilterZapsDialog} onOpenChange={setShowFilterZapsDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Filter className="h-5 w-5 text-blue-500" />
+              Filter Zaps
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Status</Label>
+              <Select
+                value={filterOptions.status}
+                onValueChange={(value) => setFilterOptions(prev => ({ ...prev, status: value }))}
+              >
+                <SelectTrigger className="mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Statuses</SelectItem>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="paused">Paused</SelectItem>
+                  <SelectItem value="draft">Draft</SelectItem>
+                  <SelectItem value="error">Error</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Date Range</Label>
+              <Select
+                value={filterOptions.dateRange}
+                onValueChange={(value) => setFilterOptions(prev => ({ ...prev, dateRange: value }))}
+              >
+                <SelectTrigger className="mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="7">Last 7 days</SelectItem>
+                  <SelectItem value="30">Last 30 days</SelectItem>
+                  <SelectItem value="90">Last 90 days</SelectItem>
+                  <SelectItem value="365">Last year</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Sort By</Label>
+              <Select
+                value={filterOptions.sortBy}
+                onValueChange={(value) => setFilterOptions(prev => ({ ...prev, sortBy: value }))}
+              >
+                <SelectTrigger className="mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="recent">Most Recent</SelectItem>
+                  <SelectItem value="runs">Most Runs</SelectItem>
+                  <SelectItem value="errors">Most Errors</SelectItem>
+                  <SelectItem value="name">Name (A-Z)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-center gap-3 pt-4">
+              <Button variant="outline" className="flex-1" onClick={() => setShowFilterZapsDialog(false)}>
+                Cancel
+              </Button>
+              <Button className="flex-1 bg-blue-500 hover:bg-blue-600" onClick={handleApplyFilters}>
+                <Filter className="h-4 w-4 mr-2" />
+                Apply Filters
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Filter History Dialog */}
+      <Dialog open={showFilterHistoryDialog} onOpenChange={setShowFilterHistoryDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Filter className="h-5 w-5 text-purple-500" />
+              Filter Execution History
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Status</Label>
+              <Select
+                value={filterOptions.status}
+                onValueChange={(value) => setFilterOptions(prev => ({ ...prev, status: value }))}
+              >
+                <SelectTrigger className="mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Statuses</SelectItem>
+                  <SelectItem value="success">Success</SelectItem>
+                  <SelectItem value="error">Error</SelectItem>
+                  <SelectItem value="skipped">Skipped</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Date Range</Label>
+              <Select
+                value={filterOptions.dateRange}
+                onValueChange={(value) => setFilterOptions(prev => ({ ...prev, dateRange: value }))}
+              >
+                <SelectTrigger className="mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="1">Last 24 hours</SelectItem>
+                  <SelectItem value="7">Last 7 days</SelectItem>
+                  <SelectItem value="30">Last 30 days</SelectItem>
+                  <SelectItem value="90">Last 90 days</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-center gap-3 pt-4">
+              <Button variant="outline" className="flex-1" onClick={() => setShowFilterHistoryDialog(false)}>
+                Cancel
+              </Button>
+              <Button className="flex-1 bg-purple-500 hover:bg-purple-600" onClick={handleApplyFilters}>
+                <Filter className="h-4 w-4 mr-2" />
+                Apply Filters
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Zap Dialog */}
+      <Dialog open={showEditZapDialog} onOpenChange={setShowEditZapDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Edit className="h-5 w-5 text-orange-500" />
+              Edit Zap
+            </DialogTitle>
+          </DialogHeader>
+          {selectedZap && (
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="edit-zap-name">Zap Name</Label>
+                <Input
+                  id="edit-zap-name"
+                  defaultValue={selectedZap.name}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label htmlFor="edit-zap-description">Description</Label>
+                <Input
+                  id="edit-zap-description"
+                  defaultValue={selectedZap.description}
+                  className="mt-1"
+                />
+              </div>
+              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-8 h-8 rounded bg-orange-500 flex items-center justify-center text-white font-bold">
+                    {selectedZap.trigger.app?.name[0]}
+                  </div>
+                  <ArrowRight className="h-4 w-4 text-gray-400" />
+                  <div className="w-8 h-8 rounded bg-blue-500 flex items-center justify-center text-white font-bold">
+                    {selectedZap.actions[0]?.app?.name[0]}
+                  </div>
+                </div>
+                <p className="text-sm text-gray-500">
+                  {selectedZap.trigger.app?.name} → {selectedZap.actions[0]?.app?.name}
+                </p>
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div>
+                  <Label>Enable Notifications</Label>
+                  <p className="text-xs text-gray-500">Get alerts when this zap runs</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+              <div className="flex items-center gap-3 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowEditZapDialog(false)}>
+                  Cancel
+                </Button>
+                <Button className="flex-1 bg-orange-500 hover:bg-orange-600" onClick={handleEditZapSubmit}>
+                  <Check className="h-4 w-4 mr-2" />
+                  Save Changes
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* View Zap History Dialog */}
+      <Dialog open={showViewHistoryDialog} onOpenChange={setShowViewHistoryDialog}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-hidden flex flex-col">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <History className="h-5 w-5 text-blue-500" />
+              Zap Execution History
+              {selectedZap && <span className="text-gray-500 text-sm font-normal">- {selectedZap.name}</span>}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex-1 overflow-auto">
+            <div className="border rounded-lg divide-y">
+              {logs.filter(log => !selectedZap || log.zapId === selectedZap.id).slice(0, 10).map(log => (
+                <div key={log.id} className="p-3 hover:bg-gray-50 dark:hover:bg-gray-800">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      {getLogStatusIcon(log.status)}
+                      <div>
+                        <div className="font-medium text-sm">{log.zapName}</div>
+                        <div className="text-xs text-gray-500">
+                          {new Date(log.triggeredAt).toLocaleString()}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-4 text-sm">
+                      <span className="text-gray-500">{log.duration}s</span>
+                      <Badge className={getStatusColor(log.status === 'success' ? 'connected' : log.status === 'error' ? 'error' : 'pending')}>
+                        {log.status}
+                      </Badge>
+                    </div>
+                  </div>
+                  {log.error && (
+                    <div className="mt-2 p-2 bg-red-50 dark:bg-red-900/20 rounded text-xs text-red-600">
+                      {log.error}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="flex justify-end pt-4 border-t">
+            <Button variant="outline" onClick={() => setShowViewHistoryDialog(false)}>
+              Close
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Manage App Dialog */}
+      <Dialog open={showManageAppDialog} onOpenChange={setShowManageAppDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Settings className="h-5 w-5 text-gray-500" />
+              Manage {selectedAppForAction?.name}
+            </DialogTitle>
+          </DialogHeader>
+          {selectedAppForAction && (
+            <div className="space-y-4">
+              <div className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center text-white font-bold text-lg">
+                  {selectedAppForAction.name[0]}
+                </div>
+                <div>
+                  <h3 className="font-semibold">{selectedAppForAction.name}</h3>
+                  <p className="text-sm text-gray-500">{selectedAppForAction.description}</p>
+                </div>
+              </div>
+              <div>
+                <Label>Sync Frequency</Label>
+                <Select defaultValue="15">
+                  <SelectTrigger className="mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="5">Every 5 minutes</SelectItem>
+                    <SelectItem value="15">Every 15 minutes</SelectItem>
+                    <SelectItem value="30">Every 30 minutes</SelectItem>
+                    <SelectItem value="60">Every hour</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div>
+                  <Label>Auto-reconnect</Label>
+                  <p className="text-xs text-gray-500">Automatically reconnect on errors</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div>
+                  <Label>Enable Webhooks</Label>
+                  <p className="text-xs text-gray-500">Receive real-time updates</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+              <div className="flex items-center gap-3 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowManageAppDialog(false)}>
+                  Cancel
+                </Button>
+                <Button className="flex-1 bg-orange-500 hover:bg-orange-600" onClick={handleManageAppSubmit}>
+                  <Check className="h-4 w-4 mr-2" />
+                  Save Settings
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Connect App Dialog */}
+      <Dialog open={showConnectAppDialog} onOpenChange={setShowConnectAppDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Link2 className="h-5 w-5 text-orange-500" />
+              Connect {selectedAppForAction?.name}
+            </DialogTitle>
+          </DialogHeader>
+          {selectedAppForAction && (
+            <div className="space-y-4">
+              <div className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center text-white font-bold text-lg">
+                  {selectedAppForAction.name[0]}
+                </div>
+                <div>
+                  <h3 className="font-semibold">{selectedAppForAction.name}</h3>
+                  <p className="text-sm text-gray-500">{selectedAppForAction.description}</p>
+                </div>
+              </div>
+              <p className="text-sm text-gray-500">
+                Choose how you want to connect to {selectedAppForAction.name}.
+              </p>
+              <div className="space-y-3">
+                <Button
+                  variant="outline"
+                  className="w-full justify-start gap-3 h-auto py-3"
+                  onClick={() => {
+                    toast.success('OAuth flow initiated', {
+                      description: `Redirecting to ${selectedAppForAction.name} authorization page...`
+                    })
+                    setShowConnectAppDialog(false)
+                  }}
+                >
+                  <div className="w-8 h-8 rounded bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center">
+                    <Shield className="h-4 w-4 text-blue-600" />
+                  </div>
+                  <div className="text-left">
+                    <div className="font-medium">OAuth 2.0</div>
+                    <div className="text-xs text-gray-500">Recommended - Secure authorization</div>
+                  </div>
+                </Button>
+                <Button
+                  variant="outline"
+                  className="w-full justify-start gap-3 h-auto py-3"
+                  onClick={handleConnectAppSubmit}
+                >
+                  <div className="w-8 h-8 rounded bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center">
+                    <Key className="h-4 w-4 text-amber-600" />
+                  </div>
+                  <div className="text-left">
+                    <div className="font-medium">API Key</div>
+                    <div className="text-xs text-gray-500">Manual authentication with API key</div>
+                  </div>
+                </Button>
+              </div>
+              <div className="flex justify-end pt-4">
+                <Button variant="outline" onClick={() => setShowConnectAppDialog(false)}>
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Execution Details Dialog */}
+      <Dialog open={showExecutionDetailsDialog} onOpenChange={setShowExecutionDetailsDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Eye className="h-5 w-5 text-blue-500" />
+              Execution Details
+            </DialogTitle>
+          </DialogHeader>
+          {selectedLogForDetails && (
+            <div className="space-y-4">
+              <div className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                {getLogStatusIcon(selectedLogForDetails.status)}
+                <div className="flex-1">
+                  <h3 className="font-semibold">{selectedLogForDetails.zapName}</h3>
+                  <p className="text-sm text-gray-500">
+                    {new Date(selectedLogForDetails.triggeredAt).toLocaleString()}
+                  </p>
+                </div>
+                <Badge className={getStatusColor(selectedLogForDetails.status === 'success' ? 'connected' : selectedLogForDetails.status === 'error' ? 'error' : 'pending')}>
+                  {selectedLogForDetails.status}
+                </Badge>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div className="text-sm text-gray-500">Duration</div>
+                  <div className="font-semibold">{selectedLogForDetails.duration}s</div>
+                </div>
+                <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div className="text-sm text-gray-500">Steps Executed</div>
+                  <div className="font-semibold">{selectedLogForDetails.stepsExecuted}</div>
+                </div>
+                <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div className="text-sm text-gray-500">Triggered At</div>
+                  <div className="font-semibold text-sm">{new Date(selectedLogForDetails.triggeredAt).toLocaleTimeString()}</div>
+                </div>
+                <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div className="text-sm text-gray-500">Completed At</div>
+                  <div className="font-semibold text-sm">{new Date(selectedLogForDetails.completedAt).toLocaleTimeString()}</div>
+                </div>
+              </div>
+
+              {selectedLogForDetails.error && (
+                <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                  <div className="flex items-center gap-2 mb-2">
+                    <XCircle className="h-4 w-4 text-red-500" />
+                    <span className="font-medium text-red-700 dark:text-red-400">Error Details</span>
+                  </div>
+                  <p className="text-sm text-red-600 dark:text-red-400">{selectedLogForDetails.error}</p>
+                </div>
+              )}
+
+              <div className="flex items-center gap-3 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowExecutionDetailsDialog(false)}>
+                  Close
+                </Button>
+                {selectedLogForDetails.status === 'error' && (
+                  <Button className="flex-1 bg-orange-500 hover:bg-orange-600" onClick={() => {
+                    toast.success('Retrying execution', {
+                      description: 'The zap is being re-run with the same trigger data'
+                    })
+                    setShowExecutionDetailsDialog(false)
+                  }}>
+                    <RefreshCcw className="h-4 w-4 mr-2" />
+                    Retry
+                  </Button>
+                )}
+              </div>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>

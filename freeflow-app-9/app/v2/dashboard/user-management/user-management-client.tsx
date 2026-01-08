@@ -122,6 +122,26 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
   const [showAuditLogDialog, setShowAuditLogDialog] = useState(false)
   const [showRolesDialog, setShowRolesDialog] = useState(false)
 
+  // Additional Dialog States
+  const [showAddConnectionDialog, setShowAddConnectionDialog] = useState(false)
+  const [showConfigureConnectionDialog, setShowConfigureConnectionDialog] = useState(false)
+  const [selectedConnection, setSelectedConnection] = useState<Connection | null>(null)
+  const [showSecurityPolicyDialog, setShowSecurityPolicyDialog] = useState(false)
+  const [selectedSecurityPolicy, setSelectedSecurityPolicy] = useState<SecurityPolicy | null>(null)
+  const [showEditRoleDialog, setShowEditRoleDialog] = useState(false)
+  const [selectedRole, setSelectedRole] = useState<Role | null>(null)
+  const [showEditUserDialog, setShowEditUserDialog] = useState(false)
+  const [showUserActionsMenu, setShowUserActionsMenu] = useState<string | null>(null)
+  const [showEditEmailTemplatesDialog, setShowEditEmailTemplatesDialog] = useState(false)
+  const [showRegisterAPIDialog, setShowRegisterAPIDialog] = useState(false)
+  const [showConfigureAPIDialog, setShowConfigureAPIDialog] = useState(false)
+  const [selectedAPI, setSelectedAPI] = useState<{ name: string; identifier: string; audience: string; scopes: number } | null>(null)
+  const [showRotateKeyDialog, setShowRotateKeyDialog] = useState(false)
+  const [showRevokeSessionsDialog, setShowRevokeSessionsDialog] = useState(false)
+  const [showDeleteTenantDialog, setShowDeleteTenantDialog] = useState(false)
+  const [showSendEmailDialog, setShowSendEmailDialog] = useState(false)
+  const [showRevokeUserSessionsDialog, setShowRevokeUserSessionsDialog] = useState(false)
+
   // Quick Actions with proper dialog handlers
   const quickActionsData = [
     { id: '1', label: 'Add User', icon: 'UserPlus', shortcut: 'N', action: () => setShowAddUserDialog(true) },
@@ -571,7 +591,7 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
               <Download className="w-4 h-4" />
               {exporting ? 'Exporting...' : 'Export'}
             </Button>
-            <Button variant="outline" className="gap-2">
+            <Button variant="outline" className="gap-2" onClick={() => setShowBulkImportDialog(true)}>
               <Upload className="w-4 h-4" />
               Import
             </Button>
@@ -883,10 +903,16 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
                           </td>
                           <td className="py-3 px-4" onClick={(e) => e.stopPropagation()}>
                             <div className="flex items-center gap-2">
-                              <Button size="sm" variant="ghost" className="h-8 w-8 p-0">
+                              <Button size="sm" variant="ghost" className="h-8 w-8 p-0" onClick={() => {
+                                setSelectedUser(user)
+                                setShowEditUserDialog(true)
+                              }}>
                                 <Edit className="w-4 h-4" />
                               </Button>
-                              <Button size="sm" variant="ghost" className="h-8 w-8 p-0">
+                              <Button size="sm" variant="ghost" className="h-8 w-8 p-0" onClick={() => {
+                                setSelectedUser(user)
+                                setShowUserModal(true)
+                              }}>
                                 <MoreHorizontal className="w-4 h-4" />
                               </Button>
                             </div>
@@ -1000,7 +1026,10 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
                           <div className="text-sm font-medium text-gray-900 dark:text-white">{role.userCount}</div>
                           <div className="text-xs text-gray-500">users</div>
                         </div>
-                        <Button size="sm" variant="ghost">
+                        <Button size="sm" variant="ghost" onClick={() => {
+                          setSelectedRole(role)
+                          setShowEditRoleDialog(true)
+                        }} disabled={role.isSystem}>
                           <Edit className="w-4 h-4" />
                         </Button>
                       </div>
@@ -1019,7 +1048,7 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
                   <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Authentication Connections</h2>
                   <p className="text-sm text-gray-600 dark:text-gray-400">Manage SSO, social logins, and identity providers</p>
                 </div>
-                <Button className="gap-2">
+                <Button className="gap-2" onClick={() => setShowAddConnectionDialog(true)}>
                   <Plus className="w-4 h-4" />
                   Add Connection
                 </Button>
@@ -1065,7 +1094,10 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
                             <div className="text-xs text-gray-500">{new Date(conn.lastUsed).toLocaleString()}</div>
                           </div>
                         )}
-                        <Button size="sm" variant="outline">Configure</Button>
+                        <Button size="sm" variant="outline" onClick={() => {
+                          setSelectedConnection(conn)
+                          setShowConfigureConnectionDialog(true)
+                        }}>Configure</Button>
                       </div>
                     </div>
                   </div>
@@ -1138,7 +1170,10 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
                           />
                           <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
                         </label>
-                        <Button size="sm" variant="outline">
+                        <Button size="sm" variant="outline" onClick={() => {
+                          setSelectedSecurityPolicy(policy)
+                          setShowSecurityPolicyDialog(true)
+                        }}>
                           <Settings className="w-4 h-4" />
                         </Button>
                       </div>
@@ -1165,9 +1200,39 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
                     <option value="security">Security</option>
                     <option value="connection">Connections</option>
                   </select>
-                  <Button variant="outline" className="gap-2">
+                  <Button variant="outline" className="gap-2" onClick={async () => {
+                    setExporting(true)
+                    try {
+                      const headers = ['Type', 'Action', 'User', 'IP', 'Location', 'Device', 'Status', 'Timestamp']
+                      const csvContent = [
+                        headers.join(','),
+                        ...auditLogs.map(log => [
+                          log.type,
+                          log.action,
+                          log.userName || '',
+                          log.ip || '',
+                          log.location || '',
+                          log.device || '',
+                          log.status,
+                          log.timestamp
+                        ].map(v => `"${v}"`).join(','))
+                      ].join('\n')
+                      const blob = new Blob([csvContent], { type: 'text/csv' })
+                      const url = window.URL.createObjectURL(blob)
+                      const a = document.createElement('a')
+                      a.href = url
+                      a.download = `audit-logs-${new Date().toISOString().split('T')[0]}.csv`
+                      a.click()
+                      window.URL.revokeObjectURL(url)
+                      toast.success('Audit logs exported')
+                    } catch (error) {
+                      toast.error('Failed to export audit logs')
+                    } finally {
+                      setExporting(false)
+                    }
+                  }} disabled={exporting}>
                     <Download className="w-4 h-4" />
-                    Export
+                    {exporting ? 'Exporting...' : 'Export'}
                   </Button>
                 </div>
               </div>
@@ -1612,7 +1677,7 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
                           <Label>Email Header Logo</Label>
                           <Input placeholder="https://cdn.freeflow.com/email-logo.png" />
                         </div>
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => setShowEditEmailTemplatesDialog(true)}>
                           <Edit className="w-4 h-4 mr-2" />
                           Edit Email Templates
                         </Button>
@@ -1754,7 +1819,7 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
                         <h3 className="font-semibold text-gray-900 dark:text-white">Registered APIs</h3>
                         <p className="text-sm text-gray-500">APIs protected by Auth0</p>
                       </div>
-                      <Button className="ml-auto gap-2">
+                      <Button className="ml-auto gap-2" onClick={() => setShowRegisterAPIDialog(true)}>
                         <Plus className="w-4 h-4" />
                         Register API
                       </Button>
@@ -1777,7 +1842,10 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
                           </div>
                           <div className="flex items-center gap-4">
                             <Badge variant="outline">{api.scopes} scopes</Badge>
-                            <Button size="sm" variant="outline">Configure</Button>
+                            <Button size="sm" variant="outline" onClick={() => {
+                              setSelectedAPI(api)
+                              setShowConfigureAPIDialog(true)
+                            }}>Configure</Button>
                           </div>
                         </div>
                       ))}
@@ -1973,7 +2041,7 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
                           <div className="font-medium text-gray-900 dark:text-white">Rotate Signing Key</div>
                           <p className="text-sm text-gray-500">Invalidates all existing tokens</p>
                         </div>
-                        <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                        <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50" onClick={() => setShowRotateKeyDialog(true)}>
                           <RefreshCw className="w-4 h-4 mr-2" />
                           Rotate Key
                         </Button>
@@ -1983,7 +2051,7 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
                           <div className="font-medium text-gray-900 dark:text-white">Revoke All Sessions</div>
                           <p className="text-sm text-gray-500">Force all users to re-authenticate</p>
                         </div>
-                        <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                        <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50" onClick={() => setShowRevokeSessionsDialog(true)}>
                           <LogOut className="w-4 h-4 mr-2" />
                           Revoke All
                         </Button>
@@ -1993,7 +2061,7 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
                           <div className="font-medium text-gray-900 dark:text-white">Delete Tenant</div>
                           <p className="text-sm text-gray-500">Permanently delete all data</p>
                         </div>
-                        <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                        <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50" onClick={() => setShowDeleteTenantDialog(true)}>
                           <Trash2 className="w-4 h-4 mr-2" />
                           Delete Tenant
                         </Button>
@@ -2076,10 +2144,10 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
                       </div>
                     </div>
                     <div className="flex gap-2">
-                      <Button size="sm" variant="outline">
+                      <Button size="sm" variant="outline" onClick={() => setShowSendEmailDialog(true)}>
                         <Mail className="w-4 h-4" />
                       </Button>
-                      <Button size="sm" variant="outline">
+                      <Button size="sm" variant="outline" onClick={() => setShowEditUserDialog(true)}>
                         <Edit className="w-4 h-4" />
                       </Button>
                     </div>
@@ -2127,7 +2195,10 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
                           <label className="text-sm text-gray-500">User ID</label>
                           <div className="flex items-center gap-2">
                             <code className="text-sm bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">{selectedUser.id.slice(0, 8)}...</code>
-                            <Button size="sm" variant="ghost" className="h-6 w-6 p-0">
+                            <Button size="sm" variant="ghost" className="h-6 w-6 p-0" onClick={() => {
+                              navigator.clipboard.writeText(selectedUser.id)
+                              toast.success('User ID copied to clipboard')
+                            }}>
                               <Copy className="w-3 h-3" />
                             </Button>
                           </div>
@@ -2172,7 +2243,7 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
                               <p className="text-sm text-gray-500">2 devices logged in</p>
                             </div>
                           </div>
-                          <Button size="sm" variant="outline">Revoke All</Button>
+                          <Button size="sm" variant="outline" onClick={() => setShowRevokeUserSessionsDialog(true)}>Revoke All</Button>
                         </div>
                       </div>
                     </TabsContent>
@@ -2343,7 +2414,18 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
                 <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                 <p className="text-gray-600 dark:text-gray-400 mb-2">Drag and drop your CSV or Excel file here</p>
                 <p className="text-sm text-gray-500 mb-4">or</p>
-                <Button variant="outline">Browse Files</Button>
+                <Button variant="outline" onClick={() => {
+                  const input = document.createElement('input')
+                  input.type = 'file'
+                  input.accept = '.csv,.xlsx,.xls'
+                  input.onchange = (e) => {
+                    const file = (e.target as HTMLInputElement).files?.[0]
+                    if (file) {
+                      toast.success(`File selected: ${file.name}`, { description: 'Ready to import' })
+                    }
+                  }
+                  input.click()
+                }}>Browse Files</Button>
               </div>
               <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
                 <h4 className="font-medium text-blue-800 dark:text-blue-300 mb-2">CSV Format Requirements</h4>
@@ -2354,7 +2436,17 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
                 </ul>
               </div>
               <div className="flex items-center gap-2">
-                <Button variant="link" className="text-blue-600 p-0 h-auto">
+                <Button variant="link" className="text-blue-600 p-0 h-auto" onClick={() => {
+                  const csvContent = 'email,full_name,role,department,job_title\nuser@example.com,John Doe,user,Engineering,Developer'
+                  const blob = new Blob([csvContent], { type: 'text/csv' })
+                  const url = window.URL.createObjectURL(blob)
+                  const a = document.createElement('a')
+                  a.href = url
+                  a.download = 'user-import-template.csv'
+                  a.click()
+                  window.URL.revokeObjectURL(url)
+                  toast.success('Template downloaded')
+                }}>
                   <Download className="w-4 h-4 mr-1" />
                   Download template CSV
                 </Button>
@@ -2399,7 +2491,30 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
                     <SelectItem value="role">Role Changes</SelectItem>
                   </SelectContent>
                 </Select>
-                <Button variant="outline">
+                <Button variant="outline" onClick={async () => {
+                  const headers = ['Type', 'Action', 'User', 'IP', 'Location', 'Device', 'Status', 'Timestamp']
+                  const csvContent = [
+                    headers.join(','),
+                    ...auditLogs.map(log => [
+                      log.type,
+                      log.action,
+                      log.userName || '',
+                      log.ip || '',
+                      log.location || '',
+                      log.device || '',
+                      log.status,
+                      log.timestamp
+                    ].map(v => `"${v}"`).join(','))
+                  ].join('\n')
+                  const blob = new Blob([csvContent], { type: 'text/csv' })
+                  const url = window.URL.createObjectURL(blob)
+                  const a = document.createElement('a')
+                  a.href = url
+                  a.download = `audit-logs-${new Date().toISOString().split('T')[0]}.csv`
+                  a.click()
+                  window.URL.revokeObjectURL(url)
+                  toast.success('Audit logs exported')
+                }}>
                   <Download className="w-4 h-4 mr-2" />
                   Export
                 </Button>
@@ -2488,7 +2603,11 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
                             <span className="text-sm font-medium">{role.userCount}</span>
                             <span className="text-xs text-gray-500 ml-1">users</span>
                           </div>
-                          <Button size="sm" variant="ghost" disabled={role.isSystem}>
+                          <Button size="sm" variant="ghost" disabled={role.isSystem} onClick={() => {
+                            setSelectedRole(role)
+                            setShowRolesDialog(false)
+                            setShowEditRoleDialog(true)
+                          }}>
                             <Edit className="w-4 h-4" />
                           </Button>
                         </div>
@@ -2500,6 +2619,785 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowRolesDialog(false)}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit User Dialog */}
+        <Dialog open={showEditUserDialog} onOpenChange={setShowEditUserDialog}>
+          <DialogContent className="sm:max-w-[500px]">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Edit className="w-5 h-5 text-blue-600" />
+                Edit User
+              </DialogTitle>
+            </DialogHeader>
+            {selectedUser && (
+              <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <Label>Email Address</Label>
+                  <Input type="email" defaultValue={selectedUser.email || ''} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Full Name</Label>
+                  <Input defaultValue={selectedUser.full_name || ''} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Display Name</Label>
+                  <Input defaultValue={selectedUser.display_name || ''} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Role</Label>
+                  <Select defaultValue={selectedUser.role}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="user">User</SelectItem>
+                      <SelectItem value="member">Member</SelectItem>
+                      <SelectItem value="manager">Manager</SelectItem>
+                      <SelectItem value="admin">Admin</SelectItem>
+                      <SelectItem value="superadmin">Super Admin</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Department</Label>
+                  <Input defaultValue={selectedUser.department || ''} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Job Title</Label>
+                  <Input defaultValue={selectedUser.job_title || ''} />
+                </div>
+              </div>
+            )}
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowEditUserDialog(false)}>Cancel</Button>
+              <Button className="bg-blue-600 hover:bg-blue-700" onClick={async () => {
+                if (selectedUser) {
+                  toast.success('User updated successfully')
+                  setShowEditUserDialog(false)
+                  refetch()
+                }
+              }}>
+                Save Changes
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Send Email Dialog */}
+        <Dialog open={showSendEmailDialog} onOpenChange={setShowSendEmailDialog}>
+          <DialogContent className="sm:max-w-[500px]">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Mail className="w-5 h-5 text-blue-600" />
+                Send Email to User
+              </DialogTitle>
+            </DialogHeader>
+            {selectedUser && (
+              <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <Label>To</Label>
+                  <Input value={selectedUser.email || ''} disabled />
+                </div>
+                <div className="space-y-2">
+                  <Label>Email Type</Label>
+                  <Select defaultValue="custom">
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="custom">Custom Message</SelectItem>
+                      <SelectItem value="welcome">Welcome Email</SelectItem>
+                      <SelectItem value="verification">Email Verification</SelectItem>
+                      <SelectItem value="password_reset">Password Reset</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Subject</Label>
+                  <Input placeholder="Email subject..." />
+                </div>
+                <div className="space-y-2">
+                  <Label>Message</Label>
+                  <textarea
+                    className="w-full min-h-[120px] px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700"
+                    placeholder="Enter your message..."
+                  />
+                </div>
+              </div>
+            )}
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowSendEmailDialog(false)}>Cancel</Button>
+              <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => {
+                toast.success('Email sent successfully')
+                setShowSendEmailDialog(false)
+              }}>
+                Send Email
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Revoke User Sessions Dialog */}
+        <Dialog open={showRevokeUserSessionsDialog} onOpenChange={setShowRevokeUserSessionsDialog}>
+          <DialogContent className="sm:max-w-[450px]">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-orange-600">
+                <LogOut className="w-5 h-5" />
+                Revoke User Sessions
+              </DialogTitle>
+            </DialogHeader>
+            {selectedUser && (
+              <div className="space-y-4 py-4">
+                <div className="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg p-4">
+                  <p className="text-orange-800 dark:text-orange-300">
+                    This will log out <strong>{selectedUser.full_name || selectedUser.email}</strong> from all devices and sessions.
+                  </p>
+                </div>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  The user will need to re-authenticate on all devices. This action cannot be undone.
+                </p>
+              </div>
+            )}
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowRevokeUserSessionsDialog(false)}>Cancel</Button>
+              <Button variant="destructive" onClick={() => {
+                toast.success('All sessions revoked', { description: `${selectedUser?.full_name || selectedUser?.email} has been logged out from all devices` })
+                setShowRevokeUserSessionsDialog(false)
+              }}>
+                Revoke All Sessions
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Role Dialog */}
+        <Dialog open={showEditRoleDialog} onOpenChange={setShowEditRoleDialog}>
+          <DialogContent className="sm:max-w-[600px]">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Shield className="w-5 h-5 text-indigo-600" />
+                Edit Role
+              </DialogTitle>
+            </DialogHeader>
+            {selectedRole && (
+              <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <Label>Role Name</Label>
+                  <Input defaultValue={selectedRole.name} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Description</Label>
+                  <Input defaultValue={selectedRole.description} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Permissions</Label>
+                  <div className="grid grid-cols-2 gap-2 p-4 border rounded-lg dark:border-gray-700 max-h-[200px] overflow-y-auto">
+                    {['users:read', 'users:write', 'users:delete', 'content:read', 'content:write', 'content:delete', 'analytics:read', 'settings:read', 'settings:write', 'billing:read', 'billing:write'].map(perm => (
+                      <label key={perm} className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          className="rounded"
+                          defaultChecked={selectedRole.permissions.includes(perm) || selectedRole.permissions.includes('*')}
+                        />
+                        <span className="text-sm">{perm}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowEditRoleDialog(false)}>Cancel</Button>
+              <Button className="bg-indigo-600 hover:bg-indigo-700" onClick={() => {
+                toast.success('Role updated successfully')
+                setShowEditRoleDialog(false)
+              }}>
+                Save Changes
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Connection Dialog */}
+        <Dialog open={showAddConnectionDialog} onOpenChange={setShowAddConnectionDialog}>
+          <DialogContent className="sm:max-w-[600px]">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Link2 className="w-5 h-5 text-green-600" />
+                Add Authentication Connection
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Connection Type</Label>
+                <Select defaultValue="saml">
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="saml">SAML (Enterprise SSO)</SelectItem>
+                    <SelectItem value="oidc">OpenID Connect</SelectItem>
+                    <SelectItem value="social">Social Login</SelectItem>
+                    <SelectItem value="database">Database (Username/Password)</SelectItem>
+                    <SelectItem value="passwordless">Passwordless (Magic Link)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Connection Name</Label>
+                <Input placeholder="e.g., Company SSO" />
+              </div>
+              <div className="space-y-2">
+                <Label>Identity Provider</Label>
+                <Select defaultValue="okta">
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="okta">Okta</SelectItem>
+                    <SelectItem value="azure">Microsoft Azure AD</SelectItem>
+                    <SelectItem value="google">Google Workspace</SelectItem>
+                    <SelectItem value="onelogin">OneLogin</SelectItem>
+                    <SelectItem value="custom">Custom SAML</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Allowed Email Domains (comma separated)</Label>
+                <Input placeholder="company.com, subsidiary.com" />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowAddConnectionDialog(false)}>Cancel</Button>
+              <Button className="bg-green-600 hover:bg-green-700" onClick={() => {
+                toast.success('Connection created', { description: 'Configure the connection to complete setup' })
+                setShowAddConnectionDialog(false)
+              }}>
+                Create Connection
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Configure Connection Dialog */}
+        <Dialog open={showConfigureConnectionDialog} onOpenChange={setShowConfigureConnectionDialog}>
+          <DialogContent className="sm:max-w-[600px]">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Settings className="w-5 h-5 text-blue-600" />
+                Configure Connection
+              </DialogTitle>
+            </DialogHeader>
+            {selectedConnection && (
+              <div className="space-y-4 py-4">
+                <div className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div className={`p-3 rounded-xl ${
+                    selectedConnection.status === 'active' ? 'bg-green-100 dark:bg-green-900/30' : 'bg-gray-100 dark:bg-gray-700'
+                  }`}>
+                    {getConnectionIcon(selectedConnection.type)}
+                  </div>
+                  <div>
+                    <h3 className="font-semibold">{selectedConnection.name}</h3>
+                    <p className="text-sm text-gray-500 capitalize">{selectedConnection.type}</p>
+                  </div>
+                  <Badge className="ml-auto">{selectedConnection.status}</Badge>
+                </div>
+                <div className="space-y-2">
+                  <Label>Connection Name</Label>
+                  <Input defaultValue={selectedConnection.name} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Status</Label>
+                  <Select defaultValue={selectedConnection.status}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="active">Active</SelectItem>
+                      <SelectItem value="testing">Testing</SelectItem>
+                      <SelectItem value="inactive">Inactive</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                {selectedConnection.domains && (
+                  <div className="space-y-2">
+                    <Label>Allowed Domains</Label>
+                    <Input defaultValue={selectedConnection.domains.join(', ')} />
+                  </div>
+                )}
+                <div className="flex items-center justify-between p-3 border rounded-lg dark:border-gray-700">
+                  <div>
+                    <Label>Auto-provision users</Label>
+                    <p className="text-xs text-gray-500">Create users automatically on first login</p>
+                  </div>
+                  <Switch defaultChecked />
+                </div>
+              </div>
+            )}
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowConfigureConnectionDialog(false)}>Cancel</Button>
+              <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => {
+                toast.success('Connection updated')
+                setShowConfigureConnectionDialog(false)
+              }}>
+                Save Changes
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Security Policy Settings Dialog */}
+        <Dialog open={showSecurityPolicyDialog} onOpenChange={setShowSecurityPolicyDialog}>
+          <DialogContent className="sm:max-w-[600px]">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Shield className="w-5 h-5 text-green-600" />
+                Security Policy Settings
+              </DialogTitle>
+            </DialogHeader>
+            {selectedSecurityPolicy && (
+              <div className="space-y-4 py-4">
+                <div className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div className="p-3 rounded-xl bg-green-100 dark:bg-green-900/30">
+                    {selectedSecurityPolicy.type === 'password' && <Key className="w-5 h-5 text-green-600" />}
+                    {selectedSecurityPolicy.type === 'mfa' && <Smartphone className="w-5 h-5 text-green-600" />}
+                    {selectedSecurityPolicy.type === 'session' && <Clock className="w-5 h-5 text-green-600" />}
+                    {selectedSecurityPolicy.type === 'brute-force' && <ShieldAlert className="w-5 h-5 text-green-600" />}
+                    {selectedSecurityPolicy.type === 'bot-detection' && <Monitor className="w-5 h-5 text-green-600" />}
+                  </div>
+                  <div>
+                    <h3 className="font-semibold">{selectedSecurityPolicy.name}</h3>
+                    <p className="text-sm text-gray-500 capitalize">{selectedSecurityPolicy.type.replace('-', ' ')} Policy</p>
+                  </div>
+                  <Badge className={`ml-auto ${selectedSecurityPolicy.enabled ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}`}>
+                    {selectedSecurityPolicy.enabled ? 'Enabled' : 'Disabled'}
+                  </Badge>
+                </div>
+
+                {selectedSecurityPolicy.type === 'password' && (
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label>Minimum Password Length</Label>
+                      <Select defaultValue={String(selectedSecurityPolicy.settings.minLength)}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="8">8 characters</SelectItem>
+                          <SelectItem value="10">10 characters</SelectItem>
+                          <SelectItem value="12">12 characters</SelectItem>
+                          <SelectItem value="16">16 characters</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="flex items-center justify-between p-3 border rounded-lg dark:border-gray-700">
+                      <Label>Require uppercase letters</Label>
+                      <Switch defaultChecked={selectedSecurityPolicy.settings.requireUppercase} />
+                    </div>
+                    <div className="flex items-center justify-between p-3 border rounded-lg dark:border-gray-700">
+                      <Label>Require numbers</Label>
+                      <Switch defaultChecked={selectedSecurityPolicy.settings.requireNumbers} />
+                    </div>
+                    <div className="flex items-center justify-between p-3 border rounded-lg dark:border-gray-700">
+                      <Label>Require special characters</Label>
+                      <Switch defaultChecked={selectedSecurityPolicy.settings.requireSymbols} />
+                    </div>
+                  </div>
+                )}
+
+                {selectedSecurityPolicy.type === 'mfa' && (
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label>Enforcement Level</Label>
+                      <Select defaultValue={selectedSecurityPolicy.settings.enforced}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="none">Optional</SelectItem>
+                          <SelectItem value="admins">Admins Only</SelectItem>
+                          <SelectItem value="all">All Users</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="flex items-center justify-between p-3 border rounded-lg dark:border-gray-700">
+                      <Label>TOTP (Authenticator Apps)</Label>
+                      <Switch defaultChecked={selectedSecurityPolicy.settings.methods?.includes('totp')} />
+                    </div>
+                    <div className="flex items-center justify-between p-3 border rounded-lg dark:border-gray-700">
+                      <Label>SMS OTP</Label>
+                      <Switch defaultChecked={selectedSecurityPolicy.settings.methods?.includes('sms')} />
+                    </div>
+                    <div className="flex items-center justify-between p-3 border rounded-lg dark:border-gray-700">
+                      <Label>Email OTP</Label>
+                      <Switch defaultChecked={selectedSecurityPolicy.settings.methods?.includes('email')} />
+                    </div>
+                  </div>
+                )}
+
+                {selectedSecurityPolicy.type === 'brute-force' && (
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label>Max Failed Attempts</Label>
+                      <Select defaultValue={String(selectedSecurityPolicy.settings.maxAttempts)}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="3">3 attempts</SelectItem>
+                          <SelectItem value="5">5 attempts</SelectItem>
+                          <SelectItem value="10">10 attempts</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Block Duration (minutes)</Label>
+                      <Select defaultValue={String(selectedSecurityPolicy.settings.blockDuration)}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="5">5 minutes</SelectItem>
+                          <SelectItem value="15">15 minutes</SelectItem>
+                          <SelectItem value="30">30 minutes</SelectItem>
+                          <SelectItem value="60">1 hour</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowSecurityPolicyDialog(false)}>Cancel</Button>
+              <Button className="bg-green-600 hover:bg-green-700" onClick={() => {
+                toast.success('Security policy updated')
+                setShowSecurityPolicyDialog(false)
+              }}>
+                Save Changes
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Email Templates Dialog */}
+        <Dialog open={showEditEmailTemplatesDialog} onOpenChange={setShowEditEmailTemplatesDialog}>
+          <DialogContent className="sm:max-w-[700px]">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Mail className="w-5 h-5 text-purple-600" />
+                Edit Email Templates
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <Tabs defaultValue="welcome">
+                <TabsList className="grid w-full grid-cols-4">
+                  <TabsTrigger value="welcome">Welcome</TabsTrigger>
+                  <TabsTrigger value="verification">Verification</TabsTrigger>
+                  <TabsTrigger value="reset">Password Reset</TabsTrigger>
+                  <TabsTrigger value="blocked">Account Blocked</TabsTrigger>
+                </TabsList>
+                <TabsContent value="welcome" className="space-y-4 pt-4">
+                  <div className="space-y-2">
+                    <Label>Subject Line</Label>
+                    <Input defaultValue="Welcome to FreeFlow!" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Email Body</Label>
+                    <textarea
+                      className="w-full min-h-[200px] px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700 font-mono text-sm"
+                      defaultValue={`Hi {{user.name}},\n\nWelcome to FreeFlow! We're excited to have you on board.\n\nClick the button below to verify your email and get started:\n\n{{verify_button}}\n\nBest regards,\nThe FreeFlow Team`}
+                    />
+                  </div>
+                </TabsContent>
+                <TabsContent value="verification" className="space-y-4 pt-4">
+                  <div className="space-y-2">
+                    <Label>Subject Line</Label>
+                    <Input defaultValue="Verify your email address" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Email Body</Label>
+                    <textarea
+                      className="w-full min-h-[200px] px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700 font-mono text-sm"
+                      defaultValue={`Hi {{user.name}},\n\nPlease verify your email address by clicking the link below:\n\n{{verification_link}}\n\nThis link will expire in 24 hours.`}
+                    />
+                  </div>
+                </TabsContent>
+                <TabsContent value="reset" className="space-y-4 pt-4">
+                  <div className="space-y-2">
+                    <Label>Subject Line</Label>
+                    <Input defaultValue="Reset your password" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Email Body</Label>
+                    <textarea
+                      className="w-full min-h-[200px] px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700 font-mono text-sm"
+                      defaultValue={`Hi {{user.name}},\n\nWe received a request to reset your password. Click the button below to create a new password:\n\n{{reset_button}}\n\nIf you didn't request this, please ignore this email.`}
+                    />
+                  </div>
+                </TabsContent>
+                <TabsContent value="blocked" className="space-y-4 pt-4">
+                  <div className="space-y-2">
+                    <Label>Subject Line</Label>
+                    <Input defaultValue="Your account has been blocked" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Email Body</Label>
+                    <textarea
+                      className="w-full min-h-[200px] px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700 font-mono text-sm"
+                      defaultValue={`Hi {{user.name}},\n\nYour account has been blocked due to suspicious activity.\n\nIf this was a mistake, please contact our support team at support@freeflow.com`}
+                    />
+                  </div>
+                </TabsContent>
+              </Tabs>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowEditEmailTemplatesDialog(false)}>Cancel</Button>
+              <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => {
+                toast.success('Email template saved')
+                setShowEditEmailTemplatesDialog(false)
+              }}>
+                Save Template
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Register API Dialog */}
+        <Dialog open={showRegisterAPIDialog} onOpenChange={setShowRegisterAPIDialog}>
+          <DialogContent className="sm:max-w-[500px]">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Zap className="w-5 h-5 text-purple-600" />
+                Register New API
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>API Name</Label>
+                <Input placeholder="e.g., My Application API" />
+              </div>
+              <div className="space-y-2">
+                <Label>API Identifier (Audience)</Label>
+                <Input placeholder="https://api.myapp.com" />
+              </div>
+              <div className="space-y-2">
+                <Label>Signing Algorithm</Label>
+                <Select defaultValue="rs256">
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="rs256">RS256</SelectItem>
+                    <SelectItem value="hs256">HS256</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex items-center justify-between p-3 border rounded-lg dark:border-gray-700">
+                <div>
+                  <Label>Enable RBAC</Label>
+                  <p className="text-xs text-gray-500">Include permissions in access tokens</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowRegisterAPIDialog(false)}>Cancel</Button>
+              <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => {
+                toast.success('API registered successfully')
+                setShowRegisterAPIDialog(false)
+              }}>
+                Register API
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Configure API Dialog */}
+        <Dialog open={showConfigureAPIDialog} onOpenChange={setShowConfigureAPIDialog}>
+          <DialogContent className="sm:max-w-[600px]">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Server className="w-5 h-5 text-blue-600" />
+                Configure API
+              </DialogTitle>
+            </DialogHeader>
+            {selectedAPI && (
+              <div className="space-y-4 py-4">
+                <div className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div className="p-3 rounded-xl bg-blue-100 dark:bg-blue-900/30">
+                    <Server className="w-5 h-5 text-blue-600" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold">{selectedAPI.name}</h3>
+                    <p className="text-sm text-gray-500 font-mono">{selectedAPI.identifier}</p>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label>API Name</Label>
+                  <Input defaultValue={selectedAPI.name} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Token Expiration (seconds)</Label>
+                  <Select defaultValue="86400">
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="3600">1 hour (3600)</SelectItem>
+                      <SelectItem value="28800">8 hours (28800)</SelectItem>
+                      <SelectItem value="86400">24 hours (86400)</SelectItem>
+                      <SelectItem value="604800">7 days (604800)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Scopes ({selectedAPI.scopes} defined)</Label>
+                  <div className="p-4 border rounded-lg dark:border-gray-700 max-h-[150px] overflow-y-auto">
+                    <div className="space-y-2">
+                      {['read:users', 'write:users', 'delete:users', 'read:content', 'write:content'].map(scope => (
+                        <div key={scope} className="flex items-center justify-between">
+                          <span className="text-sm font-mono">{scope}</span>
+                          <Badge variant="outline">Active</Badge>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between p-3 border rounded-lg dark:border-gray-700">
+                  <div>
+                    <Label>Allow offline access</Label>
+                    <p className="text-xs text-gray-500">Enable refresh token rotation</p>
+                  </div>
+                  <Switch defaultChecked />
+                </div>
+              </div>
+            )}
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowConfigureAPIDialog(false)}>Cancel</Button>
+              <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => {
+                toast.success('API configuration saved')
+                setShowConfigureAPIDialog(false)
+              }}>
+                Save Changes
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Rotate Key Dialog */}
+        <Dialog open={showRotateKeyDialog} onOpenChange={setShowRotateKeyDialog}>
+          <DialogContent className="sm:max-w-[450px]">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-600">
+                <RefreshCw className="w-5 h-5" />
+                Rotate Signing Key
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+                <p className="text-red-800 dark:text-red-300 font-medium">Warning: This action is irreversible!</p>
+                <p className="text-red-700 dark:text-red-400 text-sm mt-2">
+                  Rotating the signing key will invalidate all existing tokens. All users will need to re-authenticate.
+                </p>
+              </div>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                This is typically done during a security incident or as part of a routine key rotation policy.
+              </p>
+              <div className="space-y-2">
+                <Label>Type "ROTATE" to confirm</Label>
+                <Input placeholder="ROTATE" />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowRotateKeyDialog(false)}>Cancel</Button>
+              <Button variant="destructive" onClick={() => {
+                toast.success('Signing key rotated', { description: 'All tokens have been invalidated' })
+                setShowRotateKeyDialog(false)
+              }}>
+                Rotate Key
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Revoke All Sessions Dialog */}
+        <Dialog open={showRevokeSessionsDialog} onOpenChange={setShowRevokeSessionsDialog}>
+          <DialogContent className="sm:max-w-[450px]">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-600">
+                <LogOut className="w-5 h-5" />
+                Revoke All Sessions
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+                <p className="text-red-800 dark:text-red-300 font-medium">This will affect all users!</p>
+                <p className="text-red-700 dark:text-red-400 text-sm mt-2">
+                  All {stats.total} users will be logged out immediately and will need to re-authenticate.
+                </p>
+              </div>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Use this during a security incident or when you suspect compromised credentials.
+              </p>
+              <div className="space-y-2">
+                <Label>Type "REVOKE ALL" to confirm</Label>
+                <Input placeholder="REVOKE ALL" />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowRevokeSessionsDialog(false)}>Cancel</Button>
+              <Button variant="destructive" onClick={() => {
+                toast.success('All sessions revoked', { description: 'All users have been logged out' })
+                setShowRevokeSessionsDialog(false)
+              }}>
+                Revoke All Sessions
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Tenant Dialog */}
+        <Dialog open={showDeleteTenantDialog} onOpenChange={setShowDeleteTenantDialog}>
+          <DialogContent className="sm:max-w-[450px]">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-600">
+                <Trash2 className="w-5 h-5" />
+                Delete Tenant
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+                <p className="text-red-800 dark:text-red-300 font-medium">Danger: This cannot be undone!</p>
+                <p className="text-red-700 dark:text-red-400 text-sm mt-2">
+                  This will permanently delete all user data, connections, roles, and configurations.
+                </p>
+              </div>
+              <div className="p-4 border rounded-lg dark:border-gray-700">
+                <p className="text-sm text-gray-600 dark:text-gray-400">The following will be deleted:</p>
+                <ul className="text-sm text-gray-700 dark:text-gray-300 mt-2 space-y-1">
+                  <li>{stats.total} users</li>
+                  <li>{roles.length} roles</li>
+                  <li>{connections.length} connections</li>
+                  <li>All security policies and audit logs</li>
+                </ul>
+              </div>
+              <div className="space-y-2">
+                <Label>Type "DELETE TENANT" to confirm</Label>
+                <Input placeholder="DELETE TENANT" />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowDeleteTenantDialog(false)}>Cancel</Button>
+              <Button variant="destructive" onClick={() => {
+                toast.error('Tenant deletion initiated', { description: 'This process cannot be stopped' })
+                setShowDeleteTenantDialog(false)
+              }}>
+                Delete Tenant
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

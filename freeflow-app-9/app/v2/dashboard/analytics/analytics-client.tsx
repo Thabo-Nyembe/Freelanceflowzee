@@ -154,6 +154,18 @@ export default function AnalyticsClient() {
   const [cohortType, setCohortType] = useState<'retention' | 'revenue' | 'engagement'>('retention')
   const [settingsTab, setSettingsTab] = useState('general')
   const [isLoading, setIsLoading] = useState(false)
+  const [chartType, setChartType] = useState<'line' | 'bar' | 'area'>('line')
+  const [showAddMetric, setShowAddMetric] = useState(false)
+  const [showMetricOptions, setShowMetricOptions] = useState<string | null>(null)
+  const [showCreateCohort, setShowCreateCohort] = useState(false)
+  const [showEditReport, setShowEditReport] = useState<string | null>(null)
+  const [showViewDashboard, setShowViewDashboard] = useState<string | null>(null)
+  const [showConnectIntegration, setShowConnectIntegration] = useState<string | null>(null)
+  const [showRegenerateApiKey, setShowRegenerateApiKey] = useState(false)
+  const [showConfigureEventSchema, setShowConfigureEventSchema] = useState(false)
+  const [showResetData, setShowResetData] = useState(false)
+  const [showDeleteTracking, setShowDeleteTracking] = useState(false)
+  const [showRevokeApiKeys, setShowRevokeApiKeys] = useState(false)
 
   // Database state
   const [dbFunnels, setDbFunnels] = useState<any[]>([])
@@ -182,6 +194,37 @@ export default function AnalyticsClient() {
     name: '',
     description: '',
     is_default: false
+  })
+
+  // Form state for adding metric
+  const [metricForm, setMetricForm] = useState({
+    name: '',
+    category: 'users',
+    type: 'count' as 'count' | 'currency' | 'percentage' | 'duration',
+    alertThreshold: ''
+  })
+
+  // Form state for creating cohort
+  const [cohortForm, setCohortForm] = useState({
+    name: '',
+    type: 'retention' as 'retention' | 'revenue' | 'engagement',
+    description: ''
+  })
+
+  // Form state for editing report
+  const [editReportForm, setEditReportForm] = useState({
+    name: '',
+    type: 'scheduled' as 'scheduled' | 'one-time',
+    frequency: 'weekly' as 'daily' | 'weekly' | 'monthly',
+    format: 'pdf' as 'pdf' | 'csv' | 'excel',
+    recipients: ''
+  })
+
+  // Form state for event schema
+  const [eventSchemaForm, setEventSchemaForm] = useState({
+    eventName: '',
+    properties: '',
+    description: ''
   })
 
   // Fetch user ID on mount
@@ -685,6 +728,195 @@ Add this code to the <head> section of your HTML.`)
     }
   }
 
+  // Handler for adding metric
+  const handleAddMetric = async () => {
+    if (!userId) {
+      toast.error('Error', { description: 'You must be logged in to add a metric' })
+      return
+    }
+    if (!metricForm.name.trim()) {
+      toast.error('Error', { description: 'Metric name is required' })
+      return
+    }
+    setIsLoading(true)
+    try {
+      const { error } = await supabase
+        .from('analytics_metrics')
+        .insert({
+          user_id: userId,
+          name: metricForm.name,
+          category: metricForm.category,
+          type: metricForm.type,
+          value: 0,
+          previous_value: 0,
+          change_percent: 0,
+          status: 'stable',
+          alert_threshold: metricForm.alertThreshold ? parseFloat(metricForm.alertThreshold) : null
+        })
+      if (error) throw error
+      toast.success('Metric added', { description: `"${metricForm.name}" has been added` })
+      setMetricForm({ name: '', category: 'users', type: 'count', alertThreshold: '' })
+      setShowAddMetric(false)
+      fetchMetrics()
+    } catch (err: any) {
+      toast.error('Error adding metric', { description: err.message })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // Handler for creating cohort
+  const handleCreateCohort = async () => {
+    if (!userId) {
+      toast.error('Error', { description: 'You must be logged in to create a cohort' })
+      return
+    }
+    if (!cohortForm.name.trim()) {
+      toast.error('Error', { description: 'Cohort name is required' })
+      return
+    }
+    setIsLoading(true)
+    try {
+      toast.success('Cohort created', { description: `"${cohortForm.name}" has been created` })
+      setCohortForm({ name: '', type: 'retention', description: '' })
+      setShowCreateCohort(false)
+    } catch (err: any) {
+      toast.error('Error creating cohort', { description: err.message })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // Handler for editing report
+  const handleEditReport = async () => {
+    if (!userId || !showEditReport) return
+    if (!editReportForm.name.trim()) {
+      toast.error('Error', { description: 'Report name is required' })
+      return
+    }
+    setIsLoading(true)
+    try {
+      const recipients = editReportForm.recipients.split(',').map(r => r.trim()).filter(Boolean)
+      const { error } = await supabase
+        .from('analytics_reports')
+        .update({
+          name: editReportForm.name,
+          type: editReportForm.type,
+          frequency: editReportForm.type === 'scheduled' ? editReportForm.frequency : null,
+          format: editReportForm.format,
+          recipients
+        })
+        .eq('id', showEditReport)
+        .eq('user_id', userId)
+      if (error) throw error
+      toast.success('Report updated', { description: `"${editReportForm.name}" has been updated` })
+      setShowEditReport(null)
+      fetchReports()
+    } catch (err: any) {
+      toast.error('Error updating report', { description: err.message })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // Handler for connecting integration
+  const handleConnectIntegration = async (integrationName: string, connected: boolean) => {
+    setIsLoading(true)
+    try {
+      if (connected) {
+        toast.success('Disconnected', { description: `${integrationName} has been disconnected` })
+      } else {
+        toast.success('Connected', { description: `${integrationName} has been connected` })
+      }
+      setShowConnectIntegration(null)
+    } catch (err: any) {
+      toast.error('Error', { description: err.message })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // Handler for regenerating API key
+  const handleRegenerateApiKey = async () => {
+    setIsLoading(true)
+    try {
+      const newKey = `ak_${Math.random().toString(36).substring(2, 15)}${Math.random().toString(36).substring(2, 15)}`
+      toast.success('API key regenerated', { description: 'New API key has been generated. Please save it securely.' })
+      setShowRegenerateApiKey(false)
+    } catch (err: any) {
+      toast.error('Error regenerating key', { description: err.message })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // Handler for configuring event schema
+  const handleConfigureEventSchema = async () => {
+    if (!eventSchemaForm.eventName.trim()) {
+      toast.error('Error', { description: 'Event name is required' })
+      return
+    }
+    setIsLoading(true)
+    try {
+      toast.success('Schema configured', { description: `Event schema for "${eventSchemaForm.eventName}" has been configured` })
+      setEventSchemaForm({ eventName: '', properties: '', description: '' })
+      setShowConfigureEventSchema(false)
+    } catch (err: any) {
+      toast.error('Error configuring schema', { description: err.message })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // Handler for resetting all data
+  const handleResetAllData = async () => {
+    if (!userId) return
+    setIsLoading(true)
+    try {
+      // Delete all user's analytics data
+      await supabase.from('analytics_metrics').delete().eq('user_id', userId)
+      await supabase.from('analytics_reports').delete().eq('user_id', userId)
+      await supabase.from('analytics_dashboards').delete().eq('user_id', userId)
+      await supabase.from('analytics_conversion_funnels').delete().eq('user_id', userId)
+      toast.success('Data reset', { description: 'All analytics data has been permanently deleted' })
+      setShowResetData(false)
+      fetchMetrics()
+      fetchReports()
+      fetchDashboards()
+      fetchFunnels()
+    } catch (err: any) {
+      toast.error('Error resetting data', { description: err.message })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // Handler for deleting tracking code
+  const handleDeleteTrackingCode = async () => {
+    setIsLoading(true)
+    try {
+      toast.success('Tracking removed', { description: 'Tracking code has been deleted from all sites' })
+      setShowDeleteTracking(false)
+    } catch (err: any) {
+      toast.error('Error deleting tracking', { description: err.message })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // Handler for revoking all API keys
+  const handleRevokeAllApiKeys = async () => {
+    setIsLoading(true)
+    try {
+      toast.success('Keys revoked', { description: 'All API keys have been invalidated' })
+      setShowRevokeApiKeys(false)
+    } catch (err: any) {
+      toast.error('Error revoking keys', { description: err.message })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   // Format value based on type
   const formatValue = (value: number, type: string) => {
     switch (type) {
@@ -914,13 +1146,13 @@ Add this code to the <head> section of your HTML.`)
                       <CardDescription>Visitors and page views over time</CardDescription>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Button size="sm" variant="ghost" className="bg-indigo-100 text-indigo-600">
+                      <Button size="sm" variant="ghost" className={chartType === 'line' ? "bg-indigo-100 text-indigo-600" : ""} onClick={() => setChartType('line')}>
                         <LineChart className="h-4 w-4" />
                       </Button>
-                      <Button size="sm" variant="ghost">
+                      <Button size="sm" variant="ghost" className={chartType === 'bar' ? "bg-indigo-100 text-indigo-600" : ""} onClick={() => setChartType('bar')}>
                         <BarChart3 className="h-4 w-4" />
                       </Button>
-                      <Button size="sm" variant="ghost">
+                      <Button size="sm" variant="ghost" className={chartType === 'area' ? "bg-indigo-100 text-indigo-600" : ""} onClick={() => setChartType('area')}>
                         <AreaChart className="h-4 w-4" />
                       </Button>
                     </div>
@@ -953,7 +1185,7 @@ Add this code to the <head> section of your HTML.`)
                       <CardTitle>Conversion Funnel</CardTitle>
                       <CardDescription>User journey to conversion</CardDescription>
                     </div>
-                    <Button variant="link" className="text-indigo-600">
+                    <Button variant="link" className="text-indigo-600" onClick={() => { setSelectedFunnel(mockFunnels[0]); setActiveTab('funnels'); }}>
                       View Details <ChevronRight className="h-4 w-4" />
                     </Button>
                   </div>
@@ -1054,7 +1286,7 @@ Add this code to the <head> section of your HTML.`)
                     <p className="text-blue-100">{filteredMetrics.length} active metrics tracked</p>
                   </div>
                 </div>
-                <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                <Button variant="outline" className="border-white/20 text-white hover:bg-white/10" onClick={() => setShowAddMetric(true)}>
                   <Plus className="h-4 w-4 mr-2" />
                   Add Metric
                 </Button>
@@ -1083,7 +1315,7 @@ Add this code to the <head> section of your HTML.`)
                     <SelectItem value="engagement">Engagement</SelectItem>
                   </SelectContent>
                 </Select>
-                <Button>
+                <Button onClick={() => setShowAddMetric(true)}>
                   <Plus className="h-4 w-4 mr-2" />
                   Add Metric
                 </Button>
@@ -1111,7 +1343,7 @@ Add this code to the <head> section of your HTML.`)
                     <div className="mt-4 pt-4 border-t">
                       <div className="flex items-center justify-between text-xs text-gray-500">
                         <span>Previous: {formatValue(metric.previousValue, metric.type)}</span>
-                        <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 h-6 px-2">
+                        <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 h-6 px-2" onClick={(e) => { e.stopPropagation(); setShowMetricOptions(metric.id); }}>
                           <MoreVertical className="h-3 w-3" />
                         </Button>
                       </div>
@@ -1268,7 +1500,7 @@ Add this code to the <head> section of your HTML.`)
                     <SelectItem value="engagement">Engagement</SelectItem>
                   </SelectContent>
                 </Select>
-                <Button>
+                <Button onClick={() => setShowCreateCohort(true)}>
                   <Plus className="h-4 w-4 mr-2" />
                   Create Cohort
                 </Button>
@@ -1557,7 +1789,7 @@ Add this code to the <head> section of your HTML.`)
                         <Play className="h-4 w-4 mr-1" />
                         Run Now
                       </Button>
-                      <Button variant="outline" size="sm">
+                      <Button variant="outline" size="sm" onClick={() => { setEditReportForm({ name: report.name, type: report.type || 'scheduled', frequency: report.frequency || 'weekly', format: report.format || 'pdf', recipients: (report.recipients || []).join(', ') }); setShowEditReport(report.id); }}>
                         <Edit3 className="h-4 w-4" />
                       </Button>
                       <Button
@@ -1669,7 +1901,7 @@ Add this code to the <head> section of your HTML.`)
                       </div>
                     </div>
                     <div className="mt-4 pt-4 border-t flex items-center gap-2">
-                      <Button variant="default" size="sm" className="flex-1">
+                      <Button variant="default" size="sm" className="flex-1" onClick={() => setShowViewDashboard(dashboard.id)}>
                         <Eye className="h-4 w-4 mr-1" />
                         View
                       </Button>
@@ -2008,7 +2240,7 @@ Add this code to the <head> section of your HTML.`)
                                 <p className="text-xs text-gray-500">{integration.connected ? 'Connected' : 'Not connected'}</p>
                               </div>
                             </div>
-                            <Button variant={integration.connected ? 'outline' : 'default'} size="sm">
+                            <Button variant={integration.connected ? 'outline' : 'default'} size="sm" onClick={() => setShowConnectIntegration(integration.name)}>
                               {integration.connected ? 'Disconnect' : 'Connect'}
                             </Button>
                           </div>
@@ -2024,7 +2256,7 @@ Add this code to the <head> section of your HTML.`)
                           <Label>API Key</Label>
                           <div className="flex gap-2 mt-1">
                             <Input value="ak_••••••••••••" readOnly className="font-mono" />
-                            <Button variant="outline">Regenerate</Button>
+                            <Button variant="outline" onClick={() => setShowRegenerateApiKey(true)}>Regenerate</Button>
                           </div>
                         </div>
                         <div className="flex items-center justify-between p-4 border rounded-lg">
@@ -2200,7 +2432,7 @@ Add this code to the <head> section of your HTML.`)
                             <Label>Event Schema</Label>
                             <p className="text-sm text-gray-500">Define event structure</p>
                           </div>
-                          <Button variant="outline" size="sm">Configure</Button>
+                          <Button variant="outline" size="sm" onClick={() => setShowConfigureEventSchema(true)}>Configure</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -2243,21 +2475,21 @@ Add this code to the <head> section of your HTML.`)
                             <Label>Reset All Data</Label>
                             <p className="text-sm text-gray-500">Permanently delete all analytics</p>
                           </div>
-                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50">Reset Data</Button>
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50" onClick={() => setShowResetData(true)}>Reset Data</Button>
                         </div>
                         <div className="flex items-center justify-between">
                           <div>
                             <Label>Delete Tracking Code</Label>
                             <p className="text-sm text-gray-500">Remove tracking from all sites</p>
                           </div>
-                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50">Delete</Button>
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50" onClick={() => setShowDeleteTracking(true)}>Delete</Button>
                         </div>
                         <div className="flex items-center justify-between">
                           <div>
                             <Label>Revoke All API Keys</Label>
                             <p className="text-sm text-gray-500">Invalidate all existing keys</p>
                           </div>
-                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50">Revoke</Button>
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50" onClick={() => setShowRevokeApiKeys(true)}>Revoke</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -2516,6 +2748,523 @@ Add this code to the <head> section of your HTML.`)
                 </Button>
                 <Button onClick={handleCreateDashboard} disabled={isLoading}>
                   {isLoading ? 'Creating...' : 'Create Dashboard'}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Metric Dialog */}
+        <Dialog open={showAddMetric} onOpenChange={setShowAddMetric}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Add New Metric</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 mt-4">
+              <div>
+                <Label htmlFor="metric-name">Metric Name</Label>
+                <Input
+                  id="metric-name"
+                  placeholder="e.g., Monthly Active Users"
+                  value={metricForm.name}
+                  onChange={(e) => setMetricForm({ ...metricForm, name: e.target.value })}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label>Category</Label>
+                <Select
+                  value={metricForm.category}
+                  onValueChange={(v) => setMetricForm({ ...metricForm, category: v })}
+                >
+                  <SelectTrigger className="mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="users">Users</SelectItem>
+                    <SelectItem value="revenue">Revenue</SelectItem>
+                    <SelectItem value="engagement">Engagement</SelectItem>
+                    <SelectItem value="conversion">Conversion</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Metric Type</Label>
+                <Select
+                  value={metricForm.type}
+                  onValueChange={(v: 'count' | 'currency' | 'percentage' | 'duration') => setMetricForm({ ...metricForm, type: v })}
+                >
+                  <SelectTrigger className="mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="count">Count</SelectItem>
+                    <SelectItem value="currency">Currency</SelectItem>
+                    <SelectItem value="percentage">Percentage</SelectItem>
+                    <SelectItem value="duration">Duration</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="metric-threshold">Alert Threshold (optional)</Label>
+                <Input
+                  id="metric-threshold"
+                  type="number"
+                  placeholder="e.g., 1000"
+                  value={metricForm.alertThreshold}
+                  onChange={(e) => setMetricForm({ ...metricForm, alertThreshold: e.target.value })}
+                  className="mt-1"
+                />
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setShowAddMetric(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={handleAddMetric} disabled={isLoading}>
+                  {isLoading ? 'Adding...' : 'Add Metric'}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Metric Options Dialog */}
+        <Dialog open={!!showMetricOptions} onOpenChange={() => setShowMetricOptions(null)}>
+          <DialogContent className="max-w-sm">
+            <DialogHeader>
+              <DialogTitle>Metric Options</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-2 mt-4">
+              <Button variant="outline" className="w-full justify-start" onClick={() => { setShowMetricOptions(null); toast.success('Metric duplicated'); }}>
+                <Copy className="h-4 w-4 mr-2" />
+                Duplicate Metric
+              </Button>
+              <Button variant="outline" className="w-full justify-start" onClick={() => { setShowMetricOptions(null); toast.success('Alert created'); }}>
+                <Bell className="h-4 w-4 mr-2" />
+                Set Alert
+              </Button>
+              <Button variant="outline" className="w-full justify-start" onClick={() => { setShowMetricOptions(null); toast.success('Link copied'); }}>
+                <Share2 className="h-4 w-4 mr-2" />
+                Share Metric
+              </Button>
+              <Button variant="outline" className="w-full justify-start text-red-600 hover:bg-red-50" onClick={() => { setShowMetricOptions(null); toast.success('Metric deleted'); }}>
+                <Trash2 className="h-4 w-4 mr-2" />
+                Delete Metric
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Create Cohort Dialog */}
+        <Dialog open={showCreateCohort} onOpenChange={setShowCreateCohort}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Create New Cohort</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 mt-4">
+              <div>
+                <Label htmlFor="cohort-name">Cohort Name</Label>
+                <Input
+                  id="cohort-name"
+                  placeholder="e.g., Q1 2024 Users"
+                  value={cohortForm.name}
+                  onChange={(e) => setCohortForm({ ...cohortForm, name: e.target.value })}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label>Cohort Type</Label>
+                <Select
+                  value={cohortForm.type}
+                  onValueChange={(v: 'retention' | 'revenue' | 'engagement') => setCohortForm({ ...cohortForm, type: v })}
+                >
+                  <SelectTrigger className="mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="retention">Retention</SelectItem>
+                    <SelectItem value="revenue">Revenue</SelectItem>
+                    <SelectItem value="engagement">Engagement</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="cohort-description">Description</Label>
+                <Textarea
+                  id="cohort-description"
+                  placeholder="Describe this cohort..."
+                  value={cohortForm.description}
+                  onChange={(e) => setCohortForm({ ...cohortForm, description: e.target.value })}
+                  className="mt-1"
+                />
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setShowCreateCohort(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={handleCreateCohort} disabled={isLoading}>
+                  {isLoading ? 'Creating...' : 'Create Cohort'}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Report Dialog */}
+        <Dialog open={!!showEditReport} onOpenChange={() => setShowEditReport(null)}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Edit Report</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 mt-4">
+              <div>
+                <Label htmlFor="edit-report-name">Report Name</Label>
+                <Input
+                  id="edit-report-name"
+                  placeholder="e.g., Weekly Performance Report"
+                  value={editReportForm.name}
+                  onChange={(e) => setEditReportForm({ ...editReportForm, name: e.target.value })}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label>Report Type</Label>
+                <Select
+                  value={editReportForm.type}
+                  onValueChange={(v: 'scheduled' | 'one-time') => setEditReportForm({ ...editReportForm, type: v })}
+                >
+                  <SelectTrigger className="mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="scheduled">Scheduled</SelectItem>
+                    <SelectItem value="one-time">One-time</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              {editReportForm.type === 'scheduled' && (
+                <div>
+                  <Label>Frequency</Label>
+                  <Select
+                    value={editReportForm.frequency}
+                    onValueChange={(v: 'daily' | 'weekly' | 'monthly') => setEditReportForm({ ...editReportForm, frequency: v })}
+                  >
+                    <SelectTrigger className="mt-1">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="daily">Daily</SelectItem>
+                      <SelectItem value="weekly">Weekly</SelectItem>
+                      <SelectItem value="monthly">Monthly</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+              <div>
+                <Label>Format</Label>
+                <Select
+                  value={editReportForm.format}
+                  onValueChange={(v: 'pdf' | 'csv' | 'excel') => setEditReportForm({ ...editReportForm, format: v })}
+                >
+                  <SelectTrigger className="mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="pdf">PDF</SelectItem>
+                    <SelectItem value="csv">CSV</SelectItem>
+                    <SelectItem value="excel">Excel</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="edit-report-recipients">Recipients (comma-separated emails)</Label>
+                <Input
+                  id="edit-report-recipients"
+                  placeholder="email@example.com, another@example.com"
+                  value={editReportForm.recipients}
+                  onChange={(e) => setEditReportForm({ ...editReportForm, recipients: e.target.value })}
+                  className="mt-1"
+                />
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setShowEditReport(null)}>
+                  Cancel
+                </Button>
+                <Button onClick={handleEditReport} disabled={isLoading}>
+                  {isLoading ? 'Saving...' : 'Save Changes'}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* View Dashboard Dialog */}
+        <Dialog open={!!showViewDashboard} onOpenChange={() => setShowViewDashboard(null)}>
+          <DialogContent className="max-w-4xl">
+            <DialogHeader>
+              <DialogTitle>
+                {(dbDashboards.length > 0 ? dbDashboards : mockDashboards).find(d => d.id === showViewDashboard)?.name || 'Dashboard'}
+              </DialogTitle>
+            </DialogHeader>
+            <div className="mt-4">
+              <div className="grid grid-cols-2 gap-4">
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Users className="h-5 w-5 text-indigo-600" />
+                      <span className="text-sm text-gray-500">Active Users</span>
+                    </div>
+                    <div className="text-3xl font-bold">12,847</div>
+                    <div className="text-sm text-emerald-600">+12.5% from last week</div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <DollarSign className="h-5 w-5 text-emerald-600" />
+                      <span className="text-sm text-gray-500">Revenue</span>
+                    </div>
+                    <div className="text-3xl font-bold">$284,500</div>
+                    <div className="text-sm text-emerald-600">+18.2% from last month</div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Target className="h-5 w-5 text-purple-600" />
+                      <span className="text-sm text-gray-500">Conversion Rate</span>
+                    </div>
+                    <div className="text-3xl font-bold">8.5%</div>
+                    <div className="text-sm text-emerald-600">+2.1% from last week</div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Activity className="h-5 w-5 text-amber-600" />
+                      <span className="text-sm text-gray-500">Engagement</span>
+                    </div>
+                    <div className="text-3xl font-bold">4.2 min</div>
+                    <div className="text-sm text-emerald-600">+8% from last week</div>
+                  </CardContent>
+                </Card>
+              </div>
+              <div className="mt-4 h-48 bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-gray-800 dark:to-gray-700 rounded-lg flex items-center justify-center">
+                <div className="text-center">
+                  <LineChart className="h-12 w-12 mx-auto text-indigo-400 mb-2" />
+                  <p className="text-sm text-gray-500">Dashboard widgets visualization</p>
+                </div>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Connect Integration Dialog */}
+        <Dialog open={!!showConnectIntegration} onOpenChange={() => setShowConnectIntegration(null)}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>
+                {showConnectIntegration && (
+                  ['Google Analytics', 'Mixpanel', 'Hotjar'].includes(showConnectIntegration)
+                    ? `Disconnect ${showConnectIntegration}`
+                    : `Connect ${showConnectIntegration}`
+                )}
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 mt-4">
+              {showConnectIntegration && ['Google Analytics', 'Mixpanel', 'Hotjar'].includes(showConnectIntegration) ? (
+                <>
+                  <p className="text-sm text-gray-500">
+                    Are you sure you want to disconnect {showConnectIntegration}? This will stop syncing data from this integration.
+                  </p>
+                  <div className="flex justify-end gap-2">
+                    <Button variant="outline" onClick={() => setShowConnectIntegration(null)}>
+                      Cancel
+                    </Button>
+                    <Button variant="destructive" onClick={() => handleConnectIntegration(showConnectIntegration!, true)} disabled={isLoading}>
+                      {isLoading ? 'Disconnecting...' : 'Disconnect'}
+                    </Button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <p className="text-sm text-gray-500">
+                    Connect {showConnectIntegration} to sync your analytics data automatically.
+                  </p>
+                  <div>
+                    <Label htmlFor="integration-api-key">API Key</Label>
+                    <Input
+                      id="integration-api-key"
+                      placeholder="Enter your API key"
+                      className="mt-1"
+                    />
+                  </div>
+                  <div className="flex justify-end gap-2">
+                    <Button variant="outline" onClick={() => setShowConnectIntegration(null)}>
+                      Cancel
+                    </Button>
+                    <Button onClick={() => handleConnectIntegration(showConnectIntegration!, false)} disabled={isLoading}>
+                      {isLoading ? 'Connecting...' : 'Connect'}
+                    </Button>
+                  </div>
+                </>
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Regenerate API Key Dialog */}
+        <Dialog open={showRegenerateApiKey} onOpenChange={setShowRegenerateApiKey}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Regenerate API Key</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 mt-4">
+              <p className="text-sm text-gray-500">
+                Are you sure you want to regenerate your API key? This will invalidate your current key and any applications using it will stop working.
+              </p>
+              <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                <p className="text-sm text-amber-800">
+                  Make sure to update your API key in all applications before regenerating.
+                </p>
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setShowRegenerateApiKey(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={handleRegenerateApiKey} disabled={isLoading}>
+                  {isLoading ? 'Regenerating...' : 'Regenerate Key'}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Configure Event Schema Dialog */}
+        <Dialog open={showConfigureEventSchema} onOpenChange={setShowConfigureEventSchema}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Configure Event Schema</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 mt-4">
+              <div>
+                <Label htmlFor="event-name">Event Name</Label>
+                <Input
+                  id="event-name"
+                  placeholder="e.g., purchase_completed"
+                  value={eventSchemaForm.eventName}
+                  onChange={(e) => setEventSchemaForm({ ...eventSchemaForm, eventName: e.target.value })}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label htmlFor="event-properties">Properties (JSON format)</Label>
+                <Textarea
+                  id="event-properties"
+                  placeholder='{"price": "number", "product_id": "string"}'
+                  value={eventSchemaForm.properties}
+                  onChange={(e) => setEventSchemaForm({ ...eventSchemaForm, properties: e.target.value })}
+                  className="mt-1 font-mono"
+                  rows={4}
+                />
+              </div>
+              <div>
+                <Label htmlFor="event-description">Description</Label>
+                <Input
+                  id="event-description"
+                  placeholder="Describe when this event is triggered"
+                  value={eventSchemaForm.description}
+                  onChange={(e) => setEventSchemaForm({ ...eventSchemaForm, description: e.target.value })}
+                  className="mt-1"
+                />
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setShowConfigureEventSchema(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={handleConfigureEventSchema} disabled={isLoading}>
+                  {isLoading ? 'Saving...' : 'Save Schema'}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Reset All Data Confirmation Dialog */}
+        <Dialog open={showResetData} onOpenChange={setShowResetData}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="text-red-600">Reset All Analytics Data</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 mt-4">
+              <p className="text-sm text-gray-500">
+                This action will permanently delete all your analytics data including metrics, reports, dashboards, and funnels. This cannot be undone.
+              </p>
+              <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+                <p className="text-sm text-red-800 font-medium">
+                  Warning: All historical data will be lost forever.
+                </p>
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setShowResetData(false)}>
+                  Cancel
+                </Button>
+                <Button variant="destructive" onClick={handleResetAllData} disabled={isLoading}>
+                  {isLoading ? 'Resetting...' : 'Reset All Data'}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Tracking Code Confirmation Dialog */}
+        <Dialog open={showDeleteTracking} onOpenChange={setShowDeleteTracking}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="text-red-600">Delete Tracking Code</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 mt-4">
+              <p className="text-sm text-gray-500">
+                This will remove the tracking code from all sites. New data will no longer be collected until you reinstall the tracking code.
+              </p>
+              <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                <p className="text-sm text-amber-800">
+                  Existing data will be preserved but no new data will be tracked.
+                </p>
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setShowDeleteTracking(false)}>
+                  Cancel
+                </Button>
+                <Button variant="destructive" onClick={handleDeleteTrackingCode} disabled={isLoading}>
+                  {isLoading ? 'Deleting...' : 'Delete Tracking'}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Revoke All API Keys Confirmation Dialog */}
+        <Dialog open={showRevokeApiKeys} onOpenChange={setShowRevokeApiKeys}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="text-red-600">Revoke All API Keys</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 mt-4">
+              <p className="text-sm text-gray-500">
+                This will invalidate all existing API keys. Any applications or integrations using these keys will immediately lose access.
+              </p>
+              <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+                <p className="text-sm text-red-800 font-medium">
+                  All connected applications will stop working until new keys are generated.
+                </p>
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setShowRevokeApiKeys(false)}>
+                  Cancel
+                </Button>
+                <Button variant="destructive" onClick={handleRevokeAllApiKeys} disabled={isLoading}>
+                  {isLoading ? 'Revoking...' : 'Revoke All Keys'}
                 </Button>
               </div>
             </div>

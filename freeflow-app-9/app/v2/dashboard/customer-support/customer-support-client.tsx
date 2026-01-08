@@ -290,6 +290,83 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
   const [escalateReason, setEscalateReason] = useState('')
   const [escalatePriority, setEscalatePriority] = useState('urgent')
 
+  // Additional Dialog States
+  const [showAddAgentDialog, setShowAddAgentDialog] = useState(false)
+  const [showTeamsDialog, setShowTeamsDialog] = useState(false)
+  const [showScheduleDialog, setShowScheduleDialog] = useState(false)
+  const [showGoalsDialog, setShowGoalsDialog] = useState(false)
+  const [showReportsDialog, setShowReportsDialog] = useState(false)
+  const [showRatingsDialog, setShowRatingsDialog] = useState(false)
+  const [showTrainingDialog, setShowTrainingDialog] = useState(false)
+  const [showAgentSettingsDialog, setShowAgentSettingsDialog] = useState(false)
+  const [showAddCustomerDialog, setShowAddCustomerDialog] = useState(false)
+  const [showEmailAllDialog, setShowEmailAllDialog] = useState(false)
+  const [showSegmentsDialog, setShowSegmentsDialog] = useState(false)
+  const [showVIPDialog, setShowVIPDialog] = useState(false)
+  const [showCustomerInsightsDialog, setShowCustomerInsightsDialog] = useState(false)
+  const [showExportCustomersDialog, setShowExportCustomersDialog] = useState(false)
+  const [showImportCustomersDialog, setShowImportCustomersDialog] = useState(false)
+  const [showCustomerSettingsDialog, setShowCustomerSettingsDialog] = useState(false)
+  const [showCustomerFilterDialog, setShowCustomerFilterDialog] = useState(false)
+  const [showCustomerProfileDialog, setShowCustomerProfileDialog] = useState(false)
+  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null)
+  const [showOverviewDialog, setShowOverviewDialog] = useState(false)
+  const [showTrendsDialog, setShowTrendsDialog] = useState(false)
+  const [showResponseTimeDialog, setShowResponseTimeDialog] = useState(false)
+  const [showCSATDialog, setShowCSATDialog] = useState(false)
+  const [showAgentReportsDialog, setShowAgentReportsDialog] = useState(false)
+  const [showTopicsDialog, setShowTopicsDialog] = useState(false)
+  const [showExportAnalyticsDialog, setShowExportAnalyticsDialog] = useState(false)
+  const [showScheduleReportDialog, setShowScheduleReportDialog] = useState(false)
+  const [showGeneralSettingsDialog, setShowGeneralSettingsDialog] = useState(false)
+  const [showChannelsSettingsDialog, setShowChannelsSettingsDialog] = useState(false)
+  const [showSLASettingsDialog, setShowSLASettingsDialog] = useState(false)
+  const [showAutomationSettingsDialog, setShowAutomationSettingsDialog] = useState(false)
+  const [showIntegrationsSettingsDialog, setShowIntegrationsSettingsDialog] = useState(false)
+  const [showSecuritySettingsDialog, setShowSecuritySettingsDialog] = useState(false)
+  const [showNotificationsSettingsDialog, setShowNotificationsSettingsDialog] = useState(false)
+  const [showResetSettingsDialog, setShowResetSettingsDialog] = useState(false)
+  const [showEditSLADialog, setShowEditSLADialog] = useState(false)
+  const [showAddSLADialog, setShowAddSLADialog] = useState(false)
+  const [selectedSLA, setSelectedSLA] = useState<SLA | null>(null)
+  const [showEditAutomationDialog, setShowEditAutomationDialog] = useState(false)
+  const [showCreateAutomationDialog, setShowCreateAutomationDialog] = useState(false)
+  const [selectedAutomation, setSelectedAutomation] = useState<{name: string, trigger: string, actions: string[], status: string} | null>(null)
+  const [showPreviewCannedResponseDialog, setShowPreviewCannedResponseDialog] = useState(false)
+  const [showEditCannedResponseDialog, setShowEditCannedResponseDialog] = useState(false)
+  const [showAddCannedResponseDialog, setShowAddCannedResponseDialog] = useState(false)
+  const [selectedCannedResponse, setSelectedCannedResponse] = useState<CannedResponse | null>(null)
+  const [showConnectIntegrationDialog, setShowConnectIntegrationDialog] = useState(false)
+  const [selectedIntegration, setSelectedIntegration] = useState<{name: string, description: string} | null>(null)
+  const [showRegenerateAPIKeyDialog, setShowRegenerateAPIKeyDialog] = useState(false)
+  const [showAPIDocsDialog, setShowAPIDocsDialog] = useState(false)
+  const [showWebhooksDialog, setShowWebhooksDialog] = useState(false)
+  const [showDeleteClosedTicketsDialog, setShowDeleteClosedTicketsDialog] = useState(false)
+  const [showResetAllSettingsDialog, setShowResetAllSettingsDialog] = useState(false)
+  const [showAttachFileDialog, setShowAttachFileDialog] = useState(false)
+  const [showEmojiPickerDialog, setShowEmojiPickerDialog] = useState(false)
+  const [showAssignAgentDialog, setShowAssignAgentDialog] = useState(false)
+  const [showAddTagDialog, setShowAddTagDialog] = useState(false)
+  const [showAgentScheduleDialog, setShowAgentScheduleDialog] = useState(false)
+  const [showAgentFullReportDialog, setShowAgentFullReportDialog] = useState(false)
+  const [showSendAgentMessageDialog, setShowSendAgentMessageDialog] = useState(false)
+  const [queueFilter, setQueueFilter] = useState<'all' | 'my' | 'unassigned' | 'urgent'>('all')
+  const [newAgentForm, setNewAgentForm] = useState({ name: '', email: '', role: 'agent', skills: [] as string[] })
+  const [newCustomerForm, setNewCustomerForm] = useState({ name: '', email: '', company: '', tier: 'basic' })
+  const [emailAllForm, setEmailAllForm] = useState({ subject: '', message: '' })
+  const [newSLAForm, setNewSLAForm] = useState({ name: '', priority: 'normal', firstResponseTarget: 60, resolutionTarget: 240 })
+  const [newAutomationForm, setNewAutomationForm] = useState({ name: '', trigger: '', actions: '' })
+  const [newCannedResponseForm, setNewCannedResponseForm] = useState({ title: '', content: '', category: 'General' })
+  const [agentMessageForm, setAgentMessageForm] = useState('')
+  const [newTagValue, setNewTagValue] = useState('')
+  const [pendingStatusFilter, setPendingStatusFilter] = useState<string | null>(null)
+  const [showPendingDialog, setShowPendingDialog] = useState(false)
+  const [showResolvedDialog, setShowResolvedDialog] = useState(false)
+  const [showAssignDialog, setShowAssignDialog] = useState(false)
+  const [showTagsDialog, setShowTagsDialog] = useState(false)
+  const [showArchiveDialog, setShowArchiveDialog] = useState(false)
+  const [showTicketReportsDialog, setShowTicketReportsDialog] = useState(false)
+
   // Quick Actions with proper dialog handlers
   const supportQuickActions = [
     { id: '1', label: 'New Ticket', icon: 'Plus', shortcut: '⌘N', action: () => setShowCreateDialog(true) },
@@ -689,19 +766,20 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
             {/* Tickets Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: MessageSquare, label: 'New Ticket', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
-                { icon: Inbox, label: 'Inbox', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
-                { icon: Clock, label: 'Pending', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
-                { icon: CheckCircle, label: 'Resolved', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
-                { icon: Users, label: 'Assign', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
-                { icon: Tag, label: 'Tags', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
-                { icon: Archive, label: 'Archive', color: 'bg-gray-100 text-gray-600 dark:bg-gray-900/30 dark:text-gray-400' },
-                { icon: BarChart3, label: 'Reports', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
+                { icon: MessageSquare, label: 'New Ticket', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: () => setShowCreateDialog(true) },
+                { icon: Inbox, label: 'Inbox', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', action: () => setShowViewQueueDialog(true) },
+                { icon: Clock, label: 'Pending', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', action: () => setShowPendingDialog(true) },
+                { icon: CheckCircle, label: 'Resolved', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', action: () => setShowResolvedDialog(true) },
+                { icon: Users, label: 'Assign', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => setShowAssignDialog(true) },
+                { icon: Tag, label: 'Tags', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', action: () => setShowTagsDialog(true) },
+                { icon: Archive, label: 'Archive', color: 'bg-gray-100 text-gray-600 dark:bg-gray-900/30 dark:text-gray-400', action: () => setShowArchiveDialog(true) },
+                { icon: BarChart3, label: 'Reports', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', action: () => setShowTicketReportsDialog(true) },
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={action.action}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -750,12 +828,19 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
                 {/* Quick Filters */}
                 <div className="flex gap-2 mb-4">
                   {[
-                    { label: 'My Tickets', count: 5 },
-                    { label: 'Unassigned', count: 3 },
-                    { label: 'SLA Breached', count: 1 },
-                    { label: 'Awaiting Reply', count: 2 },
+                    { label: 'My Tickets', count: 5, filter: () => { setPendingStatusFilter('my'); setSearchQuery(''); } },
+                    { label: 'Unassigned', count: 3, filter: () => { setPendingStatusFilter('unassigned'); setSearchQuery(''); } },
+                    { label: 'SLA Breached', count: 1, filter: () => { setPendingStatusFilter('sla'); setSearchQuery(''); } },
+                    { label: 'Awaiting Reply', count: 2, filter: () => { setPendingStatusFilter('awaiting'); setSearchQuery(''); } },
                   ].map((filter, i) => (
-                    <button key={i} className="px-3 py-1.5 bg-white border rounded-lg text-sm hover:bg-gray-50 flex items-center gap-2">
+                    <button
+                      key={i}
+                      onClick={() => {
+                        filter.filter()
+                        toast.success(`Filtering by: ${filter.label}`)
+                      }}
+                      className={`px-3 py-1.5 border rounded-lg text-sm hover:bg-gray-50 flex items-center gap-2 ${pendingStatusFilter === filter.label.toLowerCase().replace(' ', '') ? 'bg-emerald-50 border-emerald-300' : 'bg-white'}`}
+                    >
                       {filter.label}
                       <Badge variant="secondary" className="text-xs">{filter.count}</Badge>
                     </button>
@@ -921,19 +1006,20 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
             {/* Agents Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: User, label: 'Add Agent', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
-                { icon: Users, label: 'Teams', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' },
-                { icon: Calendar, label: 'Schedule', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
-                { icon: Target, label: 'Goals', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400' },
-                { icon: BarChart3, label: 'Reports', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
-                { icon: Star, label: 'Ratings', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
-                { icon: Headphones, label: 'Training', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
-                { icon: Settings, label: 'Settings', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400' },
+                { icon: User, label: 'Add Agent', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', action: () => setShowAddAgentDialog(true) },
+                { icon: Users, label: 'Teams', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', action: () => setShowTeamsDialog(true) },
+                { icon: Calendar, label: 'Schedule', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', action: () => setShowScheduleDialog(true) },
+                { icon: Target, label: 'Goals', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', action: () => setShowGoalsDialog(true) },
+                { icon: BarChart3, label: 'Reports', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: () => setShowReportsDialog(true) },
+                { icon: Star, label: 'Ratings', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', action: () => setShowRatingsDialog(true) },
+                { icon: Headphones, label: 'Training', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => setShowTrainingDialog(true) },
+                { icon: Settings, label: 'Settings', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400', action: () => setShowAgentSettingsDialog(true) },
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={action.action}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1021,19 +1107,20 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
             {/* Customers Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: User, label: 'Add', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
-                { icon: Mail, label: 'Email All', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
-                { icon: Tag, label: 'Segments', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
-                { icon: Star, label: 'VIP', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
-                { icon: TrendingUp, label: 'Insights', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
-                { icon: FileText, label: 'Export', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
-                { icon: Globe, label: 'Import', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
-                { icon: Settings, label: 'Settings', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400' },
+                { icon: User, label: 'Add', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => setShowAddCustomerDialog(true) },
+                { icon: Mail, label: 'Email All', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', action: () => setShowEmailAllDialog(true) },
+                { icon: Tag, label: 'Segments', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', action: () => setShowSegmentsDialog(true) },
+                { icon: Star, label: 'VIP', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', action: () => setShowVIPDialog(true) },
+                { icon: TrendingUp, label: 'Insights', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: () => setShowCustomerInsightsDialog(true) },
+                { icon: FileText, label: 'Export', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', action: () => setShowExportCustomersDialog(true) },
+                { icon: Globe, label: 'Import', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', action: () => setShowImportCustomersDialog(true) },
+                { icon: Settings, label: 'Settings', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400', action: () => setShowCustomerSettingsDialog(true) },
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={action.action}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1047,7 +1134,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
                   <CardTitle>Customer Directory</CardTitle>
                   <div className="flex items-center gap-2">
                     <Input placeholder="Search customers..." className="w-64" />
-                    <Button variant="outline">
+                    <Button variant="outline" onClick={() => setShowCustomerFilterDialog(true)}>
                       <Filter className="h-4 w-4 mr-2" />
                       Filter
                     </Button>
@@ -1078,7 +1165,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
                         </div>
                         <p className="text-sm text-gray-500">{customer.totalTickets} tickets</p>
                       </div>
-                      <Button variant="outline" size="sm">View Profile</Button>
+                      <Button variant="outline" size="sm" onClick={() => { setSelectedCustomer(customer); setShowCustomerProfileDialog(true); }}>View Profile</Button>
                     </div>
                   ))}
                 </div>
@@ -1111,19 +1198,20 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
             {/* Analytics Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: BarChart3, label: 'Overview', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
-                { icon: TrendingUp, label: 'Trends', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400' },
-                { icon: Timer, label: 'Response', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
-                { icon: Star, label: 'CSAT', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400' },
-                { icon: Users, label: 'Agents', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
-                { icon: Tag, label: 'Topics', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
-                { icon: FileText, label: 'Export', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
-                { icon: Calendar, label: 'Schedule', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
+                { icon: BarChart3, label: 'Overview', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', action: () => setShowOverviewDialog(true) },
+                { icon: TrendingUp, label: 'Trends', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', action: () => setShowTrendsDialog(true) },
+                { icon: Timer, label: 'Response', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', action: () => setShowResponseTimeDialog(true) },
+                { icon: Star, label: 'CSAT', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400', action: () => setShowCSATDialog(true) },
+                { icon: Users, label: 'Agents', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', action: () => setShowAgentReportsDialog(true) },
+                { icon: Tag, label: 'Topics', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: () => setShowTopicsDialog(true) },
+                { icon: FileText, label: 'Export', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => setShowExportAnalyticsDialog(true) },
+                { icon: Calendar, label: 'Schedule', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', action: () => setShowScheduleReportDialog(true) },
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={action.action}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1251,19 +1339,20 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
             {/* Settings Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
-                { icon: Settings, label: 'General', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400' },
-                { icon: Headphones, label: 'Channels', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
-                { icon: Timer, label: 'SLA', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
-                { icon: Zap, label: 'Automation', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
-                { icon: Link2, label: 'Integrations', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
-                { icon: Shield, label: 'Security', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
-                { icon: Bell, label: 'Notifications', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
-                { icon: RefreshCw, label: 'Reset', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' },
+                { icon: Settings, label: 'General', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400', action: () => setSettingsTab('general') },
+                { icon: Headphones, label: 'Channels', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: () => setSettingsTab('channels') },
+                { icon: Timer, label: 'SLA', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', action: () => setSettingsTab('sla') },
+                { icon: Zap, label: 'Automation', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => setSettingsTab('automations') },
+                { icon: Link2, label: 'Integrations', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', action: () => setSettingsTab('integrations') },
+                { icon: Shield, label: 'Security', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', action: () => setSettingsTab('advanced') },
+                { icon: Bell, label: 'Notifications', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', action: () => setSettingsTab('advanced') },
+                { icon: RefreshCw, label: 'Reset', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', action: () => setShowResetSettingsDialog(true) },
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={action.action}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1516,12 +1605,12 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
                                 <Badge className={sla.complianceRate >= 95 ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}>
                                   {sla.complianceRate}% compliance
                                 </Badge>
-                                <Button variant="outline" size="sm">Edit</Button>
+                                <Button variant="outline" size="sm" onClick={() => { setSelectedSLA(sla); setShowEditSLADialog(true); }}>Edit</Button>
                               </div>
                             </div>
                           ))}
                         </div>
-                        <Button variant="outline" className="mt-4 w-full">
+                        <Button variant="outline" className="mt-4 w-full" onClick={() => setShowAddSLADialog(true)}>
                           <Target className="w-4 h-4 mr-2" />
                           Add SLA Policy
                         </Button>
@@ -1630,7 +1719,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
                                 </div>
                                 <div className="flex items-center gap-2">
                                   <Badge variant={rule.status === 'active' ? 'default' : 'secondary'}>{rule.status}</Badge>
-                                  <Button variant="ghost" size="sm">Edit</Button>
+                                  <Button variant="ghost" size="sm" onClick={() => { setSelectedAutomation(rule); setShowEditAutomationDialog(true); }}>Edit</Button>
                                 </div>
                               </div>
                               <p className="text-sm text-gray-500 ml-7">
@@ -1642,7 +1731,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
                             </div>
                           ))}
                         </div>
-                        <Button variant="outline" className="mt-4 w-full">
+                        <Button variant="outline" className="mt-4 w-full" onClick={() => setShowCreateAutomationDialog(true)}>
                           <Zap className="w-4 h-4 mr-2" />
                           Create Automation
                         </Button>
@@ -1665,13 +1754,13 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
                                 <p className="text-xs text-gray-500">{response.category} • Used {response.usageCount} times</p>
                               </div>
                               <div className="flex items-center gap-2">
-                                <Button variant="ghost" size="sm">Preview</Button>
-                                <Button variant="ghost" size="sm">Edit</Button>
+                                <Button variant="ghost" size="sm" onClick={() => { setSelectedCannedResponse(response); setShowPreviewCannedResponseDialog(true); }}>Preview</Button>
+                                <Button variant="ghost" size="sm" onClick={() => { setSelectedCannedResponse(response); setShowEditCannedResponseDialog(true); }}>Edit</Button>
                               </div>
                             </div>
                           ))}
                         </div>
-                        <Button variant="outline" className="mt-4 w-full">
+                        <Button variant="outline" className="mt-4 w-full" onClick={() => setShowAddCannedResponseDialog(true)}>
                           <FileText className="w-4 h-4 mr-2" />
                           Add Canned Response
                         </Button>
@@ -1709,7 +1798,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
                               {integration.connected ? (
                                 <Badge className="bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400">Connected</Badge>
                               ) : (
-                                <Button size="sm" variant="outline">Connect</Button>
+                                <Button size="sm" variant="outline" onClick={() => { setSelectedIntegration(integration); setShowConnectIntegrationDialog(true); }}>Connect</Button>
                               )}
                             </div>
                             {integration.connected && (
@@ -1734,16 +1823,16 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
                         <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                           <div className="flex items-center justify-between mb-2">
                             <Label>API Key</Label>
-                            <Button variant="ghost" size="sm">Regenerate</Button>
+                            <Button variant="ghost" size="sm" onClick={() => setShowRegenerateAPIKeyDialog(true)}>Regenerate</Button>
                           </div>
                           <Input type="password" value="cs_live_••••••••••••••••" readOnly className="font-mono" />
                         </div>
                         <div className="flex items-center gap-4">
-                          <Button variant="outline" className="flex items-center gap-2">
+                          <Button variant="outline" className="flex items-center gap-2" onClick={() => setShowAPIDocsDialog(true)}>
                             <FileText className="w-4 h-4" />
                             API Docs
                           </Button>
-                          <Button variant="outline" className="flex items-center gap-2">
+                          <Button variant="outline" className="flex items-center gap-2" onClick={() => setShowWebhooksDialog(true)}>
                             <Globe className="w-4 h-4" />
                             Webhooks
                           </Button>
@@ -1845,14 +1934,14 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
                             <Label className="text-red-700 dark:text-red-400">Delete All Closed Tickets</Label>
                             <p className="text-sm text-red-600 dark:text-red-500">Permanently remove closed tickets</p>
                           </div>
-                          <Button variant="destructive" size="sm">Delete</Button>
+                          <Button variant="destructive" size="sm" onClick={() => setShowDeleteClosedTicketsDialog(true)}>Delete</Button>
                         </div>
                         <div className="flex items-center justify-between p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
                           <div>
                             <Label className="text-red-700 dark:text-red-400">Reset All Settings</Label>
                             <p className="text-sm text-red-600 dark:text-red-500">Reset to factory defaults</p>
                           </div>
-                          <Button variant="destructive" size="sm">Reset</Button>
+                          <Button variant="destructive" size="sm" onClick={() => setShowResetAllSettingsDialog(true)}>Reset</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -1921,10 +2010,10 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
                         onChange={(e) => setMessageInput(e.target.value)}
                         className="flex-1"
                       />
-                      <Button variant="ghost" size="icon">
+                      <Button variant="ghost" size="icon" onClick={() => setShowAttachFileDialog(true)}>
                         <Paperclip className="h-4 w-4" />
                       </Button>
-                      <Button variant="ghost" size="icon">
+                      <Button variant="ghost" size="icon" onClick={() => setShowEmojiPickerDialog(true)}>
                         <Smile className="h-4 w-4" />
                       </Button>
                       <Button
@@ -1992,7 +2081,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
                           </div>
                         </div>
                       ) : (
-                        <Button className="w-full" variant="outline">Assign Agent</Button>
+                        <Button className="w-full" variant="outline" onClick={() => setShowAssignAgentDialog(true)}>Assign Agent</Button>
                       )}
                     </CardContent>
                   </Card>
@@ -2029,7 +2118,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
                         {selectedTicket.tags.map((tag, i) => (
                           <Badge key={i} variant="secondary" className="text-xs">{tag}</Badge>
                         ))}
-                        <Button variant="ghost" size="sm" className="h-6 px-2 text-xs">+ Add</Button>
+                        <Button variant="ghost" size="sm" className="h-6 px-2 text-xs" onClick={() => setShowAddTagDialog(true)}>+ Add</Button>
                       </div>
                     </CardContent>
                   </Card>
@@ -2201,15 +2290,15 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
 
               <DialogFooter className="mt-4">
                 <div className="flex items-center gap-3 w-full">
-                  <Button variant="outline" className="flex-1">
+                  <Button variant="outline" className="flex-1" onClick={() => setShowAgentScheduleDialog(true)}>
                     <Calendar className="h-4 w-4 mr-2" />
                     View Schedule
                   </Button>
-                  <Button variant="outline" className="flex-1">
+                  <Button variant="outline" className="flex-1" onClick={() => setShowAgentFullReportDialog(true)}>
                     <BarChart3 className="h-4 w-4 mr-2" />
                     Full Report
                   </Button>
-                  <Button className="flex-1 bg-gradient-to-r from-emerald-500 to-teal-500 text-white">
+                  <Button className="flex-1 bg-gradient-to-r from-emerald-500 to-teal-500 text-white" onClick={() => setShowSendAgentMessageDialog(true)}>
                     <MessageSquare className="h-4 w-4 mr-2" />
                     Send Message
                   </Button>
@@ -2533,10 +2622,10 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
 
             {/* Queue Filters */}
             <div className="flex gap-2">
-              <Button variant="outline" size="sm" className="bg-blue-50 text-blue-600">All Tickets</Button>
-              <Button variant="outline" size="sm">My Tickets</Button>
-              <Button variant="outline" size="sm">Unassigned</Button>
-              <Button variant="outline" size="sm">Urgent</Button>
+              <Button variant="outline" size="sm" className={queueFilter === 'all' ? 'bg-blue-50 text-blue-600' : ''} onClick={() => setQueueFilter('all')}>All Tickets</Button>
+              <Button variant="outline" size="sm" className={queueFilter === 'my' ? 'bg-blue-50 text-blue-600' : ''} onClick={() => setQueueFilter('my')}>My Tickets</Button>
+              <Button variant="outline" size="sm" className={queueFilter === 'unassigned' ? 'bg-blue-50 text-blue-600' : ''} onClick={() => setQueueFilter('unassigned')}>Unassigned</Button>
+              <Button variant="outline" size="sm" className={queueFilter === 'urgent' ? 'bg-blue-50 text-blue-600' : ''} onClick={() => setQueueFilter('urgent')}>Urgent</Button>
             </div>
 
             {/* Queue List */}
@@ -2588,6 +2677,1192 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
               Refresh Queue
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Pending Tickets Dialog */}
+      <Dialog open={showPendingDialog} onOpenChange={setShowPendingDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Clock className="h-5 w-5 text-amber-600" />
+              Pending Tickets
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-gray-500">Tickets awaiting customer response or action</p>
+            <ScrollArea className="h-[300px] border rounded-lg">
+              <div className="divide-y">
+                {tickets.filter(t => t.status === 'pending').map(ticket => (
+                  <div key={ticket.id} className="p-4 hover:bg-gray-50 cursor-pointer" onClick={() => { setShowPendingDialog(false); openTicketDetails(ticket); }}>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-medium">#{ticket.id} - {ticket.subject}</h4>
+                        <p className="text-sm text-gray-500">{ticket.customer.name}</p>
+                      </div>
+                      <Badge className={getPriorityColor(ticket.priority)}>{ticket.priority}</Badge>
+                    </div>
+                  </div>
+                ))}
+                {tickets.filter(t => t.status === 'pending').length === 0 && (
+                  <div className="p-8 text-center text-gray-500">No pending tickets</div>
+                )}
+              </div>
+            </ScrollArea>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowPendingDialog(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Resolved Tickets Dialog */}
+      <Dialog open={showResolvedDialog} onOpenChange={setShowResolvedDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <CheckCircle className="h-5 w-5 text-green-600" />
+              Resolved Tickets
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-gray-500">Recently resolved support tickets</p>
+            <ScrollArea className="h-[300px] border rounded-lg">
+              <div className="divide-y">
+                {tickets.filter(t => t.status === 'solved' || t.status === 'closed').map(ticket => (
+                  <div key={ticket.id} className="p-4 hover:bg-gray-50 cursor-pointer" onClick={() => { setShowResolvedDialog(false); openTicketDetails(ticket); }}>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-medium">#{ticket.id} - {ticket.subject}</h4>
+                        <p className="text-sm text-gray-500">{ticket.customer.name}</p>
+                      </div>
+                      <Badge className="bg-green-100 text-green-700">Resolved</Badge>
+                    </div>
+                  </div>
+                ))}
+                {tickets.filter(t => t.status === 'solved' || t.status === 'closed').length === 0 && (
+                  <div className="p-8 text-center text-gray-500">No resolved tickets</div>
+                )}
+              </div>
+            </ScrollArea>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowResolvedDialog(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Assign Tickets Dialog */}
+      <Dialog open={showAssignDialog} onOpenChange={setShowAssignDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Users className="h-5 w-5 text-purple-600" />
+              Assign Tickets
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Select Ticket</Label>
+              <Select>
+                <SelectTrigger className="mt-1">
+                  <SelectValue placeholder="Choose a ticket to assign" />
+                </SelectTrigger>
+                <SelectContent>
+                  {tickets.filter(t => !t.assignee).map(ticket => (
+                    <SelectItem key={ticket.id} value={ticket.id}>#{ticket.id} - {ticket.subject}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Assign To</Label>
+              <Select>
+                <SelectTrigger className="mt-1">
+                  <SelectValue placeholder="Select an agent" />
+                </SelectTrigger>
+                <SelectContent>
+                  {agents.filter(a => a.status === 'online').map(agent => (
+                    <SelectItem key={agent.id} value={agent.id}>{agent.name} ({agent.activeTickets} active)</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAssignDialog(false)}>Cancel</Button>
+            <Button onClick={() => { toast.success('Ticket assigned successfully'); setShowAssignDialog(false); }} className="bg-purple-600 hover:bg-purple-700">Assign</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Tags Management Dialog */}
+      <Dialog open={showTagsDialog} onOpenChange={setShowTagsDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Tag className="h-5 w-5 text-pink-600" />
+              Manage Tags
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="flex flex-wrap gap-2">
+              {['bug', 'feature', 'billing', 'technical', 'urgent', 'vip', 'new', 'export', 'api'].map(tag => (
+                <Badge key={tag} variant="secondary" className="px-3 py-1 cursor-pointer hover:bg-gray-200">{tag}</Badge>
+              ))}
+            </div>
+            <div>
+              <Label>Add New Tag</Label>
+              <div className="flex gap-2 mt-1">
+                <Input placeholder="Enter tag name" />
+                <Button onClick={() => toast.success('Tag added')}>Add</Button>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowTagsDialog(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Archive Tickets Dialog */}
+      <Dialog open={showArchiveDialog} onOpenChange={setShowArchiveDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Archive className="h-5 w-5 text-gray-600" />
+              Archive Tickets
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-gray-500">Select tickets to archive. Archived tickets can be restored later.</p>
+            <div className="space-y-2">
+              {tickets.filter(t => t.status === 'solved' || t.status === 'closed').map(ticket => (
+                <div key={ticket.id} className="flex items-center gap-3 p-3 border rounded-lg">
+                  <input type="checkbox" className="rounded" />
+                  <div className="flex-1">
+                    <p className="font-medium text-sm">#{ticket.id} - {ticket.subject}</p>
+                    <p className="text-xs text-gray-500">{ticket.customer.name}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowArchiveDialog(false)}>Cancel</Button>
+            <Button onClick={() => { toast.success('Selected tickets archived'); setShowArchiveDialog(false); }}>Archive Selected</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Ticket Reports Dialog */}
+      <Dialog open={showTicketReportsDialog} onOpenChange={setShowTicketReportsDialog}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <BarChart3 className="h-5 w-5 text-teal-600" />
+              Ticket Reports
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="grid grid-cols-3 gap-4">
+              <Card><CardContent className="pt-6 text-center"><p className="text-3xl font-bold text-blue-600">{tickets.length}</p><p className="text-sm text-gray-500">Total Tickets</p></CardContent></Card>
+              <Card><CardContent className="pt-6 text-center"><p className="text-3xl font-bold text-green-600">{tickets.filter(t => t.status === 'solved').length}</p><p className="text-sm text-gray-500">Resolved</p></CardContent></Card>
+              <Card><CardContent className="pt-6 text-center"><p className="text-3xl font-bold text-amber-600">{tickets.filter(t => t.status === 'pending').length}</p><p className="text-sm text-gray-500">Pending</p></CardContent></Card>
+            </div>
+            <div className="h-48 flex items-center justify-center bg-gray-50 rounded-lg">
+              <BarChart3 className="h-16 w-16 text-gray-300" />
+              <p className="text-gray-400 ml-4">Ticket trend visualization</p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowTicketReportsDialog(false)}>Close</Button>
+            <Button onClick={() => { handleExportTickets(); setShowTicketReportsDialog(false); }}>Export Report</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Agent Dialog */}
+      <Dialog open={showAddAgentDialog} onOpenChange={setShowAddAgentDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <User className="h-5 w-5 text-green-600" />
+              Add New Agent
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Full Name *</Label>
+              <Input placeholder="Enter agent name" value={newAgentForm.name} onChange={(e) => setNewAgentForm({...newAgentForm, name: e.target.value})} className="mt-1" />
+            </div>
+            <div>
+              <Label>Email *</Label>
+              <Input type="email" placeholder="agent@company.com" value={newAgentForm.email} onChange={(e) => setNewAgentForm({...newAgentForm, email: e.target.value})} className="mt-1" />
+            </div>
+            <div>
+              <Label>Role</Label>
+              <Select value={newAgentForm.role} onValueChange={(v) => setNewAgentForm({...newAgentForm, role: v})}>
+                <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="agent">Agent</SelectItem>
+                  <SelectItem value="supervisor">Supervisor</SelectItem>
+                  <SelectItem value="admin">Admin</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Skills</Label>
+              <div className="flex flex-wrap gap-2 mt-1">
+                {['technical', 'billing', 'onboarding', 'enterprise', 'refunds'].map(skill => (
+                  <Badge key={skill} variant="outline" className="cursor-pointer hover:bg-gray-100">{skill}</Badge>
+                ))}
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAddAgentDialog(false)}>Cancel</Button>
+            <Button onClick={() => { toast.success('Agent invited successfully'); setShowAddAgentDialog(false); setNewAgentForm({ name: '', email: '', role: 'agent', skills: [] }); }} className="bg-green-600 hover:bg-green-700">Send Invite</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Teams Dialog */}
+      <Dialog open={showTeamsDialog} onOpenChange={setShowTeamsDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Users className="h-5 w-5 text-emerald-600" />
+              Support Teams
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            {[
+              { name: 'Technical Support', members: 5, lead: 'Alex Rivera' },
+              { name: 'Billing Team', members: 3, lead: 'Taylor Kim' },
+              { name: 'Enterprise Support', members: 4, lead: 'Jordan Lee' },
+            ].map((team, i) => (
+              <div key={i} className="p-4 border rounded-lg flex items-center justify-between">
+                <div>
+                  <h4 className="font-medium">{team.name}</h4>
+                  <p className="text-sm text-gray-500">{team.members} members - Lead: {team.lead}</p>
+                </div>
+                <Button variant="outline" size="sm">Manage</Button>
+              </div>
+            ))}
+            <Button variant="outline" className="w-full" onClick={() => toast.success('Team creation dialog opened')}>
+              <Users className="h-4 w-4 mr-2" />
+              Create New Team
+            </Button>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowTeamsDialog(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Schedule Dialog */}
+      <Dialog open={showScheduleDialog} onOpenChange={setShowScheduleDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Calendar className="h-5 w-5 text-teal-600" />
+              Agent Schedules
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="grid grid-cols-7 gap-2 text-center text-sm">
+              {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(day => (
+                <div key={day} className="font-medium text-gray-500">{day}</div>
+              ))}
+            </div>
+            {agents.map(agent => (
+              <div key={agent.id} className="flex items-center gap-4">
+                <div className="w-32 flex items-center gap-2">
+                  <Avatar className="h-6 w-6"><AvatarFallback>{agent.name[0]}</AvatarFallback></Avatar>
+                  <span className="text-sm truncate">{agent.name}</span>
+                </div>
+                <div className="flex-1 grid grid-cols-7 gap-2">
+                  {[1,2,3,4,5,6,7].map(day => (
+                    <div key={day} className={`h-8 rounded ${day <= 5 ? 'bg-green-100' : 'bg-gray-100'}`}></div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowScheduleDialog(false)}>Close</Button>
+            <Button onClick={() => toast.success('Opening schedule editor')}>Edit Schedules</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Goals Dialog */}
+      <Dialog open={showGoalsDialog} onOpenChange={setShowGoalsDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Target className="h-5 w-5 text-cyan-600" />
+              Team Goals
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            {[
+              { name: 'Response Time', current: 45, target: 30, unit: 'min' },
+              { name: 'Resolution Rate', current: 92, target: 95, unit: '%' },
+              { name: 'CSAT Score', current: 4.7, target: 4.8, unit: '' },
+              { name: 'Tickets/Day', current: 120, target: 150, unit: '' },
+            ].map((goal, i) => (
+              <div key={i} className="p-4 border rounded-lg">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="font-medium">{goal.name}</span>
+                  <span className="text-sm text-gray-500">{goal.current}{goal.unit} / {goal.target}{goal.unit}</span>
+                </div>
+                <Progress value={(goal.current / goal.target) * 100} className="h-2" />
+              </div>
+            ))}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowGoalsDialog(false)}>Close</Button>
+            <Button onClick={() => toast.success('Goals updated')}>Update Goals</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Reports Dialog */}
+      <Dialog open={showReportsDialog} onOpenChange={setShowReportsDialog}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <BarChart3 className="h-5 w-5 text-blue-600" />
+              Agent Reports
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              {agents.map(agent => (
+                <Card key={agent.id}>
+                  <CardContent className="pt-4">
+                    <div className="flex items-center gap-3 mb-4">
+                      <Avatar><AvatarFallback>{agent.name[0]}</AvatarFallback></Avatar>
+                      <div>
+                        <p className="font-medium">{agent.name}</p>
+                        <p className="text-sm text-gray-500 capitalize">{agent.role}</p>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 text-sm">
+                      <div><span className="text-gray-500">Active:</span> {agent.activeTickets}</div>
+                      <div><span className="text-gray-500">Resolved:</span> {agent.resolvedToday}</div>
+                      <div><span className="text-gray-500">Avg Response:</span> {agent.avgResponseTime}m</div>
+                      <div><span className="text-gray-500">CSAT:</span> {agent.satisfactionScore}</div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowReportsDialog(false)}>Close</Button>
+            <Button onClick={() => { toast.success('Exporting agent reports'); setShowReportsDialog(false); }}>Export</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Ratings Dialog */}
+      <Dialog open={showRatingsDialog} onOpenChange={setShowRatingsDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Star className="h-5 w-5 text-amber-600" />
+              Agent Ratings
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            {agents.sort((a, b) => b.satisfactionScore - a.satisfactionScore).map((agent, i) => (
+              <div key={agent.id} className="flex items-center gap-4 p-3 border rounded-lg">
+                <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center font-bold text-amber-600">#{i + 1}</div>
+                <Avatar><AvatarFallback>{agent.name[0]}</AvatarFallback></Avatar>
+                <div className="flex-1">
+                  <p className="font-medium">{agent.name}</p>
+                  <p className="text-sm text-gray-500">{agent.resolvedToday} resolved today</p>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Star className="h-5 w-5 text-amber-500 fill-amber-500" />
+                  <span className="font-bold">{agent.satisfactionScore}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowRatingsDialog(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Training Dialog */}
+      <Dialog open={showTrainingDialog} onOpenChange={setShowTrainingDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Headphones className="h-5 w-5 text-purple-600" />
+              Agent Training
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            {[
+              { name: 'Product Knowledge', progress: 85, status: 'In Progress' },
+              { name: 'Customer Communication', progress: 100, status: 'Completed' },
+              { name: 'Technical Troubleshooting', progress: 60, status: 'In Progress' },
+              { name: 'Billing & Refunds', progress: 0, status: 'Not Started' },
+            ].map((course, i) => (
+              <div key={i} className="p-4 border rounded-lg">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="font-medium">{course.name}</span>
+                  <Badge variant={course.status === 'Completed' ? 'default' : 'secondary'}>{course.status}</Badge>
+                </div>
+                <Progress value={course.progress} className="h-2" />
+              </div>
+            ))}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowTrainingDialog(false)}>Close</Button>
+            <Button onClick={() => toast.success('Opening training portal')}>Manage Training</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Agent Settings Dialog */}
+      <Dialog open={showAgentSettingsDialog} onOpenChange={setShowAgentSettingsDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Settings className="h-5 w-5 text-slate-600" />
+              Agent Settings
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+              <div>
+                <Label>Auto-assign new tickets</Label>
+                <p className="text-sm text-gray-500">Automatically assign tickets to available agents</p>
+              </div>
+              <Switch defaultChecked />
+            </div>
+            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+              <div>
+                <Label>Show agent status</Label>
+                <p className="text-sm text-gray-500">Display online/offline status to customers</p>
+              </div>
+              <Switch defaultChecked />
+            </div>
+            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+              <div>
+                <Label>Enable agent chat</Label>
+                <p className="text-sm text-gray-500">Allow agents to chat with each other</p>
+              </div>
+              <Switch defaultChecked />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAgentSettingsDialog(false)}>Cancel</Button>
+            <Button onClick={() => { toast.success('Settings saved'); setShowAgentSettingsDialog(false); }}>Save Settings</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Customer Dialog */}
+      <Dialog open={showAddCustomerDialog} onOpenChange={setShowAddCustomerDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <User className="h-5 w-5 text-purple-600" />
+              Add New Customer
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Full Name *</Label>
+              <Input placeholder="Customer name" value={newCustomerForm.name} onChange={(e) => setNewCustomerForm({...newCustomerForm, name: e.target.value})} className="mt-1" />
+            </div>
+            <div>
+              <Label>Email *</Label>
+              <Input type="email" placeholder="customer@example.com" value={newCustomerForm.email} onChange={(e) => setNewCustomerForm({...newCustomerForm, email: e.target.value})} className="mt-1" />
+            </div>
+            <div>
+              <Label>Company</Label>
+              <Input placeholder="Company name" value={newCustomerForm.company} onChange={(e) => setNewCustomerForm({...newCustomerForm, company: e.target.value})} className="mt-1" />
+            </div>
+            <div>
+              <Label>Tier</Label>
+              <Select value={newCustomerForm.tier} onValueChange={(v) => setNewCustomerForm({...newCustomerForm, tier: v})}>
+                <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="basic">Basic</SelectItem>
+                  <SelectItem value="pro">Pro</SelectItem>
+                  <SelectItem value="enterprise">Enterprise</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAddCustomerDialog(false)}>Cancel</Button>
+            <Button onClick={() => { toast.success('Customer added successfully'); setShowAddCustomerDialog(false); setNewCustomerForm({ name: '', email: '', company: '', tier: 'basic' }); }} className="bg-purple-600 hover:bg-purple-700">Add Customer</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Email All Dialog */}
+      <Dialog open={showEmailAllDialog} onOpenChange={setShowEmailAllDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Mail className="h-5 w-5 text-violet-600" />
+              Email All Customers
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Subject *</Label>
+              <Input placeholder="Email subject" value={emailAllForm.subject} onChange={(e) => setEmailAllForm({...emailAllForm, subject: e.target.value})} className="mt-1" />
+            </div>
+            <div>
+              <Label>Message *</Label>
+              <textarea placeholder="Your message..." value={emailAllForm.message} onChange={(e) => setEmailAllForm({...emailAllForm, message: e.target.value})} className="mt-1 w-full p-3 border rounded-lg text-sm resize-none h-32" />
+            </div>
+            <div className="p-3 bg-violet-50 rounded-lg">
+              <p className="text-sm text-violet-700">This will send an email to {customers.length} customers</p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowEmailAllDialog(false)}>Cancel</Button>
+            <Button onClick={() => { toast.success('Emails queued for delivery'); setShowEmailAllDialog(false); setEmailAllForm({ subject: '', message: '' }); }} className="bg-violet-600 hover:bg-violet-700">Send to All</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Segments Dialog */}
+      <Dialog open={showSegmentsDialog} onOpenChange={setShowSegmentsDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Tag className="h-5 w-5 text-indigo-600" />
+              Customer Segments
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            {[
+              { name: 'Enterprise Customers', count: 15, color: 'bg-purple-100' },
+              { name: 'High Value', count: 42, color: 'bg-amber-100' },
+              { name: 'New Customers', count: 28, color: 'bg-green-100' },
+              { name: 'At Risk', count: 8, color: 'bg-red-100' },
+            ].map((segment, i) => (
+              <div key={i} className={`p-4 ${segment.color} rounded-lg flex items-center justify-between`}>
+                <div>
+                  <p className="font-medium">{segment.name}</p>
+                  <p className="text-sm text-gray-600">{segment.count} customers</p>
+                </div>
+                <Button variant="outline" size="sm">View</Button>
+              </div>
+            ))}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowSegmentsDialog(false)}>Close</Button>
+            <Button onClick={() => toast.success('Creating new segment')}>Create Segment</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* VIP Dialog */}
+      <Dialog open={showVIPDialog} onOpenChange={setShowVIPDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Star className="h-5 w-5 text-amber-600" />
+              VIP Customers
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            {customers.filter(c => c.tags.includes('vip') || c.tier === 'enterprise').map(customer => (
+              <div key={customer.id} className="p-4 bg-amber-50 border border-amber-200 rounded-lg flex items-center gap-4">
+                <Avatar><AvatarFallback>{customer.name[0]}</AvatarFallback></Avatar>
+                <div className="flex-1">
+                  <p className="font-medium">{customer.name}</p>
+                  <p className="text-sm text-gray-500">{customer.company || customer.email}</p>
+                </div>
+                <Badge className="bg-amber-500">VIP</Badge>
+              </div>
+            ))}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowVIPDialog(false)}>Close</Button>
+            <Button onClick={() => toast.success('Opening VIP management')}>Manage VIP List</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Customer Insights Dialog */}
+      <Dialog open={showCustomerInsightsDialog} onOpenChange={setShowCustomerInsightsDialog}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <TrendingUp className="h-5 w-5 text-blue-600" />
+              Customer Insights
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="grid grid-cols-3 gap-4">
+              <Card><CardContent className="pt-6 text-center"><p className="text-3xl font-bold text-blue-600">{customers.length}</p><p className="text-sm text-gray-500">Total Customers</p></CardContent></Card>
+              <Card><CardContent className="pt-6 text-center"><p className="text-3xl font-bold text-green-600">4.7</p><p className="text-sm text-gray-500">Avg Satisfaction</p></CardContent></Card>
+              <Card><CardContent className="pt-6 text-center"><p className="text-3xl font-bold text-purple-600">{customers.filter(c => c.tier === 'enterprise').length}</p><p className="text-sm text-gray-500">Enterprise</p></CardContent></Card>
+            </div>
+            <div className="h-48 flex items-center justify-center bg-gray-50 rounded-lg">
+              <TrendingUp className="h-16 w-16 text-gray-300" />
+              <p className="text-gray-400 ml-4">Customer growth visualization</p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCustomerInsightsDialog(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Export Customers Dialog */}
+      <Dialog open={showExportCustomersDialog} onOpenChange={setShowExportCustomersDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5 text-teal-600" />
+              Export Customers
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Export Format</Label>
+              <Select defaultValue="csv">
+                <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="csv">CSV</SelectItem>
+                  <SelectItem value="xlsx">Excel</SelectItem>
+                  <SelectItem value="json">JSON</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Customer Segment</Label>
+              <Select defaultValue="all">
+                <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Customers</SelectItem>
+                  <SelectItem value="enterprise">Enterprise Only</SelectItem>
+                  <SelectItem value="vip">VIP Only</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <p className="text-sm text-gray-500">{customers.length} customers will be exported</p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowExportCustomersDialog(false)}>Cancel</Button>
+            <Button onClick={() => { toast.success('Export started'); setShowExportCustomersDialog(false); }} className="bg-teal-600 hover:bg-teal-700">Export</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Import Customers Dialog */}
+      <Dialog open={showImportCustomersDialog} onOpenChange={setShowImportCustomersDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Globe className="h-5 w-5 text-green-600" />
+              Import Customers
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+              <Globe className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+              <p className="text-gray-600">Drop your CSV or Excel file here</p>
+              <p className="text-sm text-gray-400 mt-2">or click to browse</p>
+              <input type="file" className="hidden" accept=".csv,.xlsx" />
+            </div>
+            <p className="text-sm text-gray-500">Supported formats: CSV, XLSX</p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowImportCustomersDialog(false)}>Cancel</Button>
+            <Button onClick={() => { toast.success('Import started'); setShowImportCustomersDialog(false); }} className="bg-green-600 hover:bg-green-700">Import</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Customer Settings Dialog */}
+      <Dialog open={showCustomerSettingsDialog} onOpenChange={setShowCustomerSettingsDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Settings className="h-5 w-5 text-slate-600" />
+              Customer Settings
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+              <div>
+                <Label>Auto-detect VIP customers</Label>
+                <p className="text-sm text-gray-500">Automatically flag high-value customers</p>
+              </div>
+              <Switch defaultChecked />
+            </div>
+            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+              <div>
+                <Label>Customer health scoring</Label>
+                <p className="text-sm text-gray-500">Calculate customer health based on activity</p>
+              </div>
+              <Switch defaultChecked />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCustomerSettingsDialog(false)}>Cancel</Button>
+            <Button onClick={() => { toast.success('Settings saved'); setShowCustomerSettingsDialog(false); }}>Save Settings</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Customer Filter Dialog */}
+      <Dialog open={showCustomerFilterDialog} onOpenChange={setShowCustomerFilterDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Filter className="h-5 w-5 text-indigo-600" />
+              Filter Customers
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Tier</Label>
+              <Select defaultValue="all">
+                <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Tiers</SelectItem>
+                  <SelectItem value="basic">Basic</SelectItem>
+                  <SelectItem value="pro">Pro</SelectItem>
+                  <SelectItem value="enterprise">Enterprise</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Satisfaction Score</Label>
+              <Select defaultValue="all">
+                <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Scores</SelectItem>
+                  <SelectItem value="high">4.5+ (High)</SelectItem>
+                  <SelectItem value="medium">3.5-4.5 (Medium)</SelectItem>
+                  <SelectItem value="low">Below 3.5 (Low)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Tags</Label>
+              <div className="flex flex-wrap gap-2 mt-1">
+                {['vip', 'technical', 'billing', 'new'].map(tag => (
+                  <Badge key={tag} variant="outline" className="cursor-pointer hover:bg-gray-100">{tag}</Badge>
+                ))}
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCustomerFilterDialog(false)}>Clear</Button>
+            <Button onClick={() => { toast.success('Filters applied'); setShowCustomerFilterDialog(false); }}>Apply Filters</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Customer Profile Dialog */}
+      <Dialog open={showCustomerProfileDialog} onOpenChange={setShowCustomerProfileDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <User className="h-5 w-5 text-purple-600" />
+              Customer Profile
+            </DialogTitle>
+          </DialogHeader>
+          {selectedCustomer && (
+            <div className="space-y-4">
+              <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
+                <Avatar className="h-16 w-16"><AvatarFallback className="text-xl">{selectedCustomer.name.split(' ').map(n => n[0]).join('')}</AvatarFallback></Avatar>
+                <div>
+                  <h3 className="text-xl font-bold">{selectedCustomer.name}</h3>
+                  <p className="text-gray-500">{selectedCustomer.email}</p>
+                  {selectedCustomer.company && <p className="text-sm text-gray-500">{selectedCustomer.company}</p>}
+                </div>
+                <div className="ml-auto text-right">
+                  <Badge className="capitalize">{selectedCustomer.tier}</Badge>
+                  {selectedCustomer.tags.includes('vip') && <Badge className="ml-2 bg-amber-500">VIP</Badge>}
+                </div>
+              </div>
+              <div className="grid grid-cols-3 gap-4">
+                <Card><CardContent className="pt-4 text-center"><p className="text-2xl font-bold">{selectedCustomer.totalTickets}</p><p className="text-sm text-gray-500">Total Tickets</p></CardContent></Card>
+                <Card><CardContent className="pt-4 text-center"><div className="flex items-center justify-center gap-1"><Star className="h-5 w-5 text-amber-500 fill-amber-500" /><span className="text-2xl font-bold">{selectedCustomer.satisfactionScore}</span></div><p className="text-sm text-gray-500">CSAT Score</p></CardContent></Card>
+                <Card><CardContent className="pt-4 text-center"><p className="text-2xl font-bold">{selectedCustomer.lastContact}</p><p className="text-sm text-gray-500">Last Contact</p></CardContent></Card>
+              </div>
+              {selectedCustomer.notes && (
+                <div className="p-4 bg-amber-50 rounded-lg">
+                  <Label>Notes</Label>
+                  <p className="text-sm mt-1">{selectedCustomer.notes}</p>
+                </div>
+              )}
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCustomerProfileDialog(false)}>Close</Button>
+            <Button onClick={() => toast.success('Opening customer editor')}>Edit Customer</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Analytics Dialogs */}
+      <Dialog open={showOverviewDialog} onOpenChange={setShowOverviewDialog}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader><DialogTitle className="flex items-center gap-2"><BarChart3 className="h-5 w-5 text-amber-600" />Analytics Overview</DialogTitle></DialogHeader>
+          <div className="h-64 flex items-center justify-center bg-gray-50 rounded-lg"><BarChart3 className="h-24 w-24 text-gray-300" /></div>
+          <DialogFooter><Button variant="outline" onClick={() => setShowOverviewDialog(false)}>Close</Button></DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showTrendsDialog} onOpenChange={setShowTrendsDialog}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader><DialogTitle className="flex items-center gap-2"><TrendingUp className="h-5 w-5 text-orange-600" />Trends Analysis</DialogTitle></DialogHeader>
+          <div className="h-64 flex items-center justify-center bg-gray-50 rounded-lg"><TrendingUp className="h-24 w-24 text-gray-300" /></div>
+          <DialogFooter><Button variant="outline" onClick={() => setShowTrendsDialog(false)}>Close</Button></DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showResponseTimeDialog} onOpenChange={setShowResponseTimeDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader><DialogTitle className="flex items-center gap-2"><Timer className="h-5 w-5 text-red-600" />Response Time Analysis</DialogTitle></DialogHeader>
+          <div className="space-y-4">
+            <div className="text-center p-6 bg-gray-50 rounded-lg"><p className="text-5xl font-bold text-emerald-600">{stats.avgResponseTime}m</p><p className="text-gray-500">Average Response Time</p></div>
+            {slas.map(sla => (<div key={sla.id} className="flex items-center justify-between"><span>{sla.name}</span><span>{sla.firstResponseTarget}m target</span></div>))}
+          </div>
+          <DialogFooter><Button variant="outline" onClick={() => setShowResponseTimeDialog(false)}>Close</Button></DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showCSATDialog} onOpenChange={setShowCSATDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader><DialogTitle className="flex items-center gap-2"><Star className="h-5 w-5 text-yellow-600" />CSAT Analysis</DialogTitle></DialogHeader>
+          <div className="space-y-4">
+            <div className="text-center p-6 bg-gray-50 rounded-lg"><p className="text-5xl font-bold text-yellow-500">{stats.satisfactionScore}</p><div className="flex justify-center gap-1 mt-2">{[1,2,3,4,5].map(s => <Star key={s} className={`h-6 w-6 ${s <= 4 ? 'text-yellow-500 fill-yellow-500' : 'text-yellow-500'}`} />)}</div></div>
+          </div>
+          <DialogFooter><Button variant="outline" onClick={() => setShowCSATDialog(false)}>Close</Button></DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showAgentReportsDialog} onOpenChange={setShowAgentReportsDialog}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader><DialogTitle className="flex items-center gap-2"><Users className="h-5 w-5 text-green-600" />Agent Performance</DialogTitle></DialogHeader>
+          <div className="space-y-4">{agents.map(a => <div key={a.id} className="p-4 border rounded-lg flex items-center justify-between"><div className="flex items-center gap-3"><Avatar><AvatarFallback>{a.name[0]}</AvatarFallback></Avatar><span>{a.name}</span></div><div className="flex gap-4 text-sm"><span>Active: {a.activeTickets}</span><span>Resolved: {a.resolvedToday}</span><span>CSAT: {a.satisfactionScore}</span></div></div>)}</div>
+          <DialogFooter><Button variant="outline" onClick={() => setShowAgentReportsDialog(false)}>Close</Button></DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showTopicsDialog} onOpenChange={setShowTopicsDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader><DialogTitle className="flex items-center gap-2"><Tag className="h-5 w-5 text-blue-600" />Topic Analysis</DialogTitle></DialogHeader>
+          <div className="space-y-3">{[{ topic: 'Technical Issues', count: 45 }, { topic: 'Billing', count: 32 }, { topic: 'Feature Requests', count: 18 }, { topic: 'Account', count: 12 }].map((t, i) => <div key={i} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"><span>{t.topic}</span><Badge>{t.count}</Badge></div>)}</div>
+          <DialogFooter><Button variant="outline" onClick={() => setShowTopicsDialog(false)}>Close</Button></DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showExportAnalyticsDialog} onOpenChange={setShowExportAnalyticsDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader><DialogTitle className="flex items-center gap-2"><FileText className="h-5 w-5 text-purple-600" />Export Analytics</DialogTitle></DialogHeader>
+          <div className="space-y-4">
+            <div><Label>Date Range</Label><Select defaultValue="30"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="7">Last 7 days</SelectItem><SelectItem value="30">Last 30 days</SelectItem><SelectItem value="90">Last 90 days</SelectItem></SelectContent></Select></div>
+            <div><Label>Format</Label><Select defaultValue="pdf"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="pdf">PDF Report</SelectItem><SelectItem value="csv">CSV Data</SelectItem><SelectItem value="xlsx">Excel</SelectItem></SelectContent></Select></div>
+          </div>
+          <DialogFooter><Button variant="outline" onClick={() => setShowExportAnalyticsDialog(false)}>Cancel</Button><Button onClick={() => { toast.success('Export started'); setShowExportAnalyticsDialog(false); }}>Export</Button></DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showScheduleReportDialog} onOpenChange={setShowScheduleReportDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader><DialogTitle className="flex items-center gap-2"><Calendar className="h-5 w-5 text-pink-600" />Schedule Report</DialogTitle></DialogHeader>
+          <div className="space-y-4">
+            <div><Label>Report Type</Label><Select defaultValue="weekly"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="daily">Daily Summary</SelectItem><SelectItem value="weekly">Weekly Report</SelectItem><SelectItem value="monthly">Monthly Report</SelectItem></SelectContent></Select></div>
+            <div><Label>Recipients</Label><Input placeholder="email@example.com" className="mt-1" /></div>
+          </div>
+          <DialogFooter><Button variant="outline" onClick={() => setShowScheduleReportDialog(false)}>Cancel</Button><Button onClick={() => { toast.success('Report scheduled'); setShowScheduleReportDialog(false); }}>Schedule</Button></DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Settings Additional Dialogs */}
+      <Dialog open={showEditSLADialog} onOpenChange={setShowEditSLADialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader><DialogTitle className="flex items-center gap-2"><Target className="h-5 w-5 text-emerald-600" />Edit SLA Policy</DialogTitle></DialogHeader>
+          {selectedSLA && (<div className="space-y-4">
+            <div><Label>Policy Name</Label><Input defaultValue={selectedSLA.name} className="mt-1" /></div>
+            <div><Label>First Response Target (minutes)</Label><Input type="number" defaultValue={selectedSLA.firstResponseTarget} className="mt-1" /></div>
+            <div><Label>Resolution Target (minutes)</Label><Input type="number" defaultValue={selectedSLA.resolutionTarget} className="mt-1" /></div>
+          </div>)}
+          <DialogFooter><Button variant="outline" onClick={() => setShowEditSLADialog(false)}>Cancel</Button><Button onClick={() => { toast.success('SLA policy updated'); setShowEditSLADialog(false); }}>Save Changes</Button></DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showAddSLADialog} onOpenChange={setShowAddSLADialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader><DialogTitle className="flex items-center gap-2"><Target className="h-5 w-5 text-emerald-600" />Add SLA Policy</DialogTitle></DialogHeader>
+          <div className="space-y-4">
+            <div><Label>Policy Name *</Label><Input placeholder="e.g., Premium Support" value={newSLAForm.name} onChange={(e) => setNewSLAForm({...newSLAForm, name: e.target.value})} className="mt-1" /></div>
+            <div><Label>Priority</Label><Select value={newSLAForm.priority} onValueChange={(v) => setNewSLAForm({...newSLAForm, priority: v})}><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="low">Low</SelectItem><SelectItem value="normal">Normal</SelectItem><SelectItem value="high">High</SelectItem><SelectItem value="urgent">Urgent</SelectItem></SelectContent></Select></div>
+            <div><Label>First Response Target (minutes)</Label><Input type="number" value={newSLAForm.firstResponseTarget} onChange={(e) => setNewSLAForm({...newSLAForm, firstResponseTarget: parseInt(e.target.value)})} className="mt-1" /></div>
+            <div><Label>Resolution Target (minutes)</Label><Input type="number" value={newSLAForm.resolutionTarget} onChange={(e) => setNewSLAForm({...newSLAForm, resolutionTarget: parseInt(e.target.value)})} className="mt-1" /></div>
+          </div>
+          <DialogFooter><Button variant="outline" onClick={() => setShowAddSLADialog(false)}>Cancel</Button><Button onClick={() => { toast.success('SLA policy created'); setShowAddSLADialog(false); setNewSLAForm({ name: '', priority: 'normal', firstResponseTarget: 60, resolutionTarget: 240 }); }}>Create Policy</Button></DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showEditAutomationDialog} onOpenChange={setShowEditAutomationDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader><DialogTitle className="flex items-center gap-2"><Zap className="h-5 w-5 text-amber-600" />Edit Automation</DialogTitle></DialogHeader>
+          {selectedAutomation && (<div className="space-y-4">
+            <div><Label>Rule Name</Label><Input defaultValue={selectedAutomation.name} className="mt-1" /></div>
+            <div><Label>Trigger</Label><Input defaultValue={selectedAutomation.trigger} className="mt-1" /></div>
+            <div><Label>Actions</Label><textarea defaultValue={selectedAutomation.actions.join('\n')} className="mt-1 w-full p-3 border rounded-lg text-sm h-24" /></div>
+            <div className="flex items-center gap-2"><Switch defaultChecked={selectedAutomation.status === 'active'} /><Label>Active</Label></div>
+          </div>)}
+          <DialogFooter><Button variant="outline" onClick={() => setShowEditAutomationDialog(false)}>Cancel</Button><Button onClick={() => { toast.success('Automation updated'); setShowEditAutomationDialog(false); }}>Save Changes</Button></DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showCreateAutomationDialog} onOpenChange={setShowCreateAutomationDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader><DialogTitle className="flex items-center gap-2"><Zap className="h-5 w-5 text-amber-600" />Create Automation</DialogTitle></DialogHeader>
+          <div className="space-y-4">
+            <div><Label>Rule Name *</Label><Input placeholder="e.g., Auto-escalate urgent tickets" value={newAutomationForm.name} onChange={(e) => setNewAutomationForm({...newAutomationForm, name: e.target.value})} className="mt-1" /></div>
+            <div><Label>Trigger Condition *</Label><Input placeholder="e.g., When priority = urgent" value={newAutomationForm.trigger} onChange={(e) => setNewAutomationForm({...newAutomationForm, trigger: e.target.value})} className="mt-1" /></div>
+            <div><Label>Actions (one per line)</Label><textarea placeholder="e.g., Assign to senior agent&#10;Send Slack notification" value={newAutomationForm.actions} onChange={(e) => setNewAutomationForm({...newAutomationForm, actions: e.target.value})} className="mt-1 w-full p-3 border rounded-lg text-sm h-24" /></div>
+          </div>
+          <DialogFooter><Button variant="outline" onClick={() => setShowCreateAutomationDialog(false)}>Cancel</Button><Button onClick={() => { toast.success('Automation created'); setShowCreateAutomationDialog(false); setNewAutomationForm({ name: '', trigger: '', actions: '' }); }}>Create</Button></DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showPreviewCannedResponseDialog} onOpenChange={setShowPreviewCannedResponseDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader><DialogTitle className="flex items-center gap-2"><FileText className="h-5 w-5 text-blue-600" />Preview Response</DialogTitle></DialogHeader>
+          {selectedCannedResponse && (<div className="space-y-4">
+            <div className="p-4 bg-gray-50 rounded-lg">
+              <h4 className="font-medium mb-2">{selectedCannedResponse.title}</h4>
+              <p className="text-sm whitespace-pre-wrap">{selectedCannedResponse.content}</p>
+            </div>
+            <p className="text-sm text-gray-500">Category: {selectedCannedResponse.category} | Used {selectedCannedResponse.usageCount} times</p>
+          </div>)}
+          <DialogFooter><Button variant="outline" onClick={() => setShowPreviewCannedResponseDialog(false)}>Close</Button><Button onClick={() => { setShowPreviewCannedResponseDialog(false); setShowEditCannedResponseDialog(true); }}>Edit</Button></DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showEditCannedResponseDialog} onOpenChange={setShowEditCannedResponseDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader><DialogTitle className="flex items-center gap-2"><FileText className="h-5 w-5 text-blue-600" />Edit Response</DialogTitle></DialogHeader>
+          {selectedCannedResponse && (<div className="space-y-4">
+            <div><Label>Title</Label><Input defaultValue={selectedCannedResponse.title} className="mt-1" /></div>
+            <div><Label>Category</Label><Select defaultValue={selectedCannedResponse.category}><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="General">General</SelectItem><SelectItem value="Account">Account</SelectItem><SelectItem value="Billing">Billing</SelectItem><SelectItem value="Technical">Technical</SelectItem></SelectContent></Select></div>
+            <div><Label>Content</Label><textarea defaultValue={selectedCannedResponse.content} className="mt-1 w-full p-3 border rounded-lg text-sm h-32" /></div>
+          </div>)}
+          <DialogFooter><Button variant="outline" onClick={() => setShowEditCannedResponseDialog(false)}>Cancel</Button><Button onClick={() => { toast.success('Response updated'); setShowEditCannedResponseDialog(false); }}>Save Changes</Button></DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showAddCannedResponseDialog} onOpenChange={setShowAddCannedResponseDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader><DialogTitle className="flex items-center gap-2"><FileText className="h-5 w-5 text-blue-600" />Add Canned Response</DialogTitle></DialogHeader>
+          <div className="space-y-4">
+            <div><Label>Title *</Label><Input placeholder="Response title" value={newCannedResponseForm.title} onChange={(e) => setNewCannedResponseForm({...newCannedResponseForm, title: e.target.value})} className="mt-1" /></div>
+            <div><Label>Category</Label><Select value={newCannedResponseForm.category} onValueChange={(v) => setNewCannedResponseForm({...newCannedResponseForm, category: v})}><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="General">General</SelectItem><SelectItem value="Account">Account</SelectItem><SelectItem value="Billing">Billing</SelectItem><SelectItem value="Technical">Technical</SelectItem></SelectContent></Select></div>
+            <div><Label>Content *</Label><textarea placeholder="Response content..." value={newCannedResponseForm.content} onChange={(e) => setNewCannedResponseForm({...newCannedResponseForm, content: e.target.value})} className="mt-1 w-full p-3 border rounded-lg text-sm h-32" /></div>
+          </div>
+          <DialogFooter><Button variant="outline" onClick={() => setShowAddCannedResponseDialog(false)}>Cancel</Button><Button onClick={() => { toast.success('Response created'); setShowAddCannedResponseDialog(false); setNewCannedResponseForm({ title: '', content: '', category: 'General' }); }}>Create</Button></DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showConnectIntegrationDialog} onOpenChange={setShowConnectIntegrationDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader><DialogTitle className="flex items-center gap-2"><Link2 className="h-5 w-5 text-green-600" />Connect {selectedIntegration?.name}</DialogTitle></DialogHeader>
+          {selectedIntegration && (<div className="space-y-4">
+            <p className="text-gray-500">{selectedIntegration.description}</p>
+            <div className="p-4 bg-gray-50 rounded-lg">
+              <p className="text-sm">You will be redirected to {selectedIntegration.name} to authorize the connection.</p>
+            </div>
+          </div>)}
+          <DialogFooter><Button variant="outline" onClick={() => setShowConnectIntegrationDialog(false)}>Cancel</Button><Button onClick={() => { toast.success(`Connecting to ${selectedIntegration?.name}...`); setShowConnectIntegrationDialog(false); }} className="bg-green-600 hover:bg-green-700">Connect</Button></DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showRegenerateAPIKeyDialog} onOpenChange={setShowRegenerateAPIKeyDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader><DialogTitle className="flex items-center gap-2 text-amber-600"><AlertTriangle className="h-5 w-5" />Regenerate API Key</DialogTitle></DialogHeader>
+          <div className="space-y-4">
+            <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
+              <p className="text-sm text-amber-800">Warning: Regenerating your API key will invalidate the current key. Any applications using the old key will stop working.</p>
+            </div>
+          </div>
+          <DialogFooter><Button variant="outline" onClick={() => setShowRegenerateAPIKeyDialog(false)}>Cancel</Button><Button onClick={() => { toast.success('New API key generated'); setShowRegenerateAPIKeyDialog(false); }} variant="destructive">Regenerate Key</Button></DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showAPIDocsDialog} onOpenChange={setShowAPIDocsDialog}>
+        <DialogContent className="max-w-3xl max-h-[80vh] overflow-auto">
+          <DialogHeader><DialogTitle className="flex items-center gap-2"><FileText className="h-5 w-5 text-blue-600" />API Documentation</DialogTitle></DialogHeader>
+          <div className="space-y-4">
+            <div className="p-4 bg-gray-900 text-green-400 rounded-lg font-mono text-sm">
+              <p># Create a ticket</p>
+              <p>POST /api/v1/tickets</p>
+              <p className="mt-2"># Get ticket by ID</p>
+              <p>GET /api/v1/tickets/:id</p>
+              <p className="mt-2"># Update ticket status</p>
+              <p>PATCH /api/v1/tickets/:id</p>
+            </div>
+            <p className="text-sm text-gray-500">Full documentation available at docs.kazi.io/api</p>
+          </div>
+          <DialogFooter><Button variant="outline" onClick={() => setShowAPIDocsDialog(false)}>Close</Button><Button onClick={() => window.open('https://docs.kazi.io/api', '_blank')}>Open Full Docs</Button></DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showWebhooksDialog} onOpenChange={setShowWebhooksDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader><DialogTitle className="flex items-center gap-2"><Globe className="h-5 w-5 text-purple-600" />Webhooks</DialogTitle></DialogHeader>
+          <div className="space-y-4">
+            <div><Label>Webhook URL</Label><Input placeholder="https://your-app.com/webhook" className="mt-1" /></div>
+            <div><Label>Events to send</Label>
+              <div className="mt-2 space-y-2">{['ticket.created', 'ticket.updated', 'ticket.resolved', 'agent.assigned'].map(event => (<div key={event} className="flex items-center gap-2"><input type="checkbox" defaultChecked className="rounded" /><span className="text-sm">{event}</span></div>))}</div>
+            </div>
+          </div>
+          <DialogFooter><Button variant="outline" onClick={() => setShowWebhooksDialog(false)}>Cancel</Button><Button onClick={() => { toast.success('Webhook saved'); setShowWebhooksDialog(false); }}>Save Webhook</Button></DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showDeleteClosedTicketsDialog} onOpenChange={setShowDeleteClosedTicketsDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader><DialogTitle className="flex items-center gap-2 text-red-600"><AlertTriangle className="h-5 w-5" />Delete All Closed Tickets</DialogTitle></DialogHeader>
+          <div className="space-y-4">
+            <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-sm text-red-800">This action cannot be undone. All closed tickets and their associated data will be permanently deleted.</p>
+            </div>
+            <div><Label>Type "DELETE" to confirm</Label><Input placeholder="DELETE" className="mt-1" /></div>
+          </div>
+          <DialogFooter><Button variant="outline" onClick={() => setShowDeleteClosedTicketsDialog(false)}>Cancel</Button><Button onClick={() => { toast.success('Closed tickets deleted'); setShowDeleteClosedTicketsDialog(false); }} variant="destructive">Delete All</Button></DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showResetAllSettingsDialog} onOpenChange={setShowResetAllSettingsDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader><DialogTitle className="flex items-center gap-2 text-red-600"><AlertTriangle className="h-5 w-5" />Reset All Settings</DialogTitle></DialogHeader>
+          <div className="space-y-4">
+            <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-sm text-red-800">This will reset all support settings to their default values. Your tickets and customer data will not be affected.</p>
+            </div>
+            <div><Label>Type "RESET" to confirm</Label><Input placeholder="RESET" className="mt-1" /></div>
+          </div>
+          <DialogFooter><Button variant="outline" onClick={() => setShowResetAllSettingsDialog(false)}>Cancel</Button><Button onClick={() => { toast.success('Settings reset to defaults'); setShowResetAllSettingsDialog(false); }} variant="destructive">Reset Settings</Button></DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showResetSettingsDialog} onOpenChange={setShowResetSettingsDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader><DialogTitle className="flex items-center gap-2 text-rose-600"><RefreshCw className="h-5 w-5" />Reset Settings</DialogTitle></DialogHeader>
+          <div className="space-y-4">
+            <p className="text-gray-500">Choose which settings to reset:</p>
+            <div className="space-y-2">{['General Settings', 'Channel Settings', 'SLA Policies', 'Automation Rules', 'Integrations'].map(setting => (<div key={setting} className="flex items-center gap-2"><input type="checkbox" className="rounded" /><span>{setting}</span></div>))}</div>
+          </div>
+          <DialogFooter><Button variant="outline" onClick={() => setShowResetSettingsDialog(false)}>Cancel</Button><Button onClick={() => { toast.success('Selected settings reset'); setShowResetSettingsDialog(false); }} variant="destructive">Reset Selected</Button></DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Ticket Dialog Extras */}
+      <Dialog open={showAttachFileDialog} onOpenChange={setShowAttachFileDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader><DialogTitle className="flex items-center gap-2"><Paperclip className="h-5 w-5 text-gray-600" />Attach File</DialogTitle></DialogHeader>
+          <div className="space-y-4">
+            <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+              <Paperclip className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+              <p className="text-gray-600">Drop files here or click to browse</p>
+              <p className="text-sm text-gray-400 mt-2">Max file size: 10MB</p>
+            </div>
+          </div>
+          <DialogFooter><Button variant="outline" onClick={() => setShowAttachFileDialog(false)}>Cancel</Button><Button onClick={() => { toast.success('File attached'); setShowAttachFileDialog(false); }}>Attach</Button></DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showEmojiPickerDialog} onOpenChange={setShowEmojiPickerDialog}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader><DialogTitle className="flex items-center gap-2"><Smile className="h-5 w-5 text-amber-500" />Add Emoji</DialogTitle></DialogHeader>
+          <div className="grid grid-cols-8 gap-2 text-2xl">{['😀', '😃', '😄', '😁', '😅', '😂', '🤣', '😊', '😇', '🙂', '😉', '😌', '😍', '🥰', '😘', '👍', '👎', '❤️', '🎉', '🔥', '✨', '💯', '🙏', '👏'].map(emoji => (<button key={emoji} className="hover:bg-gray-100 p-2 rounded" onClick={() => { setMessageInput(prev => prev + emoji); setShowEmojiPickerDialog(false); }}>{emoji}</button>))}</div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showAssignAgentDialog} onOpenChange={setShowAssignAgentDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader><DialogTitle className="flex items-center gap-2"><Users className="h-5 w-5 text-purple-600" />Assign Agent</DialogTitle></DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-gray-500">Select an agent to assign this ticket to:</p>
+            {agents.map(agent => (
+              <div key={agent.id} className="p-3 border rounded-lg flex items-center gap-4 hover:bg-gray-50 cursor-pointer" onClick={() => { if(selectedTicket) handleAssignAgent(selectedTicket.id, agent.id); setShowAssignAgentDialog(false); }}>
+                <Avatar><AvatarFallback>{agent.name[0]}</AvatarFallback></Avatar>
+                <div className="flex-1"><p className="font-medium">{agent.name}</p><p className="text-sm text-gray-500">{agent.activeTickets} active tickets</p></div>
+                <div className={`h-3 w-3 rounded-full ${getAgentStatusColor(agent.status)}`}></div>
+              </div>
+            ))}
+          </div>
+          <DialogFooter><Button variant="outline" onClick={() => setShowAssignAgentDialog(false)}>Cancel</Button></DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showAddTagDialog} onOpenChange={setShowAddTagDialog}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader><DialogTitle className="flex items-center gap-2"><Tag className="h-5 w-5 text-pink-600" />Add Tag</DialogTitle></DialogHeader>
+          <div className="space-y-4">
+            <div><Label>Tag Name</Label><Input placeholder="Enter tag name" value={newTagValue} onChange={(e) => setNewTagValue(e.target.value)} className="mt-1" /></div>
+            <div><Label>Or select existing:</Label><div className="flex flex-wrap gap-2 mt-2">{['bug', 'feature', 'billing', 'urgent'].map(tag => (<Badge key={tag} variant="outline" className="cursor-pointer hover:bg-gray-100" onClick={() => { toast.success(`Tag "${tag}" added`); setShowAddTagDialog(false); }}>{tag}</Badge>))}</div></div>
+          </div>
+          <DialogFooter><Button variant="outline" onClick={() => setShowAddTagDialog(false)}>Cancel</Button><Button onClick={() => { toast.success(`Tag "${newTagValue}" added`); setNewTagValue(''); setShowAddTagDialog(false); }}>Add Tag</Button></DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Agent Dialog Extras */}
+      <Dialog open={showAgentScheduleDialog} onOpenChange={setShowAgentScheduleDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader><DialogTitle className="flex items-center gap-2"><Calendar className="h-5 w-5 text-teal-600" />Agent Schedule</DialogTitle></DialogHeader>
+          {selectedAgent && (<div className="space-y-4">
+            <div className="flex items-center gap-4 mb-4"><Avatar className="h-12 w-12"><AvatarFallback>{selectedAgent.name[0]}</AvatarFallback></Avatar><div><p className="font-medium">{selectedAgent.name}</p><p className="text-sm text-gray-500 capitalize">{selectedAgent.role}</p></div></div>
+            <div className="grid grid-cols-7 gap-2 text-center text-sm">{['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(day => <div key={day} className="font-medium text-gray-500">{day}</div>)}</div>
+            <div className="grid grid-cols-7 gap-2">{[1,2,3,4,5,6,7].map(day => <div key={day} className={`h-16 rounded flex items-center justify-center text-sm ${day <= 5 ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-400'}`}>{day <= 5 ? '9AM-5PM' : 'Off'}</div>)}</div>
+          </div>)}
+          <DialogFooter><Button variant="outline" onClick={() => setShowAgentScheduleDialog(false)}>Close</Button><Button onClick={() => toast.success('Opening schedule editor')}>Edit Schedule</Button></DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showAgentFullReportDialog} onOpenChange={setShowAgentFullReportDialog}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader><DialogTitle className="flex items-center gap-2"><BarChart3 className="h-5 w-5 text-blue-600" />Agent Full Report</DialogTitle></DialogHeader>
+          {selectedAgent && (<div className="space-y-4">
+            <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg"><Avatar className="h-12 w-12"><AvatarFallback>{selectedAgent.name[0]}</AvatarFallback></Avatar><div><p className="font-medium text-lg">{selectedAgent.name}</p><p className="text-sm text-gray-500 capitalize">{selectedAgent.role} - {selectedAgent.email}</p></div></div>
+            <div className="grid grid-cols-4 gap-4">
+              <Card><CardContent className="pt-4 text-center"><p className="text-2xl font-bold text-blue-600">{selectedAgent.activeTickets}</p><p className="text-xs text-gray-500">Active</p></CardContent></Card>
+              <Card><CardContent className="pt-4 text-center"><p className="text-2xl font-bold text-green-600">{selectedAgent.resolvedToday}</p><p className="text-xs text-gray-500">Resolved</p></CardContent></Card>
+              <Card><CardContent className="pt-4 text-center"><p className="text-2xl font-bold text-amber-600">{selectedAgent.avgResponseTime}m</p><p className="text-xs text-gray-500">Avg Response</p></CardContent></Card>
+              <Card><CardContent className="pt-4 text-center"><p className="text-2xl font-bold text-purple-600">{selectedAgent.satisfactionScore}</p><p className="text-xs text-gray-500">CSAT</p></CardContent></Card>
+            </div>
+            <div className="h-48 flex items-center justify-center bg-gray-50 rounded-lg"><BarChart3 className="h-16 w-16 text-gray-300" /></div>
+          </div>)}
+          <DialogFooter><Button variant="outline" onClick={() => setShowAgentFullReportDialog(false)}>Close</Button><Button onClick={() => { toast.success('Exporting report'); setShowAgentFullReportDialog(false); }}>Export Report</Button></DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showSendAgentMessageDialog} onOpenChange={setShowSendAgentMessageDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader><DialogTitle className="flex items-center gap-2"><MessageSquare className="h-5 w-5 text-emerald-600" />Send Message</DialogTitle></DialogHeader>
+          {selectedAgent && (<div className="space-y-4">
+            <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg"><Avatar><AvatarFallback>{selectedAgent.name[0]}</AvatarFallback></Avatar><div><p className="font-medium">{selectedAgent.name}</p><p className="text-sm text-gray-500 capitalize">{selectedAgent.status}</p></div></div>
+            <div><Label>Message</Label><textarea placeholder="Type your message..." value={agentMessageForm} onChange={(e) => setAgentMessageForm(e.target.value)} className="mt-1 w-full p-3 border rounded-lg text-sm h-32" /></div>
+          </div>)}
+          <DialogFooter><Button variant="outline" onClick={() => setShowSendAgentMessageDialog(false)}>Cancel</Button><Button onClick={() => { toast.success('Message sent'); setAgentMessageForm(''); setShowSendAgentMessageDialog(false); }} className="bg-emerald-600 hover:bg-emerald-700">Send Message</Button></DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

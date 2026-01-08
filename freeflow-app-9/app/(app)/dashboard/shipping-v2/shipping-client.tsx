@@ -783,6 +783,64 @@ export default function ShippingClient() {
   const [showCreateDialog, setShowCreateDialog] = useState(false)
   const [formState, setFormState] = useState<ShipmentFormState>(initialFormState)
 
+  // Dialog states for buttons
+  const [showBulkImportDialog, setShowBulkImportDialog] = useState(false)
+  const [showPrintLabelsDialog, setShowPrintLabelsDialog] = useState(false)
+  const [showTrackAllDialog, setShowTrackAllDialog] = useState(false)
+  const [showBatchUpdateDialog, setShowBatchUpdateDialog] = useState(false)
+  const [showSyncStatusDialog, setShowSyncStatusDialog] = useState(false)
+  const [showExceptionsDialog, setShowExceptionsDialog] = useState(false)
+  const [showFiltersDialog, setShowFiltersDialog] = useState(false)
+  const [showBatchLabelsDialog, setShowBatchLabelsDialog] = useState(false)
+  const [showPackAllDialog, setShowPackAllDialog] = useState(false)
+  const [showShipSelectedDialog, setShowShipSelectedDialog] = useState(false)
+  const [showPriorityFirstDialog, setShowPriorityFirstDialog] = useState(false)
+  const [showFindOrderDialog, setShowFindOrderDialog] = useState(false)
+  const [showOrdersExportDialog, setShowOrdersExportDialog] = useState(false)
+  const [showTrackNumberDialog, setShowTrackNumberDialog] = useState(false)
+  const [showMapViewDialog, setShowMapViewDialog] = useState(false)
+  const [showAlertsDialog, setShowAlertsDialog] = useState(false)
+  const [showTimelineDialog, setShowTimelineDialog] = useState(false)
+  const [showNotifyCustomerDialog, setShowNotifyCustomerDialog] = useState(false)
+  const [showRefreshAllDialog, setShowRefreshAllDialog] = useState(false)
+  const [showTrackingExportDialog, setShowTrackingExportDialog] = useState(false)
+  const [showTrackingExceptionsDialog, setShowTrackingExceptionsDialog] = useState(false)
+  const [showCreateLabelDialog, setShowCreateLabelDialog] = useState(false)
+  const [showBatchPrintDialog, setShowBatchPrintDialog] = useState(false)
+  const [showDownloadAllLabelsDialog, setShowDownloadAllLabelsDialog] = useState(false)
+  const [showVoidLabelDialog, setShowVoidLabelDialog] = useState(false)
+  const [showDuplicateLabelDialog, setShowDuplicateLabelDialog] = useState(false)
+  const [showFindLabelDialog, setShowFindLabelDialog] = useState(false)
+  const [showLabelHistoryDialog, setShowLabelHistoryDialog] = useState(false)
+  const [showLabelSettingsDialog, setShowLabelSettingsDialog] = useState(false)
+  const [showAddCarrierDialog, setShowAddCarrierDialog] = useState(false)
+  const [showSyncRatesDialog, setShowSyncRatesDialog] = useState(false)
+  const [showCompareRatesDialog, setShowCompareRatesDialog] = useState(false)
+  const [showConfigureCarrierDialog, setShowConfigureCarrierDialog] = useState(false)
+  const [showApiKeysDialog, setShowApiKeysDialog] = useState(false)
+  const [showInsuranceDialog, setShowInsuranceDialog] = useState(false)
+  const [showInternationalDialog, setShowInternationalDialog] = useState(false)
+  const [showCarrierAnalyticsDialog, setShowCarrierAnalyticsDialog] = useState(false)
+  const [showReportsDialog, setShowReportsDialog] = useState(false)
+  const [showTrendsDialog, setShowTrendsDialog] = useState(false)
+  const [showCostAnalysisDialog, setShowCostAnalysisDialog] = useState(false)
+  const [showCarrierStatsDialog, setShowCarrierStatsDialog] = useState(false)
+  const [showDestinationsDialog, setShowDestinationsDialog] = useState(false)
+  const [showDeliveryTimeDialog, setShowDeliveryTimeDialog] = useState(false)
+  const [showExportDataDialog, setShowExportDataDialog] = useState(false)
+  const [showDateRangeDialog, setShowDateRangeDialog] = useState(false)
+  const [showViewLabelDialog, setShowViewLabelDialog] = useState(false)
+  const [showDownloadLabelDialog, setShowDownloadLabelDialog] = useState(false)
+  const [showPrintLabelDialog, setShowPrintLabelDialog] = useState(false)
+  const [showResetSettingsDialog, setShowResetSettingsDialog] = useState(false)
+  const [showDeleteDataDialog, setShowDeleteDataDialog] = useState(false)
+  const [showExportAllDataDialog, setShowExportAllDataDialog] = useState(false)
+  const [showClearCacheDialog, setShowClearCacheDialog] = useState(false)
+  const [showRegenerateApiKeyDialog, setShowRegenerateApiKeyDialog] = useState(false)
+  const [selectedLabel, setSelectedLabel] = useState<Label | null>(null)
+  const [selectedCarrier, setSelectedCarrier] = useState<Carrier | null>(null)
+  const [trackingInput, setTrackingInput] = useState('')
+
   // Fetch shipments from Supabase
   const fetchShipments = useCallback(async () => {
     try {
@@ -1158,19 +1216,20 @@ export default function ShippingClient() {
             {/* Shipments Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
-                { icon: Plus, label: 'New Shipment', color: 'bg-blue-500' },
-                { icon: Upload, label: 'Bulk Import', color: 'bg-green-500' },
-                { icon: Printer, label: 'Print Labels', color: 'bg-purple-500' },
-                { icon: MapPin, label: 'Track All', color: 'bg-orange-500' },
-                { icon: Archive, label: 'Batch Update', color: 'bg-pink-500' },
-                { icon: Download, label: 'Export', color: 'bg-indigo-500' },
-                { icon: RefreshCw, label: 'Sync Status', color: 'bg-teal-500' },
-                { icon: AlertCircle, label: 'Exceptions', color: 'bg-red-500' }
+                { icon: Plus, label: 'New Shipment', color: 'bg-blue-500', action: () => setShowCreateDialog(true) },
+                { icon: Upload, label: 'Bulk Import', color: 'bg-green-500', action: () => setShowBulkImportDialog(true) },
+                { icon: Printer, label: 'Print Labels', color: 'bg-purple-500', action: () => setShowPrintLabelsDialog(true) },
+                { icon: MapPin, label: 'Track All', color: 'bg-orange-500', action: () => setShowTrackAllDialog(true) },
+                { icon: Archive, label: 'Batch Update', color: 'bg-pink-500', action: () => setShowBatchUpdateDialog(true) },
+                { icon: Download, label: 'Export', color: 'bg-indigo-500', action: handleExportShipments },
+                { icon: RefreshCw, label: 'Sync Status', color: 'bg-teal-500', action: () => setShowSyncStatusDialog(true) },
+                { icon: AlertCircle, label: 'Exceptions', color: 'bg-red-500', action: () => setShowExceptionsDialog(true) }
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="outline"
                   className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200"
+                  onClick={action.action}
                 >
                   <div className={`w-8 h-8 rounded-lg ${action.color} flex items-center justify-center`}>
                     <action.icon className="w-4 h-4 text-white" />
@@ -1205,7 +1264,7 @@ export default function ShippingClient() {
                   <Download className="w-4 h-4 mr-2" />
                   Export
                 </Button>
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" onClick={() => setShowFiltersDialog(true)}>
                   <Filter className="w-4 h-4 mr-2" />
                   Filters
                 </Button>
@@ -1366,19 +1425,20 @@ export default function ShippingClient() {
             {/* Orders Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
-                { icon: Printer, label: 'Batch Labels', color: 'bg-blue-500' },
-                { icon: Package, label: 'Pack All', color: 'bg-green-500' },
-                { icon: Truck, label: 'Ship Selected', color: 'bg-purple-500' },
-                { icon: Clock, label: 'Priority First', color: 'bg-orange-500' },
-                { icon: Search, label: 'Find Order', color: 'bg-pink-500' },
-                { icon: Filter, label: 'Filter', color: 'bg-indigo-500' },
-                { icon: Download, label: 'Export', color: 'bg-teal-500' },
-                { icon: RefreshCw, label: 'Refresh', color: 'bg-gray-500' }
+                { icon: Printer, label: 'Batch Labels', color: 'bg-blue-500', action: () => setShowBatchLabelsDialog(true) },
+                { icon: Package, label: 'Pack All', color: 'bg-green-500', action: () => setShowPackAllDialog(true) },
+                { icon: Truck, label: 'Ship Selected', color: 'bg-purple-500', action: () => setShowShipSelectedDialog(true) },
+                { icon: Clock, label: 'Priority First', color: 'bg-orange-500', action: () => setShowPriorityFirstDialog(true) },
+                { icon: Search, label: 'Find Order', color: 'bg-pink-500', action: () => setShowFindOrderDialog(true) },
+                { icon: Filter, label: 'Filter', color: 'bg-indigo-500', action: () => setShowFiltersDialog(true) },
+                { icon: Download, label: 'Export', color: 'bg-teal-500', action: () => setShowOrdersExportDialog(true) },
+                { icon: RefreshCw, label: 'Refresh', color: 'bg-gray-500', action: fetchShipments }
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="outline"
                   className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200"
+                  onClick={action.action}
                 >
                   <div className={`w-8 h-8 rounded-lg ${action.color} flex items-center justify-center`}>
                     <action.icon className="w-4 h-4 text-white" />
@@ -1505,19 +1565,20 @@ export default function ShippingClient() {
             {/* Tracking Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
-                { icon: Search, label: 'Track Number', color: 'bg-blue-500' },
-                { icon: Globe, label: 'Map View', color: 'bg-green-500' },
-                { icon: Bell, label: 'Alerts', color: 'bg-purple-500' },
-                { icon: Clock, label: 'Timeline', color: 'bg-orange-500' },
-                { icon: Mail, label: 'Notify Customer', color: 'bg-pink-500' },
-                { icon: RefreshCw, label: 'Refresh All', color: 'bg-indigo-500' },
-                { icon: Download, label: 'Export', color: 'bg-teal-500' },
-                { icon: AlertCircle, label: 'Exceptions', color: 'bg-red-500' }
+                { icon: Search, label: 'Track Number', color: 'bg-blue-500', action: () => setShowTrackNumberDialog(true) },
+                { icon: Globe, label: 'Map View', color: 'bg-green-500', action: () => setShowMapViewDialog(true) },
+                { icon: Bell, label: 'Alerts', color: 'bg-purple-500', action: () => setShowAlertsDialog(true) },
+                { icon: Clock, label: 'Timeline', color: 'bg-orange-500', action: () => setShowTimelineDialog(true) },
+                { icon: Mail, label: 'Notify Customer', color: 'bg-pink-500', action: () => setShowNotifyCustomerDialog(true) },
+                { icon: RefreshCw, label: 'Refresh All', color: 'bg-indigo-500', action: () => setShowRefreshAllDialog(true) },
+                { icon: Download, label: 'Export', color: 'bg-teal-500', action: () => setShowTrackingExportDialog(true) },
+                { icon: AlertCircle, label: 'Exceptions', color: 'bg-red-500', action: () => setShowTrackingExceptionsDialog(true) }
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="outline"
                   className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200"
+                  onClick={action.action}
                 >
                   <div className={`w-8 h-8 rounded-lg ${action.color} flex items-center justify-center`}>
                     <action.icon className="w-4 h-4 text-white" />
@@ -1534,8 +1595,16 @@ export default function ShippingClient() {
               </CardHeader>
               <CardContent>
                 <div className="flex gap-4">
-                  <Input placeholder="Enter tracking number..." className="flex-1" />
-                  <Button className="bg-gradient-to-r from-blue-500 to-cyan-600 text-white">
+                  <Input
+                    placeholder="Enter tracking number..."
+                    className="flex-1"
+                    value={trackingInput}
+                    onChange={(e) => setTrackingInput(e.target.value)}
+                  />
+                  <Button
+                    className="bg-gradient-to-r from-blue-500 to-cyan-600 text-white"
+                    onClick={() => setShowTrackNumberDialog(true)}
+                  >
                     <Search className="w-4 h-4 mr-2" />
                     Track
                   </Button>
@@ -1617,19 +1686,20 @@ export default function ShippingClient() {
             {/* Labels Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
-                { icon: Plus, label: 'Create Label', color: 'bg-blue-500' },
-                { icon: Printer, label: 'Batch Print', color: 'bg-green-500' },
-                { icon: Download, label: 'Download All', color: 'bg-purple-500' },
-                { icon: XCircle, label: 'Void Label', color: 'bg-red-500' },
-                { icon: Copy, label: 'Duplicate', color: 'bg-orange-500' },
-                { icon: Search, label: 'Find', color: 'bg-pink-500' },
-                { icon: History, label: 'History', color: 'bg-indigo-500' },
-                { icon: Settings, label: 'Settings', color: 'bg-gray-500' }
+                { icon: Plus, label: 'Create Label', color: 'bg-blue-500', action: () => setShowCreateLabelDialog(true) },
+                { icon: Printer, label: 'Batch Print', color: 'bg-green-500', action: () => setShowBatchPrintDialog(true) },
+                { icon: Download, label: 'Download All', color: 'bg-purple-500', action: () => setShowDownloadAllLabelsDialog(true) },
+                { icon: XCircle, label: 'Void Label', color: 'bg-red-500', action: () => setShowVoidLabelDialog(true) },
+                { icon: Copy, label: 'Duplicate', color: 'bg-orange-500', action: () => setShowDuplicateLabelDialog(true) },
+                { icon: Search, label: 'Find', color: 'bg-pink-500', action: () => setShowFindLabelDialog(true) },
+                { icon: History, label: 'History', color: 'bg-indigo-500', action: () => setShowLabelHistoryDialog(true) },
+                { icon: Settings, label: 'Settings', color: 'bg-gray-500', action: () => setShowLabelSettingsDialog(true) }
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="outline"
                   className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200"
+                  onClick={action.action}
                 >
                   <div className={`w-8 h-8 rounded-lg ${action.color} flex items-center justify-center`}>
                     <action.icon className="w-4 h-4 text-white" />
@@ -1641,7 +1711,7 @@ export default function ShippingClient() {
 
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Shipping Labels</h3>
-              <Button className="bg-gradient-to-r from-blue-500 to-cyan-600 text-white">
+              <Button className="bg-gradient-to-r from-blue-500 to-cyan-600 text-white" onClick={() => setShowBatchPrintDialog(true)}>
                 <Printer className="w-4 h-4 mr-2" />
                 Batch Print
               </Button>
@@ -1674,13 +1744,13 @@ export default function ShippingClient() {
                           <p className="text-xs text-gray-500">{formatDate(label.createdAt)}</p>
                         </div>
                         <div className="flex items-center gap-2">
-                          <Button variant="outline" size="sm">
+                          <Button variant="outline" size="sm" onClick={() => { setSelectedLabel(label); setShowViewLabelDialog(true); }}>
                             <Eye className="w-4 h-4" />
                           </Button>
-                          <Button variant="outline" size="sm">
+                          <Button variant="outline" size="sm" onClick={() => { setSelectedLabel(label); setShowDownloadLabelDialog(true); }}>
                             <Download className="w-4 h-4" />
                           </Button>
-                          <Button variant="outline" size="sm">
+                          <Button variant="outline" size="sm" onClick={() => { setSelectedLabel(label); setShowPrintLabelDialog(true); }}>
                             <Printer className="w-4 h-4" />
                           </Button>
                         </div>
@@ -1728,19 +1798,20 @@ export default function ShippingClient() {
             {/* Carriers Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
-                { icon: Plus, label: 'Add Carrier', color: 'bg-blue-500' },
-                { icon: RefreshCw, label: 'Sync Rates', color: 'bg-green-500' },
-                { icon: DollarSign, label: 'Compare Rates', color: 'bg-purple-500' },
-                { icon: Settings, label: 'Configure', color: 'bg-orange-500' },
-                { icon: Key, label: 'API Keys', color: 'bg-pink-500' },
-                { icon: Shield, label: 'Insurance', color: 'bg-indigo-500' },
-                { icon: Globe, label: 'International', color: 'bg-teal-500' },
-                { icon: BarChart3, label: 'Analytics', color: 'bg-gray-500' }
+                { icon: Plus, label: 'Add Carrier', color: 'bg-blue-500', action: () => setShowAddCarrierDialog(true) },
+                { icon: RefreshCw, label: 'Sync Rates', color: 'bg-green-500', action: () => setShowSyncRatesDialog(true) },
+                { icon: DollarSign, label: 'Compare Rates', color: 'bg-purple-500', action: () => setShowCompareRatesDialog(true) },
+                { icon: Settings, label: 'Configure', color: 'bg-orange-500', action: () => setShowConfigureCarrierDialog(true) },
+                { icon: Key, label: 'API Keys', color: 'bg-pink-500', action: () => setShowApiKeysDialog(true) },
+                { icon: Shield, label: 'Insurance', color: 'bg-indigo-500', action: () => setShowInsuranceDialog(true) },
+                { icon: Globe, label: 'International', color: 'bg-teal-500', action: () => setShowInternationalDialog(true) },
+                { icon: BarChart3, label: 'Analytics', color: 'bg-gray-500', action: () => setShowCarrierAnalyticsDialog(true) }
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="outline"
                   className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200"
+                  onClick={action.action}
                 >
                   <div className={`w-8 h-8 rounded-lg ${action.color} flex items-center justify-center`}>
                     <action.icon className="w-4 h-4 text-white" />
@@ -1752,7 +1823,7 @@ export default function ShippingClient() {
 
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Carrier Accounts</h3>
-              <Button variant="outline">
+              <Button variant="outline" onClick={() => setShowAddCarrierDialog(true)}>
                 <Plus className="w-4 h-4 mr-2" />
                 Add Carrier
               </Button>
@@ -1838,19 +1909,20 @@ export default function ShippingClient() {
             {/* Analytics Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
-                { icon: BarChart3, label: 'Reports', color: 'bg-blue-500' },
-                { icon: TrendingUp, label: 'Trends', color: 'bg-green-500' },
-                { icon: DollarSign, label: 'Cost Analysis', color: 'bg-purple-500' },
-                { icon: Truck, label: 'Carrier Stats', color: 'bg-orange-500' },
-                { icon: Globe, label: 'Destinations', color: 'bg-pink-500' },
-                { icon: Timer, label: 'Delivery Time', color: 'bg-indigo-500' },
-                { icon: Download, label: 'Export Data', color: 'bg-teal-500' },
-                { icon: Calendar, label: 'Date Range', color: 'bg-gray-500' }
+                { icon: BarChart3, label: 'Reports', color: 'bg-blue-500', action: () => setShowReportsDialog(true) },
+                { icon: TrendingUp, label: 'Trends', color: 'bg-green-500', action: () => setShowTrendsDialog(true) },
+                { icon: DollarSign, label: 'Cost Analysis', color: 'bg-purple-500', action: () => setShowCostAnalysisDialog(true) },
+                { icon: Truck, label: 'Carrier Stats', color: 'bg-orange-500', action: () => setShowCarrierStatsDialog(true) },
+                { icon: Globe, label: 'Destinations', color: 'bg-pink-500', action: () => setShowDestinationsDialog(true) },
+                { icon: Timer, label: 'Delivery Time', color: 'bg-indigo-500', action: () => setShowDeliveryTimeDialog(true) },
+                { icon: Download, label: 'Export Data', color: 'bg-teal-500', action: () => setShowExportDataDialog(true) },
+                { icon: Calendar, label: 'Date Range', color: 'bg-gray-500', action: () => setShowDateRangeDialog(true) }
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="outline"
                   className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200"
+                  onClick={action.action}
                 >
                   <div className={`w-8 h-8 rounded-lg ${action.color} flex items-center justify-center`}>
                     <action.icon className="w-4 h-4 text-white" />
@@ -2159,11 +2231,11 @@ export default function ShippingClient() {
                               <Badge className={carrier.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}>
                                 {carrier.isActive ? 'Active' : 'Inactive'}
                               </Badge>
-                              <Button variant="outline" size="sm">Configure</Button>
+                              <Button variant="outline" size="sm" onClick={() => { setSelectedCarrier(carrier); setShowConfigureCarrierDialog(true); }}>Configure</Button>
                             </div>
                           </div>
                         ))}
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => setShowAddCarrierDialog(true)}>
                           <Plus className="w-4 h-4 mr-2" />
                           Add New Carrier
                         </Button>
@@ -2298,7 +2370,7 @@ export default function ShippingClient() {
                               <Badge className={integration.status === 'connected' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}>
                                 {integration.status}
                               </Badge>
-                              <Button variant="outline" size="sm">
+                              <Button variant="outline" size="sm" onClick={() => setShowConfigureCarrierDialog(true)}>
                                 {integration.status === 'connected' ? 'Configure' : 'Connect'}
                               </Button>
                             </div>
@@ -2319,7 +2391,7 @@ export default function ShippingClient() {
                           <Label>API Key</Label>
                           <div className="flex gap-2 mt-1">
                             <Input type="password" value="sk_live_****************************" readOnly className="font-mono" />
-                            <Button variant="outline">
+                            <Button variant="outline" onClick={() => { navigator.clipboard.writeText('sk_live_****************************'); toast.success('API key copied to clipboard'); }}>
                               <Copy className="w-4 h-4" />
                             </Button>
                           </div>
@@ -2328,7 +2400,7 @@ export default function ShippingClient() {
                           <Label>Webhook URL</Label>
                           <Input defaultValue="https://api.yoursite.com/webhooks/shipping" className="mt-1 font-mono" />
                         </div>
-                        <Button variant="outline">
+                        <Button variant="outline" onClick={() => setShowRegenerateApiKeyDialog(true)}>
                           <RefreshCw className="w-4 h-4 mr-2" />
                           Regenerate API Key
                         </Button>
@@ -2471,11 +2543,11 @@ export default function ShippingClient() {
                           <Input type="number" defaultValue="365" className="mt-1" />
                         </div>
                         <div className="flex gap-2">
-                          <Button variant="outline">
+                          <Button variant="outline" onClick={() => setShowExportAllDataDialog(true)}>
                             <Download className="w-4 h-4 mr-2" />
                             Export All Data
                           </Button>
-                          <Button variant="outline" className="text-red-600 hover:text-red-700">
+                          <Button variant="outline" className="text-red-600 hover:text-red-700" onClick={() => setShowClearCacheDialog(true)}>
                             <Trash2 className="w-4 h-4 mr-2" />
                             Clear Cache
                           </Button>
@@ -2496,7 +2568,7 @@ export default function ShippingClient() {
                             <p className="font-medium text-red-700 dark:text-red-300">Reset All Settings</p>
                             <p className="text-sm text-red-600/70">Restore all settings to defaults</p>
                           </div>
-                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50">
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50" onClick={() => setShowResetSettingsDialog(true)}>
                             Reset
                           </Button>
                         </div>
@@ -2505,7 +2577,7 @@ export default function ShippingClient() {
                             <p className="font-medium text-red-700 dark:text-red-300">Delete All Data</p>
                             <p className="text-sm text-red-600/70">Permanently delete all shipping data</p>
                           </div>
-                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50">
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50" onClick={() => setShowDeleteDataDialog(true)}>
                             Delete
                           </Button>
                         </div>
@@ -2804,15 +2876,15 @@ export default function ShippingClient() {
                   )}
 
                   <div className="flex items-center gap-2 pt-4 border-t">
-                    <Button className="bg-gradient-to-r from-blue-500 to-cyan-600 text-white">
+                    <Button className="bg-gradient-to-r from-blue-500 to-cyan-600 text-white" onClick={() => { if (selectedShipment) handleTrackShipment(selectedShipment); }}>
                       <MapPin className="w-4 h-4 mr-2" />
                       Track Package
                     </Button>
-                    <Button variant="outline">
+                    <Button variant="outline" onClick={() => { if (selectedShipment) handlePrintLabel(selectedShipment); }}>
                       <Printer className="w-4 h-4 mr-2" />
                       Print Label
                     </Button>
-                    <Button variant="outline">
+                    <Button variant="outline" onClick={() => { toast.success('Downloading shipment details...'); }}>
                       <Download className="w-4 h-4 mr-2" />
                       Download
                     </Button>
@@ -2820,6 +2892,1257 @@ export default function ShippingClient() {
                 </div>
               </ScrollArea>
             )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Bulk Import Dialog */}
+        <Dialog open={showBulkImportDialog} onOpenChange={setShowBulkImportDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-green-500 to-teal-500 flex items-center justify-center text-white">
+                  <Upload className="w-5 h-5" />
+                </div>
+                Bulk Import Shipments
+              </DialogTitle>
+              <DialogDescription>Import multiple shipments from CSV or Excel file</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+                <Upload className="w-12 h-12 mx-auto text-gray-400 mb-4" />
+                <p className="text-gray-600 mb-2">Drag and drop your file here</p>
+                <p className="text-sm text-gray-400 mb-4">or</p>
+                <Button variant="outline">Browse Files</Button>
+              </div>
+              <p className="text-xs text-gray-500">Supported formats: CSV, XLSX. Maximum 1000 shipments per import.</p>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowBulkImportDialog(false)}>Cancel</Button>
+              <Button className="bg-gradient-to-r from-green-500 to-teal-500 text-white" onClick={() => { toast.success('Import started'); setShowBulkImportDialog(false); }}>Import</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Print Labels Dialog */}
+        <Dialog open={showPrintLabelsDialog} onOpenChange={setShowPrintLabelsDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center text-white">
+                  <Printer className="w-5 h-5" />
+                </div>
+                Print Shipping Labels
+              </DialogTitle>
+              <DialogDescription>Print labels for pending shipments</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <span>Label Format</span>
+                <Input defaultValue="4x6 PDF" className="w-32" />
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <span>Printer</span>
+                <Input defaultValue="Default" className="w-32" />
+              </div>
+              <p className="text-sm text-gray-500">{mockShipments.filter(s => s.status === 'pending').length} labels ready to print</p>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowPrintLabelsDialog(false)}>Cancel</Button>
+              <Button className="bg-gradient-to-r from-purple-500 to-pink-500 text-white" onClick={() => { toast.success('Labels sent to printer'); setShowPrintLabelsDialog(false); }}>Print All</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Track All Dialog */}
+        <Dialog open={showTrackAllDialog} onOpenChange={setShowTrackAllDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-orange-500 to-amber-500 flex items-center justify-center text-white">
+                  <MapPin className="w-5 h-5" />
+                </div>
+                Track All Shipments
+              </DialogTitle>
+              <DialogDescription>View tracking status for all active shipments</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4 max-h-[400px] overflow-y-auto">
+              {mockShipments.map(shipment => (
+                <div key={shipment.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div>
+                    <p className="font-medium">{shipment.trackingNumber || 'No tracking'}</p>
+                    <p className="text-sm text-gray-500">{shipment.destination.city}, {shipment.destination.state}</p>
+                  </div>
+                  <Badge className={getStatusColor(shipment.status)}>{shipment.status.replace('_', ' ')}</Badge>
+                </div>
+              ))}
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowTrackAllDialog(false)}>Close</Button>
+              <Button className="bg-gradient-to-r from-orange-500 to-amber-500 text-white" onClick={() => { toast.success('Refreshing all tracking...'); }}>Refresh All</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Batch Update Dialog */}
+        <Dialog open={showBatchUpdateDialog} onOpenChange={setShowBatchUpdateDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-pink-500 to-rose-500 flex items-center justify-center text-white">
+                  <Archive className="w-5 h-5" />
+                </div>
+                Batch Update Shipments
+              </DialogTitle>
+              <DialogDescription>Update multiple shipments at once</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label>New Status</Label>
+                <Input placeholder="Select status..." className="mt-1" />
+              </div>
+              <div>
+                <Label>Apply To</Label>
+                <Input defaultValue="All pending shipments" className="mt-1" />
+              </div>
+              <p className="text-sm text-gray-500">This will update {mockShipments.filter(s => s.status === 'pending').length} shipments</p>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowBatchUpdateDialog(false)}>Cancel</Button>
+              <Button className="bg-gradient-to-r from-pink-500 to-rose-500 text-white" onClick={() => { toast.success('Batch update applied'); setShowBatchUpdateDialog(false); }}>Update All</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Sync Status Dialog */}
+        <Dialog open={showSyncStatusDialog} onOpenChange={setShowSyncStatusDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-teal-500 to-cyan-500 flex items-center justify-center text-white">
+                  <RefreshCw className="w-5 h-5" />
+                </div>
+                Sync Shipment Status
+              </DialogTitle>
+              <DialogDescription>Sync tracking status from all carriers</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              {mockCarriers.map(carrier => (
+                <div key={carrier.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <span className="font-medium">{carrier.name}</span>
+                  <Badge className="bg-green-100 text-green-700">Synced</Badge>
+                </div>
+              ))}
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowSyncStatusDialog(false)}>Close</Button>
+              <Button className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white" onClick={() => { toast.success('Syncing with carriers...'); fetchShipments(); }}>Sync Now</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Exceptions Dialog */}
+        <Dialog open={showExceptionsDialog} onOpenChange={setShowExceptionsDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-red-500 to-rose-500 flex items-center justify-center text-white">
+                  <AlertCircle className="w-5 h-5" />
+                </div>
+                Shipping Exceptions
+              </DialogTitle>
+              <DialogDescription>View and resolve delivery issues</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
+                <p className="font-medium text-yellow-700 dark:text-yellow-300">No exceptions found</p>
+                <p className="text-sm text-yellow-600">All shipments are on track for delivery</p>
+              </div>
+            </div>
+            <div className="flex justify-end">
+              <Button variant="outline" onClick={() => setShowExceptionsDialog(false)}>Close</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Filters Dialog */}
+        <Dialog open={showFiltersDialog} onOpenChange={setShowFiltersDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-indigo-500 to-purple-500 flex items-center justify-center text-white">
+                  <Filter className="w-5 h-5" />
+                </div>
+                Filter Shipments
+              </DialogTitle>
+              <DialogDescription>Apply filters to your shipment view</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label>Status</Label>
+                <Input placeholder="All statuses" className="mt-1" />
+              </div>
+              <div>
+                <Label>Carrier</Label>
+                <Input placeholder="All carriers" className="mt-1" />
+              </div>
+              <div>
+                <Label>Date Range</Label>
+                <Input placeholder="Last 30 days" className="mt-1" />
+              </div>
+              <div>
+                <Label>Destination</Label>
+                <Input placeholder="All destinations" className="mt-1" />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowFiltersDialog(false)}>Clear</Button>
+              <Button className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white" onClick={() => { toast.success('Filters applied'); setShowFiltersDialog(false); }}>Apply Filters</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Batch Labels Dialog */}
+        <Dialog open={showBatchLabelsDialog} onOpenChange={setShowBatchLabelsDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Create Batch Labels</DialogTitle>
+              <DialogDescription>Generate labels for multiple orders</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <p className="text-sm">{pendingOrders.length} orders ready for label creation</p>
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <span>Default Carrier</span>
+                <Input defaultValue="FedEx" className="w-32" />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowBatchLabelsDialog(false)}>Cancel</Button>
+              <Button onClick={() => { toast.success('Creating batch labels...'); setShowBatchLabelsDialog(false); }}>Create Labels</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Pack All Dialog */}
+        <Dialog open={showPackAllDialog} onOpenChange={setShowPackAllDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Pack All Orders</DialogTitle>
+              <DialogDescription>Mark all orders as packed and ready to ship</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <p className="text-sm">{pendingOrders.length} orders will be marked as packed</p>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowPackAllDialog(false)}>Cancel</Button>
+              <Button onClick={() => { toast.success('All orders marked as packed'); setShowPackAllDialog(false); }}>Pack All</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Ship Selected Dialog */}
+        <Dialog open={showShipSelectedDialog} onOpenChange={setShowShipSelectedDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Ship Selected Orders</DialogTitle>
+              <DialogDescription>Create shipments for selected orders</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <p className="text-sm">{selectedOrders.length} orders selected for shipping</p>
+              {selectedOrders.length === 0 && (
+                <p className="text-yellow-600 text-sm">Please select orders from the list first</p>
+              )}
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowShipSelectedDialog(false)}>Cancel</Button>
+              <Button disabled={selectedOrders.length === 0} onClick={() => { handleBatchShip(); setShowShipSelectedDialog(false); }}>Ship Selected</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Priority First Dialog */}
+        <Dialog open={showPriorityFirstDialog} onOpenChange={setShowPriorityFirstDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Process Priority Orders</DialogTitle>
+              <DialogDescription>Sort and process priority orders first</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <p className="text-sm">Priority orders will be moved to the top of the queue</p>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowPriorityFirstDialog(false)}>Cancel</Button>
+              <Button onClick={() => { toast.success('Priority orders sorted'); setShowPriorityFirstDialog(false); }}>Sort Priority First</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Find Order Dialog */}
+        <Dialog open={showFindOrderDialog} onOpenChange={setShowFindOrderDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Find Order</DialogTitle>
+              <DialogDescription>Search for a specific order</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label>Order Number or Customer Name</Label>
+                <Input placeholder="Enter search term..." className="mt-1" />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowFindOrderDialog(false)}>Cancel</Button>
+              <Button onClick={() => { toast.success('Searching...'); setShowFindOrderDialog(false); }}>Search</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Orders Export Dialog */}
+        <Dialog open={showOrdersExportDialog} onOpenChange={setShowOrdersExportDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Export Orders</DialogTitle>
+              <DialogDescription>Export orders to CSV or Excel</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label>Format</Label>
+                <Input defaultValue="CSV" className="mt-1" />
+              </div>
+              <div>
+                <Label>Date Range</Label>
+                <Input defaultValue="Last 30 days" className="mt-1" />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowOrdersExportDialog(false)}>Cancel</Button>
+              <Button onClick={() => { handleExportShipments(); setShowOrdersExportDialog(false); }}>Export</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Track Number Dialog */}
+        <Dialog open={showTrackNumberDialog} onOpenChange={setShowTrackNumberDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Track Package</DialogTitle>
+              <DialogDescription>Enter a tracking number to view status</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label>Tracking Number</Label>
+                <Input value={trackingInput} onChange={(e) => setTrackingInput(e.target.value)} placeholder="Enter tracking number..." className="mt-1" />
+              </div>
+              {trackingInput && (
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <p className="font-medium">Status: In Transit</p>
+                  <p className="text-sm text-gray-500">Last update: Package arrived at distribution center</p>
+                </div>
+              )}
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowTrackNumberDialog(false)}>Close</Button>
+              <Button onClick={() => toast.success('Tracking refreshed')}>Track</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Map View Dialog */}
+        <Dialog open={showMapViewDialog} onOpenChange={setShowMapViewDialog}>
+          <DialogContent className="max-w-3xl">
+            <DialogHeader>
+              <DialogTitle>Shipment Map View</DialogTitle>
+              <DialogDescription>View all shipment locations on the map</DialogDescription>
+            </DialogHeader>
+            <div className="h-[400px] bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
+              <div className="text-center">
+                <Globe className="w-16 h-16 mx-auto text-gray-400 mb-4" />
+                <p className="text-gray-500">Map visualization would appear here</p>
+                <p className="text-sm text-gray-400">{mockShipments.length} active shipments</p>
+              </div>
+            </div>
+            <div className="flex justify-end">
+              <Button variant="outline" onClick={() => setShowMapViewDialog(false)}>Close</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Alerts Dialog */}
+        <Dialog open={showAlertsDialog} onOpenChange={setShowAlertsDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Delivery Alerts</DialogTitle>
+              <DialogDescription>Manage your delivery alert preferences</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <span>Email Alerts</span>
+                <Switch defaultChecked />
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <span>SMS Alerts</span>
+                <Switch />
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <span>Push Notifications</span>
+                <Switch defaultChecked />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowAlertsDialog(false)}>Cancel</Button>
+              <Button onClick={() => { toast.success('Alert preferences saved'); setShowAlertsDialog(false); }}>Save</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Timeline Dialog */}
+        <Dialog open={showTimelineDialog} onOpenChange={setShowTimelineDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Shipment Timeline</DialogTitle>
+              <DialogDescription>View chronological shipment events</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4 max-h-[400px] overflow-y-auto">
+              {mockShipments[0]?.events.map((event, idx) => (
+                <div key={idx} className="flex items-start gap-3">
+                  <div className={`w-2 h-2 rounded-full mt-2 ${idx === 0 ? 'bg-green-500' : 'bg-gray-300'}`} />
+                  <div>
+                    <p className="font-medium">{event.status}</p>
+                    <p className="text-sm text-gray-500">{event.description}</p>
+                    <p className="text-xs text-gray-400">{event.location} - {formatDate(event.timestamp)}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="flex justify-end">
+              <Button variant="outline" onClick={() => setShowTimelineDialog(false)}>Close</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Notify Customer Dialog */}
+        <Dialog open={showNotifyCustomerDialog} onOpenChange={setShowNotifyCustomerDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Notify Customer</DialogTitle>
+              <DialogDescription>Send tracking notification to customer</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label>Customer Email</Label>
+                <Input placeholder="customer@example.com" className="mt-1" />
+              </div>
+              <div>
+                <Label>Message</Label>
+                <Input placeholder="Your package is on its way..." className="mt-1" />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowNotifyCustomerDialog(false)}>Cancel</Button>
+              <Button onClick={() => { toast.success('Notification sent to customer'); setShowNotifyCustomerDialog(false); }}>Send</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Refresh All Dialog */}
+        <Dialog open={showRefreshAllDialog} onOpenChange={setShowRefreshAllDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Refresh All Tracking</DialogTitle>
+              <DialogDescription>Update tracking for all shipments</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <p className="text-sm">This will refresh tracking status for {mockShipments.length} shipments</p>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowRefreshAllDialog(false)}>Cancel</Button>
+              <Button onClick={() => { fetchShipments(); toast.success('All tracking refreshed'); setShowRefreshAllDialog(false); }}>Refresh All</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Tracking Export Dialog */}
+        <Dialog open={showTrackingExportDialog} onOpenChange={setShowTrackingExportDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Export Tracking Data</DialogTitle>
+              <DialogDescription>Export tracking information</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label>Format</Label>
+                <Input defaultValue="CSV" className="mt-1" />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowTrackingExportDialog(false)}>Cancel</Button>
+              <Button onClick={() => { handleExportShipments(); setShowTrackingExportDialog(false); }}>Export</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Tracking Exceptions Dialog */}
+        <Dialog open={showTrackingExceptionsDialog} onOpenChange={setShowTrackingExceptionsDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Tracking Exceptions</DialogTitle>
+              <DialogDescription>View packages with delivery issues</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                <p className="font-medium text-green-700 dark:text-green-300">No exceptions</p>
+                <p className="text-sm text-green-600">All packages are tracking normally</p>
+              </div>
+            </div>
+            <div className="flex justify-end">
+              <Button variant="outline" onClick={() => setShowTrackingExceptionsDialog(false)}>Close</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Create Label Dialog */}
+        <Dialog open={showCreateLabelDialog} onOpenChange={setShowCreateLabelDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Create Shipping Label</DialogTitle>
+              <DialogDescription>Generate a new shipping label</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label>Shipment</Label>
+                <Input placeholder="Select shipment..." className="mt-1" />
+              </div>
+              <div>
+                <Label>Carrier</Label>
+                <Input defaultValue="FedEx" className="mt-1" />
+              </div>
+              <div>
+                <Label>Service</Label>
+                <Input defaultValue="Ground" className="mt-1" />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowCreateLabelDialog(false)}>Cancel</Button>
+              <Button onClick={() => { toast.success('Label created'); setShowCreateLabelDialog(false); }}>Create Label</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Batch Print Dialog */}
+        <Dialog open={showBatchPrintDialog} onOpenChange={setShowBatchPrintDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Batch Print Labels</DialogTitle>
+              <DialogDescription>Print multiple labels at once</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <p className="text-sm">{mockLabels.length} labels ready to print</p>
+              <div>
+                <Label>Printer</Label>
+                <Input defaultValue="Default Printer" className="mt-1" />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowBatchPrintDialog(false)}>Cancel</Button>
+              <Button onClick={() => { toast.success('Labels sent to printer'); setShowBatchPrintDialog(false); }}>Print All</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Download All Labels Dialog */}
+        <Dialog open={showDownloadAllLabelsDialog} onOpenChange={setShowDownloadAllLabelsDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Download All Labels</DialogTitle>
+              <DialogDescription>Download all labels as a ZIP file</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <p className="text-sm">{mockLabels.length} labels will be downloaded</p>
+              <div>
+                <Label>Format</Label>
+                <Input defaultValue="PDF" className="mt-1" />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowDownloadAllLabelsDialog(false)}>Cancel</Button>
+              <Button onClick={() => { toast.success('Downloading labels...'); setShowDownloadAllLabelsDialog(false); }}>Download</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Void Label Dialog */}
+        <Dialog open={showVoidLabelDialog} onOpenChange={setShowVoidLabelDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Void Label</DialogTitle>
+              <DialogDescription>Cancel and void a shipping label</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label>Tracking Number</Label>
+                <Input placeholder="Enter tracking number..." className="mt-1" />
+              </div>
+              <p className="text-sm text-yellow-600">Voiding a label may take up to 24 hours to process with the carrier</p>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowVoidLabelDialog(false)}>Cancel</Button>
+              <Button variant="destructive" onClick={() => { toast.success('Label voided'); setShowVoidLabelDialog(false); }}>Void Label</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Duplicate Label Dialog */}
+        <Dialog open={showDuplicateLabelDialog} onOpenChange={setShowDuplicateLabelDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Duplicate Label</DialogTitle>
+              <DialogDescription>Create a copy of an existing label</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label>Source Label</Label>
+                <Input placeholder="Select label to duplicate..." className="mt-1" />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowDuplicateLabelDialog(false)}>Cancel</Button>
+              <Button onClick={() => { toast.success('Label duplicated'); setShowDuplicateLabelDialog(false); }}>Duplicate</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Find Label Dialog */}
+        <Dialog open={showFindLabelDialog} onOpenChange={setShowFindLabelDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Find Label</DialogTitle>
+              <DialogDescription>Search for a specific label</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label>Tracking Number</Label>
+                <Input placeholder="Enter tracking number..." className="mt-1" />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowFindLabelDialog(false)}>Cancel</Button>
+              <Button onClick={() => { toast.success('Searching...'); setShowFindLabelDialog(false); }}>Search</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Label History Dialog */}
+        <Dialog open={showLabelHistoryDialog} onOpenChange={setShowLabelHistoryDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Label History</DialogTitle>
+              <DialogDescription>View label creation history</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4 max-h-[400px] overflow-y-auto">
+              {mockLabels.map(label => (
+                <div key={label.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div>
+                    <p className="font-medium">{label.trackingNumber}</p>
+                    <p className="text-sm text-gray-500">{label.carrier} - {formatDate(label.createdAt)}</p>
+                  </div>
+                  <Badge>{label.status}</Badge>
+                </div>
+              ))}
+            </div>
+            <div className="flex justify-end">
+              <Button variant="outline" onClick={() => setShowLabelHistoryDialog(false)}>Close</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Label Settings Dialog */}
+        <Dialog open={showLabelSettingsDialog} onOpenChange={setShowLabelSettingsDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Label Settings</DialogTitle>
+              <DialogDescription>Configure label preferences</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label>Default Format</Label>
+                <Input defaultValue="4x6 PDF" className="mt-1" />
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <span>Include packing slip</span>
+                <Switch defaultChecked />
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <span>Auto-print on creation</span>
+                <Switch />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowLabelSettingsDialog(false)}>Cancel</Button>
+              <Button onClick={() => { toast.success('Settings saved'); setShowLabelSettingsDialog(false); }}>Save</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* View Label Dialog */}
+        <Dialog open={showViewLabelDialog} onOpenChange={setShowViewLabelDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>View Label</DialogTitle>
+              <DialogDescription>{selectedLabel?.trackingNumber}</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="h-[300px] bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
+                <div className="text-center">
+                  <FileText className="w-16 h-16 mx-auto text-gray-400 mb-4" />
+                  <p className="text-gray-500">Label Preview</p>
+                  <p className="text-sm text-gray-400">{selectedLabel?.carrier} - {selectedLabel?.service}</p>
+                </div>
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowViewLabelDialog(false)}>Close</Button>
+              <Button onClick={() => toast.success('Opening label...')}>Open Full Size</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Download Label Dialog */}
+        <Dialog open={showDownloadLabelDialog} onOpenChange={setShowDownloadLabelDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Download Label</DialogTitle>
+              <DialogDescription>Download label for {selectedLabel?.trackingNumber}</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label>Format</Label>
+                <Input defaultValue="PDF" className="mt-1" />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowDownloadLabelDialog(false)}>Cancel</Button>
+              <Button onClick={() => { toast.success('Downloading label...'); setShowDownloadLabelDialog(false); }}>Download</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Print Label Dialog */}
+        <Dialog open={showPrintLabelDialog} onOpenChange={setShowPrintLabelDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Print Label</DialogTitle>
+              <DialogDescription>Print label for {selectedLabel?.trackingNumber}</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label>Printer</Label>
+                <Input defaultValue="Default Printer" className="mt-1" />
+              </div>
+              <div>
+                <Label>Copies</Label>
+                <Input type="number" defaultValue="1" className="mt-1" />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowPrintLabelDialog(false)}>Cancel</Button>
+              <Button onClick={() => { toast.success('Label sent to printer'); setShowPrintLabelDialog(false); }}>Print</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Carrier Dialog */}
+        <Dialog open={showAddCarrierDialog} onOpenChange={setShowAddCarrierDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Add Carrier</DialogTitle>
+              <DialogDescription>Connect a new shipping carrier</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label>Carrier Name</Label>
+                <Input placeholder="Select carrier..." className="mt-1" />
+              </div>
+              <div>
+                <Label>Account Number</Label>
+                <Input placeholder="Enter account number..." className="mt-1" />
+              </div>
+              <div>
+                <Label>API Key</Label>
+                <Input type="password" placeholder="Enter API key..." className="mt-1" />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowAddCarrierDialog(false)}>Cancel</Button>
+              <Button onClick={() => { toast.success('Carrier added successfully'); setShowAddCarrierDialog(false); }}>Add Carrier</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Sync Rates Dialog */}
+        <Dialog open={showSyncRatesDialog} onOpenChange={setShowSyncRatesDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Sync Carrier Rates</DialogTitle>
+              <DialogDescription>Update rates from all carriers</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              {mockCarriers.map(carrier => (
+                <div key={carrier.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <span>{carrier.name}</span>
+                  <Badge className="bg-green-100 text-green-700">Ready</Badge>
+                </div>
+              ))}
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowSyncRatesDialog(false)}>Cancel</Button>
+              <Button onClick={() => { toast.success('Rates synced successfully'); setShowSyncRatesDialog(false); }}>Sync All</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Compare Rates Dialog */}
+        <Dialog open={showCompareRatesDialog} onOpenChange={setShowCompareRatesDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Compare Shipping Rates</DialogTitle>
+              <DialogDescription>Compare rates across carriers</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Origin ZIP</Label>
+                  <Input defaultValue="90001" className="mt-1" />
+                </div>
+                <div>
+                  <Label>Destination ZIP</Label>
+                  <Input placeholder="Enter ZIP..." className="mt-1" />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Weight (lbs)</Label>
+                  <Input type="number" defaultValue="2" className="mt-1" />
+                </div>
+                <div>
+                  <Label>Dimensions (LxWxH)</Label>
+                  <Input defaultValue="10x8x6" className="mt-1" />
+                </div>
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowCompareRatesDialog(false)}>Cancel</Button>
+              <Button onClick={() => toast.success('Fetching rates...')}>Get Rates</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Configure Carrier Dialog */}
+        <Dialog open={showConfigureCarrierDialog} onOpenChange={setShowConfigureCarrierDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Configure Carrier</DialogTitle>
+              <DialogDescription>Update carrier settings for {selectedCarrier?.name || 'carrier'}</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label>Account Number</Label>
+                <Input defaultValue={selectedCarrier?.accountNumber || ''} className="mt-1" />
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <span>Active</span>
+                <Switch defaultChecked={selectedCarrier?.isActive} />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowConfigureCarrierDialog(false)}>Cancel</Button>
+              <Button onClick={() => { toast.success('Carrier configuration saved'); setShowConfigureCarrierDialog(false); }}>Save</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* API Keys Dialog */}
+        <Dialog open={showApiKeysDialog} onOpenChange={setShowApiKeysDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>API Keys</DialogTitle>
+              <DialogDescription>Manage carrier API keys</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              {mockCarriers.map(carrier => (
+                <div key={carrier.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <span>{carrier.name}</span>
+                  <Button variant="outline" size="sm">Update Key</Button>
+                </div>
+              ))}
+            </div>
+            <div className="flex justify-end">
+              <Button variant="outline" onClick={() => setShowApiKeysDialog(false)}>Close</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Insurance Dialog */}
+        <Dialog open={showInsuranceDialog} onOpenChange={setShowInsuranceDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Shipping Insurance</DialogTitle>
+              <DialogDescription>Configure insurance settings</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <span>Default Insurance</span>
+                <Switch />
+              </div>
+              <div>
+                <Label>Minimum Value for Insurance</Label>
+                <Input type="number" defaultValue="100" className="mt-1" />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowInsuranceDialog(false)}>Cancel</Button>
+              <Button onClick={() => { toast.success('Insurance settings saved'); setShowInsuranceDialog(false); }}>Save</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* International Dialog */}
+        <Dialog open={showInternationalDialog} onOpenChange={setShowInternationalDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>International Shipping</DialogTitle>
+              <DialogDescription>Configure international shipping settings</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <span>Enable International</span>
+                <Switch defaultChecked />
+              </div>
+              <div>
+                <Label>Default Customs Declaration</Label>
+                <Input defaultValue="Commercial Invoice" className="mt-1" />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowInternationalDialog(false)}>Cancel</Button>
+              <Button onClick={() => { toast.success('International settings saved'); setShowInternationalDialog(false); }}>Save</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Carrier Analytics Dialog */}
+        <Dialog open={showCarrierAnalyticsDialog} onOpenChange={setShowCarrierAnalyticsDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Carrier Analytics</DialogTitle>
+              <DialogDescription>Performance metrics by carrier</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              {mockCarriers.map(carrier => (
+                <div key={carrier.id} className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="font-medium">{carrier.name}</span>
+                    <Badge className="bg-green-100 text-green-700">95% On-Time</Badge>
+                  </div>
+                  <div className="grid grid-cols-3 gap-4 text-sm">
+                    <div>
+                      <p className="text-gray-500">Shipments</p>
+                      <p className="font-medium">523</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-500">Avg Cost</p>
+                      <p className="font-medium">$12.50</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-500">Avg Days</p>
+                      <p className="font-medium">3.2</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="flex justify-end">
+              <Button variant="outline" onClick={() => setShowCarrierAnalyticsDialog(false)}>Close</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Reports Dialog */}
+        <Dialog open={showReportsDialog} onOpenChange={setShowReportsDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Shipping Reports</DialogTitle>
+              <DialogDescription>Generate detailed shipping reports</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label>Report Type</Label>
+                <Input defaultValue="Summary Report" className="mt-1" />
+              </div>
+              <div>
+                <Label>Date Range</Label>
+                <Input defaultValue="Last 30 days" className="mt-1" />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowReportsDialog(false)}>Cancel</Button>
+              <Button onClick={() => { toast.success('Generating report...'); setShowReportsDialog(false); }}>Generate</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Trends Dialog */}
+        <Dialog open={showTrendsDialog} onOpenChange={setShowTrendsDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Shipping Trends</DialogTitle>
+              <DialogDescription>View shipping volume and cost trends</DialogDescription>
+            </DialogHeader>
+            <div className="h-[300px] bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
+              <div className="text-center">
+                <TrendingUp className="w-16 h-16 mx-auto text-gray-400 mb-4" />
+                <p className="text-gray-500">Trend visualization would appear here</p>
+              </div>
+            </div>
+            <div className="flex justify-end">
+              <Button variant="outline" onClick={() => setShowTrendsDialog(false)}>Close</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Cost Analysis Dialog */}
+        <Dialog open={showCostAnalysisDialog} onOpenChange={setShowCostAnalysisDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Cost Analysis</DialogTitle>
+              <DialogDescription>Analyze shipping costs</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                  <p className="text-sm text-gray-500">Total Spend</p>
+                  <p className="text-2xl font-bold">{formatCurrency(mockAnalytics.totalCost)}</p>
+                </div>
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                  <p className="text-sm text-gray-500">Avg Per Shipment</p>
+                  <p className="text-2xl font-bold">{formatCurrency(mockAnalytics.avgShippingCost)}</p>
+                </div>
+              </div>
+            </div>
+            <div className="flex justify-end">
+              <Button variant="outline" onClick={() => setShowCostAnalysisDialog(false)}>Close</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Carrier Stats Dialog */}
+        <Dialog open={showCarrierStatsDialog} onOpenChange={setShowCarrierStatsDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Carrier Statistics</DialogTitle>
+              <DialogDescription>View carrier performance stats</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              {mockCarriers.map(carrier => (
+                <div key={carrier.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <span>{carrier.name}</span>
+                  <span className="text-sm text-gray-500">{carrier.services.length} services</span>
+                </div>
+              ))}
+            </div>
+            <div className="flex justify-end">
+              <Button variant="outline" onClick={() => setShowCarrierStatsDialog(false)}>Close</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Destinations Dialog */}
+        <Dialog open={showDestinationsDialog} onOpenChange={setShowDestinationsDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Top Destinations</DialogTitle>
+              <DialogDescription>Most common shipping destinations</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              {['California', 'Texas', 'New York', 'Florida', 'Illinois'].map((state, idx) => (
+                <div key={state} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <span>{state}</span>
+                  <span className="font-medium">{234 - idx * 30} shipments</span>
+                </div>
+              ))}
+            </div>
+            <div className="flex justify-end">
+              <Button variant="outline" onClick={() => setShowDestinationsDialog(false)}>Close</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delivery Time Dialog */}
+        <Dialog open={showDeliveryTimeDialog} onOpenChange={setShowDeliveryTimeDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Delivery Time Analysis</DialogTitle>
+              <DialogDescription>Average delivery times by carrier</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              {mockCarriers.map(carrier => (
+                <div key={carrier.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <span>{carrier.name}</span>
+                  <span className="font-medium">{(3 + Math.random() * 2).toFixed(1)} days avg</span>
+                </div>
+              ))}
+            </div>
+            <div className="flex justify-end">
+              <Button variant="outline" onClick={() => setShowDeliveryTimeDialog(false)}>Close</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Export Data Dialog */}
+        <Dialog open={showExportDataDialog} onOpenChange={setShowExportDataDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Export Analytics Data</DialogTitle>
+              <DialogDescription>Export analytics to CSV or Excel</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label>Format</Label>
+                <Input defaultValue="CSV" className="mt-1" />
+              </div>
+              <div>
+                <Label>Date Range</Label>
+                <Input defaultValue="Last 30 days" className="mt-1" />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowExportDataDialog(false)}>Cancel</Button>
+              <Button onClick={() => { handleExportShipments(); setShowExportDataDialog(false); }}>Export</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Date Range Dialog */}
+        <Dialog open={showDateRangeDialog} onOpenChange={setShowDateRangeDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Select Date Range</DialogTitle>
+              <DialogDescription>Filter analytics by date range</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label>Start Date</Label>
+                <Input type="date" className="mt-1" />
+              </div>
+              <div>
+                <Label>End Date</Label>
+                <Input type="date" className="mt-1" />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowDateRangeDialog(false)}>Cancel</Button>
+              <Button onClick={() => { toast.success('Date range applied'); setShowDateRangeDialog(false); }}>Apply</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Regenerate API Key Dialog */}
+        <Dialog open={showRegenerateApiKeyDialog} onOpenChange={setShowRegenerateApiKeyDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Regenerate API Key</DialogTitle>
+              <DialogDescription>This will invalidate your current API key</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
+                <p className="text-yellow-700 dark:text-yellow-300 font-medium">Warning</p>
+                <p className="text-sm text-yellow-600">Any integrations using the current key will stop working</p>
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowRegenerateApiKeyDialog(false)}>Cancel</Button>
+              <Button variant="destructive" onClick={() => { toast.success('API key regenerated'); setShowRegenerateApiKeyDialog(false); }}>Regenerate</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Export All Data Dialog */}
+        <Dialog open={showExportAllDataDialog} onOpenChange={setShowExportAllDataDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Export All Data</DialogTitle>
+              <DialogDescription>Download all shipping data</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label>Format</Label>
+                <Input defaultValue="JSON" className="mt-1" />
+              </div>
+              <p className="text-sm text-gray-500">This will export all shipments, labels, and settings</p>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowExportAllDataDialog(false)}>Cancel</Button>
+              <Button onClick={() => { handleExportShipments(); setShowExportAllDataDialog(false); }}>Export All</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Clear Cache Dialog */}
+        <Dialog open={showClearCacheDialog} onOpenChange={setShowClearCacheDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Clear Cache</DialogTitle>
+              <DialogDescription>Clear cached shipping data</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <p className="text-sm text-gray-500">This will clear all cached rates and tracking data. Fresh data will be fetched from carriers.</p>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowClearCacheDialog(false)}>Cancel</Button>
+              <Button variant="destructive" onClick={() => { toast.success('Cache cleared'); setShowClearCacheDialog(false); }}>Clear Cache</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Reset Settings Dialog */}
+        <Dialog open={showResetSettingsDialog} onOpenChange={setShowResetSettingsDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Reset All Settings</DialogTitle>
+              <DialogDescription>Restore all settings to defaults</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                <p className="text-red-700 dark:text-red-300 font-medium">Warning</p>
+                <p className="text-sm text-red-600">This action cannot be undone. All customizations will be lost.</p>
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowResetSettingsDialog(false)}>Cancel</Button>
+              <Button variant="destructive" onClick={() => { toast.success('Settings reset to defaults'); setShowResetSettingsDialog(false); }}>Reset All</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Data Dialog */}
+        <Dialog open={showDeleteDataDialog} onOpenChange={setShowDeleteDataDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Delete All Data</DialogTitle>
+              <DialogDescription>Permanently delete all shipping data</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                <p className="text-red-700 dark:text-red-300 font-medium">Danger</p>
+                <p className="text-sm text-red-600">This will permanently delete all shipments, labels, and tracking history. This action cannot be undone.</p>
+              </div>
+              <div>
+                <Label>Type "DELETE" to confirm</Label>
+                <Input placeholder="DELETE" className="mt-1" />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowDeleteDataDialog(false)}>Cancel</Button>
+              <Button variant="destructive" onClick={() => { toast.error('Data deletion requires confirmation'); }}>Delete All</Button>
+            </div>
           </DialogContent>
         </Dialog>
       </div>

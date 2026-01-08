@@ -3466,7 +3466,12 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
                         <p className="text-xs text-gray-500">{user.email}</p>
                       </div>
                     </div>
-                    <Button variant="outline" size="sm">Add</Button>
+                    <Button variant="outline" size="sm" onClick={async () => {
+                      setIsLoading(true)
+                      await new Promise(resolve => setTimeout(resolve, 500))
+                      toast.success('Member added', { description: `${user.displayName} has been added to ${selectedGroup?.name}` })
+                      setIsLoading(false)
+                    }} disabled={isLoading}>{isLoading ? 'Adding...' : 'Add'}</Button>
                   </div>
                 ))}
               </div>

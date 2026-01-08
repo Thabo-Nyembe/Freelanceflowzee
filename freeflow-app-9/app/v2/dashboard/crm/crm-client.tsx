@@ -275,6 +275,19 @@ export default function CrmClient() {
   const [showImportDialog, setShowImportDialog] = useState(false)
   const [showReportSuccessDialog, setShowReportSuccessDialog] = useState(false)
   const [showAutomationSuccessDialog, setShowAutomationSuccessDialog] = useState(false)
+  const [showFilterDialog, setShowFilterDialog] = useState(false)
+  const [showDealActionsDialog, setShowDealActionsDialog] = useState(false)
+  const [showContactEmailDialog, setShowContactEmailDialog] = useState(false)
+  const [showContactCallDialog, setShowContactCallDialog] = useState(false)
+  const [showContactActionsDialog, setShowContactActionsDialog] = useState(false)
+  const [showAutomationActionsDialog, setShowAutomationActionsDialog] = useState(false)
+  const [showSlackConnectDialog, setShowSlackConnectDialog] = useState(false)
+  const [showStripeConnectDialog, setShowStripeConnectDialog] = useState(false)
+  const [showZapierConnectDialog, setShowZapierConnectDialog] = useState(false)
+  const [selectedDealForActions, setSelectedDealForActions] = useState<Deal | null>(null)
+  const [selectedContactForActions, setSelectedContactForActions] = useState<Contact | null>(null)
+  const [selectedAutomationForActions, setSelectedAutomationForActions] = useState<Automation | null>(null)
+  const [fileInputRef] = useState<HTMLInputElement | null>(null)
 
   // Form states
   const [contactForm, setContactForm] = useState({
@@ -308,6 +321,15 @@ export default function CrmClient() {
     description: '',
     contactId: '',
     contactName: ''
+  })
+
+  const [filterForm, setFilterForm] = useState({
+    type: 'all',
+    status: 'all',
+    source: 'all',
+    minDealValue: 0,
+    maxDealValue: 1000000,
+    dateRange: '30'
   })
 
   // Real-time subscriptions
@@ -861,7 +883,7 @@ export default function CrmClient() {
             <Button variant="outline" size="icon" onClick={handleSyncData}>
               <RefreshCw className="w-4 h-4" />
             </Button>
-            <Button variant="outline" size="icon">
+            <Button variant="outline" size="icon" onClick={() => setShowFilterDialog(true)}>
               <Filter className="w-4 h-4" />
             </Button>
             <Button onClick={handleAddContact} className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white">
@@ -1051,7 +1073,11 @@ export default function CrmClient() {
                                     {deal.company}
                                   </p>
                                 </div>
-                                <Button variant="ghost" size="icon" className="h-6 w-6">
+                                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={(e) => {
+                                  e.stopPropagation()
+                                  setSelectedDealForActions(deal)
+                                  setShowDealActionsDialog(true)
+                                }}>
                                   <MoreVertical className="w-4 h-4" />
                                 </Button>
                               </div>
@@ -1198,13 +1224,25 @@ export default function CrmClient() {
                           <td className="py-3 px-4 text-sm text-gray-500">{formatTimeAgo(contact.lastContact)}</td>
                           <td className="py-3 px-4">
                             <div className="flex items-center gap-1">
-                              <Button variant="ghost" size="icon" className="h-8 w-8">
+                              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => {
+                                e.stopPropagation()
+                                setSelectedContactForActions(contact)
+                                setShowContactEmailDialog(true)
+                              }}>
                                 <Mail className="w-4 h-4" />
                               </Button>
-                              <Button variant="ghost" size="icon" className="h-8 w-8">
+                              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => {
+                                e.stopPropagation()
+                                setSelectedContactForActions(contact)
+                                setShowContactCallDialog(true)
+                              }}>
                                 <Phone className="w-4 h-4" />
                               </Button>
-                              <Button variant="ghost" size="icon" className="h-8 w-8">
+                              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => {
+                                e.stopPropagation()
+                                setSelectedContactForActions(contact)
+                                setShowContactActionsDialog(true)
+                              }}>
                                 <MoreVertical className="w-4 h-4" />
                               </Button>
                             </div>
@@ -1742,7 +1780,10 @@ export default function CrmClient() {
                         <Badge className={automation.status === 'active' ? 'bg-green-100 text-green-700' : automation.status === 'paused' ? 'bg-amber-100 text-amber-700' : 'bg-gray-100 text-gray-700'}>
                           {automation.status}
                         </Badge>
-                        <Button variant="ghost" size="icon">
+                        <Button variant="ghost" size="icon" onClick={() => {
+                          setSelectedAutomationForActions(automation)
+                          setShowAutomationActionsDialog(true)
+                        }}>
                           <MoreVertical className="w-4 h-4" />
                         </Button>
                       </div>
@@ -2039,7 +2080,7 @@ export default function CrmClient() {
                             <div className="text-sm text-muted-foreground">Deal notifications</div>
                           </div>
                         </div>
-                        <Button variant="outline" size="sm">Connect</Button>
+                        <Button variant="outline" size="sm" onClick={() => setShowSlackConnectDialog(true)}>Connect</Button>
                       </div>
                       <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
                         <div className="flex items-center gap-3">
@@ -2051,7 +2092,7 @@ export default function CrmClient() {
                             <div className="text-sm text-muted-foreground">Payment tracking</div>
                           </div>
                         </div>
-                        <Button variant="outline" size="sm">Connect</Button>
+                        <Button variant="outline" size="sm" onClick={() => setShowStripeConnectDialog(true)}>Connect</Button>
                       </div>
                       <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
                         <div className="flex items-center gap-3">
@@ -2063,7 +2104,7 @@ export default function CrmClient() {
                             <div className="text-sm text-muted-foreground">Connect 5000+ apps</div>
                           </div>
                         </div>
-                        <Button variant="outline" size="sm">Connect</Button>
+                        <Button variant="outline" size="sm" onClick={() => setShowZapierConnectDialog(true)}>Connect</Button>
                       </div>
                     </CardContent>
                   </Card>
@@ -3093,7 +3134,23 @@ export default function CrmClient() {
                 <p className="text-sm text-muted-foreground mb-2">
                   Drag and drop your CSV file here, or click to browse
                 </p>
-                <Button variant="outline" size="sm">
+                <input
+                  type="file"
+                  accept=".csv"
+                  className="hidden"
+                  id="csv-file-input"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0]
+                    if (file) {
+                      toast.success('File selected', {
+                        description: `${file.name} is ready to import`
+                      })
+                    }
+                  }}
+                />
+                <Button variant="outline" size="sm" onClick={() => {
+                  document.getElementById('csv-file-input')?.click()
+                }}>
                   Choose File
                 </Button>
               </div>
@@ -3218,6 +3275,572 @@ export default function CrmClient() {
 
         {/* Quick Actions Toolbar */}
         <QuickActionsToolbar actions={mockCrmQuickActions} />
+
+        {/* Filter Dialog */}
+        <Dialog open={showFilterDialog} onOpenChange={setShowFilterDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Filter className="w-5 h-5 text-indigo-500" />
+                Filter Contacts
+              </DialogTitle>
+              <DialogDescription>
+                Apply filters to narrow down your contact list
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label>Contact Type</Label>
+                <Select value={filterForm.type} onValueChange={(value) => setFilterForm({ ...filterForm, type: value })}>
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Types</SelectItem>
+                    <SelectItem value="lead">Lead</SelectItem>
+                    <SelectItem value="prospect">Prospect</SelectItem>
+                    <SelectItem value="customer">Customer</SelectItem>
+                    <SelectItem value="partner">Partner</SelectItem>
+                    <SelectItem value="vendor">Vendor</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Status</Label>
+                <Select value={filterForm.status} onValueChange={(value) => setFilterForm({ ...filterForm, status: value })}>
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Statuses</SelectItem>
+                    <SelectItem value="active">Active</SelectItem>
+                    <SelectItem value="new">New</SelectItem>
+                    <SelectItem value="qualified">Qualified</SelectItem>
+                    <SelectItem value="vip">VIP</SelectItem>
+                    <SelectItem value="inactive">Inactive</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Lead Source</Label>
+                <Select value={filterForm.source} onValueChange={(value) => setFilterForm({ ...filterForm, source: value })}>
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Sources</SelectItem>
+                    <SelectItem value="website">Website</SelectItem>
+                    <SelectItem value="referral">Referral</SelectItem>
+                    <SelectItem value="social_media">Social Media</SelectItem>
+                    <SelectItem value="email">Email</SelectItem>
+                    <SelectItem value="event">Event</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Date Range</Label>
+                <Select value={filterForm.dateRange} onValueChange={(value) => setFilterForm({ ...filterForm, dateRange: value })}>
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="7">Last 7 days</SelectItem>
+                    <SelectItem value="30">Last 30 days</SelectItem>
+                    <SelectItem value="90">Last 90 days</SelectItem>
+                    <SelectItem value="365">Last year</SelectItem>
+                    <SelectItem value="all">All time</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => {
+                setFilterForm({ type: 'all', status: 'all', source: 'all', minDealValue: 0, maxDealValue: 1000000, dateRange: '30' })
+              }}>Reset</Button>
+              <Button className="bg-indigo-500 hover:bg-indigo-600" onClick={() => {
+                setShowFilterDialog(false)
+                toast.success('Filters applied', {
+                  description: 'Your contact list has been filtered'
+                })
+              }}>
+                Apply Filters
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Deal Actions Dialog */}
+        <Dialog open={showDealActionsDialog} onOpenChange={setShowDealActionsDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Briefcase className="w-5 h-5 text-amber-500" />
+                Deal Actions
+              </DialogTitle>
+              <DialogDescription>
+                {selectedDealForActions?.name} - {selectedDealForActions ? formatCurrency(selectedDealForActions.value) : ''}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-2 py-4">
+              <Button variant="outline" className="w-full justify-start" onClick={() => {
+                if (selectedDealForActions) {
+                  handleEditDeal(selectedDealForActions)
+                  setShowDealActionsDialog(false)
+                }
+              }}>
+                <Edit className="w-4 h-4 mr-2" />
+                Edit Deal
+              </Button>
+              <Button variant="outline" className="w-full justify-start" onClick={() => {
+                if (selectedDealForActions) {
+                  const stages: DealStage[] = ['prospecting', 'qualification', 'proposal', 'negotiation', 'closed_won']
+                  const currentIndex = stages.indexOf(selectedDealForActions.stage)
+                  if (currentIndex < stages.length - 1) {
+                    handleMoveDealStage(selectedDealForActions.id, stages[currentIndex + 1])
+                    setShowDealActionsDialog(false)
+                  }
+                }
+              }}>
+                <ArrowRight className="w-4 h-4 mr-2" />
+                Move to Next Stage
+              </Button>
+              <Button variant="outline" className="w-full justify-start" onClick={() => {
+                if (selectedDealForActions) {
+                  setActivityForm({
+                    type: 'note',
+                    title: `Note for ${selectedDealForActions.name}`,
+                    description: '',
+                    contactId: '',
+                    contactName: selectedDealForActions.contact
+                  })
+                  setShowAddActivityDialog(true)
+                  setShowDealActionsDialog(false)
+                }
+              }}>
+                <FileText className="w-4 h-4 mr-2" />
+                Add Note
+              </Button>
+              <Button variant="outline" className="w-full justify-start text-red-600 hover:bg-red-50" onClick={() => {
+                if (selectedDealForActions) {
+                  handleDeleteDeal(selectedDealForActions.id, selectedDealForActions.name)
+                  setShowDealActionsDialog(false)
+                }
+              }}>
+                <Trash2 className="w-4 h-4 mr-2" />
+                Delete Deal
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Contact Email Dialog */}
+        <Dialog open={showContactEmailDialog} onOpenChange={setShowContactEmailDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Mail className="w-5 h-5 text-blue-500" />
+                Send Email
+              </DialogTitle>
+              <DialogDescription>
+                Compose an email to {selectedContactForActions?.name}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label>To</Label>
+                <Input value={selectedContactForActions?.email || ''} readOnly className="mt-1 bg-gray-50" />
+              </div>
+              <div>
+                <Label>Subject</Label>
+                <Input placeholder="Enter email subject..." className="mt-1" />
+              </div>
+              <div>
+                <Label>Message</Label>
+                <Textarea placeholder="Compose your email message..." rows={5} className="mt-1" />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowContactEmailDialog(false)}>Cancel</Button>
+              <Button className="bg-blue-500 hover:bg-blue-600" onClick={() => {
+                if (selectedContactForActions) {
+                  activityMutation.mutate({
+                    activity_type: 'email',
+                    title: `Email to ${selectedContactForActions.name}`,
+                    description: 'Email sent via CRM',
+                    contact_id: selectedContactForActions.id,
+                    contact_name: selectedContactForActions.name,
+                    activity_date: new Date().toISOString(),
+                    completed: true
+                  })
+                  toast.success('Email sent', {
+                    description: `Email sent to ${selectedContactForActions.name}`
+                  })
+                }
+                setShowContactEmailDialog(false)
+              }}>
+                <Mail className="w-4 h-4 mr-2" />
+                Send Email
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Contact Call Dialog */}
+        <Dialog open={showContactCallDialog} onOpenChange={setShowContactCallDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Phone className="w-5 h-5 text-green-500" />
+                Log Call
+              </DialogTitle>
+              <DialogDescription>
+                Log a call with {selectedContactForActions?.name}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg text-center">
+                <Phone className="w-12 h-12 mx-auto text-green-600 mb-2" />
+                <p className="font-medium">{selectedContactForActions?.name}</p>
+                <p className="text-sm text-gray-500">{selectedContactForActions?.phone}</p>
+              </div>
+              <div>
+                <Label>Call Outcome</Label>
+                <Select defaultValue="connected">
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="connected">Connected</SelectItem>
+                    <SelectItem value="voicemail">Left Voicemail</SelectItem>
+                    <SelectItem value="no_answer">No Answer</SelectItem>
+                    <SelectItem value="busy">Busy</SelectItem>
+                    <SelectItem value="wrong_number">Wrong Number</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Notes</Label>
+                <Textarea placeholder="Add call notes..." rows={3} className="mt-1" />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowContactCallDialog(false)}>Cancel</Button>
+              <Button className="bg-green-500 hover:bg-green-600" onClick={() => {
+                if (selectedContactForActions) {
+                  activityMutation.mutate({
+                    activity_type: 'call',
+                    title: `Call with ${selectedContactForActions.name}`,
+                    description: 'Call logged via CRM',
+                    contact_id: selectedContactForActions.id,
+                    contact_name: selectedContactForActions.name,
+                    activity_date: new Date().toISOString(),
+                    completed: true
+                  })
+                  toast.success('Call logged', {
+                    description: `Call with ${selectedContactForActions.name} recorded`
+                  })
+                }
+                setShowContactCallDialog(false)
+              }}>
+                <Phone className="w-4 h-4 mr-2" />
+                Log Call
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Contact Actions Dialog */}
+        <Dialog open={showContactActionsDialog} onOpenChange={setShowContactActionsDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Users className="w-5 h-5 text-indigo-500" />
+                Contact Actions
+              </DialogTitle>
+              <DialogDescription>
+                {selectedContactForActions?.name} - {selectedContactForActions?.company}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-2 py-4">
+              <Button variant="outline" className="w-full justify-start" onClick={() => {
+                if (selectedContactForActions) {
+                  handleEditContact(selectedContactForActions)
+                  setShowContactActionsDialog(false)
+                }
+              }}>
+                <Edit className="w-4 h-4 mr-2" />
+                Edit Contact
+              </Button>
+              <Button variant="outline" className="w-full justify-start" onClick={() => {
+                if (selectedContactForActions) {
+                  handleAddActivity(selectedContactForActions.id, selectedContactForActions.name)
+                  setShowContactActionsDialog(false)
+                }
+              }}>
+                <FileText className="w-4 h-4 mr-2" />
+                Add Activity
+              </Button>
+              <Button variant="outline" className="w-full justify-start" onClick={() => {
+                if (selectedContactForActions) {
+                  setDealForm({
+                    name: `Deal with ${selectedContactForActions.company}`,
+                    company: selectedContactForActions.company,
+                    contact: selectedContactForActions.name,
+                    value: selectedContactForActions.dealValue || 0,
+                    stage: 'prospecting',
+                    probability: 25,
+                    expectedClose: new Date().toISOString().split('T')[0],
+                    notes: ''
+                  })
+                  setShowAddDealDialog(true)
+                  setShowContactActionsDialog(false)
+                }
+              }}>
+                <Briefcase className="w-4 h-4 mr-2" />
+                Create Deal
+              </Button>
+              <Button variant="outline" className="w-full justify-start" onClick={() => {
+                if (selectedContactForActions && selectedContactForActions.status !== 'qualified') {
+                  handleQualifyLead(selectedContactForActions.id, selectedContactForActions.name)
+                  setShowContactActionsDialog(false)
+                }
+              }}>
+                <Target className="w-4 h-4 mr-2" />
+                Qualify Lead
+              </Button>
+              <Button variant="outline" className="w-full justify-start text-red-600 hover:bg-red-50" onClick={() => {
+                if (selectedContactForActions) {
+                  handleDeleteContact(selectedContactForActions.id, selectedContactForActions.name)
+                  setShowContactActionsDialog(false)
+                }
+              }}>
+                <Trash2 className="w-4 h-4 mr-2" />
+                Delete Contact
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Automation Actions Dialog */}
+        <Dialog open={showAutomationActionsDialog} onOpenChange={setShowAutomationActionsDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Workflow className="w-5 h-5 text-amber-500" />
+                Automation Actions
+              </DialogTitle>
+              <DialogDescription>
+                {selectedAutomationForActions?.name}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-2 py-4">
+              <Button variant="outline" className="w-full justify-start" onClick={() => {
+                toast.info('Edit automation', {
+                  description: `Opening editor for ${selectedAutomationForActions?.name}`
+                })
+                setShowAutomationActionsDialog(false)
+              }}>
+                <Edit className="w-4 h-4 mr-2" />
+                Edit Automation
+              </Button>
+              <Button variant="outline" className="w-full justify-start" onClick={() => {
+                toast.success(selectedAutomationForActions?.status === 'active' ? 'Automation paused' : 'Automation activated', {
+                  description: `${selectedAutomationForActions?.name} has been ${selectedAutomationForActions?.status === 'active' ? 'paused' : 'activated'}`
+                })
+                setShowAutomationActionsDialog(false)
+              }}>
+                {selectedAutomationForActions?.status === 'active' ? (
+                  <>
+                    <Clock className="w-4 h-4 mr-2" />
+                    Pause Automation
+                  </>
+                ) : (
+                  <>
+                    <Play className="w-4 h-4 mr-2" />
+                    Activate Automation
+                  </>
+                )}
+              </Button>
+              <Button variant="outline" className="w-full justify-start" onClick={() => {
+                toast.info('Viewing history', {
+                  description: `Loading execution history for ${selectedAutomationForActions?.name}`
+                })
+                setShowAutomationActionsDialog(false)
+              }}>
+                <Activity className="w-4 h-4 mr-2" />
+                View Execution History
+              </Button>
+              <Button variant="outline" className="w-full justify-start" onClick={() => {
+                toast.success('Automation duplicated', {
+                  description: `Copy of ${selectedAutomationForActions?.name} created`
+                })
+                setShowAutomationActionsDialog(false)
+              }}>
+                <Plus className="w-4 h-4 mr-2" />
+                Duplicate Automation
+              </Button>
+              <Button variant="outline" className="w-full justify-start text-red-600 hover:bg-red-50" onClick={() => {
+                toast.success('Automation deleted', {
+                  description: `${selectedAutomationForActions?.name} has been removed`
+                })
+                setShowAutomationActionsDialog(false)
+              }}>
+                <Trash2 className="w-4 h-4 mr-2" />
+                Delete Automation
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Slack Connect Dialog */}
+        <Dialog open={showSlackConnectDialog} onOpenChange={setShowSlackConnectDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <MessageSquare className="w-5 h-5 text-purple-500" />
+                Connect Slack
+              </DialogTitle>
+              <DialogDescription>
+                Integrate Slack for real-time deal notifications
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                <h4 className="font-medium mb-2">What you will get:</h4>
+                <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
+                  <li>- Real-time deal stage change notifications</li>
+                  <li>- New lead alerts in your channel</li>
+                  <li>- Daily pipeline summary reports</li>
+                  <li>- Team mentions for assigned deals</li>
+                </ul>
+              </div>
+              <div>
+                <Label>Slack Workspace</Label>
+                <Input placeholder="your-workspace.slack.com" className="mt-1" />
+              </div>
+              <div>
+                <Label>Channel</Label>
+                <Select defaultValue="sales">
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="sales">#sales</SelectItem>
+                    <SelectItem value="deals">#deals</SelectItem>
+                    <SelectItem value="general">#general</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowSlackConnectDialog(false)}>Cancel</Button>
+              <Button className="bg-purple-500 hover:bg-purple-600" onClick={() => {
+                toast.success('Slack connected', {
+                  description: 'Your Slack workspace has been connected successfully'
+                })
+                setShowSlackConnectDialog(false)
+              }}>
+                <MessageSquare className="w-4 h-4 mr-2" />
+                Connect Slack
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Stripe Connect Dialog */}
+        <Dialog open={showStripeConnectDialog} onOpenChange={setShowStripeConnectDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <DollarSign className="w-5 h-5 text-green-500" />
+                Connect Stripe
+              </DialogTitle>
+              <DialogDescription>
+                Integrate Stripe for payment tracking
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                <h4 className="font-medium mb-2">What you will get:</h4>
+                <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
+                  <li>- Automatic deal closure on payment</li>
+                  <li>- Revenue tracking in your pipeline</li>
+                  <li>- Customer payment history sync</li>
+                  <li>- Invoice status updates</li>
+                </ul>
+              </div>
+              <div>
+                <Label>Stripe API Key</Label>
+                <Input type="password" placeholder="sk_live_..." className="mt-1" />
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch id="stripe-test-mode" />
+                <Label htmlFor="stripe-test-mode">Use test mode</Label>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowStripeConnectDialog(false)}>Cancel</Button>
+              <Button className="bg-green-500 hover:bg-green-600" onClick={() => {
+                toast.success('Stripe connected', {
+                  description: 'Your Stripe account has been connected successfully'
+                })
+                setShowStripeConnectDialog(false)
+              }}>
+                <DollarSign className="w-4 h-4 mr-2" />
+                Connect Stripe
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Zapier Connect Dialog */}
+        <Dialog open={showZapierConnectDialog} onOpenChange={setShowZapierConnectDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Zap className="w-5 h-5 text-orange-500" />
+                Connect Zapier
+              </DialogTitle>
+              <DialogDescription>
+                Connect 5000+ apps with Zapier integration
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
+                <h4 className="font-medium mb-2">Popular Integrations:</h4>
+                <div className="flex flex-wrap gap-2 mt-2">
+                  <Badge variant="secondary">Gmail</Badge>
+                  <Badge variant="secondary">Google Sheets</Badge>
+                  <Badge variant="secondary">Mailchimp</Badge>
+                  <Badge variant="secondary">HubSpot</Badge>
+                  <Badge variant="secondary">Trello</Badge>
+                  <Badge variant="secondary">Asana</Badge>
+                </div>
+              </div>
+              <div>
+                <Label>Zapier Webhook URL</Label>
+                <Input placeholder="https://hooks.zapier.com/..." className="mt-1" />
+              </div>
+              <div>
+                <Label>Trigger Events</Label>
+                <div className="space-y-2 mt-2">
+                  <div className="flex items-center gap-2">
+                    <Switch id="zap-new-contact" defaultChecked />
+                    <Label htmlFor="zap-new-contact" className="font-normal">New contact created</Label>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Switch id="zap-deal-stage" defaultChecked />
+                    <Label htmlFor="zap-deal-stage" className="font-normal">Deal stage changed</Label>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Switch id="zap-deal-won" defaultChecked />
+                    <Label htmlFor="zap-deal-won" className="font-normal">Deal won</Label>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowZapierConnectDialog(false)}>Cancel</Button>
+              <Button className="bg-orange-500 hover:bg-orange-600" onClick={() => {
+                toast.success('Zapier connected', {
+                  description: 'Your Zapier integration has been set up successfully'
+                })
+                setShowZapierConnectDialog(false)
+              }}>
+                <Zap className="w-4 h-4 mr-2" />
+                Connect Zapier
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   )

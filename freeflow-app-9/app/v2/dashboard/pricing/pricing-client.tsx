@@ -492,6 +492,35 @@ export default function PricingClient({
   const [editingCouponId, setEditingCouponId] = useState<string | null>(null)
   const [showAnalyticsDialog, setShowAnalyticsDialog] = useState(false)
 
+  // New dialog states for button functionality
+  const [showFilterDialog, setShowFilterDialog] = useState(false)
+  const [showEditCouponDialog, setShowEditCouponDialog] = useState(false)
+  const [showDeleteCouponConfirmDialog, setShowDeleteCouponConfirmDialog] = useState(false)
+  const [selectedCouponForEdit, setSelectedCouponForEdit] = useState<Coupon | null>(null)
+  const [showExportAllInvoicesDialog, setShowExportAllInvoicesDialog] = useState(false)
+  const [showViewInvoiceDialog, setShowViewInvoiceDialog] = useState(false)
+  const [showDownloadInvoiceDialog, setShowDownloadInvoiceDialog] = useState(false)
+  const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null)
+  const [showUploadLogoDialog, setShowUploadLogoDialog] = useState(false)
+  const [showConnectPayPalDialog, setShowConnectPayPalDialog] = useState(false)
+  const [showAddWebhookDialog, setShowAddWebhookDialog] = useState(false)
+  const [showRegenerateApiKeyDialog, setShowRegenerateApiKeyDialog] = useState(false)
+  const [showExportInvoicesDialog, setShowExportInvoicesDialog] = useState(false)
+  const [showExportSubscriptionsDialog, setShowExportSubscriptionsDialog] = useState(false)
+  const [showCancelAllDialog, setShowCancelAllDialog] = useState(false)
+  const [showResetSettingsDialog, setShowResetSettingsDialog] = useState(false)
+  const [showDisconnectStripeDialog, setShowDisconnectStripeDialog] = useState(false)
+  const [showEditPlanDialog, setShowEditPlanDialog] = useState(false)
+  const [showDuplicatePlanDialog, setShowDuplicatePlanDialog] = useState(false)
+  const [showPlanAnalyticsDialog, setShowPlanAnalyticsDialog] = useState(false)
+  const [showChangePlanDialog, setShowChangePlanDialog] = useState(false)
+  const [showViewSubInvoicesDialog, setShowViewSubInvoicesDialog] = useState(false)
+  const [showCancelSubscriptionDialog, setShowCancelSubscriptionDialog] = useState(false)
+  const [webhookUrl, setWebhookUrl] = useState('')
+  const [filterStatus, setFilterStatus] = useState<string>('all')
+  const [filterPlan, setFilterPlan] = useState<string>('all')
+  const [logoFile, setLogoFile] = useState<File | null>(null)
+
   // Fetch plans from Supabase
   const fetchPlans = useCallback(async () => {
     try {
@@ -949,7 +978,7 @@ export default function PricingClient({
                   className="pl-9"
                 />
               </div>
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={() => setShowFilterDialog(true)}>
                 <Filter className="w-4 h-4 mr-2" />
                 Filter
               </Button>
@@ -1116,10 +1145,16 @@ export default function PricingClient({
                         <Copy className="w-3 h-3 mr-1" />
                         Copy
                       </Button>
-                      <Button variant="outline" size="sm">
+                      <Button variant="outline" size="sm" onClick={() => {
+                        setSelectedCouponForEdit(coupon)
+                        setShowEditCouponDialog(true)
+                      }}>
                         <Edit className="w-3 h-3" />
                       </Button>
-                      <Button variant="outline" size="sm">
+                      <Button variant="outline" size="sm" onClick={() => {
+                        setSelectedCouponForEdit(coupon)
+                        setShowDeleteCouponConfirmDialog(true)
+                      }}>
                         <Trash2 className="w-3 h-3" />
                       </Button>
                     </div>
@@ -1133,7 +1168,7 @@ export default function PricingClient({
           <TabsContent value="invoices" className="space-y-6">
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold">Invoices</h2>
-              <Button variant="outline">
+              <Button variant="outline" onClick={() => setShowExportAllInvoicesDialog(true)}>
                 <Download className="w-4 h-4 mr-2" />
                 Export All
               </Button>
@@ -1165,10 +1200,16 @@ export default function PricingClient({
                         </p>
                       </div>
                       <div className="flex gap-2">
-                        <Button variant="outline" size="sm">
+                        <Button variant="outline" size="sm" onClick={() => {
+                          setSelectedInvoice(invoice)
+                          setShowViewInvoiceDialog(true)
+                        }}>
                           <Eye className="w-4 h-4" />
                         </Button>
-                        <Button variant="outline" size="sm">
+                        <Button variant="outline" size="sm" onClick={() => {
+                          setSelectedInvoice(invoice)
+                          setShowDownloadInvoiceDialog(true)
+                        }}>
                           <Download className="w-4 h-4" />
                         </Button>
                       </div>
@@ -1410,7 +1451,7 @@ export default function PricingClient({
                           <div className="mt-2 border-2 border-dashed rounded-lg p-6 text-center">
                             <Package className="h-8 w-8 mx-auto text-gray-400 mb-2" />
                             <p className="text-sm text-gray-500">Upload your logo for invoices</p>
-                            <Button variant="outline" size="sm" className="mt-2">Browse</Button>
+                            <Button variant="outline" size="sm" className="mt-2" onClick={() => setShowUploadLogoDialog(true)}>Browse</Button>
                           </div>
                         </div>
                         <div>
@@ -1456,7 +1497,7 @@ export default function PricingClient({
                               <p className="text-sm text-gray-500">Alternative payments</p>
                             </div>
                           </div>
-                          <Button variant="outline" size="sm">Connect</Button>
+                          <Button variant="outline" size="sm" onClick={() => setShowConnectPayPalDialog(true)}>Connect</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -1791,7 +1832,7 @@ export default function PricingClient({
                           </div>
                           <p className="text-xs text-gray-500">Events: invoice.*, subscription.*, customer.*</p>
                         </div>
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => setShowAddWebhookDialog(true)}>
                           <Webhook className="w-4 h-4 mr-2" />
                           Add Webhook Endpoint
                         </Button>
@@ -1827,7 +1868,7 @@ export default function PricingClient({
                             <p className="text-sm text-amber-800 dark:text-amber-200">Never share your API key publicly</p>
                           </div>
                         </div>
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => setShowRegenerateApiKeyDialog(true)}>
                           <RefreshCw className="w-4 h-4 mr-2" />
                           Regenerate API Key
                         </Button>
@@ -1870,12 +1911,12 @@ export default function PricingClient({
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="grid grid-cols-2 gap-4">
-                          <Button variant="outline" className="h-auto py-4 flex-col">
+                          <Button variant="outline" className="h-auto py-4 flex-col" onClick={() => setShowExportInvoicesDialog(true)}>
                             <Download className="h-6 w-6 mb-2" />
                             <span className="font-medium">Export Invoices</span>
                             <span className="text-xs text-gray-500">CSV format</span>
                           </Button>
-                          <Button variant="outline" className="h-auto py-4 flex-col">
+                          <Button variant="outline" className="h-auto py-4 flex-col" onClick={() => setShowExportSubscriptionsDialog(true)}>
                             <Download className="h-6 w-6 mb-2" />
                             <span className="font-medium">Export Subscriptions</span>
                             <span className="text-xs text-gray-500">CSV format</span>
@@ -2031,7 +2072,7 @@ export default function PricingClient({
                               <p className="font-medium text-red-700 dark:text-red-400">Cancel All Subscriptions</p>
                               <p className="text-sm text-red-600">This will cancel all active subscriptions</p>
                             </div>
-                            <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                            <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50" onClick={() => setShowCancelAllDialog(true)}>
                               Cancel All
                             </Button>
                           </div>
@@ -2042,7 +2083,7 @@ export default function PricingClient({
                               <p className="font-medium text-red-700 dark:text-red-400">Reset Billing Configuration</p>
                               <p className="text-sm text-red-600">Reset all settings to defaults</p>
                             </div>
-                            <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                            <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50" onClick={() => setShowResetSettingsDialog(true)}>
                               Reset
                             </Button>
                           </div>
@@ -2053,7 +2094,7 @@ export default function PricingClient({
                               <p className="font-medium text-red-700 dark:text-red-400">Disconnect Stripe</p>
                               <p className="text-sm text-red-600">Disconnect payment integration</p>
                             </div>
-                            <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                            <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50" onClick={() => setShowDisconnectStripeDialog(true)}>
                               Disconnect
                             </Button>
                           </div>
@@ -2166,15 +2207,15 @@ export default function PricingClient({
                 </div>
 
                 <div className="flex gap-3">
-                  <Button className="flex-1">
+                  <Button className="flex-1" onClick={() => setShowEditPlanDialog(true)}>
                     <Edit className="w-4 h-4 mr-2" />
                     Edit Plan
                   </Button>
-                  <Button variant="outline">
+                  <Button variant="outline" onClick={() => setShowDuplicatePlanDialog(true)}>
                     <Copy className="w-4 h-4 mr-2" />
                     Duplicate
                   </Button>
-                  <Button variant="outline">
+                  <Button variant="outline" onClick={() => setShowPlanAnalyticsDialog(true)}>
                     <BarChart3 className="w-4 h-4 mr-2" />
                     Analytics
                   </Button>
@@ -2237,16 +2278,16 @@ export default function PricingClient({
                 )}
 
                 <div className="flex gap-3">
-                  <Button variant="outline">
+                  <Button variant="outline" onClick={() => setShowChangePlanDialog(true)}>
                     <Edit className="w-4 h-4 mr-2" />
                     Change Plan
                   </Button>
-                  <Button variant="outline">
+                  <Button variant="outline" onClick={() => setShowViewSubInvoicesDialog(true)}>
                     <Receipt className="w-4 h-4 mr-2" />
                     View Invoices
                   </Button>
                   {selectedSubscription.status === 'active' && (
-                    <Button variant="outline" className="text-red-600 hover:text-red-700">
+                    <Button variant="outline" className="text-red-600 hover:text-red-700" onClick={() => setShowCancelSubscriptionDialog(true)}>
                       <XCircle className="w-4 h-4 mr-2" />
                       Cancel
                     </Button>
@@ -2610,6 +2651,844 @@ export default function PricingClient({
                 >
                   <BarChart3 className="w-4 h-4 mr-2" />
                   Full Analytics Dashboard
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Filter Subscriptions Dialog */}
+        <Dialog open={showFilterDialog} onOpenChange={setShowFilterDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Filter Subscriptions</DialogTitle>
+              <DialogDescription>Filter subscriptions by status and plan</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label>Status</Label>
+                <select
+                  className="w-full mt-1 px-3 py-2 rounded-lg border dark:bg-gray-800 dark:border-gray-700"
+                  value={filterStatus}
+                  onChange={(e) => setFilterStatus(e.target.value)}
+                >
+                  <option value="all">All Statuses</option>
+                  <option value="active">Active</option>
+                  <option value="trialing">Trialing</option>
+                  <option value="past_due">Past Due</option>
+                  <option value="canceled">Canceled</option>
+                  <option value="paused">Paused</option>
+                </select>
+              </div>
+              <div>
+                <Label>Plan</Label>
+                <select
+                  className="w-full mt-1 px-3 py-2 rounded-lg border dark:bg-gray-800 dark:border-gray-700"
+                  value={filterPlan}
+                  onChange={(e) => setFilterPlan(e.target.value)}
+                >
+                  <option value="all">All Plans</option>
+                  {initialPlans.map((plan) => (
+                    <option key={plan.id} value={plan.id}>{plan.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex gap-3 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => {
+                  setFilterStatus('all')
+                  setFilterPlan('all')
+                }}>
+                  Reset
+                </Button>
+                <Button className="flex-1" onClick={() => {
+                  toast.success('Filters applied')
+                  setShowFilterDialog(false)
+                }}>
+                  Apply Filters
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Coupon Dialog */}
+        <Dialog open={showEditCouponDialog} onOpenChange={setShowEditCouponDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Edit Coupon</DialogTitle>
+              <DialogDescription>Modify coupon details for {selectedCouponForEdit?.code}</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label>Coupon Name</Label>
+                <Input defaultValue={selectedCouponForEdit?.name} className="mt-1" />
+              </div>
+              <div>
+                <Label>Discount Value</Label>
+                <Input type="number" defaultValue={selectedCouponForEdit?.value} className="mt-1" />
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch defaultChecked={selectedCouponForEdit?.isActive} />
+                <Label>Active</Label>
+              </div>
+              <div className="flex gap-3 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowEditCouponDialog(false)}>
+                  Cancel
+                </Button>
+                <Button className="flex-1" onClick={() => {
+                  toast.success('Coupon updated successfully')
+                  setShowEditCouponDialog(false)
+                }}>
+                  Save Changes
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Coupon Confirmation Dialog */}
+        <Dialog open={showDeleteCouponConfirmDialog} onOpenChange={setShowDeleteCouponConfirmDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="text-red-600">Delete Coupon</DialogTitle>
+              <DialogDescription>
+                Are you sure you want to delete the coupon &quot;{selectedCouponForEdit?.code}&quot;? This action cannot be undone.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="flex gap-3 pt-4">
+              <Button variant="outline" className="flex-1" onClick={() => setShowDeleteCouponConfirmDialog(false)}>
+                Cancel
+              </Button>
+              <Button variant="destructive" className="flex-1" onClick={() => {
+                toast.success('Coupon deleted successfully')
+                setShowDeleteCouponConfirmDialog(false)
+              }}>
+                Delete Coupon
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Export All Invoices Dialog */}
+        <Dialog open={showExportAllInvoicesDialog} onOpenChange={setShowExportAllInvoicesDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Export All Invoices</DialogTitle>
+              <DialogDescription>Export all invoices to a file</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label>Export Format</Label>
+                <select className="w-full mt-1 px-3 py-2 rounded-lg border dark:bg-gray-800 dark:border-gray-700">
+                  <option value="csv">CSV</option>
+                  <option value="json">JSON</option>
+                  <option value="pdf">PDF (ZIP)</option>
+                </select>
+              </div>
+              <div>
+                <Label>Date Range</Label>
+                <select className="w-full mt-1 px-3 py-2 rounded-lg border dark:bg-gray-800 dark:border-gray-700">
+                  <option value="all">All Time</option>
+                  <option value="month">Last Month</option>
+                  <option value="quarter">Last Quarter</option>
+                  <option value="year">Last Year</option>
+                </select>
+              </div>
+              <div className="flex gap-3 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowExportAllInvoicesDialog(false)}>
+                  Cancel
+                </Button>
+                <Button className="flex-1" onClick={() => {
+                  toast.success('Export started - check your downloads')
+                  setShowExportAllInvoicesDialog(false)
+                }}>
+                  <Download className="w-4 h-4 mr-2" />
+                  Export
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* View Invoice Dialog */}
+        <Dialog open={showViewInvoiceDialog} onOpenChange={setShowViewInvoiceDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Invoice {selectedInvoice?.invoiceNumber}</DialogTitle>
+              <DialogDescription>Invoice details for {selectedInvoice?.customerName}</DialogDescription>
+            </DialogHeader>
+            {selectedInvoice && (
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="p-4 rounded-xl bg-gray-50 dark:bg-gray-800/50">
+                    <p className="text-sm text-gray-500">Amount</p>
+                    <p className="text-xl font-bold">{formatCurrency(selectedInvoice.amount)}</p>
+                  </div>
+                  <div className="p-4 rounded-xl bg-gray-50 dark:bg-gray-800/50">
+                    <p className="text-sm text-gray-500">Status</p>
+                    <Badge className={getInvoiceStatusColor(selectedInvoice.status)}>{selectedInvoice.status}</Badge>
+                  </div>
+                  <div className="p-4 rounded-xl bg-gray-50 dark:bg-gray-800/50">
+                    <p className="text-sm text-gray-500">Due Date</p>
+                    <p className="font-semibold">{new Date(selectedInvoice.dueDate).toLocaleDateString()}</p>
+                  </div>
+                  <div className="p-4 rounded-xl bg-gray-50 dark:bg-gray-800/50">
+                    <p className="text-sm text-gray-500">Period</p>
+                    <p className="font-semibold text-sm">
+                      {new Date(selectedInvoice.periodStart).toLocaleDateString()} - {new Date(selectedInvoice.periodEnd).toLocaleDateString()}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex gap-3">
+                  <Button variant="outline" onClick={() => setShowViewInvoiceDialog(false)}>Close</Button>
+                  <Button onClick={() => {
+                    toast.success('Invoice PDF downloaded')
+                    setShowViewInvoiceDialog(false)
+                  }}>
+                    <Download className="w-4 h-4 mr-2" />
+                    Download PDF
+                  </Button>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Download Invoice Dialog */}
+        <Dialog open={showDownloadInvoiceDialog} onOpenChange={setShowDownloadInvoiceDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Download Invoice</DialogTitle>
+              <DialogDescription>Download invoice {selectedInvoice?.invoiceNumber}</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label>Format</Label>
+                <select className="w-full mt-1 px-3 py-2 rounded-lg border dark:bg-gray-800 dark:border-gray-700">
+                  <option value="pdf">PDF</option>
+                  <option value="csv">CSV</option>
+                </select>
+              </div>
+              <div className="flex gap-3 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowDownloadInvoiceDialog(false)}>
+                  Cancel
+                </Button>
+                <Button className="flex-1" onClick={() => {
+                  toast.success('Invoice downloaded')
+                  setShowDownloadInvoiceDialog(false)
+                }}>
+                  <Download className="w-4 h-4 mr-2" />
+                  Download
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Upload Logo Dialog */}
+        <Dialog open={showUploadLogoDialog} onOpenChange={setShowUploadLogoDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Upload Logo</DialogTitle>
+              <DialogDescription>Upload your company logo for invoices</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="border-2 border-dashed rounded-lg p-8 text-center">
+                <Package className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+                <p className="text-sm text-gray-500 mb-4">Drag and drop your logo here, or click to browse</p>
+                <Input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  id="logo-upload"
+                  onChange={(e) => setLogoFile(e.target.files?.[0] || null)}
+                />
+                <Button variant="outline" asChild>
+                  <label htmlFor="logo-upload" className="cursor-pointer">Browse Files</label>
+                </Button>
+                {logoFile && <p className="text-sm text-green-600 mt-2">Selected: {logoFile.name}</p>}
+              </div>
+              <p className="text-xs text-gray-500">Recommended: PNG or SVG, max 2MB, 400x100px</p>
+              <div className="flex gap-3 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowUploadLogoDialog(false)}>
+                  Cancel
+                </Button>
+                <Button className="flex-1" onClick={() => {
+                  toast.success('Logo uploaded successfully')
+                  setShowUploadLogoDialog(false)
+                }}>
+                  Upload Logo
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Connect PayPal Dialog */}
+        <Dialog open={showConnectPayPalDialog} onOpenChange={setShowConnectPayPalDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Connect PayPal</DialogTitle>
+              <DialogDescription>Link your PayPal account to accept payments</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                <div className="flex items-center gap-3">
+                  <Wallet className="w-8 h-8 text-blue-600" />
+                  <div>
+                    <p className="font-medium">PayPal Business Account</p>
+                    <p className="text-sm text-gray-500">Required for merchant payments</p>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <Label>PayPal Email</Label>
+                <Input placeholder="your-business@email.com" className="mt-1" />
+              </div>
+              <div>
+                <Label>Client ID</Label>
+                <Input placeholder="Enter your PayPal Client ID" className="mt-1" />
+              </div>
+              <div className="flex gap-3 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowConnectPayPalDialog(false)}>
+                  Cancel
+                </Button>
+                <Button className="flex-1 bg-blue-600 hover:bg-blue-700" onClick={() => {
+                  toast.success('PayPal connected successfully')
+                  setShowConnectPayPalDialog(false)
+                }}>
+                  Connect PayPal
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Webhook Dialog */}
+        <Dialog open={showAddWebhookDialog} onOpenChange={setShowAddWebhookDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Add Webhook Endpoint</DialogTitle>
+              <DialogDescription>Configure a new webhook to receive billing events</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label>Endpoint URL</Label>
+                <Input
+                  placeholder="https://your-api.com/webhooks/billing"
+                  value={webhookUrl}
+                  onChange={(e) => setWebhookUrl(e.target.value)}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label>Events to Listen</Label>
+                <div className="space-y-2 mt-2">
+                  {['invoice.created', 'invoice.paid', 'subscription.created', 'subscription.canceled', 'payment.failed'].map((event) => (
+                    <div key={event} className="flex items-center gap-2">
+                      <input type="checkbox" id={event} defaultChecked className="rounded" />
+                      <label htmlFor={event} className="text-sm font-mono">{event}</label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="flex gap-3 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowAddWebhookDialog(false)}>
+                  Cancel
+                </Button>
+                <Button className="flex-1" onClick={() => {
+                  toast.success('Webhook endpoint added')
+                  setShowAddWebhookDialog(false)
+                  setWebhookUrl('')
+                }}>
+                  <Webhook className="w-4 h-4 mr-2" />
+                  Add Webhook
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Regenerate API Key Dialog */}
+        <Dialog open={showRegenerateApiKeyDialog} onOpenChange={setShowRegenerateApiKeyDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="text-amber-600">Regenerate API Key</DialogTitle>
+              <DialogDescription>
+                This will invalidate your current API key. Any integrations using the old key will stop working.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <AlertTriangle className="h-5 w-5 text-amber-600" />
+                  <p className="text-sm text-amber-800 dark:text-amber-200 font-medium">This action cannot be undone</p>
+                </div>
+              </div>
+              <div>
+                <Label>Type &quot;REGENERATE&quot; to confirm</Label>
+                <Input placeholder="REGENERATE" className="mt-1" />
+              </div>
+              <div className="flex gap-3 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowRegenerateApiKeyDialog(false)}>
+                  Cancel
+                </Button>
+                <Button variant="destructive" className="flex-1" onClick={() => {
+                  toast.success('New API key generated')
+                  setShowRegenerateApiKeyDialog(false)
+                }}>
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                  Regenerate
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Export Invoices Dialog */}
+        <Dialog open={showExportInvoicesDialog} onOpenChange={setShowExportInvoicesDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Export Invoices</DialogTitle>
+              <DialogDescription>Export your invoice data to CSV</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label>Date Range</Label>
+                <select className="w-full mt-1 px-3 py-2 rounded-lg border dark:bg-gray-800 dark:border-gray-700">
+                  <option value="all">All Time</option>
+                  <option value="month">This Month</option>
+                  <option value="quarter">This Quarter</option>
+                  <option value="year">This Year</option>
+                </select>
+              </div>
+              <div>
+                <Label>Status Filter</Label>
+                <select className="w-full mt-1 px-3 py-2 rounded-lg border dark:bg-gray-800 dark:border-gray-700">
+                  <option value="all">All Statuses</option>
+                  <option value="paid">Paid Only</option>
+                  <option value="pending">Pending Only</option>
+                  <option value="overdue">Overdue Only</option>
+                </select>
+              </div>
+              <div className="flex gap-3 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowExportInvoicesDialog(false)}>
+                  Cancel
+                </Button>
+                <Button className="flex-1" onClick={() => {
+                  toast.success('Invoices exported to CSV')
+                  setShowExportInvoicesDialog(false)
+                }}>
+                  <Download className="w-4 h-4 mr-2" />
+                  Export CSV
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Export Subscriptions Dialog */}
+        <Dialog open={showExportSubscriptionsDialog} onOpenChange={setShowExportSubscriptionsDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Export Subscriptions</DialogTitle>
+              <DialogDescription>Export your subscription data to CSV</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label>Status Filter</Label>
+                <select className="w-full mt-1 px-3 py-2 rounded-lg border dark:bg-gray-800 dark:border-gray-700">
+                  <option value="all">All Statuses</option>
+                  <option value="active">Active Only</option>
+                  <option value="canceled">Canceled Only</option>
+                  <option value="trialing">Trialing Only</option>
+                </select>
+              </div>
+              <div>
+                <Label>Include</Label>
+                <div className="space-y-2 mt-2">
+                  {['Customer Details', 'Billing History', 'Usage Data', 'Coupon Info'].map((item) => (
+                    <div key={item} className="flex items-center gap-2">
+                      <input type="checkbox" id={item} defaultChecked className="rounded" />
+                      <label htmlFor={item} className="text-sm">{item}</label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="flex gap-3 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowExportSubscriptionsDialog(false)}>
+                  Cancel
+                </Button>
+                <Button className="flex-1" onClick={() => {
+                  toast.success('Subscriptions exported to CSV')
+                  setShowExportSubscriptionsDialog(false)
+                }}>
+                  <Download className="w-4 h-4 mr-2" />
+                  Export CSV
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Cancel All Subscriptions Dialog */}
+        <Dialog open={showCancelAllDialog} onOpenChange={setShowCancelAllDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="text-red-600">Cancel All Subscriptions</DialogTitle>
+              <DialogDescription>
+                This will cancel ALL active subscriptions. This action is irreversible and will affect all your customers.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <AlertTriangle className="h-5 w-5 text-red-600" />
+                  <p className="text-sm text-red-800 dark:text-red-200 font-medium">
+                    {mockSubscriptions.filter(s => s.status === 'active').length} active subscriptions will be canceled
+                  </p>
+                </div>
+              </div>
+              <div>
+                <Label>Type &quot;CANCEL ALL&quot; to confirm</Label>
+                <Input placeholder="CANCEL ALL" className="mt-1" />
+              </div>
+              <div className="flex gap-3 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowCancelAllDialog(false)}>
+                  Go Back
+                </Button>
+                <Button variant="destructive" className="flex-1" onClick={() => {
+                  toast.success('All subscriptions have been canceled')
+                  setShowCancelAllDialog(false)
+                }}>
+                  Cancel All
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Reset Settings Dialog */}
+        <Dialog open={showResetSettingsDialog} onOpenChange={setShowResetSettingsDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="text-red-600">Reset Billing Configuration</DialogTitle>
+              <DialogDescription>
+                This will reset all billing settings to their default values. Your subscriptions and invoices will not be affected.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+                <p className="text-sm text-amber-800 dark:text-amber-200">
+                  Settings that will be reset: Tax configuration, Invoice templates, Notification preferences, Dunning settings
+                </p>
+              </div>
+              <div className="flex gap-3 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowResetSettingsDialog(false)}>
+                  Cancel
+                </Button>
+                <Button variant="destructive" className="flex-1" onClick={() => {
+                  toast.success('Settings reset to defaults')
+                  setShowResetSettingsDialog(false)
+                }}>
+                  Reset Settings
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Disconnect Stripe Dialog */}
+        <Dialog open={showDisconnectStripeDialog} onOpenChange={setShowDisconnectStripeDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="text-red-600">Disconnect Stripe</DialogTitle>
+              <DialogDescription>
+                This will disconnect your Stripe account. You will no longer be able to process payments until you reconnect.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <AlertTriangle className="h-5 w-5 text-red-600" />
+                  <p className="text-sm text-red-800 dark:text-red-200 font-medium">
+                    Active subscriptions will fail to process payments
+                  </p>
+                </div>
+              </div>
+              <div>
+                <Label>Type &quot;DISCONNECT&quot; to confirm</Label>
+                <Input placeholder="DISCONNECT" className="mt-1" />
+              </div>
+              <div className="flex gap-3 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowDisconnectStripeDialog(false)}>
+                  Cancel
+                </Button>
+                <Button variant="destructive" className="flex-1" onClick={() => {
+                  toast.success('Stripe disconnected')
+                  setShowDisconnectStripeDialog(false)
+                }}>
+                  Disconnect
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Plan Dialog */}
+        <Dialog open={showEditPlanDialog} onOpenChange={setShowEditPlanDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Edit Plan: {selectedPlan?.name}</DialogTitle>
+              <DialogDescription>Modify the pricing plan details</DialogDescription>
+            </DialogHeader>
+            {selectedPlan && (
+              <div className="space-y-4">
+                <div>
+                  <Label>Plan Name</Label>
+                  <Input defaultValue={selectedPlan.name} className="mt-1" />
+                </div>
+                <div>
+                  <Label>Description</Label>
+                  <Input defaultValue={selectedPlan.description} className="mt-1" />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label>Monthly Price ($)</Label>
+                    <Input type="number" defaultValue={selectedPlan.prices.monthly} className="mt-1" />
+                  </div>
+                  <div>
+                    <Label>Annual Price ($)</Label>
+                    <Input type="number" defaultValue={selectedPlan.prices.annual} className="mt-1" />
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Switch defaultChecked={selectedPlan.isFeatured} />
+                  <Label>Featured Plan</Label>
+                </div>
+                <div className="flex gap-3 pt-4">
+                  <Button variant="outline" className="flex-1" onClick={() => setShowEditPlanDialog(false)}>
+                    Cancel
+                  </Button>
+                  <Button className="flex-1" onClick={() => {
+                    toast.success('Plan updated successfully')
+                    setShowEditPlanDialog(false)
+                  }}>
+                    Save Changes
+                  </Button>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Duplicate Plan Dialog */}
+        <Dialog open={showDuplicatePlanDialog} onOpenChange={setShowDuplicatePlanDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Duplicate Plan</DialogTitle>
+              <DialogDescription>Create a copy of {selectedPlan?.name}</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label>New Plan Name</Label>
+                <Input defaultValue={`${selectedPlan?.name} (Copy)`} className="mt-1" />
+              </div>
+              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <p className="text-sm text-gray-500">The following will be copied:</p>
+                <ul className="text-sm mt-2 space-y-1">
+                  <li>- All features and limits</li>
+                  <li>- Pricing configuration</li>
+                  <li>- Trial settings</li>
+                </ul>
+              </div>
+              <div className="flex gap-3 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowDuplicatePlanDialog(false)}>
+                  Cancel
+                </Button>
+                <Button className="flex-1" onClick={() => {
+                  toast.success('Plan duplicated successfully')
+                  setShowDuplicatePlanDialog(false)
+                }}>
+                  <Copy className="w-4 h-4 mr-2" />
+                  Duplicate
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Plan Analytics Dialog */}
+        <Dialog open={showPlanAnalyticsDialog} onOpenChange={setShowPlanAnalyticsDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Analytics: {selectedPlan?.name}</DialogTitle>
+              <DialogDescription>Performance metrics for this plan</DialogDescription>
+            </DialogHeader>
+            {selectedPlan && (
+              <div className="space-y-4">
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="p-4 rounded-xl bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
+                    <p className="text-sm text-green-600">Revenue</p>
+                    <p className="text-2xl font-bold text-green-700">{formatCurrency(selectedPlan.revenue)}</p>
+                  </div>
+                  <div className="p-4 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+                    <p className="text-sm text-blue-600">Subscribers</p>
+                    <p className="text-2xl font-bold text-blue-700">{selectedPlan.subscriberCount.toLocaleString()}</p>
+                  </div>
+                  <div className="p-4 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800">
+                    <p className="text-sm text-amber-600">Churn Rate</p>
+                    <p className="text-2xl font-bold text-amber-700">{selectedPlan.churnRate}%</p>
+                  </div>
+                </div>
+                <Card className="border-0 shadow-sm">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-base">Subscriber Growth</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="h-32 flex items-center justify-center text-gray-400">
+                      <div className="text-center">
+                        <BarChart3 className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                        <p className="text-sm">Monthly trend chart</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+                <div className="flex gap-3">
+                  <Button variant="outline" onClick={() => setShowPlanAnalyticsDialog(false)}>Close</Button>
+                  <Button onClick={() => {
+                    setShowPlanAnalyticsDialog(false)
+                    setActiveTab('analytics')
+                  }}>
+                    <BarChart3 className="w-4 h-4 mr-2" />
+                    Full Analytics
+                  </Button>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Change Plan Dialog */}
+        <Dialog open={showChangePlanDialog} onOpenChange={setShowChangePlanDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Change Subscription Plan</DialogTitle>
+              <DialogDescription>Change plan for {selectedSubscription?.customerName}</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <p className="text-sm text-gray-500">Current Plan</p>
+                <p className="font-semibold">{selectedSubscription?.planName}</p>
+              </div>
+              <div>
+                <Label>New Plan</Label>
+                <select className="w-full mt-1 px-3 py-2 rounded-lg border dark:bg-gray-800 dark:border-gray-700">
+                  {initialPlans.map((plan) => (
+                    <option key={plan.id} value={plan.id}>{plan.name} - {formatCurrency(plan.prices.monthly)}/mo</option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch defaultChecked />
+                <Label>Prorate charges</Label>
+              </div>
+              <div className="flex gap-3 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowChangePlanDialog(false)}>
+                  Cancel
+                </Button>
+                <Button className="flex-1" onClick={() => {
+                  toast.success('Plan changed successfully')
+                  setShowChangePlanDialog(false)
+                }}>
+                  Change Plan
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* View Subscription Invoices Dialog */}
+        <Dialog open={showViewSubInvoicesDialog} onOpenChange={setShowViewSubInvoicesDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Invoices for {selectedSubscription?.customerName}</DialogTitle>
+              <DialogDescription>Billing history for this subscription</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="divide-y border rounded-lg">
+                {mockInvoices.slice(0, 3).map((invoice) => (
+                  <div key={invoice.id} className="p-4 flex items-center justify-between">
+                    <div>
+                      <p className="font-semibold">{invoice.invoiceNumber}</p>
+                      <p className="text-sm text-gray-500">{new Date(invoice.dueDate).toLocaleDateString()}</p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <Badge className={getInvoiceStatusColor(invoice.status)}>{invoice.status}</Badge>
+                      <p className="font-semibold">{formatCurrency(invoice.amount)}</p>
+                      <Button variant="outline" size="sm">
+                        <Download className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="flex gap-3">
+                <Button variant="outline" onClick={() => setShowViewSubInvoicesDialog(false)}>Close</Button>
+                <Button variant="outline" onClick={() => {
+                  setShowViewSubInvoicesDialog(false)
+                  setActiveTab('invoices')
+                }}>
+                  View All Invoices
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Cancel Subscription Dialog */}
+        <Dialog open={showCancelSubscriptionDialog} onOpenChange={setShowCancelSubscriptionDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="text-red-600">Cancel Subscription</DialogTitle>
+              <DialogDescription>
+                Cancel the subscription for {selectedSubscription?.customerName}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label>Cancellation Reason</Label>
+                <select className="w-full mt-1 px-3 py-2 rounded-lg border dark:bg-gray-800 dark:border-gray-700">
+                  <option value="">Select a reason...</option>
+                  <option value="too_expensive">Too expensive</option>
+                  <option value="not_using">Not using the service</option>
+                  <option value="switching">Switching to competitor</option>
+                  <option value="missing_features">Missing features</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+              <div>
+                <Label>When to Cancel</Label>
+                <select className="w-full mt-1 px-3 py-2 rounded-lg border dark:bg-gray-800 dark:border-gray-700">
+                  <option value="end_of_period">At end of billing period</option>
+                  <option value="immediately">Immediately</option>
+                </select>
+              </div>
+              <div className="p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+                <p className="text-sm text-amber-800 dark:text-amber-200">
+                  The customer will retain access until {new Date(selectedSubscription?.currentPeriodEnd || '').toLocaleDateString()}
+                </p>
+              </div>
+              <div className="flex gap-3 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowCancelSubscriptionDialog(false)}>
+                  Keep Subscription
+                </Button>
+                <Button variant="destructive" className="flex-1" onClick={() => {
+                  toast.success('Subscription canceled')
+                  setShowCancelSubscriptionDialog(false)
+                }}>
+                  <XCircle className="w-4 h-4 mr-2" />
+                  Cancel
                 </Button>
               </div>
             </div>

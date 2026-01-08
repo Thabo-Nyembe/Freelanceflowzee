@@ -653,6 +653,52 @@ export default function InvoicingClient() {
   const [showSendRemindersDialog, setShowSendRemindersDialog] = useState(false)
   const [showExportReportDialog, setShowExportReportDialog] = useState(false)
 
+  // Additional Dialog States
+  const [showExportInvoicesDialog, setShowExportInvoicesDialog] = useState(false)
+  const [showRecurringDialog, setShowRecurringDialog] = useState(false)
+  const [showEstimatesDialog, setShowEstimatesDialog] = useState(false)
+  const [showOverdueDialog, setShowOverdueDialog] = useState(false)
+  const [showAddClientDialog, setShowAddClientDialog] = useState(false)
+  const [showEmailAllDialog, setShowEmailAllDialog] = useState(false)
+  const [showStatementsDialog, setShowStatementsDialog] = useState(false)
+  const [showCategoriesDialog, setShowCategoriesDialog] = useState(false)
+  const [showImportDialog, setShowImportDialog] = useState(false)
+  const [showExportClientsDialog, setShowExportClientsDialog] = useState(false)
+  const [showPaymentMethodsDialog, setShowPaymentMethodsDialog] = useState(false)
+  const [showRefundsDialog, setShowRefundsDialog] = useState(false)
+  const [showBankDialog, setShowBankDialog] = useState(false)
+  const [showReceiptsDialog, setShowReceiptsDialog] = useState(false)
+  const [showScheduleDialog, setShowScheduleDialog] = useState(false)
+  const [showExportTransactionsDialog, setShowExportTransactionsDialog] = useState(false)
+  const [showAddExpenseDialog, setShowAddExpenseDialog] = useState(false)
+  const [showExpenseReceiptsDialog, setShowExpenseReceiptsDialog] = useState(false)
+  const [showExpenseCategoriesDialog, setShowExpenseCategoriesDialog] = useState(false)
+  const [showVendorsDialog, setShowVendorsDialog] = useState(false)
+  const [showApproveExpensesDialog, setShowApproveExpensesDialog] = useState(false)
+  const [showRecurringExpensesDialog, setShowRecurringExpensesDialog] = useState(false)
+  const [showExportExpensesDialog, setShowExportExpensesDialog] = useState(false)
+  const [showExpenseReportsDialog, setShowExpenseReportsDialog] = useState(false)
+  const [showRevenueReportDialog, setShowRevenueReportDialog] = useState(false)
+  const [showTrendsDialog, setShowTrendsDialog] = useState(false)
+  const [showClientReportsDialog, setShowClientReportsDialog] = useState(false)
+  const [showExpenseReportDialog, setShowExpenseReportDialog] = useState(false)
+  const [showProfitReportDialog, setShowProfitReportDialog] = useState(false)
+  const [showScheduleReportDialog, setShowScheduleReportDialog] = useState(false)
+  const [showExportReportsDialog, setShowExportReportsDialog] = useState(false)
+  const [showPrintReportDialog, setShowPrintReportDialog] = useState(false)
+  const [showExportConfigDialog, setShowExportConfigDialog] = useState(false)
+  const [showPaymentGatewayDialog, setShowPaymentGatewayDialog] = useState(false)
+  const [showRegenerateApiKeyDialog, setShowRegenerateApiKeyDialog] = useState(false)
+  const [showDeleteDraftsDialog, setShowDeleteDraftsDialog] = useState(false)
+  const [showResetSettingsDialog, setShowResetSettingsDialog] = useState(false)
+  const [showCreateClientInvoiceDialog, setShowCreateClientInvoiceDialog] = useState(false)
+  const [showEditClientDialog, setShowEditClientDialog] = useState(false)
+  const [showViewClientInvoicesDialog, setShowViewClientInvoicesDialog] = useState(false)
+  const [showEditInvoiceDialog, setShowEditInvoiceDialog] = useState(false)
+  const [showInvoiceOptionsDialog, setShowInvoiceOptionsDialog] = useState(false)
+  const [showProcessRecurringDialog, setShowProcessRecurringDialog] = useState(false)
+  const [selectedGateway, setSelectedGateway] = useState<string | null>(null)
+
   // Quick Actions with dialog openers
   const invoicingQuickActions = [
     { id: '1', label: 'New Invoice', icon: 'FileText', shortcut: 'N', action: () => setShowNewInvoiceDialog(true) },
@@ -775,7 +821,7 @@ export default function InvoicingClient() {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <Button variant="outline" className="border-white/30 text-white hover:bg-white/10">
+              <Button variant="outline" className="border-white/30 text-white hover:bg-white/10" onClick={() => setShowExportInvoicesDialog(true)}>
                 <Download className="w-4 h-4 mr-2" />
                 Export
               </Button>
@@ -937,19 +983,20 @@ export default function InvoicingClient() {
             {/* Invoices Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Plus, label: 'New Invoice', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
-                { icon: Send, label: 'Send All', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
-                { icon: Repeat, label: 'Recurring', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
-                { icon: Receipt, label: 'Estimates', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
-                { icon: CreditCard, label: 'Payments', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
-                { icon: AlertTriangle, label: 'Overdue', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
-                { icon: Download, label: 'Export', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
-                { icon: BarChart3, label: 'Reports', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400' },
+                { icon: Plus, label: 'New Invoice', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: () => setShowNewInvoiceDialog(true) },
+                { icon: Send, label: 'Send All', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', action: () => setShowSendRemindersDialog(true) },
+                { icon: Repeat, label: 'Recurring', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => setShowRecurringDialog(true) },
+                { icon: Receipt, label: 'Estimates', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', action: () => setShowEstimatesDialog(true) },
+                { icon: CreditCard, label: 'Payments', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', action: () => setShowRecordPaymentDialog(true) },
+                { icon: AlertTriangle, label: 'Overdue', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', action: () => setShowOverdueDialog(true) },
+                { icon: Download, label: 'Export', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', action: () => setShowExportInvoicesDialog(true) },
+                { icon: BarChart3, label: 'Reports', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400', action: () => setActiveTab('reports') },
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={action.action}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1046,13 +1093,13 @@ export default function InvoicingClient() {
                           )}
                         </div>
                         <div className="flex items-center gap-2">
-                          <Button variant="ghost" size="sm">
+                          <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); handleViewInvoice(invoice); }}>
                             <Eye className="w-4 h-4" />
                           </Button>
-                          <Button variant="ghost" size="sm">
+                          <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); setSelectedInvoice(invoice); setShowEditInvoiceDialog(true); }}>
                             <Edit className="w-4 h-4" />
                           </Button>
-                          <Button variant="ghost" size="sm">
+                          <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); setSelectedInvoice(invoice); setShowInvoiceOptionsDialog(true); }}>
                             <MoreHorizontal className="w-4 h-4" />
                           </Button>
                         </div>
@@ -1100,19 +1147,20 @@ export default function InvoicingClient() {
             {/* Clients Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Plus, label: 'Add Client', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
-                { icon: Building2, label: 'Companies', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' },
-                { icon: Mail, label: 'Email All', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
-                { icon: FileText, label: 'Statements', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
-                { icon: Tag, label: 'Categories', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
-                { icon: Globe, label: 'Import', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
-                { icon: Download, label: 'Export', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
-                { icon: BarChart3, label: 'Reports', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400' },
+                { icon: Plus, label: 'Add Client', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', action: () => setShowAddClientDialog(true) },
+                { icon: Building2, label: 'Companies', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', action: () => setShowClientReportsDialog(true) },
+                { icon: Mail, label: 'Email All', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', action: () => setShowEmailAllDialog(true) },
+                { icon: FileText, label: 'Statements', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: () => setShowStatementsDialog(true) },
+                { icon: Tag, label: 'Categories', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => setShowCategoriesDialog(true) },
+                { icon: Globe, label: 'Import', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', action: () => setShowImportDialog(true) },
+                { icon: Download, label: 'Export', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', action: () => setShowExportClientsDialog(true) },
+                { icon: BarChart3, label: 'Reports', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400', action: () => setActiveTab('reports') },
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={action.action}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1210,19 +1258,20 @@ export default function InvoicingClient() {
             {/* Payments Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Plus, label: 'Record', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
-                { icon: CreditCard, label: 'Methods', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400' },
-                { icon: RefreshCw, label: 'Refunds', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
-                { icon: Banknote, label: 'Bank', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
-                { icon: Receipt, label: 'Receipts', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
-                { icon: Calendar, label: 'Schedule', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
-                { icon: Download, label: 'Export', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
-                { icon: BarChart3, label: 'Reports', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400' },
+                { icon: Plus, label: 'Record', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', action: () => setShowRecordPaymentDialog(true) },
+                { icon: CreditCard, label: 'Methods', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', action: () => setShowPaymentMethodsDialog(true) },
+                { icon: RefreshCw, label: 'Refunds', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', action: () => setShowRefundsDialog(true) },
+                { icon: Banknote, label: 'Bank', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', action: () => setShowBankDialog(true) },
+                { icon: Receipt, label: 'Receipts', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: () => setShowReceiptsDialog(true) },
+                { icon: Calendar, label: 'Schedule', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => setShowScheduleDialog(true) },
+                { icon: Download, label: 'Export', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', action: () => setShowExportTransactionsDialog(true) },
+                { icon: BarChart3, label: 'Reports', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400', action: () => setActiveTab('reports') },
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={action.action}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1290,15 +1339,15 @@ export default function InvoicingClient() {
                     <CardTitle>Quick Actions</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-2">
-                    <Button variant="outline" className="w-full justify-start">
+                    <Button variant="outline" className="w-full justify-start" onClick={() => setShowSendRemindersDialog(true)}>
                       <Send className="w-4 h-4 mr-2" />
                       Send Payment Reminders
                     </Button>
-                    <Button variant="outline" className="w-full justify-start">
+                    <Button variant="outline" className="w-full justify-start" onClick={() => setShowProcessRecurringDialog(true)}>
                       <RefreshCw className="w-4 h-4 mr-2" />
                       Process Recurring
                     </Button>
-                    <Button variant="outline" className="w-full justify-start">
+                    <Button variant="outline" className="w-full justify-start" onClick={() => setShowExportTransactionsDialog(true)}>
                       <Download className="w-4 h-4 mr-2" />
                       Export Transactions
                     </Button>
@@ -1333,19 +1382,20 @@ export default function InvoicingClient() {
             {/* Expenses Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Plus, label: 'Add', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' },
-                { icon: Receipt, label: 'Receipts', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
-                { icon: Tag, label: 'Categories', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400' },
-                { icon: Users, label: 'Vendors', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
-                { icon: FileCheck, label: 'Approve', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
-                { icon: Repeat, label: 'Recurring', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
-                { icon: Download, label: 'Export', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
-                { icon: BarChart3, label: 'Reports', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400' },
+                { icon: Plus, label: 'Add', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', action: () => setShowAddExpenseDialog(true) },
+                { icon: Receipt, label: 'Receipts', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', action: () => setShowExpenseReceiptsDialog(true) },
+                { icon: Tag, label: 'Categories', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400', action: () => setShowExpenseCategoriesDialog(true) },
+                { icon: Users, label: 'Vendors', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => setShowVendorsDialog(true) },
+                { icon: FileCheck, label: 'Approve', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', action: () => setShowApproveExpensesDialog(true) },
+                { icon: Repeat, label: 'Recurring', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: () => setShowRecurringExpensesDialog(true) },
+                { icon: Download, label: 'Export', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', action: () => setShowExportExpensesDialog(true) },
+                { icon: BarChart3, label: 'Reports', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400', action: () => setShowExpenseReportsDialog(true) },
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={action.action}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1356,7 +1406,7 @@ export default function InvoicingClient() {
             <Card className="dark:bg-gray-800/50">
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>Expenses</CardTitle>
-                <Button size="sm">
+                <Button size="sm" onClick={() => setShowAddExpenseDialog(true)}>
                   <Plus className="w-4 h-4 mr-2" />
                   Add Expense
                 </Button>
@@ -1422,19 +1472,20 @@ export default function InvoicingClient() {
             {/* Reports Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: PieChart, label: 'Revenue', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
-                { icon: TrendingUp, label: 'Trends', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
-                { icon: Users, label: 'Clients', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
-                { icon: Receipt, label: 'Expenses', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
-                { icon: DollarSign, label: 'Profit', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
-                { icon: Calendar, label: 'Schedule', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
-                { icon: Download, label: 'Export', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
-                { icon: Printer, label: 'Print', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400' },
+                { icon: PieChart, label: 'Revenue', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', action: () => setShowRevenueReportDialog(true) },
+                { icon: TrendingUp, label: 'Trends', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => setShowTrendsDialog(true) },
+                { icon: Users, label: 'Clients', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', action: () => setShowClientReportsDialog(true) },
+                { icon: Receipt, label: 'Expenses', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: () => setShowExpenseReportDialog(true) },
+                { icon: DollarSign, label: 'Profit', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', action: () => setShowProfitReportDialog(true) },
+                { icon: Calendar, label: 'Schedule', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', action: () => setShowScheduleReportDialog(true) },
+                { icon: Download, label: 'Export', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', action: () => setShowExportReportsDialog(true) },
+                { icon: Printer, label: 'Print', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400', action: () => setShowPrintReportDialog(true) },
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={action.action}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1572,7 +1623,7 @@ export default function InvoicingClient() {
                   <p className="text-slate-200">Configure your invoicing preferences and defaults</p>
                 </div>
                 <div className="flex items-center gap-4">
-                  <Button variant="secondary" className="bg-white/20 hover:bg-white/30 text-white">
+                  <Button variant="secondary" className="bg-white/20 hover:bg-white/30 text-white" onClick={() => setShowExportConfigDialog(true)}>
                     <Download className="w-4 h-4 mr-2" />
                     Export Config
                   </Button>
@@ -1778,7 +1829,7 @@ export default function InvoicingClient() {
                                 <p className="text-sm text-gray-500">{gateway.status}</p>
                               </div>
                             </div>
-                            <Button variant={gateway.status === 'Connected' ? 'outline' : 'default'} size="sm">
+                            <Button variant={gateway.status === 'Connected' ? 'outline' : 'default'} size="sm" onClick={() => { setSelectedGateway(gateway.name); setShowPaymentGatewayDialog(true); }}>
                               {gateway.status === 'Connected' ? 'Manage' : 'Connect'}
                             </Button>
                           </div>
@@ -1803,7 +1854,7 @@ export default function InvoicingClient() {
                           <Label>API Key</Label>
                           <div className="flex gap-2 mt-1">
                             <Input type="password" defaultValue="STRIPE_KEY_PLACEHOLDER" className="flex-1" />
-                            <Button variant="outline">Regenerate</Button>
+                            <Button variant="outline" onClick={() => setShowRegenerateApiKeyDialog(true)}>Regenerate</Button>
                           </div>
                         </div>
                         <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
@@ -1866,14 +1917,14 @@ export default function InvoicingClient() {
                             <Label className="text-red-700 dark:text-red-400">Delete All Draft Invoices</Label>
                             <p className="text-sm text-red-600">Permanently remove draft invoices</p>
                           </div>
-                          <Button variant="destructive" size="sm">Delete</Button>
+                          <Button variant="destructive" size="sm" onClick={() => setShowDeleteDraftsDialog(true)}>Delete</Button>
                         </div>
                         <div className="flex items-center justify-between p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
                           <div>
                             <Label className="text-red-700 dark:text-red-400">Reset Settings</Label>
                             <p className="text-sm text-red-600">Reset to default configuration</p>
                           </div>
-                          <Button variant="destructive" size="sm">Reset</Button>
+                          <Button variant="destructive" size="sm" onClick={() => setShowResetSettingsDialog(true)}>Reset</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -2158,15 +2209,15 @@ export default function InvoicingClient() {
 
                 {/* Actions */}
                 <div className="flex items-center gap-3 pt-4 border-t">
-                  <Button className="flex-1">
+                  <Button className="flex-1" onClick={() => { setShowClientDialog(false); setShowCreateClientInvoiceDialog(true); }}>
                     <Plus className="w-4 h-4 mr-2" />
                     Create Invoice
                   </Button>
-                  <Button variant="outline">
+                  <Button variant="outline" onClick={() => { setShowClientDialog(false); setShowEditClientDialog(true); }}>
                     <Edit className="w-4 h-4 mr-2" />
                     Edit Client
                   </Button>
-                  <Button variant="outline">
+                  <Button variant="outline" onClick={() => { setShowClientDialog(false); setShowViewClientInvoicesDialog(true); }}>
                     <FileText className="w-4 h-4 mr-2" />
                     View Invoices
                   </Button>
@@ -2432,6 +2483,1796 @@ export default function InvoicingClient() {
                 Cancel
               </Button>
             </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Export Invoices Dialog */}
+      <Dialog open={showExportInvoicesDialog} onOpenChange={setShowExportInvoicesDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Download className="w-5 h-5 text-teal-600" />
+              Export Invoices
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Export Format</Label>
+              <select className="w-full mt-1 px-3 py-2 border rounded-lg bg-white dark:bg-gray-800">
+                <option value="csv">CSV</option>
+                <option value="xlsx">Excel (XLSX)</option>
+                <option value="pdf">PDF</option>
+                <option value="json">JSON</option>
+              </select>
+            </div>
+            <div>
+              <Label>Date Range</Label>
+              <div className="grid grid-cols-2 gap-2 mt-1">
+                <Input type="date" placeholder="Start Date" />
+                <Input type="date" placeholder="End Date" />
+              </div>
+            </div>
+            <div>
+              <Label>Status Filter</Label>
+              <select className="w-full mt-1 px-3 py-2 border rounded-lg bg-white dark:bg-gray-800">
+                <option value="all">All Statuses</option>
+                <option value="paid">Paid Only</option>
+                <option value="pending">Pending Only</option>
+                <option value="overdue">Overdue Only</option>
+              </select>
+            </div>
+            <div className="flex items-center gap-3 pt-4 border-t">
+              <Button className="flex-1 bg-teal-600 hover:bg-teal-700" onClick={() => {
+                toast.success('Invoices exported successfully')
+                setShowExportInvoicesDialog(false)
+              }}>
+                <Download className="w-4 h-4 mr-2" />
+                Export
+              </Button>
+              <Button variant="outline" onClick={() => setShowExportInvoicesDialog(false)}>
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Recurring Invoices Dialog */}
+      <Dialog open={showRecurringDialog} onOpenChange={setShowRecurringDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Repeat className="w-5 h-5 text-purple-600" />
+              Recurring Invoices
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+              <p className="text-2xl font-bold text-purple-600">{invoices.filter(inv => inv.type === 'recurring').length}</p>
+              <p className="text-sm text-muted-foreground">Active Recurring Invoices</p>
+            </div>
+            <div className="space-y-2">
+              {invoices.filter(inv => inv.type === 'recurring').map((inv) => (
+                <div key={inv.id} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div>
+                    <p className="font-medium">{inv.invoiceNumber}</p>
+                    <p className="text-sm text-muted-foreground">{inv.client.name} - {formatCurrency(inv.total)}</p>
+                  </div>
+                  {getStatusBadge(inv.status)}
+                </div>
+              ))}
+            </div>
+            <div className="flex items-center gap-3 pt-4 border-t">
+              <Button className="flex-1 bg-purple-600 hover:bg-purple-700" onClick={() => {
+                setShowRecurringDialog(false)
+                setShowNewInvoiceDialog(true)
+              }}>
+                <Plus className="w-4 h-4 mr-2" />
+                Create Recurring Invoice
+              </Button>
+              <Button variant="outline" onClick={() => setShowRecurringDialog(false)}>
+                Close
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Estimates Dialog */}
+      <Dialog open={showEstimatesDialog} onOpenChange={setShowEstimatesDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileCheck className="w-5 h-5 text-green-600" />
+              Estimates & Quotes
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+              <p className="text-2xl font-bold text-green-600">{invoices.filter(inv => inv.type === 'estimate').length}</p>
+              <p className="text-sm text-muted-foreground">Active Estimates</p>
+            </div>
+            <div className="space-y-2">
+              {invoices.filter(inv => inv.type === 'estimate').map((inv) => (
+                <div key={inv.id} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div>
+                    <p className="font-medium">{inv.invoiceNumber}</p>
+                    <p className="text-sm text-muted-foreground">{inv.client.name} - {formatCurrency(inv.total)}</p>
+                  </div>
+                  {getStatusBadge(inv.status)}
+                </div>
+              ))}
+            </div>
+            <div className="flex items-center gap-3 pt-4 border-t">
+              <Button className="flex-1 bg-green-600 hover:bg-green-700" onClick={() => {
+                setShowEstimatesDialog(false)
+                setShowNewInvoiceDialog(true)
+              }}>
+                <Plus className="w-4 h-4 mr-2" />
+                Create Estimate
+              </Button>
+              <Button variant="outline" onClick={() => setShowEstimatesDialog(false)}>
+                Close
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Overdue Invoices Dialog */}
+      <Dialog open={showOverdueDialog} onOpenChange={setShowOverdueDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="w-5 h-5 text-red-600" />
+              Overdue Invoices
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
+              <p className="text-2xl font-bold text-red-600">{formatCurrency(invoices.filter(inv => inv.status === 'overdue').reduce((sum, inv) => sum + inv.amountDue, 0))}</p>
+              <p className="text-sm text-muted-foreground">Total Overdue Amount</p>
+            </div>
+            <div className="space-y-2 max-h-64 overflow-y-auto">
+              {invoices.filter(inv => inv.status === 'overdue').map((inv) => (
+                <div key={inv.id} className="flex items-center justify-between p-3 border border-red-200 rounded-lg">
+                  <div>
+                    <p className="font-medium">{inv.invoiceNumber}</p>
+                    <p className="text-sm text-muted-foreground">{inv.client.name}</p>
+                    <p className="text-xs text-red-600">{getDaysOverdue(inv.dueDate)} days overdue</p>
+                  </div>
+                  <p className="font-bold text-red-600">{formatCurrency(inv.amountDue)}</p>
+                </div>
+              ))}
+            </div>
+            <div className="flex items-center gap-3 pt-4 border-t">
+              <Button className="flex-1 bg-red-600 hover:bg-red-700" onClick={() => {
+                setShowOverdueDialog(false)
+                setShowSendRemindersDialog(true)
+              }}>
+                <Send className="w-4 h-4 mr-2" />
+                Send Reminders
+              </Button>
+              <Button variant="outline" onClick={() => setShowOverdueDialog(false)}>
+                Close
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Client Dialog */}
+      <Dialog open={showAddClientDialog} onOpenChange={setShowAddClientDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Users className="w-5 h-5 text-green-600" />
+              Add New Client
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Client Name</Label>
+                <Input placeholder="John Doe" className="mt-1" />
+              </div>
+              <div>
+                <Label>Company</Label>
+                <Input placeholder="Company Name" className="mt-1" />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Email</Label>
+                <Input type="email" placeholder="email@example.com" className="mt-1" />
+              </div>
+              <div>
+                <Label>Phone</Label>
+                <Input placeholder="+1 (555) 000-0000" className="mt-1" />
+              </div>
+            </div>
+            <div>
+              <Label>Address</Label>
+              <Input placeholder="Street Address" className="mt-1" />
+            </div>
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <Label>City</Label>
+                <Input placeholder="City" className="mt-1" />
+              </div>
+              <div>
+                <Label>State</Label>
+                <Input placeholder="State" className="mt-1" />
+              </div>
+              <div>
+                <Label>ZIP Code</Label>
+                <Input placeholder="12345" className="mt-1" />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Payment Terms (Days)</Label>
+                <Input type="number" defaultValue="30" className="mt-1" />
+              </div>
+              <div>
+                <Label>Credit Limit</Label>
+                <Input type="number" placeholder="50000" className="mt-1" />
+              </div>
+            </div>
+            <div className="flex items-center gap-3 pt-4 border-t">
+              <Button className="flex-1 bg-green-600 hover:bg-green-700" onClick={() => {
+                toast.success('Client added successfully')
+                setShowAddClientDialog(false)
+              }}>
+                <Plus className="w-4 h-4 mr-2" />
+                Add Client
+              </Button>
+              <Button variant="outline" onClick={() => setShowAddClientDialog(false)}>
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Email All Clients Dialog */}
+      <Dialog open={showEmailAllDialog} onOpenChange={setShowEmailAllDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Mail className="w-5 h-5 text-teal-600" />
+              Email All Clients
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Subject</Label>
+              <Input placeholder="Email subject..." className="mt-1" />
+            </div>
+            <div>
+              <Label>Message</Label>
+              <textarea
+                className="w-full mt-1 px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 min-h-[120px]"
+                placeholder="Enter your message..."
+              />
+            </div>
+            <div className="p-3 bg-muted/50 rounded-lg">
+              <p className="text-sm text-muted-foreground">This will send to {clients.length} clients</p>
+            </div>
+            <div className="flex items-center gap-3 pt-4 border-t">
+              <Button className="flex-1 bg-teal-600 hover:bg-teal-700" onClick={() => {
+                toast.success('Emails sent successfully')
+                setShowEmailAllDialog(false)
+              }}>
+                <Send className="w-4 h-4 mr-2" />
+                Send to All
+              </Button>
+              <Button variant="outline" onClick={() => setShowEmailAllDialog(false)}>
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Client Statements Dialog */}
+      <Dialog open={showStatementsDialog} onOpenChange={setShowStatementsDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileText className="w-5 h-5 text-blue-600" />
+              Generate Statements
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Select Client</Label>
+              <select className="w-full mt-1 px-3 py-2 border rounded-lg bg-white dark:bg-gray-800">
+                <option value="all">All Clients</option>
+                {clients.map((client) => (
+                  <option key={client.id} value={client.id}>{client.name}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <Label>Statement Period</Label>
+              <div className="grid grid-cols-2 gap-2 mt-1">
+                <Input type="date" />
+                <Input type="date" />
+              </div>
+            </div>
+            <div className="flex items-center gap-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+              <input type="checkbox" defaultChecked className="rounded" />
+              <span className="text-sm">Include payment history</span>
+            </div>
+            <div className="flex items-center gap-3 pt-4 border-t">
+              <Button className="flex-1 bg-blue-600 hover:bg-blue-700" onClick={() => {
+                toast.success('Statements generated successfully')
+                setShowStatementsDialog(false)
+              }}>
+                <FileText className="w-4 h-4 mr-2" />
+                Generate Statements
+              </Button>
+              <Button variant="outline" onClick={() => setShowStatementsDialog(false)}>
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Categories Dialog */}
+      <Dialog open={showCategoriesDialog} onOpenChange={setShowCategoriesDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Tag className="w-5 h-5 text-purple-600" />
+              Manage Categories
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              {['Corporate', 'Small Business', 'Startup', 'Enterprise', 'Non-Profit'].map((cat) => (
+                <div key={cat} className="flex items-center justify-between p-3 border rounded-lg">
+                  <span>{cat}</span>
+                  <Button variant="ghost" size="sm">
+                    <Edit className="w-4 h-4" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+            <div className="flex gap-2">
+              <Input placeholder="New category..." className="flex-1" />
+              <Button onClick={() => toast.success('Category added')}>
+                <Plus className="w-4 h-4" />
+              </Button>
+            </div>
+            <Button variant="outline" className="w-full" onClick={() => setShowCategoriesDialog(false)}>
+              Done
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Import Clients Dialog */}
+      <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Globe className="w-5 h-5 text-amber-600" />
+              Import Clients
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="border-2 border-dashed rounded-lg p-8 text-center">
+              <Globe className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+              <p className="text-sm text-muted-foreground mb-2">Drop CSV or Excel file here</p>
+              <Button variant="outline" size="sm">Browse Files</Button>
+            </div>
+            <div>
+              <Label>Import Source</Label>
+              <select className="w-full mt-1 px-3 py-2 border rounded-lg bg-white dark:bg-gray-800">
+                <option value="csv">CSV File</option>
+                <option value="xlsx">Excel File</option>
+                <option value="quickbooks">QuickBooks</option>
+                <option value="xero">Xero</option>
+              </select>
+            </div>
+            <div className="flex items-center gap-3 pt-4 border-t">
+              <Button className="flex-1 bg-amber-600 hover:bg-amber-700" onClick={() => {
+                toast.success('Import started')
+                setShowImportDialog(false)
+              }}>
+                <Globe className="w-4 h-4 mr-2" />
+                Import
+              </Button>
+              <Button variant="outline" onClick={() => setShowImportDialog(false)}>
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Export Clients Dialog */}
+      <Dialog open={showExportClientsDialog} onOpenChange={setShowExportClientsDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Download className="w-5 h-5 text-indigo-600" />
+              Export Clients
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Export Format</Label>
+              <select className="w-full mt-1 px-3 py-2 border rounded-lg bg-white dark:bg-gray-800">
+                <option value="csv">CSV</option>
+                <option value="xlsx">Excel (XLSX)</option>
+                <option value="pdf">PDF</option>
+              </select>
+            </div>
+            <div className="flex items-center gap-2 p-3 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg">
+              <input type="checkbox" defaultChecked className="rounded" />
+              <span className="text-sm">Include contact details</span>
+            </div>
+            <div className="flex items-center gap-2 p-3 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg">
+              <input type="checkbox" defaultChecked className="rounded" />
+              <span className="text-sm">Include billing history</span>
+            </div>
+            <div className="flex items-center gap-3 pt-4 border-t">
+              <Button className="flex-1 bg-indigo-600 hover:bg-indigo-700" onClick={() => {
+                toast.success('Clients exported successfully')
+                setShowExportClientsDialog(false)
+              }}>
+                <Download className="w-4 h-4 mr-2" />
+                Export
+              </Button>
+              <Button variant="outline" onClick={() => setShowExportClientsDialog(false)}>
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Payment Methods Dialog */}
+      <Dialog open={showPaymentMethodsDialog} onOpenChange={setShowPaymentMethodsDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <CreditCard className="w-5 h-5 text-orange-600" />
+              Payment Methods
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            {[
+              { name: 'Credit Card', icon: CreditCard, enabled: true },
+              { name: 'Bank Transfer', icon: Building2, enabled: true },
+              { name: 'PayPal', icon: Wallet, enabled: false },
+              { name: 'Check', icon: Receipt, enabled: true },
+            ].map((method) => (
+              <div key={method.name} className="flex items-center justify-between p-3 border rounded-lg">
+                <div className="flex items-center gap-3">
+                  <method.icon className="w-5 h-5 text-gray-600" />
+                  <span>{method.name}</span>
+                </div>
+                <Switch defaultChecked={method.enabled} />
+              </div>
+            ))}
+            <Button variant="outline" className="w-full" onClick={() => setShowPaymentMethodsDialog(false)}>
+              Done
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Refunds Dialog */}
+      <Dialog open={showRefundsDialog} onOpenChange={setShowRefundsDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <RefreshCw className="w-5 h-5 text-red-600" />
+              Process Refund
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Select Invoice</Label>
+              <select className="w-full mt-1 px-3 py-2 border rounded-lg bg-white dark:bg-gray-800">
+                <option value="">Select a paid invoice...</option>
+                {invoices.filter(inv => inv.status === 'paid').map((invoice) => (
+                  <option key={invoice.id} value={invoice.id}>
+                    {invoice.invoiceNumber} - {invoice.client.name} ({formatCurrency(invoice.total)})
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <Label>Refund Amount</Label>
+              <Input type="number" placeholder="0.00" className="mt-1" />
+            </div>
+            <div>
+              <Label>Reason</Label>
+              <textarea
+                className="w-full mt-1 px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 min-h-[80px]"
+                placeholder="Reason for refund..."
+              />
+            </div>
+            <div className="flex items-center gap-3 pt-4 border-t">
+              <Button className="flex-1 bg-red-600 hover:bg-red-700" onClick={() => {
+                toast.success('Refund processed successfully')
+                setShowRefundsDialog(false)
+              }}>
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Process Refund
+              </Button>
+              <Button variant="outline" onClick={() => setShowRefundsDialog(false)}>
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Bank Settings Dialog */}
+      <Dialog open={showBankDialog} onOpenChange={setShowBankDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Building2 className="w-5 h-5 text-green-600" />
+              Bank Account Settings
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Bank Name</Label>
+              <Input placeholder="Bank Name" className="mt-1" />
+            </div>
+            <div>
+              <Label>Account Name</Label>
+              <Input placeholder="Account Holder Name" className="mt-1" />
+            </div>
+            <div>
+              <Label>Account Number</Label>
+              <Input placeholder="XXXX-XXXX-XXXX" className="mt-1" />
+            </div>
+            <div>
+              <Label>Routing Number</Label>
+              <Input placeholder="XXX-XXX-XXX" className="mt-1" />
+            </div>
+            <div className="flex items-center gap-3 pt-4 border-t">
+              <Button className="flex-1 bg-green-600 hover:bg-green-700" onClick={() => {
+                toast.success('Bank settings saved')
+                setShowBankDialog(false)
+              }}>
+                <CheckCircle2 className="w-4 h-4 mr-2" />
+                Save Settings
+              </Button>
+              <Button variant="outline" onClick={() => setShowBankDialog(false)}>
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Payment Receipts Dialog */}
+      <Dialog open={showReceiptsDialog} onOpenChange={setShowReceiptsDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Receipt className="w-5 h-5 text-blue-600" />
+              Payment Receipts
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2 max-h-64 overflow-y-auto">
+              {invoices.flatMap(inv => inv.payments.map(p => ({ ...p, invoice: inv }))).map((payment) => (
+                <div key={payment.id} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div>
+                    <p className="font-medium">{payment.invoice.invoiceNumber}</p>
+                    <p className="text-sm text-muted-foreground">{new Date(payment.date).toLocaleDateString()}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-semibold text-green-600">{formatCurrency(payment.amount)}</p>
+                    <Button variant="ghost" size="sm">
+                      <Download className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <Button variant="outline" className="w-full" onClick={() => setShowReceiptsDialog(false)}>
+              Close
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Payment Schedule Dialog */}
+      <Dialog open={showScheduleDialog} onOpenChange={setShowScheduleDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Calendar className="w-5 h-5 text-purple-600" />
+              Payment Schedule
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+              <p className="text-sm text-muted-foreground">Upcoming Payments (Next 30 Days)</p>
+              <p className="text-2xl font-bold text-purple-600">{formatCurrency(invoices.filter(inv => inv.status === 'sent' || inv.status === 'viewed').reduce((sum, inv) => sum + inv.amountDue, 0))}</p>
+            </div>
+            <div className="space-y-2 max-h-64 overflow-y-auto">
+              {invoices.filter(inv => ['sent', 'viewed', 'pending'].includes(inv.status)).map((inv) => (
+                <div key={inv.id} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div>
+                    <p className="font-medium">{inv.invoiceNumber}</p>
+                    <p className="text-sm text-muted-foreground">Due: {new Date(inv.dueDate).toLocaleDateString()}</p>
+                  </div>
+                  <p className="font-semibold">{formatCurrency(inv.amountDue)}</p>
+                </div>
+              ))}
+            </div>
+            <Button variant="outline" className="w-full" onClick={() => setShowScheduleDialog(false)}>
+              Close
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Export Transactions Dialog */}
+      <Dialog open={showExportTransactionsDialog} onOpenChange={setShowExportTransactionsDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Download className="w-5 h-5 text-teal-600" />
+              Export Transactions
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Export Format</Label>
+              <select className="w-full mt-1 px-3 py-2 border rounded-lg bg-white dark:bg-gray-800">
+                <option value="csv">CSV</option>
+                <option value="xlsx">Excel (XLSX)</option>
+                <option value="qbo">QuickBooks (QBO)</option>
+              </select>
+            </div>
+            <div>
+              <Label>Date Range</Label>
+              <div className="grid grid-cols-2 gap-2 mt-1">
+                <Input type="date" />
+                <Input type="date" />
+              </div>
+            </div>
+            <div className="flex items-center gap-3 pt-4 border-t">
+              <Button className="flex-1 bg-teal-600 hover:bg-teal-700" onClick={() => {
+                toast.success('Transactions exported successfully')
+                setShowExportTransactionsDialog(false)
+              }}>
+                <Download className="w-4 h-4 mr-2" />
+                Export
+              </Button>
+              <Button variant="outline" onClick={() => setShowExportTransactionsDialog(false)}>
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Expense Dialog */}
+      <Dialog open={showAddExpenseDialog} onOpenChange={setShowAddExpenseDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Receipt className="w-5 h-5 text-rose-600" />
+              Add Expense
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Description</Label>
+              <Input placeholder="Expense description..." className="mt-1" />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Amount</Label>
+                <Input type="number" placeholder="0.00" className="mt-1" />
+              </div>
+              <div>
+                <Label>Date</Label>
+                <Input type="date" defaultValue={new Date().toISOString().split('T')[0]} className="mt-1" />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Category</Label>
+                <select className="w-full mt-1 px-3 py-2 border rounded-lg bg-white dark:bg-gray-800">
+                  <option value="software">Software</option>
+                  <option value="infrastructure">Infrastructure</option>
+                  <option value="office">Office</option>
+                  <option value="travel">Travel</option>
+                  <option value="marketing">Marketing</option>
+                </select>
+              </div>
+              <div>
+                <Label>Vendor</Label>
+                <Input placeholder="Vendor name" className="mt-1" />
+              </div>
+            </div>
+            <div className="flex items-center gap-2 p-3 bg-rose-50 dark:bg-rose-900/20 rounded-lg">
+              <input type="checkbox" className="rounded" />
+              <span className="text-sm">Billable to client</span>
+            </div>
+            <div className="flex items-center gap-3 pt-4 border-t">
+              <Button className="flex-1 bg-rose-600 hover:bg-rose-700" onClick={() => {
+                toast.success('Expense added successfully')
+                setShowAddExpenseDialog(false)
+              }}>
+                <Plus className="w-4 h-4 mr-2" />
+                Add Expense
+              </Button>
+              <Button variant="outline" onClick={() => setShowAddExpenseDialog(false)}>
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Expense Receipts Dialog */}
+      <Dialog open={showExpenseReceiptsDialog} onOpenChange={setShowExpenseReceiptsDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Receipt className="w-5 h-5 text-pink-600" />
+              Upload Receipts
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="border-2 border-dashed rounded-lg p-8 text-center">
+              <Receipt className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+              <p className="text-sm text-muted-foreground mb-2">Drop receipt images here</p>
+              <Button variant="outline" size="sm">Browse Files</Button>
+            </div>
+            <div className="flex items-center gap-2 p-3 bg-pink-50 dark:bg-pink-900/20 rounded-lg">
+              <input type="checkbox" className="rounded" />
+              <span className="text-sm">Auto-extract expense data with OCR</span>
+            </div>
+            <div className="flex items-center gap-3 pt-4 border-t">
+              <Button className="flex-1 bg-pink-600 hover:bg-pink-700" onClick={() => {
+                toast.success('Receipts uploaded successfully')
+                setShowExpenseReceiptsDialog(false)
+              }}>
+                <Receipt className="w-4 h-4 mr-2" />
+                Upload
+              </Button>
+              <Button variant="outline" onClick={() => setShowExpenseReceiptsDialog(false)}>
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Expense Categories Dialog */}
+      <Dialog open={showExpenseCategoriesDialog} onOpenChange={setShowExpenseCategoriesDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Tag className="w-5 h-5 text-fuchsia-600" />
+              Expense Categories
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              {['Software', 'Infrastructure', 'Office', 'Travel', 'Marketing', 'Equipment'].map((cat) => (
+                <div key={cat} className="flex items-center justify-between p-3 border rounded-lg">
+                  <span>{cat}</span>
+                  <Button variant="ghost" size="sm">
+                    <Edit className="w-4 h-4" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+            <div className="flex gap-2">
+              <Input placeholder="New category..." className="flex-1" />
+              <Button onClick={() => toast.success('Category added')}>
+                <Plus className="w-4 h-4" />
+              </Button>
+            </div>
+            <Button variant="outline" className="w-full" onClick={() => setShowExpenseCategoriesDialog(false)}>
+              Done
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Vendors Dialog */}
+      <Dialog open={showVendorsDialog} onOpenChange={setShowVendorsDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Users className="w-5 h-5 text-purple-600" />
+              Manage Vendors
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2 max-h-64 overflow-y-auto">
+              {['Adobe', 'AWS', 'Staples', 'Delta Airlines', 'Google', 'Microsoft'].map((vendor) => (
+                <div key={vendor} className="flex items-center justify-between p-3 border rounded-lg">
+                  <span>{vendor}</span>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline">Active</Badge>
+                    <Button variant="ghost" size="sm">
+                      <Edit className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="flex gap-2">
+              <Input placeholder="Add new vendor..." className="flex-1" />
+              <Button onClick={() => toast.success('Vendor added')}>
+                <Plus className="w-4 h-4" />
+              </Button>
+            </div>
+            <Button variant="outline" className="w-full" onClick={() => setShowVendorsDialog(false)}>
+              Done
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Approve Expenses Dialog */}
+      <Dialog open={showApproveExpensesDialog} onOpenChange={setShowApproveExpensesDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileCheck className="w-5 h-5 text-green-600" />
+              Approve Expenses
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
+              <p className="text-sm text-muted-foreground">Pending Approval</p>
+              <p className="text-2xl font-bold text-yellow-600">{expenses.filter(e => e.status === 'pending').length}</p>
+            </div>
+            <div className="space-y-2 max-h-64 overflow-y-auto">
+              {expenses.filter(e => e.status === 'pending').map((expense) => (
+                <div key={expense.id} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div>
+                    <p className="font-medium">{expense.description}</p>
+                    <p className="text-sm text-muted-foreground">{expense.vendor} - {new Date(expense.date).toLocaleDateString()}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <p className="font-semibold">{formatCurrency(expense.amount)}</p>
+                    <Button size="sm" variant="outline" className="text-green-600" onClick={() => toast.success('Expense approved')}>
+                      <CheckCircle2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="flex items-center gap-3 pt-4 border-t">
+              <Button className="flex-1 bg-green-600 hover:bg-green-700" onClick={() => {
+                toast.success('All expenses approved')
+                setShowApproveExpensesDialog(false)
+              }}>
+                <CheckCircle2 className="w-4 h-4 mr-2" />
+                Approve All
+              </Button>
+              <Button variant="outline" onClick={() => setShowApproveExpensesDialog(false)}>
+                Close
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Recurring Expenses Dialog */}
+      <Dialog open={showRecurringExpensesDialog} onOpenChange={setShowRecurringExpensesDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Repeat className="w-5 h-5 text-blue-600" />
+              Recurring Expenses
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+              <p className="text-sm text-muted-foreground">Monthly Recurring</p>
+              <p className="text-2xl font-bold text-blue-600">{formatCurrency(2100)}</p>
+            </div>
+            <div className="space-y-2">
+              {[
+                { name: 'Cloud Hosting', amount: 850, freq: 'Monthly' },
+                { name: 'Software Licenses', amount: 1250, freq: 'Monthly' },
+              ].map((exp) => (
+                <div key={exp.name} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div>
+                    <p className="font-medium">{exp.name}</p>
+                    <p className="text-sm text-muted-foreground">{exp.freq}</p>
+                  </div>
+                  <p className="font-semibold">{formatCurrency(exp.amount)}</p>
+                </div>
+              ))}
+            </div>
+            <div className="flex items-center gap-3 pt-4 border-t">
+              <Button className="flex-1 bg-blue-600 hover:bg-blue-700" onClick={() => {
+                setShowRecurringExpensesDialog(false)
+                setShowAddExpenseDialog(true)
+              }}>
+                <Plus className="w-4 h-4 mr-2" />
+                Add Recurring Expense
+              </Button>
+              <Button variant="outline" onClick={() => setShowRecurringExpensesDialog(false)}>
+                Close
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Export Expenses Dialog */}
+      <Dialog open={showExportExpensesDialog} onOpenChange={setShowExportExpensesDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Download className="w-5 h-5 text-teal-600" />
+              Export Expenses
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Export Format</Label>
+              <select className="w-full mt-1 px-3 py-2 border rounded-lg bg-white dark:bg-gray-800">
+                <option value="csv">CSV</option>
+                <option value="xlsx">Excel (XLSX)</option>
+                <option value="pdf">PDF</option>
+              </select>
+            </div>
+            <div>
+              <Label>Date Range</Label>
+              <div className="grid grid-cols-2 gap-2 mt-1">
+                <Input type="date" />
+                <Input type="date" />
+              </div>
+            </div>
+            <div className="flex items-center gap-3 pt-4 border-t">
+              <Button className="flex-1 bg-teal-600 hover:bg-teal-700" onClick={() => {
+                toast.success('Expenses exported successfully')
+                setShowExportExpensesDialog(false)
+              }}>
+                <Download className="w-4 h-4 mr-2" />
+                Export
+              </Button>
+              <Button variant="outline" onClick={() => setShowExportExpensesDialog(false)}>
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Expense Reports Dialog */}
+      <Dialog open={showExpenseReportsDialog} onOpenChange={setShowExpenseReportsDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <BarChart3 className="w-5 h-5 text-slate-600" />
+              Expense Reports
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="p-4 bg-slate-50 dark:bg-slate-900/20 rounded-lg text-center">
+                <p className="text-2xl font-bold">{formatCurrency(expenses.reduce((sum, e) => sum + e.amount, 0))}</p>
+                <p className="text-sm text-muted-foreground">Total Expenses</p>
+              </div>
+              <div className="p-4 bg-slate-50 dark:bg-slate-900/20 rounded-lg text-center">
+                <p className="text-2xl font-bold">{formatCurrency(expenses.filter(e => e.billable).reduce((sum, e) => sum + e.amount, 0))}</p>
+                <p className="text-sm text-muted-foreground">Billable</p>
+              </div>
+            </div>
+            <div className="space-y-2">
+              {['Software', 'Infrastructure', 'Office', 'Travel'].map((cat) => (
+                <div key={cat} className="flex items-center justify-between p-2">
+                  <span className="text-sm">{cat}</span>
+                  <Progress value={Math.random() * 100} className="w-32 h-2" />
+                </div>
+              ))}
+            </div>
+            <Button variant="outline" className="w-full" onClick={() => setShowExpenseReportsDialog(false)}>
+              Close
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Revenue Report Dialog */}
+      <Dialog open={showRevenueReportDialog} onOpenChange={setShowRevenueReportDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <PieChart className="w-5 h-5 text-violet-600" />
+              Revenue Report
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="p-4 bg-violet-50 dark:bg-violet-900/20 rounded-lg text-center">
+              <p className="text-3xl font-bold text-violet-600">{formatCurrency(report.totalInvoiced)}</p>
+              <p className="text-sm text-muted-foreground">Total Revenue</p>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg text-center">
+                <p className="text-xl font-bold text-green-600">{formatCurrency(report.totalPaid)}</p>
+                <p className="text-xs text-muted-foreground">Collected</p>
+              </div>
+              <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg text-center">
+                <p className="text-xl font-bold text-yellow-600">{formatCurrency(report.totalPending)}</p>
+                <p className="text-xs text-muted-foreground">Pending</p>
+              </div>
+            </div>
+            <Button variant="outline" className="w-full" onClick={() => setShowRevenueReportDialog(false)}>
+              Close
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Trends Dialog */}
+      <Dialog open={showTrendsDialog} onOpenChange={setShowTrendsDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <TrendingUp className="w-5 h-5 text-purple-600" />
+              Revenue Trends
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="h-48 flex items-end justify-between gap-2 p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+              {report.revenueByMonth.map((month, index) => (
+                <div key={index} className="flex-1 flex flex-col items-center gap-2">
+                  <div
+                    className="w-full bg-gradient-to-t from-purple-500 to-violet-500 rounded-t-lg"
+                    style={{ height: `${(month.amount / 150000) * 100}%` }}
+                  />
+                  <span className="text-xs text-muted-foreground">{month.month}</span>
+                </div>
+              ))}
+            </div>
+            <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+              <p className="text-sm text-green-600">+23.5% increase from previous period</p>
+            </div>
+            <Button variant="outline" className="w-full" onClick={() => setShowTrendsDialog(false)}>
+              Close
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Client Reports Dialog */}
+      <Dialog open={showClientReportsDialog} onOpenChange={setShowClientReportsDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Users className="w-5 h-5 text-indigo-600" />
+              Client Analytics
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-3">
+              {report.topClients.map((client, index) => (
+                <div key={client.clientId} className="flex items-center gap-4">
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 flex items-center justify-center text-white text-sm font-bold">
+                    {index + 1}
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-medium">{client.name}</p>
+                    <Progress value={(client.amount / (report.topClients[0]?.amount || 1)) * 100} className="h-2 mt-1" />
+                  </div>
+                  <p className="font-semibold">{formatCurrency(client.amount)}</p>
+                </div>
+              ))}
+            </div>
+            <Button variant="outline" className="w-full" onClick={() => setShowClientReportsDialog(false)}>
+              Close
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Profit Report Dialog */}
+      <Dialog open={showProfitReportDialog} onOpenChange={setShowProfitReportDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <DollarSign className="w-5 h-5 text-green-600" />
+              Profit & Loss
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="grid grid-cols-3 gap-4">
+              <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg text-center">
+                <p className="text-xl font-bold text-green-600">{formatCurrency(report.totalPaid)}</p>
+                <p className="text-xs text-muted-foreground">Revenue</p>
+              </div>
+              <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg text-center">
+                <p className="text-xl font-bold text-red-600">{formatCurrency(expenses.reduce((sum, e) => sum + e.amount, 0))}</p>
+                <p className="text-xs text-muted-foreground">Expenses</p>
+              </div>
+              <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-center">
+                <p className="text-xl font-bold text-blue-600">{formatCurrency(report.totalPaid - expenses.reduce((sum, e) => sum + e.amount, 0))}</p>
+                <p className="text-xs text-muted-foreground">Net Profit</p>
+              </div>
+            </div>
+            <Button variant="outline" className="w-full" onClick={() => setShowProfitReportDialog(false)}>
+              Close
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Schedule Report Dialog */}
+      <Dialog open={showScheduleReportDialog} onOpenChange={setShowScheduleReportDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Calendar className="w-5 h-5 text-amber-600" />
+              Schedule Report
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Report Type</Label>
+              <select className="w-full mt-1 px-3 py-2 border rounded-lg bg-white dark:bg-gray-800">
+                <option value="revenue">Revenue Report</option>
+                <option value="expenses">Expense Report</option>
+                <option value="profitloss">Profit & Loss</option>
+                <option value="aging">Aging Report</option>
+              </select>
+            </div>
+            <div>
+              <Label>Frequency</Label>
+              <select className="w-full mt-1 px-3 py-2 border rounded-lg bg-white dark:bg-gray-800">
+                <option value="daily">Daily</option>
+                <option value="weekly">Weekly</option>
+                <option value="monthly">Monthly</option>
+                <option value="quarterly">Quarterly</option>
+              </select>
+            </div>
+            <div>
+              <Label>Email Recipients</Label>
+              <Input placeholder="email@example.com" className="mt-1" />
+            </div>
+            <div className="flex items-center gap-3 pt-4 border-t">
+              <Button className="flex-1 bg-amber-600 hover:bg-amber-700" onClick={() => {
+                toast.success('Report scheduled successfully')
+                setShowScheduleReportDialog(false)
+              }}>
+                <Calendar className="w-4 h-4 mr-2" />
+                Schedule
+              </Button>
+              <Button variant="outline" onClick={() => setShowScheduleReportDialog(false)}>
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Export Reports Dialog */}
+      <Dialog open={showExportReportsDialog} onOpenChange={setShowExportReportsDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Download className="w-5 h-5 text-teal-600" />
+              Export Reports
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Report Type</Label>
+              <select className="w-full mt-1 px-3 py-2 border rounded-lg bg-white dark:bg-gray-800">
+                <option value="all">All Reports</option>
+                <option value="revenue">Revenue Report</option>
+                <option value="expenses">Expense Report</option>
+                <option value="profitloss">Profit & Loss</option>
+              </select>
+            </div>
+            <div>
+              <Label>Format</Label>
+              <select className="w-full mt-1 px-3 py-2 border rounded-lg bg-white dark:bg-gray-800">
+                <option value="pdf">PDF</option>
+                <option value="xlsx">Excel (XLSX)</option>
+                <option value="csv">CSV</option>
+              </select>
+            </div>
+            <div className="flex items-center gap-3 pt-4 border-t">
+              <Button className="flex-1 bg-teal-600 hover:bg-teal-700" onClick={() => {
+                toast.success('Reports exported successfully')
+                setShowExportReportsDialog(false)
+              }}>
+                <Download className="w-4 h-4 mr-2" />
+                Export
+              </Button>
+              <Button variant="outline" onClick={() => setShowExportReportsDialog(false)}>
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Print Report Dialog */}
+      <Dialog open={showPrintReportDialog} onOpenChange={setShowPrintReportDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Printer className="w-5 h-5 text-slate-600" />
+              Print Report
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Report Type</Label>
+              <select className="w-full mt-1 px-3 py-2 border rounded-lg bg-white dark:bg-gray-800">
+                <option value="revenue">Revenue Report</option>
+                <option value="expenses">Expense Report</option>
+                <option value="profitloss">Profit & Loss</option>
+                <option value="aging">Aging Report</option>
+              </select>
+            </div>
+            <div>
+              <Label>Paper Size</Label>
+              <select className="w-full mt-1 px-3 py-2 border rounded-lg bg-white dark:bg-gray-800">
+                <option value="letter">Letter</option>
+                <option value="a4">A4</option>
+                <option value="legal">Legal</option>
+              </select>
+            </div>
+            <div className="flex items-center gap-3 pt-4 border-t">
+              <Button className="flex-1 bg-slate-600 hover:bg-slate-700" onClick={() => {
+                toast.success('Opening print dialog...')
+                window.print()
+                setShowPrintReportDialog(false)
+              }}>
+                <Printer className="w-4 h-4 mr-2" />
+                Print
+              </Button>
+              <Button variant="outline" onClick={() => setShowPrintReportDialog(false)}>
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Export Config Dialog */}
+      <Dialog open={showExportConfigDialog} onOpenChange={setShowExportConfigDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Download className="w-5 h-5 text-slate-600" />
+              Export Configuration
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="p-4 bg-slate-50 dark:bg-slate-900/20 rounded-lg">
+              <p className="text-sm text-muted-foreground">This will export all your invoicing settings including templates, payment methods, and preferences.</p>
+            </div>
+            <div>
+              <Label>Format</Label>
+              <select className="w-full mt-1 px-3 py-2 border rounded-lg bg-white dark:bg-gray-800">
+                <option value="json">JSON</option>
+                <option value="xml">XML</option>
+              </select>
+            </div>
+            <div className="flex items-center gap-3 pt-4 border-t">
+              <Button className="flex-1 bg-slate-600 hover:bg-slate-700" onClick={() => {
+                toast.success('Configuration exported successfully')
+                setShowExportConfigDialog(false)
+              }}>
+                <Download className="w-4 h-4 mr-2" />
+                Export Config
+              </Button>
+              <Button variant="outline" onClick={() => setShowExportConfigDialog(false)}>
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Payment Gateway Dialog */}
+      <Dialog open={showPaymentGatewayDialog} onOpenChange={setShowPaymentGatewayDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <CreditCard className="w-5 h-5 text-indigo-600" />
+              {selectedGateway} Settings
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>API Key</Label>
+              <Input type="password" placeholder="Enter API key..." className="mt-1" />
+            </div>
+            <div>
+              <Label>Secret Key</Label>
+              <Input type="password" placeholder="Enter secret key..." className="mt-1" />
+            </div>
+            <div className="flex items-center gap-2 p-3 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg">
+              <input type="checkbox" defaultChecked className="rounded" />
+              <span className="text-sm">Enable test mode</span>
+            </div>
+            <div className="flex items-center gap-3 pt-4 border-t">
+              <Button className="flex-1 bg-indigo-600 hover:bg-indigo-700" onClick={() => {
+                toast.success(`${selectedGateway} settings saved`)
+                setShowPaymentGatewayDialog(false)
+              }}>
+                <CheckCircle2 className="w-4 h-4 mr-2" />
+                Save Settings
+              </Button>
+              <Button variant="outline" onClick={() => setShowPaymentGatewayDialog(false)}>
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Regenerate API Key Dialog */}
+      <Dialog open={showRegenerateApiKeyDialog} onOpenChange={setShowRegenerateApiKeyDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Key className="w-5 h-5 text-red-600" />
+              Regenerate API Key
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
+              <p className="text-sm text-red-600">Warning: Regenerating your API key will invalidate the current key. Any applications using the old key will stop working.</p>
+            </div>
+            <div>
+              <Label>Confirm by typing &quot;REGENERATE&quot;</Label>
+              <Input placeholder="Type REGENERATE..." className="mt-1" />
+            </div>
+            <div className="flex items-center gap-3 pt-4 border-t">
+              <Button className="flex-1 bg-red-600 hover:bg-red-700" onClick={() => {
+                toast.success('API key regenerated successfully')
+                setShowRegenerateApiKeyDialog(false)
+              }}>
+                <Key className="w-4 h-4 mr-2" />
+                Regenerate Key
+              </Button>
+              <Button variant="outline" onClick={() => setShowRegenerateApiKeyDialog(false)}>
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Drafts Dialog */}
+      <Dialog open={showDeleteDraftsDialog} onOpenChange={setShowDeleteDraftsDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-600">
+              <AlertTriangle className="w-5 h-5" />
+              Delete All Draft Invoices
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
+              <p className="text-sm text-red-600">This action cannot be undone. All {invoices.filter(inv => inv.status === 'draft').length} draft invoices will be permanently deleted.</p>
+            </div>
+            <div>
+              <Label>Type &quot;DELETE&quot; to confirm</Label>
+              <Input placeholder="Type DELETE..." className="mt-1" />
+            </div>
+            <div className="flex items-center gap-3 pt-4 border-t">
+              <Button variant="destructive" className="flex-1" onClick={() => {
+                toast.success('Draft invoices deleted')
+                setShowDeleteDraftsDialog(false)
+              }}>
+                <AlertTriangle className="w-4 h-4 mr-2" />
+                Delete Drafts
+              </Button>
+              <Button variant="outline" onClick={() => setShowDeleteDraftsDialog(false)}>
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Reset Settings Dialog */}
+      <Dialog open={showResetSettingsDialog} onOpenChange={setShowResetSettingsDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-600">
+              <AlertTriangle className="w-5 h-5" />
+              Reset All Settings
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
+              <p className="text-sm text-red-600">This will reset all invoicing settings to their default values. Your data will not be affected.</p>
+            </div>
+            <div>
+              <Label>Type &quot;RESET&quot; to confirm</Label>
+              <Input placeholder="Type RESET..." className="mt-1" />
+            </div>
+            <div className="flex items-center gap-3 pt-4 border-t">
+              <Button variant="destructive" className="flex-1" onClick={() => {
+                toast.success('Settings reset to defaults')
+                setShowResetSettingsDialog(false)
+              }}>
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Reset Settings
+              </Button>
+              <Button variant="outline" onClick={() => setShowResetSettingsDialog(false)}>
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Client Invoice Dialog */}
+      <Dialog open={showCreateClientInvoiceDialog} onOpenChange={setShowCreateClientInvoiceDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileText className="w-5 h-5 text-emerald-600" />
+              Create Invoice for {selectedClient?.name}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="p-3 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg">
+              <p className="text-sm">Client: <span className="font-medium">{selectedClient?.name}</span></p>
+              <p className="text-sm text-muted-foreground">{selectedClient?.email}</p>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Invoice Type</Label>
+                <select className="w-full mt-1 px-3 py-2 border rounded-lg bg-white dark:bg-gray-800">
+                  <option value="standard">Standard Invoice</option>
+                  <option value="recurring">Recurring Invoice</option>
+                  <option value="estimate">Estimate</option>
+                </select>
+              </div>
+              <div>
+                <Label>Due Date</Label>
+                <Input type="date" className="mt-1" />
+              </div>
+            </div>
+            <div>
+              <Label>Description</Label>
+              <Input placeholder="Invoice description..." className="mt-1" />
+            </div>
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <Label>Quantity</Label>
+                <Input type="number" defaultValue="1" className="mt-1" />
+              </div>
+              <div>
+                <Label>Unit Price</Label>
+                <Input type="number" placeholder="0.00" className="mt-1" />
+              </div>
+              <div>
+                <Label>Tax Rate (%)</Label>
+                <Input type="number" defaultValue="10" className="mt-1" />
+              </div>
+            </div>
+            <div className="flex items-center gap-3 pt-4 border-t">
+              <Button className="flex-1 bg-emerald-600 hover:bg-emerald-700" onClick={() => {
+                toast.success('Invoice created successfully')
+                setShowCreateClientInvoiceDialog(false)
+              }}>
+                <Plus className="w-4 h-4 mr-2" />
+                Create Invoice
+              </Button>
+              <Button variant="outline" onClick={() => setShowCreateClientInvoiceDialog(false)}>
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Client Dialog */}
+      <Dialog open={showEditClientDialog} onOpenChange={setShowEditClientDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Edit className="w-5 h-5 text-blue-600" />
+              Edit Client: {selectedClient?.name}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Client Name</Label>
+                <Input defaultValue={selectedClient?.name} className="mt-1" />
+              </div>
+              <div>
+                <Label>Company</Label>
+                <Input defaultValue={selectedClient?.company} className="mt-1" />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Email</Label>
+                <Input type="email" defaultValue={selectedClient?.email} className="mt-1" />
+              </div>
+              <div>
+                <Label>Phone</Label>
+                <Input defaultValue={selectedClient?.phone} className="mt-1" />
+              </div>
+            </div>
+            <div>
+              <Label>Address</Label>
+              <Input defaultValue={selectedClient?.address} className="mt-1" />
+            </div>
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <Label>City</Label>
+                <Input defaultValue={selectedClient?.city} className="mt-1" />
+              </div>
+              <div>
+                <Label>State</Label>
+                <Input defaultValue={selectedClient?.state} className="mt-1" />
+              </div>
+              <div>
+                <Label>ZIP Code</Label>
+                <Input defaultValue={selectedClient?.zip} className="mt-1" />
+              </div>
+            </div>
+            <div className="flex items-center gap-3 pt-4 border-t">
+              <Button className="flex-1 bg-blue-600 hover:bg-blue-700" onClick={() => {
+                toast.success('Client updated successfully')
+                setShowEditClientDialog(false)
+              }}>
+                <CheckCircle2 className="w-4 h-4 mr-2" />
+                Save Changes
+              </Button>
+              <Button variant="outline" onClick={() => setShowEditClientDialog(false)}>
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* View Client Invoices Dialog */}
+      <Dialog open={showViewClientInvoicesDialog} onOpenChange={setShowViewClientInvoicesDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileText className="w-5 h-5 text-purple-600" />
+              Invoices for {selectedClient?.name}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg text-center">
+                <p className="text-xl font-bold text-green-600">{formatCurrency(selectedClient?.totalPaid || 0)}</p>
+                <p className="text-xs text-muted-foreground">Total Paid</p>
+              </div>
+              <div className="p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg text-center">
+                <p className="text-xl font-bold text-orange-600">{formatCurrency(selectedClient?.balance || 0)}</p>
+                <p className="text-xs text-muted-foreground">Outstanding</p>
+              </div>
+            </div>
+            <div className="space-y-2 max-h-64 overflow-y-auto">
+              {invoices.filter(inv => inv.client.id === selectedClient?.id).map((inv) => (
+                <div key={inv.id} className="flex items-center justify-between p-3 border rounded-lg cursor-pointer hover:bg-muted/50" onClick={() => { setShowViewClientInvoicesDialog(false); handleViewInvoice(inv); }}>
+                  <div>
+                    <p className="font-medium">{inv.invoiceNumber}</p>
+                    <p className="text-sm text-muted-foreground">{new Date(inv.issueDate).toLocaleDateString()}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <p className="font-semibold">{formatCurrency(inv.total)}</p>
+                    {getStatusBadge(inv.status)}
+                  </div>
+                </div>
+              ))}
+            </div>
+            <Button variant="outline" className="w-full" onClick={() => setShowViewClientInvoicesDialog(false)}>
+              Close
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Invoice Dialog */}
+      <Dialog open={showEditInvoiceDialog} onOpenChange={setShowEditInvoiceDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Edit className="w-5 h-5 text-blue-600" />
+              Edit Invoice: {selectedInvoice?.invoiceNumber}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Client</Label>
+                <select className="w-full mt-1 px-3 py-2 border rounded-lg bg-white dark:bg-gray-800" defaultValue={selectedInvoice?.client.id}>
+                  {clients.map((client) => (
+                    <option key={client.id} value={client.id}>{client.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <Label>Status</Label>
+                <select className="w-full mt-1 px-3 py-2 border rounded-lg bg-white dark:bg-gray-800" defaultValue={selectedInvoice?.status}>
+                  <option value="draft">Draft</option>
+                  <option value="pending">Pending</option>
+                  <option value="sent">Sent</option>
+                  <option value="paid">Paid</option>
+                </select>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Issue Date</Label>
+                <Input type="date" defaultValue={selectedInvoice?.issueDate} className="mt-1" />
+              </div>
+              <div>
+                <Label>Due Date</Label>
+                <Input type="date" defaultValue={selectedInvoice?.dueDate} className="mt-1" />
+              </div>
+            </div>
+            <div>
+              <Label>Notes</Label>
+              <textarea
+                className="w-full mt-1 px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 min-h-[80px]"
+                defaultValue={selectedInvoice?.notes}
+                placeholder="Invoice notes..."
+              />
+            </div>
+            <div className="flex items-center gap-3 pt-4 border-t">
+              <Button className="flex-1 bg-blue-600 hover:bg-blue-700" onClick={() => {
+                toast.success('Invoice updated successfully')
+                setShowEditInvoiceDialog(false)
+              }}>
+                <CheckCircle2 className="w-4 h-4 mr-2" />
+                Save Changes
+              </Button>
+              <Button variant="outline" onClick={() => setShowEditInvoiceDialog(false)}>
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Invoice Options Dialog */}
+      <Dialog open={showInvoiceOptionsDialog} onOpenChange={setShowInvoiceOptionsDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <MoreHorizontal className="w-5 h-5 text-gray-600" />
+              Invoice Options: {selectedInvoice?.invoiceNumber}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-2">
+            <Button variant="outline" className="w-full justify-start" onClick={() => { setShowInvoiceOptionsDialog(false); handleViewInvoice(selectedInvoice!); }}>
+              <Eye className="w-4 h-4 mr-2" />
+              View Invoice
+            </Button>
+            <Button variant="outline" className="w-full justify-start" onClick={() => { setShowInvoiceOptionsDialog(false); setShowEditInvoiceDialog(true); }}>
+              <Edit className="w-4 h-4 mr-2" />
+              Edit Invoice
+            </Button>
+            <Button variant="outline" className="w-full justify-start" onClick={() => { toast.success('Invoice sent'); setShowInvoiceOptionsDialog(false); }}>
+              <Send className="w-4 h-4 mr-2" />
+              Send Invoice
+            </Button>
+            <Button variant="outline" className="w-full justify-start" onClick={() => { toast.success('Invoice duplicated'); setShowInvoiceOptionsDialog(false); }}>
+              <Copy className="w-4 h-4 mr-2" />
+              Duplicate Invoice
+            </Button>
+            <Button variant="outline" className="w-full justify-start" onClick={() => { toast.success('Downloading...'); setShowInvoiceOptionsDialog(false); }}>
+              <Download className="w-4 h-4 mr-2" />
+              Download PDF
+            </Button>
+            <Button variant="outline" className="w-full justify-start text-red-600" onClick={() => { toast.success('Invoice voided'); setShowInvoiceOptionsDialog(false); }}>
+              <FileX className="w-4 h-4 mr-2" />
+              Void Invoice
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Process Recurring Dialog */}
+      <Dialog open={showProcessRecurringDialog} onOpenChange={setShowProcessRecurringDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <RefreshCw className="w-5 h-5 text-purple-600" />
+              Process Recurring Invoices
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+              <p className="text-sm text-muted-foreground">Recurring invoices ready to process</p>
+              <p className="text-2xl font-bold text-purple-600">{invoices.filter(inv => inv.type === 'recurring').length}</p>
+            </div>
+            <div className="space-y-2">
+              {invoices.filter(inv => inv.type === 'recurring').map((inv) => (
+                <div key={inv.id} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <input type="checkbox" defaultChecked className="rounded" />
+                    <div>
+                      <p className="font-medium">{inv.invoiceNumber}</p>
+                      <p className="text-sm text-muted-foreground">{inv.client.name}</p>
+                    </div>
+                  </div>
+                  <p className="font-semibold">{formatCurrency(inv.total)}</p>
+                </div>
+              ))}
+            </div>
+            <div className="flex items-center gap-3 pt-4 border-t">
+              <Button className="flex-1 bg-purple-600 hover:bg-purple-700" onClick={() => {
+                toast.success('Recurring invoices processed')
+                setShowProcessRecurringDialog(false)
+              }}>
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Process Selected
+              </Button>
+              <Button variant="outline" onClick={() => setShowProcessRecurringDialog(false)}>
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Expense Report Dialog (for reports tab) */}
+      <Dialog open={showExpenseReportDialog} onOpenChange={setShowExpenseReportDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Receipt className="w-5 h-5 text-blue-600" />
+              Expense Report
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-center">
+                <p className="text-2xl font-bold text-blue-600">{formatCurrency(expenses.reduce((sum, e) => sum + e.amount, 0))}</p>
+                <p className="text-sm text-muted-foreground">Total Expenses</p>
+              </div>
+              <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg text-center">
+                <p className="text-2xl font-bold text-green-600">{formatCurrency(expenses.filter(e => e.billable).reduce((sum, e) => sum + e.amount, 0))}</p>
+                <p className="text-sm text-muted-foreground">Billable</p>
+              </div>
+            </div>
+            <div className="space-y-2">
+              {['Software', 'Infrastructure', 'Office', 'Travel'].map((cat) => {
+                const catExpenses = expenses.filter(e => e.category === cat)
+                const catTotal = catExpenses.reduce((sum, e) => sum + e.amount, 0)
+                return (
+                  <div key={cat} className="flex items-center justify-between p-2 border rounded-lg">
+                    <span className="text-sm font-medium">{cat}</span>
+                    <span className="font-semibold">{formatCurrency(catTotal)}</span>
+                  </div>
+                )
+              })}
+            </div>
+            <Button variant="outline" className="w-full" onClick={() => setShowExpenseReportDialog(false)}>
+              Close
+            </Button>
           </div>
         </DialogContent>
       </Dialog>

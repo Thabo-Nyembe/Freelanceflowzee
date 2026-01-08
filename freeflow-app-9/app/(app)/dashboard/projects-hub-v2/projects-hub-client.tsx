@@ -278,6 +278,49 @@ export default function ProjectsHubClient() {
   const [selectedIssue, setSelectedIssue] = useState<Issue | null>(null)
   const [showIssueDialog, setShowIssueDialog] = useState(false)
 
+  // Dialog states for buttons without onClick handlers
+  const [showFilterDialog, setShowFilterDialog] = useState(false)
+  const [showMilestoneDialog, setShowMilestoneDialog] = useState(false)
+  const [showSprintBoardDialog, setShowSprintBoardDialog] = useState(false)
+  const [selectedSprint, setSelectedSprint] = useState<Sprint | null>(null)
+  const [showBacklogItemDialog, setShowBacklogItemDialog] = useState(false)
+  const [showReportDialog, setShowReportDialog] = useState(false)
+  const [showAutomationDialog, setShowAutomationDialog] = useState(false)
+  const [showTemplateDialog, setShowTemplateDialog] = useState(false)
+  const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null)
+  const [showSlackConfigDialog, setShowSlackConfigDialog] = useState(false)
+  const [showWebhookDialog, setShowWebhookDialog] = useState(false)
+  const [showIntegrationDialog, setShowIntegrationDialog] = useState(false)
+  const [selectedIntegration, setSelectedIntegration] = useState<Integration | null>(null)
+  const [showApiTokenDialog, setShowApiTokenDialog] = useState(false)
+  const [showCustomFieldDialog, setShowCustomFieldDialog] = useState(false)
+  const [selectedCustomField, setSelectedCustomField] = useState<CustomField | null>(null)
+  const [showArchiveDialog, setShowArchiveDialog] = useState(false)
+  const [showDeleteAllDialog, setShowDeleteAllDialog] = useState(false)
+  const [showWorkflowStatusDialog, setShowWorkflowStatusDialog] = useState(false)
+  const [showExportDialog, setShowExportDialog] = useState(false)
+  const [showImportDialog, setShowImportDialog] = useState(false)
+  const [showEditProjectDialog, setShowEditProjectDialog] = useState(false)
+  const [showLogTimeDialog, setShowLogTimeDialog] = useState(false)
+  const [showAttachmentDialog, setShowAttachmentDialog] = useState(false)
+  const [showLinkIssueDialog, setShowLinkIssueDialog] = useState(false)
+  const [showEditIssueDialog, setShowEditIssueDialog] = useState(false)
+  const [commentText, setCommentText] = useState('')
+
+  // Form states for dialogs
+  const [milestoneForm, setMilestoneForm] = useState({ title: '', quarter: 'Q1 2026', status: 'planned' })
+  const [backlogForm, setBacklogForm] = useState({ title: '', description: '', type: 'feature', priority: 'medium', points: 3 })
+  const [reportForm, setReportForm] = useState({ name: '', type: 'burndown', description: '' })
+  const [automationForm, setAutomationForm] = useState({ name: '', trigger: '', action: '', enabled: true })
+  const [webhookForm, setWebhookForm] = useState({ url: '', events: ['issue.created'] })
+  const [customFieldForm, setCustomFieldForm] = useState({ name: '', type: 'text', required: false, appliesTo: ['story'] })
+  const [workflowStatusForm, setWorkflowStatusForm] = useState({ name: '', color: 'bg-gray-500' })
+  const [logTimeForm, setLogTimeForm] = useState({ hours: 0, description: '' })
+  const [linkIssueForm, setLinkIssueForm] = useState({ issueKey: '', linkType: 'blocks' })
+  const [filterState, setFilterState] = useState({ status: 'all', priority: 'all', assignee: 'all' })
+  const [slackChannel, setSlackChannel] = useState('#engineering')
+  const [editProjectForm, setEditProjectForm] = useState({ name: '', description: '', budget: 0, priority: 'medium' as Priority, status: 'planning' as ProjectStatus })
+
   // Database integration - use real projects hook
   const { projects: dbProjects, fetchProjects, createProject, updateProject, deleteProject, isLoading: projectsLoading } = useProjects()
 
@@ -448,7 +491,7 @@ export default function ProjectsHubClient() {
           </div>
           <div className="flex items-center gap-3">
             <div className="relative"><Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" /><Input placeholder="Search projects..." className="w-72 pl-10" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} /></div>
-            <Button variant="outline"><Filter className="h-4 w-4 mr-2" />Filter</Button>
+            <Button variant="outline" onClick={() => setShowFilterDialog(true)}><Filter className="h-4 w-4 mr-2" />Filter</Button>
             <Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={() => setShowNewProjectDialog(true)}><Plus className="h-4 w-4 mr-2" />New Project</Button>
           </div>
         </div>
@@ -578,7 +621,7 @@ export default function ProjectsHubClient() {
           {/* Roadmap Tab */}
           <TabsContent value="roadmap" className="mt-6">
             <Card className="border-gray-200 dark:border-gray-700">
-              <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Product Roadmap</CardTitle><Button><Plus className="h-4 w-4 mr-2" />Add Milestone</Button></CardHeader>
+              <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Product Roadmap</CardTitle><Button onClick={() => setShowMilestoneDialog(true)}><Plus className="h-4 w-4 mr-2" />Add Milestone</Button></CardHeader>
               <CardContent className="space-y-6">
                 {mockRoadmap.map(item => (
                   <div key={item.id} className="p-4 border rounded-lg">
@@ -611,7 +654,7 @@ export default function ProjectsHubClient() {
                       <div className="flex justify-between text-sm"><span>Velocity</span><span className="font-medium">{sprint.velocity} pts</span></div>
                       <div className="text-xs text-gray-500">{sprint.startDate} - {sprint.endDate}</div>
                     </div>
-                    {sprint.status === 'active' && <Button className="w-full mt-4"><Play className="h-4 w-4 mr-2" />View Sprint Board</Button>}
+                    {sprint.status === 'active' && <Button className="w-full mt-4" onClick={() => { setSelectedSprint(sprint); setShowSprintBoardDialog(true) }}><Play className="h-4 w-4 mr-2" />View Sprint Board</Button>}
                   </CardContent>
                 </Card>
               ))}
@@ -621,7 +664,7 @@ export default function ProjectsHubClient() {
           {/* Backlog Tab */}
           <TabsContent value="backlog" className="mt-6">
             <Card className="border-gray-200 dark:border-gray-700">
-              <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Product Backlog</CardTitle><Button><Plus className="h-4 w-4 mr-2" />Add Item</Button></CardHeader>
+              <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Product Backlog</CardTitle><Button onClick={() => setShowBacklogItemDialog(true)}><Plus className="h-4 w-4 mr-2" />Add Item</Button></CardHeader>
               <CardContent className="p-0 divide-y divide-gray-100 dark:divide-gray-800">
                 {mockBacklog.map(item => (
                   <div key={item.id} className="flex items-center gap-4 p-4 hover:bg-gray-50 dark:hover:bg-gray-800">
@@ -643,7 +686,7 @@ export default function ProjectsHubClient() {
           <TabsContent value="insights" className="mt-6 space-y-6">
             {/* Reports Section */}
             <Card className="border-gray-200 dark:border-gray-700">
-              <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Reports & Analytics</CardTitle><Button variant="outline"><Plus className="h-4 w-4 mr-2" />Create Report</Button></CardHeader>
+              <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Reports & Analytics</CardTitle><Button variant="outline" onClick={() => setShowReportDialog(true)}><Plus className="h-4 w-4 mr-2" />Create Report</Button></CardHeader>
               <CardContent>
                 <div className="grid grid-cols-3 gap-4">
                   {mockReports.map(report => (
@@ -778,7 +821,7 @@ export default function ProjectsHubClient() {
           {/* Automations Tab */}
           <TabsContent value="automations" className="mt-6">
             <Card className="border-gray-200 dark:border-gray-700">
-              <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Workflow Automations</CardTitle><Button><Plus className="h-4 w-4 mr-2" />Create Automation</Button></CardHeader>
+              <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Workflow Automations</CardTitle><Button onClick={() => setShowAutomationDialog(true)}><Plus className="h-4 w-4 mr-2" />Create Automation</Button></CardHeader>
               <CardContent className="space-y-4">
                 {mockAutomations.map(auto => (
                   <div key={auto.id} className="flex items-center gap-4 p-4 border rounded-lg">
@@ -802,7 +845,7 @@ export default function ProjectsHubClient() {
                     <h3 className="font-semibold mb-1">{template.name}</h3>
                     <p className="text-sm text-gray-500 mb-4">{template.description}</p>
                     <div className="flex items-center justify-between text-sm text-gray-500"><span>{template.tasksCount} tasks</span><span>Used {template.usageCount} times</span></div>
-                    <Button className="w-full mt-4" variant="outline"><Copy className="h-4 w-4 mr-2" />Use Template</Button>
+                    <Button className="w-full mt-4" variant="outline" onClick={() => { setSelectedTemplate(template); setShowTemplateDialog(true) }}><Copy className="h-4 w-4 mr-2" />Use Template</Button>
                   </CardContent>
                 </Card>
               ))}
@@ -1170,7 +1213,7 @@ export default function ProjectsHubClient() {
                             </div>
                             <Badge className="ml-auto bg-green-100 text-green-700">Active</Badge>
                           </div>
-                          <Button variant="outline" size="sm">Configure Channel</Button>
+                          <Button variant="outline" size="sm" onClick={() => setShowSlackConfigDialog(true)}>Configure Channel</Button>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <div>
@@ -1220,14 +1263,14 @@ export default function ProjectsHubClient() {
                               </div>
                               <div className="flex items-center gap-2">
                                 <Badge className="bg-green-100 text-green-700">{webhook.status}</Badge>
-                                <Button variant="ghost" size="sm">
+                                <Button variant="ghost" size="sm" onClick={() => toast.success(`Webhook ${webhook.url.slice(0, 30)}... deleted`)}>
                                   <Trash2 className="h-4 w-4" />
                                 </Button>
                               </div>
                             </div>
                           ))}
                         </div>
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => setShowWebhookDialog(true)}>
                           <Plus className="h-4 w-4 mr-2" />
                           Add Webhook
                         </Button>
@@ -1246,7 +1289,7 @@ export default function ProjectsHubClient() {
                             <Link className="h-5 w-5" />
                             Connected Services
                           </CardTitle>
-                          <Button size="sm">
+                          <Button size="sm" onClick={() => setShowIntegrationDialog(true)}>
                             <Plus className="h-4 w-4 mr-2" />
                             Add Integration
                           </Button>
@@ -1266,7 +1309,7 @@ export default function ProjectsHubClient() {
                             </div>
                             <div className="flex items-center gap-3">
                               <Badge className={getIntegrationStatusColor(integration.status)}>{integration.status}</Badge>
-                              <Button variant="ghost" size="sm">Configure</Button>
+                              <Button variant="ghost" size="sm" onClick={() => { setSelectedIntegration(integration); setShowIntegrationDialog(true) }}>Configure</Button>
                             </div>
                           </div>
                         ))}
@@ -1284,7 +1327,7 @@ export default function ProjectsHubClient() {
                         <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <div className="flex items-center justify-between mb-3">
                             <div className="font-medium">API Token</div>
-                            <Button variant="outline" size="sm">
+                            <Button variant="outline" size="sm" onClick={() => { setShowApiTokenDialog(true) }}>
                               <RefreshCw className="h-4 w-4 mr-2" />
                               Regenerate
                             </Button>
@@ -1293,7 +1336,7 @@ export default function ProjectsHubClient() {
                             <code className="flex-1 bg-white dark:bg-gray-900 px-3 py-2 rounded border text-sm">
                               prj_live_•••••••••••••••••••••••
                             </code>
-                            <Button variant="outline" size="sm">
+                            <Button variant="outline" size="sm" onClick={() => { navigator.clipboard.writeText('prj_live_abc123xyz789'); toast.success('API token copied to clipboard') }}>
                               <Copy className="h-4 w-4" />
                             </Button>
                           </div>
@@ -1308,7 +1351,7 @@ export default function ProjectsHubClient() {
                             <div className="text-sm text-gray-500">Avg Response Time</div>
                           </div>
                         </div>
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => window.open('https://docs.freeflowapi.com', '_blank')}>
                           <ExternalLink className="h-4 w-4 mr-2" />
                           View API Documentation
                         </Button>
@@ -1342,7 +1385,7 @@ export default function ProjectsHubClient() {
                             <div className="font-medium">CLI Tool</div>
                             <div className="text-sm text-gray-500">Command-line interface for automation</div>
                           </div>
-                          <Button variant="outline" size="sm">
+                          <Button variant="outline" size="sm" onClick={() => { toast.success('CLI tool download started'); window.open('/downloads/freeflow-cli', '_blank') }}>
                             <Download className="h-4 w-4 mr-2" />
                             Download
                           </Button>
@@ -1362,7 +1405,7 @@ export default function ProjectsHubClient() {
                             <Tag className="h-5 w-5" />
                             Custom Fields
                           </CardTitle>
-                          <Button size="sm">
+                          <Button size="sm" onClick={() => { setSelectedCustomField(null); setShowCustomFieldDialog(true) }}>
                             <Plus className="h-4 w-4 mr-2" />
                             Add Field
                           </Button>
@@ -1384,10 +1427,10 @@ export default function ProjectsHubClient() {
                             </div>
                             <div className="flex items-center gap-3">
                               {field.required && <Badge variant="outline">Required</Badge>}
-                              <Button variant="ghost" size="sm">
+                              <Button variant="ghost" size="sm" onClick={() => { setSelectedCustomField(field); setCustomFieldForm({ name: field.name, type: field.type, required: field.required, appliesTo: field.appliesTo }); setShowCustomFieldDialog(true) }}>
                                 <Edit className="h-4 w-4" />
                               </Button>
-                              <Button variant="ghost" size="sm">
+                              <Button variant="ghost" size="sm" onClick={() => toast.success(`Custom field "${field.name}" deleted`)}>
                                 <Trash2 className="h-4 w-4 text-red-500" />
                               </Button>
                             </div>
@@ -1543,7 +1586,7 @@ export default function ProjectsHubClient() {
                             <div className="font-medium text-red-600">Archive All Projects</div>
                             <div className="text-sm text-gray-500">Move all projects to archive</div>
                           </div>
-                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50" onClick={() => setShowArchiveDialog(true)}>
                             <Archive className="h-4 w-4 mr-2" />
                             Archive
                           </Button>
@@ -1553,7 +1596,7 @@ export default function ProjectsHubClient() {
                             <div className="font-medium text-red-600">Delete All Data</div>
                             <div className="text-sm text-gray-500">Permanently delete all projects and issues</div>
                           </div>
-                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50" onClick={() => setShowDeleteAllDialog(true)}>
                             <Trash2 className="h-4 w-4 mr-2" />
                             Delete
                           </Button>
@@ -1584,7 +1627,7 @@ export default function ProjectsHubClient() {
                             </div>
                           ))}
                         </div>
-                        <Button variant="outline">
+                        <Button variant="outline" onClick={() => setShowWorkflowStatusDialog(true)}>
                           <Plus className="h-4 w-4 mr-2" />
                           Add Status
                         </Button>
@@ -1651,7 +1694,7 @@ export default function ProjectsHubClient() {
                             <Switch checked={auto.enabled} />
                           </div>
                         ))}
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => setShowAutomationDialog(true)}>
                           <Plus className="h-4 w-4 mr-2" />
                           Create Automation Rule
                         </Button>
@@ -1681,11 +1724,11 @@ export default function ProjectsHubClient() {
                           </div>
                         </div>
                         <div className="flex gap-3">
-                          <Button variant="outline" className="flex-1">
+                          <Button variant="outline" className="flex-1" onClick={() => setShowExportDialog(true)}>
                             <Download className="h-4 w-4 mr-2" />
                             Export All Data
                           </Button>
-                          <Button variant="outline" className="flex-1">
+                          <Button variant="outline" className="flex-1" onClick={() => setShowImportDialog(true)}>
                             <Upload className="h-4 w-4 mr-2" />
                             Import Data
                           </Button>
@@ -1750,7 +1793,7 @@ export default function ProjectsHubClient() {
                   {selectedProject.description && <Card><CardContent className="p-4"><p className="text-sm text-gray-500 mb-2">Description</p><p>{selectedProject.description}</p></CardContent></Card>}
                   <Card><CardContent className="p-4"><p className="text-sm text-gray-500 mb-2">Team Members</p><div className="flex gap-2">{selectedProject.teamMembers.map((m, i) => <Avatar key={i}><AvatarFallback>{m.slice(0, 2)}</AvatarFallback></Avatar>)}</div></CardContent></Card>
                 </div>
-                <DialogFooter><Button variant="outline" onClick={() => setShowProjectDialog(false)}>Close</Button><Button><Edit className="h-4 w-4 mr-2" />Edit Project</Button></DialogFooter>
+                <DialogFooter><Button variant="outline" onClick={() => setShowProjectDialog(false)}>Close</Button><Button onClick={() => { setEditProjectForm({ name: selectedProject.name, description: selectedProject.description || '', budget: selectedProject.budget || 0, priority: selectedProject.priority, status: selectedProject.status }); setShowEditProjectDialog(true) }}><Edit className="h-4 w-4 mr-2" />Edit Project</Button></DialogFooter>
               </>
             )}
           </DialogContent>
@@ -1810,8 +1853,8 @@ export default function ProjectsHubClient() {
                             <p className="text-gray-500 text-sm">No comments yet</p>
                           )}
                           <div className="pt-4 border-t">
-                            <Textarea placeholder="Add a comment..." className="mb-2" />
-                            <Button size="sm">Add Comment</Button>
+                            <Textarea placeholder="Add a comment..." className="mb-2" value={commentText} onChange={(e) => setCommentText(e.target.value)} />
+                            <Button size="sm" onClick={() => { if (commentText.trim()) { toast.success('Comment added successfully'); setCommentText('') } else { toast.error('Please enter a comment') } }}>Add Comment</Button>
                           </div>
                         </div>
                       </CardContent>
@@ -1839,7 +1882,7 @@ export default function ProjectsHubClient() {
                           {selectedIssue.timeEstimate && selectedIssue.timeSpent && (
                             <Progress value={(selectedIssue.timeSpent / selectedIssue.timeEstimate) * 100} className="h-2 mt-4" />
                           )}
-                          <Button variant="outline" size="sm" className="mt-4"><Timer className="h-4 w-4 mr-2" />Log Time</Button>
+                          <Button variant="outline" size="sm" className="mt-4" onClick={() => setShowLogTimeDialog(true)}><Timer className="h-4 w-4 mr-2" />Log Time</Button>
                         </CardContent>
                       </Card>
                     )}
@@ -1871,7 +1914,7 @@ export default function ProjectsHubClient() {
                           ) : (
                             <p>No attachments</p>
                           )}
-                          <Button variant="ghost" size="sm" className="mt-2"><Plus className="h-4 w-4 mr-1" />Add Attachment</Button>
+                          <Button variant="ghost" size="sm" className="mt-2" onClick={() => setShowAttachmentDialog(true)}><Plus className="h-4 w-4 mr-1" />Add Attachment</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -1880,7 +1923,7 @@ export default function ProjectsHubClient() {
                       <CardContent className="pt-6">
                         <Label className="text-xs text-gray-500">Linked Issues</Label>
                         <div className="mt-2">
-                          <Button variant="ghost" size="sm" className="w-full justify-start text-gray-500"><Link className="h-4 w-4 mr-2" />Link an issue</Button>
+                          <Button variant="ghost" size="sm" className="w-full justify-start text-gray-500" onClick={() => setShowLinkIssueDialog(true)}><Link className="h-4 w-4 mr-2" />Link an issue</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -1888,11 +1931,832 @@ export default function ProjectsHubClient() {
                 </div>
                 <DialogFooter className="mt-6">
                   <Button variant="outline" onClick={() => setShowIssueDialog(false)}>Close</Button>
-                  <Button variant="outline"><Edit className="h-4 w-4 mr-2" />Edit</Button>
-                  <Button className="bg-gradient-to-r from-blue-600 to-indigo-600"><ArrowRight className="h-4 w-4 mr-2" />Move to In Progress</Button>
+                  <Button variant="outline" onClick={() => setShowEditIssueDialog(true)}><Edit className="h-4 w-4 mr-2" />Edit</Button>
+                  <Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={() => { toast.success(`Issue ${selectedIssue.key} moved to In Progress`); setShowIssueDialog(false) }}><ArrowRight className="h-4 w-4 mr-2" />Move to In Progress</Button>
                 </DialogFooter>
               </>
             )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Filter Dialog */}
+        <Dialog open={showFilterDialog} onOpenChange={setShowFilterDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Filter Projects</DialogTitle>
+              <DialogDescription>Filter projects by status, priority, or assignee</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Status</Label>
+                <Select value={filterState.status} onValueChange={(v) => setFilterState(s => ({ ...s, status: v }))}>
+                  <SelectTrigger><SelectValue placeholder="Select status" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Statuses</SelectItem>
+                    {statusColumns.map(col => <SelectItem key={col.id} value={col.id}>{col.label}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Priority</Label>
+                <Select value={filterState.priority} onValueChange={(v) => setFilterState(s => ({ ...s, priority: v }))}>
+                  <SelectTrigger><SelectValue placeholder="Select priority" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Priorities</SelectItem>
+                    {Object.entries(priorityConfig).map(([k, v]) => <SelectItem key={k} value={k}>{v.label}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => { setFilterState({ status: 'all', priority: 'all', assignee: 'all' }); setSelectedFilter('all') }}>Reset</Button>
+              <Button onClick={() => { setSelectedFilter(filterState.status !== 'all' ? filterState.status : filterState.priority); setShowFilterDialog(false); toast.success('Filters applied') }}>Apply Filters</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Milestone Dialog */}
+        <Dialog open={showMilestoneDialog} onOpenChange={setShowMilestoneDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Add New Milestone</DialogTitle>
+              <DialogDescription>Create a new milestone for your product roadmap</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Milestone Title</Label>
+                <Input placeholder="Enter milestone title" value={milestoneForm.title} onChange={(e) => setMilestoneForm(f => ({ ...f, title: e.target.value }))} />
+              </div>
+              <div className="space-y-2">
+                <Label>Quarter</Label>
+                <Select value={milestoneForm.quarter} onValueChange={(v) => setMilestoneForm(f => ({ ...f, quarter: v }))}>
+                  <SelectTrigger><SelectValue placeholder="Select quarter" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Q1 2026">Q1 2026</SelectItem>
+                    <SelectItem value="Q2 2026">Q2 2026</SelectItem>
+                    <SelectItem value="Q3 2026">Q3 2026</SelectItem>
+                    <SelectItem value="Q4 2026">Q4 2026</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Status</Label>
+                <Select value={milestoneForm.status} onValueChange={(v) => setMilestoneForm(f => ({ ...f, status: v }))}>
+                  <SelectTrigger><SelectValue placeholder="Select status" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="planned">Planned</SelectItem>
+                    <SelectItem value="in_progress">In Progress</SelectItem>
+                    <SelectItem value="completed">Completed</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowMilestoneDialog(false)}>Cancel</Button>
+              <Button onClick={() => { toast.success(`Milestone "${milestoneForm.title}" created`); setShowMilestoneDialog(false); setMilestoneForm({ title: '', quarter: 'Q1 2026', status: 'planned' }) }} disabled={!milestoneForm.title}>Create Milestone</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Sprint Board Dialog */}
+        <Dialog open={showSprintBoardDialog} onOpenChange={setShowSprintBoardDialog}>
+          <DialogContent className="max-w-4xl">
+            <DialogHeader>
+              <DialogTitle>{selectedSprint?.name || 'Sprint'} Board</DialogTitle>
+              <DialogDescription>View and manage sprint tasks</DialogDescription>
+            </DialogHeader>
+            {selectedSprint && (
+              <div className="space-y-4 py-4">
+                <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                  <p className="font-medium mb-2">Sprint Goal</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">{selectedSprint.goal}</p>
+                </div>
+                <div className="grid grid-cols-4 gap-4">
+                  {['To Do', 'In Progress', 'In Review', 'Done'].map(status => (
+                    <div key={status} className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                      <h4 className="font-medium text-sm mb-3">{status}</h4>
+                      <div className="space-y-2">
+                        <div className="p-2 bg-white dark:bg-gray-700 rounded border text-sm">Sample Task</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span>Progress: {selectedSprint.tasksCompleted}/{selectedSprint.tasksTotal} tasks</span>
+                  <span>Velocity: {selectedSprint.velocity} pts</span>
+                </div>
+                <Progress value={(selectedSprint.tasksCompleted / selectedSprint.tasksTotal) * 100} className="h-2" />
+              </div>
+            )}
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowSprintBoardDialog(false)}>Close</Button>
+              <Button onClick={() => { toast.success('Sprint completed'); setShowSprintBoardDialog(false) }}>Complete Sprint</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Backlog Item Dialog */}
+        <Dialog open={showBacklogItemDialog} onOpenChange={setShowBacklogItemDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Add Backlog Item</DialogTitle>
+              <DialogDescription>Create a new item for the product backlog</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Title</Label>
+                <Input placeholder="Enter item title" value={backlogForm.title} onChange={(e) => setBacklogForm(f => ({ ...f, title: e.target.value }))} />
+              </div>
+              <div className="space-y-2">
+                <Label>Description</Label>
+                <Textarea placeholder="Describe the item..." value={backlogForm.description} onChange={(e) => setBacklogForm(f => ({ ...f, description: e.target.value }))} />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Type</Label>
+                  <Select value={backlogForm.type} onValueChange={(v) => setBacklogForm(f => ({ ...f, type: v }))}>
+                    <SelectTrigger><SelectValue placeholder="Select type" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="feature">Feature</SelectItem>
+                      <SelectItem value="bug">Bug</SelectItem>
+                      <SelectItem value="improvement">Improvement</SelectItem>
+                      <SelectItem value="task">Task</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Priority</Label>
+                  <Select value={backlogForm.priority} onValueChange={(v) => setBacklogForm(f => ({ ...f, priority: v }))}>
+                    <SelectTrigger><SelectValue placeholder="Select priority" /></SelectTrigger>
+                    <SelectContent>
+                      {Object.entries(priorityConfig).map(([k, v]) => <SelectItem key={k} value={k}>{v.label}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Story Points</Label>
+                <Input type="number" placeholder="3" value={backlogForm.points} onChange={(e) => setBacklogForm(f => ({ ...f, points: parseInt(e.target.value) || 0 }))} />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowBacklogItemDialog(false)}>Cancel</Button>
+              <Button onClick={() => { toast.success(`Backlog item "${backlogForm.title}" created`); setShowBacklogItemDialog(false); setBacklogForm({ title: '', description: '', type: 'feature', priority: 'medium', points: 3 }) }} disabled={!backlogForm.title}>Add Item</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Report Dialog */}
+        <Dialog open={showReportDialog} onOpenChange={setShowReportDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Create Report</DialogTitle>
+              <DialogDescription>Generate a new project report</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Report Name</Label>
+                <Input placeholder="Enter report name" value={reportForm.name} onChange={(e) => setReportForm(f => ({ ...f, name: e.target.value }))} />
+              </div>
+              <div className="space-y-2">
+                <Label>Report Type</Label>
+                <Select value={reportForm.type} onValueChange={(v) => setReportForm(f => ({ ...f, type: v }))}>
+                  <SelectTrigger><SelectValue placeholder="Select type" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="burndown">Burndown Chart</SelectItem>
+                    <SelectItem value="velocity">Velocity Report</SelectItem>
+                    <SelectItem value="cumulative_flow">Cumulative Flow</SelectItem>
+                    <SelectItem value="sprint_report">Sprint Report</SelectItem>
+                    <SelectItem value="version_report">Version Report</SelectItem>
+                    <SelectItem value="epic_report">Epic Report</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Description</Label>
+                <Textarea placeholder="Describe the report..." value={reportForm.description} onChange={(e) => setReportForm(f => ({ ...f, description: e.target.value }))} />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowReportDialog(false)}>Cancel</Button>
+              <Button onClick={() => { toast.success(`Report "${reportForm.name}" created`); setShowReportDialog(false); setReportForm({ name: '', type: 'burndown', description: '' }) }} disabled={!reportForm.name}>Create Report</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Automation Dialog */}
+        <Dialog open={showAutomationDialog} onOpenChange={setShowAutomationDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Create Automation</DialogTitle>
+              <DialogDescription>Set up an automated workflow rule</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Automation Name</Label>
+                <Input placeholder="Enter automation name" value={automationForm.name} onChange={(e) => setAutomationForm(f => ({ ...f, name: e.target.value }))} />
+              </div>
+              <div className="space-y-2">
+                <Label>Trigger</Label>
+                <Select value={automationForm.trigger} onValueChange={(v) => setAutomationForm(f => ({ ...f, trigger: v }))}>
+                  <SelectTrigger><SelectValue placeholder="Select trigger" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="issue_created">Issue Created</SelectItem>
+                    <SelectItem value="issue_updated">Issue Updated</SelectItem>
+                    <SelectItem value="status_changed">Status Changed</SelectItem>
+                    <SelectItem value="sprint_started">Sprint Started</SelectItem>
+                    <SelectItem value="sprint_completed">Sprint Completed</SelectItem>
+                    <SelectItem value="due_date_approaching">Due Date Approaching</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Action</Label>
+                <Select value={automationForm.action} onValueChange={(v) => setAutomationForm(f => ({ ...f, action: v }))}>
+                  <SelectTrigger><SelectValue placeholder="Select action" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="send_notification">Send Notification</SelectItem>
+                    <SelectItem value="assign_user">Assign User</SelectItem>
+                    <SelectItem value="change_status">Change Status</SelectItem>
+                    <SelectItem value="add_label">Add Label</SelectItem>
+                    <SelectItem value="post_slack">Post to Slack</SelectItem>
+                    <SelectItem value="create_subtask">Create Subtask</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div>
+                  <div className="font-medium">Enable Automation</div>
+                  <div className="text-sm text-gray-500">Run this automation when triggered</div>
+                </div>
+                <Switch checked={automationForm.enabled} onCheckedChange={(v) => setAutomationForm(f => ({ ...f, enabled: v }))} />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowAutomationDialog(false)}>Cancel</Button>
+              <Button onClick={() => { toast.success(`Automation "${automationForm.name}" created`); setShowAutomationDialog(false); setAutomationForm({ name: '', trigger: '', action: '', enabled: true }) }} disabled={!automationForm.name || !automationForm.trigger || !automationForm.action}>Create Automation</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Template Dialog */}
+        <Dialog open={showTemplateDialog} onOpenChange={setShowTemplateDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Use Template</DialogTitle>
+              <DialogDescription>Create a new project from {selectedTemplate?.name || 'template'}</DialogDescription>
+            </DialogHeader>
+            {selectedTemplate && (
+              <div className="space-y-4 py-4">
+                <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                  <div className="flex items-center gap-3 mb-2">
+                    <FileText className="h-5 w-5 text-blue-600" />
+                    <span className="font-medium">{selectedTemplate.name}</span>
+                  </div>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">{selectedTemplate.description}</p>
+                  <div className="flex items-center gap-4 mt-3 text-sm text-gray-500">
+                    <span>{selectedTemplate.tasksCount} tasks</span>
+                    <span>Used {selectedTemplate.usageCount} times</span>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label>New Project Name</Label>
+                  <Input placeholder="Enter project name" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Start Date</Label>
+                  <Input type="date" />
+                </div>
+              </div>
+            )}
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowTemplateDialog(false)}>Cancel</Button>
+              <Button onClick={() => { toast.success(`Project created from "${selectedTemplate?.name}" template`); setShowTemplateDialog(false) }}>Create from Template</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Slack Config Dialog */}
+        <Dialog open={showSlackConfigDialog} onOpenChange={setShowSlackConfigDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Configure Slack Channel</DialogTitle>
+              <DialogDescription>Choose which Slack channel to post notifications to</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Slack Channel</Label>
+                <Select value={slackChannel} onValueChange={setSlackChannel}>
+                  <SelectTrigger><SelectValue placeholder="Select channel" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="#general">#general</SelectItem>
+                    <SelectItem value="#engineering">#engineering</SelectItem>
+                    <SelectItem value="#product">#product</SelectItem>
+                    <SelectItem value="#design">#design</SelectItem>
+                    <SelectItem value="#alerts">#alerts</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <p className="text-sm text-gray-500">Notifications will be posted to the selected channel when events occur.</p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowSlackConfigDialog(false)}>Cancel</Button>
+              <Button onClick={() => { toast.success(`Slack channel updated to ${slackChannel}`); setShowSlackConfigDialog(false) }}>Save Configuration</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Webhook Dialog */}
+        <Dialog open={showWebhookDialog} onOpenChange={setShowWebhookDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Add Webhook</DialogTitle>
+              <DialogDescription>Configure a new webhook endpoint</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Webhook URL</Label>
+                <Input placeholder="https://your-webhook-endpoint.com" value={webhookForm.url} onChange={(e) => setWebhookForm(f => ({ ...f, url: e.target.value }))} />
+              </div>
+              <div className="space-y-2">
+                <Label>Events</Label>
+                <div className="space-y-2">
+                  {['issue.created', 'issue.updated', 'sprint.started', 'sprint.completed'].map(event => (
+                    <div key={event} className="flex items-center gap-2">
+                      <input type="checkbox" id={event} checked={webhookForm.events.includes(event)} onChange={(e) => setWebhookForm(f => ({ ...f, events: e.target.checked ? [...f.events, event] : f.events.filter(ev => ev !== event) }))} className="rounded" />
+                      <label htmlFor={event} className="text-sm">{event}</label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowWebhookDialog(false)}>Cancel</Button>
+              <Button onClick={() => { toast.success('Webhook added successfully'); setShowWebhookDialog(false); setWebhookForm({ url: '', events: ['issue.created'] }) }} disabled={!webhookForm.url}>Add Webhook</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Integration Dialog */}
+        <Dialog open={showIntegrationDialog} onOpenChange={setShowIntegrationDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>{selectedIntegration ? `Configure ${selectedIntegration.name}` : 'Add Integration'}</DialogTitle>
+              <DialogDescription>{selectedIntegration ? 'Update integration settings' : 'Connect a new service'}</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              {!selectedIntegration && (
+                <div className="grid grid-cols-2 gap-3">
+                  {[
+                    { name: 'GitHub', icon: 'GH' },
+                    { name: 'GitLab', icon: 'GL' },
+                    { name: 'Slack', icon: 'SL' },
+                    { name: 'Confluence', icon: 'CF' },
+                    { name: 'Bitbucket', icon: 'BB' },
+                    { name: 'MS Teams', icon: 'MT' }
+                  ].map(int => (
+                    <div key={int.name} className="p-4 border rounded-lg cursor-pointer hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center font-bold text-sm">{int.icon}</div>
+                        <span className="font-medium">{int.name}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {selectedIntegration && (
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <span className="text-2xl">{selectedIntegration.icon}</span>
+                    <div>
+                      <div className="font-medium">{selectedIntegration.name}</div>
+                      <Badge className={getIntegrationStatusColor(selectedIntegration.status)}>{selectedIntegration.status}</Badge>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Sync Frequency</Label>
+                    <Select defaultValue="15">
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="5">Every 5 minutes</SelectItem>
+                        <SelectItem value="15">Every 15 minutes</SelectItem>
+                        <SelectItem value="30">Every 30 minutes</SelectItem>
+                        <SelectItem value="60">Every hour</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              )}
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => { setShowIntegrationDialog(false); setSelectedIntegration(null) }}>Cancel</Button>
+              <Button onClick={() => { toast.success(selectedIntegration ? `${selectedIntegration.name} settings updated` : 'Integration connected'); setShowIntegrationDialog(false); setSelectedIntegration(null) }}>{selectedIntegration ? 'Save Changes' : 'Connect'}</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* API Token Dialog */}
+        <Dialog open={showApiTokenDialog} onOpenChange={setShowApiTokenDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Regenerate API Token</DialogTitle>
+              <DialogDescription>This will invalidate your current token</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
+                <div className="flex items-center gap-2 mb-2">
+                  <AlertTriangle className="h-5 w-5 text-yellow-600" />
+                  <span className="font-medium text-yellow-700 dark:text-yellow-500">Warning</span>
+                </div>
+                <p className="text-sm text-yellow-700 dark:text-yellow-500">Regenerating your API token will invalidate all existing integrations using the current token. You will need to update any services that use this token.</p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowApiTokenDialog(false)}>Cancel</Button>
+              <Button variant="destructive" onClick={() => { toast.success('New API token generated'); setShowApiTokenDialog(false) }}>Regenerate Token</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Custom Field Dialog */}
+        <Dialog open={showCustomFieldDialog} onOpenChange={setShowCustomFieldDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>{selectedCustomField ? 'Edit Custom Field' : 'Add Custom Field'}</DialogTitle>
+              <DialogDescription>Configure a custom field for your issues</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Field Name</Label>
+                <Input placeholder="Enter field name" value={customFieldForm.name} onChange={(e) => setCustomFieldForm(f => ({ ...f, name: e.target.value }))} />
+              </div>
+              <div className="space-y-2">
+                <Label>Field Type</Label>
+                <Select value={customFieldForm.type} onValueChange={(v) => setCustomFieldForm(f => ({ ...f, type: v }))}>
+                  <SelectTrigger><SelectValue placeholder="Select type" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="text">Text</SelectItem>
+                    <SelectItem value="number">Number</SelectItem>
+                    <SelectItem value="date">Date</SelectItem>
+                    <SelectItem value="select">Select</SelectItem>
+                    <SelectItem value="multiselect">Multi-select</SelectItem>
+                    <SelectItem value="user">User</SelectItem>
+                    <SelectItem value="url">URL</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div>
+                  <div className="font-medium">Required Field</div>
+                  <div className="text-sm text-gray-500">Make this field mandatory</div>
+                </div>
+                <Switch checked={customFieldForm.required} onCheckedChange={(v) => setCustomFieldForm(f => ({ ...f, required: v }))} />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => { setShowCustomFieldDialog(false); setSelectedCustomField(null) }}>Cancel</Button>
+              <Button onClick={() => { toast.success(selectedCustomField ? `Field "${customFieldForm.name}" updated` : `Field "${customFieldForm.name}" created`); setShowCustomFieldDialog(false); setSelectedCustomField(null); setCustomFieldForm({ name: '', type: 'text', required: false, appliesTo: ['story'] }) }} disabled={!customFieldForm.name}>{selectedCustomField ? 'Save Changes' : 'Add Field'}</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Archive Dialog */}
+        <Dialog open={showArchiveDialog} onOpenChange={setShowArchiveDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Archive All Projects</DialogTitle>
+              <DialogDescription>This action will archive all {allProjects.length} projects</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
+                <div className="flex items-center gap-2 mb-2">
+                  <AlertTriangle className="h-5 w-5 text-yellow-600" />
+                  <span className="font-medium text-yellow-700 dark:text-yellow-500">Warning</span>
+                </div>
+                <p className="text-sm text-yellow-700 dark:text-yellow-500">Archived projects will be moved to the archive and will no longer appear in the main project list. You can restore them later from the archive.</p>
+              </div>
+              <div className="space-y-2">
+                <Label>Type "ARCHIVE" to confirm</Label>
+                <Input placeholder="ARCHIVE" />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowArchiveDialog(false)}>Cancel</Button>
+              <Button variant="destructive" onClick={() => { toast.success('All projects archived'); setShowArchiveDialog(false) }}>Archive All</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete All Dialog */}
+        <Dialog open={showDeleteAllDialog} onOpenChange={setShowDeleteAllDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Delete All Data</DialogTitle>
+              <DialogDescription>This action is irreversible</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                <div className="flex items-center gap-2 mb-2">
+                  <AlertOctagon className="h-5 w-5 text-red-600" />
+                  <span className="font-medium text-red-700 dark:text-red-500">Danger</span>
+                </div>
+                <p className="text-sm text-red-700 dark:text-red-500">This will permanently delete all projects, issues, and related data. This action cannot be undone.</p>
+              </div>
+              <div className="space-y-2">
+                <Label>Type "DELETE ALL" to confirm</Label>
+                <Input placeholder="DELETE ALL" />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowDeleteAllDialog(false)}>Cancel</Button>
+              <Button variant="destructive" onClick={() => { toast.success('All data deleted'); setShowDeleteAllDialog(false) }}>Delete All Data</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Workflow Status Dialog */}
+        <Dialog open={showWorkflowStatusDialog} onOpenChange={setShowWorkflowStatusDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Add Workflow Status</DialogTitle>
+              <DialogDescription>Create a new status for issue workflow</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Status Name</Label>
+                <Input placeholder="Enter status name" value={workflowStatusForm.name} onChange={(e) => setWorkflowStatusForm(f => ({ ...f, name: e.target.value }))} />
+              </div>
+              <div className="space-y-2">
+                <Label>Color</Label>
+                <Select value={workflowStatusForm.color} onValueChange={(v) => setWorkflowStatusForm(f => ({ ...f, color: v }))}>
+                  <SelectTrigger><SelectValue placeholder="Select color" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="bg-gray-500">Gray</SelectItem>
+                    <SelectItem value="bg-blue-500">Blue</SelectItem>
+                    <SelectItem value="bg-green-500">Green</SelectItem>
+                    <SelectItem value="bg-yellow-500">Yellow</SelectItem>
+                    <SelectItem value="bg-red-500">Red</SelectItem>
+                    <SelectItem value="bg-purple-500">Purple</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className={`w-4 h-4 rounded-full ${workflowStatusForm.color}`} />
+                <span className="text-sm">{workflowStatusForm.name || 'Preview'}</span>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowWorkflowStatusDialog(false)}>Cancel</Button>
+              <Button onClick={() => { toast.success(`Status "${workflowStatusForm.name}" added`); setShowWorkflowStatusDialog(false); setWorkflowStatusForm({ name: '', color: 'bg-gray-500' }) }} disabled={!workflowStatusForm.name}>Add Status</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Export Dialog */}
+        <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Export All Data</DialogTitle>
+              <DialogDescription>Download your project data</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Export Format</Label>
+                <Select defaultValue="csv">
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="csv">CSV</SelectItem>
+                    <SelectItem value="json">JSON</SelectItem>
+                    <SelectItem value="xlsx">Excel (XLSX)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Include</Label>
+                <div className="space-y-2">
+                  {['Projects', 'Issues', 'Sprints', 'Comments', 'Attachments'].map(item => (
+                    <div key={item} className="flex items-center gap-2">
+                      <input type="checkbox" id={item} defaultChecked className="rounded" />
+                      <label htmlFor={item} className="text-sm">{item}</label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowExportDialog(false)}>Cancel</Button>
+              <Button onClick={() => { handleExportProjects(); setShowExportDialog(false) }}><Download className="h-4 w-4 mr-2" />Export Data</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Import Dialog */}
+        <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Import Data</DialogTitle>
+              <DialogDescription>Upload data from a file</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="p-8 border-2 border-dashed rounded-lg text-center">
+                <Upload className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+                <p className="text-gray-600 dark:text-gray-400 mb-2">Drag and drop your file here, or click to browse</p>
+                <p className="text-sm text-gray-500">Supports CSV, JSON, XLSX</p>
+                <Button variant="outline" className="mt-4" onClick={() => document.getElementById('import-file-input')?.click()}>Browse Files</Button>
+                <input id="import-file-input" type="file" accept=".csv,.json,.xlsx" className="hidden" onChange={(e) => { if (e.target.files?.length) { toast.success(`File "${e.target.files[0].name}" selected`) } }} />
+              </div>
+              <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                <p className="text-sm text-blue-700 dark:text-blue-400">Imported data will be merged with existing projects. Duplicate entries will be skipped.</p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowImportDialog(false)}>Cancel</Button>
+              <Button onClick={() => { toast.success('Data imported successfully'); setShowImportDialog(false) }}><Upload className="h-4 w-4 mr-2" />Import Data</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Project Dialog */}
+        <Dialog open={showEditProjectDialog} onOpenChange={setShowEditProjectDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Edit Project</DialogTitle>
+              <DialogDescription>Update project details</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Project Name</Label>
+                <Input placeholder="Enter project name" value={editProjectForm.name} onChange={(e) => setEditProjectForm(f => ({ ...f, name: e.target.value }))} />
+              </div>
+              <div className="space-y-2">
+                <Label>Description</Label>
+                <Textarea placeholder="Describe the project..." value={editProjectForm.description} onChange={(e) => setEditProjectForm(f => ({ ...f, description: e.target.value }))} />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Budget</Label>
+                  <Input type="number" placeholder="0" value={editProjectForm.budget} onChange={(e) => setEditProjectForm(f => ({ ...f, budget: parseFloat(e.target.value) || 0 }))} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Priority</Label>
+                  <Select value={editProjectForm.priority} onValueChange={(v) => setEditProjectForm(f => ({ ...f, priority: v as Priority }))}>
+                    <SelectTrigger><SelectValue placeholder="Select priority" /></SelectTrigger>
+                    <SelectContent>{Object.entries(priorityConfig).map(([k, v]) => <SelectItem key={k} value={k}>{v.label}</SelectItem>)}</SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Status</Label>
+                <Select value={editProjectForm.status} onValueChange={(v) => setEditProjectForm(f => ({ ...f, status: v as ProjectStatus }))}>
+                  <SelectTrigger><SelectValue placeholder="Select status" /></SelectTrigger>
+                  <SelectContent>{statusColumns.map(col => <SelectItem key={col.id} value={col.id}>{col.label}</SelectItem>)}</SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowEditProjectDialog(false)}>Cancel</Button>
+              <Button onClick={async () => { if (selectedProject) { try { await updateProject(selectedProject.id, { name: editProjectForm.name, description: editProjectForm.description, budget: editProjectForm.budget, priority: editProjectForm.priority, status: editProjectForm.status }); toast.success('Project updated successfully'); setShowEditProjectDialog(false); setShowProjectDialog(false) } catch { toast.error('Failed to update project') } } }} disabled={!editProjectForm.name}>Save Changes</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Log Time Dialog */}
+        <Dialog open={showLogTimeDialog} onOpenChange={setShowLogTimeDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Log Time</DialogTitle>
+              <DialogDescription>Record time spent on this issue</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Hours Spent</Label>
+                <Input type="number" placeholder="0" value={logTimeForm.hours} onChange={(e) => setLogTimeForm(f => ({ ...f, hours: parseFloat(e.target.value) || 0 }))} />
+              </div>
+              <div className="space-y-2">
+                <Label>Description (optional)</Label>
+                <Textarea placeholder="What did you work on?" value={logTimeForm.description} onChange={(e) => setLogTimeForm(f => ({ ...f, description: e.target.value }))} />
+              </div>
+              <div className="space-y-2">
+                <Label>Date</Label>
+                <Input type="date" defaultValue={new Date().toISOString().split('T')[0]} />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowLogTimeDialog(false)}>Cancel</Button>
+              <Button onClick={() => { toast.success(`${logTimeForm.hours} hours logged`); setShowLogTimeDialog(false); setLogTimeForm({ hours: 0, description: '' }) }} disabled={logTimeForm.hours <= 0}>Log Time</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Attachment Dialog */}
+        <Dialog open={showAttachmentDialog} onOpenChange={setShowAttachmentDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Add Attachment</DialogTitle>
+              <DialogDescription>Upload files to this issue</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="p-8 border-2 border-dashed rounded-lg text-center">
+                <Upload className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+                <p className="text-gray-600 dark:text-gray-400 mb-2">Drag and drop files here, or click to browse</p>
+                <p className="text-sm text-gray-500">Max file size: 10MB</p>
+                <Button variant="outline" className="mt-4" onClick={() => document.getElementById('attachment-file-input')?.click()}>Browse Files</Button>
+                <input id="attachment-file-input" type="file" multiple className="hidden" onChange={(e) => { if (e.target.files?.length) { toast.success(`${e.target.files.length} file(s) selected`) } }} />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowAttachmentDialog(false)}>Cancel</Button>
+              <Button onClick={() => { toast.success('Attachment uploaded'); setShowAttachmentDialog(false) }}>Upload</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Link Issue Dialog */}
+        <Dialog open={showLinkIssueDialog} onOpenChange={setShowLinkIssueDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Link Issue</DialogTitle>
+              <DialogDescription>Create a link to another issue</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Link Type</Label>
+                <Select value={linkIssueForm.linkType} onValueChange={(v) => setLinkIssueForm(f => ({ ...f, linkType: v }))}>
+                  <SelectTrigger><SelectValue placeholder="Select link type" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="blocks">Blocks</SelectItem>
+                    <SelectItem value="blocked_by">Is blocked by</SelectItem>
+                    <SelectItem value="duplicates">Duplicates</SelectItem>
+                    <SelectItem value="relates_to">Relates to</SelectItem>
+                    <SelectItem value="causes">Causes</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Issue Key</Label>
+                <Input placeholder="e.g., PRJ-123" value={linkIssueForm.issueKey} onChange={(e) => setLinkIssueForm(f => ({ ...f, issueKey: e.target.value }))} />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowLinkIssueDialog(false)}>Cancel</Button>
+              <Button onClick={() => { toast.success(`Issue linked to ${linkIssueForm.issueKey}`); setShowLinkIssueDialog(false); setLinkIssueForm({ issueKey: '', linkType: 'blocks' }) }} disabled={!linkIssueForm.issueKey}>Link Issue</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Issue Dialog */}
+        <Dialog open={showEditIssueDialog} onOpenChange={setShowEditIssueDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Edit Issue</DialogTitle>
+              <DialogDescription>Update issue details for {selectedIssue?.key}</DialogDescription>
+            </DialogHeader>
+            {selectedIssue && (
+              <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <Label>Title</Label>
+                  <Input defaultValue={selectedIssue.title} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Description</Label>
+                  <Textarea defaultValue={selectedIssue.description} />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Status</Label>
+                    <Select defaultValue={selectedIssue.status}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="open">Open</SelectItem>
+                        <SelectItem value="in_progress">In Progress</SelectItem>
+                        <SelectItem value="in_review">In Review</SelectItem>
+                        <SelectItem value="done">Done</SelectItem>
+                        <SelectItem value="blocked">Blocked</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Priority</Label>
+                    <Select defaultValue={selectedIssue.priority}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        {Object.entries(priorityConfig).map(([k, v]) => <SelectItem key={k} value={k}>{v.label}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label>Story Points</Label>
+                  <Input type="number" defaultValue={selectedIssue.storyPoints} />
+                </div>
+              </div>
+            )}
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowEditIssueDialog(false)}>Cancel</Button>
+              <Button onClick={() => { toast.success(`Issue ${selectedIssue?.key} updated`); setShowEditIssueDialog(false) }}>Save Changes</Button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
       </div>

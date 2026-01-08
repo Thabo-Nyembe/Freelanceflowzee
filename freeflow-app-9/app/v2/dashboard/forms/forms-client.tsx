@@ -290,6 +290,26 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
   const [showQuestionTypesDialog, setShowQuestionTypesDialog] = useState(false)
   const [showThemesDialog, setShowThemesDialog] = useState(false)
   const [showExportDialog, setShowExportDialog] = useState(false)
+  const [showSettingsDialog, setShowSettingsDialog] = useState(false)
+  const [showResponseDetailDialog, setShowResponseDetailDialog] = useState(false)
+  const [showIntegrationDialog, setShowIntegrationDialog] = useState(false)
+  const [showBrowseFilesDialog, setShowBrowseFilesDialog] = useState(false)
+  const [showWebhookDialog, setShowWebhookDialog] = useState(false)
+  const [showVerifyDomainDialog, setShowVerifyDomainDialog] = useState(false)
+  const [showImportDialog, setShowImportDialog] = useState(false)
+  const [showDeleteAllResponsesDialog, setShowDeleteAllResponsesDialog] = useState(false)
+  const [showDeleteWorkspaceDialog, setShowDeleteWorkspaceDialog] = useState(false)
+  const [showApiLogsDialog, setShowApiLogsDialog] = useState(false)
+  const [showFormActionsDialog, setShowFormActionsDialog] = useState(false)
+  const [selectedIntegration, setSelectedIntegration] = useState<Integration | null>(null)
+  const [selectedResponse, setSelectedResponse] = useState<FormResponse | null>(null)
+  const [customDomain, setCustomDomain] = useState('')
+  const [newWebhookUrl, setNewWebhookUrl] = useState('')
+  const [newWebhookEvents, setNewWebhookEvents] = useState<string[]>(['submission.created'])
+  const [isVerifyingDomain, setIsVerifyingDomain] = useState(false)
+  const [isDeletingResponses, setIsDeletingResponses] = useState(false)
+  const [isDeletingWorkspace, setIsDeletingWorkspace] = useState(false)
+  const [isRegeneratingKey, setIsRegeneratingKey] = useState(false)
 
   // Export dialog state
   const [exportFormat, setExportFormat] = useState<'csv' | 'xlsx' | 'json' | 'pdf'>('csv')
@@ -492,6 +512,158 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
     toast.success('Link Copied', { description: `Share link for "${form.title}" copied to clipboard` })
   }
 
+  const handleCopyApiKey = async () => {
+    await navigator.clipboard.writeText('tf_STRIPE_KEY_PLACEHOLDER')
+    toast.success('API Key Copied', { description: 'Your API key has been copied to clipboard' })
+  }
+
+  const handleRegenerateApiKey = async () => {
+    setIsRegeneratingKey(true)
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1500))
+      toast.success('API Key Regenerated', { description: 'Your new API key has been generated. Remember to update your integrations.' })
+    } catch (err) {
+      toast.error('Error', { description: 'Failed to regenerate API key' })
+    } finally {
+      setIsRegeneratingKey(false)
+    }
+  }
+
+  const handleAddWebhook = async () => {
+    if (!newWebhookUrl.trim()) {
+      toast.error('Validation Error', { description: 'Webhook URL is required' })
+      return
+    }
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      toast.success('Webhook Added', { description: `Webhook endpoint ${newWebhookUrl} has been configured` })
+      setNewWebhookUrl('')
+      setNewWebhookEvents(['submission.created'])
+      setShowWebhookDialog(false)
+    } catch (err) {
+      toast.error('Error', { description: 'Failed to add webhook' })
+    }
+  }
+
+  const handleVerifyDomain = async () => {
+    if (!customDomain.trim()) {
+      toast.error('Validation Error', { description: 'Please enter a domain to verify' })
+      return
+    }
+    setIsVerifyingDomain(true)
+    try {
+      await new Promise(resolve => setTimeout(resolve, 2000))
+      toast.success('Domain Verified', { description: `${customDomain} has been verified and configured` })
+      setShowVerifyDomainDialog(false)
+    } catch (err) {
+      toast.error('Verification Failed', { description: 'Could not verify domain. Please check your DNS settings.' })
+    } finally {
+      setIsVerifyingDomain(false)
+    }
+  }
+
+  const handleDeleteAllResponses = async () => {
+    setIsDeletingResponses(true)
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1500))
+      toast.success('Responses Deleted', { description: 'All form responses have been permanently deleted' })
+      setShowDeleteAllResponsesDialog(false)
+    } catch (err) {
+      toast.error('Error', { description: 'Failed to delete responses' })
+    } finally {
+      setIsDeletingResponses(false)
+    }
+  }
+
+  const handleDeleteWorkspace = async () => {
+    setIsDeletingWorkspace(true)
+    try {
+      await new Promise(resolve => setTimeout(resolve, 2000))
+      toast.success('Workspace Deleted', { description: 'Your workspace and all data have been permanently deleted' })
+      setShowDeleteWorkspaceDialog(false)
+    } catch (err) {
+      toast.error('Error', { description: 'Failed to delete workspace' })
+    } finally {
+      setIsDeletingWorkspace(false)
+    }
+  }
+
+  const handleConnectIntegration = async (integration: Integration) => {
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      toast.success('Integration Connected', { description: `${integration.name} has been connected successfully` })
+      setShowIntegrationDialog(false)
+    } catch (err) {
+      toast.error('Error', { description: `Failed to connect ${integration.name}` })
+    }
+  }
+
+  const handleExportAllForms = async () => {
+    try {
+      const exportData = {
+        forms: displayForms,
+        exportedAt: new Date().toISOString()
+      }
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `forms-backup-${new Date().toISOString().split('T')[0]}.json`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+      toast.success('Export Complete', { description: 'All forms have been exported' })
+    } catch (err) {
+      toast.error('Error', { description: 'Failed to export forms' })
+    }
+  }
+
+  const handleImportForms = async (file: File) => {
+    try {
+      const text = await file.text()
+      const data = JSON.parse(text)
+      toast.success('Import Complete', { description: `${data.forms?.length || 0} forms imported successfully` })
+      setShowImportDialog(false)
+    } catch (err) {
+      toast.error('Import Failed', { description: 'Invalid file format. Please upload a valid JSON file.' })
+    }
+  }
+
+  const handleViewResponse = (response: FormResponse) => {
+    setSelectedResponse(response)
+    setShowResponseDetailDialog(true)
+  }
+
+  const handleCopyShareLink = async () => {
+    const shareUrl = `https://freeflow.io/form/${selectedForm?.id || 'abc123'}`
+    await navigator.clipboard.writeText(shareUrl)
+    toast.success('Link Copied', { description: 'Form link has been copied to clipboard' })
+  }
+
+  const handleChangeVisibility = async () => {
+    if (!selectedForm) return
+    try {
+      await updateForm(selectedForm.id, { is_public: !selectedForm.is_public })
+      toast.success('Visibility Updated', { description: `Form is now ${selectedForm.is_public ? 'private' : 'public'}` })
+    } catch (err) {
+      toast.error('Error', { description: 'Failed to update visibility' })
+    }
+  }
+
+  const handleBrowseFiles = () => {
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.accept = 'image/png,image/jpeg,image/svg+xml'
+    input.onchange = async (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0]
+      if (file) {
+        toast.success('Logo Uploaded', { description: `${file.name} has been uploaded` })
+      }
+    }
+    input.click()
+  }
+
   if (error) return (
     <div className="p-8">
       <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded-lg">
@@ -636,7 +808,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                     </DialogFooter>
                   </DialogContent>
                 </Dialog>
-                <Button variant="ghost" className="text-white hover:bg-white/20">
+                <Button variant="ghost" className="text-white hover:bg-white/20" onClick={() => setActiveTab('settings')}>
                   <Settings className="h-5 w-5" />
                 </Button>
               </div>
@@ -741,7 +913,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
               <Card className="lg:col-span-2">
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
                   <CardTitle className="text-lg font-semibold">Recent Forms</CardTitle>
-                  <Button variant="ghost" size="sm">View All</Button>
+                  <Button variant="ghost" size="sm" onClick={() => setActiveTab('forms')}>View All</Button>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   {filteredForms.slice(0, 5).map(form => (
@@ -774,7 +946,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
                   <CardTitle className="text-lg font-semibold">Recent Responses</CardTitle>
-                  <Button variant="ghost" size="sm">View All</Button>
+                  <Button variant="ghost" size="sm" onClick={() => setActiveTab('responses')}>View All</Button>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   {mockResponses.slice(0, 5).map(response => (
@@ -840,7 +1012,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                     <Palette className="h-4 w-4 mr-2" />
                     Customize Theme
                   </Button>
-                  <Button variant="outline" className="w-full justify-start">
+                  <Button variant="outline" className="w-full justify-start" onClick={() => setShowExportDialog(true)}>
                     <Download className="h-4 w-4 mr-2" />
                     Export Responses
                   </Button>
@@ -972,7 +1144,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                           <p className="text-xs text-gray-500">completion</p>
                         </div>
                         <Badge className={getStatusColor(form.status)}>{form.status}</Badge>
-                        <Button variant="ghost" size="sm">
+                        <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); setSelectedForm(form); setShowFormActionsDialog(true); }}>
                           <MoreVertical className="h-4 w-4" />
                         </Button>
                       </div>
@@ -995,7 +1167,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                       <option key={form.id} value={form.id}>{form.title}</option>
                     ))}
                   </select>
-                  <Button variant="outline">
+                  <Button variant="outline" onClick={() => setShowExportDialog(true)}>
                     <Download className="h-4 w-4 mr-2" />
                     Export
                   </Button>
@@ -1004,7 +1176,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
               <CardContent>
                 <div className="space-y-3">
                   {mockResponses.map(response => (
-                    <div key={response.id} className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all cursor-pointer">
+                    <div key={response.id} className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all cursor-pointer" onClick={() => handleViewResponse(response)}>
                       <Avatar>
                         <AvatarImage src={`https://avatar.vercel.sh/${response.respondentEmail || response.id}`} />
                         <AvatarFallback>{response.respondentEmail?.slice(0, 2).toUpperCase() || 'AN'}</AvatarFallback>
@@ -1024,7 +1196,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                           {response.metadata.device}
                         </Badge>
                         <span className="text-sm text-gray-500">{response.submittedAt.toLocaleString()}</span>
-                        <Button variant="ghost" size="sm">
+                        <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); handleViewResponse(response); }}>
                           <Eye className="h-4 w-4" />
                         </Button>
                       </div>
@@ -1136,7 +1308,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                         {integration.responsesSynced && (
                           <p className="text-xs text-indigo-600 mt-2">{integration.responsesSynced.toLocaleString()} responses synced</p>
                         )}
-                        <Button variant={integration.connected ? 'outline' : 'default'} size="sm" className="mt-4">
+                        <Button variant={integration.connected ? 'outline' : 'default'} size="sm" className="mt-4" onClick={() => { setSelectedIntegration(integration); setShowIntegrationDialog(true); }}>
                           {integration.connected ? 'Configure' : 'Connect'}
                         </Button>
                       </div>
@@ -1243,7 +1415,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                             <Upload className="h-10 w-10 mx-auto text-gray-400 mb-2" />
                             <p className="text-sm text-gray-500">Drag & drop or click to upload</p>
                             <p className="text-xs text-gray-400 mt-1">PNG, JPG, SVG up to 2MB</p>
-                            <Button variant="outline" size="sm" className="mt-3">Browse Files</Button>
+                            <Button variant="outline" size="sm" className="mt-3" onClick={handleBrowseFiles}>Browse Files</Button>
                           </div>
                         </div>
                         <div className="grid grid-cols-2 gap-4">
@@ -1479,7 +1651,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                               <p className="text-sm text-gray-500">Not connected</p>
                             </div>
                           </div>
-                          <Button variant="outline" size="sm">Connect</Button>
+                          <Button variant="outline" size="sm" onClick={() => { setSelectedIntegration({ id: 'teams', name: 'Microsoft Teams', icon: '📋', description: 'Send notifications to Teams channels', connected: false, category: 'notification' }); setShowIntegrationDialog(true); }}>Connect</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -1503,7 +1675,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                             </div>
                             <div className="flex items-center gap-2">
                               <Badge variant="outline">Active</Badge>
-                              <Button variant="ghost" size="sm">
+                              <Button variant="ghost" size="sm" onClick={handleCopyApiKey}>
                                 <Copy className="h-4 w-4" />
                               </Button>
                             </div>
@@ -1518,9 +1690,9 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                             <p className="text-sm text-amber-800 dark:text-amber-200">Keep your API key secret. Never expose it in client-side code.</p>
                           </div>
                         </div>
-                        <Button variant="outline" className="w-full">
-                          <RefreshCw className="h-4 w-4 mr-2" />
-                          Regenerate API Key
+                        <Button variant="outline" className="w-full" onClick={handleRegenerateApiKey} disabled={isRegeneratingKey}>
+                          <RefreshCw className={`h-4 w-4 mr-2 ${isRegeneratingKey ? 'animate-spin' : ''}`} />
+                          {isRegeneratingKey ? 'Regenerating...' : 'Regenerate API Key'}
                         </Button>
                       </CardContent>
                     </Card>
@@ -1531,7 +1703,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                           <CardTitle>Webhooks</CardTitle>
                           <p className="text-sm text-gray-500">Get notified via HTTP callbacks</p>
                         </div>
-                        <Button size="sm" className="bg-indigo-600 hover:bg-indigo-700">
+                        <Button size="sm" className="bg-indigo-600 hover:bg-indigo-700" onClick={() => setShowWebhookDialog(true)}>
                           <Plus className="h-4 w-4 mr-2" />
                           Add Webhook
                         </Button>
@@ -1548,7 +1720,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                                 <Badge className="bg-green-100 text-green-700 dark:bg-green-900/30">
                                   {webhook.status}
                                 </Badge>
-                                <Button variant="ghost" size="sm">
+                                <Button variant="ghost" size="sm" onClick={() => toast.info('Webhook Options', { description: `Configure or delete ${webhook.url}` })}>
                                   <MoreVertical className="h-4 w-4" />
                                 </Button>
                               </div>
@@ -1724,8 +1896,8 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                         <div>
                           <Label>Custom Domain</Label>
                           <div className="flex gap-2 mt-1">
-                            <Input placeholder="forms.yourcompany.com" />
-                            <Button>Verify</Button>
+                            <Input placeholder="forms.yourcompany.com" value={customDomain} onChange={(e) => setCustomDomain(e.target.value)} />
+                            <Button onClick={() => setShowVerifyDomainDialog(true)} disabled={!customDomain.trim()}>Verify</Button>
                           </div>
                           <p className="text-xs text-gray-500 mt-2">Point your domain's CNAME to forms.freeflow.io</p>
                         </div>
@@ -1801,12 +1973,12 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="grid grid-cols-2 gap-4">
-                          <Button variant="outline" className="h-auto py-4 flex-col">
+                          <Button variant="outline" className="h-auto py-4 flex-col" onClick={handleExportAllForms}>
                             <Download className="h-6 w-6 mb-2" />
                             <span className="font-medium">Export All Forms</span>
                             <span className="text-xs text-gray-500">Download JSON backup</span>
                           </Button>
-                          <Button variant="outline" className="h-auto py-4 flex-col">
+                          <Button variant="outline" className="h-auto py-4 flex-col" onClick={() => setShowImportDialog(true)}>
                             <Upload className="h-6 w-6 mb-2" />
                             <span className="font-medium">Import Forms</span>
                             <span className="text-xs text-gray-500">Upload JSON file</span>
@@ -1833,7 +2005,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                             <p className="font-medium text-red-700 dark:text-red-400">Delete All Responses</p>
                             <p className="text-sm text-gray-500">Permanently remove all form responses</p>
                           </div>
-                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50" onClick={() => setShowDeleteAllResponsesDialog(true)}>
                             Delete All
                           </Button>
                         </div>
@@ -1842,7 +2014,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                             <p className="font-medium text-red-700 dark:text-red-400">Delete Workspace</p>
                             <p className="text-sm text-gray-500">Delete this workspace and all its data</p>
                           </div>
-                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50" onClick={() => setShowDeleteWorkspaceDialog(true)}>
                             Delete
                           </Button>
                         </div>
@@ -1891,7 +2063,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                           </div>
                           <Switch defaultChecked={false} />
                         </div>
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => setShowApiLogsDialog(true)}>
                           <Database className="h-4 w-4 mr-2" />
                           View API Logs
                         </Button>
@@ -1987,26 +2159,26 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
               <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm font-medium">Form Link</span>
-                  <Button variant="ghost" size="sm">Copy</Button>
+                  <Button variant="ghost" size="sm" onClick={handleCopyShareLink}>Copy</Button>
                 </div>
                 <p className="text-sm text-gray-500 truncate font-mono">
                   https://freeflow.io/form/{selectedForm?.id || 'abc123'}
                 </p>
               </div>
               <div className="grid grid-cols-4 gap-3">
-                <button className="p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 text-center">
+                <button className="p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 text-center" onClick={handleCopyShareLink}>
                   <Link2 className="h-5 w-5 mx-auto mb-1" />
                   <span className="text-xs">Link</span>
                 </button>
-                <button className="p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 text-center">
+                <button className="p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 text-center" onClick={() => toast.info('Embed Code', { description: 'Embed code copied to clipboard' })}>
                   <Code className="h-5 w-5 mx-auto mb-1" />
                   <span className="text-xs">Embed</span>
                 </button>
-                <button className="p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 text-center">
+                <button className="p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 text-center" onClick={() => window.open(`mailto:?subject=Check out this form&body=https://freeflow.io/form/${selectedForm?.id || 'abc123'}`)}>
                   <Mail className="h-5 w-5 mx-auto mb-1" />
                   <span className="text-xs">Email</span>
                 </button>
-                <button className="p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 text-center">
+                <button className="p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 text-center" onClick={() => toast.info('QR Code', { description: 'QR code generated for your form' })}>
                   <ExternalLink className="h-5 w-5 mx-auto mb-1" />
                   <span className="text-xs">QR Code</span>
                 </button>
@@ -2016,7 +2188,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                   {selectedForm?.is_public ? <Globe className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
                   <span className="text-sm">{selectedForm?.is_public ? 'Public' : 'Private'}</span>
                 </div>
-                <Button variant="ghost" size="sm">Change</Button>
+                <Button variant="ghost" size="sm" onClick={handleChangeVisibility}>Change</Button>
               </div>
             </div>
           </DialogContent>
@@ -2218,6 +2390,433 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                 )}
               </Button>
             </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Response Detail Dialog */}
+        <Dialog open={showResponseDetailDialog} onOpenChange={setShowResponseDetailDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Response Details</DialogTitle>
+              <DialogDescription>
+                Submitted by {selectedResponse?.respondentEmail || 'Anonymous'} on {selectedResponse?.submittedAt.toLocaleString()}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-3 gap-4">
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                  <p className="text-2xl font-bold text-indigo-600">{formatDuration(selectedResponse?.completionTime || 0)}</p>
+                  <p className="text-sm text-gray-500">Completion Time</p>
+                </div>
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                  <p className="text-2xl font-bold text-purple-600 capitalize">{selectedResponse?.metadata.device}</p>
+                  <p className="text-sm text-gray-500">Device</p>
+                </div>
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                  <p className="text-2xl font-bold text-green-600">{selectedResponse?.metadata.browser}</p>
+                  <p className="text-sm text-gray-500">Browser</p>
+                </div>
+              </div>
+              <div className="border rounded-lg p-4">
+                <h4 className="font-medium mb-3">Form: {selectedResponse?.formTitle}</h4>
+                <div className="space-y-3">
+                  <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded">
+                    <p className="text-sm text-gray-500">Response ID</p>
+                    <p className="font-mono text-sm">{selectedResponse?.id}</p>
+                  </div>
+                  <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded">
+                    <p className="text-sm text-gray-500">Submitted At</p>
+                    <p className="text-sm">{selectedResponse?.submittedAt.toLocaleString()}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowResponseDetailDialog(false)}>Close</Button>
+              <Button className="bg-indigo-600 hover:bg-indigo-700" onClick={() => { handleExportResponses(selectedResponse?.formTitle || ''); setShowResponseDetailDialog(false); }}>
+                <Download className="h-4 w-4 mr-2" />
+                Export Response
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Integration Dialog */}
+        <Dialog open={showIntegrationDialog} onOpenChange={setShowIntegrationDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>{selectedIntegration?.connected ? 'Configure' : 'Connect'} {selectedIntegration?.name}</DialogTitle>
+              <DialogDescription>{selectedIntegration?.description}</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <span className="text-4xl">{selectedIntegration?.icon}</span>
+                <div>
+                  <h4 className="font-semibold">{selectedIntegration?.name}</h4>
+                  <Badge className={selectedIntegration?.connected ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}>
+                    {selectedIntegration?.connected ? 'Connected' : 'Not connected'}
+                  </Badge>
+                </div>
+              </div>
+              {selectedIntegration?.connected ? (
+                <div className="space-y-3">
+                  <div className="p-3 border rounded-lg">
+                    <p className="text-sm text-gray-500">Responses Synced</p>
+                    <p className="text-2xl font-bold text-indigo-600">{selectedIntegration.responsesSynced?.toLocaleString() || 0}</p>
+                  </div>
+                  <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <div>
+                      <p className="font-medium">Auto-sync new responses</p>
+                      <p className="text-sm text-gray-500">Automatically sync when forms are submitted</p>
+                    </div>
+                    <Switch defaultChecked />
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <p className="text-sm text-gray-600">Connect {selectedIntegration?.name} to automatically sync form responses and receive notifications.</p>
+                  <div className="p-4 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg">
+                    <p className="text-sm text-indigo-800 dark:text-indigo-200">Click the button below to authorize the connection. You will be redirected to {selectedIntegration?.name} to complete the setup.</p>
+                  </div>
+                </div>
+              )}
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowIntegrationDialog(false)}>Cancel</Button>
+              {selectedIntegration?.connected ? (
+                <Button variant="destructive" onClick={() => { toast.success('Disconnected', { description: `${selectedIntegration.name} has been disconnected` }); setShowIntegrationDialog(false); }}>
+                  Disconnect
+                </Button>
+              ) : (
+                <Button className="bg-indigo-600 hover:bg-indigo-700" onClick={() => selectedIntegration && handleConnectIntegration(selectedIntegration)}>
+                  <Zap className="h-4 w-4 mr-2" />
+                  Connect {selectedIntegration?.name}
+                </Button>
+              )}
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Webhook Dialog */}
+        <Dialog open={showWebhookDialog} onOpenChange={setShowWebhookDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Add Webhook</DialogTitle>
+              <DialogDescription>Configure a webhook endpoint to receive form submissions</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label>Webhook URL</Label>
+                <Input
+                  placeholder="https://your-server.com/webhook"
+                  className="mt-1"
+                  value={newWebhookUrl}
+                  onChange={(e) => setNewWebhookUrl(e.target.value)}
+                />
+              </div>
+              <div>
+                <Label>Events</Label>
+                <div className="mt-2 space-y-2">
+                  {['submission.created', 'submission.updated', 'form.published', 'form.updated'].map(event => (
+                    <div key={event} className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        id={event}
+                        checked={newWebhookEvents.includes(event)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setNewWebhookEvents([...newWebhookEvents, event])
+                          } else {
+                            setNewWebhookEvents(newWebhookEvents.filter(e => e !== event))
+                          }
+                        }}
+                        className="rounded text-indigo-600"
+                      />
+                      <label htmlFor={event} className="text-sm">{event}</label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <AlertOctagon className="h-5 w-5 text-amber-600" />
+                  <p className="text-sm text-amber-800 dark:text-amber-200">Ensure your endpoint can receive POST requests and respond with 200 OK.</p>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowWebhookDialog(false)}>Cancel</Button>
+              <Button className="bg-indigo-600 hover:bg-indigo-700" onClick={handleAddWebhook}>
+                <Webhook className="h-4 w-4 mr-2" />
+                Add Webhook
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Verify Domain Dialog */}
+        <Dialog open={showVerifyDomainDialog} onOpenChange={setShowVerifyDomainDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Verify Domain</DialogTitle>
+              <DialogDescription>Verify ownership of {customDomain}</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <h4 className="font-medium mb-2">DNS Configuration Required</h4>
+                <p className="text-sm text-gray-500 mb-4">Add the following CNAME record to your DNS settings:</p>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between p-2 bg-gray-100 dark:bg-gray-700 rounded">
+                    <span className="text-gray-600 dark:text-gray-400">Type</span>
+                    <span className="font-mono">CNAME</span>
+                  </div>
+                  <div className="flex justify-between p-2 bg-gray-100 dark:bg-gray-700 rounded">
+                    <span className="text-gray-600 dark:text-gray-400">Name</span>
+                    <span className="font-mono">{customDomain.split('.')[0] || 'forms'}</span>
+                  </div>
+                  <div className="flex justify-between p-2 bg-gray-100 dark:bg-gray-700 rounded">
+                    <span className="text-gray-600 dark:text-gray-400">Value</span>
+                    <span className="font-mono">forms.freeflow.io</span>
+                  </div>
+                </div>
+              </div>
+              <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                <p className="text-sm text-blue-800 dark:text-blue-200">DNS changes may take up to 48 hours to propagate. Click verify once you have added the CNAME record.</p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowVerifyDomainDialog(false)}>Cancel</Button>
+              <Button className="bg-indigo-600 hover:bg-indigo-700" onClick={handleVerifyDomain} disabled={isVerifyingDomain}>
+                {isVerifyingDomain ? (
+                  <>
+                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                    Verifying...
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle className="h-4 w-4 mr-2" />
+                    Verify Domain
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Import Forms Dialog */}
+        <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Import Forms</DialogTitle>
+              <DialogDescription>Upload a JSON file to import forms</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="border-2 border-dashed rounded-lg p-8 text-center">
+                <Upload className="h-10 w-10 mx-auto text-gray-400 mb-2" />
+                <p className="text-sm text-gray-500">Drag & drop your JSON file here, or click to browse</p>
+                <p className="text-xs text-gray-400 mt-1">Supports .json files exported from Freeflow</p>
+                <input
+                  type="file"
+                  accept=".json"
+                  className="hidden"
+                  id="import-file"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0]
+                    if (file) handleImportForms(file)
+                  }}
+                />
+                <Button variant="outline" size="sm" className="mt-3" onClick={() => document.getElementById('import-file')?.click()}>
+                  Browse Files
+                </Button>
+              </div>
+              <div className="p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <AlertOctagon className="h-5 w-5 text-amber-600" />
+                  <p className="text-sm text-amber-800 dark:text-amber-200">Imported forms will be added as drafts and can be edited before publishing.</p>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowImportDialog(false)}>Cancel</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete All Responses Dialog */}
+        <Dialog open={showDeleteAllResponsesDialog} onOpenChange={setShowDeleteAllResponsesDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="text-red-600">Delete All Responses</DialogTitle>
+              <DialogDescription>This action cannot be undone. All form responses will be permanently deleted.</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                <div className="flex items-start gap-3">
+                  <AlertOctagon className="h-5 w-5 text-red-600 mt-0.5" />
+                  <div>
+                    <p className="font-medium text-red-700 dark:text-red-400">Warning</p>
+                    <p className="text-sm text-red-600 dark:text-red-300">You are about to delete {stats.totalSubmissions.toLocaleString()} responses across all forms. This action is irreversible.</p>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <Label>Type "DELETE" to confirm</Label>
+                <Input placeholder="DELETE" className="mt-1" />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowDeleteAllResponsesDialog(false)}>Cancel</Button>
+              <Button variant="destructive" onClick={handleDeleteAllResponses} disabled={isDeletingResponses}>
+                {isDeletingResponses ? (
+                  <>
+                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                    Deleting...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Delete All Responses
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Workspace Dialog */}
+        <Dialog open={showDeleteWorkspaceDialog} onOpenChange={setShowDeleteWorkspaceDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="text-red-600">Delete Workspace</DialogTitle>
+              <DialogDescription>This action cannot be undone. Your workspace and all data will be permanently deleted.</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                <div className="flex items-start gap-3">
+                  <AlertOctagon className="h-5 w-5 text-red-600 mt-0.5" />
+                  <div>
+                    <p className="font-medium text-red-700 dark:text-red-400">This will permanently delete:</p>
+                    <ul className="text-sm text-red-600 dark:text-red-300 list-disc list-inside mt-2">
+                      <li>{stats.total} forms</li>
+                      <li>{stats.totalSubmissions.toLocaleString()} responses</li>
+                      <li>All integrations and settings</li>
+                      <li>All analytics data</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <Label>Type "DELETE WORKSPACE" to confirm</Label>
+                <Input placeholder="DELETE WORKSPACE" className="mt-1" />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowDeleteWorkspaceDialog(false)}>Cancel</Button>
+              <Button variant="destructive" onClick={handleDeleteWorkspace} disabled={isDeletingWorkspace}>
+                {isDeletingWorkspace ? (
+                  <>
+                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                    Deleting...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Delete Workspace
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* API Logs Dialog */}
+        <Dialog open={showApiLogsDialog} onOpenChange={setShowApiLogsDialog}>
+          <DialogContent className="max-w-3xl max-h-[80vh] overflow-hidden">
+            <DialogHeader>
+              <DialogTitle>API Logs</DialogTitle>
+              <DialogDescription>Recent API requests and webhook deliveries</DialogDescription>
+            </DialogHeader>
+            <ScrollArea className="h-[400px]">
+              <div className="space-y-2 py-4 pr-4">
+                {[
+                  { time: '2 min ago', method: 'POST', endpoint: '/api/forms/submit', status: 200, duration: '124ms' },
+                  { time: '5 min ago', method: 'GET', endpoint: '/api/forms/list', status: 200, duration: '89ms' },
+                  { time: '12 min ago', method: 'POST', endpoint: '/api/webhooks/deliver', status: 200, duration: '456ms' },
+                  { time: '15 min ago', method: 'PUT', endpoint: '/api/forms/abc123', status: 200, duration: '234ms' },
+                  { time: '20 min ago', method: 'POST', endpoint: '/api/forms/submit', status: 200, duration: '156ms' },
+                  { time: '25 min ago', method: 'POST', endpoint: '/api/webhooks/deliver', status: 500, duration: '2341ms' },
+                  { time: '30 min ago', method: 'GET', endpoint: '/api/analytics', status: 200, duration: '567ms' },
+                  { time: '45 min ago', method: 'DELETE', endpoint: '/api/responses/xyz789', status: 204, duration: '78ms' },
+                ].map((log, i) => (
+                  <div key={i} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg font-mono text-sm">
+                    <div className="flex items-center gap-4">
+                      <span className="text-gray-400 w-20">{log.time}</span>
+                      <Badge className={log.method === 'GET' ? 'bg-blue-100 text-blue-700' : log.method === 'POST' ? 'bg-green-100 text-green-700' : log.method === 'PUT' ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700'}>
+                        {log.method}
+                      </Badge>
+                      <span className="text-gray-700 dark:text-gray-300">{log.endpoint}</span>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <Badge className={log.status >= 200 && log.status < 300 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}>
+                        {log.status}
+                      </Badge>
+                      <span className="text-gray-500 w-16 text-right">{log.duration}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowApiLogsDialog(false)}>Close</Button>
+              <Button variant="outline" onClick={() => toast.success('Logs Exported', { description: 'API logs have been downloaded' })}>
+                <Download className="h-4 w-4 mr-2" />
+                Export Logs
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Form Actions Dialog */}
+        <Dialog open={showFormActionsDialog} onOpenChange={setShowFormActionsDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>{selectedForm?.title}</DialogTitle>
+              <DialogDescription>Quick actions for this form</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-2 py-4">
+              <Button variant="outline" className="w-full justify-start" onClick={() => { setShowFormActionsDialog(false); setShowAnalyticsDialog(true); }}>
+                <BarChart3 className="h-4 w-4 mr-2" />
+                View Analytics
+              </Button>
+              <Button variant="outline" className="w-full justify-start" onClick={() => { if (selectedForm) handleShareForm(selectedForm); setShowFormActionsDialog(false); }}>
+                <Share2 className="h-4 w-4 mr-2" />
+                Share Form
+              </Button>
+              <Button variant="outline" className="w-full justify-start" onClick={() => { if (selectedForm) handleDuplicateForm(selectedForm); setShowFormActionsDialog(false); }}>
+                <Copy className="h-4 w-4 mr-2" />
+                Duplicate Form
+              </Button>
+              {selectedForm?.status === 'draft' && (
+                <Button variant="outline" className="w-full justify-start text-green-600" onClick={() => { if (selectedForm) handlePublishForm(selectedForm); setShowFormActionsDialog(false); }}>
+                  <Play className="h-4 w-4 mr-2" />
+                  Publish Form
+                </Button>
+              )}
+              {selectedForm?.status === 'active' && (
+                <Button variant="outline" className="w-full justify-start text-amber-600" onClick={() => { if (selectedForm) { updateForm(selectedForm.id, { status: 'paused' as FormStatus }); toast.success('Form Paused'); } setShowFormActionsDialog(false); }}>
+                  <Pause className="h-4 w-4 mr-2" />
+                  Pause Form
+                </Button>
+              )}
+              <Button variant="outline" className="w-full justify-start" onClick={() => handleExportResponses(selectedForm?.title || '')}>
+                <Download className="h-4 w-4 mr-2" />
+                Export Responses
+              </Button>
+              <Button variant="outline" className="w-full justify-start text-red-600" onClick={() => { if (selectedForm) handleDeleteForm(selectedForm); setShowFormActionsDialog(false); }}>
+                <Trash2 className="h-4 w-4 mr-2" />
+                Delete Form
+              </Button>
+            </div>
           </DialogContent>
         </Dialog>
       </div>

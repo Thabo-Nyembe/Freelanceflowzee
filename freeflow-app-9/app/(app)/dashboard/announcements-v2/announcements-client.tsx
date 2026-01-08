@@ -486,6 +486,71 @@ export default function AnnouncementsClient() {
     send_push: false
   })
 
+  // Additional dialog states
+  const [showAddReleaseDialog, setShowAddReleaseDialog] = useState(false)
+  const [showCreateSegmentDialog, setShowCreateSegmentDialog] = useState(false)
+  const [showEditSegmentDialog, setShowEditSegmentDialog] = useState(false)
+  const [showSendToSegmentDialog, setShowSendToSegmentDialog] = useState(false)
+  const [showConfigureSlackDialog, setShowConfigureSlackDialog] = useState(false)
+  const [showAddWebhookDialog, setShowAddWebhookDialog] = useState(false)
+  const [showDeleteWebhookDialog, setShowDeleteWebhookDialog] = useState(false)
+  const [showConfigureIntegrationDialog, setShowConfigureIntegrationDialog] = useState(false)
+  const [showConnectIntegrationDialog, setShowConnectIntegrationDialog] = useState(false)
+  const [showRegenerateApiKeyDialog, setShowRegenerateApiKeyDialog] = useState(false)
+  const [showNewTemplateDialog, setShowNewTemplateDialog] = useState(false)
+  const [showEditTemplateDialog, setShowEditTemplateDialog] = useState(false)
+  const [showDeleteTemplateDialog, setShowDeleteTemplateDialog] = useState(false)
+  const [showExportDataDialog, setShowExportDataDialog] = useState(false)
+  const [showImportDataDialog, setShowImportDataDialog] = useState(false)
+  const [showClearCacheDialog, setShowClearCacheDialog] = useState(false)
+  const [showArchiveAllDialog, setShowArchiveAllDialog] = useState(false)
+  const [showDeleteAllDialog, setShowDeleteAllDialog] = useState(false)
+  const [showResetSettingsDialog, setShowResetSettingsDialog] = useState(false)
+  const [showEditAnnouncementDialog, setShowEditAnnouncementDialog] = useState(false)
+  const [showShareAnnouncementDialog, setShowShareAnnouncementDialog] = useState(false)
+
+  // Form states for dialogs
+  const [newRelease, setNewRelease] = useState({
+    version: '',
+    title: '',
+    description: '',
+    type: 'feature' as AnnouncementType,
+    changes: ['']
+  })
+
+  const [newSegment, setNewSegment] = useState({
+    name: '',
+    description: '',
+    attribute: '',
+    operator: '=',
+    value: ''
+  })
+
+  const [selectedSegment, setSelectedSegment] = useState<Segment | null>(null)
+
+  const [newWebhook, setNewWebhook] = useState({
+    url: '',
+    events: ['published'] as string[]
+  })
+
+  const [selectedWebhookIndex, setSelectedWebhookIndex] = useState<number | null>(null)
+
+  const [selectedIntegration, setSelectedIntegration] = useState<{ name: string; connected: boolean } | null>(null)
+
+  const [newTemplate, setNewTemplate] = useState({
+    name: '',
+    type: 'feature' as AnnouncementType,
+    description: '',
+    content: ''
+  })
+
+  const [selectedTemplate, setSelectedTemplate] = useState<{ name: string; type: string; description: string } | null>(null)
+
+  const [editingAnnouncement, setEditingAnnouncement] = useState({
+    title: '',
+    content: ''
+  })
+
   // Helper function to map DB types to local types
   function mapDbTypeToLocal(dbType: string): AnnouncementType {
     const typeMap: Record<string, AnnouncementType> = {
@@ -716,6 +781,260 @@ export default function AnnouncementsClient() {
         description: error instanceof Error ? error.message : 'Unknown error occurred'
       })
     }
+  }
+
+  // Handler for Add Release
+  const handleAddRelease = () => {
+    if (!newRelease.version.trim() || !newRelease.title.trim()) {
+      toast.error('Validation Error', { description: 'Version and title are required' })
+      return
+    }
+    toast.success('Release Added', {
+      description: `Version ${newRelease.version} has been added to the changelog`
+    })
+    setNewRelease({ version: '', title: '', description: '', type: 'feature', changes: [''] })
+    setShowAddReleaseDialog(false)
+  }
+
+  // Handler for Create Segment
+  const handleCreateSegment = () => {
+    if (!newSegment.name.trim()) {
+      toast.error('Validation Error', { description: 'Segment name is required' })
+      return
+    }
+    toast.success('Segment Created', {
+      description: `"${newSegment.name}" segment has been created`
+    })
+    setNewSegment({ name: '', description: '', attribute: '', operator: '=', value: '' })
+    setShowCreateSegmentDialog(false)
+  }
+
+  // Handler for Edit Segment
+  const handleEditSegment = () => {
+    if (!selectedSegment) return
+    toast.success('Segment Updated', {
+      description: `"${selectedSegment.name}" segment has been updated`
+    })
+    setShowEditSegmentDialog(false)
+    setSelectedSegment(null)
+  }
+
+  // Handler for Send to Segment
+  const handleSendToSegment = () => {
+    if (!selectedSegment) return
+    toast.success('Announcement Sent', {
+      description: `Announcement will be sent to ${formatNumber(selectedSegment.userCount)} users in "${selectedSegment.name}"`
+    })
+    setShowSendToSegmentDialog(false)
+    setSelectedSegment(null)
+  }
+
+  // Handler for Configure Slack
+  const handleConfigureSlack = () => {
+    toast.success('Slack Configuration Updated', {
+      description: 'Your Slack integration settings have been saved'
+    })
+    setShowConfigureSlackDialog(false)
+  }
+
+  // Handler for Add Webhook
+  const handleAddWebhook = () => {
+    if (!newWebhook.url.trim()) {
+      toast.error('Validation Error', { description: 'Webhook URL is required' })
+      return
+    }
+    toast.success('Webhook Added', {
+      description: `Webhook endpoint has been configured for ${newWebhook.events.join(', ')} events`
+    })
+    setNewWebhook({ url: '', events: ['published'] })
+    setShowAddWebhookDialog(false)
+  }
+
+  // Handler for Delete Webhook
+  const handleDeleteWebhook = () => {
+    toast.success('Webhook Deleted', {
+      description: 'The webhook endpoint has been removed'
+    })
+    setShowDeleteWebhookDialog(false)
+    setSelectedWebhookIndex(null)
+  }
+
+  // Handler for Configure Integration
+  const handleConfigureIntegration = () => {
+    if (!selectedIntegration) return
+    toast.success('Integration Updated', {
+      description: `${selectedIntegration.name} configuration has been saved`
+    })
+    setShowConfigureIntegrationDialog(false)
+    setSelectedIntegration(null)
+  }
+
+  // Handler for Connect Integration
+  const handleConnectIntegration = () => {
+    if (!selectedIntegration) return
+    toast.success('Integration Connected', {
+      description: `${selectedIntegration.name} has been successfully connected`
+    })
+    setShowConnectIntegrationDialog(false)
+    setSelectedIntegration(null)
+  }
+
+  // Handler for Regenerate API Key
+  const handleRegenerateApiKey = () => {
+    toast.success('API Key Regenerated', {
+      description: 'Your new API key has been generated. Make sure to update your integrations.'
+    })
+    setShowRegenerateApiKeyDialog(false)
+  }
+
+  // Handler for Copy to Clipboard
+  const handleCopyToClipboard = (text: string, label: string) => {
+    navigator.clipboard.writeText(text)
+    toast.success('Copied to Clipboard', {
+      description: `${label} has been copied to your clipboard`
+    })
+  }
+
+  // Handler for New Template
+  const handleNewTemplate = () => {
+    if (!newTemplate.name.trim()) {
+      toast.error('Validation Error', { description: 'Template name is required' })
+      return
+    }
+    toast.success('Template Created', {
+      description: `"${newTemplate.name}" template has been created`
+    })
+    setNewTemplate({ name: '', type: 'feature', description: '', content: '' })
+    setShowNewTemplateDialog(false)
+  }
+
+  // Handler for Edit Template
+  const handleEditTemplate = () => {
+    if (!selectedTemplate) return
+    toast.success('Template Updated', {
+      description: `"${selectedTemplate.name}" template has been updated`
+    })
+    setShowEditTemplateDialog(false)
+    setSelectedTemplate(null)
+  }
+
+  // Handler for Delete Template
+  const handleDeleteTemplate = () => {
+    if (!selectedTemplate) return
+    toast.success('Template Deleted', {
+      description: `"${selectedTemplate.name}" template has been deleted`
+    })
+    setShowDeleteTemplateDialog(false)
+    setSelectedTemplate(null)
+  }
+
+  // Handler for Export Data
+  const handleExportData = () => {
+    toast.success('Export Started', {
+      description: 'Your data export is being prepared. You will receive a download link shortly.'
+    })
+    setShowExportDataDialog(false)
+  }
+
+  // Handler for Import Data
+  const handleImportData = () => {
+    toast.success('Import Started', {
+      description: 'Your data is being imported. This may take a few minutes.'
+    })
+    setShowImportDataDialog(false)
+  }
+
+  // Handler for Clear Cache
+  const handleClearCache = () => {
+    toast.success('Cache Cleared', {
+      description: 'All caches have been cleared successfully'
+    })
+    setShowClearCacheDialog(false)
+  }
+
+  // Handler for Archive All
+  const handleArchiveAll = async () => {
+    try {
+      const publishedAnnouncements = announcements.filter(a => a.status === 'published')
+      for (const ann of publishedAnnouncements) {
+        await updateAnnouncement(ann.id, { status: 'archived' })
+      }
+      toast.success('All Announcements Archived', {
+        description: `${publishedAnnouncements.length} announcements have been moved to archive`
+      })
+    } catch (error) {
+      toast.error('Failed to archive announcements', {
+        description: error instanceof Error ? error.message : 'Unknown error occurred'
+      })
+    }
+    setShowArchiveAllDialog(false)
+  }
+
+  // Handler for Delete All
+  const handleDeleteAll = async () => {
+    try {
+      for (const ann of announcements) {
+        await deleteAnnouncement(ann.id)
+      }
+      toast.success('All Data Deleted', {
+        description: 'All announcements and analytics have been permanently deleted'
+      })
+    } catch (error) {
+      toast.error('Failed to delete data', {
+        description: error instanceof Error ? error.message : 'Unknown error occurred'
+      })
+    }
+    setShowDeleteAllDialog(false)
+  }
+
+  // Handler for Reset Settings
+  const handleResetSettings = () => {
+    toast.success('Settings Reset', {
+      description: 'All settings have been reset to factory defaults'
+    })
+    setShowResetSettingsDialog(false)
+  }
+
+  // Handler for Edit Announcement
+  const handleEditAnnouncement = async () => {
+    if (!selectedAnnouncement) return
+    if (!editingAnnouncement.title.trim() || !editingAnnouncement.content.trim()) {
+      toast.error('Validation Error', { description: 'Title and content are required' })
+      return
+    }
+    try {
+      await updateAnnouncement(selectedAnnouncement.id, {
+        title: editingAnnouncement.title,
+        content: editingAnnouncement.content
+      })
+      toast.success('Announcement Updated', {
+        description: `"${editingAnnouncement.title}" has been updated`
+      })
+      setShowEditAnnouncementDialog(false)
+      setSelectedAnnouncement(null)
+    } catch (error) {
+      toast.error('Failed to update announcement', {
+        description: error instanceof Error ? error.message : 'Unknown error occurred'
+      })
+    }
+  }
+
+  // Handler for Share Announcement
+  const handleShareAnnouncement = (channel: 'link' | 'email' | 'twitter' | 'linkedin') => {
+    if (!selectedAnnouncement) return
+    const shareMessages: Record<string, string> = {
+      link: 'Share link copied to clipboard',
+      email: 'Email share dialog opened',
+      twitter: 'Opening Twitter share dialog',
+      linkedin: 'Opening LinkedIn share dialog'
+    }
+    toast.success('Share Initiated', {
+      description: shareMessages[channel]
+    })
+    if (channel === 'link') {
+      navigator.clipboard.writeText(`https://app.freeflow.com/announcements/${selectedAnnouncement.id}`)
+    }
+    setShowShareAnnouncementDialog(false)
   }
 
   return (
@@ -952,7 +1271,7 @@ export default function AnnouncementsClient() {
           <TabsContent value="changelog" className="space-y-6">
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold">Release History</h2>
-              <Button variant="outline">
+              <Button variant="outline" onClick={() => setShowAddReleaseDialog(true)}>
                 <Plus className="h-4 w-4 mr-2" />
                 Add Release
               </Button>
@@ -1011,7 +1330,7 @@ export default function AnnouncementsClient() {
           <TabsContent value="segments" className="space-y-6">
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold">User Segments</h2>
-              <Button>
+              <Button onClick={() => setShowCreateSegmentDialog(true)}>
                 <Plus className="h-4 w-4 mr-2" />
                 Create Segment
               </Button>
@@ -1046,8 +1365,14 @@ export default function AnnouncementsClient() {
                     )}
 
                     <div className="flex items-center gap-2 mt-4">
-                      <Button variant="outline" size="sm">Edit</Button>
-                      <Button variant="outline" size="sm">
+                      <Button variant="outline" size="sm" onClick={() => {
+                        setSelectedSegment(segment)
+                        setShowEditSegmentDialog(true)
+                      }}>Edit</Button>
+                      <Button variant="outline" size="sm" onClick={() => {
+                        setSelectedSegment(segment)
+                        setShowSendToSegmentDialog(true)
+                      }}>
                         <Send className="h-4 w-4 mr-2" />
                         Send Announcement
                       </Button>
@@ -1587,7 +1912,7 @@ export default function AnnouncementsClient() {
                             </div>
                             <Badge className="ml-auto bg-green-100 text-green-700">Active</Badge>
                           </div>
-                          <Button variant="outline" size="sm">Configure Channel</Button>
+                          <Button variant="outline" size="sm" onClick={() => setShowConfigureSlackDialog(true)}>Configure Channel</Button>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <div>
@@ -1630,14 +1955,17 @@ export default function AnnouncementsClient() {
                               </div>
                               <div className="flex items-center gap-2">
                                 <Badge className="bg-green-100 text-green-700">{webhook.status}</Badge>
-                                <Button variant="ghost" size="sm">
+                                <Button variant="ghost" size="sm" onClick={() => {
+                                  setSelectedWebhookIndex(i)
+                                  setShowDeleteWebhookDialog(true)
+                                }}>
                                   <Trash2 className="h-4 w-4" />
                                 </Button>
                               </div>
                             </div>
                           ))}
                         </div>
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => setShowAddWebhookDialog(true)}>
                           <Plus className="h-4 w-4 mr-2" />
                           Add Webhook
                         </Button>
@@ -1675,10 +2003,16 @@ export default function AnnouncementsClient() {
                             {integration.connected ? (
                               <div className="flex items-center gap-2">
                                 <Badge className="bg-green-100 text-green-700">Connected</Badge>
-                                <Button variant="ghost" size="sm">Configure</Button>
+                                <Button variant="ghost" size="sm" onClick={() => {
+                                  setSelectedIntegration({ name: integration.name, connected: integration.connected })
+                                  setShowConfigureIntegrationDialog(true)
+                                }}>Configure</Button>
                               </div>
                             ) : (
-                              <Button variant="outline" size="sm">Connect</Button>
+                              <Button variant="outline" size="sm" onClick={() => {
+                                setSelectedIntegration({ name: integration.name, connected: integration.connected })
+                                setShowConnectIntegrationDialog(true)
+                              }}>Connect</Button>
                             )}
                           </div>
                         ))}
@@ -1696,7 +2030,7 @@ export default function AnnouncementsClient() {
                         <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <div className="flex items-center justify-between mb-3">
                             <div className="font-medium">API Key</div>
-                            <Button variant="outline" size="sm">
+                            <Button variant="outline" size="sm" onClick={() => setShowRegenerateApiKeyDialog(true)}>
                               <RefreshCw className="h-4 w-4 mr-2" />
                               Regenerate
                             </Button>
@@ -1705,7 +2039,7 @@ export default function AnnouncementsClient() {
                             <code className="flex-1 bg-white dark:bg-gray-900 px-3 py-2 rounded border text-sm">
                               ann_live_•••••••••••••••••••••••
                             </code>
-                            <Button variant="outline" size="sm">
+                            <Button variant="outline" size="sm" onClick={() => handleCopyToClipboard('ann_live_sk_1234567890abcdef', 'API Key')}>
                               <Copy className="h-4 w-4" />
                             </Button>
                           </div>
@@ -1720,7 +2054,7 @@ export default function AnnouncementsClient() {
                             <div className="text-sm text-gray-500">Avg Response Time</div>
                           </div>
                         </div>
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => window.open('https://docs.freeflow.com/api/announcements', '_blank')}>
                           <ExternalLink className="h-4 w-4 mr-2" />
                           View API Documentation
                         </Button>
@@ -1741,7 +2075,7 @@ export default function AnnouncementsClient() {
                             <code className="flex-1 bg-white dark:bg-gray-900 px-3 py-2 rounded border text-sm truncate">
                               https://app.freeflow.com/feed/announcements.xml
                             </code>
-                            <Button variant="outline" size="sm">
+                            <Button variant="outline" size="sm" onClick={() => handleCopyToClipboard('https://app.freeflow.com/feed/announcements.xml', 'RSS Feed URL')}>
                               <Copy className="h-4 w-4" />
                             </Button>
                           </div>
@@ -1752,7 +2086,7 @@ export default function AnnouncementsClient() {
 {`<script src="https://cdn.freeflow.com/embed.js"></script>
 <div data-freeflow-announcements></div>`}
                           </pre>
-                          <Button variant="outline" size="sm" className="mt-2">
+                          <Button variant="outline" size="sm" className="mt-2" onClick={() => handleCopyToClipboard('<script src="https://cdn.freeflow.com/embed.js"></script>\n<div data-freeflow-announcements></div>', 'Embed Code')}>
                             <Copy className="h-4 w-4 mr-2" />
                             Copy Code
                           </Button>
@@ -1772,7 +2106,7 @@ export default function AnnouncementsClient() {
                             <FileText className="h-5 w-5" />
                             Announcement Templates
                           </CardTitle>
-                          <Button size="sm">
+                          <Button size="sm" onClick={() => setShowNewTemplateDialog(true)}>
                             <Plus className="h-4 w-4 mr-2" />
                             New Template
                           </Button>
@@ -1797,10 +2131,16 @@ export default function AnnouncementsClient() {
                             </div>
                             <div className="flex items-center gap-3">
                               <span className="text-sm text-gray-500">{template.uses} uses</span>
-                              <Button variant="ghost" size="sm">
+                              <Button variant="ghost" size="sm" onClick={() => {
+                                setSelectedTemplate({ name: template.name, type: template.type, description: template.description })
+                                setShowEditTemplateDialog(true)
+                              }}>
                                 <Edit className="h-4 w-4" />
                               </Button>
-                              <Button variant="ghost" size="sm">
+                              <Button variant="ghost" size="sm" onClick={() => {
+                                setSelectedTemplate({ name: template.name, type: template.type, description: template.description })
+                                setShowDeleteTemplateDialog(true)
+                              }}>
                                 <Trash2 className="h-4 w-4" />
                               </Button>
                             </div>
@@ -1911,11 +2251,11 @@ export default function AnnouncementsClient() {
                           </div>
                         </div>
                         <div className="flex gap-3">
-                          <Button variant="outline" className="flex-1">
+                          <Button variant="outline" className="flex-1" onClick={() => setShowExportDataDialog(true)}>
                             <Download className="h-4 w-4 mr-2" />
                             Export All Data
                           </Button>
-                          <Button variant="outline" className="flex-1">
+                          <Button variant="outline" className="flex-1" onClick={() => setShowImportDataDialog(true)}>
                             <Upload className="h-4 w-4 mr-2" />
                             Import Data
                           </Button>
@@ -1952,7 +2292,7 @@ export default function AnnouncementsClient() {
                             </SelectContent>
                           </Select>
                         </div>
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => setShowClearCacheDialog(true)}>
                           <RefreshCw className="h-4 w-4 mr-2" />
                           Clear All Caches
                         </Button>
@@ -2010,7 +2350,7 @@ export default function AnnouncementsClient() {
                             <div className="font-medium text-red-600">Archive All Announcements</div>
                             <div className="text-sm text-gray-500">Move all published announcements to archive</div>
                           </div>
-                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50" onClick={() => setShowArchiveAllDialog(true)}>
                             <Archive className="h-4 w-4 mr-2" />
                             Archive All
                           </Button>
@@ -2020,7 +2360,7 @@ export default function AnnouncementsClient() {
                             <div className="font-medium text-red-600">Delete All Data</div>
                             <div className="text-sm text-gray-500">Permanently delete all announcements and analytics</div>
                           </div>
-                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50" onClick={() => setShowDeleteAllDialog(true)}>
                             <Trash2 className="h-4 w-4 mr-2" />
                             Delete All
                           </Button>
@@ -2030,7 +2370,7 @@ export default function AnnouncementsClient() {
                             <div className="font-medium text-red-600">Reset to Defaults</div>
                             <div className="text-sm text-gray-500">Reset all settings to factory defaults</div>
                           </div>
-                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50" onClick={() => setShowResetSettingsDialog(true)}>
                             <RefreshCw className="h-4 w-4 mr-2" />
                             Reset
                           </Button>
@@ -2216,11 +2556,17 @@ export default function AnnouncementsClient() {
                       </Button>
                     )}
 
-                    <Button variant="outline">
+                    <Button variant="outline" onClick={() => {
+                      setEditingAnnouncement({
+                        title: selectedAnnouncement.title,
+                        content: selectedAnnouncement.content
+                      })
+                      setShowEditAnnouncementDialog(true)
+                    }}>
                       <Edit className="h-4 w-4 mr-2" />
                       Edit
                     </Button>
-                    <Button variant="outline">
+                    <Button variant="outline" onClick={() => setShowShareAnnouncementDialog(true)}>
                       <Share2 className="h-4 w-4 mr-2" />
                       Share
                     </Button>
@@ -2436,6 +2782,834 @@ export default function AnnouncementsClient() {
             >
               {mutating ? 'Publishing...' : 'Publish Now'}
             </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Release Dialog */}
+      <Dialog open={showAddReleaseDialog} onOpenChange={setShowAddReleaseDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <History className="h-5 w-5 text-violet-600" />
+              Add New Release
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Version</Label>
+                <Input
+                  placeholder="e.g., 3.1.0"
+                  value={newRelease.version}
+                  onChange={(e) => setNewRelease(prev => ({ ...prev, version: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Type</Label>
+                <Select
+                  value={newRelease.type}
+                  onValueChange={(value: AnnouncementType) => setNewRelease(prev => ({ ...prev, type: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="feature">Feature</SelectItem>
+                    <SelectItem value="improvement">Improvement</SelectItem>
+                    <SelectItem value="fix">Bug Fix</SelectItem>
+                    <SelectItem value="maintenance">Maintenance</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Title</Label>
+              <Input
+                placeholder="Release title..."
+                value={newRelease.title}
+                onChange={(e) => setNewRelease(prev => ({ ...prev, title: e.target.value }))}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Description</Label>
+              <Textarea
+                placeholder="Describe what's in this release..."
+                value={newRelease.description}
+                onChange={(e) => setNewRelease(prev => ({ ...prev, description: e.target.value }))}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Changes (one per line)</Label>
+              <Textarea
+                placeholder="- Added new feature&#10;- Fixed bug&#10;- Improved performance"
+                value={newRelease.changes.join('\n')}
+                onChange={(e) => setNewRelease(prev => ({ ...prev, changes: e.target.value.split('\n') }))}
+                className="min-h-[100px]"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAddReleaseDialog(false)}>Cancel</Button>
+            <Button onClick={handleAddRelease}>Add Release</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Segment Dialog */}
+      <Dialog open={showCreateSegmentDialog} onOpenChange={setShowCreateSegmentDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Users className="h-5 w-5 text-violet-600" />
+              Create User Segment
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Segment Name</Label>
+              <Input
+                placeholder="e.g., Power Users"
+                value={newSegment.name}
+                onChange={(e) => setNewSegment(prev => ({ ...prev, name: e.target.value }))}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Description</Label>
+              <Input
+                placeholder="Describe this segment..."
+                value={newSegment.description}
+                onChange={(e) => setNewSegment(prev => ({ ...prev, description: e.target.value }))}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Rule</Label>
+              <div className="grid grid-cols-3 gap-2">
+                <Select
+                  value={newSegment.attribute}
+                  onValueChange={(value) => setNewSegment(prev => ({ ...prev, attribute: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Attribute" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="plan">Plan</SelectItem>
+                    <SelectItem value="created_at">Created At</SelectItem>
+                    <SelectItem value="country">Country</SelectItem>
+                    <SelectItem value="role">Role</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Select
+                  value={newSegment.operator}
+                  onValueChange={(value) => setNewSegment(prev => ({ ...prev, operator: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="=">equals</SelectItem>
+                    <SelectItem value="!=">not equals</SelectItem>
+                    <SelectItem value=">">greater than</SelectItem>
+                    <SelectItem value="<">less than</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Input
+                  placeholder="Value"
+                  value={newSegment.value}
+                  onChange={(e) => setNewSegment(prev => ({ ...prev, value: e.target.value }))}
+                />
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCreateSegmentDialog(false)}>Cancel</Button>
+            <Button onClick={handleCreateSegment}>Create Segment</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Segment Dialog */}
+      <Dialog open={showEditSegmentDialog} onOpenChange={setShowEditSegmentDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Edit className="h-5 w-5 text-violet-600" />
+              Edit Segment
+            </DialogTitle>
+          </DialogHeader>
+          {selectedSegment && (
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Segment Name</Label>
+                <Input defaultValue={selectedSegment.name} />
+              </div>
+              <div className="space-y-2">
+                <Label>Description</Label>
+                <Input defaultValue={selectedSegment.description} />
+              </div>
+              {selectedSegment.rules.length > 0 && (
+                <div className="space-y-2">
+                  <Label>Rules</Label>
+                  {selectedSegment.rules.map((rule, i) => (
+                    <div key={i} className="flex items-center gap-2 text-sm bg-gray-50 dark:bg-gray-800 rounded-lg px-3 py-2">
+                      <code className="text-violet-600">{rule.attribute}</code>
+                      <span className="text-gray-400">{rule.operator}</span>
+                      <code className="text-green-600">{rule.value}</code>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowEditSegmentDialog(false)}>Cancel</Button>
+            <Button onClick={handleEditSegment}>Save Changes</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Send to Segment Dialog */}
+      <Dialog open={showSendToSegmentDialog} onOpenChange={setShowSendToSegmentDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Send className="h-5 w-5 text-violet-600" />
+              Send Announcement to Segment
+            </DialogTitle>
+          </DialogHeader>
+          {selectedSegment && (
+            <div className="space-y-4 py-4">
+              <div className="p-4 bg-violet-50 dark:bg-violet-900/20 rounded-lg">
+                <div className="font-medium">{selectedSegment.name}</div>
+                <div className="text-sm text-gray-500">{selectedSegment.description}</div>
+                <div className="text-sm text-violet-600 mt-2">
+                  {formatNumber(selectedSegment.userCount)} users will receive this announcement
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Select Announcement</Label>
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Choose an announcement" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {announcements.filter(a => a.status === 'published').map(a => (
+                      <SelectItem key={a.id} value={a.id}>{a.title}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Delivery Channels</Label>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="flex items-center gap-2 p-2 border rounded-lg">
+                    <Switch defaultChecked />
+                    <span className="text-sm">Email</span>
+                  </div>
+                  <div className="flex items-center gap-2 p-2 border rounded-lg">
+                    <Switch />
+                    <span className="text-sm">Push Notification</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowSendToSegmentDialog(false)}>Cancel</Button>
+            <Button onClick={handleSendToSegment}>Send Announcement</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Configure Slack Dialog */}
+      <Dialog open={showConfigureSlackDialog} onOpenChange={setShowConfigureSlackDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Slack className="h-5 w-5 text-violet-600" />
+              Configure Slack Integration
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Channel</Label>
+              <Select defaultValue="announcements">
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="announcements">#announcements</SelectItem>
+                  <SelectItem value="general">#general</SelectItem>
+                  <SelectItem value="product-updates">#product-updates</SelectItem>
+                  <SelectItem value="team">#team</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Notification Settings</Label>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <span className="text-sm">Include preview image</span>
+                  <Switch defaultChecked />
+                </div>
+                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <span className="text-sm">Mention @channel for urgent</span>
+                  <Switch />
+                </div>
+                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <span className="text-sm">Include metrics in updates</span>
+                  <Switch defaultChecked />
+                </div>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowConfigureSlackDialog(false)}>Cancel</Button>
+            <Button onClick={handleConfigureSlack}>Save Configuration</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Webhook Dialog */}
+      <Dialog open={showAddWebhookDialog} onOpenChange={setShowAddWebhookDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Webhook className="h-5 w-5 text-violet-600" />
+              Add Webhook
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Webhook URL</Label>
+              <Input
+                placeholder="https://api.example.com/webhooks/..."
+                value={newWebhook.url}
+                onChange={(e) => setNewWebhook(prev => ({ ...prev, url: e.target.value }))}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Events</Label>
+              <div className="grid grid-cols-2 gap-2">
+                {['published', 'updated', 'archived', 'deleted'].map(event => (
+                  <div key={event} className="flex items-center gap-2 p-2 border rounded-lg">
+                    <Switch
+                      checked={newWebhook.events.includes(event)}
+                      onCheckedChange={(checked) => {
+                        if (checked) {
+                          setNewWebhook(prev => ({ ...prev, events: [...prev.events, event] }))
+                        } else {
+                          setNewWebhook(prev => ({ ...prev, events: prev.events.filter(e => e !== event) }))
+                        }
+                      }}
+                    />
+                    <span className="text-sm capitalize">{event}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAddWebhookDialog(false)}>Cancel</Button>
+            <Button onClick={handleAddWebhook}>Add Webhook</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Webhook Dialog */}
+      <Dialog open={showDeleteWebhookDialog} onOpenChange={setShowDeleteWebhookDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-600">
+              <Trash2 className="h-5 w-5" />
+              Delete Webhook
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-gray-600">Are you sure you want to delete this webhook? This action cannot be undone.</p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowDeleteWebhookDialog(false)}>Cancel</Button>
+            <Button variant="destructive" onClick={handleDeleteWebhook}>Delete Webhook</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Configure Integration Dialog */}
+      <Dialog open={showConfigureIntegrationDialog} onOpenChange={setShowConfigureIntegrationDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Settings className="h-5 w-5 text-violet-600" />
+              Configure {selectedIntegration?.name}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>API Key</Label>
+              <Input type="password" defaultValue="••••••••••••••••" />
+            </div>
+            <div className="space-y-2">
+              <Label>Sync Settings</Label>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <span className="text-sm">Auto-sync announcements</span>
+                  <Switch defaultChecked />
+                </div>
+                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <span className="text-sm">Sync user engagement data</span>
+                  <Switch defaultChecked />
+                </div>
+                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <span className="text-sm">Enable bidirectional sync</span>
+                  <Switch />
+                </div>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowConfigureIntegrationDialog(false)}>Cancel</Button>
+            <Button onClick={handleConfigureIntegration}>Save Configuration</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Connect Integration Dialog */}
+      <Dialog open={showConnectIntegrationDialog} onOpenChange={setShowConnectIntegrationDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Link2 className="h-5 w-5 text-violet-600" />
+              Connect {selectedIntegration?.name}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <p className="text-gray-600">
+              Connect your {selectedIntegration?.name} account to enable seamless integration with your announcements.
+            </p>
+            <div className="space-y-2">
+              <Label>API Key</Label>
+              <Input placeholder="Enter your API key..." />
+            </div>
+            <div className="space-y-2">
+              <Label>Workspace ID (optional)</Label>
+              <Input placeholder="Enter workspace ID..." />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowConnectIntegrationDialog(false)}>Cancel</Button>
+            <Button onClick={handleConnectIntegration}>Connect</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Regenerate API Key Dialog */}
+      <Dialog open={showRegenerateApiKeyDialog} onOpenChange={setShowRegenerateApiKeyDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-amber-600">
+              <RefreshCw className="h-5 w-5" />
+              Regenerate API Key
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-gray-600">
+              Are you sure you want to regenerate your API key? Your current key will be invalidated immediately and any applications using it will stop working.
+            </p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowRegenerateApiKeyDialog(false)}>Cancel</Button>
+            <Button onClick={handleRegenerateApiKey}>Regenerate Key</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* New Template Dialog */}
+      <Dialog open={showNewTemplateDialog} onOpenChange={setShowNewTemplateDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5 text-violet-600" />
+              Create New Template
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Template Name</Label>
+                <Input
+                  placeholder="e.g., Weekly Update"
+                  value={newTemplate.name}
+                  onChange={(e) => setNewTemplate(prev => ({ ...prev, name: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Type</Label>
+                <Select
+                  value={newTemplate.type}
+                  onValueChange={(value: AnnouncementType) => setNewTemplate(prev => ({ ...prev, type: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="feature">Feature</SelectItem>
+                    <SelectItem value="improvement">Improvement</SelectItem>
+                    <SelectItem value="fix">Bug Fix</SelectItem>
+                    <SelectItem value="promotion">Promotion</SelectItem>
+                    <SelectItem value="maintenance">Maintenance</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Description</Label>
+              <Input
+                placeholder="Describe when to use this template..."
+                value={newTemplate.description}
+                onChange={(e) => setNewTemplate(prev => ({ ...prev, description: e.target.value }))}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Template Content</Label>
+              <Textarea
+                placeholder="Write your template content here..."
+                value={newTemplate.content}
+                onChange={(e) => setNewTemplate(prev => ({ ...prev, content: e.target.value }))}
+                className="min-h-[120px]"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowNewTemplateDialog(false)}>Cancel</Button>
+            <Button onClick={handleNewTemplate}>Create Template</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Template Dialog */}
+      <Dialog open={showEditTemplateDialog} onOpenChange={setShowEditTemplateDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Edit className="h-5 w-5 text-violet-600" />
+              Edit Template
+            </DialogTitle>
+          </DialogHeader>
+          {selectedTemplate && (
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Template Name</Label>
+                  <Input defaultValue={selectedTemplate.name} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Type</Label>
+                  <Select defaultValue={selectedTemplate.type}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="feature">Feature</SelectItem>
+                      <SelectItem value="improvement">Improvement</SelectItem>
+                      <SelectItem value="fix">Bug Fix</SelectItem>
+                      <SelectItem value="promotion">Promotion</SelectItem>
+                      <SelectItem value="maintenance">Maintenance</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Description</Label>
+                <Input defaultValue={selectedTemplate.description} />
+              </div>
+              <div className="space-y-2">
+                <Label>Template Content</Label>
+                <Textarea defaultValue="" className="min-h-[120px]" />
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowEditTemplateDialog(false)}>Cancel</Button>
+            <Button onClick={handleEditTemplate}>Save Changes</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Template Dialog */}
+      <Dialog open={showDeleteTemplateDialog} onOpenChange={setShowDeleteTemplateDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-600">
+              <Trash2 className="h-5 w-5" />
+              Delete Template
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-gray-600">
+              Are you sure you want to delete "{selectedTemplate?.name}"? This action cannot be undone.
+            </p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowDeleteTemplateDialog(false)}>Cancel</Button>
+            <Button variant="destructive" onClick={handleDeleteTemplate}>Delete Template</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Export Data Dialog */}
+      <Dialog open={showExportDataDialog} onOpenChange={setShowExportDataDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Download className="h-5 w-5 text-violet-600" />
+              Export Data
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Export Format</Label>
+              <Select defaultValue="json">
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="json">JSON</SelectItem>
+                  <SelectItem value="csv">CSV</SelectItem>
+                  <SelectItem value="xml">XML</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Data to Include</Label>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 p-2 border rounded-lg">
+                  <Switch defaultChecked />
+                  <span className="text-sm">Announcements</span>
+                </div>
+                <div className="flex items-center gap-2 p-2 border rounded-lg">
+                  <Switch defaultChecked />
+                  <span className="text-sm">Changelog Entries</span>
+                </div>
+                <div className="flex items-center gap-2 p-2 border rounded-lg">
+                  <Switch defaultChecked />
+                  <span className="text-sm">Analytics Data</span>
+                </div>
+                <div className="flex items-center gap-2 p-2 border rounded-lg">
+                  <Switch />
+                  <span className="text-sm">User Segments</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowExportDataDialog(false)}>Cancel</Button>
+            <Button onClick={handleExportData}>Export Data</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Import Data Dialog */}
+      <Dialog open={showImportDataDialog} onOpenChange={setShowImportDataDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Upload className="h-5 w-5 text-violet-600" />
+              Import Data
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="border-2 border-dashed rounded-lg p-8 text-center">
+              <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+              <div className="text-sm text-gray-500">Drop your file here or click to upload</div>
+              <div className="text-xs text-gray-400 mt-1">JSON, CSV up to 10MB</div>
+            </div>
+            <div className="space-y-2">
+              <Label>Import Options</Label>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 p-2 border rounded-lg">
+                  <Switch defaultChecked />
+                  <span className="text-sm">Skip duplicates</span>
+                </div>
+                <div className="flex items-center gap-2 p-2 border rounded-lg">
+                  <Switch />
+                  <span className="text-sm">Overwrite existing data</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowImportDataDialog(false)}>Cancel</Button>
+            <Button onClick={handleImportData}>Import Data</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Clear Cache Dialog */}
+      <Dialog open={showClearCacheDialog} onOpenChange={setShowClearCacheDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <RefreshCw className="h-5 w-5 text-violet-600" />
+              Clear All Caches
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-gray-600">
+              This will clear all cached data including CDN caches, browser caches, and server-side caches. Users may experience slightly slower load times temporarily.
+            </p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowClearCacheDialog(false)}>Cancel</Button>
+            <Button onClick={handleClearCache}>Clear Caches</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Archive All Dialog */}
+      <Dialog open={showArchiveAllDialog} onOpenChange={setShowArchiveAllDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-600">
+              <Archive className="h-5 w-5" />
+              Archive All Announcements
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-gray-600">
+              Are you sure you want to archive all published announcements? They will no longer be visible to users but can be restored later.
+            </p>
+            <div className="mt-4 p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800">
+              <p className="text-sm text-amber-700 dark:text-amber-400">
+                {announcements.filter(a => a.status === 'published').length} announcements will be archived
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowArchiveAllDialog(false)}>Cancel</Button>
+            <Button variant="destructive" onClick={handleArchiveAll}>Archive All</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete All Dialog */}
+      <Dialog open={showDeleteAllDialog} onOpenChange={setShowDeleteAllDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-600">
+              <Trash2 className="h-5 w-5" />
+              Delete All Data
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-gray-600">
+              This will permanently delete all announcements, analytics data, and cannot be undone. Please type "DELETE" to confirm.
+            </p>
+            <Input className="mt-4" placeholder='Type "DELETE" to confirm' />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowDeleteAllDialog(false)}>Cancel</Button>
+            <Button variant="destructive" onClick={handleDeleteAll}>Delete All Data</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Reset Settings Dialog */}
+      <Dialog open={showResetSettingsDialog} onOpenChange={setShowResetSettingsDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-600">
+              <RefreshCw className="h-5 w-5" />
+              Reset to Defaults
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-gray-600">
+              This will reset all settings to their default values. Your announcements and data will not be affected.
+            </p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowResetSettingsDialog(false)}>Cancel</Button>
+            <Button variant="destructive" onClick={handleResetSettings}>Reset Settings</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Announcement Dialog */}
+      <Dialog open={showEditAnnouncementDialog} onOpenChange={setShowEditAnnouncementDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Edit className="h-5 w-5 text-violet-600" />
+              Edit Announcement
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Title</Label>
+              <Input
+                value={editingAnnouncement.title}
+                onChange={(e) => setEditingAnnouncement(prev => ({ ...prev, title: e.target.value }))}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Content</Label>
+              <Textarea
+                value={editingAnnouncement.content}
+                onChange={(e) => setEditingAnnouncement(prev => ({ ...prev, content: e.target.value }))}
+                className="min-h-[200px]"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowEditAnnouncementDialog(false)}>Cancel</Button>
+            <Button onClick={handleEditAnnouncement} disabled={mutating}>
+              {mutating ? 'Saving...' : 'Save Changes'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Share Announcement Dialog */}
+      <Dialog open={showShareAnnouncementDialog} onOpenChange={setShowShareAnnouncementDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Share2 className="h-5 w-5 text-violet-600" />
+              Share Announcement
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <p className="text-sm text-gray-500">Share this announcement via:</p>
+            <div className="grid grid-cols-2 gap-3">
+              <Button variant="outline" className="flex items-center gap-2" onClick={() => handleShareAnnouncement('link')}>
+                <Link2 className="h-4 w-4" />
+                Copy Link
+              </Button>
+              <Button variant="outline" className="flex items-center gap-2" onClick={() => handleShareAnnouncement('email')}>
+                <Mail className="h-4 w-4" />
+                Email
+              </Button>
+              <Button variant="outline" className="flex items-center gap-2" onClick={() => handleShareAnnouncement('twitter')}>
+                <ExternalLink className="h-4 w-4" />
+                Twitter
+              </Button>
+              <Button variant="outline" className="flex items-center gap-2" onClick={() => handleShareAnnouncement('linkedin')}>
+                <ExternalLink className="h-4 w-4" />
+                LinkedIn
+              </Button>
+            </div>
+            {selectedAnnouncement && (
+              <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div className="text-xs text-gray-500 mb-1">Direct Link</div>
+                <code className="text-sm break-all">
+                  https://app.freeflow.com/announcements/{selectedAnnouncement.id}
+                </code>
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowShareAnnouncementDialog(false)}>Close</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

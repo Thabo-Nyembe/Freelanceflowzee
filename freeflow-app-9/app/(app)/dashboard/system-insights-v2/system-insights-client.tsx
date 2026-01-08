@@ -302,6 +302,43 @@ export default function SystemInsightsClient() {
   const [showLogsDialog, setShowLogsDialog] = useState(false)
   const [showMetricsDialog, setShowMetricsDialog] = useState(false)
 
+  // Additional dialog states for buttons without handlers
+  const [showExportLogsDialog, setShowExportLogsDialog] = useState(false)
+  const [showEditNotificationDialog, setShowEditNotificationDialog] = useState(false)
+  const [showAddNotificationDialog, setShowAddNotificationDialog] = useState(false)
+  const [showEditEscalationDialog, setShowEditEscalationDialog] = useState(false)
+  const [showAddEscalationDialog, setShowAddEscalationDialog] = useState(false)
+  const [showCloudProviderDialog, setShowCloudProviderDialog] = useState(false)
+  const [showContainerPlatformDialog, setShowContainerPlatformDialog] = useState(false)
+  const [showAPMAgentDialog, setShowAPMAgentDialog] = useState(false)
+  const [showEditWebhookDialog, setShowEditWebhookDialog] = useState(false)
+  const [showDeleteWebhookDialog, setShowDeleteWebhookDialog] = useState(false)
+  const [showAddWebhookDialog, setShowAddWebhookDialog] = useState(false)
+  const [showCopyApiKeyDialog, setShowCopyApiKeyDialog] = useState(false)
+  const [showRegenerateApiKeyDialog, setShowRegenerateApiKeyDialog] = useState(false)
+  const [showGenerateNewKeyDialog, setShowGenerateNewKeyDialog] = useState(false)
+  const [showDeleteApiKeyDialog, setShowDeleteApiKeyDialog] = useState(false)
+  const [showPurgeDataDialog, setShowPurgeDataDialog] = useState(false)
+  const [showResetEnvironmentDialog, setShowResetEnvironmentDialog] = useState(false)
+  const [showExportMetricsDialog, setShowExportMetricsDialog] = useState(false)
+  const [showRefreshMetricsDialog, setShowRefreshMetricsDialog] = useState(false)
+  const [showDocumentationDialog, setShowDocumentationDialog] = useState(false)
+
+  // Selected item states for editing
+  const [selectedNotificationChannel, setSelectedNotificationChannel] = useState<{ name: string; icon: typeof Mail; config: string; enabled: boolean } | null>(null)
+  const [selectedEscalationPolicy, setSelectedEscalationPolicy] = useState<{ tier: string; team: string; delay: string; channels: string[] } | null>(null)
+  const [selectedCloudProvider, setSelectedCloudProvider] = useState<{ name: string; status: string; lastSync: string | null } | null>(null)
+  const [selectedContainerPlatform, setSelectedContainerPlatform] = useState<{ name: string; status: string; clusters: number } | null>(null)
+  const [selectedAPMAgent, setSelectedAPMAgent] = useState<{ language: string; version: string; services: number } | null>(null)
+  const [selectedWebhook, setSelectedWebhook] = useState<{ name: string; url: string; events: string[] } | null>(null)
+  const [selectedApiKey, setSelectedApiKey] = useState<{ name: string; lastUsed: string; permissions: string } | null>(null)
+
+  // Form states for new items
+  const [notificationForm, setNotificationForm] = useState({ name: '', config: '', enabled: true })
+  const [escalationForm, setEscalationForm] = useState({ tier: '', team: '', delay: '15 min', channels: ['Email'] })
+  const [webhookForm, setWebhookForm] = useState({ name: '', url: '', events: ['alerts'] })
+  const [apiKeyForm, setApiKeyForm] = useState({ name: '', permissions: 'Read' })
+
   // Quick actions with proper dialog handlers
   const systemInsightsQuickActions = [
     { id: '1', label: 'Deploy', icon: 'Rocket', shortcut: 'D', action: () => setShowDeployDialog(true) },
@@ -626,6 +663,239 @@ export default function SystemInsightsClient() {
         loading: `Opening scaling options for ${serviceName}...`,
         success: `Scaling options loaded for ${serviceName}`,
         error: `Failed to load scaling options`
+      }
+    )
+  }
+
+  // Handler functions for buttons without onClick
+  const handleExportLogs = async () => {
+    setShowExportLogsDialog(false)
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 1500)),
+      {
+        loading: 'Exporting logs...',
+        success: 'Logs exported successfully',
+        error: 'Failed to export logs'
+      }
+    )
+  }
+
+  const handleSaveNotificationChannel = async () => {
+    if (!notificationForm.name.trim()) {
+      toast.error('Please enter a channel name')
+      return
+    }
+    setShowAddNotificationDialog(false)
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 800)),
+      {
+        loading: 'Adding notification channel...',
+        success: 'Notification channel added',
+        error: 'Failed to add notification channel'
+      }
+    )
+    setNotificationForm({ name: '', config: '', enabled: true })
+  }
+
+  const handleUpdateNotificationChannel = async () => {
+    setShowEditNotificationDialog(false)
+    toast.success('Notification channel updated')
+    setSelectedNotificationChannel(null)
+  }
+
+  const handleSaveEscalationPolicy = async () => {
+    if (!escalationForm.tier.trim() || !escalationForm.team.trim()) {
+      toast.error('Please fill in required fields')
+      return
+    }
+    setShowAddEscalationDialog(false)
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 800)),
+      {
+        loading: 'Adding escalation tier...',
+        success: 'Escalation tier added',
+        error: 'Failed to add escalation tier'
+      }
+    )
+    setEscalationForm({ tier: '', team: '', delay: '15 min', channels: ['Email'] })
+  }
+
+  const handleUpdateEscalationPolicy = async () => {
+    setShowEditEscalationDialog(false)
+    toast.success('Escalation policy updated')
+    setSelectedEscalationPolicy(null)
+  }
+
+  const handleConnectCloudProvider = async () => {
+    setShowCloudProviderDialog(false)
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 2000)),
+      {
+        loading: `Connecting to ${selectedCloudProvider?.name}...`,
+        success: `Connected to ${selectedCloudProvider?.name}`,
+        error: `Failed to connect to ${selectedCloudProvider?.name}`
+      }
+    )
+    setSelectedCloudProvider(null)
+  }
+
+  const handleConnectContainerPlatform = async () => {
+    setShowContainerPlatformDialog(false)
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 2000)),
+      {
+        loading: `Connecting to ${selectedContainerPlatform?.name}...`,
+        success: `Connected to ${selectedContainerPlatform?.name}`,
+        error: `Failed to connect to ${selectedContainerPlatform?.name}`
+      }
+    )
+    setSelectedContainerPlatform(null)
+  }
+
+  const handleViewAPMAgent = async () => {
+    setShowAPMAgentDialog(false)
+    window.open(`https://docs.kazi.app/apm/${selectedAPMAgent?.language?.toLowerCase()}`, '_blank')
+    setSelectedAPMAgent(null)
+  }
+
+  const handleSaveWebhook = async () => {
+    if (!webhookForm.name.trim() || !webhookForm.url.trim()) {
+      toast.error('Please fill in required fields')
+      return
+    }
+    setShowAddWebhookDialog(false)
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 800)),
+      {
+        loading: 'Adding webhook...',
+        success: 'Webhook added successfully',
+        error: 'Failed to add webhook'
+      }
+    )
+    setWebhookForm({ name: '', url: '', events: ['alerts'] })
+  }
+
+  const handleUpdateWebhook = async () => {
+    setShowEditWebhookDialog(false)
+    toast.success('Webhook updated')
+    setSelectedWebhook(null)
+  }
+
+  const handleDeleteWebhook = async () => {
+    setShowDeleteWebhookDialog(false)
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 500)),
+      {
+        loading: 'Deleting webhook...',
+        success: 'Webhook deleted',
+        error: 'Failed to delete webhook'
+      }
+    )
+    setSelectedWebhook(null)
+  }
+
+  const handleCopyApiKey = async () => {
+    await navigator.clipboard.writeText('kazi-prod-xxxxxxxxxxxxxxxxxxxxx')
+    setShowCopyApiKeyDialog(false)
+    toast.success('API key copied to clipboard')
+  }
+
+  const handleRegenerateApiKey = async () => {
+    setShowRegenerateApiKeyDialog(false)
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 1500)),
+      {
+        loading: 'Regenerating API key...',
+        success: 'New API key generated. Please update your integrations.',
+        error: 'Failed to regenerate API key'
+      }
+    )
+  }
+
+  const handleGenerateNewApiKey = async () => {
+    if (!apiKeyForm.name.trim()) {
+      toast.error('Please enter a key name')
+      return
+    }
+    setShowGenerateNewKeyDialog(false)
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 1000)),
+      {
+        loading: 'Generating new API key...',
+        success: 'New API key generated',
+        error: 'Failed to generate API key'
+      }
+    )
+    setApiKeyForm({ name: '', permissions: 'Read' })
+  }
+
+  const handleDeleteApiKey = async () => {
+    setShowDeleteApiKeyDialog(false)
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 500)),
+      {
+        loading: 'Deleting API key...',
+        success: 'API key deleted',
+        error: 'Failed to delete API key'
+      }
+    )
+    setSelectedApiKey(null)
+  }
+
+  const handleCopyInstallCommand = async () => {
+    const command = `curl -sL https://install.kazi.app/agent | bash -s -- --api-key=KAZI-XXXXXXXX`
+    await navigator.clipboard.writeText(command)
+    toast.success('Installation command copied to clipboard')
+  }
+
+  const handleOpenDocumentation = () => {
+    setShowDocumentationDialog(false)
+    window.open('https://docs.kazi.app/agent-installation', '_blank')
+  }
+
+  const handlePurgeData = async () => {
+    setShowPurgeDataDialog(false)
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 3000)),
+      {
+        loading: 'Purging all monitoring data...',
+        success: 'All data has been purged',
+        error: 'Failed to purge data'
+      }
+    )
+  }
+
+  const handleResetEnvironment = async () => {
+    setShowResetEnvironmentDialog(false)
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 4000)),
+      {
+        loading: 'Resetting environment...',
+        success: 'Environment has been reset to defaults',
+        error: 'Failed to reset environment'
+      }
+    )
+  }
+
+  const handleExportMetrics = async () => {
+    setShowExportMetricsDialog(false)
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 1500)),
+      {
+        loading: 'Exporting metrics...',
+        success: 'Metrics exported successfully',
+        error: 'Failed to export metrics'
+      }
+    )
+  }
+
+  const handleRefreshMetricsDashboard = () => {
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 1000)),
+      {
+        loading: 'Refreshing metrics...',
+        success: 'Metrics refreshed',
+        error: 'Failed to refresh metrics'
       }
     )
   }
@@ -1091,7 +1361,7 @@ export default function SystemInsightsClient() {
                   <SelectItem value="fatal">Fatal</SelectItem>
                 </SelectContent>
               </Select>
-              <Button variant="outline">
+              <Button variant="outline" onClick={() => setShowExportLogsDialog(true)}>
                 <Download className="h-4 w-4 mr-2" />
                 Export
               </Button>
@@ -1770,14 +2040,17 @@ export default function SystemInsightsClient() {
                               </div>
                             </div>
                             <div className="flex items-center gap-3">
-                              <Button variant="ghost" size="sm">
+                              <Button variant="ghost" size="sm" onClick={() => {
+                                setSelectedNotificationChannel(channel)
+                                setShowEditNotificationDialog(true)
+                              }}>
                                 <Edit3 className="h-4 w-4" />
                               </Button>
                               <Switch defaultChecked={channel.enabled} />
                             </div>
                           </div>
                         ))}
-                        <Button variant="outline" className="w-full mt-4">
+                        <Button variant="outline" className="w-full mt-4" onClick={() => setShowAddNotificationDialog(true)}>
                           <Plus className="h-4 w-4 mr-2" />
                           Add Notification Channel
                         </Button>
@@ -1862,12 +2135,15 @@ export default function SystemInsightsClient() {
                                 After {policy.delay} → {policy.channels.join(', ')}
                               </p>
                             </div>
-                            <Button variant="ghost" size="sm">
+                            <Button variant="ghost" size="sm" onClick={() => {
+                              setSelectedEscalationPolicy(policy)
+                              setShowEditEscalationDialog(true)
+                            }}>
                               <Edit3 className="h-4 w-4" />
                             </Button>
                           </div>
                         ))}
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => setShowAddEscalationDialog(true)}>
                           <Plus className="h-4 w-4 mr-2" />
                           Add Escalation Tier
                         </Button>
@@ -2084,7 +2360,10 @@ export default function SystemInsightsClient() {
                                 )}
                               </div>
                             </div>
-                            <Button variant={provider.status === 'connected' ? 'outline' : 'default'} size="sm">
+                            <Button variant={provider.status === 'connected' ? 'outline' : 'default'} size="sm" onClick={() => {
+                              setSelectedCloudProvider(provider)
+                              setShowCloudProviderDialog(true)
+                            }}>
                               {provider.status === 'connected' ? 'Configure' : 'Connect'}
                             </Button>
                           </div>
@@ -2116,7 +2395,10 @@ export default function SystemInsightsClient() {
                                 )}
                               </div>
                             </div>
-                            <Button variant={platform.status === 'connected' ? 'outline' : 'default'} size="sm">
+                            <Button variant={platform.status === 'connected' ? 'outline' : 'default'} size="sm" onClick={() => {
+                              setSelectedContainerPlatform(platform)
+                              setShowContainerPlatformDialog(true)
+                            }}>
                               {platform.status === 'connected' ? 'Manage' : 'Connect'}
                             </Button>
                           </div>
@@ -2144,7 +2426,10 @@ export default function SystemInsightsClient() {
                             </div>
                             <div className="flex items-center gap-4">
                               <span className="text-sm">{agent.services} service(s)</span>
-                              <Button variant="ghost" size="sm">
+                              <Button variant="ghost" size="sm" onClick={() => {
+                                setSelectedAPMAgent(agent)
+                                setShowAPMAgentDialog(true)
+                              }}>
                                 <ExternalLink className="h-4 w-4" />
                               </Button>
                             </div>
@@ -2169,16 +2454,22 @@ export default function SystemInsightsClient() {
                               <p className="text-sm text-gray-500 font-mono">{webhook.url}</p>
                             </div>
                             <div className="flex items-center gap-2">
-                              <Button variant="ghost" size="sm">
+                              <Button variant="ghost" size="sm" onClick={() => {
+                                setSelectedWebhook(webhook)
+                                setShowEditWebhookDialog(true)
+                              }}>
                                 <Edit3 className="h-4 w-4" />
                               </Button>
-                              <Button variant="ghost" size="sm" className="text-red-600">
+                              <Button variant="ghost" size="sm" className="text-red-600" onClick={() => {
+                                setSelectedWebhook(webhook)
+                                setShowDeleteWebhookDialog(true)
+                              }}>
                                 <Trash2 className="h-4 w-4" />
                               </Button>
                             </div>
                           </div>
                         ))}
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => setShowAddWebhookDialog(true)}>
                           <Plus className="h-4 w-4 mr-2" />
                           Add Webhook
                         </Button>
@@ -2200,10 +2491,10 @@ export default function SystemInsightsClient() {
                           <Label>API Key</Label>
                           <div className="flex items-center gap-2">
                             <Input type="password" value="kazi-prod-xxxxxxxxxxxxxxxxxxxxx" readOnly className="font-mono" />
-                            <Button variant="outline" size="sm">
+                            <Button variant="outline" size="sm" onClick={() => setShowCopyApiKeyDialog(true)}>
                               <Copy className="h-4 w-4" />
                             </Button>
-                            <Button variant="outline" size="sm">
+                            <Button variant="outline" size="sm" onClick={() => setShowRegenerateApiKeyDialog(true)}>
                               <RefreshCw className="h-4 w-4" />
                             </Button>
                           </div>
@@ -2212,7 +2503,7 @@ export default function SystemInsightsClient() {
                         <div className="pt-4 border-t">
                           <div className="flex items-center justify-between mb-4">
                             <Label>Additional API Keys</Label>
-                            <Button variant="outline" size="sm">
+                            <Button variant="outline" size="sm" onClick={() => setShowGenerateNewKeyDialog(true)}>
                               <Plus className="h-4 w-4 mr-2" />
                               Generate New Key
                             </Button>
@@ -2232,7 +2523,10 @@ export default function SystemInsightsClient() {
                                 </div>
                                 <div className="flex items-center gap-2">
                                   <Badge variant="outline">{key.permissions}</Badge>
-                                  <Button variant="ghost" size="sm" className="text-red-600">
+                                  <Button variant="ghost" size="sm" className="text-red-600" onClick={() => {
+                                    setSelectedApiKey(key)
+                                    setShowDeleteApiKeyDialog(true)
+                                  }}>
                                     <Trash2 className="h-4 w-4" />
                                   </Button>
                                 </div>
@@ -2262,11 +2556,11 @@ docker run -d --name kazi-agent \\
   kazi/agent:latest`}</pre>
                         </div>
                         <div className="mt-4 flex items-center gap-2">
-                          <Button variant="outline" size="sm">
+                          <Button variant="outline" size="sm" onClick={handleCopyInstallCommand}>
                             <Copy className="h-4 w-4 mr-2" />
                             Copy Command
                           </Button>
-                          <Button variant="outline" size="sm">
+                          <Button variant="outline" size="sm" onClick={() => setShowDocumentationDialog(true)}>
                             <ExternalLink className="h-4 w-4 mr-2" />
                             Documentation
                           </Button>
@@ -2411,7 +2705,7 @@ docker run -d --name kazi-agent \\
                             <p className="font-medium">Purge All Data</p>
                             <p className="text-sm text-gray-500">Delete all metrics, logs, and traces</p>
                           </div>
-                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50 dark:hover:bg-red-900/20">
+                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50 dark:hover:bg-red-900/20" onClick={() => setShowPurgeDataDialog(true)}>
                             Purge Data
                           </Button>
                         </div>
@@ -2420,7 +2714,7 @@ docker run -d --name kazi-agent \\
                             <p className="font-medium">Reset Environment</p>
                             <p className="text-sm text-gray-500">Reset all settings to defaults and remove all integrations</p>
                           </div>
-                          <Button variant="destructive">
+                          <Button variant="destructive" onClick={() => setShowResetEnvironmentDialog(true)}>
                             Reset Environment
                           </Button>
                         </div>
@@ -2627,7 +2921,7 @@ docker run -d --name kazi-agent \\
               <Button variant="outline" onClick={() => setShowLogsDialog(false)}>
                 Close
               </Button>
-              <Button variant="outline">
+              <Button variant="outline" onClick={handleExportLogs}>
                 <Download className="h-4 w-4 mr-2" />
                 Export Logs
               </Button>
@@ -2666,7 +2960,7 @@ docker run -d --name kazi-agent \\
                   ))}
                 </SelectContent>
               </Select>
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={handleRefreshMetricsDashboard}>
                 <RefreshCw className="h-4 w-4 mr-2" />
                 Refresh
               </Button>
@@ -2703,9 +2997,727 @@ docker run -d --name kazi-agent \\
               <Button variant="outline" onClick={() => setShowMetricsDialog(false)}>
                 Close
               </Button>
-              <Button variant="outline">
+              <Button variant="outline" onClick={handleExportMetrics}>
                 <Download className="h-4 w-4 mr-2" />
                 Export Metrics
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Export Logs Dialog */}
+      <Dialog open={showExportLogsDialog} onOpenChange={setShowExportLogsDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Export Logs</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Format</Label>
+              <Select defaultValue="json">
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="json">JSON</SelectItem>
+                  <SelectItem value="csv">CSV</SelectItem>
+                  <SelectItem value="txt">Plain Text</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Time Range</Label>
+              <Select defaultValue="1h">
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="1h">Last 1 hour</SelectItem>
+                  <SelectItem value="24h">Last 24 hours</SelectItem>
+                  <SelectItem value="7d">Last 7 days</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-center justify-between">
+              <Label>Include metadata</Label>
+              <Switch defaultChecked />
+            </div>
+            <div className="flex gap-3 pt-4">
+              <Button variant="outline" className="flex-1" onClick={() => setShowExportLogsDialog(false)}>
+                Cancel
+              </Button>
+              <Button className="flex-1" onClick={handleExportLogs}>
+                <Download className="h-4 w-4 mr-2" />
+                Export
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Notification Channel Dialog */}
+      <Dialog open={showEditNotificationDialog} onOpenChange={setShowEditNotificationDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Notification Channel</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Channel Name</Label>
+              <Input defaultValue={selectedNotificationChannel?.name || ''} />
+            </div>
+            <div className="space-y-2">
+              <Label>Configuration</Label>
+              <Input defaultValue={selectedNotificationChannel?.config || ''} placeholder="e.g., email@example.com or #channel" />
+            </div>
+            <div className="flex items-center justify-between">
+              <Label>Enabled</Label>
+              <Switch defaultChecked={selectedNotificationChannel?.enabled} />
+            </div>
+            <div className="flex gap-3 pt-4">
+              <Button variant="outline" className="flex-1" onClick={() => setShowEditNotificationDialog(false)}>
+                Cancel
+              </Button>
+              <Button className="flex-1" onClick={handleUpdateNotificationChannel}>
+                Save Changes
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Notification Channel Dialog */}
+      <Dialog open={showAddNotificationDialog} onOpenChange={setShowAddNotificationDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add Notification Channel</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Channel Type</Label>
+              <Select value={notificationForm.name} onValueChange={(v) => setNotificationForm({ ...notificationForm, name: v })}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select type..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Email">Email</SelectItem>
+                  <SelectItem value="Slack">Slack</SelectItem>
+                  <SelectItem value="PagerDuty">PagerDuty</SelectItem>
+                  <SelectItem value="Microsoft Teams">Microsoft Teams</SelectItem>
+                  <SelectItem value="Webhook">Webhook</SelectItem>
+                  <SelectItem value="SMS">SMS</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Configuration</Label>
+              <Input
+                value={notificationForm.config}
+                onChange={(e) => setNotificationForm({ ...notificationForm, config: e.target.value })}
+                placeholder="e.g., email@example.com or webhook URL"
+              />
+            </div>
+            <div className="flex items-center justify-between">
+              <Label>Enable immediately</Label>
+              <Switch
+                checked={notificationForm.enabled}
+                onCheckedChange={(v) => setNotificationForm({ ...notificationForm, enabled: v })}
+              />
+            </div>
+            <div className="flex gap-3 pt-4">
+              <Button variant="outline" className="flex-1" onClick={() => setShowAddNotificationDialog(false)}>
+                Cancel
+              </Button>
+              <Button className="flex-1" onClick={handleSaveNotificationChannel}>
+                <Plus className="h-4 w-4 mr-2" />
+                Add Channel
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Escalation Policy Dialog */}
+      <Dialog open={showEditEscalationDialog} onOpenChange={setShowEditEscalationDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Escalation Policy</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Tier Name</Label>
+              <Input defaultValue={selectedEscalationPolicy?.tier || ''} />
+            </div>
+            <div className="space-y-2">
+              <Label>Team/Person</Label>
+              <Input defaultValue={selectedEscalationPolicy?.team || ''} />
+            </div>
+            <div className="space-y-2">
+              <Label>Delay Before Escalation</Label>
+              <Select defaultValue={selectedEscalationPolicy?.delay || '15 min'}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Immediate">Immediate</SelectItem>
+                  <SelectItem value="5 min">5 minutes</SelectItem>
+                  <SelectItem value="15 min">15 minutes</SelectItem>
+                  <SelectItem value="30 min">30 minutes</SelectItem>
+                  <SelectItem value="1 hour">1 hour</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex gap-3 pt-4">
+              <Button variant="outline" className="flex-1" onClick={() => setShowEditEscalationDialog(false)}>
+                Cancel
+              </Button>
+              <Button className="flex-1" onClick={handleUpdateEscalationPolicy}>
+                Save Changes
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Escalation Tier Dialog */}
+      <Dialog open={showAddEscalationDialog} onOpenChange={setShowAddEscalationDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add Escalation Tier</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Tier Name *</Label>
+              <Input
+                value={escalationForm.tier}
+                onChange={(e) => setEscalationForm({ ...escalationForm, tier: e.target.value })}
+                placeholder="e.g., Tier 4"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Team/Person *</Label>
+              <Input
+                value={escalationForm.team}
+                onChange={(e) => setEscalationForm({ ...escalationForm, team: e.target.value })}
+                placeholder="e.g., VP of Engineering"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Delay Before Escalation</Label>
+              <Select value={escalationForm.delay} onValueChange={(v) => setEscalationForm({ ...escalationForm, delay: v })}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Immediate">Immediate</SelectItem>
+                  <SelectItem value="5 min">5 minutes</SelectItem>
+                  <SelectItem value="15 min">15 minutes</SelectItem>
+                  <SelectItem value="30 min">30 minutes</SelectItem>
+                  <SelectItem value="1 hour">1 hour</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex gap-3 pt-4">
+              <Button variant="outline" className="flex-1" onClick={() => setShowAddEscalationDialog(false)}>
+                Cancel
+              </Button>
+              <Button className="flex-1" onClick={handleSaveEscalationPolicy}>
+                <Plus className="h-4 w-4 mr-2" />
+                Add Tier
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Cloud Provider Dialog */}
+      <Dialog open={showCloudProviderDialog} onOpenChange={setShowCloudProviderDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{selectedCloudProvider?.status === 'connected' ? 'Configure' : 'Connect'} {selectedCloudProvider?.name}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            {selectedCloudProvider?.status === 'connected' ? (
+              <>
+                <div className="p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg">
+                  <div className="flex items-center gap-2 text-emerald-600">
+                    <CheckCircle className="h-5 w-5" />
+                    <span className="font-medium">Connected</span>
+                  </div>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Last sync: {selectedCloudProvider?.lastSync}</p>
+                </div>
+                <div className="space-y-2">
+                  <Label>Sync Interval</Label>
+                  <Select defaultValue="5">
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="1">Every 1 minute</SelectItem>
+                      <SelectItem value="5">Every 5 minutes</SelectItem>
+                      <SelectItem value="15">Every 15 minutes</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex items-center justify-between">
+                  <Label>Auto-import resources</Label>
+                  <Switch defaultChecked />
+                </div>
+              </>
+            ) : (
+              <>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Connect your {selectedCloudProvider?.name} account to import metrics and resources.
+                </p>
+                <div className="space-y-2">
+                  <Label>Access Key / Service Account</Label>
+                  <Input placeholder="Enter your access key..." />
+                </div>
+                <div className="space-y-2">
+                  <Label>Secret Key / Credentials</Label>
+                  <Input type="password" placeholder="Enter your secret..." />
+                </div>
+                <div className="space-y-2">
+                  <Label>Region</Label>
+                  <Select defaultValue="us-east-1">
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="us-east-1">US East (N. Virginia)</SelectItem>
+                      <SelectItem value="us-west-2">US West (Oregon)</SelectItem>
+                      <SelectItem value="eu-west-1">EU (Ireland)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </>
+            )}
+            <div className="flex gap-3 pt-4">
+              <Button variant="outline" className="flex-1" onClick={() => setShowCloudProviderDialog(false)}>
+                Cancel
+              </Button>
+              <Button className="flex-1" onClick={handleConnectCloudProvider}>
+                {selectedCloudProvider?.status === 'connected' ? 'Save Changes' : 'Connect'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Container Platform Dialog */}
+      <Dialog open={showContainerPlatformDialog} onOpenChange={setShowContainerPlatformDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{selectedContainerPlatform?.status === 'connected' ? 'Manage' : 'Connect'} {selectedContainerPlatform?.name}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            {selectedContainerPlatform?.status === 'connected' ? (
+              <>
+                <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                  <div className="flex items-center gap-2 text-blue-600">
+                    <Box className="h-5 w-5" />
+                    <span className="font-medium">{selectedContainerPlatform?.clusters} cluster(s) connected</span>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label>Auto-discovery</Label>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-600">Discover new services automatically</span>
+                    <Switch defaultChecked />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label>Namespace filter</Label>
+                  <Input placeholder="e.g., production,staging" />
+                </div>
+              </>
+            ) : (
+              <>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Connect to {selectedContainerPlatform?.name} to monitor your containerized workloads.
+                </p>
+                <div className="space-y-2">
+                  <Label>Cluster URL</Label>
+                  <Input placeholder="https://kubernetes.example.com:6443" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Authentication Token</Label>
+                  <Input type="password" placeholder="Enter service account token..." />
+                </div>
+              </>
+            )}
+            <div className="flex gap-3 pt-4">
+              <Button variant="outline" className="flex-1" onClick={() => setShowContainerPlatformDialog(false)}>
+                Cancel
+              </Button>
+              <Button className="flex-1" onClick={handleConnectContainerPlatform}>
+                {selectedContainerPlatform?.status === 'connected' ? 'Save Changes' : 'Connect'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* APM Agent Dialog */}
+      <Dialog open={showAPMAgentDialog} onOpenChange={setShowAPMAgentDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{selectedAPMAgent?.language} APM Agent</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+              <div className="flex items-center justify-between mb-2">
+                <span className="font-medium">Version</span>
+                <Badge variant="outline">v{selectedAPMAgent?.version}</Badge>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="font-medium">Active Services</span>
+                <span>{selectedAPMAgent?.services}</span>
+              </div>
+            </div>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              View documentation and configuration options for the {selectedAPMAgent?.language} APM agent.
+            </p>
+            <div className="flex gap-3 pt-4">
+              <Button variant="outline" className="flex-1" onClick={() => setShowAPMAgentDialog(false)}>
+                Close
+              </Button>
+              <Button className="flex-1" onClick={handleViewAPMAgent}>
+                <ExternalLink className="h-4 w-4 mr-2" />
+                View Documentation
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Webhook Dialog */}
+      <Dialog open={showEditWebhookDialog} onOpenChange={setShowEditWebhookDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Webhook</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Webhook Name</Label>
+              <Input defaultValue={selectedWebhook?.name || ''} />
+            </div>
+            <div className="space-y-2">
+              <Label>URL</Label>
+              <Input defaultValue={selectedWebhook?.url || ''} placeholder="https://..." />
+            </div>
+            <div className="space-y-2">
+              <Label>Events</Label>
+              <div className="space-y-2">
+                {['alerts', 'metrics', 'logs', 'traces'].map(event => (
+                  <div key={event} className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      id={event}
+                      defaultChecked={selectedWebhook?.events.includes(event)}
+                      className="rounded border-gray-300"
+                    />
+                    <label htmlFor={event} className="text-sm capitalize">{event}</label>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="flex gap-3 pt-4">
+              <Button variant="outline" className="flex-1" onClick={() => setShowEditWebhookDialog(false)}>
+                Cancel
+              </Button>
+              <Button className="flex-1" onClick={handleUpdateWebhook}>
+                Save Changes
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Webhook Dialog */}
+      <Dialog open={showDeleteWebhookDialog} onOpenChange={setShowDeleteWebhookDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Webhook</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <p className="text-gray-600 dark:text-gray-400">
+              Are you sure you want to delete the webhook "{selectedWebhook?.name}"? This action cannot be undone.
+            </p>
+            <div className="flex gap-3 pt-4">
+              <Button variant="outline" className="flex-1" onClick={() => setShowDeleteWebhookDialog(false)}>
+                Cancel
+              </Button>
+              <Button variant="destructive" className="flex-1" onClick={handleDeleteWebhook}>
+                <Trash2 className="h-4 w-4 mr-2" />
+                Delete
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Webhook Dialog */}
+      <Dialog open={showAddWebhookDialog} onOpenChange={setShowAddWebhookDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add Webhook</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Webhook Name *</Label>
+              <Input
+                value={webhookForm.name}
+                onChange={(e) => setWebhookForm({ ...webhookForm, name: e.target.value })}
+                placeholder="e.g., Slack Alerts"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>URL *</Label>
+              <Input
+                value={webhookForm.url}
+                onChange={(e) => setWebhookForm({ ...webhookForm, url: e.target.value })}
+                placeholder="https://hooks.example.com/webhook"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Events to send</Label>
+              <div className="space-y-2">
+                {['alerts', 'metrics', 'logs', 'traces'].map(event => (
+                  <div key={event} className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      id={`new-${event}`}
+                      defaultChecked={event === 'alerts'}
+                      className="rounded border-gray-300"
+                    />
+                    <label htmlFor={`new-${event}`} className="text-sm capitalize">{event}</label>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="flex gap-3 pt-4">
+              <Button variant="outline" className="flex-1" onClick={() => setShowAddWebhookDialog(false)}>
+                Cancel
+              </Button>
+              <Button className="flex-1" onClick={handleSaveWebhook}>
+                <Plus className="h-4 w-4 mr-2" />
+                Add Webhook
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Copy API Key Dialog */}
+      <Dialog open={showCopyApiKeyDialog} onOpenChange={setShowCopyApiKeyDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Copy API Key</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
+              <div className="flex items-center gap-2 text-amber-600 mb-2">
+                <AlertTriangle className="h-5 w-5" />
+                <span className="font-medium">Security Notice</span>
+              </div>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Keep your API key secure. Do not share it publicly or commit it to version control.
+              </p>
+            </div>
+            <div className="flex gap-3 pt-4">
+              <Button variant="outline" className="flex-1" onClick={() => setShowCopyApiKeyDialog(false)}>
+                Cancel
+              </Button>
+              <Button className="flex-1" onClick={handleCopyApiKey}>
+                <Copy className="h-4 w-4 mr-2" />
+                Copy to Clipboard
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Regenerate API Key Dialog */}
+      <Dialog open={showRegenerateApiKeyDialog} onOpenChange={setShowRegenerateApiKeyDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Regenerate API Key</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
+              <div className="flex items-center gap-2 text-red-600 mb-2">
+                <AlertTriangle className="h-5 w-5" />
+                <span className="font-medium">Warning</span>
+              </div>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Regenerating your API key will invalidate the current key. All integrations using the old key will stop working.
+              </p>
+            </div>
+            <div className="flex gap-3 pt-4">
+              <Button variant="outline" className="flex-1" onClick={() => setShowRegenerateApiKeyDialog(false)}>
+                Cancel
+              </Button>
+              <Button variant="destructive" className="flex-1" onClick={handleRegenerateApiKey}>
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Regenerate Key
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Generate New API Key Dialog */}
+      <Dialog open={showGenerateNewKeyDialog} onOpenChange={setShowGenerateNewKeyDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Generate New API Key</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Key Name *</Label>
+              <Input
+                value={apiKeyForm.name}
+                onChange={(e) => setApiKeyForm({ ...apiKeyForm, name: e.target.value })}
+                placeholder="e.g., Production CI/CD"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Permissions</Label>
+              <Select value={apiKeyForm.permissions} onValueChange={(v) => setApiKeyForm({ ...apiKeyForm, permissions: v })}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Read">Read Only</SelectItem>
+                  <SelectItem value="Write">Read & Write</SelectItem>
+                  <SelectItem value="Admin">Admin</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex gap-3 pt-4">
+              <Button variant="outline" className="flex-1" onClick={() => setShowGenerateNewKeyDialog(false)}>
+                Cancel
+              </Button>
+              <Button className="flex-1" onClick={handleGenerateNewApiKey}>
+                <Key className="h-4 w-4 mr-2" />
+                Generate Key
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete API Key Dialog */}
+      <Dialog open={showDeleteApiKeyDialog} onOpenChange={setShowDeleteApiKeyDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete API Key</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <p className="text-gray-600 dark:text-gray-400">
+              Are you sure you want to delete the API key "{selectedApiKey?.name}"? Any integrations using this key will stop working.
+            </p>
+            <div className="flex gap-3 pt-4">
+              <Button variant="outline" className="flex-1" onClick={() => setShowDeleteApiKeyDialog(false)}>
+                Cancel
+              </Button>
+              <Button variant="destructive" className="flex-1" onClick={handleDeleteApiKey}>
+                <Trash2 className="h-4 w-4 mr-2" />
+                Delete Key
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Documentation Dialog */}
+      <Dialog open={showDocumentationDialog} onOpenChange={setShowDocumentationDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Agent Documentation</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <p className="text-gray-600 dark:text-gray-400">
+              You will be redirected to the official Kazi agent installation documentation.
+            </p>
+            <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+              <p className="text-sm font-mono">https://docs.kazi.app/agent-installation</p>
+            </div>
+            <div className="flex gap-3 pt-4">
+              <Button variant="outline" className="flex-1" onClick={() => setShowDocumentationDialog(false)}>
+                Cancel
+              </Button>
+              <Button className="flex-1" onClick={handleOpenDocumentation}>
+                <ExternalLink className="h-4 w-4 mr-2" />
+                Open Documentation
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Purge Data Dialog */}
+      <Dialog open={showPurgeDataDialog} onOpenChange={setShowPurgeDataDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="text-red-600">Purge All Data</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
+              <div className="flex items-center gap-2 text-red-600 mb-2">
+                <AlertOctagon className="h-5 w-5" />
+                <span className="font-medium">Danger Zone</span>
+              </div>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                This will permanently delete all metrics, logs, and traces. This action cannot be undone.
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label>Type "PURGE" to confirm</Label>
+              <Input placeholder="PURGE" />
+            </div>
+            <div className="flex gap-3 pt-4">
+              <Button variant="outline" className="flex-1" onClick={() => setShowPurgeDataDialog(false)}>
+                Cancel
+              </Button>
+              <Button variant="destructive" className="flex-1" onClick={handlePurgeData}>
+                <Trash2 className="h-4 w-4 mr-2" />
+                Purge All Data
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Reset Environment Dialog */}
+      <Dialog open={showResetEnvironmentDialog} onOpenChange={setShowResetEnvironmentDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="text-red-600">Reset Environment</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
+              <div className="flex items-center gap-2 text-red-600 mb-2">
+                <AlertOctagon className="h-5 w-5" />
+                <span className="font-medium">This Cannot Be Undone</span>
+              </div>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                This will reset all settings to defaults, remove all integrations, and disconnect all monitoring agents.
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label>Type "RESET" to confirm</Label>
+              <Input placeholder="RESET" />
+            </div>
+            <div className="flex gap-3 pt-4">
+              <Button variant="outline" className="flex-1" onClick={() => setShowResetEnvironmentDialog(false)}>
+                Cancel
+              </Button>
+              <Button variant="destructive" className="flex-1" onClick={handleResetEnvironment}>
+                <AlertOctagon className="h-4 w-4 mr-2" />
+                Reset Environment
               </Button>
             </div>
           </div>

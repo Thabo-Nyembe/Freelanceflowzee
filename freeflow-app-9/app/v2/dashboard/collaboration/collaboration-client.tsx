@@ -455,6 +455,34 @@ export default function CollaborationClient() {
   const [showTemplateDialog, setShowTemplateDialog] = useState(false)
   const [showIntegrationDialog, setShowIntegrationDialog] = useState(false)
   const [showAutomationDialog, setShowAutomationDialog] = useState(false)
+  const [showNewBoardDialog, setShowNewBoardDialog] = useState(false)
+  const [showInviteMemberDialog, setShowInviteMemberDialog] = useState(false)
+  const [showStarredBoardsDialog, setShowStarredBoardsDialog] = useState(false)
+  const [showScheduleMeetingDialog, setShowScheduleMeetingDialog] = useState(false)
+  const [showRecordingsDialog, setShowRecordingsDialog] = useState(false)
+  const [showMeetingSettingsDialog, setShowMeetingSettingsDialog] = useState(false)
+  const [showUploadFileDialog, setShowUploadFileDialog] = useState(false)
+  const [showNewFolderDialog, setShowNewFolderDialog] = useState(false)
+  const [showStarredFilesDialog, setShowStarredFilesDialog] = useState(false)
+  const [showRecentFilesDialog, setShowRecentFilesDialog] = useState(false)
+  const [showCreateTeamDialog, setShowCreateTeamDialog] = useState(false)
+  const [showTeamSettingsDialog, setShowTeamSettingsDialog] = useState(false)
+  const [showPrivateChannelDialog, setShowPrivateChannelDialog] = useState(false)
+  const [showPinnedChannelsDialog, setShowPinnedChannelsDialog] = useState(false)
+  const [showBrowseChannelsDialog, setShowBrowseChannelsDialog] = useState(false)
+  const [showBoardActivityDialog, setShowBoardActivityDialog] = useState(false)
+  const [showMessagesActivityDialog, setShowMessagesActivityDialog] = useState(false)
+  const [showFileUploadsActivityDialog, setShowFileUploadsActivityDialog] = useState(false)
+  const [showTeamUpdatesActivityDialog, setShowTeamUpdatesActivityDialog] = useState(false)
+  const [newBoardName, setNewBoardName] = useState('')
+  const [newBoardDescription, setNewBoardDescription] = useState('')
+  const [newBoardType, setNewBoardType] = useState<BoardType>('whiteboard')
+  const [inviteEmail, setInviteEmail] = useState('')
+  const [newFolderName, setNewFolderName] = useState('')
+  const [newTeamName, setNewTeamName] = useState('')
+  const [newTeamDescription, setNewTeamDescription] = useState('')
+  const [selectedIntegration, setSelectedIntegration] = useState<Integration | null>(null)
+  const [activityFilter, setActivityFilter] = useState<string>('all')
 
   const filteredBoards = useMemo(() => {
     return mockBoards.filter(board => {
@@ -590,7 +618,7 @@ export default function CollaborationClient() {
               <Input placeholder="Search everything..." className="w-72 pl-10" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
             </div>
             <Button variant="outline" onClick={() => setShowNewMeeting(true)}><Video className="h-4 w-4 mr-2" />New Meeting</Button>
-            <Button className="bg-gradient-to-r from-blue-600 to-indigo-600"><Plus className="h-4 w-4 mr-2" />New Board</Button>
+            <Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={() => setShowNewBoardDialog(true)}><Plus className="h-4 w-4 mr-2" />New Board</Button>
           </div>
         </div>
 
@@ -634,8 +662,31 @@ export default function CollaborationClient() {
                 <span className="text-sm text-gray-500">{mockMembers.filter(m => m.presence === 'online').length} collaborating</span>
               </div>
               <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm"><Video className="h-4 w-4 mr-2" />Start Meeting</Button>
-                <Button variant="outline" size="sm"><ScreenShare className="h-4 w-4 mr-2" />Share Screen</Button>
+                <Button variant="outline" size="sm" onClick={() => {
+                  toast.promise(
+                    new Promise<void>((resolve) => {
+                      setTimeout(() => {
+                        window.open('https://meet.example.com/instant-meeting', '_blank');
+                        resolve();
+                      }, 800);
+                    }),
+                    { loading: 'Starting instant meeting...', success: 'Meeting started! Joining now...', error: 'Failed to start meeting' }
+                  );
+                }}><Video className="h-4 w-4 mr-2" />Start Meeting</Button>
+                <Button variant="outline" size="sm" onClick={() => {
+                  toast.promise(
+                    new Promise<void>((resolve) => {
+                      setTimeout(() => {
+                        navigator.mediaDevices.getDisplayMedia({ video: true }).then(() => {
+                          resolve();
+                        }).catch(() => {
+                          toast.error('Screen sharing was cancelled');
+                        });
+                      }, 300);
+                    }),
+                    { loading: 'Preparing screen share...', success: 'Screen sharing started', error: 'Failed to start screen share' }
+                  );
+                }}><ScreenShare className="h-4 w-4 mr-2" />Share Screen</Button>
               </div>
             </div>
           </CardContent>
@@ -698,19 +749,19 @@ export default function CollaborationClient() {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all hover:scale-105">
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all hover:scale-105" onClick={() => setShowNewBoardDialog(true)}>
                     <Plus className="h-5 w-5 text-blue-600" />
                     <span className="text-sm">New Board</span>
                   </Button>
-                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all hover:scale-105">
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all hover:scale-105" onClick={() => setShowTemplateDialog(true)}>
                     <LayoutTemplate className="h-5 w-5 text-purple-600" />
                     <span className="text-sm">From Template</span>
                   </Button>
-                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-green-500 hover:bg-green-50 dark:hover:bg-green-900/20 transition-all hover:scale-105">
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-green-500 hover:bg-green-50 dark:hover:bg-green-900/20 transition-all hover:scale-105" onClick={() => setShowInviteMemberDialog(true)}>
                     <UserPlus className="h-5 w-5 text-green-600" />
                     <span className="text-sm">Invite Members</span>
                   </Button>
-                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-all hover:scale-105">
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-all hover:scale-105" onClick={() => setShowStarredBoardsDialog(true)}>
                     <Star className="h-5 w-5 text-amber-600" />
                     <span className="text-sm">Starred Boards</span>
                   </Button>
@@ -1021,15 +1072,15 @@ export default function CollaborationClient() {
                     <Video className="h-5 w-5 text-cyan-600" />
                     <span className="text-sm">Start Meeting</span>
                   </Button>
-                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-green-500 hover:bg-green-50 dark:hover:bg-green-900/20 transition-all hover:scale-105">
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-green-500 hover:bg-green-50 dark:hover:bg-green-900/20 transition-all hover:scale-105" onClick={() => setShowScheduleMeetingDialog(true)}>
                     <Calendar className="h-5 w-5 text-green-600" />
                     <span className="text-sm">Schedule</span>
                   </Button>
-                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all hover:scale-105">
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all hover:scale-105" onClick={() => setShowRecordingsDialog(true)}>
                     <Play className="h-5 w-5 text-purple-600" />
                     <span className="text-sm">Recordings</span>
                   </Button>
-                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-all hover:scale-105">
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-all hover:scale-105" onClick={() => setShowMeetingSettingsDialog(true)}>
                     <Settings className="h-5 w-5 text-amber-600" />
                     <span className="text-sm">Settings</span>
                   </Button>
@@ -1069,9 +1120,46 @@ export default function CollaborationClient() {
                         {meeting.participants.length > 4 && <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-xs">+{meeting.participants.length - 4}</div>}
                       </div>
                       <div className="flex gap-2">
-                        {meeting.hasRecording && <Button variant="outline" size="sm"><Play className="h-4 w-4 mr-1" />Recording</Button>}
-                        {meeting.status === 'live' && <Button className="bg-green-600 hover:bg-green-700"><Video className="h-4 w-4 mr-2" />Join</Button>}
-                        {meeting.status === 'scheduled' && <Button variant="outline"><Calendar className="h-4 w-4 mr-2" />Add to Calendar</Button>}
+                        {meeting.hasRecording && <Button variant="outline" size="sm" onClick={() => {
+                          toast.promise(
+                            new Promise<void>((resolve) => {
+                              setTimeout(() => {
+                                window.open(meeting.recordingUrl || '#', '_blank');
+                                resolve();
+                              }, 500);
+                            }),
+                            { loading: 'Loading recording...', success: 'Recording opened', error: 'Failed to load recording' }
+                          );
+                        }}><Play className="h-4 w-4 mr-1" />Recording</Button>}
+                        {meeting.status === 'live' && <Button className="bg-green-600 hover:bg-green-700" onClick={() => {
+                          toast.promise(
+                            new Promise<void>((resolve) => {
+                              setTimeout(() => {
+                                window.open(meeting.meetingUrl, '_blank');
+                                resolve();
+                              }, 500);
+                            }),
+                            { loading: 'Joining meeting...', success: 'Joined meeting successfully', error: 'Failed to join meeting' }
+                          );
+                        }}><Video className="h-4 w-4 mr-2" />Join</Button>}
+                        {meeting.status === 'scheduled' && <Button variant="outline" onClick={() => {
+                          toast.promise(
+                            new Promise<void>((resolve) => {
+                              setTimeout(() => {
+                                const event = {
+                                  title: meeting.title,
+                                  start: new Date(meeting.startTime),
+                                  end: new Date(new Date(meeting.startTime).getTime() + meeting.duration * 60000),
+                                  description: meeting.description || ''
+                                };
+                                const googleCalendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(event.title)}&dates=${event.start.toISOString().replace(/[-:]/g, '').split('.')[0]}Z/${event.end.toISOString().replace(/[-:]/g, '').split('.')[0]}Z&details=${encodeURIComponent(event.description)}`;
+                                window.open(googleCalendarUrl, '_blank');
+                                resolve();
+                              }, 500);
+                            }),
+                            { loading: 'Adding to calendar...', success: 'Added to calendar', error: 'Failed to add to calendar' }
+                          );
+                        }}><Calendar className="h-4 w-4 mr-2" />Add to Calendar</Button>}
                       </div>
                     </div>
                   </CardContent>
@@ -1124,19 +1212,19 @@ export default function CollaborationClient() {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-all hover:scale-105">
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-all hover:scale-105" onClick={() => setShowUploadFileDialog(true)}>
                     <Upload className="h-5 w-5 text-rose-600" />
                     <span className="text-sm">Upload File</span>
                   </Button>
-                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-pink-500 hover:bg-pink-50 dark:hover:bg-pink-900/20 transition-all hover:scale-105">
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-pink-500 hover:bg-pink-50 dark:hover:bg-pink-900/20 transition-all hover:scale-105" onClick={() => setShowNewFolderDialog(true)}>
                     <FolderOpen className="h-5 w-5 text-pink-600" />
                     <span className="text-sm">New Folder</span>
                   </Button>
-                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-fuchsia-500 hover:bg-fuchsia-50 dark:hover:bg-fuchsia-900/20 transition-all hover:scale-105">
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-fuchsia-500 hover:bg-fuchsia-50 dark:hover:bg-fuchsia-900/20 transition-all hover:scale-105" onClick={() => setShowStarredFilesDialog(true)}>
                     <Star className="h-5 w-5 text-fuchsia-600" />
                     <span className="text-sm">Starred Files</span>
                   </Button>
-                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all hover:scale-105">
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all hover:scale-105" onClick={() => setShowRecentFilesDialog(true)}>
                     <Download className="h-5 w-5 text-purple-600" />
                     <span className="text-sm">Recent</span>
                   </Button>
@@ -1250,19 +1338,19 @@ export default function CollaborationClient() {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-all hover:scale-105">
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-all hover:scale-105" onClick={() => setShowCreateTeamDialog(true)}>
                     <Plus className="h-5 w-5 text-indigo-600" />
                     <span className="text-sm">Create Team</span>
                   </Button>
-                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all hover:scale-105">
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all hover:scale-105" onClick={() => setShowInviteMemberDialog(true)}>
                     <UserPlus className="h-5 w-5 text-purple-600" />
                     <span className="text-sm">Invite Members</span>
                   </Button>
-                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-pink-500 hover:bg-pink-50 dark:hover:bg-pink-900/20 transition-all hover:scale-105">
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-pink-500 hover:bg-pink-50 dark:hover:bg-pink-900/20 transition-all hover:scale-105" onClick={() => setShowNewChannel(true)}>
                     <Hash className="h-5 w-5 text-pink-600" />
                     <span className="text-sm">New Channel</span>
                   </Button>
-                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all hover:scale-105">
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all hover:scale-105" onClick={() => setShowTeamSettingsDialog(true)}>
                     <Settings className="h-5 w-5 text-blue-600" />
                     <span className="text-sm">Team Settings</span>
                   </Button>
@@ -1344,15 +1432,15 @@ export default function CollaborationClient() {
                     <Plus className="h-5 w-5 text-amber-600" />
                     <span className="text-sm">Create Channel</span>
                   </Button>
-                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-orange-500 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all hover:scale-105">
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-orange-500 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all hover:scale-105" onClick={() => setShowPrivateChannelDialog(true)}>
                     <Lock className="h-5 w-5 text-orange-600" />
                     <span className="text-sm">Private Channel</span>
                   </Button>
-                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all hover:scale-105">
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all hover:scale-105" onClick={() => setShowPinnedChannelsDialog(true)}>
                     <Pin className="h-5 w-5 text-red-600" />
                     <span className="text-sm">Pinned Channels</span>
                   </Button>
-                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all hover:scale-105">
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all hover:scale-105" onClick={() => setShowBrowseChannelsDialog(true)}>
                     <Search className="h-5 w-5 text-purple-600" />
                     <span className="text-sm">Browse All</span>
                   </Button>
@@ -1432,19 +1520,31 @@ export default function CollaborationClient() {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-violet-500 hover:bg-violet-50 dark:hover:bg-violet-900/20 transition-all hover:scale-105">
+                  <Button variant="outline" className={`h-auto py-4 flex flex-col items-center gap-2 hover:border-violet-500 hover:bg-violet-50 dark:hover:bg-violet-900/20 transition-all hover:scale-105 ${activityFilter === 'board' ? 'border-violet-500 bg-violet-50 dark:bg-violet-900/20' : ''}`} onClick={() => {
+                    setActivityFilter(activityFilter === 'board' ? 'all' : 'board');
+                    toast.success(activityFilter === 'board' ? 'Showing all activities' : 'Filtering by board activity');
+                  }}>
                     <Layout className="h-5 w-5 text-violet-600" />
                     <span className="text-sm">Board Activity</span>
                   </Button>
-                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all hover:scale-105">
+                  <Button variant="outline" className={`h-auto py-4 flex flex-col items-center gap-2 hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all hover:scale-105 ${activityFilter === 'message' ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20' : ''}`} onClick={() => {
+                    setActivityFilter(activityFilter === 'message' ? 'all' : 'message');
+                    toast.success(activityFilter === 'message' ? 'Showing all activities' : 'Filtering by messages');
+                  }}>
                     <MessageSquare className="h-5 w-5 text-purple-600" />
                     <span className="text-sm">Messages</span>
                   </Button>
-                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-all hover:scale-105">
+                  <Button variant="outline" className={`h-auto py-4 flex flex-col items-center gap-2 hover:border-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-all hover:scale-105 ${activityFilter === 'file' ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20' : ''}`} onClick={() => {
+                    setActivityFilter(activityFilter === 'file' ? 'all' : 'file');
+                    toast.success(activityFilter === 'file' ? 'Showing all activities' : 'Filtering by file uploads');
+                  }}>
                     <FileText className="h-5 w-5 text-indigo-600" />
                     <span className="text-sm">File Uploads</span>
                   </Button>
-                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all hover:scale-105">
+                  <Button variant="outline" className={`h-auto py-4 flex flex-col items-center gap-2 hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all hover:scale-105 ${activityFilter === 'member' ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : ''}`} onClick={() => {
+                    setActivityFilter(activityFilter === 'member' ? 'all' : 'member');
+                    toast.success(activityFilter === 'member' ? 'Showing all activities' : 'Filtering by team updates');
+                  }}>
                     <Users className="h-5 w-5 text-blue-600" />
                     <span className="text-sm">Team Updates</span>
                   </Button>
@@ -1739,8 +1839,41 @@ export default function CollaborationClient() {
                             {integration.status}
                           </Badge>
                           <div className="flex gap-2">
-                            <Button variant="outline" size="sm">{integration.status === 'connected' ? 'Configure' : 'Connect'}</Button>
-                            {integration.status === 'connected' && <Button variant="ghost" size="sm" className="text-red-600">Disconnect</Button>}
+                            <Button variant="outline" size="sm" onClick={() => {
+                              if (integration.status === 'connected') {
+                                setSelectedIntegration(integration);
+                                toast.promise(
+                                  new Promise<void>((resolve) => {
+                                    setTimeout(() => {
+                                      resolve();
+                                    }, 500);
+                                  }),
+                                  { loading: 'Opening configuration...', success: `${integration.name} settings opened`, error: 'Failed to open settings' }
+                                );
+                              } else {
+                                toast.promise(
+                                  new Promise<void>((resolve) => {
+                                    setTimeout(() => {
+                                      integration.status = 'connected';
+                                      integration.lastSync = new Date().toISOString();
+                                      resolve();
+                                    }, 1500);
+                                  }),
+                                  { loading: `Connecting to ${integration.name}...`, success: `${integration.name} connected successfully`, error: 'Connection failed' }
+                                );
+                              }
+                            }}>{integration.status === 'connected' ? 'Configure' : 'Connect'}</Button>
+                            {integration.status === 'connected' && <Button variant="ghost" size="sm" className="text-red-600" onClick={() => {
+                              toast.promise(
+                                new Promise<void>((resolve) => {
+                                  setTimeout(() => {
+                                    integration.status = 'disconnected';
+                                    resolve();
+                                  }, 800);
+                                }),
+                                { loading: `Disconnecting ${integration.name}...`, success: `${integration.name} disconnected`, error: 'Failed to disconnect' }
+                              );
+                            }}>Disconnect</Button>}
                           </div>
                         </div>
                       ))}
@@ -1821,7 +1954,32 @@ export default function CollaborationClient() {
                     <CardContent className="space-y-4">
                       <div className="flex items-center justify-between"><div><p className="font-medium">Two-Factor Auth</p><p className="text-sm text-gray-500">Require 2FA for login</p></div><Switch defaultChecked /></div>
                       <div className="flex items-center justify-between"><div><p className="font-medium">Session Timeout</p><p className="text-sm text-gray-500">Auto-logout after inactivity</p></div><Switch /></div>
-                      <Button variant="outline" className="w-full"><Download className="h-4 w-4 mr-2" />Export My Data</Button>
+                      <Button variant="outline" className="w-full" onClick={() => {
+                        toast.promise(
+                          new Promise<void>((resolve) => {
+                            setTimeout(() => {
+                              const data = {
+                                user: mockMembers[0],
+                                boards: mockBoards,
+                                channels: mockChannels,
+                                meetings: mockMeetings,
+                                files: mockFiles,
+                                activities: mockActivities,
+                                exportDate: new Date().toISOString()
+                              };
+                              const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                              const url = URL.createObjectURL(blob);
+                              const a = document.createElement('a');
+                              a.href = url;
+                              a.download = `collaboration-data-export-${new Date().toISOString().split('T')[0]}.json`;
+                              a.click();
+                              URL.revokeObjectURL(url);
+                              resolve();
+                            }, 1500);
+                          }),
+                          { loading: 'Preparing your data export...', success: 'Data exported successfully', error: 'Failed to export data' }
+                        );
+                      }}><Download className="h-4 w-4 mr-2" />Export My Data</Button>
                     </CardContent>
                   </Card>
                 </div>
@@ -1927,7 +2085,31 @@ export default function CollaborationClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowNewMeeting(false)}>Cancel</Button>
-              <Button className="bg-blue-600 hover:bg-blue-700">Schedule Meeting</Button>
+              <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => {
+                toast.promise(
+                  new Promise<void>((resolve) => {
+                    setTimeout(() => {
+                      const newMeeting: Meeting = {
+                        id: `mt${Date.now()}`,
+                        title: 'New Scheduled Meeting',
+                        description: 'Meeting scheduled via dialog',
+                        status: 'scheduled',
+                        startTime: new Date(Date.now() + 86400000).toISOString(),
+                        duration: 60,
+                        organizer: mockMembers[0],
+                        participants: mockMembers.slice(0, 3),
+                        isRecurring: false,
+                        hasRecording: false,
+                        meetingUrl: `https://meet.example.com/meeting-${Date.now()}`
+                      };
+                      mockMeetings.push(newMeeting);
+                      setShowNewMeeting(false);
+                      resolve();
+                    }, 1000);
+                  }),
+                  { loading: 'Scheduling meeting...', success: 'Meeting scheduled successfully', error: 'Failed to schedule meeting' }
+                );
+              }}>Schedule Meeting</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -1961,7 +2143,28 @@ export default function CollaborationClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowTemplateDialog(false)}>Cancel</Button>
-              <Button className="bg-blue-600 hover:bg-blue-700">Create Template</Button>
+              <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => {
+                toast.promise(
+                  new Promise<void>((resolve) => {
+                    setTimeout(() => {
+                      const newTemplate: Template = {
+                        id: `tmp${Date.now()}`,
+                        name: 'My Custom Template',
+                        description: 'Custom template created via dialog',
+                        category: 'project',
+                        preview: '/templates/custom.png',
+                        usageCount: 0,
+                        createdBy: 'You',
+                        isOfficial: false
+                      };
+                      mockTemplates.push(newTemplate);
+                      setShowTemplateDialog(false);
+                      resolve();
+                    }, 1000);
+                  }),
+                  { loading: 'Creating template...', success: 'Template created successfully', error: 'Failed to create template' }
+                );
+              }}>Create Template</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -1983,7 +2186,26 @@ export default function CollaborationClient() {
                   { name: 'Figma', type: 'productivity', description: 'Embed design files' },
                   { name: 'Zoom', type: 'communication', description: 'Video conferencing' },
                 ].map((integration, i) => (
-                  <div key={i} className="flex items-center gap-3 p-4 border rounded-lg hover:border-blue-500 cursor-pointer">
+                  <div key={i} className="flex items-center gap-3 p-4 border rounded-lg hover:border-blue-500 cursor-pointer" onClick={() => {
+                    toast.promise(
+                      new Promise<void>((resolve) => {
+                        setTimeout(() => {
+                          const newIntegration: Integration = {
+                            id: `int${Date.now()}`,
+                            name: integration.name,
+                            type: integration.type as Integration['type'],
+                            status: 'connected',
+                            icon: integration.name.toLowerCase().replace(' ', '-'),
+                            lastSync: new Date().toISOString()
+                          };
+                          mockIntegrations.push(newIntegration);
+                          setShowIntegrationDialog(false);
+                          resolve();
+                        }, 1500);
+                      }),
+                      { loading: `Connecting to ${integration.name}...`, success: `${integration.name} connected successfully`, error: 'Connection failed' }
+                    );
+                  }}>
                     <div className="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
                       <Globe className="h-5 w-5 text-gray-600" />
                     </div>
@@ -2028,7 +2250,9 @@ export default function CollaborationClient() {
                       toast.success('Action removed successfully');
                     }}><Trash2 className="h-4 w-4" /></Button>
                   </div>
-                  <Button variant="outline" size="sm" className="w-full"><Plus className="h-4 w-4 mr-2" />Add Action</Button>
+                  <Button variant="outline" size="sm" className="w-full" onClick={() => {
+                    toast.success('Action added: Post to channel', { description: 'You can add more actions to this automation' });
+                  }}><Plus className="h-4 w-4 mr-2" />Add Action</Button>
                 </div>
               </div>
               <div><Label>Conditions (Optional)</Label>
@@ -2041,7 +2265,26 @@ export default function CollaborationClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowAutomationDialog(false)}>Cancel</Button>
-              <Button className="bg-purple-600 hover:bg-purple-700">Create Automation</Button>
+              <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => {
+                toast.promise(
+                  new Promise<void>((resolve) => {
+                    setTimeout(() => {
+                      const newAutomation: Automation = {
+                        id: `aut${Date.now()}`,
+                        name: 'Custom Automation',
+                        trigger: 'When task is created',
+                        actions: ['Send notification'],
+                        isActive: true,
+                        lastTriggered: undefined
+                      };
+                      mockAutomations.push(newAutomation);
+                      setShowAutomationDialog(false);
+                      resolve();
+                    }, 1000);
+                  }),
+                  { loading: 'Creating automation...', success: 'Automation created and enabled', error: 'Failed to create automation' }
+                );
+              }}>Create Automation</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -2066,7 +2309,631 @@ export default function CollaborationClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowNewChannel(false)}>Cancel</Button>
-              <Button className="bg-blue-600 hover:bg-blue-700">Create Channel</Button>
+              <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => {
+                toast.promise(
+                  new Promise<void>((resolve) => {
+                    setTimeout(() => {
+                      const newChannel: Channel = {
+                        id: `c${Date.now()}`,
+                        name: 'new-channel',
+                        type: 'public',
+                        description: 'New channel created via dialog',
+                        memberCount: 1,
+                        unreadCount: 0,
+                        isPinned: false,
+                        isMuted: false,
+                        createdAt: new Date().toISOString()
+                      };
+                      mockChannels.push(newChannel);
+                      setShowNewChannel(false);
+                      resolve();
+                    }, 1000);
+                  }),
+                  { loading: 'Creating channel...', success: 'Channel created successfully', error: 'Failed to create channel' }
+                );
+              }}>Create Channel</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* New Board Dialog */}
+        <Dialog open={showNewBoardDialog} onOpenChange={setShowNewBoardDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader><DialogTitle>Create New Board</DialogTitle></DialogHeader>
+            <div className="space-y-4 py-4">
+              <div><Label>Board Name</Label><Input placeholder="My Board" value={newBoardName} onChange={(e) => setNewBoardName(e.target.value)} /></div>
+              <div><Label>Description</Label><Textarea placeholder="What's this board for?" rows={2} value={newBoardDescription} onChange={(e) => setNewBoardDescription(e.target.value)} /></div>
+              <div><Label>Board Type</Label>
+                <Select value={newBoardType} onValueChange={(v) => setNewBoardType(v as BoardType)}>
+                  <SelectTrigger><SelectValue placeholder="Select type" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="whiteboard">Whiteboard</SelectItem>
+                    <SelectItem value="flowchart">Flowchart</SelectItem>
+                    <SelectItem value="mindmap">Mind Map</SelectItem>
+                    <SelectItem value="wireframe">Wireframe</SelectItem>
+                    <SelectItem value="kanban">Kanban</SelectItem>
+                    <SelectItem value="brainstorm">Brainstorm</SelectItem>
+                    <SelectItem value="retrospective">Retrospective</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div className="flex items-center gap-2"><Globe className="h-4 w-4 text-gray-500" /><span className="text-sm">Make board public</span></div>
+                <Switch />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowNewBoardDialog(false)}>Cancel</Button>
+              <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => {
+                if (!newBoardName.trim()) {
+                  toast.error('Please enter a board name');
+                  return;
+                }
+                toast.promise(
+                  new Promise<void>((resolve) => {
+                    setTimeout(() => {
+                      const newBoard: Board = {
+                        id: `b${Date.now()}`,
+                        name: newBoardName,
+                        description: newBoardDescription,
+                        type: newBoardType,
+                        status: 'active',
+                        createdAt: new Date().toISOString(),
+                        updatedAt: new Date().toISOString(),
+                        createdBy: mockMembers[0],
+                        members: [mockMembers[0]],
+                        isStarred: false,
+                        isLocked: false,
+                        isPublic: false,
+                        viewCount: 0,
+                        commentCount: 0,
+                        elementCount: 0,
+                        version: 1,
+                        tags: ['new']
+                      };
+                      mockBoards.push(newBoard);
+                      setNewBoardName('');
+                      setNewBoardDescription('');
+                      setShowNewBoardDialog(false);
+                      resolve();
+                    }, 1000);
+                  }),
+                  { loading: 'Creating board...', success: 'Board created successfully', error: 'Failed to create board' }
+                );
+              }}>Create Board</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Invite Member Dialog */}
+        <Dialog open={showInviteMemberDialog} onOpenChange={setShowInviteMemberDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader><DialogTitle>Invite Team Members</DialogTitle></DialogHeader>
+            <div className="space-y-4 py-4">
+              <div><Label>Email Address</Label><Input type="email" placeholder="colleague@company.com" value={inviteEmail} onChange={(e) => setInviteEmail(e.target.value)} /></div>
+              <div><Label>Role</Label>
+                <Select defaultValue="member">
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="admin">Admin</SelectItem>
+                    <SelectItem value="member">Member</SelectItem>
+                    <SelectItem value="guest">Guest</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div><Label>Personal Message (Optional)</Label><Textarea placeholder="Add a personal note to your invitation..." rows={2} /></div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowInviteMemberDialog(false)}>Cancel</Button>
+              <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => {
+                if (!inviteEmail.trim() || !inviteEmail.includes('@')) {
+                  toast.error('Please enter a valid email address');
+                  return;
+                }
+                toast.promise(
+                  new Promise<void>((resolve) => {
+                    setTimeout(() => {
+                      setInviteEmail('');
+                      setShowInviteMemberDialog(false);
+                      resolve();
+                    }, 1000);
+                  }),
+                  { loading: 'Sending invitation...', success: `Invitation sent to ${inviteEmail}`, error: 'Failed to send invitation' }
+                );
+              }}>Send Invitation</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Starred Boards Dialog */}
+        <Dialog open={showStarredBoardsDialog} onOpenChange={setShowStarredBoardsDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader><DialogTitle>Starred Boards</DialogTitle></DialogHeader>
+            <div className="py-4">
+              <ScrollArea className="h-[400px]">
+                <div className="space-y-3">
+                  {mockBoards.filter(b => b.isStarred).map(board => (
+                    <div key={board.id} className="flex items-center gap-4 p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer" onClick={() => {
+                      setSelectedBoard(board);
+                      setShowStarredBoardsDialog(false);
+                      toast.success(`Opening ${board.name}`);
+                    }}>
+                      <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
+                        <Layout className="h-6 w-6 text-white" />
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-medium">{board.name}</h4>
+                        <p className="text-sm text-gray-500">{board.description}</p>
+                      </div>
+                      <Star className="h-5 w-5 text-amber-500 fill-amber-500" />
+                    </div>
+                  ))}
+                  {mockBoards.filter(b => b.isStarred).length === 0 && (
+                    <div className="text-center py-8 text-gray-500">
+                      <Star className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                      <p>No starred boards yet</p>
+                      <p className="text-sm">Star boards to access them quickly</p>
+                    </div>
+                  )}
+                </div>
+              </ScrollArea>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowStarredBoardsDialog(false)}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Schedule Meeting Dialog */}
+        <Dialog open={showScheduleMeetingDialog} onOpenChange={setShowScheduleMeetingDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader><DialogTitle>Schedule Meeting</DialogTitle></DialogHeader>
+            <div className="space-y-4 py-4">
+              <div><Label>Meeting Title</Label><Input placeholder="Weekly Sync" /></div>
+              <div><Label>Description</Label><Textarea placeholder="Meeting agenda..." rows={2} /></div>
+              <div className="grid grid-cols-2 gap-4">
+                <div><Label>Date</Label><Input type="date" /></div>
+                <div><Label>Time</Label><Input type="time" /></div>
+              </div>
+              <div><Label>Duration</Label>
+                <Select defaultValue="30">
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="15">15 minutes</SelectItem>
+                    <SelectItem value="30">30 minutes</SelectItem>
+                    <SelectItem value="45">45 minutes</SelectItem>
+                    <SelectItem value="60">1 hour</SelectItem>
+                    <SelectItem value="90">1.5 hours</SelectItem>
+                    <SelectItem value="120">2 hours</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div className="flex items-center gap-2"><Video className="h-4 w-4 text-gray-500" /><span className="text-sm">Auto-record meeting</span></div>
+                <Switch />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowScheduleMeetingDialog(false)}>Cancel</Button>
+              <Button className="bg-green-600 hover:bg-green-700" onClick={() => {
+                toast.promise(
+                  new Promise<void>((resolve) => {
+                    setTimeout(() => {
+                      setShowScheduleMeetingDialog(false);
+                      resolve();
+                    }, 1000);
+                  }),
+                  { loading: 'Scheduling meeting...', success: 'Meeting scheduled successfully', error: 'Failed to schedule meeting' }
+                );
+              }}>Schedule</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Recordings Dialog */}
+        <Dialog open={showRecordingsDialog} onOpenChange={setShowRecordingsDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader><DialogTitle>Meeting Recordings</DialogTitle></DialogHeader>
+            <div className="py-4">
+              <ScrollArea className="h-[400px]">
+                <div className="space-y-3">
+                  {mockMeetings.filter(m => m.hasRecording).map(meeting => (
+                    <div key={meeting.id} className="flex items-center gap-4 p-4 border rounded-lg">
+                      <div className="w-12 h-12 rounded-lg bg-purple-100 dark:bg-purple-900 flex items-center justify-center">
+                        <Play className="h-6 w-6 text-purple-600" />
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-medium">{meeting.title}</h4>
+                        <p className="text-sm text-gray-500">{new Date(meeting.startTime).toLocaleDateString()} - {meeting.duration} min</p>
+                      </div>
+                      <Button variant="outline" size="sm" onClick={() => {
+                        toast.promise(
+                          new Promise<void>((resolve) => {
+                            setTimeout(() => {
+                              window.open(meeting.recordingUrl || '#', '_blank');
+                              resolve();
+                            }, 500);
+                          }),
+                          { loading: 'Loading recording...', success: 'Recording opened', error: 'Failed to load recording' }
+                        );
+                      }}><Play className="h-4 w-4 mr-1" />Play</Button>
+                      <Button variant="ghost" size="sm" onClick={() => {
+                        toast.promise(
+                          new Promise<void>((resolve) => {
+                            setTimeout(() => resolve(), 1000);
+                          }),
+                          { loading: 'Preparing download...', success: 'Recording download started', error: 'Failed to download' }
+                        );
+                      }}><Download className="h-4 w-4" /></Button>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowRecordingsDialog(false)}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Meeting Settings Dialog */}
+        <Dialog open={showMeetingSettingsDialog} onOpenChange={setShowMeetingSettingsDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader><DialogTitle>Meeting Settings</DialogTitle></DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="flex items-center justify-between"><div><p className="font-medium">Auto-record all meetings</p><p className="text-sm text-gray-500">Automatically record when meetings start</p></div><Switch /></div>
+              <div className="flex items-center justify-between"><div><p className="font-medium">Enable transcription</p><p className="text-sm text-gray-500">Auto-transcribe meeting recordings</p></div><Switch defaultChecked /></div>
+              <div className="flex items-center justify-between"><div><p className="font-medium">Camera on by default</p><p className="text-sm text-gray-500">Start meetings with camera enabled</p></div><Switch defaultChecked /></div>
+              <div className="flex items-center justify-between"><div><p className="font-medium">Mic on by default</p><p className="text-sm text-gray-500">Start meetings with microphone enabled</p></div><Switch /></div>
+              <div className="flex items-center justify-between"><div><p className="font-medium">Allow guests</p><p className="text-sm text-gray-500">Let external users join meetings</p></div><Switch defaultChecked /></div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowMeetingSettingsDialog(false)}>Cancel</Button>
+              <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => {
+                toast.success('Meeting settings saved');
+                setShowMeetingSettingsDialog(false);
+              }}>Save Settings</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Upload File Dialog */}
+        <Dialog open={showUploadFileDialog} onOpenChange={setShowUploadFileDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader><DialogTitle>Upload File</DialogTitle></DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="p-8 border-2 border-dashed rounded-lg text-center hover:border-blue-500 cursor-pointer" onClick={() => {
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.multiple = true;
+                input.onchange = (e) => {
+                  const files = (e.target as HTMLInputElement).files;
+                  if (files && files.length > 0) {
+                    toast.promise(
+                      new Promise<void>((resolve) => {
+                        setTimeout(() => {
+                          setShowUploadFileDialog(false);
+                          resolve();
+                        }, 1500);
+                      }),
+                      { loading: `Uploading ${files.length} file(s)...`, success: 'Files uploaded successfully', error: 'Failed to upload files' }
+                    );
+                  }
+                };
+                input.click();
+              }}>
+                <Upload className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+                <p className="text-lg font-medium">Click to upload</p>
+                <p className="text-sm text-gray-500">or drag and drop files here</p>
+                <p className="text-xs text-gray-400 mt-2">Supports all file types up to 100MB</p>
+              </div>
+              <div><Label>Share with channel</Label>
+                <Select>
+                  <SelectTrigger><SelectValue placeholder="Select channel" /></SelectTrigger>
+                  <SelectContent>
+                    {mockChannels.map(channel => (
+                      <SelectItem key={channel.id} value={channel.id}># {channel.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowUploadFileDialog(false)}>Cancel</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* New Folder Dialog */}
+        <Dialog open={showNewFolderDialog} onOpenChange={setShowNewFolderDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader><DialogTitle>Create New Folder</DialogTitle></DialogHeader>
+            <div className="space-y-4 py-4">
+              <div><Label>Folder Name</Label><Input placeholder="My Folder" value={newFolderName} onChange={(e) => setNewFolderName(e.target.value)} /></div>
+              <div><Label>Location</Label>
+                <Select defaultValue="root">
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="root">Root Directory</SelectItem>
+                    <SelectItem value="documents">Documents</SelectItem>
+                    <SelectItem value="projects">Projects</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowNewFolderDialog(false)}>Cancel</Button>
+              <Button className="bg-pink-600 hover:bg-pink-700" onClick={() => {
+                if (!newFolderName.trim()) {
+                  toast.error('Please enter a folder name');
+                  return;
+                }
+                toast.promise(
+                  new Promise<void>((resolve) => {
+                    setTimeout(() => {
+                      setNewFolderName('');
+                      setShowNewFolderDialog(false);
+                      resolve();
+                    }, 800);
+                  }),
+                  { loading: 'Creating folder...', success: `Folder "${newFolderName}" created`, error: 'Failed to create folder' }
+                );
+              }}>Create Folder</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Starred Files Dialog */}
+        <Dialog open={showStarredFilesDialog} onOpenChange={setShowStarredFilesDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader><DialogTitle>Starred Files</DialogTitle></DialogHeader>
+            <div className="py-4">
+              <ScrollArea className="h-[400px]">
+                <div className="space-y-3">
+                  {mockFiles.filter(f => f.isStarred).map(file => {
+                    const FileIcon = getFileIcon(file.type);
+                    return (
+                      <div key={file.id} className="flex items-center gap-4 p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
+                        <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
+                          <FileIcon className="h-5 w-5 text-blue-600" />
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="font-medium">{file.name}</h4>
+                          <p className="text-sm text-gray-500">{formatSize(file.size)}</p>
+                        </div>
+                        <Star className="h-5 w-5 text-amber-500 fill-amber-500" />
+                        <Button variant="ghost" size="sm" onClick={() => {
+                          toast.success('File downloaded');
+                        }}><Download className="h-4 w-4" /></Button>
+                      </div>
+                    );
+                  })}
+                </div>
+              </ScrollArea>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowStarredFilesDialog(false)}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Recent Files Dialog */}
+        <Dialog open={showRecentFilesDialog} onOpenChange={setShowRecentFilesDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader><DialogTitle>Recent Files</DialogTitle></DialogHeader>
+            <div className="py-4">
+              <ScrollArea className="h-[400px]">
+                <div className="space-y-3">
+                  {mockFiles.sort((a, b) => new Date(b.modifiedAt).getTime() - new Date(a.modifiedAt).getTime()).map(file => {
+                    const FileIcon = getFileIcon(file.type);
+                    return (
+                      <div key={file.id} className="flex items-center gap-4 p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
+                        <div className="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900 flex items-center justify-center">
+                          <FileIcon className="h-5 w-5 text-purple-600" />
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="font-medium">{file.name}</h4>
+                          <p className="text-sm text-gray-500">Modified {formatTimeAgo(file.modifiedAt)}</p>
+                        </div>
+                        <Button variant="ghost" size="sm" onClick={() => {
+                          toast.success('File opened');
+                        }}><ExternalLink className="h-4 w-4" /></Button>
+                      </div>
+                    );
+                  })}
+                </div>
+              </ScrollArea>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowRecentFilesDialog(false)}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Create Team Dialog */}
+        <Dialog open={showCreateTeamDialog} onOpenChange={setShowCreateTeamDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader><DialogTitle>Create Team</DialogTitle></DialogHeader>
+            <div className="space-y-4 py-4">
+              <div><Label>Team Name</Label><Input placeholder="Engineering Team" value={newTeamName} onChange={(e) => setNewTeamName(e.target.value)} /></div>
+              <div><Label>Description</Label><Textarea placeholder="What's this team about?" rows={2} value={newTeamDescription} onChange={(e) => setNewTeamDescription(e.target.value)} /></div>
+              <div className="p-4 border-2 border-dashed rounded-lg text-center">
+                <Upload className="h-8 w-8 mx-auto text-gray-400 mb-2" />
+                <p className="text-sm text-gray-500">Upload team avatar</p>
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div className="flex items-center gap-2"><Globe className="h-4 w-4 text-gray-500" /><span className="text-sm">Allow anyone to join</span></div>
+                <Switch />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowCreateTeamDialog(false)}>Cancel</Button>
+              <Button className="bg-indigo-600 hover:bg-indigo-700" onClick={() => {
+                if (!newTeamName.trim()) {
+                  toast.error('Please enter a team name');
+                  return;
+                }
+                toast.promise(
+                  new Promise<void>((resolve) => {
+                    setTimeout(() => {
+                      const newTeam: Team = {
+                        id: `t${Date.now()}`,
+                        name: newTeamName,
+                        description: newTeamDescription,
+                        memberCount: 1,
+                        boardCount: 0,
+                        channelCount: 1,
+                        plan: 'free',
+                        role: 'owner',
+                        createdAt: new Date().toISOString()
+                      };
+                      mockTeams.push(newTeam);
+                      setNewTeamName('');
+                      setNewTeamDescription('');
+                      setShowCreateTeamDialog(false);
+                      resolve();
+                    }, 1000);
+                  }),
+                  { loading: 'Creating team...', success: `Team "${newTeamName}" created`, error: 'Failed to create team' }
+                );
+              }}>Create Team</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Team Settings Dialog */}
+        <Dialog open={showTeamSettingsDialog} onOpenChange={setShowTeamSettingsDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader><DialogTitle>Team Settings</DialogTitle></DialogHeader>
+            <div className="space-y-4 py-4">
+              <div><Label>Team Name</Label><Input defaultValue={mockTeams[0]?.name || 'Product Team'} /></div>
+              <div><Label>Description</Label><Textarea defaultValue={mockTeams[0]?.description || ''} rows={2} /></div>
+              <div className="flex items-center justify-between"><div><p className="font-medium">Allow member invites</p><p className="text-sm text-gray-500">Members can invite others</p></div><Switch defaultChecked /></div>
+              <div className="flex items-center justify-between"><div><p className="font-medium">Public team</p><p className="text-sm text-gray-500">Anyone can discover and join</p></div><Switch /></div>
+              <div className="pt-4 border-t">
+                <Button variant="outline" className="w-full text-red-600 hover:bg-red-50" onClick={() => {
+                  toast.error('Team deletion requires confirmation');
+                }}>Delete Team</Button>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowTeamSettingsDialog(false)}>Cancel</Button>
+              <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => {
+                toast.success('Team settings saved');
+                setShowTeamSettingsDialog(false);
+              }}>Save Changes</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Private Channel Dialog */}
+        <Dialog open={showPrivateChannelDialog} onOpenChange={setShowPrivateChannelDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader><DialogTitle>Create Private Channel</DialogTitle></DialogHeader>
+            <div className="space-y-4 py-4">
+              <div><Label>Channel Name</Label><Input placeholder="secret-project" /></div>
+              <div><Label>Description</Label><Textarea placeholder="What's this channel for?" rows={2} /></div>
+              <div className="p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
+                <div className="flex items-center gap-2 text-amber-700 dark:text-amber-400">
+                  <Lock className="h-4 w-4" />
+                  <span className="text-sm font-medium">Private Channel</span>
+                </div>
+                <p className="text-xs text-amber-600 dark:text-amber-500 mt-1">Only invited members can see and access this channel</p>
+              </div>
+              <div><Label>Invite Members</Label><Input placeholder="Search members..." /></div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowPrivateChannelDialog(false)}>Cancel</Button>
+              <Button className="bg-orange-600 hover:bg-orange-700" onClick={() => {
+                toast.promise(
+                  new Promise<void>((resolve) => {
+                    setTimeout(() => {
+                      setShowPrivateChannelDialog(false);
+                      resolve();
+                    }, 1000);
+                  }),
+                  { loading: 'Creating private channel...', success: 'Private channel created', error: 'Failed to create channel' }
+                );
+              }}>Create Private Channel</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Pinned Channels Dialog */}
+        <Dialog open={showPinnedChannelsDialog} onOpenChange={setShowPinnedChannelsDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader><DialogTitle>Pinned Channels</DialogTitle></DialogHeader>
+            <div className="py-4">
+              <ScrollArea className="h-[400px]">
+                <div className="space-y-3">
+                  {mockChannels.filter(c => c.isPinned).map(channel => (
+                    <div key={channel.id} className="flex items-center gap-4 p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer" onClick={() => {
+                      setSelectedChannel(channel);
+                      setShowPinnedChannelsDialog(false);
+                      setActiveTab('chat');
+                      toast.success(`Opened #${channel.name}`);
+                    }}>
+                      <div className="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                        {channel.type === 'private' ? <Lock className="h-5 w-5 text-gray-600" /> : <Hash className="h-5 w-5 text-gray-600" />}
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-medium"># {channel.name}</h4>
+                        <p className="text-sm text-gray-500">{channel.description}</p>
+                      </div>
+                      <Pin className="h-5 w-5 text-amber-500" />
+                      <Badge variant="outline">{channel.memberCount} members</Badge>
+                    </div>
+                  ))}
+                  {mockChannels.filter(c => c.isPinned).length === 0 && (
+                    <div className="text-center py-8 text-gray-500">
+                      <Pin className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                      <p>No pinned channels yet</p>
+                      <p className="text-sm">Pin channels to access them quickly</p>
+                    </div>
+                  )}
+                </div>
+              </ScrollArea>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowPinnedChannelsDialog(false)}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Browse Channels Dialog */}
+        <Dialog open={showBrowseChannelsDialog} onOpenChange={setShowBrowseChannelsDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader><DialogTitle>Browse All Channels</DialogTitle></DialogHeader>
+            <div className="py-4">
+              <Input placeholder="Search channels..." className="mb-4" />
+              <ScrollArea className="h-[400px]">
+                <div className="space-y-3">
+                  {mockChannels.map(channel => (
+                    <div key={channel.id} className="flex items-center gap-4 p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
+                      <div className="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                        {channel.type === 'private' ? <Lock className="h-5 w-5 text-gray-600" /> : <Hash className="h-5 w-5 text-gray-600" />}
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <h4 className="font-medium"># {channel.name}</h4>
+                          {channel.isPinned && <Pin className="h-4 w-4 text-amber-500" />}
+                        </div>
+                        <p className="text-sm text-gray-500">{channel.description}</p>
+                      </div>
+                      <Badge variant="outline">{channel.memberCount} members</Badge>
+                      <Button size="sm" onClick={() => {
+                        setSelectedChannel(channel);
+                        setShowBrowseChannelsDialog(false);
+                        setActiveTab('chat');
+                        toast.success(`Joined #${channel.name}`);
+                      }}>Join</Button>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowBrowseChannelsDialog(false)}>Close</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

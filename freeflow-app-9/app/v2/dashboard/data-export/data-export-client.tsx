@@ -17,7 +17,7 @@ import {
   Download, CheckCircle2, XCircle, Clock, Database, HardDrive,
   FileCode, Shield, Archive, Play, Pause, RefreshCw, Settings, Zap, GitBranch, ArrowRight, Filter, Layers, AlertTriangle,
   BarChart3, History, Plus, Search, MoreHorizontal, Eye, Trash2, Copy,
-  Server, Cloud, Table, Key, Globe, Activity
+  Server, Cloud, Table, Key, Globe, Activity, Upload
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -460,6 +460,101 @@ export default function DataExportClient() {
   const [showRunAllSyncsDialog, setShowRunAllSyncsDialog] = useState(false)
   const [showViewLogsDialog, setShowViewLogsDialog] = useState(false)
 
+  // Header Dialog States
+  const [showJobHistoryDialog, setShowJobHistoryDialog] = useState(false)
+  const [showNewPipelineHeaderDialog, setShowNewPipelineHeaderDialog] = useState(false)
+
+  // Pipeline Actions Dialog States
+  const [showPipelineConfigureDialog, setShowPipelineConfigureDialog] = useState(false)
+  const [showPipelineLogsDialog, setShowPipelineLogsDialog] = useState(false)
+  const [showPauseAllDialog, setShowPauseAllDialog] = useState(false)
+  const [showCloneDialog, setShowCloneDialog] = useState(false)
+  const [showExportPipelinesDialog, setShowExportPipelinesDialog] = useState(false)
+  const [showPipelineHistoryDialog, setShowPipelineHistoryDialog] = useState(false)
+  const [showFilterDialog, setShowFilterDialog] = useState(false)
+  const [showPipelineMoreDialog, setShowPipelineMoreDialog] = useState(false)
+  const [selectedPipelineForAction, setSelectedPipelineForAction] = useState<Pipeline | null>(null)
+
+  // Sources Dialog States
+  const [showAddSourceDialog, setShowAddSourceDialog] = useState(false)
+  const [showSyncAllSourcesDialog, setShowSyncAllSourcesDialog] = useState(false)
+  const [showDatabasesDialog, setShowDatabasesDialog] = useState(false)
+  const [showSaasDialog, setShowSaasDialog] = useState(false)
+  const [showApisDialog, setShowApisDialog] = useState(false)
+  const [showFilesDialog, setShowFilesDialog] = useState(false)
+  const [showCredentialsDialog, setShowCredentialsDialog] = useState(false)
+  const [showSourceConfigureDialog, setShowSourceConfigureDialog] = useState(false)
+  const [selectedSourceForAction, setSelectedSourceForAction] = useState<DataSource | null>(null)
+
+  // Jobs Dialog States
+  const [showNewJobDialog, setShowNewJobDialog] = useState(false)
+  const [showRunNowDialog, setShowRunNowDialog] = useState(false)
+  const [showPauseJobsDialog, setShowPauseJobsDialog] = useState(false)
+  const [showCancelAllJobsDialog, setShowCancelAllJobsDialog] = useState(false)
+  const [showRetryFailedDialog, setShowRetryFailedDialog] = useState(false)
+  const [showDownloadJobsDialog, setShowDownloadJobsDialog] = useState(false)
+  const [showJobHistoryTabDialog, setShowJobHistoryTabDialog] = useState(false)
+  const [showJobFilterDialog, setShowJobFilterDialog] = useState(false)
+  const [showJobDetailsDialog, setShowJobDetailsDialog] = useState(false)
+  const [selectedJobForAction, setSelectedJobForAction] = useState<ExportJob | null>(null)
+
+  // Transforms Dialog States
+  const [showCreateTransformDialog, setShowCreateTransformDialog] = useState(false)
+  const [showFilterTransformDialog, setShowFilterTransformDialog] = useState(false)
+  const [showMapTransformDialog, setShowMapTransformDialog] = useState(false)
+  const [showAggregateTransformDialog, setShowAggregateTransformDialog] = useState(false)
+  const [showJoinTransformDialog, setShowJoinTransformDialog] = useState(false)
+  const [showDedupeTransformDialog, setShowDedupeTransformDialog] = useState(false)
+  const [showCustomSqlDialog, setShowCustomSqlDialog] = useState(false)
+  const [showPreviewTransformDialog, setShowPreviewTransformDialog] = useState(false)
+
+  // Schema Dialog States
+  const [showAutoDetectSchemaDialog, setShowAutoDetectSchemaDialog] = useState(false)
+  const [showAddColumnDialog, setShowAddColumnDialog] = useState(false)
+  const [showViewSchemaDialog, setShowViewSchemaDialog] = useState(false)
+  const [showMapAllDialog, setShowMapAllDialog] = useState(false)
+  const [showSchemaTransformDialog, setShowSchemaTransformDialog] = useState(false)
+  const [showExportSchemaDialog, setShowExportSchemaDialog] = useState(false)
+  const [showSchemaHistoryDialog, setShowSchemaHistoryDialog] = useState(false)
+  const [showSchemaPreviewDialog, setShowSchemaPreviewDialog] = useState(false)
+  const [showAddMappingDialog, setShowAddMappingDialog] = useState(false)
+  const [showEditMappingDialog, setShowEditMappingDialog] = useState(false)
+  const [showDeleteMappingDialog, setShowDeleteMappingDialog] = useState(false)
+  const [selectedMappingIndex, setSelectedMappingIndex] = useState<number | null>(null)
+
+  // Monitoring Dialog States
+  const [showRefreshMonitoringDialog, setShowRefreshMonitoringDialog] = useState(false)
+  const [showDashboardDialog, setShowDashboardDialog] = useState(false)
+  const [showAlertsDialog, setShowAlertsDialog] = useState(false)
+  const [showMetricsDialog, setShowMetricsDialog] = useState(false)
+  const [showMonitoringHistoryDialog, setShowMonitoringHistoryDialog] = useState(false)
+  const [showExportMonitoringDialog, setShowExportMonitoringDialog] = useState(false)
+  const [showHealthDialog, setShowHealthDialog] = useState(false)
+  const [showMonitoringConfigureDialog, setShowMonitoringConfigureDialog] = useState(false)
+
+  // Destinations Dialog States
+  const [showAddDestinationDialog, setShowAddDestinationDialog] = useState(false)
+  const [showWarehousesDialog, setShowWarehousesDialog] = useState(false)
+  const [showLakesDialog, setShowLakesDialog] = useState(false)
+  const [showStreamsDialog, setShowStreamsDialog] = useState(false)
+  const [showDestApisDialog, setShowDestApisDialog] = useState(false)
+  const [showDestFilesDialog, setShowDestFilesDialog] = useState(false)
+  const [showTestDestinationDialog, setShowTestDestinationDialog] = useState(false)
+  const [showDestConfigureDialog, setShowDestConfigureDialog] = useState(false)
+  const [showViewDestinationDialog, setShowViewDestinationDialog] = useState(false)
+  const [showIntegrationFilterDialog, setShowIntegrationFilterDialog] = useState(false)
+  const [selectedDestinationForAction, setSelectedDestinationForAction] = useState<Destination | null>(null)
+
+  // Settings Dialog States
+  const [showIpAllowlistDialog, setShowIpAllowlistDialog] = useState(false)
+  const [showWebhookConfigureDialog, setShowWebhookConfigureDialog] = useState(false)
+  const [showClearLogsDialog, setShowClearLogsDialog] = useState(false)
+  const [showManageArchivedDialog, setShowManageArchivedDialog] = useState(false)
+  const [showPurgeCacheDialog, setShowPurgeCacheDialog] = useState(false)
+  const [showResetPipelinesDialog, setShowResetPipelinesDialog] = useState(false)
+  const [showDeleteAllDataDialog, setShowDeleteAllDataDialog] = useState(false)
+  const [showDisconnectAllDialog, setShowDisconnectAllDialog] = useState(false)
+
   // Quick Actions Form State
   const [newPipelineData, setNewPipelineData] = useState({
     name: '',
@@ -711,6 +806,306 @@ export default function DataExportClient() {
     }, 500)
   }
 
+  // Pipeline Action Handlers
+  const handlePausePipeline = async (pipeline: Pipeline) => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1000)),
+      {
+        loading: `Pausing ${pipeline.name}...`,
+        success: `${pipeline.name} has been paused`,
+        error: 'Failed to pause pipeline'
+      }
+    )
+  }
+
+  const handleRunPipeline = async (pipeline: Pipeline) => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1500)),
+      {
+        loading: `Starting ${pipeline.name}...`,
+        success: `${pipeline.name} is now running`,
+        error: 'Failed to start pipeline'
+      }
+    )
+  }
+
+  const handlePauseAllPipelines = async () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 2000)),
+      {
+        loading: 'Pausing all pipelines...',
+        success: () => {
+          setShowPauseAllDialog(false)
+          return 'All pipelines have been paused'
+        },
+        error: 'Failed to pause pipelines'
+      }
+    )
+  }
+
+  const handleClonePipeline = async (pipeline: Pipeline) => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1500)),
+      {
+        loading: `Cloning ${pipeline.name}...`,
+        success: () => {
+          setShowCloneDialog(false)
+          return `${pipeline.name} has been cloned`
+        },
+        error: 'Failed to clone pipeline'
+      }
+    )
+  }
+
+  const handleExportPipelines = async () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1500)),
+      {
+        loading: 'Exporting pipeline configurations...',
+        success: () => {
+          setShowExportPipelinesDialog(false)
+          return 'Pipeline configurations exported successfully'
+        },
+        error: 'Failed to export pipelines'
+      }
+    )
+  }
+
+  // Source Action Handlers
+  const handleSyncSource = async (source: DataSource) => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 2000)),
+      {
+        loading: `Syncing ${source.name}...`,
+        success: `${source.name} sync completed`,
+        error: 'Failed to sync source'
+      }
+    )
+  }
+
+  const handleSyncAllSources = async () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 3000)),
+      {
+        loading: 'Syncing all data sources...',
+        success: () => {
+          setShowSyncAllSourcesDialog(false)
+          return 'All sources synced successfully'
+        },
+        error: 'Failed to sync sources'
+      }
+    )
+  }
+
+  const handleConfigureSource = async (source: DataSource) => {
+    setSelectedSourceForAction(source)
+    setShowSourceConfigureDialog(true)
+  }
+
+  // Job Action Handlers
+  const handleCancelAllJobs = async () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1500)),
+      {
+        loading: 'Cancelling all running jobs...',
+        success: () => {
+          setShowCancelAllJobsDialog(false)
+          return 'All jobs have been cancelled'
+        },
+        error: 'Failed to cancel jobs'
+      }
+    )
+  }
+
+  const handleRetryFailedJobs = async () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 2000)),
+      {
+        loading: 'Retrying failed jobs...',
+        success: () => {
+          setShowRetryFailedDialog(false)
+          return 'Failed jobs have been requeued'
+        },
+        error: 'Failed to retry jobs'
+      }
+    )
+  }
+
+  const handleViewJobDetails = (job: ExportJob) => {
+    setSelectedJobForAction(job)
+    setShowJobDetailsDialog(true)
+  }
+
+  const handleCancelJob = async (job: ExportJob) => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1000)),
+      {
+        loading: `Cancelling ${job.name}...`,
+        success: `${job.name} has been cancelled`,
+        error: 'Failed to cancel job'
+      }
+    )
+  }
+
+  const handleDownloadJob = async (job: ExportJob) => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1000)),
+      {
+        loading: `Preparing download for ${job.name}...`,
+        success: `${job.name} download started`,
+        error: 'Failed to download job'
+      }
+    )
+  }
+
+  // Schema Action Handlers
+  const handleAutoDetectSchema = async () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 2000)),
+      {
+        loading: 'Auto-detecting schema from source...',
+        success: () => {
+          setShowAutoDetectSchemaDialog(false)
+          return 'Schema detected successfully'
+        },
+        error: 'Failed to detect schema'
+      }
+    )
+  }
+
+  const handleEditMapping = (index: number) => {
+    setSelectedMappingIndex(index)
+    setShowEditMappingDialog(true)
+  }
+
+  const handleDeleteMapping = async (index: number) => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 800)),
+      {
+        loading: 'Removing column mapping...',
+        success: 'Column mapping removed',
+        error: 'Failed to remove mapping'
+      }
+    )
+  }
+
+  // Destination Action Handlers
+  const handleViewDestination = (dest: Destination) => {
+    setSelectedDestinationForAction(dest)
+    setShowViewDestinationDialog(true)
+  }
+
+  const handleConfigureDestination = (dest: Destination) => {
+    setSelectedDestinationForAction(dest)
+    setShowDestConfigureDialog(true)
+  }
+
+  const handleTestDestination = async (dest: Destination) => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 2000)),
+      {
+        loading: `Testing connection to ${dest.name}...`,
+        success: `${dest.name} connection successful`,
+        error: 'Connection test failed'
+      }
+    )
+  }
+
+  // Settings Action Handlers
+  const handleCopyApiKey = () => {
+    navigator.clipboard.writeText('dp_live_xxxxxxxxxxxxxxxxxxxxxxxxxxxx')
+    toast.success('API key copied to clipboard')
+  }
+
+  const handleClearLogs = async () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1500)),
+      {
+        loading: 'Clearing job logs...',
+        success: () => {
+          setShowClearLogsDialog(false)
+          return 'Job logs cleared (2.4 GB freed)'
+        },
+        error: 'Failed to clear logs'
+      }
+    )
+  }
+
+  const handlePurgeCache = async () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1000)),
+      {
+        loading: 'Purging cache storage...',
+        success: () => {
+          setShowPurgeCacheDialog(false)
+          return 'Cache purged (890 MB freed)'
+        },
+        error: 'Failed to purge cache'
+      }
+    )
+  }
+
+  const handleResetPipelines = async () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 2000)),
+      {
+        loading: 'Resetting all pipelines...',
+        success: () => {
+          setShowResetPipelinesDialog(false)
+          return 'All pipelines have been reset'
+        },
+        error: 'Failed to reset pipelines'
+      }
+    )
+  }
+
+  const handleDeleteAllData = async () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 3000)),
+      {
+        loading: 'Deleting all exported data...',
+        success: () => {
+          setShowDeleteAllDataDialog(false)
+          return 'All data has been permanently deleted'
+        },
+        error: 'Failed to delete data'
+      }
+    )
+  }
+
+  const handleDisconnectAllSources = async () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 2000)),
+      {
+        loading: 'Disconnecting all data sources...',
+        success: () => {
+          setShowDisconnectAllDialog(false)
+          return 'All sources have been disconnected'
+        },
+        error: 'Failed to disconnect sources'
+      }
+    )
+  }
+
+  // Monitoring Handlers
+  const handleRefreshMonitoring = () => {
+    toast.success('Monitoring data refreshed')
+  }
+
+  const handleExportMonitoringReport = async () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1500)),
+      {
+        loading: 'Generating monitoring report...',
+        success: () => {
+          setShowExportMonitoringDialog(false)
+          return 'Monitoring report exported'
+        },
+        error: 'Failed to export report'
+      }
+    )
+  }
+
   // Get quick actions with dialog handlers
   const dataExportQuickActions = getDataExportQuickActions(
     setShowNewPipelineQuickDialog,
@@ -734,11 +1129,18 @@ export default function DataExportClient() {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <Button variant="outline" className="bg-white/10 border-white/20 text-white hover:bg-white/20">
+              <Button
+                variant="outline"
+                className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+                onClick={() => setShowJobHistoryDialog(true)}
+              >
                 <History className="w-4 h-4 mr-2" />
                 Job History
               </Button>
-              <Button className="bg-white text-green-600 hover:bg-green-50">
+              <Button
+                className="bg-white text-green-600 hover:bg-green-50"
+                onClick={() => setShowNewPipelineHeaderDialog(true)}
+              >
                 <Plus className="w-4 h-4 mr-2" />
                 New Pipeline
               </Button>
@@ -863,17 +1265,18 @@ export default function DataExportClient() {
             {/* Pipelines Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
-                { icon: Plus, label: 'New Pipeline', color: 'text-green-600 bg-green-100 dark:bg-green-900/30' },
-                { icon: Play, label: 'Run All', color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30' },
-                { icon: Pause, label: 'Pause All', color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/30' },
-                { icon: RefreshCw, label: 'Sync', color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30' },
-                { icon: GitBranch, label: 'Clone', color: 'text-cyan-600 bg-cyan-100 dark:bg-cyan-900/30' },
-                { icon: Download, label: 'Export', color: 'text-indigo-600 bg-indigo-100 dark:bg-indigo-900/30' },
-                { icon: History, label: 'History', color: 'text-pink-600 bg-pink-100 dark:bg-pink-900/30' },
-                { icon: Settings, label: 'Configure', color: 'text-gray-600 bg-gray-100 dark:bg-gray-700' },
+                { icon: Plus, label: 'New Pipeline', color: 'text-green-600 bg-green-100 dark:bg-green-900/30', onClick: () => setShowNewPipelineQuickDialog(true) },
+                { icon: Play, label: 'Run All', color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30', onClick: () => setShowRunAllSyncsDialog(true) },
+                { icon: Pause, label: 'Pause All', color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/30', onClick: () => setShowPauseAllDialog(true) },
+                { icon: RefreshCw, label: 'Sync', color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30', onClick: () => { toast.success('Sync started', { description: 'Refreshing all pipeline data' }); fetchDataExports(); } },
+                { icon: GitBranch, label: 'Clone', color: 'text-cyan-600 bg-cyan-100 dark:bg-cyan-900/30', onClick: () => setShowCloneDialog(true) },
+                { icon: Download, label: 'Export', color: 'text-indigo-600 bg-indigo-100 dark:bg-indigo-900/30', onClick: () => setShowExportPipelinesDialog(true) },
+                { icon: History, label: 'History', color: 'text-pink-600 bg-pink-100 dark:bg-pink-900/30', onClick: () => setShowPipelineHistoryDialog(true) },
+                { icon: Settings, label: 'Configure', color: 'text-gray-600 bg-gray-100 dark:bg-gray-700', onClick: () => setShowPipelineConfigureDialog(true) },
               ].map((action, i) => (
                 <button
                   key={i}
+                  onClick={action.onClick}
                   className={`flex flex-col items-center gap-2 p-4 rounded-xl ${action.color} hover:scale-105 transition-all duration-200`}
                 >
                   <action.icon className="h-5 w-5" />
@@ -893,11 +1296,11 @@ export default function DataExportClient() {
                 />
               </div>
               <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" onClick={() => setShowFilterDialog(true)}>
                   <Filter className="w-4 h-4 mr-2" />
                   Filter
                 </Button>
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" onClick={() => { fetchDataExports(); toast.success('Data refreshed'); }}>
                   <RefreshCw className="w-4 h-4 mr-2" />
                   Refresh
                 </Button>
@@ -921,7 +1324,7 @@ export default function DataExportClient() {
                       <Badge className={getPipelineStatusColor(pipeline.status)}>
                         {pipeline.status}
                       </Badge>
-                      <Button variant="ghost" size="icon">
+                      <Button variant="ghost" size="icon" onClick={() => { setSelectedPipelineForAction(pipeline); setShowPipelineMoreDialog(true); }}>
                         <MoreHorizontal className="w-4 h-4" />
                       </Button>
                     </div>
@@ -997,21 +1400,21 @@ export default function DataExportClient() {
                       </Badge>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Button variant="outline" size="sm">
+                      <Button variant="outline" size="sm" onClick={() => { setSelectedPipelineForAction(pipeline); setShowPipelineLogsDialog(true); }}>
                         <Eye className="w-4 h-4 mr-2" />
                         View Logs
                       </Button>
-                      <Button variant="outline" size="sm">
+                      <Button variant="outline" size="sm" onClick={() => { setSelectedPipelineForAction(pipeline); setShowPipelineConfigureDialog(true); }}>
                         <Settings className="w-4 h-4 mr-2" />
                         Configure
                       </Button>
                       {pipeline.status === 'active' ? (
-                        <Button variant="outline" size="sm">
+                        <Button variant="outline" size="sm" onClick={() => handlePausePipeline(pipeline)}>
                           <Pause className="w-4 h-4 mr-2" />
                           Pause
                         </Button>
                       ) : (
-                        <Button size="sm" className="bg-green-600 hover:bg-green-700">
+                        <Button size="sm" className="bg-green-600 hover:bg-green-700" onClick={() => handleRunPipeline(pipeline)}>
                           <Play className="w-4 h-4 mr-2" />
                           Run Now
                         </Button>
@@ -1044,17 +1447,18 @@ export default function DataExportClient() {
             {/* Sources Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
-                { icon: Plus, label: 'Add Source', color: 'text-green-600 bg-green-100 dark:bg-green-900/30' },
-                { icon: RefreshCw, label: 'Sync All', color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30' },
-                { icon: Server, label: 'Databases', color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30' },
-                { icon: Cloud, label: 'SaaS', color: 'text-cyan-600 bg-cyan-100 dark:bg-cyan-900/30' },
-                { icon: FileCode, label: 'APIs', color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/30' },
-                { icon: Archive, label: 'Files', color: 'text-indigo-600 bg-indigo-100 dark:bg-indigo-900/30' },
-                { icon: Key, label: 'Credentials', color: 'text-red-600 bg-red-100 dark:bg-red-900/30' },
-                { icon: Settings, label: 'Configure', color: 'text-gray-600 bg-gray-100 dark:bg-gray-700' },
+                { icon: Plus, label: 'Add Source', color: 'text-green-600 bg-green-100 dark:bg-green-900/30', onClick: () => setShowAddSourceDialog(true) },
+                { icon: RefreshCw, label: 'Sync All', color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30', onClick: () => setShowSyncAllSourcesDialog(true) },
+                { icon: Server, label: 'Databases', color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30', onClick: () => setShowDatabasesDialog(true) },
+                { icon: Cloud, label: 'SaaS', color: 'text-cyan-600 bg-cyan-100 dark:bg-cyan-900/30', onClick: () => setShowSaasDialog(true) },
+                { icon: FileCode, label: 'APIs', color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/30', onClick: () => setShowApisDialog(true) },
+                { icon: Archive, label: 'Files', color: 'text-indigo-600 bg-indigo-100 dark:bg-indigo-900/30', onClick: () => setShowFilesDialog(true) },
+                { icon: Key, label: 'Credentials', color: 'text-red-600 bg-red-100 dark:bg-red-900/30', onClick: () => setShowCredentialsDialog(true) },
+                { icon: Settings, label: 'Configure', color: 'text-gray-600 bg-gray-100 dark:bg-gray-700', onClick: () => setShowSourceConfigureDialog(true) },
               ].map((action, i) => (
                 <button
                   key={i}
+                  onClick={action.onClick}
                   className={`flex flex-col items-center gap-2 p-4 rounded-xl ${action.color} hover:scale-105 transition-all duration-200`}
                 >
                   <action.icon className="h-5 w-5" />
@@ -1065,7 +1469,7 @@ export default function DataExportClient() {
 
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold">Connected Data Sources</h2>
-              <Button>
+              <Button onClick={() => setShowAddSourceDialog(true)}>
                 <Plus className="w-4 h-4 mr-2" />
                 Add Source
               </Button>
@@ -1114,11 +1518,11 @@ export default function DataExportClient() {
                   </div>
 
                   <div className="flex items-center gap-2 mt-4">
-                    <Button variant="outline" size="sm" className="flex-1">
+                    <Button variant="outline" size="sm" className="flex-1" onClick={() => handleSyncSource(source)}>
                       <RefreshCw className="w-4 h-4 mr-2" />
                       Sync
                     </Button>
-                    <Button variant="outline" size="sm" className="flex-1">
+                    <Button variant="outline" size="sm" className="flex-1" onClick={() => handleConfigureSource(source)}>
                       <Settings className="w-4 h-4 mr-2" />
                       Configure
                     </Button>
@@ -1127,7 +1531,10 @@ export default function DataExportClient() {
               ))}
 
               {/* Add Source Card */}
-              <Card className="p-6 border-dashed border-2 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+              <Card
+                className="p-6 border-dashed border-2 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                onClick={() => setShowAddSourceDialog(true)}
+              >
                 <div className="p-4 bg-gray-100 dark:bg-gray-800 rounded-full mb-4">
                   <Plus className="w-8 h-8 text-gray-400" />
                 </div>
@@ -1158,17 +1565,18 @@ export default function DataExportClient() {
             {/* Jobs Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
-                { icon: Plus, label: 'New Job', color: 'text-green-600 bg-green-100 dark:bg-green-900/30' },
-                { icon: Play, label: 'Run Now', color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30' },
-                { icon: Pause, label: 'Pause', color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/30' },
-                { icon: XCircle, label: 'Cancel All', color: 'text-red-600 bg-red-100 dark:bg-red-900/30' },
-                { icon: RefreshCw, label: 'Retry Failed', color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30' },
-                { icon: Download, label: 'Download', color: 'text-cyan-600 bg-cyan-100 dark:bg-cyan-900/30' },
-                { icon: History, label: 'History', color: 'text-indigo-600 bg-indigo-100 dark:bg-indigo-900/30' },
-                { icon: Filter, label: 'Filter', color: 'text-gray-600 bg-gray-100 dark:bg-gray-700' },
+                { icon: Plus, label: 'New Job', color: 'text-green-600 bg-green-100 dark:bg-green-900/30', onClick: () => setShowNewJobDialog(true) },
+                { icon: Play, label: 'Run Now', color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30', onClick: () => setShowRunNowDialog(true) },
+                { icon: Pause, label: 'Pause', color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/30', onClick: () => setShowPauseJobsDialog(true) },
+                { icon: XCircle, label: 'Cancel All', color: 'text-red-600 bg-red-100 dark:bg-red-900/30', onClick: () => setShowCancelAllJobsDialog(true) },
+                { icon: RefreshCw, label: 'Retry Failed', color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30', onClick: () => setShowRetryFailedDialog(true) },
+                { icon: Download, label: 'Download', color: 'text-cyan-600 bg-cyan-100 dark:bg-cyan-900/30', onClick: () => setShowDownloadJobsDialog(true) },
+                { icon: History, label: 'History', color: 'text-indigo-600 bg-indigo-100 dark:bg-indigo-900/30', onClick: () => setShowJobHistoryTabDialog(true) },
+                { icon: Filter, label: 'Filter', color: 'text-gray-600 bg-gray-100 dark:bg-gray-700', onClick: () => setShowJobFilterDialog(true) },
               ].map((action, i) => (
                 <button
                   key={i}
+                  onClick={action.onClick}
                   className={`flex flex-col items-center gap-2 p-4 rounded-xl ${action.color} hover:scale-105 transition-all duration-200`}
                 >
                   <action.icon className="h-5 w-5" />
@@ -1323,15 +1731,15 @@ export default function DataExportClient() {
                       <div className="text-sm text-gray-500 truncate">{job.destination}</div>
                       <div className="flex items-center gap-1">
                         {job.status === 'completed' && (
-                          <Button variant="ghost" size="icon">
+                          <Button variant="ghost" size="icon" onClick={() => handleDownloadJob(job)}>
                             <Download className="w-4 h-4" />
                           </Button>
                         )}
-                        <Button variant="ghost" size="icon">
+                        <Button variant="ghost" size="icon" onClick={() => handleViewJobDetails(job)}>
                           <Eye className="w-4 h-4" />
                         </Button>
                         {job.status === 'running' && (
-                          <Button variant="ghost" size="icon">
+                          <Button variant="ghost" size="icon" onClick={() => handleCancelJob(job)}>
                             <XCircle className="w-4 h-4 text-red-500" />
                           </Button>
                         )}
@@ -1364,17 +1772,18 @@ export default function DataExportClient() {
             {/* Transforms Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
-                { icon: Plus, label: 'Create', color: 'text-green-600 bg-green-100 dark:bg-green-900/30' },
-                { icon: Filter, label: 'Filter', color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30' },
-                { icon: ArrowRight, label: 'Map', color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30' },
-                { icon: Layers, label: 'Aggregate', color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/30' },
-                { icon: GitBranch, label: 'Join', color: 'text-cyan-600 bg-cyan-100 dark:bg-cyan-900/30' },
-                { icon: Copy, label: 'Dedupe', color: 'text-indigo-600 bg-indigo-100 dark:bg-indigo-900/30' },
-                { icon: FileCode, label: 'Custom SQL', color: 'text-pink-600 bg-pink-100 dark:bg-pink-900/30' },
-                { icon: Eye, label: 'Preview', color: 'text-gray-600 bg-gray-100 dark:bg-gray-700' },
+                { icon: Plus, label: 'Create', color: 'text-green-600 bg-green-100 dark:bg-green-900/30', onClick: () => setShowCreateTransformDialog(true) },
+                { icon: Filter, label: 'Filter', color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30', onClick: () => setShowFilterTransformDialog(true) },
+                { icon: ArrowRight, label: 'Map', color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30', onClick: () => setShowMapTransformDialog(true) },
+                { icon: Layers, label: 'Aggregate', color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/30', onClick: () => setShowAggregateTransformDialog(true) },
+                { icon: GitBranch, label: 'Join', color: 'text-cyan-600 bg-cyan-100 dark:bg-cyan-900/30', onClick: () => setShowJoinTransformDialog(true) },
+                { icon: Copy, label: 'Dedupe', color: 'text-indigo-600 bg-indigo-100 dark:bg-indigo-900/30', onClick: () => setShowDedupeTransformDialog(true) },
+                { icon: FileCode, label: 'Custom SQL', color: 'text-pink-600 bg-pink-100 dark:bg-pink-900/30', onClick: () => setShowCustomSqlDialog(true) },
+                { icon: Eye, label: 'Preview', color: 'text-gray-600 bg-gray-100 dark:bg-gray-700', onClick: () => setShowPreviewTransformDialog(true) },
               ].map((action, i) => (
                 <button
                   key={i}
+                  onClick={action.onClick}
                   className={`flex flex-col items-center gap-2 p-4 rounded-xl ${action.color} hover:scale-105 transition-all duration-200`}
                 >
                   <action.icon className="h-5 w-5" />
@@ -1385,7 +1794,7 @@ export default function DataExportClient() {
 
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold">Data Transformations</h2>
-              <Button>
+              <Button onClick={() => setShowCreateTransformDialog(true)}>
                 <Plus className="w-4 h-4 mr-2" />
                 Create Transform
               </Button>
@@ -1434,17 +1843,18 @@ export default function DataExportClient() {
             {/* Schema Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
-                { icon: RefreshCw, label: 'Auto-detect', color: 'text-green-600 bg-green-100 dark:bg-green-900/30' },
-                { icon: Plus, label: 'Add Column', color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30' },
-                { icon: Table, label: 'View Schema', color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30' },
-                { icon: ArrowRight, label: 'Map All', color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/30' },
-                { icon: Zap, label: 'Transform', color: 'text-yellow-600 bg-yellow-100 dark:bg-yellow-900/30' },
-                { icon: Download, label: 'Export', color: 'text-cyan-600 bg-cyan-100 dark:bg-cyan-900/30' },
-                { icon: History, label: 'History', color: 'text-indigo-600 bg-indigo-100 dark:bg-indigo-900/30' },
-                { icon: Eye, label: 'Preview', color: 'text-gray-600 bg-gray-100 dark:bg-gray-700' },
+                { icon: RefreshCw, label: 'Auto-detect', color: 'text-green-600 bg-green-100 dark:bg-green-900/30', onClick: () => setShowAutoDetectSchemaDialog(true) },
+                { icon: Plus, label: 'Add Column', color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30', onClick: () => setShowAddColumnDialog(true) },
+                { icon: Table, label: 'View Schema', color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30', onClick: () => setShowViewSchemaDialog(true) },
+                { icon: ArrowRight, label: 'Map All', color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/30', onClick: () => setShowMapAllDialog(true) },
+                { icon: Zap, label: 'Transform', color: 'text-yellow-600 bg-yellow-100 dark:bg-yellow-900/30', onClick: () => setShowSchemaTransformDialog(true) },
+                { icon: Download, label: 'Export', color: 'text-cyan-600 bg-cyan-100 dark:bg-cyan-900/30', onClick: () => setShowExportSchemaDialog(true) },
+                { icon: History, label: 'History', color: 'text-indigo-600 bg-indigo-100 dark:bg-indigo-900/30', onClick: () => setShowSchemaHistoryDialog(true) },
+                { icon: Eye, label: 'Preview', color: 'text-gray-600 bg-gray-100 dark:bg-gray-700', onClick: () => setShowSchemaPreviewDialog(true) },
               ].map((action, i) => (
                 <button
                   key={i}
+                  onClick={action.onClick}
                   className={`flex flex-col items-center gap-2 p-4 rounded-xl ${action.color} hover:scale-105 transition-all duration-200`}
                 >
                   <action.icon className="h-5 w-5" />
@@ -1459,11 +1869,11 @@ export default function DataExportClient() {
                 <p className="text-sm text-gray-500">Configure how source columns map to destination</p>
               </div>
               <div className="flex items-center gap-2">
-                <Button variant="outline">
+                <Button variant="outline" onClick={() => setShowAutoDetectSchemaDialog(true)}>
                   <RefreshCw className="w-4 h-4 mr-2" />
                   Auto-detect Schema
                 </Button>
-                <Button>
+                <Button onClick={() => setShowAddMappingDialog(true)}>
                   <Plus className="w-4 h-4 mr-2" />
                   Add Mapping
                 </Button>
@@ -1512,10 +1922,10 @@ export default function DataExportClient() {
                         )}
                       </div>
                       <div className="flex items-center gap-1">
-                        <Button variant="ghost" size="icon">
+                        <Button variant="ghost" size="icon" onClick={() => handleEditMapping(i)}>
                           <Settings className="w-4 h-4" />
                         </Button>
-                        <Button variant="ghost" size="icon">
+                        <Button variant="ghost" size="icon" onClick={() => handleDeleteMapping(i)}>
                           <Trash2 className="w-4 h-4 text-red-500" />
                         </Button>
                       </div>
@@ -1547,17 +1957,18 @@ export default function DataExportClient() {
             {/* Monitoring Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
-                { icon: RefreshCw, label: 'Refresh', color: 'text-green-600 bg-green-100 dark:bg-green-900/30' },
-                { icon: BarChart3, label: 'Dashboard', color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30' },
-                { icon: AlertTriangle, label: 'Alerts', color: 'text-red-600 bg-red-100 dark:bg-red-900/30' },
-                { icon: Activity, label: 'Metrics', color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30' },
-                { icon: Clock, label: 'History', color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/30' },
-                { icon: Download, label: 'Export', color: 'text-cyan-600 bg-cyan-100 dark:bg-cyan-900/30' },
-                { icon: Shield, label: 'Health', color: 'text-indigo-600 bg-indigo-100 dark:bg-indigo-900/30' },
-                { icon: Settings, label: 'Configure', color: 'text-gray-600 bg-gray-100 dark:bg-gray-700' },
+                { icon: RefreshCw, label: 'Refresh', color: 'text-green-600 bg-green-100 dark:bg-green-900/30', onClick: () => handleRefreshMonitoring() },
+                { icon: BarChart3, label: 'Dashboard', color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30', onClick: () => setShowDashboardDialog(true) },
+                { icon: AlertTriangle, label: 'Alerts', color: 'text-red-600 bg-red-100 dark:bg-red-900/30', onClick: () => setShowAlertsDialog(true) },
+                { icon: Activity, label: 'Metrics', color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30', onClick: () => setShowMetricsDialog(true) },
+                { icon: Clock, label: 'History', color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/30', onClick: () => setShowMonitoringHistoryDialog(true) },
+                { icon: Download, label: 'Export', color: 'text-cyan-600 bg-cyan-100 dark:bg-cyan-900/30', onClick: () => setShowExportMonitoringDialog(true) },
+                { icon: Shield, label: 'Health', color: 'text-indigo-600 bg-indigo-100 dark:bg-indigo-900/30', onClick: () => setShowHealthDialog(true) },
+                { icon: Settings, label: 'Configure', color: 'text-gray-600 bg-gray-100 dark:bg-gray-700', onClick: () => setShowMonitoringConfigureDialog(true) },
               ].map((action, i) => (
                 <button
                   key={i}
+                  onClick={action.onClick}
                   className={`flex flex-col items-center gap-2 p-4 rounded-xl ${action.color} hover:scale-105 transition-all duration-200`}
                 >
                   <action.icon className="h-5 w-5" />
@@ -1685,17 +2096,18 @@ export default function DataExportClient() {
             {/* Destinations Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
-                { icon: Plus, label: 'Add', color: 'text-green-600 bg-green-100 dark:bg-green-900/30' },
-                { icon: Cloud, label: 'Warehouses', color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30' },
-                { icon: Server, label: 'Lakes', color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30' },
-                { icon: Zap, label: 'Streams', color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/30' },
-                { icon: Globe, label: 'APIs', color: 'text-cyan-600 bg-cyan-100 dark:bg-cyan-900/30' },
-                { icon: Archive, label: 'Files', color: 'text-indigo-600 bg-indigo-100 dark:bg-indigo-900/30' },
-                { icon: RefreshCw, label: 'Test', color: 'text-pink-600 bg-pink-100 dark:bg-pink-900/30' },
-                { icon: Settings, label: 'Configure', color: 'text-gray-600 bg-gray-100 dark:bg-gray-700' },
+                { icon: Plus, label: 'Add', color: 'text-green-600 bg-green-100 dark:bg-green-900/30', onClick: () => setShowAddDestinationDialog(true) },
+                { icon: Cloud, label: 'Warehouses', color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30', onClick: () => setShowWarehousesDialog(true) },
+                { icon: Server, label: 'Lakes', color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30', onClick: () => setShowLakesDialog(true) },
+                { icon: Zap, label: 'Streams', color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/30', onClick: () => setShowStreamsDialog(true) },
+                { icon: Globe, label: 'APIs', color: 'text-cyan-600 bg-cyan-100 dark:bg-cyan-900/30', onClick: () => setShowDestApisDialog(true) },
+                { icon: Archive, label: 'Files', color: 'text-indigo-600 bg-indigo-100 dark:bg-indigo-900/30', onClick: () => setShowDestFilesDialog(true) },
+                { icon: RefreshCw, label: 'Test', color: 'text-pink-600 bg-pink-100 dark:bg-pink-900/30', onClick: () => setShowTestDestinationDialog(true) },
+                { icon: Settings, label: 'Configure', color: 'text-gray-600 bg-gray-100 dark:bg-gray-700', onClick: () => setShowDestConfigureDialog(true) },
               ].map((action, i) => (
                 <button
                   key={i}
+                  onClick={action.onClick}
                   className={`flex flex-col items-center gap-2 p-4 rounded-xl ${action.color} hover:scale-105 transition-all duration-200`}
                 >
                   <action.icon className="h-5 w-5" />
@@ -1709,7 +2121,7 @@ export default function DataExportClient() {
                 <h2 className="text-lg font-semibold">Data Destinations</h2>
                 <p className="text-sm text-gray-500">Configure where your data flows to</p>
               </div>
-              <Button className="bg-green-600 hover:bg-green-700">
+              <Button className="bg-green-600 hover:bg-green-700" onClick={() => setShowAddDestinationDialog(true)}>
                 <Plus className="w-4 h-4 mr-2" />
                 Add Destination
               </Button>
@@ -1756,11 +2168,11 @@ export default function DataExportClient() {
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Button variant="outline" size="sm" className="flex-1">
+                      <Button variant="outline" size="sm" className="flex-1" onClick={() => handleViewDestination(dest)}>
                         <Eye className="w-4 h-4 mr-2" />
                         View
                       </Button>
-                      <Button variant="outline" size="sm" className="flex-1">
+                      <Button variant="outline" size="sm" className="flex-1" onClick={() => handleConfigureDestination(dest)}>
                         <Settings className="w-4 h-4 mr-2" />
                         Configure
                       </Button>
@@ -1778,7 +2190,7 @@ export default function DataExportClient() {
                   <p className="text-sm text-gray-500">Send data to your favorite tools</p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Button variant="outline" size="sm">
+                  <Button variant="outline" size="sm" onClick={() => setShowIntegrationFilterDialog(true)}>
                     <Filter className="w-4 h-4 mr-2" />
                     Filter
                   </Button>
@@ -1940,7 +2352,7 @@ export default function DataExportClient() {
                           <p className="font-medium text-gray-900 dark:text-white">IP Allowlist</p>
                           <p className="text-sm text-gray-500">Restrict access to specific IPs</p>
                         </div>
-                        <Button variant="outline" size="sm">Configure</Button>
+                        <Button variant="outline" size="sm" onClick={() => setShowIpAllowlistDialog(true)}>Configure</Button>
                       </div>
                       <div className="flex items-center justify-between py-3">
                         <div>
@@ -1996,7 +2408,7 @@ export default function DataExportClient() {
                       <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
                         <div className="flex items-center justify-between mb-2">
                           <p className="font-medium text-gray-900 dark:text-white">API Key</p>
-                          <Button variant="outline" size="sm">
+                          <Button variant="outline" size="sm" onClick={handleCopyApiKey}>
                             <Copy className="w-4 h-4 mr-2" />
                             Copy
                           </Button>
@@ -2017,7 +2429,7 @@ export default function DataExportClient() {
                           <p className="font-medium text-gray-900 dark:text-white">Webhook URL</p>
                           <p className="text-sm text-gray-500">Receive pipeline events</p>
                         </div>
-                        <Button variant="outline" size="sm">Configure</Button>
+                        <Button variant="outline" size="sm" onClick={() => setShowWebhookConfigureDialog(true)}>Configure</Button>
                       </div>
                       <div className="flex items-center justify-between py-3">
                         <div>
@@ -2124,7 +2536,7 @@ export default function DataExportClient() {
                               <p className="text-sm text-gray-500">2.4 GB of log files</p>
                             </div>
                           </div>
-                          <Button variant="outline" size="sm">Clear</Button>
+                          <Button variant="outline" size="sm" onClick={() => setShowClearLogsDialog(true)}>Clear</Button>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
                           <div className="flex items-center gap-3">
@@ -2134,7 +2546,7 @@ export default function DataExportClient() {
                               <p className="text-sm text-gray-500">15.8 GB archived exports</p>
                             </div>
                           </div>
-                          <Button variant="outline" size="sm">Manage</Button>
+                          <Button variant="outline" size="sm" onClick={() => setShowManageArchivedDialog(true)}>Manage</Button>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
                           <div className="flex items-center gap-3">
@@ -2144,7 +2556,7 @@ export default function DataExportClient() {
                               <p className="text-sm text-gray-500">890 MB cached schemas</p>
                             </div>
                           </div>
-                          <Button variant="outline" size="sm">Purge</Button>
+                          <Button variant="outline" size="sm" onClick={() => setShowPurgeCacheDialog(true)}>Purge</Button>
                         </div>
                       </div>
                     </div>
@@ -2156,21 +2568,21 @@ export default function DataExportClient() {
                             <p className="font-medium text-gray-900 dark:text-white">Reset All Pipelines</p>
                             <p className="text-sm text-gray-500">Delete all pipeline configurations</p>
                           </div>
-                          <Button variant="destructive" size="sm">Reset</Button>
+                          <Button variant="destructive" size="sm" onClick={() => setShowResetPipelinesDialog(true)}>Reset</Button>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
                           <div>
                             <p className="font-medium text-gray-900 dark:text-white">Delete All Data</p>
                             <p className="text-sm text-gray-500">Permanently remove all exported data</p>
                           </div>
-                          <Button variant="destructive" size="sm">Delete</Button>
+                          <Button variant="destructive" size="sm" onClick={() => setShowDeleteAllDataDialog(true)}>Delete</Button>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
                           <div>
                             <p className="font-medium text-gray-900 dark:text-white">Disconnect All Sources</p>
                             <p className="text-sm text-gray-500">Remove all data source connections</p>
                           </div>
-                          <Button variant="destructive" size="sm">Disconnect</Button>
+                          <Button variant="destructive" size="sm" onClick={() => setShowDisconnectAllDialog(true)}>Disconnect</Button>
                         </div>
                       </div>
                     </div>
@@ -2451,6 +2863,1501 @@ export default function DataExportClient() {
               </Button>
             </div>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Job History Dialog */}
+      <Dialog open={showJobHistoryDialog} onOpenChange={setShowJobHistoryDialog}>
+        <DialogContent className="max-w-3xl max-h-[80vh]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <History className="w-5 h-5 text-blue-600" />
+              Job History
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <ScrollArea className="h-[400px]">
+              <div className="space-y-3">
+                {mockAuditLogs.map(log => (
+                  <div key={log.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <Badge className={getAuditActionColor(log.action)}>{log.action}</Badge>
+                      <div>
+                        <p className="font-medium">{log.resource}</p>
+                        <p className="text-sm text-gray-500">{log.details}</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <Badge variant="outline" className={log.status === 'success' ? 'text-green-600' : 'text-red-600'}>{log.status}</Badge>
+                      <p className="text-xs text-gray-400 mt-1">{new Date(log.timestamp).toLocaleString()}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+            <div className="flex justify-end">
+              <Button variant="outline" onClick={() => setShowJobHistoryDialog(false)}>Close</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* New Pipeline Header Dialog */}
+      <Dialog open={showNewPipelineHeaderDialog} onOpenChange={setShowNewPipelineHeaderDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <GitBranch className="w-5 h-5 text-green-600" />
+              Create New Pipeline
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Pipeline Name</Label>
+              <Input placeholder="e.g., Customer Analytics Sync" value={newPipelineData.name} onChange={(e) => setNewPipelineData(prev => ({ ...prev, name: e.target.value }))} />
+            </div>
+            <div className="space-y-2">
+              <Label>Description</Label>
+              <Input placeholder="Describe what this pipeline does" value={newPipelineData.description} onChange={(e) => setNewPipelineData(prev => ({ ...prev, description: e.target.value }))} />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Source Type</Label>
+                <Select value={newPipelineData.sourceType} onValueChange={(v) => setNewPipelineData(prev => ({ ...prev, sourceType: v }))}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="postgresql">PostgreSQL</SelectItem>
+                    <SelectItem value="mysql">MySQL</SelectItem>
+                    <SelectItem value="mongodb">MongoDB</SelectItem>
+                    <SelectItem value="salesforce">Salesforce</SelectItem>
+                    <SelectItem value="hubspot">HubSpot</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Destination</Label>
+                <Select value={newPipelineData.destinationType} onValueChange={(v) => setNewPipelineData(prev => ({ ...prev, destinationType: v }))}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="snowflake">Snowflake</SelectItem>
+                    <SelectItem value="bigquery">BigQuery</SelectItem>
+                    <SelectItem value="redshift">Redshift</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 pt-4">
+              <Button variant="outline" onClick={() => setShowNewPipelineHeaderDialog(false)}>Cancel</Button>
+              <Button onClick={() => { handleCreatePipelineQuick(); setShowNewPipelineHeaderDialog(false); }} className="bg-green-600 hover:bg-green-700">
+                <Plus className="w-4 h-4 mr-2" />Create Pipeline
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Pause All Pipelines Dialog */}
+      <Dialog open={showPauseAllDialog} onOpenChange={setShowPauseAllDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Pause className="w-5 h-5 text-orange-600" />
+              Pause All Pipelines
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <p className="text-gray-600 dark:text-gray-300">Are you sure you want to pause all {mockPipelines.length} active pipelines? This will stop all data synchronization.</p>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowPauseAllDialog(false)}>Cancel</Button>
+              <Button onClick={handlePauseAllPipelines} className="bg-orange-600 hover:bg-orange-700">
+                <Pause className="w-4 h-4 mr-2" />Pause All
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Clone Pipeline Dialog */}
+      <Dialog open={showCloneDialog} onOpenChange={setShowCloneDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <GitBranch className="w-5 h-5 text-cyan-600" />
+              Clone Pipeline
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Select Pipeline to Clone</Label>
+              <Select defaultValue={mockPipelines[0]?.id}>
+                <SelectTrigger><SelectValue placeholder="Select a pipeline" /></SelectTrigger>
+                <SelectContent>
+                  {mockPipelines.map(p => (
+                    <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>New Pipeline Name</Label>
+              <Input placeholder="e.g., Customer Sync (Copy)" />
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowCloneDialog(false)}>Cancel</Button>
+              <Button onClick={() => handleClonePipeline(mockPipelines[0])} className="bg-cyan-600 hover:bg-cyan-700">
+                <GitBranch className="w-4 h-4 mr-2" />Clone
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Export Pipelines Dialog */}
+      <Dialog open={showExportPipelinesDialog} onOpenChange={setShowExportPipelinesDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Download className="w-5 h-5 text-indigo-600" />
+              Export Pipelines
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <p className="text-gray-600 dark:text-gray-300">Export all pipeline configurations as a JSON file.</p>
+            <div className="space-y-2">
+              <Label>Export Format</Label>
+              <Select defaultValue="json">
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="json">JSON</SelectItem>
+                  <SelectItem value="yaml">YAML</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowExportPipelinesDialog(false)}>Cancel</Button>
+              <Button onClick={handleExportPipelines} className="bg-indigo-600 hover:bg-indigo-700">
+                <Download className="w-4 h-4 mr-2" />Export
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Pipeline History Dialog */}
+      <Dialog open={showPipelineHistoryDialog} onOpenChange={setShowPipelineHistoryDialog}>
+        <DialogContent className="max-w-3xl max-h-[80vh]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <History className="w-5 h-5 text-pink-600" />
+              Pipeline History
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <ScrollArea className="h-[400px]">
+              <div className="space-y-3">
+                {mockAuditLogs.filter(l => l.action === 'run' || l.action === 'create').map(log => (
+                  <div key={log.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <div>
+                      <p className="font-medium">{log.resource}</p>
+                      <p className="text-sm text-gray-500">{log.details}</p>
+                    </div>
+                    <div className="text-right">
+                      <Badge variant="outline" className={log.status === 'success' ? 'text-green-600' : 'text-red-600'}>{log.status}</Badge>
+                      <p className="text-xs text-gray-400 mt-1">{new Date(log.timestamp).toLocaleString()}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+            <div className="flex justify-end">
+              <Button variant="outline" onClick={() => setShowPipelineHistoryDialog(false)}>Close</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Filter Dialog */}
+      <Dialog open={showFilterDialog} onOpenChange={setShowFilterDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Filter className="w-5 h-5 text-gray-600" />
+              Filter Pipelines
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Status</Label>
+              <Select defaultValue="all">
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All</SelectItem>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="paused">Paused</SelectItem>
+                  <SelectItem value="error">Error</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Source Type</Label>
+              <Select defaultValue="all">
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Sources</SelectItem>
+                  <SelectItem value="database">Databases</SelectItem>
+                  <SelectItem value="saas">SaaS</SelectItem>
+                  <SelectItem value="api">APIs</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowFilterDialog(false)}>Cancel</Button>
+              <Button onClick={() => { toast.success('Filters applied'); setShowFilterDialog(false); }}>Apply Filters</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Pipeline Configure Dialog */}
+      <Dialog open={showPipelineConfigureDialog} onOpenChange={setShowPipelineConfigureDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Settings className="w-5 h-5 text-gray-600" />
+              Configure Pipeline {selectedPipelineForAction?.name}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Sync Frequency</Label>
+              <Select defaultValue="hourly">
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="realtime">Real-time</SelectItem>
+                  <SelectItem value="hourly">Hourly</SelectItem>
+                  <SelectItem value="daily">Daily</SelectItem>
+                  <SelectItem value="weekly">Weekly</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Batch Size</Label>
+              <Input type="number" defaultValue="10000" />
+            </div>
+            <div className="space-y-2">
+              <Label>Retry Count</Label>
+              <Input type="number" defaultValue="3" />
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowPipelineConfigureDialog(false)}>Cancel</Button>
+              <Button onClick={() => { toast.success('Pipeline configuration saved'); setShowPipelineConfigureDialog(false); }}>Save Changes</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Pipeline Logs Dialog */}
+      <Dialog open={showPipelineLogsDialog} onOpenChange={setShowPipelineLogsDialog}>
+        <DialogContent className="max-w-3xl max-h-[80vh]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Eye className="w-5 h-5 text-blue-600" />
+              Logs: {selectedPipelineForAction?.name}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <ScrollArea className="h-[400px] bg-gray-900 rounded-lg p-4">
+              <pre className="text-xs text-green-400 font-mono">
+{`[2024-01-01 10:00:00] INFO: Pipeline started
+[2024-01-01 10:00:01] INFO: Connecting to source...
+[2024-01-01 10:00:02] INFO: Source connection established
+[2024-01-01 10:00:03] INFO: Extracting data...
+[2024-01-01 10:00:15] INFO: Extracted 45,234 records
+[2024-01-01 10:00:16] INFO: Applying transformations...
+[2024-01-01 10:00:25] INFO: Transformations complete
+[2024-01-01 10:00:26] INFO: Loading to destination...
+[2024-01-01 10:00:45] INFO: Successfully loaded 45,234 records
+[2024-01-01 10:00:46] INFO: Pipeline completed successfully`}
+              </pre>
+            </ScrollArea>
+            <div className="flex justify-between">
+              <Button variant="outline" size="sm"><Download className="w-4 h-4 mr-2" />Export Logs</Button>
+              <Button variant="outline" onClick={() => setShowPipelineLogsDialog(false)}>Close</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Pipeline More Actions Dialog */}
+      <Dialog open={showPipelineMoreDialog} onOpenChange={setShowPipelineMoreDialog}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Pipeline Actions</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-2 py-4">
+            <Button variant="ghost" className="w-full justify-start" onClick={() => { setShowPipelineMoreDialog(false); setShowPipelineLogsDialog(true); }}>
+              <Eye className="w-4 h-4 mr-2" />View Logs
+            </Button>
+            <Button variant="ghost" className="w-full justify-start" onClick={() => { setShowPipelineMoreDialog(false); setShowPipelineConfigureDialog(true); }}>
+              <Settings className="w-4 h-4 mr-2" />Configure
+            </Button>
+            <Button variant="ghost" className="w-full justify-start" onClick={() => { setShowPipelineMoreDialog(false); setShowCloneDialog(true); }}>
+              <GitBranch className="w-4 h-4 mr-2" />Clone Pipeline
+            </Button>
+            <Button variant="ghost" className="w-full justify-start text-red-600" onClick={() => { setShowPipelineMoreDialog(false); toast.success('Pipeline deleted'); }}>
+              <Trash2 className="w-4 h-4 mr-2" />Delete Pipeline
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Source Dialog */}
+      <Dialog open={showAddSourceDialog} onOpenChange={setShowAddSourceDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Plus className="w-5 h-5 text-green-600" />
+              Add Data Source
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Source Type</Label>
+              <Select defaultValue="postgresql">
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="postgresql">PostgreSQL</SelectItem>
+                  <SelectItem value="mysql">MySQL</SelectItem>
+                  <SelectItem value="mongodb">MongoDB</SelectItem>
+                  <SelectItem value="salesforce">Salesforce</SelectItem>
+                  <SelectItem value="hubspot">HubSpot</SelectItem>
+                  <SelectItem value="s3">AWS S3</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Connection Name</Label>
+              <Input placeholder="e.g., Production Database" />
+            </div>
+            <div className="space-y-2">
+              <Label>Host</Label>
+              <Input placeholder="e.g., db.example.com" />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Port</Label>
+                <Input placeholder="5432" type="number" />
+              </div>
+              <div className="space-y-2">
+                <Label>Database</Label>
+                <Input placeholder="mydb" />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowAddSourceDialog(false)}>Cancel</Button>
+              <Button onClick={() => { toast.success('Data source added successfully'); setShowAddSourceDialog(false); }} className="bg-green-600 hover:bg-green-700">
+                <Plus className="w-4 h-4 mr-2" />Add Source
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Sync All Sources Dialog */}
+      <Dialog open={showSyncAllSourcesDialog} onOpenChange={setShowSyncAllSourcesDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <RefreshCw className="w-5 h-5 text-blue-600" />
+              Sync All Sources
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <p className="text-gray-600 dark:text-gray-300">This will sync data from all {mockDataSources.length} connected sources. This may take several minutes.</p>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowSyncAllSourcesDialog(false)}>Cancel</Button>
+              <Button onClick={handleSyncAllSources} className="bg-blue-600 hover:bg-blue-700">
+                <RefreshCw className="w-4 h-4 mr-2" />Sync All
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Source Configure Dialog */}
+      <Dialog open={showSourceConfigureDialog} onOpenChange={setShowSourceConfigureDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Settings className="w-5 h-5 text-gray-600" />
+              Configure: {selectedSourceForAction?.name}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Connection Name</Label>
+              <Input defaultValue={selectedSourceForAction?.name} />
+            </div>
+            <div className="space-y-2">
+              <Label>Host</Label>
+              <Input defaultValue={selectedSourceForAction?.host} />
+            </div>
+            <div className="space-y-2">
+              <Label>Sync Interval</Label>
+              <Select defaultValue="hourly">
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="realtime">Real-time</SelectItem>
+                  <SelectItem value="hourly">Hourly</SelectItem>
+                  <SelectItem value="daily">Daily</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowSourceConfigureDialog(false)}>Cancel</Button>
+              <Button onClick={() => { toast.success('Source configuration saved'); setShowSourceConfigureDialog(false); }}>Save Changes</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Cancel All Jobs Dialog */}
+      <Dialog open={showCancelAllJobsDialog} onOpenChange={setShowCancelAllJobsDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <XCircle className="w-5 h-5 text-red-600" />
+              Cancel All Jobs
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <p className="text-gray-600 dark:text-gray-300">Are you sure you want to cancel all running jobs? This action cannot be undone.</p>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowCancelAllJobsDialog(false)}>Cancel</Button>
+              <Button variant="destructive" onClick={handleCancelAllJobs}>Cancel All Jobs</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Retry Failed Jobs Dialog */}
+      <Dialog open={showRetryFailedDialog} onOpenChange={setShowRetryFailedDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <RefreshCw className="w-5 h-5 text-purple-600" />
+              Retry Failed Jobs
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <p className="text-gray-600 dark:text-gray-300">This will retry all failed jobs from the last 24 hours.</p>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowRetryFailedDialog(false)}>Cancel</Button>
+              <Button onClick={handleRetryFailedJobs} className="bg-purple-600 hover:bg-purple-700">
+                <RefreshCw className="w-4 h-4 mr-2" />Retry Failed
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Job Details Dialog */}
+      <Dialog open={showJobDetailsDialog} onOpenChange={setShowJobDetailsDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Eye className="w-5 h-5 text-blue-600" />
+              Job Details: {selectedJobForAction?.name}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label className="text-gray-500">Status</Label>
+                <p className="font-medium">{selectedJobForAction?.status}</p>
+              </div>
+              <div>
+                <Label className="text-gray-500">Progress</Label>
+                <p className="font-medium">{selectedJobForAction?.progress}%</p>
+              </div>
+              <div>
+                <Label className="text-gray-500">Records</Label>
+                <p className="font-medium">{selectedJobForAction?.recordsExported.toLocaleString()}</p>
+              </div>
+              <div>
+                <Label className="text-gray-500">Format</Label>
+                <p className="font-medium">{selectedJobForAction?.format.toUpperCase()}</p>
+              </div>
+              <div>
+                <Label className="text-gray-500">Destination</Label>
+                <p className="font-medium">{selectedJobForAction?.destination}</p>
+              </div>
+              <div>
+                <Label className="text-gray-500">Size</Label>
+                <p className="font-medium">{selectedJobForAction?.fileSizeMb} MB</p>
+              </div>
+            </div>
+            <div className="flex justify-end">
+              <Button variant="outline" onClick={() => setShowJobDetailsDialog(false)}>Close</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Transform Dialog */}
+      <Dialog open={showCreateTransformDialog} onOpenChange={setShowCreateTransformDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Zap className="w-5 h-5 text-purple-600" />
+              Create Transform
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Transform Name</Label>
+              <Input placeholder="e.g., Filter Active Users" />
+            </div>
+            <div className="space-y-2">
+              <Label>Transform Type</Label>
+              <Select defaultValue="filter">
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="filter">Filter</SelectItem>
+                  <SelectItem value="map">Map</SelectItem>
+                  <SelectItem value="aggregate">Aggregate</SelectItem>
+                  <SelectItem value="join">Join</SelectItem>
+                  <SelectItem value="dedupe">Dedupe</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Configuration</Label>
+              <textarea className="w-full h-24 p-2 border rounded-md bg-gray-50 dark:bg-gray-800" placeholder="Enter transform configuration..." />
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowCreateTransformDialog(false)}>Cancel</Button>
+              <Button onClick={() => { toast.success('Transform created'); setShowCreateTransformDialog(false); }} className="bg-purple-600 hover:bg-purple-700">Create</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Auto-detect Schema Dialog */}
+      <Dialog open={showAutoDetectSchemaDialog} onOpenChange={setShowAutoDetectSchemaDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <RefreshCw className="w-5 h-5 text-green-600" />
+              Auto-detect Schema
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Select Source</Label>
+              <Select defaultValue={mockDataSources[0]?.id}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {mockDataSources.map(s => (
+                    <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <p className="text-sm text-gray-500">This will scan the source and automatically detect column types and mappings.</p>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowAutoDetectSchemaDialog(false)}>Cancel</Button>
+              <Button onClick={handleAutoDetectSchema} className="bg-green-600 hover:bg-green-700">
+                <RefreshCw className="w-4 h-4 mr-2" />Detect
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Mapping Dialog */}
+      <Dialog open={showAddMappingDialog} onOpenChange={setShowAddMappingDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Plus className="w-5 h-5 text-blue-600" />
+              Add Column Mapping
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Source Column</Label>
+                <Input placeholder="e.g., user_id" />
+              </div>
+              <div className="space-y-2">
+                <Label>Destination Column</Label>
+                <Input placeholder="e.g., UserId" />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Data Type</Label>
+                <Select defaultValue="string">
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="string">STRING</SelectItem>
+                    <SelectItem value="integer">INTEGER</SelectItem>
+                    <SelectItem value="timestamp">TIMESTAMP</SelectItem>
+                    <SelectItem value="boolean">BOOLEAN</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Transformation</Label>
+                <Select defaultValue="none">
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">None</SelectItem>
+                    <SelectItem value="uppercase">UPPERCASE</SelectItem>
+                    <SelectItem value="lowercase">lowercase</SelectItem>
+                    <SelectItem value="trim">TRIM</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowAddMappingDialog(false)}>Cancel</Button>
+              <Button onClick={() => { toast.success('Mapping added'); setShowAddMappingDialog(false); }} className="bg-blue-600 hover:bg-blue-700">Add Mapping</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Destination Dialog */}
+      <Dialog open={showAddDestinationDialog} onOpenChange={setShowAddDestinationDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Plus className="w-5 h-5 text-green-600" />
+              Add Destination
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Destination Type</Label>
+              <Select defaultValue="snowflake">
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="snowflake">Snowflake</SelectItem>
+                  <SelectItem value="bigquery">BigQuery</SelectItem>
+                  <SelectItem value="redshift">Redshift</SelectItem>
+                  <SelectItem value="s3">AWS S3</SelectItem>
+                  <SelectItem value="gcs">Google Cloud Storage</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Connection Name</Label>
+              <Input placeholder="e.g., Analytics Warehouse" />
+            </div>
+            <div className="space-y-2">
+              <Label>Host/Endpoint</Label>
+              <Input placeholder="e.g., account.snowflakecomputing.com" />
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowAddDestinationDialog(false)}>Cancel</Button>
+              <Button onClick={() => { toast.success('Destination added'); setShowAddDestinationDialog(false); }} className="bg-green-600 hover:bg-green-700">
+                <Plus className="w-4 h-4 mr-2" />Add Destination
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* View Destination Dialog */}
+      <Dialog open={showViewDestinationDialog} onOpenChange={setShowViewDestinationDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Eye className="w-5 h-5 text-blue-600" />
+              {selectedDestinationForAction?.name}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label className="text-gray-500">Platform</Label>
+                <p className="font-medium">{selectedDestinationForAction?.platform}</p>
+              </div>
+              <div>
+                <Label className="text-gray-500">Status</Label>
+                <p className="font-medium">{selectedDestinationForAction?.status}</p>
+              </div>
+              <div>
+                <Label className="text-gray-500">Host</Label>
+                <p className="font-medium">{selectedDestinationForAction?.host}</p>
+              </div>
+              <div>
+                <Label className="text-gray-500">Data Volume</Label>
+                <p className="font-medium">{selectedDestinationForAction?.dataVolume}</p>
+              </div>
+              <div>
+                <Label className="text-gray-500">Records Written</Label>
+                <p className="font-medium">{selectedDestinationForAction?.recordsWritten.toLocaleString()}</p>
+              </div>
+              <div>
+                <Label className="text-gray-500">Last Write</Label>
+                <p className="font-medium">{selectedDestinationForAction?.lastWrite && new Date(selectedDestinationForAction.lastWrite).toLocaleString()}</p>
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowViewDestinationDialog(false)}>Close</Button>
+              <Button onClick={() => handleTestDestination(selectedDestinationForAction!)}>Test Connection</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Configure Destination Dialog */}
+      <Dialog open={showDestConfigureDialog} onOpenChange={setShowDestConfigureDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Settings className="w-5 h-5 text-gray-600" />
+              Configure: {selectedDestinationForAction?.name}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Connection Name</Label>
+              <Input defaultValue={selectedDestinationForAction?.name} />
+            </div>
+            <div className="space-y-2">
+              <Label>Host</Label>
+              <Input defaultValue={selectedDestinationForAction?.host} />
+            </div>
+            <div className="space-y-2">
+              <Label>Write Mode</Label>
+              <Select defaultValue="append">
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="append">Append</SelectItem>
+                  <SelectItem value="overwrite">Overwrite</SelectItem>
+                  <SelectItem value="upsert">Upsert</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowDestConfigureDialog(false)}>Cancel</Button>
+              <Button onClick={() => { toast.success('Destination configuration saved'); setShowDestConfigureDialog(false); }}>Save Changes</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* IP Allowlist Dialog */}
+      <Dialog open={showIpAllowlistDialog} onOpenChange={setShowIpAllowlistDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Shield className="w-5 h-5 text-blue-600" />
+              IP Allowlist
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Allowed IP Addresses</Label>
+              <textarea className="w-full h-32 p-2 border rounded-md bg-gray-50 dark:bg-gray-800 text-sm font-mono" placeholder="Enter one IP per line&#10;e.g., 192.168.1.1&#10;10.0.0.0/24" />
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowIpAllowlistDialog(false)}>Cancel</Button>
+              <Button onClick={() => { toast.success('IP allowlist updated'); setShowIpAllowlistDialog(false); }}>Save</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Webhook Configure Dialog */}
+      <Dialog open={showWebhookConfigureDialog} onOpenChange={setShowWebhookConfigureDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Zap className="w-5 h-5 text-purple-600" />
+              Configure Webhook
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Webhook URL</Label>
+              <Input placeholder="https://your-server.com/webhook" />
+            </div>
+            <div className="space-y-2">
+              <Label>Events to Send</Label>
+              <div className="space-y-2">
+                <label className="flex items-center gap-2">
+                  <input type="checkbox" defaultChecked className="rounded" />
+                  <span className="text-sm">Pipeline completed</span>
+                </label>
+                <label className="flex items-center gap-2">
+                  <input type="checkbox" defaultChecked className="rounded" />
+                  <span className="text-sm">Pipeline failed</span>
+                </label>
+                <label className="flex items-center gap-2">
+                  <input type="checkbox" className="rounded" />
+                  <span className="text-sm">Schema changed</span>
+                </label>
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowWebhookConfigureDialog(false)}>Cancel</Button>
+              <Button onClick={() => { toast.success('Webhook configured'); setShowWebhookConfigureDialog(false); }}>Save</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Clear Logs Dialog */}
+      <Dialog open={showClearLogsDialog} onOpenChange={setShowClearLogsDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <HardDrive className="w-5 h-5 text-orange-600" />
+              Clear Job Logs
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <p className="text-gray-600 dark:text-gray-300">This will permanently delete 2.4 GB of job log files. This action cannot be undone.</p>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowClearLogsDialog(false)}>Cancel</Button>
+              <Button variant="destructive" onClick={handleClearLogs}>Clear Logs</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Manage Archived Dialog */}
+      <Dialog open={showManageArchivedDialog} onOpenChange={setShowManageArchivedDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Archive className="w-5 h-5 text-indigo-600" />
+              Manage Archived Data
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-3">
+              {['Export_2024_01_Analytics.zip', 'Export_2024_02_Users.zip', 'Export_2024_03_Orders.zip'].map((file, i) => (
+                <div key={i} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <Archive className="w-4 h-4 text-gray-400" />
+                    <div>
+                      <p className="font-medium">{file}</p>
+                      <p className="text-xs text-gray-500">{(5 + i * 2).toFixed(1)} GB</p>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm"><Download className="w-4 h-4" /></Button>
+                    <Button variant="outline" size="sm" className="text-red-600"><Trash2 className="w-4 h-4" /></Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="flex justify-end">
+              <Button variant="outline" onClick={() => setShowManageArchivedDialog(false)}>Close</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Purge Cache Dialog */}
+      <Dialog open={showPurgeCacheDialog} onOpenChange={setShowPurgeCacheDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Database className="w-5 h-5 text-yellow-600" />
+              Purge Cache
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <p className="text-gray-600 dark:text-gray-300">This will clear 890 MB of cached schemas. Subsequent operations may be slower until the cache rebuilds.</p>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowPurgeCacheDialog(false)}>Cancel</Button>
+              <Button onClick={handlePurgeCache} className="bg-yellow-600 hover:bg-yellow-700">Purge Cache</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Reset Pipelines Dialog */}
+      <Dialog open={showResetPipelinesDialog} onOpenChange={setShowResetPipelinesDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-600">
+              <AlertTriangle className="w-5 h-5" />
+              Reset All Pipelines
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <p className="text-gray-600 dark:text-gray-300">This will delete ALL pipeline configurations. This action is irreversible.</p>
+            <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
+              <p className="text-sm text-red-700 dark:text-red-300">{mockPipelines.length} pipelines will be deleted</p>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowResetPipelinesDialog(false)}>Cancel</Button>
+              <Button variant="destructive" onClick={handleResetPipelines}>Reset All</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete All Data Dialog */}
+      <Dialog open={showDeleteAllDataDialog} onOpenChange={setShowDeleteAllDataDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-600">
+              <AlertTriangle className="w-5 h-5" />
+              Delete All Data
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <p className="text-gray-600 dark:text-gray-300">This will permanently delete ALL exported data. This cannot be undone.</p>
+            <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
+              <p className="text-sm text-red-700 dark:text-red-300">3.4 TB of data will be deleted</p>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowDeleteAllDataDialog(false)}>Cancel</Button>
+              <Button variant="destructive" onClick={handleDeleteAllData}>Delete All</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Disconnect All Sources Dialog */}
+      <Dialog open={showDisconnectAllDialog} onOpenChange={setShowDisconnectAllDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-600">
+              <AlertTriangle className="w-5 h-5" />
+              Disconnect All Sources
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <p className="text-gray-600 dark:text-gray-300">This will remove all data source connections. You will need to reconnect them manually.</p>
+            <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
+              <p className="text-sm text-red-700 dark:text-red-300">{mockDataSources.length} sources will be disconnected</p>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowDisconnectAllDialog(false)}>Cancel</Button>
+              <Button variant="destructive" onClick={handleDisconnectAllSources}>Disconnect All</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Generic placeholder dialogs for less-used features */}
+      <Dialog open={showDatabasesDialog} onOpenChange={setShowDatabasesDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader><DialogTitle>Database Connections</DialogTitle></DialogHeader>
+          <div className="py-4">
+            <p className="text-gray-600 dark:text-gray-300">View and manage your database connections.</p>
+            <div className="space-y-2 mt-4">
+              {mockDataSources.filter(s => s.type.includes('SQL') || s.type === 'MongoDB').map(s => (
+                <div key={s.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <span>{s.name}</span>
+                  <Badge className={getSourceStatusColor(s.status)}>{s.status}</Badge>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="flex justify-end"><Button variant="outline" onClick={() => setShowDatabasesDialog(false)}>Close</Button></div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showSaasDialog} onOpenChange={setShowSaasDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader><DialogTitle>SaaS Integrations</DialogTitle></DialogHeader>
+          <div className="py-4">
+            <p className="text-gray-600 dark:text-gray-300">Connect to your SaaS applications.</p>
+            <div className="grid grid-cols-2 gap-3 mt-4">
+              {['Salesforce', 'HubSpot', 'Stripe', 'Zendesk'].map(app => (
+                <div key={app} className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700">
+                  <p className="font-medium">{app}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="flex justify-end"><Button variant="outline" onClick={() => setShowSaasDialog(false)}>Close</Button></div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showApisDialog} onOpenChange={setShowApisDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader><DialogTitle>API Connections</DialogTitle></DialogHeader>
+          <div className="py-4">
+            <p className="text-gray-600 dark:text-gray-300">Configure REST API endpoints as data sources.</p>
+            <Button className="w-full mt-4" onClick={() => { setShowApisDialog(false); setShowAddSourceDialog(true); }}>
+              <Plus className="w-4 h-4 mr-2" />Add API Source
+            </Button>
+          </div>
+          <div className="flex justify-end"><Button variant="outline" onClick={() => setShowApisDialog(false)}>Close</Button></div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showFilesDialog} onOpenChange={setShowFilesDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader><DialogTitle>File Sources</DialogTitle></DialogHeader>
+          <div className="py-4">
+            <p className="text-gray-600 dark:text-gray-300">Import data from CSV, JSON, or Parquet files.</p>
+            <div className="mt-4 p-8 border-2 border-dashed rounded-lg text-center">
+              <Upload className="w-8 h-8 mx-auto text-gray-400 mb-2" />
+              <p className="text-sm text-gray-500">Drag and drop files here</p>
+            </div>
+          </div>
+          <div className="flex justify-end"><Button variant="outline" onClick={() => setShowFilesDialog(false)}>Close</Button></div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showCredentialsDialog} onOpenChange={setShowCredentialsDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader><DialogTitle>Credentials Manager</DialogTitle></DialogHeader>
+          <div className="py-4">
+            <p className="text-gray-600 dark:text-gray-300">Manage your stored credentials securely.</p>
+            <div className="space-y-2 mt-4">
+              {['PostgreSQL - Production', 'MongoDB - Analytics', 'Snowflake - DW'].map((cred, i) => (
+                <div key={i} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <Key className="w-4 h-4 text-gray-400" />
+                    <span>{cred}</span>
+                  </div>
+                  <Button variant="ghost" size="sm"><Settings className="w-4 h-4" /></Button>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="flex justify-end"><Button variant="outline" onClick={() => setShowCredentialsDialog(false)}>Close</Button></div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showNewJobDialog} onOpenChange={setShowNewJobDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader><DialogTitle>Create New Job</DialogTitle></DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Job Name</Label>
+              <Input placeholder="e.g., Daily User Export" />
+            </div>
+            <div className="space-y-2">
+              <Label>Pipeline</Label>
+              <Select defaultValue={mockPipelines[0]?.id}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {mockPipelines.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowNewJobDialog(false)}>Cancel</Button>
+              <Button onClick={() => { toast.success('Job created'); setShowNewJobDialog(false); }}>Create Job</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showRunNowDialog} onOpenChange={setShowRunNowDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader><DialogTitle>Run Job Now</DialogTitle></DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Select Job</Label>
+              <Select>
+                <SelectTrigger><SelectValue placeholder="Select a job" /></SelectTrigger>
+                <SelectContent>
+                  {mockExportJobs.map(j => <SelectItem key={j.id} value={j.id}>{j.name}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowRunNowDialog(false)}>Cancel</Button>
+              <Button onClick={() => { toast.success('Job started'); setShowRunNowDialog(false); }} className="bg-blue-600 hover:bg-blue-700">Run Now</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showPauseJobsDialog} onOpenChange={setShowPauseJobsDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader><DialogTitle>Pause Jobs</DialogTitle></DialogHeader>
+          <div className="space-y-4 py-4">
+            <p className="text-gray-600 dark:text-gray-300">Pause all running jobs temporarily.</p>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowPauseJobsDialog(false)}>Cancel</Button>
+              <Button onClick={() => { toast.success('Jobs paused'); setShowPauseJobsDialog(false); }} className="bg-orange-600 hover:bg-orange-700">Pause All</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showDownloadJobsDialog} onOpenChange={setShowDownloadJobsDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader><DialogTitle>Download Jobs</DialogTitle></DialogHeader>
+          <div className="space-y-4 py-4">
+            <p className="text-gray-600 dark:text-gray-300">Download completed job exports.</p>
+            <div className="space-y-2">
+              {mockExportJobs.filter(j => j.status === 'completed').map(j => (
+                <div key={j.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <span>{j.name}</span>
+                  <Button size="sm"><Download className="w-4 h-4" /></Button>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="flex justify-end"><Button variant="outline" onClick={() => setShowDownloadJobsDialog(false)}>Close</Button></div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showJobHistoryTabDialog} onOpenChange={setShowJobHistoryTabDialog}>
+        <DialogContent className="max-w-3xl"><DialogHeader><DialogTitle>Job History</DialogTitle></DialogHeader>
+          <ScrollArea className="h-[400px]">
+            <div className="space-y-2 py-4">
+              {mockAuditLogs.filter(l => l.action === 'run').map(log => (
+                <div key={log.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div><p className="font-medium">{log.resource}</p><p className="text-sm text-gray-500">{log.details}</p></div>
+                  <Badge variant="outline" className={log.status === 'success' ? 'text-green-600' : 'text-red-600'}>{log.status}</Badge>
+                </div>
+              ))}
+            </div>
+          </ScrollArea>
+          <div className="flex justify-end"><Button variant="outline" onClick={() => setShowJobHistoryTabDialog(false)}>Close</Button></div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showJobFilterDialog} onOpenChange={setShowJobFilterDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader><DialogTitle>Filter Jobs</DialogTitle></DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Status</Label>
+              <Select defaultValue="all"><SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All</SelectItem>
+                  <SelectItem value="running">Running</SelectItem>
+                  <SelectItem value="completed">Completed</SelectItem>
+                  <SelectItem value="failed">Failed</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowJobFilterDialog(false)}>Cancel</Button>
+              <Button onClick={() => { toast.success('Filters applied'); setShowJobFilterDialog(false); }}>Apply</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Transform Dialogs */}
+      <Dialog open={showFilterTransformDialog} onOpenChange={setShowFilterTransformDialog}>
+        <DialogContent className="max-w-md"><DialogHeader><DialogTitle>Filter Transform</DialogTitle></DialogHeader>
+          <div className="py-4"><p className="text-gray-600">Create a filter to include/exclude records based on conditions.</p>
+            <div className="space-y-2 mt-4">
+              <Label>Field</Label><Input placeholder="e.g., status" />
+              <Label>Condition</Label>
+              <Select defaultValue="equals"><SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent><SelectItem value="equals">Equals</SelectItem><SelectItem value="contains">Contains</SelectItem><SelectItem value="gt">Greater Than</SelectItem></SelectContent>
+              </Select>
+              <Label>Value</Label><Input placeholder="e.g., active" />
+            </div>
+          </div>
+          <div className="flex justify-end gap-2"><Button variant="outline" onClick={() => setShowFilterTransformDialog(false)}>Cancel</Button><Button onClick={() => { toast.success('Filter created'); setShowFilterTransformDialog(false); }}>Create</Button></div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showMapTransformDialog} onOpenChange={setShowMapTransformDialog}>
+        <DialogContent className="max-w-md"><DialogHeader><DialogTitle>Map Transform</DialogTitle></DialogHeader>
+          <div className="py-4"><p className="text-gray-600">Map and rename columns between source and destination.</p></div>
+          <div className="flex justify-end"><Button variant="outline" onClick={() => setShowMapTransformDialog(false)}>Close</Button></div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showAggregateTransformDialog} onOpenChange={setShowAggregateTransformDialog}>
+        <DialogContent className="max-w-md"><DialogHeader><DialogTitle>Aggregate Transform</DialogTitle></DialogHeader>
+          <div className="py-4"><p className="text-gray-600">Group and aggregate data using functions like SUM, COUNT, AVG.</p></div>
+          <div className="flex justify-end"><Button variant="outline" onClick={() => setShowAggregateTransformDialog(false)}>Close</Button></div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showJoinTransformDialog} onOpenChange={setShowJoinTransformDialog}>
+        <DialogContent className="max-w-md"><DialogHeader><DialogTitle>Join Transform</DialogTitle></DialogHeader>
+          <div className="py-4"><p className="text-gray-600">Join data from multiple sources based on common keys.</p></div>
+          <div className="flex justify-end"><Button variant="outline" onClick={() => setShowJoinTransformDialog(false)}>Close</Button></div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showDedupeTransformDialog} onOpenChange={setShowDedupeTransformDialog}>
+        <DialogContent className="max-w-md"><DialogHeader><DialogTitle>Dedupe Transform</DialogTitle></DialogHeader>
+          <div className="py-4"><p className="text-gray-600">Remove duplicate records based on specified columns.</p></div>
+          <div className="flex justify-end"><Button variant="outline" onClick={() => setShowDedupeTransformDialog(false)}>Close</Button></div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showCustomSqlDialog} onOpenChange={setShowCustomSqlDialog}>
+        <DialogContent className="max-w-lg"><DialogHeader><DialogTitle>Custom SQL Transform</DialogTitle></DialogHeader>
+          <div className="py-4">
+            <Label>SQL Query</Label>
+            <textarea className="w-full h-32 p-2 border rounded-md bg-gray-50 dark:bg-gray-800 font-mono text-sm mt-2" placeholder="SELECT * FROM source WHERE..." />
+          </div>
+          <div className="flex justify-end gap-2"><Button variant="outline" onClick={() => setShowCustomSqlDialog(false)}>Cancel</Button><Button onClick={() => { toast.success('SQL transform created'); setShowCustomSqlDialog(false); }}>Create</Button></div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showPreviewTransformDialog} onOpenChange={setShowPreviewTransformDialog}>
+        <DialogContent className="max-w-3xl"><DialogHeader><DialogTitle>Transform Preview</DialogTitle></DialogHeader>
+          <div className="py-4"><p className="text-gray-600">Preview how your transforms affect the data.</p>
+            <div className="mt-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+              <p className="text-sm text-gray-500">Sample output will appear here after running transforms.</p>
+            </div>
+          </div>
+          <div className="flex justify-end"><Button variant="outline" onClick={() => setShowPreviewTransformDialog(false)}>Close</Button></div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Schema Dialogs */}
+      <Dialog open={showAddColumnDialog} onOpenChange={setShowAddColumnDialog}>
+        <DialogContent className="max-w-md"><DialogHeader><DialogTitle>Add Column</DialogTitle></DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2"><Label>Column Name</Label><Input placeholder="e.g., new_column" /></div>
+            <div className="space-y-2"><Label>Data Type</Label>
+              <Select defaultValue="string"><SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent><SelectItem value="string">STRING</SelectItem><SelectItem value="integer">INTEGER</SelectItem><SelectItem value="timestamp">TIMESTAMP</SelectItem></SelectContent>
+              </Select>
+            </div>
+          </div>
+          <div className="flex justify-end gap-2"><Button variant="outline" onClick={() => setShowAddColumnDialog(false)}>Cancel</Button><Button onClick={() => { toast.success('Column added'); setShowAddColumnDialog(false); }}>Add</Button></div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showViewSchemaDialog} onOpenChange={setShowViewSchemaDialog}>
+        <DialogContent className="max-w-3xl"><DialogHeader><DialogTitle>View Schema</DialogTitle></DialogHeader>
+          <ScrollArea className="h-[400px] py-4">
+            <div className="space-y-2">
+              {mockSchemaMappings.map((m, i) => (
+                <div key={i} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <code className="text-sm">{m.sourceColumn}</code>
+                  <ArrowRight className="w-4 h-4 text-gray-400" />
+                  <code className="text-sm text-blue-600">{m.destinationColumn}</code>
+                  <Badge variant="outline">{m.destinationType}</Badge>
+                </div>
+              ))}
+            </div>
+          </ScrollArea>
+          <div className="flex justify-end"><Button variant="outline" onClick={() => setShowViewSchemaDialog(false)}>Close</Button></div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showMapAllDialog} onOpenChange={setShowMapAllDialog}>
+        <DialogContent className="max-w-md"><DialogHeader><DialogTitle>Map All Columns</DialogTitle></DialogHeader>
+          <div className="py-4"><p className="text-gray-600">Automatically map all source columns to destination using naming conventions.</p></div>
+          <div className="flex justify-end gap-2"><Button variant="outline" onClick={() => setShowMapAllDialog(false)}>Cancel</Button><Button onClick={() => { toast.success('All columns mapped'); setShowMapAllDialog(false); }}>Map All</Button></div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showSchemaTransformDialog} onOpenChange={setShowSchemaTransformDialog}>
+        <DialogContent className="max-w-md"><DialogHeader><DialogTitle>Schema Transform</DialogTitle></DialogHeader>
+          <div className="py-4"><p className="text-gray-600">Apply transformations to schema columns.</p></div>
+          <div className="flex justify-end"><Button variant="outline" onClick={() => setShowSchemaTransformDialog(false)}>Close</Button></div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showExportSchemaDialog} onOpenChange={setShowExportSchemaDialog}>
+        <DialogContent className="max-w-md"><DialogHeader><DialogTitle>Export Schema</DialogTitle></DialogHeader>
+          <div className="py-4"><p className="text-gray-600">Export schema definition as JSON or DDL.</p></div>
+          <div className="flex justify-end gap-2"><Button variant="outline" onClick={() => setShowExportSchemaDialog(false)}>Cancel</Button><Button onClick={() => { toast.success('Schema exported'); setShowExportSchemaDialog(false); }}>Export</Button></div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showSchemaHistoryDialog} onOpenChange={setShowSchemaHistoryDialog}>
+        <DialogContent className="max-w-3xl"><DialogHeader><DialogTitle>Schema History</DialogTitle></DialogHeader>
+          <div className="py-4"><p className="text-gray-600">View schema change history and versions.</p></div>
+          <div className="flex justify-end"><Button variant="outline" onClick={() => setShowSchemaHistoryDialog(false)}>Close</Button></div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showSchemaPreviewDialog} onOpenChange={setShowSchemaPreviewDialog}>
+        <DialogContent className="max-w-3xl"><DialogHeader><DialogTitle>Schema Preview</DialogTitle></DialogHeader>
+          <div className="py-4"><p className="text-gray-600">Preview data with current schema mappings.</p></div>
+          <div className="flex justify-end"><Button variant="outline" onClick={() => setShowSchemaPreviewDialog(false)}>Close</Button></div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showEditMappingDialog} onOpenChange={setShowEditMappingDialog}>
+        <DialogContent className="max-w-md"><DialogHeader><DialogTitle>Edit Mapping</DialogTitle></DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2"><Label>Source Column</Label><Input defaultValue={mockSchemaMappings[selectedMappingIndex || 0]?.sourceColumn} /></div>
+            <div className="space-y-2"><Label>Destination Column</Label><Input defaultValue={mockSchemaMappings[selectedMappingIndex || 0]?.destinationColumn} /></div>
+          </div>
+          <div className="flex justify-end gap-2"><Button variant="outline" onClick={() => setShowEditMappingDialog(false)}>Cancel</Button><Button onClick={() => { toast.success('Mapping updated'); setShowEditMappingDialog(false); }}>Save</Button></div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Monitoring Dialogs */}
+      <Dialog open={showDashboardDialog} onOpenChange={setShowDashboardDialog}>
+        <DialogContent className="max-w-3xl"><DialogHeader><DialogTitle>Monitoring Dashboard</DialogTitle></DialogHeader>
+          <div className="py-4"><p className="text-gray-600">View comprehensive pipeline metrics and charts.</p>
+            <div className="grid grid-cols-3 gap-4 mt-4">
+              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center"><p className="text-2xl font-bold">{stats.successRate.toFixed(1)}%</p><p className="text-sm text-gray-500">Success Rate</p></div>
+              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center"><p className="text-2xl font-bold">{stats.runningJobs}</p><p className="text-sm text-gray-500">Running Jobs</p></div>
+              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center"><p className="text-2xl font-bold">{stats.totalErrors}</p><p className="text-sm text-gray-500">Errors Today</p></div>
+            </div>
+          </div>
+          <div className="flex justify-end"><Button variant="outline" onClick={() => setShowDashboardDialog(false)}>Close</Button></div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showAlertsDialog} onOpenChange={setShowAlertsDialog}>
+        <DialogContent className="max-w-lg"><DialogHeader><DialogTitle>Alerts</DialogTitle></DialogHeader>
+          <div className="py-4">
+            <div className="space-y-3">
+              <div className="p-3 bg-red-50 dark:bg-red-900/20 rounded-lg"><p className="font-medium text-red-700">Pipeline Failed</p><p className="text-sm text-red-600">Customer Sync - 2 hours ago</p></div>
+              <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg"><p className="font-medium text-yellow-700">High Latency</p><p className="text-sm text-yellow-600">Analytics Pipeline - 5 hours ago</p></div>
+            </div>
+          </div>
+          <div className="flex justify-end"><Button variant="outline" onClick={() => setShowAlertsDialog(false)}>Close</Button></div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showMetricsDialog} onOpenChange={setShowMetricsDialog}>
+        <DialogContent className="max-w-3xl"><DialogHeader><DialogTitle>Metrics</DialogTitle></DialogHeader>
+          <div className="py-4"><p className="text-gray-600">Detailed performance metrics for all pipelines.</p></div>
+          <div className="flex justify-end"><Button variant="outline" onClick={() => setShowMetricsDialog(false)}>Close</Button></div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showMonitoringHistoryDialog} onOpenChange={setShowMonitoringHistoryDialog}>
+        <DialogContent className="max-w-3xl"><DialogHeader><DialogTitle>Monitoring History</DialogTitle></DialogHeader>
+          <div className="py-4"><p className="text-gray-600">Historical monitoring data and trends.</p></div>
+          <div className="flex justify-end"><Button variant="outline" onClick={() => setShowMonitoringHistoryDialog(false)}>Close</Button></div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showExportMonitoringDialog} onOpenChange={setShowExportMonitoringDialog}>
+        <DialogContent className="max-w-md"><DialogHeader><DialogTitle>Export Monitoring Report</DialogTitle></DialogHeader>
+          <div className="py-4"><p className="text-gray-600">Export monitoring data as a report.</p></div>
+          <div className="flex justify-end gap-2"><Button variant="outline" onClick={() => setShowExportMonitoringDialog(false)}>Cancel</Button><Button onClick={handleExportMonitoringReport}>Export</Button></div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showHealthDialog} onOpenChange={setShowHealthDialog}>
+        <DialogContent className="max-w-lg"><DialogHeader><DialogTitle>System Health</DialogTitle></DialogHeader>
+          <div className="py-4">
+            <div className="space-y-3">
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <span>API Gateway</span><Badge className="bg-green-100 text-green-700">Healthy</Badge>
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <span>Database</span><Badge className="bg-green-100 text-green-700">Healthy</Badge>
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <span>Queue</span><Badge className="bg-green-100 text-green-700">Healthy</Badge>
+              </div>
+            </div>
+          </div>
+          <div className="flex justify-end"><Button variant="outline" onClick={() => setShowHealthDialog(false)}>Close</Button></div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showMonitoringConfigureDialog} onOpenChange={setShowMonitoringConfigureDialog}>
+        <DialogContent className="max-w-md"><DialogHeader><DialogTitle>Configure Monitoring</DialogTitle></DialogHeader>
+          <div className="py-4"><p className="text-gray-600">Configure monitoring thresholds and alerts.</p></div>
+          <div className="flex justify-end"><Button variant="outline" onClick={() => setShowMonitoringConfigureDialog(false)}>Close</Button></div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Destination Dialogs */}
+      <Dialog open={showWarehousesDialog} onOpenChange={setShowWarehousesDialog}>
+        <DialogContent className="max-w-lg"><DialogHeader><DialogTitle>Data Warehouses</DialogTitle></DialogHeader>
+          <div className="py-4">
+            <div className="grid grid-cols-2 gap-3">
+              {['Snowflake', 'BigQuery', 'Redshift', 'Databricks'].map(wh => (
+                <div key={wh} className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700">
+                  <Cloud className="w-8 h-8 mx-auto text-blue-500 mb-2" /><p className="font-medium">{wh}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="flex justify-end"><Button variant="outline" onClick={() => setShowWarehousesDialog(false)}>Close</Button></div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showLakesDialog} onOpenChange={setShowLakesDialog}>
+        <DialogContent className="max-w-lg"><DialogHeader><DialogTitle>Data Lakes</DialogTitle></DialogHeader>
+          <div className="py-4">
+            <div className="grid grid-cols-2 gap-3">
+              {['AWS S3', 'Google Cloud Storage', 'Azure Blob', 'Delta Lake'].map(lake => (
+                <div key={lake} className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700">
+                  <Server className="w-8 h-8 mx-auto text-purple-500 mb-2" /><p className="font-medium">{lake}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="flex justify-end"><Button variant="outline" onClick={() => setShowLakesDialog(false)}>Close</Button></div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showStreamsDialog} onOpenChange={setShowStreamsDialog}>
+        <DialogContent className="max-w-lg"><DialogHeader><DialogTitle>Streaming Destinations</DialogTitle></DialogHeader>
+          <div className="py-4">
+            <div className="grid grid-cols-2 gap-3">
+              {['Kafka', 'Kinesis', 'Pub/Sub', 'EventHub'].map(stream => (
+                <div key={stream} className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700">
+                  <Zap className="w-8 h-8 mx-auto text-orange-500 mb-2" /><p className="font-medium">{stream}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="flex justify-end"><Button variant="outline" onClick={() => setShowStreamsDialog(false)}>Close</Button></div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showDestApisDialog} onOpenChange={setShowDestApisDialog}>
+        <DialogContent className="max-w-md"><DialogHeader><DialogTitle>API Destinations</DialogTitle></DialogHeader>
+          <div className="py-4"><p className="text-gray-600">Send data to REST API endpoints.</p></div>
+          <div className="flex justify-end"><Button variant="outline" onClick={() => setShowDestApisDialog(false)}>Close</Button></div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showDestFilesDialog} onOpenChange={setShowDestFilesDialog}>
+        <DialogContent className="max-w-md"><DialogHeader><DialogTitle>File Destinations</DialogTitle></DialogHeader>
+          <div className="py-4"><p className="text-gray-600">Export data to CSV, JSON, or Parquet files.</p></div>
+          <div className="flex justify-end"><Button variant="outline" onClick={() => setShowDestFilesDialog(false)}>Close</Button></div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showTestDestinationDialog} onOpenChange={setShowTestDestinationDialog}>
+        <DialogContent className="max-w-md"><DialogHeader><DialogTitle>Test Destination</DialogTitle></DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Select Destination</Label>
+              <Select><SelectTrigger><SelectValue placeholder="Select destination" /></SelectTrigger>
+                <SelectContent>{mockDestinations.map(d => <SelectItem key={d.id} value={d.id}>{d.name}</SelectItem>)}</SelectContent>
+              </Select>
+            </div>
+          </div>
+          <div className="flex justify-end gap-2"><Button variant="outline" onClick={() => setShowTestDestinationDialog(false)}>Cancel</Button><Button onClick={() => { toast.success('Connection test successful'); setShowTestDestinationDialog(false); }}>Test Connection</Button></div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showIntegrationFilterDialog} onOpenChange={setShowIntegrationFilterDialog}>
+        <DialogContent className="max-w-md"><DialogHeader><DialogTitle>Filter Integrations</DialogTitle></DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Category</Label>
+              <Select defaultValue="all"><SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent><SelectItem value="all">All</SelectItem><SelectItem value="analytics">Analytics</SelectItem><SelectItem value="marketing">Marketing</SelectItem><SelectItem value="crm">CRM</SelectItem></SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Status</Label>
+              <Select defaultValue="all"><SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent><SelectItem value="all">All</SelectItem><SelectItem value="enabled">Enabled</SelectItem><SelectItem value="disabled">Disabled</SelectItem></SelectContent>
+              </Select>
+            </div>
+          </div>
+          <div className="flex justify-end gap-2"><Button variant="outline" onClick={() => setShowIntegrationFilterDialog(false)}>Cancel</Button><Button onClick={() => { toast.success('Filters applied'); setShowIntegrationFilterDialog(false); }}>Apply</Button></div>
         </DialogContent>
       </Dialog>
     </div>

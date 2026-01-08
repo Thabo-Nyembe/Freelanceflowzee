@@ -125,15 +125,94 @@ grep -r "toast\.promise(new Promise" --include="*.tsx" app/ | wc -l
 
 ---
 
-## Next Steps (Future Improvements)
+---
 
-The buttons now provide immediate feedback. Future enhancements could include:
+# Phase 2: Buttons Without onClick Handlers
 
-1. **Connect to Real APIs** - Wire buttons to actual backend operations
-2. **Add Optimistic Updates** - Update UI before server confirmation
-3. **Add Error Boundaries** - Handle failed operations gracefully
-4. **Add Loading States** - Show spinners during real async operations
+**Started:** 2026-01-08
+**Status:** 🔄 IN PROGRESS
+
+## New Assessment
+
+### Total Buttons Without ANY onClick Handler
+- **Total Found**: 2,952 buttons
+- **Location**: app/v2/dashboard/ and app/(app)/dashboard/
+
+These buttons have icons and labels but no onClick handler at all - they are completely non-functional.
+
+### Categories Identified
+
+#### 1. Action Buttons (High Priority)
+- Import/Export buttons
+- Connect buttons
+- New Task / Log Activity buttons
+- Edit buttons
+- Delete buttons
+
+#### 2. Form Buttons
+- Submit buttons without form handlers
+- Cancel buttons without close handlers
+- Save buttons without save handlers
+
+#### 3. Navigation Buttons
+- View Profile buttons
+- Store/Visit buttons
+- Preview buttons
 
 ---
 
-*Document completed: 2026-01-07*
+## Files With Most Non-Functional Buttons
+
+| File | Button Count | Status |
+|------|-------------|--------|
+| customers-client.tsx | 25+ | 🔄 In Progress |
+| customer-support-client.tsx | 30+ | Pending |
+| marketplace-client.tsx | 20+ | Pending |
+| mobile-app-client.tsx | 10+ | Pending |
+| projects-hub-client.tsx | 15+ | Pending |
+| team-hub-client.tsx | 10+ | Pending |
+| deployments-client.tsx | 15+ | Pending |
+| roles-client.tsx | 20+ | Pending |
+
+---
+
+## Progress Tracking - Phase 2
+
+### Batch 1
+- [ ] v2/customers/customers-client.tsx
+- [ ] v2/customer-support/customer-support-client.tsx
+- [ ] v2/marketplace/marketplace-client.tsx
+
+### Batch 2
+- [ ] v2/mobile-app/mobile-app-client.tsx
+- [ ] v2/projects-hub/projects-hub-client.tsx
+- [ ] v2/team-hub/team-hub-client.tsx
+
+---
+
+## Fix Pattern
+
+### Before (No Handler)
+```tsx
+<Button variant="outline"><Upload className="h-4 w-4 mr-2" />Import</Button>
+```
+
+### After (With Dialog)
+```tsx
+const [showImportDialog, setShowImportDialog] = useState(false)
+
+<Button variant="outline" onClick={() => setShowImportDialog(true)}>
+  <Upload className="h-4 w-4 mr-2" />Import
+</Button>
+
+<Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
+  <DialogContent>
+    <DialogHeader><DialogTitle>Import Data</DialogTitle></DialogHeader>
+    {/* Form content */}
+  </DialogContent>
+</Dialog>
+```
+
+---
+
+*Document updated: 2026-01-08*

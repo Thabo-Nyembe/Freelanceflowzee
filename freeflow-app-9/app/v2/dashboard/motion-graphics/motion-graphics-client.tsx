@@ -534,6 +534,25 @@ export default function MotionGraphicsClient({
   const [showAssetsDialog, setShowAssetsDialog] = useState(false)
   const [showTemplatesDialog, setShowTemplatesDialog] = useState(false)
 
+  // Additional dialog states
+  const [showSettingsDialog, setShowSettingsDialog] = useState(false)
+  const [showAddLayerDialog, setShowAddLayerDialog] = useState(false)
+  const [showAddEffectDialog, setShowAddEffectDialog] = useState(false)
+  const [showExportAnalyticsDialog, setShowExportAnalyticsDialog] = useState(false)
+  const [showExportConfigDialog, setShowExportConfigDialog] = useState(false)
+  const [showClearCacheDialog, setShowClearCacheDialog] = useState(false)
+  const [showResetSettingsDialog, setShowResetSettingsDialog] = useState(false)
+  const [showDeleteAllProjectsDialog, setShowDeleteAllProjectsDialog] = useState(false)
+  const [showShareDialog, setShowShareDialog] = useState(false)
+  const [showEditProjectDialog, setShowEditProjectDialog] = useState(false)
+
+  // Timeline state
+  const [isMuted, setIsMuted] = useState(false)
+  const [isFullscreen, setIsFullscreen] = useState(false)
+  const [layers, setLayers] = useState(mockLayers)
+  const [assetFilter, setAssetFilter] = useState('All')
+  const [templateCategory, setTemplateCategory] = useState('All')
+
   // Quick actions with proper dialog handlers
   const motionGraphicsQuickActions = [
     { id: '1', label: 'New Project', icon: 'Film', shortcut: 'N', action: () => setShowNewProjectDialog(true) },
@@ -822,6 +841,153 @@ export default function MotionGraphicsClient({
     })
   }
 
+  // Timeline control handlers
+  const handleSkipBack = () => {
+    setCurrentTime(0)
+    toast.info('Skipped to beginning')
+  }
+
+  const handleRewind = () => {
+    setCurrentTime(Math.max(0, currentTime - 1))
+  }
+
+  const handleFastForward = () => {
+    setCurrentTime(Math.min(8.5, currentTime + 1))
+  }
+
+  const handleSkipForward = () => {
+    setCurrentTime(8.5)
+    toast.info('Skipped to end')
+  }
+
+  const handleToggleMute = () => {
+    setIsMuted(!isMuted)
+    toast.info(isMuted ? 'Audio unmuted' : 'Audio muted')
+  }
+
+  const handleToggleFullscreen = () => {
+    setIsFullscreen(!isFullscreen)
+    toast.info(isFullscreen ? 'Exited fullscreen' : 'Entered fullscreen')
+  }
+
+  // Layer handlers
+  const handleToggleLayerVisibility = (layerId: string) => {
+    setLayers(layers.map(l =>
+      l.id === layerId ? { ...l, visible: !l.visible } : l
+    ))
+    const layer = layers.find(l => l.id === layerId)
+    toast.info(layer?.visible ? `${layer.name} hidden` : `${layer?.name} visible`)
+  }
+
+  const handleToggleLayerLock = (layerId: string) => {
+    setLayers(layers.map(l =>
+      l.id === layerId ? { ...l, locked: !l.locked } : l
+    ))
+    const layer = layers.find(l => l.id === layerId)
+    toast.info(layer?.locked ? `${layer.name} unlocked` : `${layer?.name} locked`)
+  }
+
+  // Effect handlers
+  const handleApplyEffect = (effectName: string) => {
+    toast.success(`${effectName} applied`, {
+      description: 'Effect added to selected layer'
+    })
+  }
+
+  // Render queue handlers
+  const handleStartRenderJob = (jobId: string) => {
+    toast.info('Render started', {
+      description: 'Job added to active queue'
+    })
+  }
+
+  const handlePauseRenderJob = (jobId: string) => {
+    toast.info('Render paused', {
+      description: 'Job paused - resume when ready'
+    })
+  }
+
+  const handleDownloadRender = (job: RenderJob) => {
+    toast.success('Download started', {
+      description: `Downloading ${job.animationTitle}`
+    })
+  }
+
+  const handleDeleteRenderJob = (jobId: string) => {
+    toast.success('Job removed from queue')
+  }
+
+  const handleStartAllRenders = () => {
+    toast.success('All renders started', {
+      description: 'Processing queue...'
+    })
+  }
+
+  // Export handlers
+  const handleExportAnalytics = () => {
+    toast.success('Analytics exported', {
+      description: 'CSV file downloaded'
+    })
+    setShowExportAnalyticsDialog(false)
+  }
+
+  const handleExportConfig = () => {
+    toast.success('Configuration exported', {
+      description: 'Settings file downloaded'
+    })
+    setShowExportConfigDialog(false)
+  }
+
+  // Settings handlers
+  const handleClearCache = () => {
+    toast.success('Cache cleared', {
+      description: '12.4 GB freed'
+    })
+    setShowClearCacheDialog(false)
+  }
+
+  const handleRegenerateApiKey = () => {
+    toast.success('API key regenerated', {
+      description: 'New key is now active'
+    })
+  }
+
+  const handleResetSettings = () => {
+    toast.success('Settings reset', {
+      description: 'All settings restored to defaults'
+    })
+    setShowResetSettingsDialog(false)
+  }
+
+  const handleDeleteAllProjects = () => {
+    toast.success('All projects deleted', {
+      description: 'Project data has been removed'
+    })
+    setShowDeleteAllProjectsDialog(false)
+  }
+
+  // Asset handlers
+  const handleUploadAsset = () => {
+    toast.success('Asset upload started', {
+      description: 'Select files to upload'
+    })
+  }
+
+  const handleAddAssetToProject = () => {
+    toast.success('Asset added to project', {
+      description: 'Asset is now available in timeline'
+    })
+    setShowAssetsDialog(false)
+  }
+
+  // Share handler
+  const handleShare = () => {
+    toast.success('Share link copied', {
+      description: 'Link copied to clipboard'
+    })
+    setShowShareDialog(false)
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-blue-50/30 to-indigo-50/40 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900 dark:bg-none dark:bg-gray-900 p-6">
       <div className="max-w-[1800px] mx-auto space-y-6">
@@ -837,7 +1003,7 @@ export default function MotionGraphicsClient({
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={() => setActiveTab('settings')}>
               <Settings className="w-4 h-4 mr-2" />
               Settings
             </Button>
@@ -935,16 +1101,16 @@ export default function MotionGraphicsClient({
             {/* Quick Actions */}
             <div className="grid grid-cols-4 gap-4">
               {[
-                { icon: Plus, label: 'New Project', desc: 'Start fresh', color: 'text-cyan-500' },
-                { icon: Wand2, label: 'AI Animate', desc: 'Auto-create', color: 'text-purple-500' },
-                { icon: LayoutTemplate, label: 'Templates', desc: 'Start fast', color: 'text-blue-500' },
-                { icon: Layers, label: 'Compositions', desc: 'Layer groups', color: 'text-green-500' },
-                { icon: Sparkles, label: 'Effects', desc: 'Add effects', color: 'text-pink-500' },
-                { icon: Type, label: 'Typography', desc: 'Kinetic text', color: 'text-orange-500' },
-                { icon: Camera, label: 'Cameras', desc: '3D cameras', color: 'text-amber-500' },
-                { icon: Clapperboard, label: 'Render', desc: 'Export video', color: 'text-red-500' },
+                { icon: Plus, label: 'New Project', desc: 'Start fresh', color: 'text-cyan-500', action: () => setShowCreateDialog(true) },
+                { icon: Wand2, label: 'AI Animate', desc: 'Auto-create', color: 'text-purple-500', action: () => toast.success('AI Animation', { description: 'AI is generating your animation...' }) },
+                { icon: LayoutTemplate, label: 'Templates', desc: 'Start fast', color: 'text-blue-500', action: () => setShowTemplatesDialog(true) },
+                { icon: Layers, label: 'Compositions', desc: 'Layer groups', color: 'text-green-500', action: () => setActiveTab('timeline') },
+                { icon: Sparkles, label: 'Effects', desc: 'Add effects', color: 'text-pink-500', action: () => setShowAddEffectDialog(true) },
+                { icon: Type, label: 'Typography', desc: 'Kinetic text', color: 'text-orange-500', action: () => toast.info('Typography', { description: 'Opening kinetic text editor...' }) },
+                { icon: Camera, label: 'Cameras', desc: '3D cameras', color: 'text-amber-500', action: () => toast.info('Cameras', { description: 'Opening 3D camera controls...' }) },
+                { icon: Clapperboard, label: 'Render', desc: 'Export video', color: 'text-red-500', action: () => setShowRenderDialog(true) },
               ].map((action, i) => (
-                <Card key={i} className="p-4 cursor-pointer hover:shadow-lg transition-all hover:scale-105">
+                <Card key={i} className="p-4 cursor-pointer hover:shadow-lg transition-all hover:scale-105" onClick={action.action}>
                   <action.icon className={`h-8 w-8 ${action.color} mb-3`} />
                   <h4 className="font-semibold text-gray-900 dark:text-white">{action.label}</h4>
                   <p className="text-sm text-gray-500 dark:text-gray-400">{action.desc}</p>
@@ -1002,7 +1168,11 @@ export default function MotionGraphicsClient({
                       <div className={`aspect-video rounded-t-lg bg-gradient-to-br ${getTypeColor(animation.type)} flex items-center justify-center relative overflow-hidden`}>
                         <Film className="w-12 h-12 text-white/80" />
                         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
-                          <Button size="icon" variant="secondary" className="w-12 h-12 rounded-full">
+                          <Button size="icon" variant="secondary" className="w-12 h-12 rounded-full" onClick={(e) => {
+                            e.stopPropagation()
+                            setSelectedAnimation(animation)
+                            toast.info('Preview', { description: `Playing ${animation.title}` })
+                          }}>
                             <Play className="w-6 h-6" />
                           </Button>
                         </div>
@@ -1112,7 +1282,7 @@ export default function MotionGraphicsClient({
                     <p className="text-2xl font-bold">60</p>
                     <p className="text-purple-100 text-sm">FPS</p>
                   </div>
-                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10" onClick={() => setShowAddLayerDialog(true)}>
                     <Plus className="h-4 w-4 mr-2" />
                     Add Layer
                   </Button>
@@ -1135,19 +1305,19 @@ export default function MotionGraphicsClient({
                     </Button>
                     <div className="absolute bottom-4 left-4 right-4">
                       <div className="flex items-center gap-2 mb-2">
-                        <Button size="icon" variant="ghost" className="w-8 h-8 text-white">
+                        <Button size="icon" variant="ghost" className="w-8 h-8 text-white" onClick={handleSkipBack}>
                           <SkipBack className="w-4 h-4" />
                         </Button>
-                        <Button size="icon" variant="ghost" className="w-8 h-8 text-white">
+                        <Button size="icon" variant="ghost" className="w-8 h-8 text-white" onClick={handleRewind}>
                           <Rewind className="w-4 h-4" />
                         </Button>
                         <Button size="icon" variant="ghost" className="w-8 h-8 text-white" onClick={() => setIsPlaying(!isPlaying)}>
                           {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
                         </Button>
-                        <Button size="icon" variant="ghost" className="w-8 h-8 text-white">
+                        <Button size="icon" variant="ghost" className="w-8 h-8 text-white" onClick={handleFastForward}>
                           <FastForward className="w-4 h-4" />
                         </Button>
-                        <Button size="icon" variant="ghost" className="w-8 h-8 text-white">
+                        <Button size="icon" variant="ghost" className="w-8 h-8 text-white" onClick={handleSkipForward}>
                           <SkipForward className="w-4 h-4" />
                         </Button>
                         <span className="text-white text-sm ml-2">{formatDuration(currentTime)}</span>
@@ -1155,10 +1325,10 @@ export default function MotionGraphicsClient({
                           <div className="h-full bg-cyan-500 rounded-full" style={{ width: '35%' }} />
                         </div>
                         <span className="text-white text-sm">{formatDuration(8.5)}</span>
-                        <Button size="icon" variant="ghost" className="w-8 h-8 text-white">
+                        <Button size="icon" variant="ghost" className="w-8 h-8 text-white" onClick={handleToggleMute}>
                           <Volume2 className="w-4 h-4" />
                         </Button>
-                        <Button size="icon" variant="ghost" className="w-8 h-8 text-white">
+                        <Button size="icon" variant="ghost" className="w-8 h-8 text-white" onClick={handleToggleFullscreen}>
                           <Maximize2 className="w-4 h-4" />
                         </Button>
                       </div>
@@ -1181,13 +1351,13 @@ export default function MotionGraphicsClient({
                     </div>
 
                     <div className="space-y-1">
-                      {mockLayers.map((layer) => (
+                      {layers.map((layer) => (
                         <div key={layer.id} className="flex items-center gap-2 h-10">
                           <div className="w-40 flex items-center gap-2 text-sm">
-                            <Button size="icon" variant="ghost" className="w-6 h-6">
+                            <Button size="icon" variant="ghost" className="w-6 h-6" onClick={() => handleToggleLayerVisibility(layer.id)}>
                               {layer.visible ? <Eye className="w-3 h-3" /> : <Eye className="w-3 h-3 opacity-30" />}
                             </Button>
-                            <Button size="icon" variant="ghost" className="w-6 h-6">
+                            <Button size="icon" variant="ghost" className="w-6 h-6" onClick={() => handleToggleLayerLock(layer.id)}>
                               {layer.locked ? <Lock className="w-3 h-3" /> : <Unlock className="w-3 h-3 opacity-30" />}
                             </Button>
                             {getLayerIcon(layer.type)}
@@ -1244,15 +1414,15 @@ export default function MotionGraphicsClient({
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-2">
-                      <Button variant="outline" className="w-full justify-start text-sm h-9">
+                      <Button variant="outline" className="w-full justify-start text-sm h-9" onClick={() => handleApplyEffect('Glow Effect')}>
                         <Sparkles className="w-4 h-4 mr-2" />
                         Glow Effect
                       </Button>
-                      <Button variant="outline" className="w-full justify-start text-sm h-9">
+                      <Button variant="outline" className="w-full justify-start text-sm h-9" onClick={() => handleApplyEffect('Drop Shadow')}>
                         <Blend className="w-4 h-4 mr-2" />
                         Drop Shadow
                       </Button>
-                      <Button variant="ghost" className="w-full justify-start text-sm h-9">
+                      <Button variant="ghost" className="w-full justify-start text-sm h-9" onClick={() => setShowAddEffectDialog(true)}>
                         <Plus className="w-4 h-4 mr-2" />
                         Add Effect
                       </Button>
@@ -1282,7 +1452,7 @@ export default function MotionGraphicsClient({
                     <p className="text-2xl font-bold">8</p>
                     <p className="text-green-100 text-sm">Categories</p>
                   </div>
-                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10" onClick={() => setShowAddEffectDialog(true)}>
                     <Plus className="h-4 w-4 mr-2" />
                     Create
                   </Button>
@@ -1293,16 +1463,16 @@ export default function MotionGraphicsClient({
             {/* Quick Actions */}
             <div className="grid grid-cols-4 gap-4">
               {[
-                { icon: Plus, label: 'Create Preset', desc: 'New effect', color: 'text-green-500' },
-                { icon: Sparkles, label: 'Effects', desc: 'Visual effects', color: 'text-purple-500' },
-                { icon: Move, label: 'Motion', desc: 'Animations', color: 'text-blue-500' },
-                { icon: Type, label: 'Text', desc: 'Typography', color: 'text-orange-500' },
-                { icon: Shapes, label: 'Shapes', desc: 'Shape presets', color: 'text-pink-500' },
-                { icon: Palette, label: 'Colors', desc: 'Color presets', color: 'text-red-500' },
-                { icon: Download, label: 'Import', desc: 'Import preset', color: 'text-cyan-500' },
-                { icon: Upload, label: 'Export', desc: 'Share preset', color: 'text-amber-500' },
+                { icon: Plus, label: 'Create Preset', desc: 'New effect', color: 'text-green-500', action: () => setShowAddEffectDialog(true) },
+                { icon: Sparkles, label: 'Effects', desc: 'Visual effects', color: 'text-purple-500', action: () => toast.info('Effects library opened') },
+                { icon: Move, label: 'Motion', desc: 'Animations', color: 'text-blue-500', action: () => toast.info('Motion presets opened') },
+                { icon: Type, label: 'Text', desc: 'Typography', color: 'text-orange-500', action: () => toast.info('Text presets opened') },
+                { icon: Shapes, label: 'Shapes', desc: 'Shape presets', color: 'text-pink-500', action: () => toast.info('Shape presets opened') },
+                { icon: Palette, label: 'Colors', desc: 'Color presets', color: 'text-red-500', action: () => toast.info('Color presets opened') },
+                { icon: Download, label: 'Import', desc: 'Import preset', color: 'text-cyan-500', action: () => toast.success('Import dialog opened') },
+                { icon: Upload, label: 'Export', desc: 'Share preset', color: 'text-amber-500', action: () => toast.success('Export dialog opened') },
               ].map((action, i) => (
-                <Card key={i} className="p-4 cursor-pointer hover:shadow-lg transition-all hover:scale-105">
+                <Card key={i} className="p-4 cursor-pointer hover:shadow-lg transition-all hover:scale-105" onClick={action.action}>
                   <action.icon className={`h-8 w-8 ${action.color} mb-3`} />
                   <h4 className="font-semibold text-gray-900 dark:text-white">{action.label}</h4>
                   <p className="text-sm text-gray-500 dark:text-gray-400">{action.desc}</p>
@@ -1312,7 +1482,7 @@ export default function MotionGraphicsClient({
 
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold">All Presets</h2>
-              <Button>
+              <Button onClick={() => setShowAddEffectDialog(true)}>
                 <Plus className="w-4 h-4 mr-2" />
                 Create Preset
               </Button>
@@ -1356,7 +1526,7 @@ export default function MotionGraphicsClient({
                     <p className="text-2xl font-bold">{mockRenderQueue.filter(j => j.status === 'completed').length}</p>
                     <p className="text-orange-100 text-sm">Completed</p>
                   </div>
-                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10" onClick={handleStartAllRenders}>
                     <Play className="h-4 w-4 mr-2" />
                     Start All
                   </Button>
@@ -1367,16 +1537,16 @@ export default function MotionGraphicsClient({
             {/* Quick Actions */}
             <div className="grid grid-cols-4 gap-4">
               {[
-                { icon: Play, label: 'Start All', desc: 'Begin rendering', color: 'text-green-500' },
-                { icon: Pause, label: 'Pause All', desc: 'Pause queue', color: 'text-amber-500' },
-                { icon: Square, label: 'Stop All', desc: 'Cancel all', color: 'text-red-500' },
-                { icon: RefreshCw, label: 'Retry Failed', desc: 'Retry errors', color: 'text-blue-500' },
-                { icon: Plus, label: 'Add to Queue', desc: 'New render', color: 'text-purple-500' },
-                { icon: Download, label: 'Download All', desc: 'Get outputs', color: 'text-cyan-500' },
-                { icon: Trash2, label: 'Clear Queue', desc: 'Remove all', color: 'text-gray-500' },
-                { icon: Settings, label: 'Queue Settings', desc: 'Configure', color: 'text-indigo-500' },
+                { icon: Play, label: 'Start All', desc: 'Begin rendering', color: 'text-green-500', action: handleStartAllRenders },
+                { icon: Pause, label: 'Pause All', desc: 'Pause queue', color: 'text-amber-500', action: () => toast.info('All renders paused') },
+                { icon: Square, label: 'Stop All', desc: 'Cancel all', color: 'text-red-500', action: () => toast.info('All renders stopped') },
+                { icon: RefreshCw, label: 'Retry Failed', desc: 'Retry errors', color: 'text-blue-500', action: () => toast.info('Retrying failed renders') },
+                { icon: Plus, label: 'Add to Queue', desc: 'New render', color: 'text-purple-500', action: () => setShowRenderDialog(true) },
+                { icon: Download, label: 'Download All', desc: 'Get outputs', color: 'text-cyan-500', action: () => toast.success('Downloading all completed renders') },
+                { icon: Trash2, label: 'Clear Queue', desc: 'Remove all', color: 'text-gray-500', action: () => toast.success('Queue cleared') },
+                { icon: Settings, label: 'Queue Settings', desc: 'Configure', color: 'text-indigo-500', action: () => setActiveTab('settings') },
               ].map((action, i) => (
-                <Card key={i} className="p-4 cursor-pointer hover:shadow-lg transition-all hover:scale-105">
+                <Card key={i} className="p-4 cursor-pointer hover:shadow-lg transition-all hover:scale-105" onClick={action.action}>
                   <action.icon className={`h-8 w-8 ${action.color} mb-3`} />
                   <h4 className="font-semibold text-gray-900 dark:text-white">{action.label}</h4>
                   <p className="text-sm text-gray-500 dark:text-gray-400">{action.desc}</p>
@@ -1386,7 +1556,7 @@ export default function MotionGraphicsClient({
 
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold">All Jobs</h2>
-              <Button className="bg-gradient-to-r from-green-500 to-emerald-600 text-white">
+              <Button className="bg-gradient-to-r from-green-500 to-emerald-600 text-white" onClick={handleStartAllRenders}>
                 <Play className="w-4 h-4 mr-2" />
                 Start All
               </Button>
@@ -1427,22 +1597,22 @@ export default function MotionGraphicsClient({
                       </div>
                       <div className="flex items-center gap-2">
                         {job.status === 'queued' && (
-                          <Button size="sm" variant="outline">
+                          <Button size="sm" variant="outline" onClick={() => handleStartRenderJob(job.id)}>
                             <Play className="w-4 h-4" />
                           </Button>
                         )}
                         {job.status === 'rendering' && (
-                          <Button size="sm" variant="outline">
+                          <Button size="sm" variant="outline" onClick={() => handlePauseRenderJob(job.id)}>
                             <Pause className="w-4 h-4" />
                           </Button>
                         )}
                         {job.status === 'completed' && (
-                          <Button size="sm">
+                          <Button size="sm" onClick={() => handleDownloadRender(job)}>
                             <Download className="w-4 h-4 mr-2" />
                             Download
                           </Button>
                         )}
-                        <Button size="sm" variant="ghost">
+                        <Button size="sm" variant="ghost" onClick={() => handleDeleteRenderJob(job.id)}>
                           <Trash2 className="w-4 h-4" />
                         </Button>
                       </div>
@@ -1472,7 +1642,7 @@ export default function MotionGraphicsClient({
                     <p className="text-2xl font-bold">{stats.totalViews.toLocaleString()}</p>
                     <p className="text-indigo-100 text-sm">Total Views</p>
                   </div>
-                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10" onClick={() => setShowExportAnalyticsDialog(true)}>
                     <Download className="h-4 w-4 mr-2" />
                     Export
                   </Button>
@@ -1483,16 +1653,16 @@ export default function MotionGraphicsClient({
             {/* Quick Actions */}
             <div className="grid grid-cols-4 gap-4">
               {[
-                { icon: BarChart3, label: 'Overview', desc: 'Key metrics', color: 'text-indigo-500' },
-                { icon: TrendingUp, label: 'Trends', desc: 'View trends', color: 'text-green-500' },
-                { icon: Eye, label: 'Views', desc: 'View stats', color: 'text-blue-500' },
-                { icon: Heart, label: 'Engagement', desc: 'Likes & shares', color: 'text-pink-500' },
-                { icon: Download, label: 'Downloads', desc: 'Download stats', color: 'text-cyan-500' },
-                { icon: Timer, label: 'Performance', desc: 'Render times', color: 'text-amber-500' },
-                { icon: Users, label: 'Audience', desc: 'User insights', color: 'text-purple-500' },
-                { icon: FileText, label: 'Reports', desc: 'Custom reports', color: 'text-orange-500' },
+                { icon: BarChart3, label: 'Overview', desc: 'Key metrics', color: 'text-indigo-500', action: () => toast.info('Analytics overview loaded') },
+                { icon: TrendingUp, label: 'Trends', desc: 'View trends', color: 'text-green-500', action: () => toast.info('Trend analysis loaded') },
+                { icon: Eye, label: 'Views', desc: 'View stats', color: 'text-blue-500', action: () => toast.info('View statistics loaded') },
+                { icon: Heart, label: 'Engagement', desc: 'Likes & shares', color: 'text-pink-500', action: () => toast.info('Engagement metrics loaded') },
+                { icon: Download, label: 'Downloads', desc: 'Download stats', color: 'text-cyan-500', action: () => toast.info('Download statistics loaded') },
+                { icon: Timer, label: 'Performance', desc: 'Render times', color: 'text-amber-500', action: () => toast.info('Performance metrics loaded') },
+                { icon: Users, label: 'Audience', desc: 'User insights', color: 'text-purple-500', action: () => toast.info('Audience insights loaded') },
+                { icon: FileText, label: 'Reports', desc: 'Custom reports', color: 'text-orange-500', action: () => setShowExportAnalyticsDialog(true) },
               ].map((action, i) => (
-                <Card key={i} className="p-4 cursor-pointer hover:shadow-lg transition-all hover:scale-105">
+                <Card key={i} className="p-4 cursor-pointer hover:shadow-lg transition-all hover:scale-105" onClick={action.action}>
                   <action.icon className={`h-8 w-8 ${action.color} mb-3`} />
                   <h4 className="font-semibold text-gray-900 dark:text-white">{action.label}</h4>
                   <p className="text-sm text-gray-500 dark:text-gray-400">{action.desc}</p>
@@ -1602,7 +1772,7 @@ export default function MotionGraphicsClient({
                 </div>
                 <div className="flex items-center gap-4">
                   <Badge className="bg-green-500/20 text-green-300 border-green-500/30">Active</Badge>
-                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10" onClick={() => setShowExportConfigDialog(true)}>
                     <Download className="h-4 w-4 mr-2" />
                     Export Config
                   </Button>
@@ -1848,7 +2018,7 @@ export default function MotionGraphicsClient({
                           </div>
                           <Progress value={45} className="h-2" />
                         </div>
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => setShowClearCacheDialog(true)}>
                           <Trash2 className="w-4 h-4 mr-2" />
                           Clear Cache
                         </Button>
@@ -2002,7 +2172,7 @@ export default function MotionGraphicsClient({
                           <label className="block text-sm font-medium mb-2">API Key</label>
                           <div className="flex gap-2">
                             <Input value="mg_••••••••••••" readOnly className="font-mono" />
-                            <Button variant="outline">Regenerate</Button>
+                            <Button variant="outline" onClick={handleRegenerateApiKey}>Regenerate</Button>
                           </div>
                         </div>
                       </CardContent>
@@ -2042,14 +2212,14 @@ export default function MotionGraphicsClient({
                             <p className="font-medium">Reset All Settings</p>
                             <p className="text-sm text-gray-500">Restore factory defaults</p>
                           </div>
-                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50">Reset</Button>
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50" onClick={() => setShowResetSettingsDialog(true)}>Reset</Button>
                         </div>
                         <div className="flex items-center justify-between">
                           <div>
                             <p className="font-medium">Clear All Projects</p>
                             <p className="text-sm text-gray-500">Delete all project data</p>
                           </div>
-                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50">Delete All</Button>
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50" onClick={() => setShowDeleteAllProjectsDialog(true)}>Delete All</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -2116,6 +2286,12 @@ export default function MotionGraphicsClient({
                       size="icon"
                       variant="secondary"
                       className="w-16 h-16 rounded-full"
+                      onClick={() => {
+                        setIsPlaying(!isPlaying)
+                        toast.info(isPlaying ? 'Paused' : 'Playing', {
+                          description: selectedAnimation.title
+                        })
+                      }}
                     >
                       <Play className="w-8 h-8 ml-1" />
                     </Button>
@@ -2194,19 +2370,32 @@ export default function MotionGraphicsClient({
                   )}
 
                   <div className="flex gap-3">
-                    <Button className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white">
+                    <Button className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white" onClick={() => {
+                      setSelectedAnimation(null)
+                      setShowEditProjectDialog(true)
+                    }}>
                       <Edit className="w-4 h-4 mr-2" />
                       Edit Project
                     </Button>
-                    <Button variant="outline">
+                    <Button variant="outline" onClick={() => {
+                      setSelectedAnimation(null)
+                      setShowRenderDialog(true)
+                    }}>
                       <Clapperboard className="w-4 h-4 mr-2" />
                       Render
                     </Button>
-                    <Button variant="outline">
+                    <Button variant="outline" onClick={() => {
+                      if (selectedAnimation) {
+                        handleExportAnimation(selectedAnimation.id, selectedAnimation.title)
+                      }
+                    }}>
                       <Download className="w-4 h-4 mr-2" />
                       Export
                     </Button>
-                    <Button variant="outline">
+                    <Button variant="outline" onClick={() => {
+                      setSelectedAnimation(null)
+                      setShowShareDialog(true)
+                    }}>
                       <Share2 className="w-4 h-4 mr-2" />
                       Share
                     </Button>
@@ -2448,7 +2637,13 @@ export default function MotionGraphicsClient({
               </div>
               <div className="grid grid-cols-4 gap-2 mb-4">
                 {['All', 'Images', 'Videos', 'Audio', 'Shapes', 'Text'].map((filter) => (
-                  <Button key={filter} variant="outline" size="sm" className="text-xs">
+                  <Button
+                    key={filter}
+                    variant={assetFilter === filter ? 'default' : 'outline'}
+                    size="sm"
+                    className="text-xs"
+                    onClick={() => setAssetFilter(filter)}
+                  >
                     {filter}
                   </Button>
                 ))}
@@ -2467,7 +2662,7 @@ export default function MotionGraphicsClient({
               </ScrollArea>
             </div>
             <div className="flex justify-between gap-3">
-              <Button variant="outline">
+              <Button variant="outline" onClick={handleUploadAsset}>
                 <Upload className="w-4 h-4 mr-2" />
                 Upload Asset
               </Button>
@@ -2475,7 +2670,7 @@ export default function MotionGraphicsClient({
                 <Button variant="outline" onClick={() => setShowAssetsDialog(false)}>
                   Close
                 </Button>
-                <Button className="bg-gradient-to-r from-blue-500 to-cyan-600 text-white">
+                <Button className="bg-gradient-to-r from-blue-500 to-cyan-600 text-white" onClick={handleAddAssetToProject}>
                   <Plus className="w-4 h-4 mr-2" />
                   Add to Project
                 </Button>
@@ -2497,7 +2692,13 @@ export default function MotionGraphicsClient({
             <div className="py-4">
               <div className="flex gap-2 mb-4">
                 {['All', 'Intros', 'Titles', 'Transitions', 'Lower Thirds', 'Social Media'].map((cat) => (
-                  <Button key={cat} variant="outline" size="sm" className="text-xs">
+                  <Button
+                    key={cat}
+                    variant={templateCategory === cat ? 'default' : 'outline'}
+                    size="sm"
+                    className="text-xs"
+                    onClick={() => setTemplateCategory(cat)}
+                  >
                     {cat}
                   </Button>
                 ))}
@@ -2541,6 +2742,454 @@ export default function MotionGraphicsClient({
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Use Template
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Layer Dialog */}
+        <Dialog open={showAddLayerDialog} onOpenChange={setShowAddLayerDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Layers className="w-5 h-5 text-purple-500" />
+                Add Layer
+              </DialogTitle>
+              <DialogDescription>Choose a layer type to add to your composition</DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { type: 'video', icon: FileVideo, label: 'Video', desc: 'Import video file' },
+                  { type: 'image', icon: Image, label: 'Image', desc: 'Import image file' },
+                  { type: 'text', icon: Type, label: 'Text', desc: 'Add text layer' },
+                  { type: 'shape', icon: Shapes, label: 'Shape', desc: 'Add shape layer' },
+                  { type: 'audio', icon: Volume2, label: 'Audio', desc: 'Import audio file' },
+                  { type: 'effect', icon: Sparkles, label: 'Effect', desc: 'Add effect layer' },
+                ].map((item) => (
+                  <button
+                    key={item.type}
+                    className="p-4 rounded-lg border hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all text-left"
+                    onClick={() => {
+                      setShowAddLayerDialog(false)
+                      toast.success(`${item.label} layer added`, {
+                        description: 'New layer added to timeline'
+                      })
+                    }}
+                  >
+                    <item.icon className="w-6 h-6 text-purple-500 mb-2" />
+                    <p className="font-medium text-sm">{item.label}</p>
+                    <p className="text-xs text-gray-500">{item.desc}</p>
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setShowAddLayerDialog(false)}>
+                Cancel
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Effect Dialog */}
+        <Dialog open={showAddEffectDialog} onOpenChange={setShowAddEffectDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-orange-500" />
+                Add Effect
+              </DialogTitle>
+              <DialogDescription>Choose an effect to apply to your layer</DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="relative mb-4">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Input placeholder="Search effects..." className="pl-9" />
+              </div>
+              <ScrollArea className="h-64">
+                <div className="grid grid-cols-2 gap-3">
+                  {[
+                    { name: 'Glow', category: 'Style' },
+                    { name: 'Drop Shadow', category: 'Style' },
+                    { name: 'Blur', category: 'Blur & Sharpen' },
+                    { name: 'Motion Blur', category: 'Blur & Sharpen' },
+                    { name: 'Color Correction', category: 'Color' },
+                    { name: 'Gradient Ramp', category: 'Generate' },
+                    { name: 'Noise', category: 'Noise & Grain' },
+                    { name: 'Distort', category: 'Distort' },
+                    { name: 'Echo', category: 'Time' },
+                    { name: 'Particle World', category: 'Simulation' },
+                  ].map((effect) => (
+                    <button
+                      key={effect.name}
+                      className="p-3 rounded-lg border hover:border-orange-500 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all text-left"
+                      onClick={() => {
+                        setShowAddEffectDialog(false)
+                        handleApplyEffect(effect.name)
+                      }}
+                    >
+                      <Sparkles className="w-5 h-5 text-orange-500 mb-1" />
+                      <p className="font-medium text-sm">{effect.name}</p>
+                      <p className="text-xs text-gray-500">{effect.category}</p>
+                    </button>
+                  ))}
+                </div>
+              </ScrollArea>
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setShowAddEffectDialog(false)}>
+                Cancel
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Export Analytics Dialog */}
+        <Dialog open={showExportAnalyticsDialog} onOpenChange={setShowExportAnalyticsDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Download className="w-5 h-5 text-indigo-500" />
+                Export Analytics
+              </DialogTitle>
+              <DialogDescription>Choose export format for your analytics data</DialogDescription>
+            </DialogHeader>
+            <div className="py-4 space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">Export Format</label>
+                <select className="w-full px-3 py-2 border rounded-lg">
+                  <option>CSV</option>
+                  <option>Excel (XLSX)</option>
+                  <option>JSON</option>
+                  <option>PDF Report</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Date Range</label>
+                <select className="w-full px-3 py-2 border rounded-lg">
+                  <option>Last 7 days</option>
+                  <option>Last 30 days</option>
+                  <option>Last 90 days</option>
+                  <option>All time</option>
+                </select>
+              </div>
+              <div className="flex items-center justify-between p-3 border rounded-lg">
+                <div>
+                  <p className="font-medium text-sm">Include all projects</p>
+                  <p className="text-xs text-gray-500">Export data for all projects</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setShowExportAnalyticsDialog(false)}>
+                Cancel
+              </Button>
+              <Button className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white" onClick={handleExportAnalytics}>
+                <Download className="w-4 h-4 mr-2" />
+                Export
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Export Config Dialog */}
+        <Dialog open={showExportConfigDialog} onOpenChange={setShowExportConfigDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Settings className="w-5 h-5 text-cyan-500" />
+                Export Configuration
+              </DialogTitle>
+              <DialogDescription>Export your settings as a configuration file</DialogDescription>
+            </DialogHeader>
+            <div className="py-4 space-y-4">
+              <div className="flex items-center justify-between p-3 border rounded-lg">
+                <div>
+                  <p className="font-medium text-sm">Include keyboard shortcuts</p>
+                  <p className="text-xs text-gray-500">Export custom shortcuts</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+              <div className="flex items-center justify-between p-3 border rounded-lg">
+                <div>
+                  <p className="font-medium text-sm">Include workspace layout</p>
+                  <p className="text-xs text-gray-500">Export UI preferences</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+              <div className="flex items-center justify-between p-3 border rounded-lg">
+                <div>
+                  <p className="font-medium text-sm">Include render presets</p>
+                  <p className="text-xs text-gray-500">Export output settings</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setShowExportConfigDialog(false)}>
+                Cancel
+              </Button>
+              <Button className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white" onClick={handleExportConfig}>
+                <Download className="w-4 h-4 mr-2" />
+                Export Config
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Clear Cache Dialog */}
+        <Dialog open={showClearCacheDialog} onOpenChange={setShowClearCacheDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Trash2 className="w-5 h-5 text-amber-500" />
+                Clear Cache
+              </DialogTitle>
+              <DialogDescription>This will free up disk space by removing cached files</DialogDescription>
+            </DialogHeader>
+            <div className="py-4 space-y-4">
+              <div className="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-medium">Cache Size</span>
+                  <span className="text-sm text-gray-500">12.4 GB</span>
+                </div>
+                <Progress value={25} className="h-2" />
+              </div>
+              <div className="flex items-center justify-between p-3 border rounded-lg">
+                <div>
+                  <p className="font-medium text-sm">Preview cache</p>
+                  <p className="text-xs text-gray-500">8.2 GB</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+              <div className="flex items-center justify-between p-3 border rounded-lg">
+                <div>
+                  <p className="font-medium text-sm">Render cache</p>
+                  <p className="text-xs text-gray-500">3.1 GB</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+              <div className="flex items-center justify-between p-3 border rounded-lg">
+                <div>
+                  <p className="font-medium text-sm">Thumbnail cache</p>
+                  <p className="text-xs text-gray-500">1.1 GB</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setShowClearCacheDialog(false)}>
+                Cancel
+              </Button>
+              <Button className="bg-gradient-to-r from-amber-500 to-orange-600 text-white" onClick={handleClearCache}>
+                <Trash2 className="w-4 h-4 mr-2" />
+                Clear Cache
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Reset Settings Dialog */}
+        <Dialog open={showResetSettingsDialog} onOpenChange={setShowResetSettingsDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-600">
+                <RotateCcw className="w-5 h-5" />
+                Reset All Settings
+              </DialogTitle>
+              <DialogDescription>This will restore all settings to their default values. This action cannot be undone.</DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                <p className="text-sm text-red-700 dark:text-red-400">
+                  The following will be reset:
+                </p>
+                <ul className="mt-2 text-sm text-red-600 dark:text-red-300 list-disc list-inside">
+                  <li>Project defaults</li>
+                  <li>Keyboard shortcuts</li>
+                  <li>Export settings</li>
+                  <li>Performance settings</li>
+                  <li>UI preferences</li>
+                </ul>
+              </div>
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setShowResetSettingsDialog(false)}>
+                Cancel
+              </Button>
+              <Button variant="destructive" onClick={handleResetSettings}>
+                <RotateCcw className="w-4 h-4 mr-2" />
+                Reset Settings
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete All Projects Dialog */}
+        <Dialog open={showDeleteAllProjectsDialog} onOpenChange={setShowDeleteAllProjectsDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-600">
+                <Trash2 className="w-5 h-5" />
+                Delete All Projects
+              </DialogTitle>
+              <DialogDescription>This will permanently delete all your projects. This action cannot be undone.</DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                <p className="text-sm text-red-700 dark:text-red-400">
+                  You are about to delete:
+                </p>
+                <ul className="mt-2 text-sm text-red-600 dark:text-red-300 list-disc list-inside">
+                  <li>{stats.total} projects</li>
+                  <li>All associated layers and effects</li>
+                  <li>All render exports</li>
+                  <li>All project history</li>
+                </ul>
+              </div>
+              <div className="mt-4">
+                <label className="block text-sm font-medium mb-2">Type DELETE to confirm</label>
+                <Input placeholder="DELETE" />
+              </div>
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setShowDeleteAllProjectsDialog(false)}>
+                Cancel
+              </Button>
+              <Button variant="destructive" onClick={handleDeleteAllProjects}>
+                <Trash2 className="w-4 h-4 mr-2" />
+                Delete All
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Share Dialog */}
+        <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Share2 className="w-5 h-5 text-blue-500" />
+                Share Project
+              </DialogTitle>
+              <DialogDescription>Share your project with others</DialogDescription>
+            </DialogHeader>
+            <div className="py-4 space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">Share Link</label>
+                <div className="flex gap-2">
+                  <Input value="https://freeflow.app/project/abc123" readOnly />
+                  <Button variant="outline" onClick={() => {
+                    toast.success('Link copied to clipboard')
+                  }}>
+                    Copy
+                  </Button>
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Permission</label>
+                <select className="w-full px-3 py-2 border rounded-lg">
+                  <option>View only</option>
+                  <option>Can comment</option>
+                  <option>Can edit</option>
+                </select>
+              </div>
+              <div className="flex items-center justify-between p-3 border rounded-lg">
+                <div>
+                  <p className="font-medium text-sm">Allow downloads</p>
+                  <p className="text-xs text-gray-500">Others can download the project</p>
+                </div>
+                <Switch />
+              </div>
+              <div className="flex items-center justify-between p-3 border rounded-lg">
+                <div>
+                  <p className="font-medium text-sm">Public link</p>
+                  <p className="text-xs text-gray-500">Anyone with the link can access</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setShowShareDialog(false)}>
+                Close
+              </Button>
+              <Button className="bg-gradient-to-r from-blue-500 to-cyan-600 text-white" onClick={handleShare}>
+                <Share2 className="w-4 h-4 mr-2" />
+                Copy Link
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Project Dialog */}
+        <Dialog open={showEditProjectDialog} onOpenChange={setShowEditProjectDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Edit className="w-5 h-5 text-cyan-500" />
+                Edit Project
+              </DialogTitle>
+              <DialogDescription>Modify project settings and properties</DialogDescription>
+            </DialogHeader>
+            <div className="py-4 space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">Project Name</label>
+                <Input defaultValue="Product Launch Intro" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Description</label>
+                <Input defaultValue="Dynamic 3D text reveal with particle effects" />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2">Width</label>
+                  <Input type="number" defaultValue={1920} />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">Height</label>
+                  <Input type="number" defaultValue={1080} />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2">Frame Rate</label>
+                  <select className="w-full px-3 py-2 border rounded-lg">
+                    <option value={24}>24 fps</option>
+                    <option value={30}>30 fps</option>
+                    <option value={60} selected>60 fps</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">Duration (sec)</label>
+                  <Input type="number" defaultValue={10} />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Tags</label>
+                <Input defaultValue="product, launch, 3d, particles" />
+              </div>
+              <div className="flex items-center justify-between p-3 border rounded-lg">
+                <div>
+                  <p className="font-medium text-sm">Public Project</p>
+                  <p className="text-xs text-gray-500">Allow others to view</p>
+                </div>
+                <Switch />
+              </div>
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setShowEditProjectDialog(false)}>
+                Cancel
+              </Button>
+              <Button className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white" onClick={() => {
+                setShowEditProjectDialog(false)
+                toast.success('Project updated', {
+                  description: 'Changes saved successfully'
+                })
+              }}>
+                <CheckCircle2 className="w-4 h-4 mr-2" />
+                Save Changes
               </Button>
             </div>
           </DialogContent>

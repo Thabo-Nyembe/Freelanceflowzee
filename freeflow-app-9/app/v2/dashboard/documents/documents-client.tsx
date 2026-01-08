@@ -362,6 +362,28 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
   const [showBulkDownloadDialog, setShowBulkDownloadDialog] = useState(false)
   const [showSyncSettingsDialog, setShowSyncSettingsDialog] = useState(false)
   const [showExportSettingsDialog, setShowExportSettingsDialog] = useState(false)
+  const [showAllRecentDocsDialog, setShowAllRecentDocsDialog] = useState(false)
+  const [showAllActivityDialog, setShowAllActivityDialog] = useState(false)
+  const [showDocumentMenuDialog, setShowDocumentMenuDialog] = useState(false)
+  const [showFolderMenuDialog, setShowFolderMenuDialog] = useState(false)
+  const [showRestoreVersionDialog, setShowRestoreVersionDialog] = useState(false)
+  const [showQuickShareDialog, setShowQuickShareDialog] = useState(false)
+  const [showOpenDocumentDialog, setShowOpenDocumentDialog] = useState(false)
+  const [showDocSettingsDialog, setShowDocSettingsDialog] = useState(false)
+  const [showClearTrashDialog, setShowClearTrashDialog] = useState(false)
+  const [showDeleteAllDocsDialog, setShowDeleteAllDocsDialog] = useState(false)
+  const [showUpgradePremiumDialog, setShowUpgradePremiumDialog] = useState(false)
+  const [showCheckoutDialog, setShowCheckoutDialog] = useState(false)
+  const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'yearly'>('monthly')
+  const [showAddPersonDialog, setShowAddPersonDialog] = useState(false)
+  const [showEditFolderDialog, setShowEditFolderDialog] = useState(false)
+  const [menuDocument, setMenuDocument] = useState<DocumentFile | null>(null)
+  const [menuFolder, setMenuFolder] = useState<DocumentFolder | null>(null)
+  const [versionToRestore, setVersionToRestore] = useState<VersionEntry | null>(null)
+  const [editFolderData, setEditFolderData] = useState<DocumentFolder | null>(null)
+  const [newPersonEmail, setNewPersonEmail] = useState('')
+  const [newPersonRole, setNewPersonRole] = useState('viewer')
+  const [templateFileInput, setTemplateFileInput] = useState<HTMLInputElement | null>(null)
 
   // Form state for dialogs
   const [newFolderName, setNewFolderName] = useState('')
@@ -691,7 +713,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
                     </div>
                   </DialogContent>
                 </Dialog>
-                <Button variant="ghost" className="text-white hover:bg-white/20">
+                <Button variant="ghost" className="text-white hover:bg-white/20" onClick={() => setShowDocSettingsDialog(true)}>
                   <Settings className="h-5 w-5" />
                 </Button>
               </div>
@@ -889,7 +911,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
               <Card className="lg:col-span-2">
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
                   <CardTitle className="text-lg font-semibold">Recent Documents</CardTitle>
-                  <Button variant="ghost" size="sm">View All</Button>
+                  <Button variant="ghost" size="sm" onClick={() => setShowAllRecentDocsDialog(true)}>View All</Button>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   {recentDocuments.slice(0, 5).map(doc => (
@@ -944,7 +966,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
               <Card className="lg:col-span-2">
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
                   <CardTitle className="text-lg font-semibold">Recent Activity</CardTitle>
-                  <Button variant="ghost" size="sm">View All</Button>
+                  <Button variant="ghost" size="sm" onClick={() => setShowAllActivityDialog(true)}>View All</Button>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   {mockRecentActivity.map(activity => (
@@ -1124,7 +1146,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
                             {getFileIcon(doc.type)}
                             <div className="flex items-center gap-1">
                               {doc.starred && <Star className="h-4 w-4 text-amber-500 fill-amber-500" />}
-                              <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
+                              <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={(e) => { e.stopPropagation(); setMenuDocument(doc); setShowDocumentMenuDialog(true); }}>
                                 <MoreVertical className="h-4 w-4" />
                               </Button>
                             </div>
@@ -1159,7 +1181,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
                           {doc.starred && <Star className="h-4 w-4 text-amber-500 fill-amber-500" />}
                           <Badge className={getStatusColor(doc.status)}>{doc.status}</Badge>
                           <Badge className={getSharingColor(doc.sharingType)}>{doc.sharingType}</Badge>
-                          <Button variant="ghost" size="sm">
+                          <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); setMenuDocument(doc); setShowDocumentMenuDialog(true); }}>
                             <MoreVertical className="h-4 w-4" />
                           </Button>
                         </div>
@@ -1278,7 +1300,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
                       <div className={`p-3 rounded-xl ${folder.color}`}>
                         <Folder className="h-6 w-6 text-white" />
                       </div>
-                      <Button variant="ghost" size="sm">
+                      <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); setMenuFolder(folder); setShowFolderMenuDialog(true); }}>
                         <MoreVertical className="h-4 w-4" />
                       </Button>
                     </div>
@@ -1874,11 +1896,21 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
                           </p>
                         </div>
                         <div className="flex gap-3">
-                          <Button variant="outline" className="flex-1">
+                          <Button variant="outline" className="flex-1" onClick={() => {
+                            toast.promise(
+                              new Promise((resolve) => setTimeout(resolve, 2000)),
+                              { loading: 'Exporting all documents...', success: 'Export complete! Download starting...', error: 'Export failed' }
+                            )
+                          }}>
                             <Download className="h-4 w-4 mr-2" />
                             Export All
                           </Button>
-                          <Button variant="outline" className="flex-1">
+                          <Button variant="outline" className="flex-1" onClick={() => {
+                            toast.promise(
+                              new Promise((resolve) => setTimeout(resolve, 2500)),
+                              { loading: 'Creating backup archive...', success: 'Backup downloaded successfully!', error: 'Backup failed' }
+                            )
+                          }}>
                             <Archive className="h-4 w-4 mr-2" />
                             Download Backup
                           </Button>
@@ -2102,7 +2134,19 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
                               </div>
                               <span className="font-medium text-gray-900 dark:text-white">{integration.name}</span>
                             </div>
-                            <Button variant={integration.connected ? 'outline' : 'default'} size="sm">
+                            <Button variant={integration.connected ? 'outline' : 'default'} size="sm" onClick={() => {
+                              if (integration.connected) {
+                                toast.promise(
+                                  new Promise((resolve) => setTimeout(resolve, 1000)),
+                                  { loading: `Disconnecting ${integration.name}...`, success: `${integration.name} disconnected`, error: 'Disconnect failed' }
+                                )
+                              } else {
+                                toast.promise(
+                                  new Promise((resolve) => setTimeout(resolve, 1500)),
+                                  { loading: `Connecting to ${integration.name}...`, success: `${integration.name} connected successfully!`, error: 'Connection failed' }
+                                )
+                              }
+                            }}>
                               {integration.connected ? 'Disconnect' : 'Connect'}
                             </Button>
                           </div>
@@ -2126,7 +2170,10 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
                         <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <div className="flex items-center justify-between mb-2">
                             <Label className="text-gray-900 dark:text-white font-medium">API Token</Label>
-                            <Button variant="outline" size="sm">
+                            <Button variant="outline" size="sm" onClick={() => {
+                              navigator.clipboard.writeText('doc_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
+                              toast.success('API token copied to clipboard!')
+                            }}>
                               <Copy className="h-4 w-4 mr-2" />
                               Copy
                             </Button>
@@ -2135,7 +2182,12 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
                             doc_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
                           </code>
                         </div>
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => {
+                          toast.promise(
+                            new Promise((resolve) => setTimeout(resolve, 1500)),
+                            { loading: 'Regenerating API token...', success: 'New API token generated!', error: 'Failed to regenerate token' }
+                          )
+                        }}>
                           <RefreshCw className="h-4 w-4 mr-2" />
                           Regenerate Token
                         </Button>
@@ -2241,7 +2293,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
                             <h4 className="font-medium text-gray-900 dark:text-white">Clear Trash</h4>
                             <p className="text-sm text-gray-500 dark:text-gray-400">Permanently delete all trashed documents</p>
                           </div>
-                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-900/20">
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-900/20" onClick={() => setShowClearTrashDialog(true)}>
                             <Trash2 className="h-4 w-4 mr-2" />
                             Clear Trash
                           </Button>
@@ -2251,7 +2303,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
                             <h4 className="font-medium text-gray-900 dark:text-white">Delete All Documents</h4>
                             <p className="text-sm text-gray-500 dark:text-gray-400">Permanently remove all documents</p>
                           </div>
-                          <Button variant="destructive">
+                          <Button variant="destructive" onClick={() => setShowDeleteAllDocsDialog(true)}>
                             <Trash2 className="h-4 w-4 mr-2" />
                             Delete All
                           </Button>
@@ -2373,7 +2425,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
                           <p className="text-sm text-gray-500">{version.changes}</p>
                           <p className="text-xs text-gray-400 mt-1">{version.createdAt.toLocaleString()}</p>
                         </div>
-                        {i > 0 && <Button variant="ghost" size="sm">Restore</Button>}
+                        {i > 0 && <Button variant="ghost" size="sm" onClick={() => { setVersionToRestore(version); setShowRestoreVersionDialog(true); }}>Restore</Button>}
                       </div>
                     ))}
                   </TabsContent>
@@ -2398,14 +2450,19 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
                   <TabsContent value="sharing" className="mt-4 space-y-4">
                     <div className="flex gap-2">
                       <Input placeholder="Add people or groups" className="flex-1" />
-                      <Button>Share</Button>
+                      <Button onClick={() => { setShowQuickShareDialog(true); }}>Share</Button>
                     </div>
                     <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <Link2 className="h-4 w-4" />
                         <span className="text-sm">Copy link</span>
                       </div>
-                      <Button variant="ghost" size="sm">
+                      <Button variant="ghost" size="sm" onClick={() => {
+                        if (selectedDocument) {
+                          navigator.clipboard.writeText(`https://docs.freeflow.app/d/${selectedDocument.id}`)
+                          toast.success('Link copied to clipboard!')
+                        }
+                      }}>
                         <Copy className="h-4 w-4" />
                       </Button>
                     </div>
@@ -2413,7 +2470,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
                 </Tabs>
               </ScrollArea>
               <div className="flex items-center gap-2 pt-4 border-t">
-                <Button className="flex-1 bg-cyan-600 hover:bg-cyan-700">
+                <Button className="flex-1 bg-cyan-600 hover:bg-cyan-700" onClick={() => { setShowOpenDocumentDialog(true); }}>
                   <ExternalLink className="h-4 w-4 mr-2" />
                   Open Document
                 </Button>
@@ -2906,10 +2963,15 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
                       </div>
                     </div>
                     <div className="flex gap-1">
-                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => { setEditFolderData(folder); setNewFolderName(folder.name); setShowEditFolderDialog(true); }}>
                         <Edit3 className="h-3 w-3" />
                       </Button>
-                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-red-500">
+                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-red-500" onClick={() => {
+                        toast.promise(
+                          new Promise((resolve) => setTimeout(resolve, 1000)),
+                          { loading: `Deleting "${folder.name}"...`, success: `Folder "${folder.name}" deleted`, error: 'Delete failed' }
+                        )
+                      }}>
                         <Trash2 className="h-3 w-3" />
                       </Button>
                     </div>
@@ -3088,7 +3150,22 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
                 <Upload className="h-10 w-10 mx-auto text-gray-400 mb-3" />
                 <p className="font-medium mb-1">Drop template file here</p>
                 <p className="text-sm text-gray-500 mb-4">Supports .docx, .xlsx, .pptx files</p>
-                <Button variant="outline">Browse Files</Button>
+                <input
+                  type="file"
+                  accept=".docx,.xlsx,.pptx"
+                  className="hidden"
+                  id="template-file-input"
+                  onChange={(e) => {
+                    if (e.target.files && e.target.files.length > 0) {
+                      toast.promise(
+                        new Promise((resolve) => setTimeout(resolve, 1500)),
+                        { loading: `Importing ${e.target.files[0].name}...`, success: 'Template imported successfully', error: 'Import failed' }
+                      )
+                      setShowImportTemplateDialog(false)
+                    }
+                  }}
+                />
+                <Button variant="outline" onClick={() => document.getElementById('template-file-input')?.click()}>Browse Files</Button>
               </div>
             </div>
             <DialogFooter>
@@ -3187,7 +3264,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowPremiumTemplatesDialog(false)}>Close</Button>
-              <Button className="bg-gradient-to-r from-amber-500 to-orange-500">Upgrade to Premium</Button>
+              <Button className="bg-gradient-to-r from-amber-500 to-orange-500" onClick={() => { setShowPremiumTemplatesDialog(false); setShowUpgradePremiumDialog(true); }}>Upgrade to Premium</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -3481,7 +3558,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
                 ))}
               </div>
               <div className="pt-2">
-                <Button variant="outline" className="w-full">
+                <Button variant="outline" className="w-full" onClick={() => setShowAddPersonDialog(true)}>
                   <Plus className="h-4 w-4 mr-2" />
                   Add Person
                 </Button>
@@ -3680,6 +3757,681 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
                 toast.success('Export settings saved')
                 setShowExportSettingsDialog(false)
               }}>Save Settings</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* All Recent Documents Dialog */}
+        <Dialog open={showAllRecentDocsDialog} onOpenChange={setShowAllRecentDocsDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Clock className="h-5 w-5" />
+                All Recent Documents
+              </DialogTitle>
+              <DialogDescription>
+                Browse all recently accessed documents sorted by date.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <ScrollArea className="h-96">
+                <div className="space-y-2">
+                  {[...mockDocuments].sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime()).map(doc => (
+                    <div key={doc.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer" onClick={() => { setShowAllRecentDocsDialog(false); setSelectedDocument(doc); }}>
+                      <div className="flex items-center gap-3">
+                        {getFileIcon(doc.type)}
+                        <div>
+                          <p className="font-medium text-sm">{doc.name}</p>
+                          <p className="text-xs text-gray-500">Updated {doc.updatedAt.toLocaleDateString()} at {doc.updatedAt.toLocaleTimeString()}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {doc.starred && <Star className="h-4 w-4 text-amber-500 fill-amber-500" />}
+                        <Badge className={getStatusColor(doc.status)}>{doc.status}</Badge>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowAllRecentDocsDialog(false)}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* All Activity Dialog */}
+        <Dialog open={showAllActivityDialog} onOpenChange={setShowAllActivityDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Clock className="h-5 w-5" />
+                All Activity
+              </DialogTitle>
+              <DialogDescription>
+                View complete activity history for your documents.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <ScrollArea className="h-96">
+                <div className="space-y-2">
+                  {mockRecentActivity.map(activity => (
+                    <div key={activity.id} className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                      <div className="p-2 rounded-full bg-white dark:bg-gray-700">
+                        {getActionIcon(activity.action)}
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm">
+                          <span className="font-medium">{activity.userName}</span>
+                          {' '}{activity.action}{' '}
+                          <span className="font-medium">{activity.documentName}</span>
+                          {activity.details && <span className="text-gray-500"> {activity.details}</span>}
+                        </p>
+                        <p className="text-xs text-gray-500">{activity.timestamp.toLocaleString()}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowAllActivityDialog(false)}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Document Menu Dialog */}
+        <Dialog open={showDocumentMenuDialog} onOpenChange={setShowDocumentMenuDialog}>
+          <DialogContent className="max-w-sm">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                {menuDocument && getFileIcon(menuDocument.type)}
+                {menuDocument?.name || 'Document Actions'}
+              </DialogTitle>
+              <DialogDescription>
+                Choose an action for this document.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4 space-y-2">
+              <Button variant="ghost" className="w-full justify-start" onClick={() => { setShowDocumentMenuDialog(false); if (menuDocument) setSelectedDocument(menuDocument); }}>
+                <ExternalLink className="h-4 w-4 mr-3" />
+                Open Document
+              </Button>
+              <Button variant="ghost" className="w-full justify-start" onClick={() => { setShowDocumentMenuDialog(false); if (menuDocument) handleDownloadDocument(menuDocument); }}>
+                <Download className="h-4 w-4 mr-3" />
+                Download
+              </Button>
+              <Button variant="ghost" className="w-full justify-start" onClick={() => { setShowDocumentMenuDialog(false); if (menuDocument) handleShareDocument(menuDocument); }}>
+                <Share2 className="h-4 w-4 mr-3" />
+                Share
+              </Button>
+              <Button variant="ghost" className="w-full justify-start" onClick={() => { setShowDocumentMenuDialog(false); if (menuDocument) handleStarDocument(menuDocument); }}>
+                <Star className="h-4 w-4 mr-3" />
+                {menuDocument?.starred ? 'Remove from Starred' : 'Add to Starred'}
+              </Button>
+              <Button variant="ghost" className="w-full justify-start" onClick={() => { setShowDocumentMenuDialog(false); if (menuDocument) showMoveToFolderDialog(menuDocument); }}>
+                <Move className="h-4 w-4 mr-3" />
+                Move to Folder
+              </Button>
+              <Button variant="ghost" className="w-full justify-start" onClick={() => { setShowDocumentMenuDialog(false); if (menuDocument) { setDuplicateName(`${menuDocument.name} (Copy)`); setShowDuplicateDialog(true); } }}>
+                <Copy className="h-4 w-4 mr-3" />
+                Duplicate
+              </Button>
+              <Button variant="ghost" className="w-full justify-start" onClick={() => { setShowDocumentMenuDialog(false); if (menuDocument) handleArchiveDocument(menuDocument); }}>
+                <Archive className="h-4 w-4 mr-3" />
+                Archive
+              </Button>
+              <Button variant="ghost" className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50" onClick={() => { setShowDocumentMenuDialog(false); if (menuDocument) confirmDeleteDocument(menuDocument); }}>
+                <Trash2 className="h-4 w-4 mr-3" />
+                Delete
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Folder Menu Dialog */}
+        <Dialog open={showFolderMenuDialog} onOpenChange={setShowFolderMenuDialog}>
+          <DialogContent className="max-w-sm">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Folder className="h-5 w-5" />
+                {menuFolder?.name || 'Folder Actions'}
+              </DialogTitle>
+              <DialogDescription>
+                Choose an action for this folder.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4 space-y-2">
+              <Button variant="ghost" className="w-full justify-start" onClick={() => { setShowFolderMenuDialog(false); if (menuFolder) setSelectedFolder(menuFolder); }}>
+                <FolderTree className="h-4 w-4 mr-3" />
+                Open Folder
+              </Button>
+              <Button variant="ghost" className="w-full justify-start" onClick={() => { setShowFolderMenuDialog(false); if (menuFolder) { navigator.clipboard.writeText(`https://docs.freeflow.app/folder/${menuFolder.id}`); toast.success('Folder link copied!'); } }}>
+                <Share2 className="h-4 w-4 mr-3" />
+                Share Folder
+              </Button>
+              <Button variant="ghost" className="w-full justify-start" onClick={() => { setShowFolderMenuDialog(false); if (menuFolder) { setEditFolderData(menuFolder); setNewFolderName(menuFolder.name); setShowEditFolderDialog(true); } }}>
+                <Edit3 className="h-4 w-4 mr-3" />
+                Rename
+              </Button>
+              <Button variant="ghost" className="w-full justify-start" onClick={() => { setShowFolderMenuDialog(false); setShowFolderColorDialog(true); }}>
+                <Palette className="h-4 w-4 mr-3" />
+                Change Color
+              </Button>
+              <Button variant="ghost" className="w-full justify-start" onClick={() => { setShowFolderMenuDialog(false); toast.promise(new Promise((resolve) => setTimeout(resolve, 1000)), { loading: 'Archiving folder...', success: `Folder "${menuFolder?.name}" archived`, error: 'Archive failed' }); }}>
+                <Archive className="h-4 w-4 mr-3" />
+                Archive
+              </Button>
+              <Button variant="ghost" className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50" onClick={() => { setShowFolderMenuDialog(false); toast.promise(new Promise((resolve) => setTimeout(resolve, 1000)), { loading: `Deleting "${menuFolder?.name}"...`, success: `Folder "${menuFolder?.name}" deleted`, error: 'Delete failed' }); }}>
+                <Trash2 className="h-4 w-4 mr-3" />
+                Delete
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Restore Version Dialog */}
+        <Dialog open={showRestoreVersionDialog} onOpenChange={setShowRestoreVersionDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <RefreshCw className="h-5 w-5" />
+                Restore Version
+              </DialogTitle>
+              <DialogDescription>
+                Are you sure you want to restore to version {versionToRestore?.version}? This will create a new version with the old content.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              {versionToRestore && (
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div className="flex items-center gap-3 mb-2">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={`https://avatar.vercel.sh/${versionToRestore.userName}`} />
+                      <AvatarFallback>{versionToRestore.userName.slice(0, 2)}</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <p className="font-medium text-sm">{versionToRestore.userName}</p>
+                      <p className="text-xs text-gray-500">Version {versionToRestore.version}</p>
+                    </div>
+                  </div>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">{versionToRestore.changes}</p>
+                  <p className="text-xs text-gray-500 mt-2">{versionToRestore.createdAt.toLocaleString()}</p>
+                </div>
+              )}
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => { setShowRestoreVersionDialog(false); setVersionToRestore(null); }}>Cancel</Button>
+              <Button onClick={() => {
+                toast.promise(
+                  new Promise((resolve) => setTimeout(resolve, 1500)),
+                  { loading: `Restoring to version ${versionToRestore?.version}...`, success: 'Document restored successfully!', error: 'Restore failed' }
+                )
+                setShowRestoreVersionDialog(false)
+                setVersionToRestore(null)
+              }}>
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Restore Version
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Quick Share Dialog */}
+        <Dialog open={showQuickShareDialog} onOpenChange={setShowQuickShareDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Share2 className="h-5 w-5" />
+                Share Document
+              </DialogTitle>
+              <DialogDescription>
+                Share "{selectedDocument?.name}" with others.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4 space-y-4">
+              <div>
+                <Label className="text-sm font-medium">Email or Name</Label>
+                <Input
+                  type="email"
+                  value={emailRecipient}
+                  onChange={(e) => setEmailRecipient(e.target.value)}
+                  className="mt-2"
+                  placeholder="Enter email address"
+                />
+              </div>
+              <div>
+                <Label className="text-sm font-medium">Permission Level</Label>
+                <Select defaultValue="viewer">
+                  <SelectTrigger className="mt-2">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="viewer">Viewer - Can view</SelectItem>
+                    <SelectItem value="commenter">Commenter - Can comment</SelectItem>
+                    <SelectItem value="editor">Editor - Can edit</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="text-sm font-medium">Message (optional)</Label>
+                <textarea
+                  value={shareMessage}
+                  onChange={(e) => setShareMessage(e.target.value)}
+                  className="w-full mt-2 p-3 border rounded-lg resize-none h-20 dark:bg-gray-800 dark:border-gray-700"
+                  placeholder="Add a personal message..."
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => { setShowQuickShareDialog(false); setEmailRecipient(''); setShareMessage(''); }}>Cancel</Button>
+              <Button onClick={() => {
+                toast.promise(
+                  new Promise((resolve) => setTimeout(resolve, 1000)),
+                  { loading: 'Sharing document...', success: `Document shared with ${emailRecipient}`, error: 'Share failed' }
+                )
+                setShowQuickShareDialog(false)
+                setEmailRecipient('')
+                setShareMessage('')
+              }} disabled={!emailRecipient}>
+                <Share2 className="h-4 w-4 mr-2" />
+                Share
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Open Document Dialog */}
+        <Dialog open={showOpenDocumentDialog} onOpenChange={setShowOpenDocumentDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <ExternalLink className="h-5 w-5" />
+                Open Document
+              </DialogTitle>
+              <DialogDescription>
+                Choose how to open "{selectedDocument?.name}".
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4 space-y-2">
+              <Button variant="ghost" className="w-full justify-start" onClick={() => {
+                toast.promise(
+                  new Promise((resolve) => setTimeout(resolve, 500)),
+                  { loading: 'Opening in browser...', success: 'Document opened in new tab', error: 'Failed to open' }
+                )
+                setShowOpenDocumentDialog(false)
+              }}>
+                <Globe className="h-4 w-4 mr-3" />
+                Open in Browser
+              </Button>
+              <Button variant="ghost" className="w-full justify-start" onClick={() => {
+                toast.promise(
+                  new Promise((resolve) => setTimeout(resolve, 500)),
+                  { loading: 'Opening in desktop app...', success: 'Opening in desktop application', error: 'Desktop app not installed' }
+                )
+                setShowOpenDocumentDialog(false)
+              }}>
+                <FileText className="h-4 w-4 mr-3" />
+                Open in Desktop App
+              </Button>
+              <Button variant="ghost" className="w-full justify-start" onClick={() => {
+                toast.promise(
+                  new Promise((resolve) => setTimeout(resolve, 500)),
+                  { loading: 'Creating preview...', success: 'Preview ready', error: 'Preview failed' }
+                )
+                setShowOpenDocumentDialog(false)
+              }}>
+                <ImageIcon className="h-4 w-4 mr-3" />
+                Preview Only
+              </Button>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowOpenDocumentDialog(false)}>Cancel</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Document Settings Dialog */}
+        <Dialog open={showDocSettingsDialog} onOpenChange={setShowDocSettingsDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Settings className="h-5 w-5" />
+                Document Settings
+              </DialogTitle>
+              <DialogDescription>
+                Configure your document preferences quickly.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4 space-y-4">
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div>
+                  <Label className="font-medium">Auto-save</Label>
+                  <p className="text-xs text-gray-500">Save changes automatically</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div>
+                  <Label className="font-medium">Version History</Label>
+                  <p className="text-xs text-gray-500">Keep track of changes</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div>
+                  <Label className="font-medium">Spell Check</Label>
+                  <p className="text-xs text-gray-500">Check spelling as you type</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div>
+                  <Label className="font-medium">Dark Mode</Label>
+                  <p className="text-xs text-gray-500">Use dark theme for documents</p>
+                </div>
+                <Switch />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowDocSettingsDialog(false)}>Cancel</Button>
+              <Button onClick={() => {
+                toast.success('Settings saved!')
+                setShowDocSettingsDialog(false)
+              }}>Save Settings</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Clear Trash Dialog */}
+        <Dialog open={showClearTrashDialog} onOpenChange={setShowClearTrashDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-600">
+                <AlertCircle className="h-5 w-5" />
+                Clear Trash
+              </DialogTitle>
+              <DialogDescription>
+                This will permanently delete all documents in the trash. This action cannot be undone.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                <p className="text-sm text-red-700 dark:text-red-400">
+                  <strong>Warning:</strong> All trashed documents will be permanently removed. Make sure you have backed up any important files.
+                </p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowClearTrashDialog(false)}>Cancel</Button>
+              <Button variant="destructive" onClick={() => {
+                toast.promise(
+                  new Promise((resolve) => setTimeout(resolve, 1500)),
+                  { loading: 'Clearing trash...', success: 'Trash cleared successfully!', error: 'Failed to clear trash' }
+                )
+                setShowClearTrashDialog(false)
+              }}>
+                <Trash2 className="h-4 w-4 mr-2" />
+                Clear Trash
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete All Documents Dialog */}
+        <Dialog open={showDeleteAllDocsDialog} onOpenChange={setShowDeleteAllDocsDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-600">
+                <AlertCircle className="h-5 w-5" />
+                Delete All Documents
+              </DialogTitle>
+              <DialogDescription>
+                This will permanently delete ALL documents in your account. This is irreversible.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4 space-y-4">
+              <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                <p className="text-sm text-red-700 dark:text-red-400">
+                  <strong>Danger:</strong> This will delete all {mockDocuments.length} documents permanently. This action cannot be undone.
+                </p>
+              </div>
+              <div>
+                <Label className="text-sm font-medium">Type "DELETE" to confirm</Label>
+                <Input className="mt-2" placeholder="Type DELETE to confirm" />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowDeleteAllDocsDialog(false)}>Cancel</Button>
+              <Button variant="destructive" onClick={() => {
+                toast.promise(
+                  new Promise((resolve) => setTimeout(resolve, 2000)),
+                  { loading: 'Deleting all documents...', success: 'All documents deleted', error: 'Delete failed' }
+                )
+                setShowDeleteAllDocsDialog(false)
+              }}>
+                <Trash2 className="h-4 w-4 mr-2" />
+                Delete All
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Upgrade Premium Dialog */}
+        <Dialog open={showUpgradePremiumDialog} onOpenChange={setShowUpgradePremiumDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Star className="h-5 w-5 text-amber-500" />
+                Upgrade to Premium
+              </DialogTitle>
+              <DialogDescription>
+                Unlock premium templates and advanced features.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4 space-y-4">
+              <div className="p-6 bg-gradient-to-r from-amber-500 to-orange-500 rounded-lg text-white">
+                <h3 className="text-xl font-bold mb-2">Premium Plan</h3>
+                <p className="text-white/80 mb-4">$12/month or $99/year</p>
+                <ul className="space-y-2">
+                  <li className="flex items-center gap-2"><Star className="h-4 w-4" /> Premium templates</li>
+                  <li className="flex items-center gap-2"><Star className="h-4 w-4" /> 100GB storage</li>
+                  <li className="flex items-center gap-2"><Star className="h-4 w-4" /> Priority support</li>
+                  <li className="flex items-center gap-2"><Star className="h-4 w-4" /> Advanced analytics</li>
+                </ul>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <Button variant="outline" className="h-12" onClick={() => {
+                  setSelectedPlan('monthly')
+                  setShowCheckoutDialog(true)
+                }}>
+                  Monthly - $12
+                </Button>
+                <Button className="h-12 bg-gradient-to-r from-amber-500 to-orange-500" onClick={() => {
+                  setSelectedPlan('yearly')
+                  setShowCheckoutDialog(true)
+                }}>
+                  Yearly - $99
+                </Button>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowUpgradePremiumDialog(false)}>Maybe Later</Button>
+              <Button className="bg-gradient-to-r from-amber-500 to-orange-500" onClick={() => {
+                toast.promise(
+                  new Promise((resolve) => setTimeout(resolve, 1500)),
+                  { loading: 'Processing upgrade...', success: 'Welcome to Premium!', error: 'Upgrade failed' }
+                )
+                setShowUpgradePremiumDialog(false)
+              }}>
+                <Star className="h-4 w-4 mr-2" />
+                Upgrade Now
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Person Dialog */}
+        <Dialog open={showAddPersonDialog} onOpenChange={setShowAddPersonDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Plus className="h-5 w-5" />
+                Add Person
+              </DialogTitle>
+              <DialogDescription>
+                Add a person to collaborate on documents.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4 space-y-4">
+              <div>
+                <Label className="text-sm font-medium">Email Address</Label>
+                <Input
+                  type="email"
+                  value={newPersonEmail}
+                  onChange={(e) => setNewPersonEmail(e.target.value)}
+                  className="mt-2"
+                  placeholder="Enter email address"
+                />
+              </div>
+              <div>
+                <Label className="text-sm font-medium">Role</Label>
+                <Select value={newPersonRole} onValueChange={setNewPersonRole}>
+                  <SelectTrigger className="mt-2">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="viewer">Viewer - Can view only</SelectItem>
+                    <SelectItem value="commenter">Commenter - Can view and comment</SelectItem>
+                    <SelectItem value="editor">Editor - Can edit documents</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => { setShowAddPersonDialog(false); setNewPersonEmail(''); }}>Cancel</Button>
+              <Button onClick={() => {
+                toast.promise(
+                  new Promise((resolve) => setTimeout(resolve, 1000)),
+                  { loading: 'Adding person...', success: `${newPersonEmail} added as ${newPersonRole}`, error: 'Failed to add person' }
+                )
+                setShowAddPersonDialog(false)
+                setNewPersonEmail('')
+              }} disabled={!newPersonEmail}>
+                <Plus className="h-4 w-4 mr-2" />
+                Add Person
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Folder Dialog */}
+        <Dialog open={showEditFolderDialog} onOpenChange={setShowEditFolderDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Edit3 className="h-5 w-5" />
+                Edit Folder
+              </DialogTitle>
+              <DialogDescription>
+                Rename folder or change its settings.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4 space-y-4">
+              <div>
+                <Label className="text-sm font-medium">Folder Name</Label>
+                <Input
+                  value={newFolderName}
+                  onChange={(e) => setNewFolderName(e.target.value)}
+                  className="mt-2"
+                  placeholder="Enter folder name"
+                />
+              </div>
+              <div>
+                <Label className="text-sm font-medium">Folder Color</Label>
+                <div className="flex gap-2 mt-2">
+                  {['bg-blue-500', 'bg-green-500', 'bg-purple-500', 'bg-pink-500', 'bg-amber-500', 'bg-red-500', 'bg-cyan-500', 'bg-gray-500'].map(color => (
+                    <button
+                      key={color}
+                      onClick={() => setNewFolderColor(color)}
+                      className={`w-8 h-8 rounded-full ${color} ${newFolderColor === color ? 'ring-2 ring-offset-2 ring-blue-500' : ''}`}
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => { setShowEditFolderDialog(false); setNewFolderName(''); setEditFolderData(null); }}>Cancel</Button>
+              <Button onClick={() => {
+                toast.promise(
+                  new Promise((resolve) => setTimeout(resolve, 800)),
+                  { loading: 'Updating folder...', success: `Folder renamed to "${newFolderName}"`, error: 'Update failed' }
+                )
+                setShowEditFolderDialog(false)
+                setNewFolderName('')
+                setEditFolderData(null)
+              }} disabled={!newFolderName.trim()}>
+                Save Changes
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Checkout Dialog */}
+        <Dialog open={showCheckoutDialog} onOpenChange={setShowCheckoutDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Star className="h-5 w-5 text-amber-500" />
+                Complete Your Purchase
+              </DialogTitle>
+              <DialogDescription>
+                You selected the {selectedPlan === 'monthly' ? 'Monthly' : 'Yearly'} plan
+                {selectedPlan === 'yearly' && ' - Save $45/year!'}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4 space-y-4">
+              <div className="p-4 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 rounded-lg border border-amber-200 dark:border-amber-800">
+                <div className="flex justify-between items-center">
+                  <span className="font-medium">Documents Pro - {selectedPlan === 'monthly' ? 'Monthly' : 'Yearly'}</span>
+                  <span className="text-2xl font-bold text-amber-600">${selectedPlan === 'monthly' ? '12' : '99'}</span>
+                </div>
+                <p className="text-sm text-gray-500 mt-1">{selectedPlan === 'monthly' ? 'Billed monthly' : 'Billed annually'}</p>
+              </div>
+              <div className="space-y-3">
+                <div>
+                  <Label className="text-sm font-medium">Card Number</Label>
+                  <Input placeholder="4242 4242 4242 4242" className="mt-1" />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <Label className="text-sm font-medium">Expiry</Label>
+                    <Input placeholder="MM/YY" className="mt-1" />
+                  </div>
+                  <div>
+                    <Label className="text-sm font-medium">CVC</Label>
+                    <Input placeholder="123" className="mt-1" />
+                  </div>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium">Name on Card</Label>
+                  <Input placeholder="John Doe" className="mt-1" />
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowCheckoutDialog(false)}>Cancel</Button>
+              <Button className="bg-gradient-to-r from-amber-500 to-orange-500" onClick={() => {
+                toast.promise(
+                  new Promise((resolve) => setTimeout(resolve, 2000)),
+                  { loading: 'Processing payment...', success: `Welcome to Documents Pro! Your ${selectedPlan} subscription is now active.`, error: 'Payment failed. Please try again.' }
+                )
+                setShowCheckoutDialog(false)
+                setShowUpgradePremiumDialog(false)
+              }}>
+                <Star className="h-4 w-4 mr-2" />
+                Pay ${selectedPlan === 'monthly' ? '12' : '99'}
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

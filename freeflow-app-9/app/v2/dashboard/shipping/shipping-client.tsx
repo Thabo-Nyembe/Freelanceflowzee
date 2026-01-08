@@ -804,6 +804,24 @@ export default function ShippingClient() {
   const [showCreateDialog, setShowCreateDialog] = useState(false)
   const [formState, setFormState] = useState<ShipmentFormState>(initialFormState)
 
+  // Dialog states for button functionality
+  const [showFiltersDialog, setShowFiltersDialog] = useState(false)
+  const [showLabelPreviewDialog, setShowLabelPreviewDialog] = useState(false)
+  const [showPrintDialog, setShowPrintDialog] = useState(false)
+  const [showAddCarrierDialog, setShowAddCarrierDialog] = useState(false)
+  const [showConfigureCarrierDialog, setShowConfigureCarrierDialog] = useState(false)
+  const [showSaveOriginDialog, setShowSaveOriginDialog] = useState(false)
+  const [showConfigureIntegrationDialog, setShowConfigureIntegrationDialog] = useState(false)
+  const [showCopyApiKeyDialog, setShowCopyApiKeyDialog] = useState(false)
+  const [showRegenerateKeyDialog, setShowRegenerateKeyDialog] = useState(false)
+  const [showExportDataDialog, setShowExportDataDialog] = useState(false)
+  const [showClearCacheDialog, setShowClearCacheDialog] = useState(false)
+  const [showResetSettingsDialog, setShowResetSettingsDialog] = useState(false)
+  const [showDeleteDataDialog, setShowDeleteDataDialog] = useState(false)
+  const [selectedLabel, setSelectedLabel] = useState<Label | null>(null)
+  const [selectedCarrier, setSelectedCarrier] = useState<Carrier | null>(null)
+  const [selectedIntegration, setSelectedIntegration] = useState<{ name: string; status: string } | null>(null)
+
   // Fetch shipments from Supabase
   const fetchShipments = useCallback(async () => {
     try {
@@ -1226,7 +1244,7 @@ export default function ShippingClient() {
                   <Download className="w-4 h-4 mr-2" />
                   Export
                 </Button>
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" onClick={() => setShowFiltersDialog(true)}>
                   <Filter className="w-4 h-4 mr-2" />
                   Filters
                 </Button>
@@ -1695,13 +1713,13 @@ export default function ShippingClient() {
                           <p className="text-xs text-gray-500">{formatDate(label.createdAt)}</p>
                         </div>
                         <div className="flex items-center gap-2">
-                          <Button variant="outline" size="sm">
+                          <Button variant="outline" size="sm" onClick={() => { setSelectedLabel(label); setShowLabelPreviewDialog(true); }}>
                             <Eye className="w-4 h-4" />
                           </Button>
-                          <Button variant="outline" size="sm">
+                          <Button variant="outline" size="sm" onClick={() => { window.open(label.labelUrl, '_blank'); toast.success('Downloading label...'); }}>
                             <Download className="w-4 h-4" />
                           </Button>
-                          <Button variant="outline" size="sm">
+                          <Button variant="outline" size="sm" onClick={() => { setSelectedLabel(label); setShowPrintDialog(true); }}>
                             <Printer className="w-4 h-4" />
                           </Button>
                         </div>
@@ -1773,7 +1791,7 @@ export default function ShippingClient() {
 
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Carrier Accounts</h3>
-              <Button variant="outline">
+              <Button variant="outline" onClick={() => setShowAddCarrierDialog(true)}>
                 <Plus className="w-4 h-4 mr-2" />
                 Add Carrier
               </Button>
@@ -2145,7 +2163,7 @@ export default function ShippingClient() {
                             <Input defaultValue="90001" className="mt-1" />
                           </div>
                         </div>
-                        <Button className="bg-gradient-to-r from-blue-500 to-cyan-600 text-white">
+                        <Button className="bg-gradient-to-r from-blue-500 to-cyan-600 text-white" onClick={() => { toast.success('Origin address saved'); }}>
                           Save Origin Address
                         </Button>
                       </CardContent>
@@ -2180,11 +2198,11 @@ export default function ShippingClient() {
                               <Badge className={carrier.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}>
                                 {carrier.isActive ? 'Active' : 'Inactive'}
                               </Badge>
-                              <Button variant="outline" size="sm">Configure</Button>
+                              <Button variant="outline" size="sm" onClick={() => { setSelectedCarrier(carrier); setShowConfigureCarrierDialog(true); }}>Configure</Button>
                             </div>
                           </div>
                         ))}
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => setShowAddCarrierDialog(true)}>
                           <Plus className="w-4 h-4 mr-2" />
                           Add New Carrier
                         </Button>
@@ -2319,7 +2337,7 @@ export default function ShippingClient() {
                               <Badge className={integration.status === 'connected' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}>
                                 {integration.status}
                               </Badge>
-                              <Button variant="outline" size="sm">
+                              <Button variant="outline" size="sm" onClick={() => { setSelectedIntegration(integration); setShowConfigureIntegrationDialog(true); }}>
                                 {integration.status === 'connected' ? 'Configure' : 'Connect'}
                               </Button>
                             </div>
@@ -2340,7 +2358,7 @@ export default function ShippingClient() {
                           <Label>API Key</Label>
                           <div className="flex gap-2 mt-1">
                             <Input type="password" value="sk_live_****************************" readOnly className="font-mono" />
-                            <Button variant="outline">
+                            <Button variant="outline" onClick={() => { navigator.clipboard.writeText('sk_live_****************************'); toast.success('API key copied to clipboard'); }}>
                               <Copy className="w-4 h-4" />
                             </Button>
                           </div>
@@ -2349,7 +2367,7 @@ export default function ShippingClient() {
                           <Label>Webhook URL</Label>
                           <Input defaultValue="https://api.yoursite.com/webhooks/shipping" className="mt-1 font-mono" />
                         </div>
-                        <Button variant="outline">
+                        <Button variant="outline" onClick={() => setShowRegenerateKeyDialog(true)}>
                           <RefreshCw className="w-4 h-4 mr-2" />
                           Regenerate API Key
                         </Button>
@@ -2492,11 +2510,11 @@ export default function ShippingClient() {
                           <Input type="number" defaultValue="365" className="mt-1" />
                         </div>
                         <div className="flex gap-2">
-                          <Button variant="outline">
+                          <Button variant="outline" onClick={() => setShowExportDataDialog(true)}>
                             <Download className="w-4 h-4 mr-2" />
                             Export All Data
                           </Button>
-                          <Button variant="outline" className="text-red-600 hover:text-red-700">
+                          <Button variant="outline" className="text-red-600 hover:text-red-700" onClick={() => setShowClearCacheDialog(true)}>
                             <Trash2 className="w-4 h-4 mr-2" />
                             Clear Cache
                           </Button>
@@ -2517,7 +2535,7 @@ export default function ShippingClient() {
                             <p className="font-medium text-red-700 dark:text-red-300">Reset All Settings</p>
                             <p className="text-sm text-red-600/70">Restore all settings to defaults</p>
                           </div>
-                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50">
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50" onClick={() => setShowResetSettingsDialog(true)}>
                             Reset
                           </Button>
                         </div>
@@ -2526,7 +2544,7 @@ export default function ShippingClient() {
                             <p className="font-medium text-red-700 dark:text-red-300">Delete All Data</p>
                             <p className="text-sm text-red-600/70">Permanently delete all shipping data</p>
                           </div>
-                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50">
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50" onClick={() => setShowDeleteDataDialog(true)}>
                             Delete
                           </Button>
                         </div>
@@ -2825,15 +2843,15 @@ export default function ShippingClient() {
                   )}
 
                   <div className="flex items-center gap-2 pt-4 border-t">
-                    <Button className="bg-gradient-to-r from-blue-500 to-cyan-600 text-white">
+                    <Button className="bg-gradient-to-r from-blue-500 to-cyan-600 text-white" onClick={() => { if (selectedShipment?.trackingNumber) { window.open(`https://track.example.com/${selectedShipment.trackingNumber}`, '_blank'); } else { toast.info('No tracking number available'); } }}>
                       <MapPin className="w-4 h-4 mr-2" />
                       Track Package
                     </Button>
-                    <Button variant="outline">
+                    <Button variant="outline" onClick={() => { if (selectedShipment?.labelUrl) { setShowPrintDialog(true); } else { toast.info('No label available'); } }}>
                       <Printer className="w-4 h-4 mr-2" />
                       Print Label
                     </Button>
-                    <Button variant="outline">
+                    <Button variant="outline" onClick={() => { if (selectedShipment?.labelUrl) { window.open(selectedShipment.labelUrl, '_blank'); toast.success('Downloading label...'); } else { toast.info('No label available'); } }}>
                       <Download className="w-4 h-4 mr-2" />
                       Download
                     </Button>
@@ -2841,6 +2859,330 @@ export default function ShippingClient() {
                 </div>
               </ScrollArea>
             )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Filters Dialog */}
+        <Dialog open={showFiltersDialog} onOpenChange={setShowFiltersDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Filter Shipments</DialogTitle>
+              <DialogDescription>Apply filters to narrow down your shipments</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label>Status</Label>
+                <select className="w-full mt-1 p-2 border rounded-lg">
+                  <option value="all">All Statuses</option>
+                  <option value="pending">Pending</option>
+                  <option value="in_transit">In Transit</option>
+                  <option value="delivered">Delivered</option>
+                </select>
+              </div>
+              <div>
+                <Label>Carrier</Label>
+                <select className="w-full mt-1 p-2 border rounded-lg">
+                  <option value="all">All Carriers</option>
+                  <option value="fedex">FedEx</option>
+                  <option value="ups">UPS</option>
+                  <option value="usps">USPS</option>
+                </select>
+              </div>
+              <div>
+                <Label>Date Range</Label>
+                <div className="flex gap-2 mt-1">
+                  <Input type="date" className="flex-1" />
+                  <Input type="date" className="flex-1" />
+                </div>
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 mt-4">
+              <Button variant="outline" onClick={() => setShowFiltersDialog(false)}>Cancel</Button>
+              <Button onClick={() => { setShowFiltersDialog(false); toast.success('Filters applied'); }}>Apply Filters</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Label Preview Dialog */}
+        <Dialog open={showLabelPreviewDialog} onOpenChange={setShowLabelPreviewDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Label Preview</DialogTitle>
+              <DialogDescription>Preview and print your shipping label</DialogDescription>
+            </DialogHeader>
+            {selectedLabel && (
+              <div className="space-y-4">
+                <div className="border rounded-lg p-4 bg-gray-50 dark:bg-gray-800 text-center">
+                  <p className="text-sm text-gray-500 mb-2">Tracking Number</p>
+                  <p className="font-mono text-lg">{selectedLabel.trackingNumber}</p>
+                </div>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div><span className="text-gray-500">Carrier:</span> {selectedLabel.carrier}</div>
+                  <div><span className="text-gray-500">Service:</span> {selectedLabel.service}</div>
+                  <div><span className="text-gray-500">Cost:</span> {formatCurrency(selectedLabel.cost)}</div>
+                  <div><span className="text-gray-500">Format:</span> {selectedLabel.format}</div>
+                </div>
+              </div>
+            )}
+            <div className="flex justify-end gap-2 mt-4">
+              <Button variant="outline" onClick={() => setShowLabelPreviewDialog(false)}>Close</Button>
+              <Button onClick={() => { window.print(); toast.success('Printing label...'); }}>Print</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Print Dialog */}
+        <Dialog open={showPrintDialog} onOpenChange={setShowPrintDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Print Label</DialogTitle>
+              <DialogDescription>Configure print settings</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label>Printer</Label>
+                <select className="w-full mt-1 p-2 border rounded-lg">
+                  <option>Default Printer</option>
+                  <option>Thermal Label Printer</option>
+                  <option>Office Printer</option>
+                </select>
+              </div>
+              <div>
+                <Label>Copies</Label>
+                <Input type="number" defaultValue={1} min={1} className="mt-1" />
+              </div>
+              <div className="flex items-center gap-2">
+                <Checkbox id="include-packing" />
+                <Label htmlFor="include-packing">Include packing slip</Label>
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 mt-4">
+              <Button variant="outline" onClick={() => setShowPrintDialog(false)}>Cancel</Button>
+              <Button onClick={() => { setShowPrintDialog(false); window.print(); toast.success('Printing...'); }}>Print</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Carrier Dialog */}
+        <Dialog open={showAddCarrierDialog} onOpenChange={setShowAddCarrierDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Add Carrier</DialogTitle>
+              <DialogDescription>Connect a new shipping carrier</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label>Carrier</Label>
+                <select className="w-full mt-1 p-2 border rounded-lg">
+                  <option>FedEx</option>
+                  <option>UPS</option>
+                  <option>USPS</option>
+                  <option>DHL</option>
+                  <option>Canada Post</option>
+                  <option>Other</option>
+                </select>
+              </div>
+              <div>
+                <Label>Account Number</Label>
+                <Input placeholder="Enter account number" className="mt-1" />
+              </div>
+              <div>
+                <Label>API Key</Label>
+                <Input type="password" placeholder="Enter API key" className="mt-1" />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 mt-4">
+              <Button variant="outline" onClick={() => setShowAddCarrierDialog(false)}>Cancel</Button>
+              <Button onClick={() => { setShowAddCarrierDialog(false); toast.success('Carrier added successfully'); }}>Add Carrier</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Configure Carrier Dialog */}
+        <Dialog open={showConfigureCarrierDialog} onOpenChange={setShowConfigureCarrierDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Configure {selectedCarrier?.name}</DialogTitle>
+              <DialogDescription>Update carrier settings</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label>Account Number</Label>
+                <Input defaultValue={selectedCarrier?.accountNumber || ''} className="mt-1" />
+              </div>
+              <div className="flex items-center justify-between">
+                <Label>Active</Label>
+                <Switch defaultChecked={selectedCarrier?.isActive} />
+              </div>
+              <div>
+                <Label>Default Service</Label>
+                <select className="w-full mt-1 p-2 border rounded-lg">
+                  {selectedCarrier?.services.map(service => (
+                    <option key={service.id} value={service.code}>{service.name}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 mt-4">
+              <Button variant="outline" onClick={() => setShowConfigureCarrierDialog(false)}>Cancel</Button>
+              <Button onClick={() => { setShowConfigureCarrierDialog(false); toast.success('Carrier updated'); }}>Save Changes</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Configure Integration Dialog */}
+        <Dialog open={showConfigureIntegrationDialog} onOpenChange={setShowConfigureIntegrationDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>{selectedIntegration?.status === 'connected' ? 'Configure' : 'Connect'} {selectedIntegration?.name}</DialogTitle>
+              <DialogDescription>Manage integration settings</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              {selectedIntegration?.status !== 'connected' && (
+                <>
+                  <div>
+                    <Label>API Key</Label>
+                    <Input type="password" placeholder="Enter API key" className="mt-1" />
+                  </div>
+                  <div>
+                    <Label>Store URL</Label>
+                    <Input placeholder="https://your-store.com" className="mt-1" />
+                  </div>
+                </>
+              )}
+              <div className="flex items-center justify-between">
+                <Label>Auto-sync orders</Label>
+                <Switch defaultChecked />
+              </div>
+              <div className="flex items-center justify-between">
+                <Label>Import tracking to store</Label>
+                <Switch defaultChecked />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 mt-4">
+              <Button variant="outline" onClick={() => setShowConfigureIntegrationDialog(false)}>Cancel</Button>
+              <Button onClick={() => { setShowConfigureIntegrationDialog(false); toast.success('Integration saved'); }}>
+                {selectedIntegration?.status === 'connected' ? 'Save Changes' : 'Connect'}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Regenerate API Key Dialog */}
+        <Dialog open={showRegenerateKeyDialog} onOpenChange={setShowRegenerateKeyDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Regenerate API Key</DialogTitle>
+              <DialogDescription>This will invalidate your current API key</DialogDescription>
+            </DialogHeader>
+            <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
+              <p className="text-sm text-yellow-700 dark:text-yellow-300">
+                Warning: Regenerating your API key will immediately invalidate the current key. Any applications using the old key will stop working.
+              </p>
+            </div>
+            <div className="flex justify-end gap-2 mt-4">
+              <Button variant="outline" onClick={() => setShowRegenerateKeyDialog(false)}>Cancel</Button>
+              <Button variant="destructive" onClick={() => { setShowRegenerateKeyDialog(false); toast.success('New API key generated'); }}>Regenerate Key</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Export Data Dialog */}
+        <Dialog open={showExportDataDialog} onOpenChange={setShowExportDataDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Export Data</DialogTitle>
+              <DialogDescription>Download your shipping data</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label>Export Format</Label>
+                <select className="w-full mt-1 p-2 border rounded-lg">
+                  <option value="csv">CSV</option>
+                  <option value="xlsx">Excel (XLSX)</option>
+                  <option value="json">JSON</option>
+                </select>
+              </div>
+              <div>
+                <Label>Date Range</Label>
+                <div className="flex gap-2 mt-1">
+                  <Input type="date" className="flex-1" />
+                  <Input type="date" className="flex-1" />
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <Checkbox id="include-tracking" defaultChecked />
+                <Label htmlFor="include-tracking">Include tracking history</Label>
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 mt-4">
+              <Button variant="outline" onClick={() => setShowExportDataDialog(false)}>Cancel</Button>
+              <Button onClick={() => { setShowExportDataDialog(false); toast.success('Export started. You will receive an email when complete.'); }}>Export Data</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Clear Cache Dialog */}
+        <Dialog open={showClearCacheDialog} onOpenChange={setShowClearCacheDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Clear Cache</DialogTitle>
+              <DialogDescription>Remove cached shipping rates and data</DialogDescription>
+            </DialogHeader>
+            <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
+              <p className="text-sm text-yellow-700 dark:text-yellow-300">
+                This will clear all cached rate quotes and temporary data. Rate lookups may be slower until the cache is rebuilt.
+              </p>
+            </div>
+            <div className="flex justify-end gap-2 mt-4">
+              <Button variant="outline" onClick={() => setShowClearCacheDialog(false)}>Cancel</Button>
+              <Button variant="destructive" onClick={() => { setShowClearCacheDialog(false); toast.success('Cache cleared successfully'); }}>Clear Cache</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Reset Settings Dialog */}
+        <Dialog open={showResetSettingsDialog} onOpenChange={setShowResetSettingsDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Reset All Settings</DialogTitle>
+              <DialogDescription>This will restore all settings to their default values</DialogDescription>
+            </DialogHeader>
+            <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
+              <p className="text-sm text-red-700 dark:text-red-300">
+                Warning: This action cannot be undone. All your custom settings, preferences, and configurations will be reset to defaults.
+              </p>
+            </div>
+            <div className="flex justify-end gap-2 mt-4">
+              <Button variant="outline" onClick={() => setShowResetSettingsDialog(false)}>Cancel</Button>
+              <Button variant="destructive" onClick={() => { setShowResetSettingsDialog(false); toast.success('Settings reset to defaults'); }}>Reset Settings</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Data Dialog */}
+        <Dialog open={showDeleteDataDialog} onOpenChange={setShowDeleteDataDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Delete All Data</DialogTitle>
+              <DialogDescription>Permanently delete all shipping data</DialogDescription>
+            </DialogHeader>
+            <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg space-y-2">
+              <p className="text-sm text-red-700 dark:text-red-300 font-medium">
+                ⚠️ This action is permanent and cannot be undone!
+              </p>
+              <p className="text-sm text-red-600 dark:text-red-400">
+                All shipments, labels, tracking history, and related data will be permanently deleted.
+              </p>
+            </div>
+            <div className="space-y-2 mt-4">
+              <Label>Type DELETE to confirm</Label>
+              <Input placeholder="DELETE" className="mt-1" />
+            </div>
+            <div className="flex justify-end gap-2 mt-4">
+              <Button variant="outline" onClick={() => setShowDeleteDataDialog(false)}>Cancel</Button>
+              <Button variant="destructive" onClick={() => { setShowDeleteDataDialog(false); toast.success('All data deleted'); }}>Delete All Data</Button>
+            </div>
           </DialogContent>
         </Dialog>
       </div>

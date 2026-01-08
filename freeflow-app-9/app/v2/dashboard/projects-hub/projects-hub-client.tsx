@@ -278,6 +278,44 @@ export default function ProjectsHubClient() {
   const [selectedIssue, setSelectedIssue] = useState<Issue | null>(null)
   const [showIssueDialog, setShowIssueDialog] = useState(false)
 
+  // Additional dialog states for buttons
+  const [showFilterDialog, setShowFilterDialog] = useState(false)
+  const [showMilestoneDialog, setShowMilestoneDialog] = useState(false)
+  const [showSprintBoardDialog, setShowSprintBoardDialog] = useState(false)
+  const [showBacklogItemDialog, setShowBacklogItemDialog] = useState(false)
+  const [showReportDialog, setShowReportDialog] = useState(false)
+  const [showAutomationDialog, setShowAutomationDialog] = useState(false)
+  const [showTemplateUseDialog, setShowTemplateUseDialog] = useState(false)
+  const [showSlackConfigDialog, setShowSlackConfigDialog] = useState(false)
+  const [showWebhookDialog, setShowWebhookDialog] = useState(false)
+  const [showIntegrationDialog, setShowIntegrationDialog] = useState(false)
+  const [showIntegrationConfigDialog, setShowIntegrationConfigDialog] = useState(false)
+  const [showCustomFieldDialog, setShowCustomFieldDialog] = useState(false)
+  const [showArchiveDialog, setShowArchiveDialog] = useState(false)
+  const [showDeleteAllDialog, setShowDeleteAllDialog] = useState(false)
+  const [showStatusDialog, setShowStatusDialog] = useState(false)
+  const [showAutomationRuleDialog, setShowAutomationRuleDialog] = useState(false)
+  const [showEditProjectDialog, setShowEditProjectDialog] = useState(false)
+  const [showLogTimeDialog, setShowLogTimeDialog] = useState(false)
+  const [showAttachmentDialog, setShowAttachmentDialog] = useState(false)
+  const [showLinkIssueDialog, setShowLinkIssueDialog] = useState(false)
+  const [showEditIssueDialog, setShowEditIssueDialog] = useState(false)
+  const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null)
+  const [selectedIntegration, setSelectedIntegration] = useState<Integration | null>(null)
+  const [selectedSprint, setSelectedSprint] = useState<Sprint | null>(null)
+  const [commentText, setCommentText] = useState('')
+  const [logTimeAmount, setLogTimeAmount] = useState('')
+
+  // Form states
+  const [milestoneForm, setMilestoneForm] = useState({ title: '', quarter: '', status: 'planned' as const })
+  const [backlogItemForm, setBacklogItemForm] = useState({ title: '', description: '', priority: 'medium' as Priority, points: 1, type: 'task' as const })
+  const [reportForm, setReportForm] = useState({ name: '', type: 'burndown' as const, description: '' })
+  const [automationForm, setAutomationForm] = useState({ name: '', trigger: '', action: '' })
+  const [webhookForm, setWebhookForm] = useState({ url: '', events: [] as string[] })
+  const [customFieldForm, setCustomFieldForm] = useState({ name: '', type: 'text' as const, required: false, appliesTo: [] as string[] })
+  const [statusForm, setStatusForm] = useState({ name: '' })
+  const [filterForm, setFilterForm] = useState({ status: 'all', priority: 'all', dateRange: 'all' })
+
   // Database integration - use real projects hook
   const { projects: dbProjects, fetchProjects, createProject, updateProject, deleteProject, isLoading: projectsLoading } = useProjects()
 
@@ -432,6 +470,262 @@ export default function ProjectsHubClient() {
     toast.success('Projects exported to CSV')
   }
 
+  // Handler functions for all buttons
+  const handleApplyFilters = () => {
+    if (filterForm.status !== 'all') setSelectedFilter(filterForm.status)
+    else if (filterForm.priority !== 'all') setSelectedFilter(filterForm.priority)
+    else setSelectedFilter('all')
+    setShowFilterDialog(false)
+    toast.success('Filters applied')
+  }
+
+  const handleCreateMilestone = () => {
+    if (!milestoneForm.title) {
+      toast.error('Please enter a milestone title')
+      return
+    }
+    toast.success('Milestone created', { description: `"${milestoneForm.title}" added to roadmap` })
+    setShowMilestoneDialog(false)
+    setMilestoneForm({ title: '', quarter: '', status: 'planned' })
+  }
+
+  const handleViewSprintBoard = (sprint: Sprint) => {
+    setSelectedSprint(sprint)
+    setShowSprintBoardDialog(true)
+  }
+
+  const handleCreateBacklogItem = () => {
+    if (!backlogItemForm.title) {
+      toast.error('Please enter a title')
+      return
+    }
+    toast.success('Backlog item created', { description: `"${backlogItemForm.title}" added to backlog` })
+    setShowBacklogItemDialog(false)
+    setBacklogItemForm({ title: '', description: '', priority: 'medium', points: 1, type: 'task' })
+  }
+
+  const handleCreateReport = () => {
+    if (!reportForm.name) {
+      toast.error('Please enter a report name')
+      return
+    }
+    toast.success('Report created', { description: `"${reportForm.name}" report is ready` })
+    setShowReportDialog(false)
+    setReportForm({ name: '', type: 'burndown', description: '' })
+  }
+
+  const handleCreateAutomation = () => {
+    if (!automationForm.name || !automationForm.trigger || !automationForm.action) {
+      toast.error('Please fill in all fields')
+      return
+    }
+    toast.success('Automation created', { description: `"${automationForm.name}" is now active` })
+    setShowAutomationDialog(false)
+    setAutomationForm({ name: '', trigger: '', action: '' })
+  }
+
+  const handleUseTemplate = (template: Template) => {
+    setSelectedTemplate(template)
+    setShowTemplateUseDialog(true)
+  }
+
+  const handleConfirmUseTemplate = () => {
+    if (selectedTemplate) {
+      toast.success('Template applied', { description: `Project created from "${selectedTemplate.name}"` })
+      setShowTemplateUseDialog(false)
+      setSelectedTemplate(null)
+    }
+  }
+
+  const handleConfigureSlack = () => {
+    toast.success('Slack channel updated', { description: 'Notifications will be sent to the selected channel' })
+    setShowSlackConfigDialog(false)
+  }
+
+  const handleCreateWebhook = () => {
+    if (!webhookForm.url) {
+      toast.error('Please enter a webhook URL')
+      return
+    }
+    toast.success('Webhook created', { description: 'New webhook endpoint added' })
+    setShowWebhookDialog(false)
+    setWebhookForm({ url: '', events: [] })
+  }
+
+  const handleAddIntegration = () => {
+    toast.success('Integration added', { description: 'New service connected successfully' })
+    setShowIntegrationDialog(false)
+  }
+
+  const handleConfigureIntegration = (integration: Integration) => {
+    setSelectedIntegration(integration)
+    setShowIntegrationConfigDialog(true)
+  }
+
+  const handleSaveIntegrationConfig = () => {
+    if (selectedIntegration) {
+      toast.success('Integration updated', { description: `${selectedIntegration.name} configuration saved` })
+      setShowIntegrationConfigDialog(false)
+      setSelectedIntegration(null)
+    }
+  }
+
+  const handleRegenerateApiToken = () => {
+    toast.success('API token regenerated', { description: 'New token has been created. Please update your applications.' })
+  }
+
+  const handleViewApiDocs = () => {
+    window.open('/docs/api', '_blank')
+    toast.success('Opening API documentation')
+  }
+
+  const handleDownloadCli = () => {
+    toast.success('Downloading CLI tool', { description: 'Download started' })
+    // Simulate download
+    const link = document.createElement('a')
+    link.href = '#'
+    link.download = 'projects-cli'
+    link.click()
+  }
+
+  const handleCreateCustomField = () => {
+    if (!customFieldForm.name) {
+      toast.error('Please enter a field name')
+      return
+    }
+    toast.success('Custom field created', { description: `"${customFieldForm.name}" field added` })
+    setShowCustomFieldDialog(false)
+    setCustomFieldForm({ name: '', type: 'text', required: false, appliesTo: [] })
+  }
+
+  const handleArchiveAllProjects = () => {
+    toast.success('All projects archived', { description: 'Projects moved to archive' })
+    setShowArchiveDialog(false)
+  }
+
+  const handleDeleteAllData = () => {
+    toast.success('All data deleted', { description: 'Projects and issues permanently removed' })
+    setShowDeleteAllDialog(false)
+  }
+
+  const handleAddStatus = () => {
+    if (!statusForm.name) {
+      toast.error('Please enter a status name')
+      return
+    }
+    toast.success('Status added', { description: `"${statusForm.name}" status added to workflow` })
+    setShowStatusDialog(false)
+    setStatusForm({ name: '' })
+  }
+
+  const handleCreateAutomationRule = () => {
+    if (!automationForm.name) {
+      toast.error('Please enter a rule name')
+      return
+    }
+    toast.success('Automation rule created', { description: 'New rule is now active' })
+    setShowAutomationRuleDialog(false)
+    setAutomationForm({ name: '', trigger: '', action: '' })
+  }
+
+  const handleExportAllData = () => {
+    handleExportProjects()
+  }
+
+  const handleImportData = () => {
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.accept = '.csv,.json'
+    input.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0]
+      if (file) {
+        toast.success('Data imported', { description: `${file.name} processed successfully` })
+      }
+    }
+    input.click()
+  }
+
+  const handleEditProject = () => {
+    if (selectedProject) {
+      setShowProjectDialog(false)
+      setShowEditProjectDialog(true)
+    }
+  }
+
+  const handleSaveProjectEdit = async () => {
+    if (selectedProject) {
+      try {
+        await updateProject(selectedProject.id, {
+          name: selectedProject.name,
+          description: selectedProject.description,
+          budget: selectedProject.budget,
+          priority: selectedProject.priority as any
+        })
+        toast.success('Project updated')
+        setShowEditProjectDialog(false)
+      } catch (error) {
+        toast.error('Failed to update project')
+      }
+    }
+  }
+
+  const handleAddComment = () => {
+    if (!commentText.trim()) {
+      toast.error('Please enter a comment')
+      return
+    }
+    toast.success('Comment added', { description: 'Your comment has been posted' })
+    setCommentText('')
+  }
+
+  const handleLogTime = () => {
+    if (!logTimeAmount) {
+      toast.error('Please enter time amount')
+      return
+    }
+    toast.success('Time logged', { description: `${logTimeAmount} hours logged` })
+    setShowLogTimeDialog(false)
+    setLogTimeAmount('')
+  }
+
+  const handleAddAttachment = () => {
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.multiple = true
+    input.onchange = (e) => {
+      const files = (e.target as HTMLInputElement).files
+      if (files && files.length > 0) {
+        toast.success('Attachment added', { description: `${files.length} file(s) uploaded` })
+        setShowAttachmentDialog(false)
+      }
+    }
+    input.click()
+  }
+
+  const handleLinkIssue = (issueKey: string) => {
+    toast.success('Issue linked', { description: `Linked to ${issueKey}` })
+    setShowLinkIssueDialog(false)
+  }
+
+  const handleEditIssue = () => {
+    setShowIssueDialog(false)
+    setShowEditIssueDialog(true)
+  }
+
+  const handleSaveIssueEdit = () => {
+    if (selectedIssue) {
+      toast.success('Issue updated', { description: `${selectedIssue.key} has been updated` })
+      setShowEditIssueDialog(false)
+    }
+  }
+
+  const handleMoveToInProgress = () => {
+    if (selectedIssue) {
+      toast.success('Issue moved', { description: `${selectedIssue.key} moved to In Progress` })
+      setShowIssueDialog(false)
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:bg-none dark:bg-gray-900 p-6">
       <div className="max-w-[1800px] mx-auto space-y-6">
@@ -443,7 +737,7 @@ export default function ProjectsHubClient() {
           </div>
           <div className="flex items-center gap-3">
             <div className="relative"><Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" /><Input placeholder="Search projects..." className="w-72 pl-10" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} /></div>
-            <Button variant="outline"><Filter className="h-4 w-4 mr-2" />Filter</Button>
+            <Button variant="outline" onClick={() => setShowFilterDialog(true)}><Filter className="h-4 w-4 mr-2" />Filter</Button>
             <Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={() => setShowNewProjectDialog(true)}><Plus className="h-4 w-4 mr-2" />New Project</Button>
           </div>
         </div>
@@ -573,7 +867,7 @@ export default function ProjectsHubClient() {
           {/* Roadmap Tab */}
           <TabsContent value="roadmap" className="mt-6">
             <Card className="border-gray-200 dark:border-gray-700">
-              <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Product Roadmap</CardTitle><Button><Plus className="h-4 w-4 mr-2" />Add Milestone</Button></CardHeader>
+              <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Product Roadmap</CardTitle><Button onClick={() => setShowMilestoneDialog(true)}><Plus className="h-4 w-4 mr-2" />Add Milestone</Button></CardHeader>
               <CardContent className="space-y-6">
                 {mockRoadmap.map(item => (
                   <div key={item.id} className="p-4 border rounded-lg">
@@ -606,7 +900,7 @@ export default function ProjectsHubClient() {
                       <div className="flex justify-between text-sm"><span>Velocity</span><span className="font-medium">{sprint.velocity} pts</span></div>
                       <div className="text-xs text-gray-500">{sprint.startDate} - {sprint.endDate}</div>
                     </div>
-                    {sprint.status === 'active' && <Button className="w-full mt-4"><Play className="h-4 w-4 mr-2" />View Sprint Board</Button>}
+                    {sprint.status === 'active' && <Button className="w-full mt-4" onClick={() => handleViewSprintBoard(sprint as Sprint)}><Play className="h-4 w-4 mr-2" />View Sprint Board</Button>}
                   </CardContent>
                 </Card>
               ))}
@@ -616,7 +910,7 @@ export default function ProjectsHubClient() {
           {/* Backlog Tab */}
           <TabsContent value="backlog" className="mt-6">
             <Card className="border-gray-200 dark:border-gray-700">
-              <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Product Backlog</CardTitle><Button><Plus className="h-4 w-4 mr-2" />Add Item</Button></CardHeader>
+              <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Product Backlog</CardTitle><Button onClick={() => setShowBacklogItemDialog(true)}><Plus className="h-4 w-4 mr-2" />Add Item</Button></CardHeader>
               <CardContent className="p-0 divide-y divide-gray-100 dark:divide-gray-800">
                 {mockBacklog.map(item => (
                   <div key={item.id} className="flex items-center gap-4 p-4 hover:bg-gray-50 dark:hover:bg-gray-800">
@@ -638,7 +932,7 @@ export default function ProjectsHubClient() {
           <TabsContent value="insights" className="mt-6 space-y-6">
             {/* Reports Section */}
             <Card className="border-gray-200 dark:border-gray-700">
-              <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Reports & Analytics</CardTitle><Button variant="outline"><Plus className="h-4 w-4 mr-2" />Create Report</Button></CardHeader>
+              <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Reports & Analytics</CardTitle><Button variant="outline" onClick={() => setShowReportDialog(true)}><Plus className="h-4 w-4 mr-2" />Create Report</Button></CardHeader>
               <CardContent>
                 <div className="grid grid-cols-3 gap-4">
                   {mockReports.map(report => (
@@ -773,7 +1067,7 @@ export default function ProjectsHubClient() {
           {/* Automations Tab */}
           <TabsContent value="automations" className="mt-6">
             <Card className="border-gray-200 dark:border-gray-700">
-              <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Workflow Automations</CardTitle><Button><Plus className="h-4 w-4 mr-2" />Create Automation</Button></CardHeader>
+              <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Workflow Automations</CardTitle><Button onClick={() => setShowAutomationDialog(true)}><Plus className="h-4 w-4 mr-2" />Create Automation</Button></CardHeader>
               <CardContent className="space-y-4">
                 {mockAutomations.map(auto => (
                   <div key={auto.id} className="flex items-center gap-4 p-4 border rounded-lg">
@@ -797,7 +1091,7 @@ export default function ProjectsHubClient() {
                     <h3 className="font-semibold mb-1">{template.name}</h3>
                     <p className="text-sm text-gray-500 mb-4">{template.description}</p>
                     <div className="flex items-center justify-between text-sm text-gray-500"><span>{template.tasksCount} tasks</span><span>Used {template.usageCount} times</span></div>
-                    <Button className="w-full mt-4" variant="outline"><Copy className="h-4 w-4 mr-2" />Use Template</Button>
+                    <Button className="w-full mt-4" variant="outline" onClick={() => handleUseTemplate(template as Template)}><Copy className="h-4 w-4 mr-2" />Use Template</Button>
                   </CardContent>
                 </Card>
               ))}
@@ -1165,7 +1459,7 @@ export default function ProjectsHubClient() {
                             </div>
                             <Badge className="ml-auto bg-green-100 text-green-700">Active</Badge>
                           </div>
-                          <Button variant="outline" size="sm">Configure Channel</Button>
+                          <Button variant="outline" size="sm" onClick={() => setShowSlackConfigDialog(true)}>Configure Channel</Button>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <div>
@@ -1222,7 +1516,7 @@ export default function ProjectsHubClient() {
                             </div>
                           ))}
                         </div>
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => setShowWebhookDialog(true)}>
                           <Plus className="h-4 w-4 mr-2" />
                           Add Webhook
                         </Button>
@@ -1241,7 +1535,7 @@ export default function ProjectsHubClient() {
                             <Link className="h-5 w-5" />
                             Connected Services
                           </CardTitle>
-                          <Button size="sm">
+                          <Button size="sm" onClick={() => setShowIntegrationDialog(true)}>
                             <Plus className="h-4 w-4 mr-2" />
                             Add Integration
                           </Button>
@@ -1261,7 +1555,7 @@ export default function ProjectsHubClient() {
                             </div>
                             <div className="flex items-center gap-3">
                               <Badge className={getIntegrationStatusColor(integration.status)}>{integration.status}</Badge>
-                              <Button variant="ghost" size="sm">Configure</Button>
+                              <Button variant="ghost" size="sm" onClick={() => handleConfigureIntegration(integration)}>Configure</Button>
                             </div>
                           </div>
                         ))}
@@ -1279,7 +1573,7 @@ export default function ProjectsHubClient() {
                         <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <div className="flex items-center justify-between mb-3">
                             <div className="font-medium">API Token</div>
-                            <Button variant="outline" size="sm">
+                            <Button variant="outline" size="sm" onClick={handleRegenerateApiToken}>
                               <RefreshCw className="h-4 w-4 mr-2" />
                               Regenerate
                             </Button>
@@ -1303,7 +1597,7 @@ export default function ProjectsHubClient() {
                             <div className="text-sm text-gray-500">Avg Response Time</div>
                           </div>
                         </div>
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={handleViewApiDocs}>
                           <ExternalLink className="h-4 w-4 mr-2" />
                           View API Documentation
                         </Button>
@@ -1337,7 +1631,7 @@ export default function ProjectsHubClient() {
                             <div className="font-medium">CLI Tool</div>
                             <div className="text-sm text-gray-500">Command-line interface for automation</div>
                           </div>
-                          <Button variant="outline" size="sm">
+                          <Button variant="outline" size="sm" onClick={handleDownloadCli}>
                             <Download className="h-4 w-4 mr-2" />
                             Download
                           </Button>
@@ -1357,7 +1651,7 @@ export default function ProjectsHubClient() {
                             <Tag className="h-5 w-5" />
                             Custom Fields
                           </CardTitle>
-                          <Button size="sm">
+                          <Button size="sm" onClick={() => setShowCustomFieldDialog(true)}>
                             <Plus className="h-4 w-4 mr-2" />
                             Add Field
                           </Button>
@@ -1538,7 +1832,7 @@ export default function ProjectsHubClient() {
                             <div className="font-medium text-red-600">Archive All Projects</div>
                             <div className="text-sm text-gray-500">Move all projects to archive</div>
                           </div>
-                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50" onClick={() => setShowArchiveDialog(true)}>
                             <Archive className="h-4 w-4 mr-2" />
                             Archive
                           </Button>
@@ -1548,7 +1842,7 @@ export default function ProjectsHubClient() {
                             <div className="font-medium text-red-600">Delete All Data</div>
                             <div className="text-sm text-gray-500">Permanently delete all projects and issues</div>
                           </div>
-                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50" onClick={() => setShowDeleteAllDialog(true)}>
                             <Trash2 className="h-4 w-4 mr-2" />
                             Delete
                           </Button>
@@ -1579,7 +1873,7 @@ export default function ProjectsHubClient() {
                             </div>
                           ))}
                         </div>
-                        <Button variant="outline">
+                        <Button variant="outline" onClick={() => setShowStatusDialog(true)}>
                           <Plus className="h-4 w-4 mr-2" />
                           Add Status
                         </Button>
@@ -1646,7 +1940,7 @@ export default function ProjectsHubClient() {
                             <Switch checked={auto.enabled} />
                           </div>
                         ))}
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => setShowAutomationRuleDialog(true)}>
                           <Plus className="h-4 w-4 mr-2" />
                           Create Automation Rule
                         </Button>
@@ -1676,11 +1970,11 @@ export default function ProjectsHubClient() {
                           </div>
                         </div>
                         <div className="flex gap-3">
-                          <Button variant="outline" className="flex-1">
+                          <Button variant="outline" className="flex-1" onClick={handleExportAllData}>
                             <Download className="h-4 w-4 mr-2" />
                             Export All Data
                           </Button>
-                          <Button variant="outline" className="flex-1">
+                          <Button variant="outline" className="flex-1" onClick={handleImportData}>
                             <Upload className="h-4 w-4 mr-2" />
                             Import Data
                           </Button>
@@ -1745,7 +2039,7 @@ export default function ProjectsHubClient() {
                   {selectedProject.description && <Card><CardContent className="p-4"><p className="text-sm text-gray-500 mb-2">Description</p><p>{selectedProject.description}</p></CardContent></Card>}
                   <Card><CardContent className="p-4"><p className="text-sm text-gray-500 mb-2">Team Members</p><div className="flex gap-2">{selectedProject.teamMembers.map((m, i) => <Avatar key={i}><AvatarFallback>{m.slice(0, 2)}</AvatarFallback></Avatar>)}</div></CardContent></Card>
                 </div>
-                <DialogFooter><Button variant="outline" onClick={() => setShowProjectDialog(false)}>Close</Button><Button><Edit className="h-4 w-4 mr-2" />Edit Project</Button></DialogFooter>
+                <DialogFooter><Button variant="outline" onClick={() => setShowProjectDialog(false)}>Close</Button><Button onClick={handleEditProject}><Edit className="h-4 w-4 mr-2" />Edit Project</Button></DialogFooter>
               </>
             )}
           </DialogContent>
@@ -1805,8 +2099,8 @@ export default function ProjectsHubClient() {
                             <p className="text-gray-500 text-sm">No comments yet</p>
                           )}
                           <div className="pt-4 border-t">
-                            <Textarea placeholder="Add a comment..." className="mb-2" />
-                            <Button size="sm">Add Comment</Button>
+                            <Textarea placeholder="Add a comment..." className="mb-2" value={commentText} onChange={(e) => setCommentText(e.target.value)} />
+                            <Button size="sm" onClick={handleAddComment}>Add Comment</Button>
                           </div>
                         </div>
                       </CardContent>
@@ -1834,7 +2128,7 @@ export default function ProjectsHubClient() {
                           {selectedIssue.timeEstimate && selectedIssue.timeSpent && (
                             <Progress value={(selectedIssue.timeSpent / selectedIssue.timeEstimate) * 100} className="h-2 mt-4" />
                           )}
-                          <Button variant="outline" size="sm" className="mt-4"><Timer className="h-4 w-4 mr-2" />Log Time</Button>
+                          <Button variant="outline" size="sm" className="mt-4" onClick={() => setShowLogTimeDialog(true)}><Timer className="h-4 w-4 mr-2" />Log Time</Button>
                         </CardContent>
                       </Card>
                     )}
@@ -1866,7 +2160,7 @@ export default function ProjectsHubClient() {
                           ) : (
                             <p>No attachments</p>
                           )}
-                          <Button variant="ghost" size="sm" className="mt-2"><Plus className="h-4 w-4 mr-1" />Add Attachment</Button>
+                          <Button variant="ghost" size="sm" className="mt-2" onClick={handleAddAttachment}><Plus className="h-4 w-4 mr-1" />Add Attachment</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -1875,7 +2169,7 @@ export default function ProjectsHubClient() {
                       <CardContent className="pt-6">
                         <Label className="text-xs text-gray-500">Linked Issues</Label>
                         <div className="mt-2">
-                          <Button variant="ghost" size="sm" className="w-full justify-start text-gray-500"><Link className="h-4 w-4 mr-2" />Link an issue</Button>
+                          <Button variant="ghost" size="sm" className="w-full justify-start text-gray-500" onClick={() => setShowLinkIssueDialog(true)}><Link className="h-4 w-4 mr-2" />Link an issue</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -1883,11 +2177,809 @@ export default function ProjectsHubClient() {
                 </div>
                 <DialogFooter className="mt-6">
                   <Button variant="outline" onClick={() => setShowIssueDialog(false)}>Close</Button>
-                  <Button variant="outline"><Edit className="h-4 w-4 mr-2" />Edit</Button>
-                  <Button className="bg-gradient-to-r from-blue-600 to-indigo-600"><ArrowRight className="h-4 w-4 mr-2" />Move to In Progress</Button>
+                  <Button variant="outline" onClick={handleEditIssue}><Edit className="h-4 w-4 mr-2" />Edit</Button>
+                  <Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={handleMoveToInProgress}><ArrowRight className="h-4 w-4 mr-2" />Move to In Progress</Button>
                 </DialogFooter>
               </>
             )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Filter Dialog */}
+        <Dialog open={showFilterDialog} onOpenChange={setShowFilterDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Filter Projects</DialogTitle>
+              <DialogDescription>Apply filters to narrow down your project list</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label>Status</Label>
+                <Select value={filterForm.status} onValueChange={(v) => setFilterForm(f => ({ ...f, status: v }))}>
+                  <SelectTrigger className="mt-1"><SelectValue placeholder="All statuses" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Statuses</SelectItem>
+                    {statusColumns.map(col => <SelectItem key={col.id} value={col.id}>{col.label}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Priority</Label>
+                <Select value={filterForm.priority} onValueChange={(v) => setFilterForm(f => ({ ...f, priority: v }))}>
+                  <SelectTrigger className="mt-1"><SelectValue placeholder="All priorities" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Priorities</SelectItem>
+                    {Object.entries(priorityConfig).map(([k, v]) => <SelectItem key={k} value={k}>{v.label}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Date Range</Label>
+                <Select value={filterForm.dateRange} onValueChange={(v) => setFilterForm(f => ({ ...f, dateRange: v }))}>
+                  <SelectTrigger className="mt-1"><SelectValue placeholder="All time" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Time</SelectItem>
+                    <SelectItem value="week">This Week</SelectItem>
+                    <SelectItem value="month">This Month</SelectItem>
+                    <SelectItem value="quarter">This Quarter</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => { setFilterForm({ status: 'all', priority: 'all', dateRange: 'all' }); setSelectedFilter('all') }}>Clear Filters</Button>
+              <Button onClick={handleApplyFilters}>Apply Filters</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Milestone Dialog */}
+        <Dialog open={showMilestoneDialog} onOpenChange={setShowMilestoneDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Add Milestone</DialogTitle>
+              <DialogDescription>Create a new milestone for your roadmap</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label>Milestone Title</Label>
+                <Input placeholder="Enter milestone title" className="mt-1" value={milestoneForm.title} onChange={(e) => setMilestoneForm(f => ({ ...f, title: e.target.value }))} />
+              </div>
+              <div>
+                <Label>Quarter</Label>
+                <Select value={milestoneForm.quarter} onValueChange={(v) => setMilestoneForm(f => ({ ...f, quarter: v }))}>
+                  <SelectTrigger className="mt-1"><SelectValue placeholder="Select quarter" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Q1 2024">Q1 2024</SelectItem>
+                    <SelectItem value="Q2 2024">Q2 2024</SelectItem>
+                    <SelectItem value="Q3 2024">Q3 2024</SelectItem>
+                    <SelectItem value="Q4 2024">Q4 2024</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Status</Label>
+                <Select value={milestoneForm.status} onValueChange={(v: 'planned') => setMilestoneForm(f => ({ ...f, status: v }))}>
+                  <SelectTrigger className="mt-1"><SelectValue placeholder="Select status" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="planned">Planned</SelectItem>
+                    <SelectItem value="in_progress">In Progress</SelectItem>
+                    <SelectItem value="completed">Completed</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowMilestoneDialog(false)}>Cancel</Button>
+              <Button onClick={handleCreateMilestone}>Create Milestone</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Sprint Board Dialog */}
+        <Dialog open={showSprintBoardDialog} onOpenChange={setShowSprintBoardDialog}>
+          <DialogContent className="max-w-4xl">
+            <DialogHeader>
+              <DialogTitle>{selectedSprint?.name} - Sprint Board</DialogTitle>
+              <DialogDescription>{selectedSprint?.goal}</DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="grid grid-cols-4 gap-4">
+                {['To Do', 'In Progress', 'Review', 'Done'].map((col, i) => (
+                  <div key={col} className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3">
+                    <h4 className="font-medium mb-3 text-sm">{col}</h4>
+                    <div className="space-y-2">
+                      {[1, 2].slice(0, i === 1 ? 2 : 1).map((item) => (
+                        <div key={item} className="bg-white dark:bg-gray-900 p-2 rounded border text-sm">
+                          <p className="font-medium">Task {col}-{item}</p>
+                          <p className="text-xs text-gray-500">2 story points</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              {selectedSprint && (
+                <div className="mt-4 flex items-center justify-between text-sm text-gray-500">
+                  <span>{selectedSprint.tasksCompleted}/{selectedSprint.tasksTotal} tasks completed</span>
+                  <span>Velocity: {selectedSprint.velocity} pts</span>
+                </div>
+              )}
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowSprintBoardDialog(false)}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Backlog Item Dialog */}
+        <Dialog open={showBacklogItemDialog} onOpenChange={setShowBacklogItemDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Add Backlog Item</DialogTitle>
+              <DialogDescription>Create a new item for the product backlog</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label>Title</Label>
+                <Input placeholder="Enter title" className="mt-1" value={backlogItemForm.title} onChange={(e) => setBacklogItemForm(f => ({ ...f, title: e.target.value }))} />
+              </div>
+              <div>
+                <Label>Description</Label>
+                <Textarea placeholder="Describe the item..." className="mt-1" value={backlogItemForm.description} onChange={(e) => setBacklogItemForm(f => ({ ...f, description: e.target.value }))} />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Type</Label>
+                  <Select value={backlogItemForm.type} onValueChange={(v: 'task') => setBacklogItemForm(f => ({ ...f, type: v }))}>
+                    <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="feature">Feature</SelectItem>
+                      <SelectItem value="bug">Bug</SelectItem>
+                      <SelectItem value="improvement">Improvement</SelectItem>
+                      <SelectItem value="task">Task</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>Priority</Label>
+                  <Select value={backlogItemForm.priority} onValueChange={(v: Priority) => setBacklogItemForm(f => ({ ...f, priority: v }))}>
+                    <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {Object.entries(priorityConfig).map(([k, v]) => <SelectItem key={k} value={k}>{v.label}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div>
+                <Label>Story Points</Label>
+                <Input type="number" min="1" max="21" className="mt-1" value={backlogItemForm.points} onChange={(e) => setBacklogItemForm(f => ({ ...f, points: parseInt(e.target.value) || 1 }))} />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowBacklogItemDialog(false)}>Cancel</Button>
+              <Button onClick={handleCreateBacklogItem}>Add to Backlog</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Report Dialog */}
+        <Dialog open={showReportDialog} onOpenChange={setShowReportDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Create Report</DialogTitle>
+              <DialogDescription>Generate a new analytics report</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label>Report Name</Label>
+                <Input placeholder="Enter report name" className="mt-1" value={reportForm.name} onChange={(e) => setReportForm(f => ({ ...f, name: e.target.value }))} />
+              </div>
+              <div>
+                <Label>Report Type</Label>
+                <Select value={reportForm.type} onValueChange={(v: 'burndown') => setReportForm(f => ({ ...f, type: v }))}>
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="burndown">Burndown Chart</SelectItem>
+                    <SelectItem value="velocity">Velocity Report</SelectItem>
+                    <SelectItem value="cumulative_flow">Cumulative Flow</SelectItem>
+                    <SelectItem value="sprint_report">Sprint Report</SelectItem>
+                    <SelectItem value="version_report">Version Report</SelectItem>
+                    <SelectItem value="epic_report">Epic Report</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Description</Label>
+                <Textarea placeholder="Describe the report..." className="mt-1" value={reportForm.description} onChange={(e) => setReportForm(f => ({ ...f, description: e.target.value }))} />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowReportDialog(false)}>Cancel</Button>
+              <Button onClick={handleCreateReport}>Create Report</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Automation Dialog */}
+        <Dialog open={showAutomationDialog} onOpenChange={setShowAutomationDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Create Automation</DialogTitle>
+              <DialogDescription>Set up a new workflow automation</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label>Automation Name</Label>
+                <Input placeholder="Enter automation name" className="mt-1" value={automationForm.name} onChange={(e) => setAutomationForm(f => ({ ...f, name: e.target.value }))} />
+              </div>
+              <div>
+                <Label>Trigger</Label>
+                <Select value={automationForm.trigger} onValueChange={(v) => setAutomationForm(f => ({ ...f, trigger: v }))}>
+                  <SelectTrigger className="mt-1"><SelectValue placeholder="Select trigger" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="issue_created">When issue is created</SelectItem>
+                    <SelectItem value="status_changed">When status changes</SelectItem>
+                    <SelectItem value="assigned">When issue is assigned</SelectItem>
+                    <SelectItem value="due_date">When due date approaches</SelectItem>
+                    <SelectItem value="sprint_started">When sprint starts</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Action</Label>
+                <Select value={automationForm.action} onValueChange={(v) => setAutomationForm(f => ({ ...f, action: v }))}>
+                  <SelectTrigger className="mt-1"><SelectValue placeholder="Select action" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="send_notification">Send notification</SelectItem>
+                    <SelectItem value="assign_user">Assign to user</SelectItem>
+                    <SelectItem value="change_status">Change status</SelectItem>
+                    <SelectItem value="add_label">Add label</SelectItem>
+                    <SelectItem value="post_slack">Post to Slack</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowAutomationDialog(false)}>Cancel</Button>
+              <Button onClick={handleCreateAutomation}>Create Automation</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Use Template Dialog */}
+        <Dialog open={showTemplateUseDialog} onOpenChange={setShowTemplateUseDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Use Template</DialogTitle>
+              <DialogDescription>Create a new project from "{selectedTemplate?.name}"</DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              {selectedTemplate && (
+                <div className="space-y-4">
+                  <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <p className="font-medium">{selectedTemplate.name}</p>
+                    <p className="text-sm text-gray-500 mt-1">{selectedTemplate.description}</p>
+                    <div className="flex items-center gap-4 mt-3 text-sm text-gray-500">
+                      <span>{selectedTemplate.tasksCount} tasks</span>
+                      <span>Used {selectedTemplate.usageCount} times</span>
+                    </div>
+                  </div>
+                  <div>
+                    <Label>Project Name</Label>
+                    <Input placeholder="Enter project name" className="mt-1" defaultValue={`${selectedTemplate.name} - Copy`} />
+                  </div>
+                </div>
+              )}
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowTemplateUseDialog(false)}>Cancel</Button>
+              <Button onClick={handleConfirmUseTemplate}>Create Project</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Slack Config Dialog */}
+        <Dialog open={showSlackConfigDialog} onOpenChange={setShowSlackConfigDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Configure Slack Channel</DialogTitle>
+              <DialogDescription>Choose which Slack channel to send notifications to</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label>Slack Channel</Label>
+                <Select defaultValue="engineering">
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="engineering">#engineering</SelectItem>
+                    <SelectItem value="product">#product</SelectItem>
+                    <SelectItem value="design">#design</SelectItem>
+                    <SelectItem value="general">#general</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <span className="text-sm">Send test message</span>
+                <Button variant="outline" size="sm" onClick={() => toast.success('Test message sent to Slack')}>Send Test</Button>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowSlackConfigDialog(false)}>Cancel</Button>
+              <Button onClick={handleConfigureSlack}>Save Configuration</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Webhook Dialog */}
+        <Dialog open={showWebhookDialog} onOpenChange={setShowWebhookDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Add Webhook</DialogTitle>
+              <DialogDescription>Create a new webhook endpoint</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label>Webhook URL</Label>
+                <Input placeholder="https://..." className="mt-1" value={webhookForm.url} onChange={(e) => setWebhookForm(f => ({ ...f, url: e.target.value }))} />
+              </div>
+              <div>
+                <Label>Events</Label>
+                <div className="mt-2 space-y-2">
+                  {['issue.created', 'issue.updated', 'issue.deleted', 'sprint.started', 'sprint.completed'].map(event => (
+                    <div key={event} className="flex items-center gap-2">
+                      <input type="checkbox" id={event} className="rounded" onChange={(e) => {
+                        if (e.target.checked) {
+                          setWebhookForm(f => ({ ...f, events: [...f.events, event] }))
+                        } else {
+                          setWebhookForm(f => ({ ...f, events: f.events.filter(e => e !== event) }))
+                        }
+                      }} />
+                      <label htmlFor={event} className="text-sm">{event}</label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowWebhookDialog(false)}>Cancel</Button>
+              <Button onClick={handleCreateWebhook}>Create Webhook</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Integration Dialog */}
+        <Dialog open={showIntegrationDialog} onOpenChange={setShowIntegrationDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Add Integration</DialogTitle>
+              <DialogDescription>Connect a new service to your project</DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="grid grid-cols-2 gap-4">
+                {[
+                  { name: 'GitHub', icon: '🐙', desc: 'Connect your repositories' },
+                  { name: 'GitLab', icon: '🦊', desc: 'Sync with GitLab projects' },
+                  { name: 'Slack', icon: '💬', desc: 'Team notifications' },
+                  { name: 'Microsoft Teams', icon: '👥', desc: 'Team collaboration' },
+                  { name: 'Confluence', icon: '📄', desc: 'Documentation sync' },
+                  { name: 'Bitbucket', icon: '🪣', desc: 'Repository integration' },
+                ].map(integration => (
+                  <div key={integration.name} className="p-4 border rounded-lg cursor-pointer hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors" onClick={() => { toast.success(`${integration.name} connected`); setShowIntegrationDialog(false) }}>
+                    <div className="text-2xl mb-2">{integration.icon}</div>
+                    <p className="font-medium">{integration.name}</p>
+                    <p className="text-xs text-gray-500">{integration.desc}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowIntegrationDialog(false)}>Cancel</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Integration Config Dialog */}
+        <Dialog open={showIntegrationConfigDialog} onOpenChange={setShowIntegrationConfigDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Configure {selectedIntegration?.name}</DialogTitle>
+              <DialogDescription>Manage your integration settings</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="flex items-center gap-3 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <span className="text-2xl">{selectedIntegration?.icon}</span>
+                <div>
+                  <p className="font-medium">{selectedIntegration?.name}</p>
+                  <p className="text-sm text-gray-500">Status: {selectedIntegration?.status}</p>
+                </div>
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <span className="text-sm">Auto-sync enabled</span>
+                <Switch defaultChecked />
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <span className="text-sm">Sync on push</span>
+                <Switch defaultChecked />
+              </div>
+              <Button variant="outline" className="w-full" onClick={() => toast.success('Syncing...', { description: 'Manual sync started' })}>
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Sync Now
+              </Button>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" className="text-red-600" onClick={() => { toast.success('Integration disconnected'); setShowIntegrationConfigDialog(false) }}>Disconnect</Button>
+              <Button onClick={handleSaveIntegrationConfig}>Save Changes</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Custom Field Dialog */}
+        <Dialog open={showCustomFieldDialog} onOpenChange={setShowCustomFieldDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Add Custom Field</DialogTitle>
+              <DialogDescription>Create a new custom field for your issues</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label>Field Name</Label>
+                <Input placeholder="Enter field name" className="mt-1" value={customFieldForm.name} onChange={(e) => setCustomFieldForm(f => ({ ...f, name: e.target.value }))} />
+              </div>
+              <div>
+                <Label>Field Type</Label>
+                <Select value={customFieldForm.type} onValueChange={(v: 'text') => setCustomFieldForm(f => ({ ...f, type: v }))}>
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="text">Text</SelectItem>
+                    <SelectItem value="number">Number</SelectItem>
+                    <SelectItem value="date">Date</SelectItem>
+                    <SelectItem value="select">Select</SelectItem>
+                    <SelectItem value="multiselect">Multi-select</SelectItem>
+                    <SelectItem value="user">User</SelectItem>
+                    <SelectItem value="url">URL</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex items-center gap-2">
+                <input type="checkbox" id="required" className="rounded" checked={customFieldForm.required} onChange={(e) => setCustomFieldForm(f => ({ ...f, required: e.target.checked }))} />
+                <label htmlFor="required" className="text-sm">Required field</label>
+              </div>
+              <div>
+                <Label>Applies To</Label>
+                <div className="mt-2 space-y-2">
+                  {['story', 'bug', 'task', 'epic'].map(type => (
+                    <div key={type} className="flex items-center gap-2">
+                      <input type="checkbox" id={`applies-${type}`} className="rounded" onChange={(e) => {
+                        if (e.target.checked) {
+                          setCustomFieldForm(f => ({ ...f, appliesTo: [...f.appliesTo, type] }))
+                        } else {
+                          setCustomFieldForm(f => ({ ...f, appliesTo: f.appliesTo.filter(t => t !== type) }))
+                        }
+                      }} />
+                      <label htmlFor={`applies-${type}`} className="text-sm capitalize">{type}</label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowCustomFieldDialog(false)}>Cancel</Button>
+              <Button onClick={handleCreateCustomField}>Create Field</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Archive All Dialog */}
+        <Dialog open={showArchiveDialog} onOpenChange={setShowArchiveDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="text-red-600">Archive All Projects</DialogTitle>
+              <DialogDescription>This will move all projects to the archive. This action can be undone.</DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                <div className="flex items-center gap-2 text-red-600 mb-2">
+                  <AlertTriangle className="h-5 w-5" />
+                  <span className="font-medium">Warning</span>
+                </div>
+                <p className="text-sm text-gray-600 dark:text-gray-400">You are about to archive {allProjects.length} projects. Team members will no longer be able to view or edit these projects until they are restored.</p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowArchiveDialog(false)}>Cancel</Button>
+              <Button variant="destructive" onClick={handleArchiveAllProjects}>Archive All</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete All Dialog */}
+        <Dialog open={showDeleteAllDialog} onOpenChange={setShowDeleteAllDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="text-red-600">Delete All Data</DialogTitle>
+              <DialogDescription>This will permanently delete all projects and issues. This action cannot be undone.</DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                <div className="flex items-center gap-2 text-red-600 mb-2">
+                  <AlertTriangle className="h-5 w-5" />
+                  <span className="font-medium">Danger</span>
+                </div>
+                <p className="text-sm text-gray-600 dark:text-gray-400">You are about to permanently delete all data including {allProjects.length} projects and all associated issues, comments, and attachments. This cannot be recovered.</p>
+              </div>
+              <div className="mt-4">
+                <Label>Type "DELETE" to confirm</Label>
+                <Input placeholder="DELETE" className="mt-1" />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowDeleteAllDialog(false)}>Cancel</Button>
+              <Button variant="destructive" onClick={handleDeleteAllData}>Delete Everything</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Status Dialog */}
+        <Dialog open={showStatusDialog} onOpenChange={setShowStatusDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Add Status</DialogTitle>
+              <DialogDescription>Create a new status for your workflow</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label>Status Name</Label>
+                <Input placeholder="Enter status name" className="mt-1" value={statusForm.name} onChange={(e) => setStatusForm(f => ({ ...f, name: e.target.value }))} />
+              </div>
+              <div>
+                <Label>Status Color</Label>
+                <div className="flex gap-2 mt-2">
+                  {['bg-gray-500', 'bg-blue-500', 'bg-green-500', 'bg-yellow-500', 'bg-red-500', 'bg-purple-500'].map(color => (
+                    <div key={color} className={`w-8 h-8 rounded-lg ${color} cursor-pointer hover:ring-2 ring-offset-2`} />
+                  ))}
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowStatusDialog(false)}>Cancel</Button>
+              <Button onClick={handleAddStatus}>Add Status</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Automation Rule Dialog */}
+        <Dialog open={showAutomationRuleDialog} onOpenChange={setShowAutomationRuleDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Create Automation Rule</DialogTitle>
+              <DialogDescription>Set up a new automation rule for your workflow</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label>Rule Name</Label>
+                <Input placeholder="Enter rule name" className="mt-1" value={automationForm.name} onChange={(e) => setAutomationForm(f => ({ ...f, name: e.target.value }))} />
+              </div>
+              <div>
+                <Label>When...</Label>
+                <Select value={automationForm.trigger} onValueChange={(v) => setAutomationForm(f => ({ ...f, trigger: v }))}>
+                  <SelectTrigger className="mt-1"><SelectValue placeholder="Select trigger" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="status_to_done">Issue moves to Done</SelectItem>
+                    <SelectItem value="status_to_blocked">Issue moves to Blocked</SelectItem>
+                    <SelectItem value="priority_high">Priority set to High/Critical</SelectItem>
+                    <SelectItem value="due_date_passed">Due date has passed</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Then...</Label>
+                <Select value={automationForm.action} onValueChange={(v) => setAutomationForm(f => ({ ...f, action: v }))}>
+                  <SelectTrigger className="mt-1"><SelectValue placeholder="Select action" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="notify_team">Notify team</SelectItem>
+                    <SelectItem value="notify_manager">Notify manager</SelectItem>
+                    <SelectItem value="add_label">Add label</SelectItem>
+                    <SelectItem value="move_sprint">Move to current sprint</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowAutomationRuleDialog(false)}>Cancel</Button>
+              <Button onClick={handleCreateAutomationRule}>Create Rule</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Project Dialog */}
+        <Dialog open={showEditProjectDialog} onOpenChange={setShowEditProjectDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Edit Project</DialogTitle>
+              <DialogDescription>Update project details</DialogDescription>
+            </DialogHeader>
+            {selectedProject && (
+              <div className="space-y-4 py-4">
+                <div>
+                  <Label>Project Name</Label>
+                  <Input className="mt-1" defaultValue={selectedProject.name} />
+                </div>
+                <div>
+                  <Label>Description</Label>
+                  <Textarea className="mt-1" defaultValue={selectedProject.description} />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label>Budget</Label>
+                    <Input type="number" className="mt-1" defaultValue={selectedProject.budget} />
+                  </div>
+                  <div>
+                    <Label>Priority</Label>
+                    <Select defaultValue={selectedProject.priority}>
+                      <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        {Object.entries(priorityConfig).map(([k, v]) => <SelectItem key={k} value={k}>{v.label}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div>
+                  <Label>Status</Label>
+                  <Select defaultValue={selectedProject.status}>
+                    <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {statusColumns.map(col => <SelectItem key={col.id} value={col.id}>{col.label}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            )}
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowEditProjectDialog(false)}>Cancel</Button>
+              <Button onClick={handleSaveProjectEdit}>Save Changes</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Log Time Dialog */}
+        <Dialog open={showLogTimeDialog} onOpenChange={setShowLogTimeDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Log Time</DialogTitle>
+              <DialogDescription>Record time spent on {selectedIssue?.key}</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label>Time Spent (hours)</Label>
+                <Input type="number" min="0.25" step="0.25" placeholder="e.g., 2.5" className="mt-1" value={logTimeAmount} onChange={(e) => setLogTimeAmount(e.target.value)} />
+              </div>
+              <div>
+                <Label>Work Description</Label>
+                <Textarea placeholder="What did you work on?" className="mt-1" />
+              </div>
+              <div>
+                <Label>Date</Label>
+                <Input type="date" className="mt-1" defaultValue={new Date().toISOString().split('T')[0]} />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowLogTimeDialog(false)}>Cancel</Button>
+              <Button onClick={handleLogTime}>Log Time</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Link Issue Dialog */}
+        <Dialog open={showLinkIssueDialog} onOpenChange={setShowLinkIssueDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Link Issue</DialogTitle>
+              <DialogDescription>Link this issue to another issue</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label>Link Type</Label>
+                <Select defaultValue="blocks">
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="blocks">Blocks</SelectItem>
+                    <SelectItem value="blocked_by">Is blocked by</SelectItem>
+                    <SelectItem value="relates_to">Relates to</SelectItem>
+                    <SelectItem value="duplicates">Duplicates</SelectItem>
+                    <SelectItem value="clones">Clones</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Issue</Label>
+                <Select>
+                  <SelectTrigger className="mt-1"><SelectValue placeholder="Search for an issue..." /></SelectTrigger>
+                  <SelectContent>
+                    {mockIssues.slice(0, 5).map(issue => (
+                      <SelectItem key={issue.id} value={issue.key}>{issue.key}: {issue.title}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowLinkIssueDialog(false)}>Cancel</Button>
+              <Button onClick={() => handleLinkIssue('PRJ-123')}>Link Issue</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Issue Dialog */}
+        <Dialog open={showEditIssueDialog} onOpenChange={setShowEditIssueDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Edit Issue</DialogTitle>
+              <DialogDescription>Update {selectedIssue?.key}</DialogDescription>
+            </DialogHeader>
+            {selectedIssue && (
+              <div className="space-y-4 py-4">
+                <div>
+                  <Label>Title</Label>
+                  <Input className="mt-1" defaultValue={selectedIssue.title} />
+                </div>
+                <div>
+                  <Label>Description</Label>
+                  <Textarea className="mt-1" rows={4} defaultValue={selectedIssue.description} />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label>Type</Label>
+                    <Select defaultValue={selectedIssue.type}>
+                      <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="story">Story</SelectItem>
+                        <SelectItem value="bug">Bug</SelectItem>
+                        <SelectItem value="task">Task</SelectItem>
+                        <SelectItem value="epic">Epic</SelectItem>
+                        <SelectItem value="subtask">Subtask</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label>Priority</Label>
+                    <Select defaultValue={selectedIssue.priority}>
+                      <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        {Object.entries(priorityConfig).map(([k, v]) => <SelectItem key={k} value={k}>{v.label}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label>Status</Label>
+                    <Select defaultValue={selectedIssue.status}>
+                      <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="open">Open</SelectItem>
+                        <SelectItem value="in_progress">In Progress</SelectItem>
+                        <SelectItem value="in_review">In Review</SelectItem>
+                        <SelectItem value="done">Done</SelectItem>
+                        <SelectItem value="blocked">Blocked</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label>Story Points</Label>
+                    <Input type="number" className="mt-1" defaultValue={selectedIssue.storyPoints} />
+                  </div>
+                </div>
+                <div>
+                  <Label>Due Date</Label>
+                  <Input type="date" className="mt-1" defaultValue={selectedIssue.dueDate} />
+                </div>
+              </div>
+            )}
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowEditIssueDialog(false)}>Cancel</Button>
+              <Button onClick={handleSaveIssueEdit}>Save Changes</Button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
       </div>

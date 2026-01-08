@@ -335,6 +335,22 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
   const [showAddScheduledDialog, setShowAddScheduledDialog] = useState(false)
   const [showExportPdfDialog, setShowExportPdfDialog] = useState(false)
   const [showGenerateReportDialog, setShowGenerateReportDialog] = useState<string | null>(null)
+  const [showSettingsDialog, setShowSettingsDialog] = useState(false)
+  const [showEditGroupDialog, setShowEditGroupDialog] = useState<string | null>(null)
+  const [showCategoryOptionsDialog, setShowCategoryOptionsDialog] = useState<string | null>(null)
+  const [showAddRuleDialog, setShowAddRuleDialog] = useState(false)
+  const [showSyncAccountDialog, setShowSyncAccountDialog] = useState<string | null>(null)
+  const [showLinkAccountDialog, setShowLinkAccountDialog] = useState(false)
+  const [showImportCsvDialog, setShowImportCsvDialog] = useState(false)
+  const [showExportCsvDialog, setShowExportCsvDialog] = useState(false)
+  const [showImportQifDialog, setShowImportQifDialog] = useState(false)
+  const [showExportReportsDialog, setShowExportReportsDialog] = useState(false)
+  const [showCopyApiKeyDialog, setShowCopyApiKeyDialog] = useState(false)
+  const [showRegenerateApiKeyDialog, setShowRegenerateApiKeyDialog] = useState(false)
+  const [showDownloadDataDialog, setShowDownloadDataDialog] = useState(false)
+  const [showFullReportDialog, setShowFullReportDialog] = useState(false)
+  const [showEditTransactionDialog, setShowEditTransactionDialog] = useState(false)
+  const [showDeleteTransactionDialog, setShowDeleteTransactionDialog] = useState(false)
   const [expandedGroups, setExpandedGroups] = useState<string[]>(['needs', 'wants', 'savings', 'debt'])
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedTransaction, setSelectedTransaction] = useState<LocalTransaction | null>(null)
@@ -808,7 +824,7 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
                   <Wallet className="h-4 w-4 mr-2" />
                   New Budget
                 </Button>
-                <Button variant="ghost" className="text-white hover:bg-white/20">
+                <Button variant="ghost" className="text-white hover:bg-white/20" onClick={() => setShowSettingsDialog(true)}>
                   <Settings className="h-5 w-5" />
                 </Button>
               </div>
@@ -1945,7 +1961,7 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
                     <Card>
                       <CardHeader className="flex flex-row items-center justify-between">
                         <CardTitle>Budget Categories</CardTitle>
-                        <Button size="sm" className="gap-2">
+                        <Button size="sm" className="gap-2" onClick={() => setShowNewCategoryModal(true)}>
                           <Plus className="w-4 h-4" />
                           Add Category
                         </Button>
@@ -1955,7 +1971,7 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
                           <div key={group.id} className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
                             <div className="flex items-center justify-between mb-3">
                               <h4 className="font-semibold text-gray-900 dark:text-white">{group.name}</h4>
-                              <Button variant="ghost" size="sm">
+                              <Button variant="ghost" size="sm" onClick={() => setShowEditGroupDialog(group.id)}>
                                 <Edit3 className="w-4 h-4" />
                               </Button>
                             </div>
@@ -1965,7 +1981,7 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
                                   <span className="text-gray-600 dark:text-gray-400">{cat.name}</span>
                                   <div className="flex items-center gap-2">
                                     <span className="text-sm text-gray-500">{formatCurrency(cat.budgeted)}</span>
-                                    <Button variant="ghost" size="sm">
+                                    <Button variant="ghost" size="sm" onClick={() => setShowCategoryOptionsDialog(cat.id)}>
                                       <MoreHorizontal className="w-4 h-4" />
                                     </Button>
                                   </div>
@@ -2053,7 +2069,7 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
                             <Switch defaultChecked={rule.active} />
                           </div>
                         ))}
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => setShowAddRuleDialog(true)}>
                           <Plus className="w-4 h-4 mr-2" />
                           Add Rule
                         </Button>
@@ -2083,13 +2099,13 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
                             </div>
                             <div className="flex items-center gap-3">
                               <Badge variant="outline" className="text-green-600 border-green-600">Connected</Badge>
-                              <Button variant="ghost" size="sm">
+                              <Button variant="ghost" size="sm" onClick={() => setShowSyncAccountDialog(account.id)}>
                                 <RefreshCw className="w-4 h-4" />
                               </Button>
                             </div>
                           </div>
                         ))}
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => setShowLinkAccountDialog(true)}>
                           <Plus className="w-4 h-4 mr-2" />
                           Link New Account
                         </Button>
@@ -2100,19 +2116,19 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
                         <CardTitle>Import & Export</CardTitle>
                       </CardHeader>
                       <CardContent className="grid grid-cols-2 gap-4">
-                        <Button variant="outline" className="justify-start">
+                        <Button variant="outline" className="justify-start" onClick={() => setShowImportCsvDialog(true)}>
                           <Upload className="w-4 h-4 mr-2" />
                           Import from CSV
                         </Button>
-                        <Button variant="outline" className="justify-start">
+                        <Button variant="outline" className="justify-start" onClick={() => setShowExportCsvDialog(true)}>
                           <Download className="w-4 h-4 mr-2" />
                           Export to CSV
                         </Button>
-                        <Button variant="outline" className="justify-start">
+                        <Button variant="outline" className="justify-start" onClick={() => setShowImportQifDialog(true)}>
                           <FileText className="w-4 h-4 mr-2" />
                           Import from QIF
                         </Button>
-                        <Button variant="outline" className="justify-start">
+                        <Button variant="outline" className="justify-start" onClick={() => setShowExportReportsDialog(true)}>
                           <FileText className="w-4 h-4 mr-2" />
                           Export Reports
                         </Button>
@@ -2197,10 +2213,10 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
                           <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">API Key</p>
                           <div className="flex items-center gap-2">
                             <input type="password" defaultValue="budget_api_xxxxxxxxxxxx" className="flex-1 px-3 py-2 border rounded-lg dark:bg-gray-600 dark:border-gray-500 font-mono text-sm" />
-                            <Button variant="outline" size="sm">
+                            <Button variant="outline" size="sm" onClick={() => setShowCopyApiKeyDialog(true)}>
                               <Copy className="w-4 h-4" />
                             </Button>
-                            <Button size="sm">
+                            <Button size="sm" onClick={() => setShowRegenerateApiKeyDialog(true)}>
                               <RefreshCw className="w-4 h-4" />
                             </Button>
                           </div>
@@ -2219,11 +2235,11 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
                         <CardTitle>Data Management</CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <Button variant="outline" className="w-full justify-start">
+                        <Button variant="outline" className="w-full justify-start" onClick={() => setShowDownloadDataDialog(true)}>
                           <Download className="w-4 h-4 mr-2" />
                           Download All Data
                         </Button>
-                        <Button variant="outline" className="w-full justify-start">
+                        <Button variant="outline" className="w-full justify-start" onClick={() => setShowFullReportDialog(true)}>
                           <FileText className="w-4 h-4 mr-2" />
                           Generate Full Report
                         </Button>
@@ -2340,11 +2356,11 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
                 )}
               </div>
               <DialogFooter>
-                <Button variant="outline">
+                <Button variant="outline" onClick={() => setShowEditTransactionDialog(true)}>
                   <Edit3 className="h-4 w-4 mr-2" />
                   Edit
                 </Button>
-                <Button variant="outline" className="text-red-600">
+                <Button variant="outline" className="text-red-600" onClick={() => setShowDeleteTransactionDialog(true)}>
                   <Trash2 className="h-4 w-4 mr-2" />
                   Delete
                 </Button>
@@ -3540,6 +3556,894 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
                 setShowGenerateReportDialog(null)
               }}>
                 Generate Report
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Settings Dialog */}
+        <Dialog open={showSettingsDialog} onOpenChange={setShowSettingsDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Settings className="h-5 w-5 text-blue-600" />
+                Quick Settings
+              </DialogTitle>
+              <DialogDescription>
+                Configure your budget settings and preferences
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="flex items-center justify-between py-3 border-b dark:border-gray-700">
+                <div>
+                  <p className="font-medium text-gray-900 dark:text-white">Dark Mode</p>
+                  <p className="text-sm text-gray-500">Toggle dark mode appearance</p>
+                </div>
+                <Switch />
+              </div>
+              <div className="flex items-center justify-between py-3 border-b dark:border-gray-700">
+                <div>
+                  <p className="font-medium text-gray-900 dark:text-white">Budget Notifications</p>
+                  <p className="text-sm text-gray-500">Receive alerts for budget changes</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+              <div className="flex items-center justify-between py-3 border-b dark:border-gray-700">
+                <div>
+                  <p className="font-medium text-gray-900 dark:text-white">Weekly Summary</p>
+                  <p className="text-sm text-gray-500">Get weekly spending summaries</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+              <div className="space-y-2">
+                <Label>Default Currency</Label>
+                <Select defaultValue="USD">
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="USD">USD - US Dollar</SelectItem>
+                    <SelectItem value="EUR">EUR - Euro</SelectItem>
+                    <SelectItem value="GBP">GBP - British Pound</SelectItem>
+                    <SelectItem value="CAD">CAD - Canadian Dollar</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowSettingsDialog(false)}>Cancel</Button>
+              <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => {
+                toast.success('Settings saved successfully')
+                setShowSettingsDialog(false)
+              }}>
+                Save Settings
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Group Dialog */}
+        <Dialog open={!!showEditGroupDialog} onOpenChange={(open) => !open && setShowEditGroupDialog(null)}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Edit3 className="h-5 w-5 text-blue-600" />
+                Edit Category Group
+              </DialogTitle>
+              <DialogDescription>
+                Modify the category group settings
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Group Name</Label>
+                <Input
+                  defaultValue={mockCategories.find(c => c.id === showEditGroupDialog)?.name || ''}
+                  placeholder="Enter group name"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Group Color</Label>
+                <Select defaultValue="blue">
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="blue">Blue</SelectItem>
+                    <SelectItem value="green">Green</SelectItem>
+                    <SelectItem value="purple">Purple</SelectItem>
+                    <SelectItem value="red">Red</SelectItem>
+                    <SelectItem value="orange">Orange</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch defaultChecked />
+                <Label>Enable carryover for this group</Label>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowEditGroupDialog(null)}>Cancel</Button>
+              <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => {
+                toast.success('Category group updated successfully')
+                setShowEditGroupDialog(null)
+              }}>
+                Save Changes
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Category Options Dialog */}
+        <Dialog open={!!showCategoryOptionsDialog} onOpenChange={(open) => !open && setShowCategoryOptionsDialog(null)}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <MoreHorizontal className="h-5 w-5 text-gray-600" />
+                Category Options
+              </DialogTitle>
+              <DialogDescription>
+                Manage category settings
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-3 py-4">
+              <Button variant="outline" className="w-full justify-start gap-2" onClick={() => {
+                toast.success('Category renamed')
+                setShowCategoryOptionsDialog(null)
+              }}>
+                <Edit3 className="h-4 w-4" />
+                Rename Category
+              </Button>
+              <Button variant="outline" className="w-full justify-start gap-2" onClick={() => {
+                toast.success('Category moved')
+                setShowCategoryOptionsDialog(null)
+              }}>
+                <ArrowLeftRight className="h-4 w-4" />
+                Move to Different Group
+              </Button>
+              <Button variant="outline" className="w-full justify-start gap-2" onClick={() => {
+                toast.success('Goal set for category')
+                setShowCategoryOptionsDialog(null)
+              }}>
+                <Target className="h-4 w-4" />
+                Set Goal
+              </Button>
+              <Button variant="outline" className="w-full justify-start gap-2" onClick={() => {
+                toast.success('Category hidden')
+                setShowCategoryOptionsDialog(null)
+              }}>
+                <Clock className="h-4 w-4" />
+                Hide Category
+              </Button>
+              <Button variant="outline" className="w-full justify-start gap-2 text-red-600" onClick={() => {
+                toast.success('Category deleted')
+                setShowCategoryOptionsDialog(null)
+              }}>
+                <Trash2 className="h-4 w-4" />
+                Delete Category
+              </Button>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowCategoryOptionsDialog(null)}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Rule Dialog */}
+        <Dialog open={showAddRuleDialog} onOpenChange={setShowAddRuleDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Zap className="h-5 w-5 text-purple-600" />
+                Add Auto-categorization Rule
+              </DialogTitle>
+              <DialogDescription>
+                Create a rule to automatically categorize transactions
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Rule Name</Label>
+                <Input placeholder="e.g., Coffee purchases" />
+              </div>
+              <div className="space-y-2">
+                <Label>Match Pattern</Label>
+                <Input placeholder="e.g., Starbucks, Dunkin, Coffee" />
+                <p className="text-xs text-gray-500">Comma-separated keywords to match in transaction descriptions</p>
+              </div>
+              <div className="space-y-2">
+                <Label>Assign to Category</Label>
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {mockCategories.filter(c => !c.isGroup).map(cat => (
+                      <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch defaultChecked />
+                <Label>Apply to existing transactions</Label>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowAddRuleDialog(false)}>Cancel</Button>
+              <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => {
+                toast.success('Auto-categorization rule created')
+                setShowAddRuleDialog(false)
+              }}>
+                Create Rule
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Sync Account Dialog */}
+        <Dialog open={!!showSyncAccountDialog} onOpenChange={(open) => !open && setShowSyncAccountDialog(null)}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <RefreshCw className="h-5 w-5 text-blue-600" />
+                Sync Account
+              </DialogTitle>
+              <DialogDescription>
+                Sync your account with your financial institution
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                <div className="flex items-center gap-3 mb-2">
+                  <Building2 className="h-6 w-6 text-blue-600" />
+                  <div>
+                    <p className="font-medium">{mockAccounts.find(a => a.id === showSyncAccountDialog)?.name || 'Account'}</p>
+                    <p className="text-sm text-gray-500">{mockAccounts.find(a => a.id === showSyncAccountDialog)?.institution || 'Institution'}</p>
+                  </div>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  This will fetch the latest transactions and balance from your financial institution.
+                </p>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-gray-500">Last synced:</span>
+                  <span className="font-medium">Today at 9:30 AM</span>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowSyncAccountDialog(null)}>Cancel</Button>
+              <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => {
+                toast.success('Account sync started - this may take a moment')
+                setShowSyncAccountDialog(null)
+              }}>
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Sync Now
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Link New Account Dialog */}
+        <Dialog open={showLinkAccountDialog} onOpenChange={setShowLinkAccountDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Building2 className="h-5 w-5 text-blue-600" />
+                Link New Account
+              </DialogTitle>
+              <DialogDescription>
+                Connect a new bank account or credit card
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Search Institution</Label>
+                <Input placeholder="Search for your bank or credit union..." />
+              </div>
+              <div className="space-y-3">
+                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Popular Institutions</p>
+                {['Chase Bank', 'Bank of America', 'Wells Fargo', 'Capital One', 'Citi'].map((bank) => (
+                  <div key={bank} className="flex items-center justify-between p-3 border rounded-lg hover:border-blue-300 cursor-pointer transition-all">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+                        <Building2 className="w-5 h-5 text-blue-600" />
+                      </div>
+                      <span className="font-medium">{bank}</span>
+                    </div>
+                    <ChevronRight className="h-4 w-4 text-gray-400" />
+                  </div>
+                ))}
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowLinkAccountDialog(false)}>Cancel</Button>
+              <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => {
+                toast.success('Redirecting to secure login...')
+                setShowLinkAccountDialog(false)
+              }}>
+                Continue
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Import CSV Dialog */}
+        <Dialog open={showImportCsvDialog} onOpenChange={setShowImportCsvDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Upload className="h-5 w-5 text-blue-600" />
+                Import from CSV
+              </DialogTitle>
+              <DialogDescription>
+                Import transactions from a CSV file
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center">
+                <Upload className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <p className="font-medium text-gray-900 dark:text-white mb-1">Drop your CSV file here</p>
+                <p className="text-sm text-gray-500 mb-4">or click to browse</p>
+                <Button variant="outline" size="sm" onClick={() => toast.success('File browser opened')}>Select File</Button>
+              </div>
+              <div className="space-y-2">
+                <Label>Account to Import To</Label>
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select account" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {mockAccounts.map(account => (
+                      <SelectItem key={account.id} value={account.id}>{account.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch defaultChecked />
+                <Label>Auto-detect date format</Label>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowImportCsvDialog(false)}>Cancel</Button>
+              <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => {
+                toast.success('CSV import started')
+                setShowImportCsvDialog(false)
+              }}>
+                Import
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Export CSV Dialog */}
+        <Dialog open={showExportCsvDialog} onOpenChange={setShowExportCsvDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Download className="h-5 w-5 text-green-600" />
+                Export to CSV
+              </DialogTitle>
+              <DialogDescription>
+                Export your transactions to a CSV file
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Date Range</Label>
+                <div className="grid grid-cols-2 gap-3">
+                  <Input type="date" defaultValue={new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]} />
+                  <Input type="date" defaultValue={new Date().toISOString().split('T')[0]} />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Account</Label>
+                <Select defaultValue="all">
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Accounts</SelectItem>
+                    {mockAccounts.map(account => (
+                      <SelectItem key={account.id} value={account.id}>{account.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-3">
+                <Label>Include in Export</Label>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <input type="checkbox" defaultChecked className="rounded" />
+                    <label className="text-sm">Transaction details</label>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <input type="checkbox" defaultChecked className="rounded" />
+                    <label className="text-sm">Categories</label>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <input type="checkbox" defaultChecked className="rounded" />
+                    <label className="text-sm">Memo/Notes</label>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowExportCsvDialog(false)}>Cancel</Button>
+              <Button className="bg-green-600 hover:bg-green-700" onClick={() => {
+                toast.success('CSV export started - download will begin shortly')
+                setShowExportCsvDialog(false)
+              }}>
+                <Download className="h-4 w-4 mr-2" />
+                Export CSV
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Import QIF Dialog */}
+        <Dialog open={showImportQifDialog} onOpenChange={setShowImportQifDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <FileText className="h-5 w-5 text-blue-600" />
+                Import from QIF
+              </DialogTitle>
+              <DialogDescription>
+                Import transactions from a Quicken Interchange Format (QIF) file
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center">
+                <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <p className="font-medium text-gray-900 dark:text-white mb-1">Drop your QIF file here</p>
+                <p className="text-sm text-gray-500 mb-4">or click to browse</p>
+                <Button variant="outline" size="sm" onClick={() => toast.success('File browser opened')}>Select File</Button>
+              </div>
+              <div className="space-y-2">
+                <Label>Account to Import To</Label>
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select account" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {mockAccounts.map(account => (
+                      <SelectItem key={account.id} value={account.id}>{account.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
+                <p className="text-sm text-yellow-700 dark:text-yellow-300">
+                  QIF files from Quicken, Money, or similar apps are supported.
+                </p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowImportQifDialog(false)}>Cancel</Button>
+              <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => {
+                toast.success('QIF import started')
+                setShowImportQifDialog(false)
+              }}>
+                Import
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Export Reports Dialog */}
+        <Dialog open={showExportReportsDialog} onOpenChange={setShowExportReportsDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <FileText className="h-5 w-5 text-green-600" />
+                Export Reports
+              </DialogTitle>
+              <DialogDescription>
+                Export your budget reports in various formats
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Report Type</Label>
+                <Select defaultValue="spending">
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="spending">Spending Report</SelectItem>
+                    <SelectItem value="income">Income vs Expenses</SelectItem>
+                    <SelectItem value="networth">Net Worth</SelectItem>
+                    <SelectItem value="budget">Budget Performance</SelectItem>
+                    <SelectItem value="all">All Reports</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Export Format</Label>
+                <Select defaultValue="pdf">
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="pdf">PDF Document</SelectItem>
+                    <SelectItem value="excel">Excel Spreadsheet</SelectItem>
+                    <SelectItem value="csv">CSV File</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Period</Label>
+                <Select defaultValue="current-month">
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="current-month">Current Month</SelectItem>
+                    <SelectItem value="last-month">Last Month</SelectItem>
+                    <SelectItem value="last-quarter">Last Quarter</SelectItem>
+                    <SelectItem value="ytd">Year to Date</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowExportReportsDialog(false)}>Cancel</Button>
+              <Button className="bg-green-600 hover:bg-green-700" onClick={() => {
+                toast.success('Report export started - download will begin shortly')
+                setShowExportReportsDialog(false)
+              }}>
+                <Download className="h-4 w-4 mr-2" />
+                Export
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Copy API Key Dialog */}
+        <Dialog open={showCopyApiKeyDialog} onOpenChange={setShowCopyApiKeyDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Copy className="h-5 w-5 text-blue-600" />
+                Copy API Key
+              </DialogTitle>
+              <DialogDescription>
+                Copy your API key to use with external integrations
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <code className="flex-1 font-mono text-sm bg-white dark:bg-gray-700 px-3 py-2 rounded border dark:border-gray-600">
+                    budget_api_xxxxxxxxxxxx
+                  </code>
+                </div>
+              </div>
+              <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
+                <p className="text-sm text-yellow-700 dark:text-yellow-300">
+                  Keep your API key secure. Do not share it publicly or include it in client-side code.
+                </p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowCopyApiKeyDialog(false)}>Cancel</Button>
+              <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => {
+                navigator.clipboard?.writeText('budget_api_xxxxxxxxxxxx')
+                toast.success('API key copied to clipboard')
+                setShowCopyApiKeyDialog(false)
+              }}>
+                <Copy className="h-4 w-4 mr-2" />
+                Copy to Clipboard
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Regenerate API Key Dialog */}
+        <Dialog open={showRegenerateApiKeyDialog} onOpenChange={setShowRegenerateApiKeyDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-amber-600">
+                <RefreshCw className="h-5 w-5" />
+                Regenerate API Key
+              </DialogTitle>
+              <DialogDescription>
+                Generate a new API key for your account
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+                <div className="flex items-start gap-3">
+                  <AlertTriangle className="h-5 w-5 text-amber-600 mt-0.5" />
+                  <div>
+                    <p className="font-medium text-amber-700 dark:text-amber-300">Warning</p>
+                    <p className="text-sm text-amber-600 dark:text-amber-400 mt-1">
+                      Regenerating your API key will immediately invalidate your existing key. All applications using the old key will stop working.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <input type="checkbox" id="confirm-regen" className="rounded" />
+                <label htmlFor="confirm-regen" className="text-sm text-gray-600 dark:text-gray-400">
+                  I understand that my existing API key will be invalidated
+                </label>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowRegenerateApiKeyDialog(false)}>Cancel</Button>
+              <Button className="bg-amber-600 hover:bg-amber-700" onClick={() => {
+                toast.success('New API key generated successfully')
+                setShowRegenerateApiKeyDialog(false)
+              }}>
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Regenerate Key
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Download All Data Dialog */}
+        <Dialog open={showDownloadDataDialog} onOpenChange={setShowDownloadDataDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Download className="h-5 w-5 text-blue-600" />
+                Download All Data
+              </DialogTitle>
+              <DialogDescription>
+                Export all your budget data in a portable format
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-3">
+                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Your export will include:</p>
+                <div className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-500" />
+                    <span>All budget categories and allocations</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-500" />
+                    <span>Complete transaction history</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-500" />
+                    <span>Account information</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-500" />
+                    <span>Goals and progress</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-500" />
+                    <span>Settings and preferences</span>
+                  </div>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Export Format</Label>
+                <Select defaultValue="json">
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="json">JSON (Recommended)</SelectItem>
+                    <SelectItem value="zip">ZIP Archive</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowDownloadDataDialog(false)}>Cancel</Button>
+              <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => {
+                toast.success('Data export started - download will begin shortly')
+                setShowDownloadDataDialog(false)
+              }}>
+                <Download className="h-4 w-4 mr-2" />
+                Download Data
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Generate Full Report Dialog */}
+        <Dialog open={showFullReportDialog} onOpenChange={setShowFullReportDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <FileText className="h-5 w-5 text-purple-600" />
+                Generate Full Report
+              </DialogTitle>
+              <DialogDescription>
+                Create a comprehensive financial report
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Report Period</Label>
+                <Select defaultValue="ytd">
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="current-month">Current Month</SelectItem>
+                    <SelectItem value="last-month">Last Month</SelectItem>
+                    <SelectItem value="last-quarter">Last Quarter</SelectItem>
+                    <SelectItem value="ytd">Year to Date</SelectItem>
+                    <SelectItem value="last-year">Last Year</SelectItem>
+                    <SelectItem value="all-time">All Time</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-3">
+                <Label>Sections to Include</Label>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <input type="checkbox" defaultChecked className="rounded" />
+                    <label className="text-sm">Executive Summary</label>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <input type="checkbox" defaultChecked className="rounded" />
+                    <label className="text-sm">Income & Expenses Analysis</label>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <input type="checkbox" defaultChecked className="rounded" />
+                    <label className="text-sm">Budget Performance</label>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <input type="checkbox" defaultChecked className="rounded" />
+                    <label className="text-sm">Net Worth Tracking</label>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <input type="checkbox" defaultChecked className="rounded" />
+                    <label className="text-sm">Goals Progress</label>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <input type="checkbox" defaultChecked className="rounded" />
+                    <label className="text-sm">Charts & Visualizations</label>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowFullReportDialog(false)}>Cancel</Button>
+              <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => {
+                toast.success('Full report generation started')
+                setShowFullReportDialog(false)
+              }}>
+                Generate Report
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Transaction Dialog */}
+        <Dialog open={showEditTransactionDialog} onOpenChange={setShowEditTransactionDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Edit3 className="h-5 w-5 text-blue-600" />
+                Edit Transaction
+              </DialogTitle>
+              <DialogDescription>
+                Modify transaction details
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Payee</Label>
+                <Input defaultValue={selectedTransaction?.payee || ''} placeholder="Enter payee name" />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Amount</Label>
+                  <div className="relative">
+                    <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <Input
+                      type="number"
+                      className="pl-10"
+                      defaultValue={Math.abs(selectedTransaction?.amount || 0)}
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label>Date</Label>
+                  <Input
+                    type="date"
+                    defaultValue={selectedTransaction?.date?.toISOString().split('T')[0] || ''}
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Category</Label>
+                <Select defaultValue={selectedTransaction?.categoryId || ''}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {mockCategories.filter(c => !c.isGroup).map(cat => (
+                      <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Memo</Label>
+                <Textarea
+                  defaultValue={selectedTransaction?.memo || ''}
+                  placeholder="Add a note..."
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch defaultChecked={selectedTransaction?.cleared} />
+                <Label>Mark as cleared</Label>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowEditTransactionDialog(false)}>Cancel</Button>
+              <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => {
+                toast.success('Transaction updated successfully')
+                setShowEditTransactionDialog(false)
+                setSelectedTransaction(null)
+              }}>
+                Save Changes
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Transaction Dialog */}
+        <Dialog open={showDeleteTransactionDialog} onOpenChange={setShowDeleteTransactionDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-600">
+                <Trash2 className="h-5 w-5" />
+                Delete Transaction
+              </DialogTitle>
+              <DialogDescription>
+                Are you sure you want to delete this transaction?
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              {selectedTransaction && (
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className={`p-2 rounded-lg ${selectedTransaction.type === 'inflow' ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-600'}`}>
+                      {selectedTransaction.type === 'inflow' ? <ArrowDownRight className="h-5 w-5" /> : <ArrowUpRight className="h-5 w-5" />}
+                    </div>
+                    <div>
+                      <p className="font-medium">{selectedTransaction.payee}</p>
+                      <p className="text-sm text-gray-500">{selectedTransaction.date.toLocaleDateString()}</p>
+                    </div>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-500">Amount</span>
+                    <span className={`font-semibold ${selectedTransaction.type === 'inflow' ? 'text-green-600' : ''}`}>
+                      {selectedTransaction.type === 'inflow' ? '+' : '-'}{formatCurrency(selectedTransaction.amount)}
+                    </span>
+                  </div>
+                </div>
+              )}
+              <div className="mt-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                <p className="text-sm text-red-700 dark:text-red-300">
+                  This action cannot be undone. The transaction will be permanently removed from your records.
+                </p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowDeleteTransactionDialog(false)}>Cancel</Button>
+              <Button variant="destructive" onClick={() => {
+                toast.success('Transaction deleted successfully')
+                setShowDeleteTransactionDialog(false)
+                setSelectedTransaction(null)
+              }}>
+                <Trash2 className="h-4 w-4 mr-2" />
+                Delete Transaction
               </Button>
             </DialogFooter>
           </DialogContent>

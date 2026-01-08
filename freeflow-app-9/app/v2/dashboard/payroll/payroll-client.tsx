@@ -670,6 +670,57 @@ export default function PayrollClient() {
   const [showEmployeeDialog, setShowEmployeeDialog] = useState(false)
   const [showCreateDialog, setShowCreateDialog] = useState(false)
 
+  // New Dialog States
+  const [showExportDialog, setShowExportDialog] = useState(false)
+  const [showImportDialog, setShowImportDialog] = useState(false)
+  const [showFiltersDialog, setShowFiltersDialog] = useState(false)
+  const [showAddEmployeeDialog, setShowAddEmployeeDialog] = useState(false)
+  const [showEmployeeImportDialog, setShowEmployeeImportDialog] = useState(false)
+  const [showEmployeeExportDialog, setShowEmployeeExportDialog] = useState(false)
+  const [showPaymentDialog, setShowPaymentDialog] = useState(false)
+  const [showTaxFormsDialog, setShowTaxFormsDialog] = useState(false)
+  const [showNotifyAllDialog, setShowNotifyAllDialog] = useState(false)
+  const [showEmployeeReportsDialog, setShowEmployeeReportsDialog] = useState(false)
+  const [showEmployeeSettingsDialog, setShowEmployeeSettingsDialog] = useState(false)
+  const [showFileTaxesDialog, setShowFileTaxesDialog] = useState(false)
+  const [showCalculateTaxDialog, setShowCalculateTaxDialog] = useState(false)
+  const [showTaxDeadlinesDialog, setShowTaxDeadlinesDialog] = useState(false)
+  const [showTaxFormsDownloadDialog, setShowTaxFormsDownloadDialog] = useState(false)
+  const [showComplianceDialog, setShowComplianceDialog] = useState(false)
+  const [showTaxHistoryDialog, setShowTaxHistoryDialog] = useState(false)
+  const [showTaxReportsDialog, setShowTaxReportsDialog] = useState(false)
+  const [showTaxSettingsDialog, setShowTaxSettingsDialog] = useState(false)
+  const [showDownloadTaxReportsDialog, setShowDownloadTaxReportsDialog] = useState(false)
+  const [showGenerateW2Dialog, setShowGenerateW2Dialog] = useState(false)
+  const [showGenerate1099Dialog, setShowGenerate1099Dialog] = useState(false)
+  const [showFileQuarterlyTaxesDialog, setShowFileQuarterlyTaxesDialog] = useState(false)
+  const [showAddBenefitPlanDialog, setShowAddBenefitPlanDialog] = useState(false)
+  const [showHealthBenefitsDialog, setShowHealthBenefitsDialog] = useState(false)
+  const [showInsuranceDialog, setShowInsuranceDialog] = useState(false)
+  const [show401kDialog, setShow401kDialog] = useState(false)
+  const [showEnrollmentDialog, setShowEnrollmentDialog] = useState(false)
+  const [showBenefitDocumentsDialog, setShowBenefitDocumentsDialog] = useState(false)
+  const [showBenefitReportsDialog, setShowBenefitReportsDialog] = useState(false)
+  const [showBenefitSettingsDialog, setShowBenefitSettingsDialog] = useState(false)
+  const [showNewTimeEntryDialog, setShowNewTimeEntryDialog] = useState(false)
+  const [showClockInDialog, setShowClockInDialog] = useState(false)
+  const [showApproveTimeDialog, setShowApproveTimeDialog] = useState(false)
+  const [showScheduleDialog, setShowScheduleDialog] = useState(false)
+  const [showTeamViewDialog, setShowTeamViewDialog] = useState(false)
+  const [showTimeExportDialog, setShowTimeExportDialog] = useState(false)
+  const [showTimeReportsDialog, setShowTimeReportsDialog] = useState(false)
+  const [showTimeSettingsDialog, setShowTimeSettingsDialog] = useState(false)
+  const [showPayFrequencyDialog, setShowPayFrequencyDialog] = useState(false)
+  const [showFiscalYearDialog, setShowFiscalYearDialog] = useState(false)
+  const [showCurrencyDialog, setShowCurrencyDialog] = useState(false)
+  const [showBankAccountDialog, setShowBankAccountDialog] = useState(false)
+  const [showAutoProcessDialog, setShowAutoProcessDialog] = useState(false)
+  const [showApprovalWorkflowDialog, setShowApprovalWorkflowDialog] = useState(false)
+  const [showAccessRolesDialog, setShowAccessRolesDialog] = useState(false)
+  const [showPayStubsDialog, setShowPayStubsDialog] = useState(false)
+  const [showEditEmployeeDetailsDialog, setShowEditEmployeeDetailsDialog] = useState(false)
+  const [selectedTimeEntry, setSelectedTimeEntry] = useState<TimeEntry | null>(null)
+
   // Database State
   const [dbPayrollRuns, setDbPayrollRuns] = useState<DbPayrollRun[]>([])
   const [loading, setLoading] = useState(true)
@@ -968,11 +1019,11 @@ export default function PayrollClient() {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={() => setShowExportDialog(true)}>
               <Download className="w-4 h-4 mr-2" />
               Export
             </Button>
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={() => setShowImportDialog(true)}>
               <Upload className="w-4 h-4 mr-2" />
               Import
             </Button>
@@ -1120,7 +1171,7 @@ export default function PayrollClient() {
               className="pl-10"
             />
           </div>
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" onClick={() => setShowFiltersDialog(true)}>
             <Filter className="w-4 h-4 mr-2" />
             Filters
           </Button>
@@ -1570,19 +1621,20 @@ export default function PayrollClient() {
             {/* Employees Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: UserPlus, label: 'Add Employee', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
-                { icon: Upload, label: 'Import', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
-                { icon: Download, label: 'Export', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
-                { icon: CreditCard, label: 'Payment', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
-                { icon: FileText, label: 'Tax Forms', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400' },
-                { icon: Mail, label: 'Notify All', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
-                { icon: BarChart3, label: 'Reports', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' },
-                { icon: Settings, label: 'Settings', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400' }
+                { icon: UserPlus, label: 'Add Employee', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => setShowAddEmployeeDialog(true) },
+                { icon: Upload, label: 'Import', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => setShowEmployeeImportDialog(true) },
+                { icon: Download, label: 'Export', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => setShowEmployeeExportDialog(true) },
+                { icon: CreditCard, label: 'Payment', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', onClick: () => setShowPaymentDialog(true) },
+                { icon: FileText, label: 'Tax Forms', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400', onClick: () => setShowTaxFormsDialog(true) },
+                { icon: Mail, label: 'Notify All', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', onClick: () => setShowNotifyAllDialog(true) },
+                { icon: BarChart3, label: 'Reports', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', onClick: () => setShowEmployeeReportsDialog(true) },
+                { icon: Settings, label: 'Settings', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400', onClick: () => setShowEmployeeSettingsDialog(true) }
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={action.onClick}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1689,19 +1741,20 @@ export default function PayrollClient() {
             {/* Taxes Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: FileText, label: 'File Taxes', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
-                { icon: Calculator, label: 'Calculate', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400' },
-                { icon: Calendar, label: 'Deadlines', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
-                { icon: Download, label: 'Forms', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' },
-                { icon: Shield, label: 'Compliance', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400' },
-                { icon: History, label: 'History', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400' },
-                { icon: BarChart3, label: 'Reports', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
-                { icon: Settings, label: 'Settings', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400' }
+                { icon: FileText, label: 'File Taxes', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', onClick: () => setShowFileTaxesDialog(true) },
+                { icon: Calculator, label: 'Calculate', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', onClick: () => setShowCalculateTaxDialog(true) },
+                { icon: Calendar, label: 'Deadlines', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', onClick: () => setShowTaxDeadlinesDialog(true) },
+                { icon: Download, label: 'Forms', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', onClick: () => setShowTaxFormsDownloadDialog(true) },
+                { icon: Shield, label: 'Compliance', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400', onClick: () => setShowComplianceDialog(true) },
+                { icon: History, label: 'History', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400', onClick: () => setShowTaxHistoryDialog(true) },
+                { icon: BarChart3, label: 'Reports', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', onClick: () => setShowTaxReportsDialog(true) },
+                { icon: Settings, label: 'Settings', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400', onClick: () => setShowTaxSettingsDialog(true) }
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={action.onClick}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1792,19 +1845,19 @@ export default function PayrollClient() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-2">
-                    <Button variant="outline" className="w-full justify-start">
+                    <Button variant="outline" className="w-full justify-start" onClick={() => setShowDownloadTaxReportsDialog(true)}>
                       <Download className="w-4 h-4 mr-2" />
                       Download Tax Reports
                     </Button>
-                    <Button variant="outline" className="w-full justify-start">
+                    <Button variant="outline" className="w-full justify-start" onClick={() => setShowGenerateW2Dialog(true)}>
                       <FileText className="w-4 h-4 mr-2" />
                       Generate W-2 Forms
                     </Button>
-                    <Button variant="outline" className="w-full justify-start">
+                    <Button variant="outline" className="w-full justify-start" onClick={() => setShowGenerate1099Dialog(true)}>
                       <FileText className="w-4 h-4 mr-2" />
                       Generate 1099 Forms
                     </Button>
-                    <Button variant="outline" className="w-full justify-start">
+                    <Button variant="outline" className="w-full justify-start" onClick={() => setShowFileQuarterlyTaxesDialog(true)}>
                       <Send className="w-4 h-4 mr-2" />
                       File Quarterly Taxes
                     </Button>
@@ -1843,19 +1896,20 @@ export default function PayrollClient() {
             {/* Benefits Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Plus, label: 'Add Plan', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
-                { icon: Heart, label: 'Health', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' },
-                { icon: Shield, label: 'Insurance', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
-                { icon: Briefcase, label: '401k', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400' },
-                { icon: Users, label: 'Enrollment', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
-                { icon: FileText, label: 'Documents', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400' },
-                { icon: BarChart3, label: 'Reports', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400' },
-                { icon: Settings, label: 'Settings', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400' }
+                { icon: Plus, label: 'Add Plan', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', onClick: () => setShowAddBenefitPlanDialog(true) },
+                { icon: Heart, label: 'Health', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', onClick: () => setShowHealthBenefitsDialog(true) },
+                { icon: Shield, label: 'Insurance', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', onClick: () => setShowInsuranceDialog(true) },
+                { icon: Briefcase, label: '401k', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', onClick: () => setShow401kDialog(true) },
+                { icon: Users, label: 'Enrollment', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', onClick: () => setShowEnrollmentDialog(true) },
+                { icon: FileText, label: 'Documents', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400', onClick: () => setShowBenefitDocumentsDialog(true) },
+                { icon: BarChart3, label: 'Reports', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400', onClick: () => setShowBenefitReportsDialog(true) },
+                { icon: Settings, label: 'Settings', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400', onClick: () => setShowBenefitSettingsDialog(true) }
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={action.onClick}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1938,19 +1992,20 @@ export default function PayrollClient() {
             {/* Time Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Plus, label: 'New Entry', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400' },
-                { icon: Clock, label: 'Clock In', color: 'bg-sky-100 text-sky-600 dark:bg-sky-900/30 dark:text-sky-400' },
-                { icon: CheckCircle, label: 'Approve', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
-                { icon: Calendar, label: 'Schedule', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
-                { icon: Users, label: 'Team View', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
-                { icon: Download, label: 'Export', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
-                { icon: BarChart3, label: 'Reports', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400' },
-                { icon: Settings, label: 'Settings', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400' }
+                { icon: Plus, label: 'New Entry', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', onClick: () => setShowNewTimeEntryDialog(true) },
+                { icon: Clock, label: 'Clock In', color: 'bg-sky-100 text-sky-600 dark:bg-sky-900/30 dark:text-sky-400', onClick: () => setShowClockInDialog(true) },
+                { icon: CheckCircle, label: 'Approve', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => setShowApproveTimeDialog(true) },
+                { icon: Calendar, label: 'Schedule', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => setShowScheduleDialog(true) },
+                { icon: Users, label: 'Team View', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', onClick: () => setShowTeamViewDialog(true) },
+                { icon: Download, label: 'Export', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => setShowTimeExportDialog(true) },
+                { icon: BarChart3, label: 'Reports', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400', onClick: () => setShowTimeReportsDialog(true) },
+                { icon: Settings, label: 'Settings', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400', onClick: () => setShowTimeSettingsDialog(true) }
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={action.onClick}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -2002,10 +2057,10 @@ export default function PayrollClient() {
                         </Badge>
                         {entry.status === 'pending' && (
                           <div className="flex items-center gap-2">
-                            <Button size="sm" variant="outline" className="text-green-600 border-green-600">
+                            <Button size="sm" variant="outline" className="text-green-600 border-green-600" onClick={() => { setSelectedTimeEntry(entry); setShowApproveTimeDialog(true) }}>
                               <CheckCircle2 className="w-4 h-4" />
                             </Button>
-                            <Button size="sm" variant="outline" className="text-red-600 border-red-600">
+                            <Button size="sm" variant="outline" className="text-red-600 border-red-600" onClick={() => { setSelectedTimeEntry(entry); toast.error(`Time entry for ${entry.employeeName} rejected`) }}>
                               <XCircle className="w-4 h-4" />
                             </Button>
                           </div>
@@ -2054,21 +2109,21 @@ export default function PayrollClient() {
                       <div className="font-medium text-gray-900 dark:text-white">Pay Frequency</div>
                       <div className="text-sm text-gray-500">Semi-monthly (1st & 15th)</div>
                     </div>
-                    <Button variant="outline" size="sm">Edit</Button>
+                    <Button variant="outline" size="sm" onClick={() => setShowPayFrequencyDialog(true)}>Edit</Button>
                   </div>
                   <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
                     <div>
                       <div className="font-medium text-gray-900 dark:text-white">Fiscal Year</div>
                       <div className="text-sm text-gray-500">January - December</div>
                     </div>
-                    <Button variant="outline" size="sm">Edit</Button>
+                    <Button variant="outline" size="sm" onClick={() => setShowFiscalYearDialog(true)}>Edit</Button>
                   </div>
                   <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
                     <div>
                       <div className="font-medium text-gray-900 dark:text-white">Default Currency</div>
                       <div className="text-sm text-gray-500">USD - US Dollar</div>
                     </div>
-                    <Button variant="outline" size="sm">Edit</Button>
+                    <Button variant="outline" size="sm" onClick={() => setShowCurrencyDialog(true)}>Edit</Button>
                   </div>
                 </CardContent>
               </Card>
@@ -2086,14 +2141,14 @@ export default function PayrollClient() {
                       <div className="font-medium text-gray-900 dark:text-white">Bank Account</div>
                       <div className="text-sm text-gray-500">Chase Business ****4521</div>
                     </div>
-                    <Button variant="outline" size="sm">Manage</Button>
+                    <Button variant="outline" size="sm" onClick={() => setShowBankAccountDialog(true)}>Manage</Button>
                   </div>
                   <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
                     <div>
                       <div className="font-medium text-gray-900 dark:text-white">Auto-process</div>
                       <div className="text-sm text-gray-500">Enabled - 2 days before pay date</div>
                     </div>
-                    <Button variant="outline" size="sm">Configure</Button>
+                    <Button variant="outline" size="sm" onClick={() => setShowAutoProcessDialog(true)}>Configure</Button>
                   </div>
                 </CardContent>
               </Card>
@@ -2143,14 +2198,14 @@ export default function PayrollClient() {
                       <div className="font-medium text-gray-900 dark:text-white">Approval Workflow</div>
                       <div className="text-sm text-gray-500">Dual approval required</div>
                     </div>
-                    <Button variant="outline" size="sm">Configure</Button>
+                    <Button variant="outline" size="sm" onClick={() => setShowApprovalWorkflowDialog(true)}>Configure</Button>
                   </div>
                   <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
                     <div>
                       <div className="font-medium text-gray-900 dark:text-white">Access Roles</div>
                       <div className="text-sm text-gray-500">5 admins, 3 managers</div>
                     </div>
-                    <Button variant="outline" size="sm">Manage</Button>
+                    <Button variant="outline" size="sm" onClick={() => setShowAccessRolesDialog(true)}>Manage</Button>
                   </div>
                 </CardContent>
               </Card>
@@ -2304,11 +2359,11 @@ export default function PayrollClient() {
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <Button className="flex-1" variant="outline">
+                  <Button className="flex-1" variant="outline" onClick={() => setShowPayStubsDialog(true)}>
                     <FileText className="w-4 h-4 mr-2" />
                     View Pay Stubs
                   </Button>
-                  <Button className="flex-1" variant="outline">
+                  <Button className="flex-1" variant="outline" onClick={() => setShowEditEmployeeDetailsDialog(true)}>
                     <Edit className="w-4 h-4 mr-2" />
                     Edit Details
                   </Button>
@@ -2405,6 +2460,1647 @@ export default function PayrollClient() {
                 </Button>
               </div>
             </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Export Dialog */}
+        <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Export Payroll Data</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Export Format</Label>
+                <select className="w-full p-2 border rounded-md dark:bg-gray-800 dark:border-gray-700">
+                  <option value="csv">CSV</option>
+                  <option value="xlsx">Excel (XLSX)</option>
+                  <option value="pdf">PDF Report</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label>Date Range</Label>
+                <div className="grid grid-cols-2 gap-2">
+                  <Input type="date" placeholder="Start Date" />
+                  <Input type="date" placeholder="End Date" />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Include</Label>
+                <div className="space-y-2">
+                  <label className="flex items-center gap-2">
+                    <input type="checkbox" defaultChecked className="rounded" />
+                    <span className="text-sm">Pay Runs</span>
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <input type="checkbox" defaultChecked className="rounded" />
+                    <span className="text-sm">Employee Details</span>
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <input type="checkbox" defaultChecked className="rounded" />
+                    <span className="text-sm">Tax Information</span>
+                  </label>
+                </div>
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowExportDialog(false)}>Cancel</Button>
+                <Button className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white" onClick={() => { toast.success('Export started'); setShowExportDialog(false) }}>
+                  <Download className="w-4 h-4 mr-2" />
+                  Export
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Import Dialog */}
+        <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Import Payroll Data</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="border-2 border-dashed rounded-lg p-8 text-center">
+                <Upload className="w-12 h-12 mx-auto text-gray-400 mb-4" />
+                <p className="text-sm text-gray-500 mb-2">Drag and drop your file here, or click to browse</p>
+                <Button variant="outline" size="sm" onClick={() => toast.info('File browser would open here')}>Choose File</Button>
+              </div>
+              <div className="space-y-2">
+                <Label>Import Type</Label>
+                <select className="w-full p-2 border rounded-md dark:bg-gray-800 dark:border-gray-700">
+                  <option value="employees">Employee Data</option>
+                  <option value="timesheet">Timesheet Data</option>
+                  <option value="benefits">Benefits Data</option>
+                </select>
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowImportDialog(false)}>Cancel</Button>
+                <Button className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white" onClick={() => { toast.success('Import completed'); setShowImportDialog(false) }}>
+                  <Upload className="w-4 h-4 mr-2" />
+                  Import
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Filters Dialog */}
+        <Dialog open={showFiltersDialog} onOpenChange={setShowFiltersDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Filter Payroll Data</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Status</Label>
+                <select className="w-full p-2 border rounded-md dark:bg-gray-800 dark:border-gray-700">
+                  <option value="">All Statuses</option>
+                  <option value="draft">Draft</option>
+                  <option value="pending_approval">Pending Approval</option>
+                  <option value="approved">Approved</option>
+                  <option value="processing">Processing</option>
+                  <option value="completed">Completed</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label>Department</Label>
+                <select className="w-full p-2 border rounded-md dark:bg-gray-800 dark:border-gray-700">
+                  <option value="">All Departments</option>
+                  <option value="engineering">Engineering</option>
+                  <option value="product">Product</option>
+                  <option value="sales">Sales</option>
+                  <option value="marketing">Marketing</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label>Date Range</Label>
+                <div className="grid grid-cols-2 gap-2">
+                  <Input type="date" placeholder="Start Date" />
+                  <Input type="date" placeholder="End Date" />
+                </div>
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowFiltersDialog(false)}>Clear</Button>
+                <Button className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white" onClick={() => { toast.success('Filters applied'); setShowFiltersDialog(false) }}>
+                  Apply Filters
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Employee Dialog */}
+        <Dialog open={showAddEmployeeDialog} onOpenChange={setShowAddEmployeeDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Add New Employee</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>First Name</Label>
+                  <Input placeholder="John" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Last Name</Label>
+                  <Input placeholder="Doe" />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Email</Label>
+                <Input type="email" placeholder="john.doe@company.com" />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Department</Label>
+                  <select className="w-full p-2 border rounded-md dark:bg-gray-800 dark:border-gray-700">
+                    <option value="">Select Department</option>
+                    <option value="engineering">Engineering</option>
+                    <option value="product">Product</option>
+                    <option value="sales">Sales</option>
+                    <option value="marketing">Marketing</option>
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Employee Type</Label>
+                  <select className="w-full p-2 border rounded-md dark:bg-gray-800 dark:border-gray-700">
+                    <option value="full_time">Full Time</option>
+                    <option value="part_time">Part Time</option>
+                    <option value="contractor">Contractor</option>
+                    <option value="intern">Intern</option>
+                  </select>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Salary</Label>
+                  <Input type="number" placeholder="75000" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Start Date</Label>
+                  <Input type="date" />
+                </div>
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowAddEmployeeDialog(false)}>Cancel</Button>
+                <Button className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white" onClick={() => { toast.success('Employee added successfully'); setShowAddEmployeeDialog(false) }}>
+                  <UserPlus className="w-4 h-4 mr-2" />
+                  Add Employee
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Employee Import Dialog */}
+        <Dialog open={showEmployeeImportDialog} onOpenChange={setShowEmployeeImportDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Import Employees</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="border-2 border-dashed rounded-lg p-8 text-center">
+                <Upload className="w-12 h-12 mx-auto text-gray-400 mb-4" />
+                <p className="text-sm text-gray-500 mb-2">Upload CSV or Excel file with employee data</p>
+                <Button variant="outline" size="sm" onClick={() => toast.info('File browser would open here')}>Choose File</Button>
+              </div>
+              <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                <p className="text-sm text-blue-700 dark:text-blue-400">Download our template to ensure proper formatting</p>
+                <Button variant="link" size="sm" className="p-0 h-auto text-blue-600" onClick={() => toast.success('Downloading employee import template...')}>Download Template</Button>
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowEmployeeImportDialog(false)}>Cancel</Button>
+                <Button className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white" onClick={() => { toast.success('Employees imported'); setShowEmployeeImportDialog(false) }}>Import</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Employee Export Dialog */}
+        <Dialog open={showEmployeeExportDialog} onOpenChange={setShowEmployeeExportDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Export Employee Data</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Export Format</Label>
+                <select className="w-full p-2 border rounded-md dark:bg-gray-800 dark:border-gray-700">
+                  <option value="csv">CSV</option>
+                  <option value="xlsx">Excel (XLSX)</option>
+                  <option value="pdf">PDF Report</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label>Include Fields</Label>
+                <div className="space-y-2">
+                  <label className="flex items-center gap-2">
+                    <input type="checkbox" defaultChecked className="rounded" />
+                    <span className="text-sm">Personal Information</span>
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <input type="checkbox" defaultChecked className="rounded" />
+                    <span className="text-sm">Salary Details</span>
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <input type="checkbox" defaultChecked className="rounded" />
+                    <span className="text-sm">Benefits Enrollment</span>
+                  </label>
+                </div>
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowEmployeeExportDialog(false)}>Cancel</Button>
+                <Button className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white" onClick={() => { toast.success('Export started'); setShowEmployeeExportDialog(false) }}>Export</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Payment Dialog */}
+        <Dialog open={showPaymentDialog} onOpenChange={setShowPaymentDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Payment Settings</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Default Payment Method</Label>
+                <select className="w-full p-2 border rounded-md dark:bg-gray-800 dark:border-gray-700">
+                  <option value="direct_deposit">Direct Deposit</option>
+                  <option value="check">Check</option>
+                  <option value="wire">Wire Transfer</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label>Bank Account</Label>
+                <Input placeholder="Account Number" />
+              </div>
+              <div className="space-y-2">
+                <Label>Routing Number</Label>
+                <Input placeholder="Routing Number" />
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowPaymentDialog(false)}>Cancel</Button>
+                <Button className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white" onClick={() => { toast.success('Payment settings updated'); setShowPaymentDialog(false) }}>Save</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Tax Forms Dialog */}
+        <Dialog open={showTaxFormsDialog} onOpenChange={setShowTaxFormsDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Employee Tax Forms</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-3">
+                {['W-4', 'I-9', 'State Tax Form', 'Direct Deposit Form'].map((form) => (
+                  <div key={form} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <FileText className="w-5 h-5 text-gray-500" />
+                      <span className="font-medium">{form}</span>
+                    </div>
+                    <Button variant="outline" size="sm" onClick={() => toast.success(`Downloading ${form}...`)}>Download</Button>
+                  </div>
+                ))}
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowTaxFormsDialog(false)}>Close</Button>
+                <Button className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white" onClick={() => { toast.success('All forms downloaded'); setShowTaxFormsDialog(false) }}>Download All</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Notify All Dialog */}
+        <Dialog open={showNotifyAllDialog} onOpenChange={setShowNotifyAllDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Send Notification to All Employees</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Subject</Label>
+                <Input placeholder="Enter notification subject" />
+              </div>
+              <div className="space-y-2">
+                <Label>Message</Label>
+                <Textarea placeholder="Enter your message..." rows={4} />
+              </div>
+              <div className="space-y-2">
+                <Label>Send Via</Label>
+                <div className="flex gap-4">
+                  <label className="flex items-center gap-2">
+                    <input type="checkbox" defaultChecked className="rounded" />
+                    <span className="text-sm">Email</span>
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <input type="checkbox" className="rounded" />
+                    <span className="text-sm">SMS</span>
+                  </label>
+                </div>
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowNotifyAllDialog(false)}>Cancel</Button>
+                <Button className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white" onClick={() => { toast.success('Notification sent to all employees'); setShowNotifyAllDialog(false) }}>
+                  <Send className="w-4 h-4 mr-2" />
+                  Send
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Employee Reports Dialog */}
+        <Dialog open={showEmployeeReportsDialog} onOpenChange={setShowEmployeeReportsDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Employee Reports</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-3">
+                {['Headcount Report', 'Salary Distribution', 'Department Summary', 'Turnover Analysis', 'Benefits Enrollment'].map((report) => (
+                  <div key={report} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <BarChart3 className="w-5 h-5 text-gray-500" />
+                      <span className="font-medium">{report}</span>
+                    </div>
+                    <Button variant="outline" size="sm" onClick={() => toast.success(`Generating ${report}...`)}>Generate</Button>
+                  </div>
+                ))}
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowEmployeeReportsDialog(false)}>Close</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Employee Settings Dialog */}
+        <Dialog open={showEmployeeSettingsDialog} onOpenChange={setShowEmployeeSettingsDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Employee Settings</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="font-medium">Auto-enroll in Benefits</div>
+                  <div className="text-sm text-gray-500">Automatically enroll new employees</div>
+                </div>
+                <input type="checkbox" defaultChecked className="toggle" />
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="font-medium">Self-Service Portal</div>
+                  <div className="text-sm text-gray-500">Allow employees to update their info</div>
+                </div>
+                <input type="checkbox" defaultChecked className="toggle" />
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="font-medium">Email Notifications</div>
+                  <div className="text-sm text-gray-500">Send payroll notifications</div>
+                </div>
+                <input type="checkbox" defaultChecked className="toggle" />
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowEmployeeSettingsDialog(false)}>Cancel</Button>
+                <Button className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white" onClick={() => { toast.success('Settings saved'); setShowEmployeeSettingsDialog(false) }}>Save</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* File Taxes Dialog */}
+        <Dialog open={showFileTaxesDialog} onOpenChange={setShowFileTaxesDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>File Taxes</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Tax Type</Label>
+                <select className="w-full p-2 border rounded-md dark:bg-gray-800 dark:border-gray-700">
+                  <option value="federal">Federal Tax (Form 941)</option>
+                  <option value="state">State Income Tax</option>
+                  <option value="unemployment">Unemployment Tax</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label>Period</Label>
+                <select className="w-full p-2 border rounded-md dark:bg-gray-800 dark:border-gray-700">
+                  <option value="q1">Q1 2025</option>
+                  <option value="q4">Q4 2024</option>
+                  <option value="q3">Q3 2024</option>
+                </select>
+              </div>
+              <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
+                <p className="text-sm text-yellow-700 dark:text-yellow-400">Estimated tax amount: $324,500</p>
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowFileTaxesDialog(false)}>Cancel</Button>
+                <Button className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white" onClick={() => { toast.success('Tax filing initiated'); setShowFileTaxesDialog(false) }}>File Now</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Calculate Tax Dialog */}
+        <Dialog open={showCalculateTaxDialog} onOpenChange={setShowCalculateTaxDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Tax Calculator</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Gross Pay</Label>
+                <Input type="number" placeholder="Enter gross pay amount" />
+              </div>
+              <div className="space-y-2">
+                <Label>Filing Status</Label>
+                <select className="w-full p-2 border rounded-md dark:bg-gray-800 dark:border-gray-700">
+                  <option value="single">Single</option>
+                  <option value="married">Married Filing Jointly</option>
+                  <option value="head">Head of Household</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label>State</Label>
+                <select className="w-full p-2 border rounded-md dark:bg-gray-800 dark:border-gray-700">
+                  <option value="ca">California</option>
+                  <option value="ny">New York</option>
+                  <option value="tx">Texas</option>
+                </select>
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowCalculateTaxDialog(false)}>Cancel</Button>
+                <Button className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white" onClick={() => { toast.success('Tax calculated'); setShowCalculateTaxDialog(false) }}>
+                  <Calculator className="w-4 h-4 mr-2" />
+                  Calculate
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Tax Deadlines Dialog */}
+        <Dialog open={showTaxDeadlinesDialog} onOpenChange={setShowTaxDeadlinesDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Tax Deadlines</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-3">
+                {[
+                  { name: 'Q4 Federal Tax (941)', date: 'Jan 31, 2025', status: 'upcoming' },
+                  { name: 'W-2 Distribution', date: 'Jan 31, 2025', status: 'upcoming' },
+                  { name: '1099 Forms', date: 'Jan 31, 2025', status: 'upcoming' },
+                  { name: 'Q1 Estimated Tax', date: 'Apr 15, 2025', status: 'future' }
+                ].map((deadline) => (
+                  <div key={deadline.name} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                    <div>
+                      <div className="font-medium">{deadline.name}</div>
+                      <div className="text-sm text-gray-500">{deadline.date}</div>
+                    </div>
+                    <Badge className={deadline.status === 'upcoming' ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-700'}>{deadline.status}</Badge>
+                  </div>
+                ))}
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowTaxDeadlinesDialog(false)}>Close</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Tax Forms Download Dialog */}
+        <Dialog open={showTaxFormsDownloadDialog} onOpenChange={setShowTaxFormsDownloadDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Download Tax Forms</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-3">
+                {['Form 941', 'Form 940', 'W-2', 'W-3', '1099-NEC', '1099-MISC'].map((form) => (
+                  <div key={form} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <FileText className="w-5 h-5 text-gray-500" />
+                      <span className="font-medium">{form}</span>
+                    </div>
+                    <Button variant="outline" size="sm" onClick={() => toast.success(`Downloading ${form}...`)}>Download</Button>
+                  </div>
+                ))}
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowTaxFormsDownloadDialog(false)}>Close</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Compliance Dialog */}
+        <Dialog open={showComplianceDialog} onOpenChange={setShowComplianceDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Tax Compliance Status</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-3">
+                {[
+                  { name: 'Federal Tax Compliance', status: 'compliant' },
+                  { name: 'State Tax Compliance', status: 'compliant' },
+                  { name: 'Workers Comp', status: 'compliant' },
+                  { name: 'Unemployment Insurance', status: 'review' }
+                ].map((item) => (
+                  <div key={item.name} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <Shield className="w-5 h-5 text-gray-500" />
+                      <span className="font-medium">{item.name}</span>
+                    </div>
+                    <Badge className={item.status === 'compliant' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}>{item.status}</Badge>
+                  </div>
+                ))}
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowComplianceDialog(false)}>Close</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Tax History Dialog */}
+        <Dialog open={showTaxHistoryDialog} onOpenChange={setShowTaxHistoryDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Tax Filing History</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-3">
+                {[
+                  { period: 'Q3 2024', type: 'Form 941', amount: '$298,000', status: 'accepted' },
+                  { period: 'Q2 2024', type: 'Form 941', amount: '$285,000', status: 'accepted' },
+                  { period: 'Q1 2024', type: 'Form 941', amount: '$275,000', status: 'accepted' }
+                ].map((filing, idx) => (
+                  <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                    <div>
+                      <div className="font-medium">{filing.type} - {filing.period}</div>
+                      <div className="text-sm text-gray-500">{filing.amount}</div>
+                    </div>
+                    <Badge className="bg-green-100 text-green-700">{filing.status}</Badge>
+                  </div>
+                ))}
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowTaxHistoryDialog(false)}>Close</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Tax Reports Dialog */}
+        <Dialog open={showTaxReportsDialog} onOpenChange={setShowTaxReportsDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Tax Reports</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-3">
+                {['Tax Liability Summary', 'Quarterly Tax Report', 'Annual Tax Summary', 'Tax Payment History'].map((report) => (
+                  <div key={report} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <BarChart3 className="w-5 h-5 text-gray-500" />
+                      <span className="font-medium">{report}</span>
+                    </div>
+                    <Button variant="outline" size="sm" onClick={() => toast.success(`Generating ${report}...`)}>Generate</Button>
+                  </div>
+                ))}
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowTaxReportsDialog(false)}>Close</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Tax Settings Dialog */}
+        <Dialog open={showTaxSettingsDialog} onOpenChange={setShowTaxSettingsDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Tax Settings</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="font-medium">Auto-file Taxes</div>
+                  <div className="text-sm text-gray-500">Automatically file taxes when due</div>
+                </div>
+                <input type="checkbox" className="toggle" />
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="font-medium">Tax Reminders</div>
+                  <div className="text-sm text-gray-500">Send reminders before deadlines</div>
+                </div>
+                <input type="checkbox" defaultChecked className="toggle" />
+              </div>
+              <div className="space-y-2">
+                <Label>Default Filing Agency</Label>
+                <select className="w-full p-2 border rounded-md dark:bg-gray-800 dark:border-gray-700">
+                  <option value="irs">IRS</option>
+                  <option value="ssa">SSA</option>
+                </select>
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowTaxSettingsDialog(false)}>Cancel</Button>
+                <Button className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white" onClick={() => { toast.success('Tax settings saved'); setShowTaxSettingsDialog(false) }}>Save</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Download Tax Reports Dialog */}
+        <Dialog open={showDownloadTaxReportsDialog} onOpenChange={setShowDownloadTaxReportsDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Download Tax Reports</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Report Type</Label>
+                <select className="w-full p-2 border rounded-md dark:bg-gray-800 dark:border-gray-700">
+                  <option value="summary">Tax Summary Report</option>
+                  <option value="detailed">Detailed Tax Report</option>
+                  <option value="ytd">Year-to-Date Report</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label>Period</Label>
+                <select className="w-full p-2 border rounded-md dark:bg-gray-800 dark:border-gray-700">
+                  <option value="2024">2024</option>
+                  <option value="2023">2023</option>
+                  <option value="2022">2022</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label>Format</Label>
+                <select className="w-full p-2 border rounded-md dark:bg-gray-800 dark:border-gray-700">
+                  <option value="pdf">PDF</option>
+                  <option value="xlsx">Excel</option>
+                  <option value="csv">CSV</option>
+                </select>
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowDownloadTaxReportsDialog(false)}>Cancel</Button>
+                <Button className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white" onClick={() => { toast.success('Tax report downloaded'); setShowDownloadTaxReportsDialog(false) }}>
+                  <Download className="w-4 h-4 mr-2" />
+                  Download
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Generate W-2 Dialog */}
+        <Dialog open={showGenerateW2Dialog} onOpenChange={setShowGenerateW2Dialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Generate W-2 Forms</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Tax Year</Label>
+                <select className="w-full p-2 border rounded-md dark:bg-gray-800 dark:border-gray-700">
+                  <option value="2024">2024</option>
+                  <option value="2023">2023</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label>Employees</Label>
+                <select className="w-full p-2 border rounded-md dark:bg-gray-800 dark:border-gray-700">
+                  <option value="all">All Employees (156)</option>
+                  <option value="selected">Selected Employees</option>
+                </select>
+              </div>
+              <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                <p className="text-sm text-blue-700 dark:text-blue-400">W-2 forms will be generated for all employees who worked during the selected tax year.</p>
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowGenerateW2Dialog(false)}>Cancel</Button>
+                <Button className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white" onClick={() => { toast.success('W-2 forms generated'); setShowGenerateW2Dialog(false) }}>Generate W-2s</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Generate 1099 Dialog */}
+        <Dialog open={showGenerate1099Dialog} onOpenChange={setShowGenerate1099Dialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Generate 1099 Forms</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Tax Year</Label>
+                <select className="w-full p-2 border rounded-md dark:bg-gray-800 dark:border-gray-700">
+                  <option value="2024">2024</option>
+                  <option value="2023">2023</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label>Form Type</Label>
+                <select className="w-full p-2 border rounded-md dark:bg-gray-800 dark:border-gray-700">
+                  <option value="1099-nec">1099-NEC (Non-Employee Compensation)</option>
+                  <option value="1099-misc">1099-MISC</option>
+                </select>
+              </div>
+              <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                <p className="text-sm text-blue-700 dark:text-blue-400">1099 forms will be generated for contractors who earned $600 or more.</p>
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowGenerate1099Dialog(false)}>Cancel</Button>
+                <Button className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white" onClick={() => { toast.success('1099 forms generated'); setShowGenerate1099Dialog(false) }}>Generate 1099s</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* File Quarterly Taxes Dialog */}
+        <Dialog open={showFileQuarterlyTaxesDialog} onOpenChange={setShowFileQuarterlyTaxesDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>File Quarterly Taxes</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Quarter</Label>
+                <select className="w-full p-2 border rounded-md dark:bg-gray-800 dark:border-gray-700">
+                  <option value="q4-2024">Q4 2024</option>
+                  <option value="q1-2025">Q1 2025</option>
+                </select>
+              </div>
+              <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg space-y-2">
+                <div className="flex justify-between">
+                  <span>Federal Tax (941)</span>
+                  <span className="font-semibold">$324,500</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>State Unemployment</span>
+                  <span className="font-semibold">$12,800</span>
+                </div>
+                <div className="flex justify-between border-t pt-2">
+                  <span className="font-medium">Total Due</span>
+                  <span className="font-bold text-red-600">$337,300</span>
+                </div>
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowFileQuarterlyTaxesDialog(false)}>Cancel</Button>
+                <Button className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white" onClick={() => { toast.success('Quarterly taxes filed'); setShowFileQuarterlyTaxesDialog(false) }}>
+                  <Send className="w-4 h-4 mr-2" />
+                  File Now
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Benefit Plan Dialog */}
+        <Dialog open={showAddBenefitPlanDialog} onOpenChange={setShowAddBenefitPlanDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Add Benefit Plan</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Plan Name</Label>
+                <Input placeholder="Enter plan name" />
+              </div>
+              <div className="space-y-2">
+                <Label>Benefit Type</Label>
+                <select className="w-full p-2 border rounded-md dark:bg-gray-800 dark:border-gray-700">
+                  <option value="health">Health Insurance</option>
+                  <option value="dental">Dental Insurance</option>
+                  <option value="vision">Vision Insurance</option>
+                  <option value="life">Life Insurance</option>
+                  <option value="401k">401(k)</option>
+                  <option value="hsa">HSA</option>
+                </select>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Employer Contribution</Label>
+                  <Input type="number" placeholder="0" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Employee Contribution</Label>
+                  <Input type="number" placeholder="0" />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Provider</Label>
+                <Input placeholder="Enter provider name" />
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowAddBenefitPlanDialog(false)}>Cancel</Button>
+                <Button className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white" onClick={() => { toast.success('Benefit plan added'); setShowAddBenefitPlanDialog(false) }}>Add Plan</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Health Benefits Dialog */}
+        <Dialog open={showHealthBenefitsDialog} onOpenChange={setShowHealthBenefitsDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Health Benefits Overview</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-3">
+                {[
+                  { name: 'Medical Insurance - PPO', enrolled: 142, cost: '$170,400/mo' },
+                  { name: 'Medical Insurance - HMO', enrolled: 28, cost: '$22,400/mo' }
+                ].map((plan) => (
+                  <div key={plan.name} className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="font-medium">{plan.name}</span>
+                      <Badge className="bg-green-100 text-green-700">Active</Badge>
+                    </div>
+                    <div className="text-sm text-gray-500">
+                      <div>{plan.enrolled} employees enrolled</div>
+                      <div>Monthly cost: {plan.cost}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowHealthBenefitsDialog(false)}>Close</Button>
+                <Button className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white" onClick={() => { setShowHealthBenefitsDialog(false); setShowAddBenefitPlanDialog(true) }}>Add New Plan</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Insurance Dialog */}
+        <Dialog open={showInsuranceDialog} onOpenChange={setShowInsuranceDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Insurance Plans</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-3">
+                {[
+                  { name: 'Life Insurance', provider: 'MetLife', coverage: '2x Annual Salary' },
+                  { name: 'Disability Insurance', provider: 'Prudential', coverage: '60% Income' },
+                  { name: 'AD&D Insurance', provider: 'MetLife', coverage: '1x Annual Salary' }
+                ].map((plan) => (
+                  <div key={plan.name} className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                    <div className="font-medium">{plan.name}</div>
+                    <div className="text-sm text-gray-500">
+                      <div>Provider: {plan.provider}</div>
+                      <div>Coverage: {plan.coverage}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowInsuranceDialog(false)}>Close</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* 401k Dialog */}
+        <Dialog open={show401kDialog} onOpenChange={setShow401kDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>401(k) Retirement Plan</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                <div className="font-medium mb-3">Plan Details</div>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Provider</span>
+                    <span>Fidelity</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Employer Match</span>
+                    <span>6%</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Vesting Schedule</span>
+                    <span>4 years</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Enrolled</span>
+                    <span>148 employees</span>
+                  </div>
+                </div>
+              </div>
+              <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                <div className="text-sm text-green-700 dark:text-green-400">
+                  <div className="font-medium">Total Plan Assets</div>
+                  <div className="text-2xl font-bold">$4,250,000</div>
+                </div>
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShow401kDialog(false)}>Close</Button>
+                <Button className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white" onClick={() => { toast.success('Opening Fidelity portal...'); setShow401kDialog(false) }}>Manage Plan</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Enrollment Dialog */}
+        <Dialog open={showEnrollmentDialog} onOpenChange={setShowEnrollmentDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Benefits Enrollment</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                <p className="text-sm text-blue-700 dark:text-blue-400">Open enrollment period: Nov 1 - Nov 30, 2024</p>
+              </div>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                  <span>Pending Enrollments</span>
+                  <Badge className="bg-yellow-100 text-yellow-700">12</Badge>
+                </div>
+                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                  <span>Completed Enrollments</span>
+                  <Badge className="bg-green-100 text-green-700">144</Badge>
+                </div>
+                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                  <span>Declined Coverage</span>
+                  <Badge className="bg-gray-100 text-gray-700">2</Badge>
+                </div>
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowEnrollmentDialog(false)}>Close</Button>
+                <Button className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white" onClick={() => { toast.success('Sending enrollment reminders'); setShowEnrollmentDialog(false) }}>Send Reminders</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Benefit Documents Dialog */}
+        <Dialog open={showBenefitDocumentsDialog} onOpenChange={setShowBenefitDocumentsDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Benefits Documents</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-3">
+                {['Summary Plan Description', 'Enrollment Guide', 'Benefits Summary', 'COBRA Notice', 'HIPAA Notice'].map((doc) => (
+                  <div key={doc} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <FileText className="w-5 h-5 text-gray-500" />
+                      <span className="font-medium">{doc}</span>
+                    </div>
+                    <Button variant="outline" size="sm" onClick={() => toast.success(`Downloading ${doc}...`)}>Download</Button>
+                  </div>
+                ))}
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowBenefitDocumentsDialog(false)}>Close</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Benefit Reports Dialog */}
+        <Dialog open={showBenefitReportsDialog} onOpenChange={setShowBenefitReportsDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Benefits Reports</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-3">
+                {['Enrollment Summary', 'Cost Analysis', 'Utilization Report', 'Premium Breakdown', 'Claims Report'].map((report) => (
+                  <div key={report} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <BarChart3 className="w-5 h-5 text-gray-500" />
+                      <span className="font-medium">{report}</span>
+                    </div>
+                    <Button variant="outline" size="sm" onClick={() => toast.success(`Generating ${report}...`)}>Generate</Button>
+                  </div>
+                ))}
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowBenefitReportsDialog(false)}>Close</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Benefit Settings Dialog */}
+        <Dialog open={showBenefitSettingsDialog} onOpenChange={setShowBenefitSettingsDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Benefits Settings</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="font-medium">Auto-Enrollment</div>
+                  <div className="text-sm text-gray-500">Automatically enroll new hires</div>
+                </div>
+                <input type="checkbox" defaultChecked className="toggle" />
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="font-medium">Enrollment Reminders</div>
+                  <div className="text-sm text-gray-500">Send reminders during open enrollment</div>
+                </div>
+                <input type="checkbox" defaultChecked className="toggle" />
+              </div>
+              <div className="space-y-2">
+                <Label>Waiting Period</Label>
+                <select className="w-full p-2 border rounded-md dark:bg-gray-800 dark:border-gray-700">
+                  <option value="0">Immediate</option>
+                  <option value="30">30 days</option>
+                  <option value="60">60 days</option>
+                  <option value="90">90 days</option>
+                </select>
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowBenefitSettingsDialog(false)}>Cancel</Button>
+                <Button className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white" onClick={() => { toast.success('Settings saved'); setShowBenefitSettingsDialog(false) }}>Save</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* New Time Entry Dialog */}
+        <Dialog open={showNewTimeEntryDialog} onOpenChange={setShowNewTimeEntryDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>New Time Entry</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Employee</Label>
+                <select className="w-full p-2 border rounded-md dark:bg-gray-800 dark:border-gray-700">
+                  <option value="">Select Employee</option>
+                  {mockEmployees.map((emp) => (
+                    <option key={emp.id} value={emp.id}>{emp.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label>Date</Label>
+                <Input type="date" />
+              </div>
+              <div className="grid grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label>Regular Hours</Label>
+                  <Input type="number" placeholder="8" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Overtime</Label>
+                  <Input type="number" placeholder="0" />
+                </div>
+                <div className="space-y-2">
+                  <Label>PTO</Label>
+                  <Input type="number" placeholder="0" />
+                </div>
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowNewTimeEntryDialog(false)}>Cancel</Button>
+                <Button className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white" onClick={() => { toast.success('Time entry created'); setShowNewTimeEntryDialog(false) }}>Create Entry</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Clock In Dialog */}
+        <Dialog open={showClockInDialog} onOpenChange={setShowClockInDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Clock In/Out</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="text-center p-6">
+                <Clock className="w-16 h-16 mx-auto text-green-500 mb-4" />
+                <div className="text-3xl font-bold mb-2">{new Date().toLocaleTimeString()}</div>
+                <div className="text-gray-500">{new Date().toLocaleDateString()}</div>
+              </div>
+              <div className="space-y-2">
+                <Label>Employee</Label>
+                <select className="w-full p-2 border rounded-md dark:bg-gray-800 dark:border-gray-700">
+                  <option value="">Select Employee</option>
+                  {mockEmployees.map((emp) => (
+                    <option key={emp.id} value={emp.id}>{emp.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="grid grid-cols-2 gap-4 pt-4">
+                <Button className="bg-green-500 text-white" onClick={() => { toast.success('Clocked in successfully'); setShowClockInDialog(false) }}>
+                  <PlayCircle className="w-4 h-4 mr-2" />
+                  Clock In
+                </Button>
+                <Button variant="outline" onClick={() => { toast.success('Clocked out successfully'); setShowClockInDialog(false) }}>
+                  <XCircle className="w-4 h-4 mr-2" />
+                  Clock Out
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Approve Time Dialog */}
+        <Dialog open={showApproveTimeDialog} onOpenChange={setShowApproveTimeDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Approve Time Entry</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              {selectedTimeEntry ? (
+                <>
+                  <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                    <div className="font-medium mb-2">{selectedTimeEntry.employeeName}</div>
+                    <div className="text-sm text-gray-500 space-y-1">
+                      <div>Date: {selectedTimeEntry.date}</div>
+                      <div>Regular Hours: {selectedTimeEntry.regularHours}h</div>
+                      <div>Overtime: {selectedTimeEntry.overtimeHours}h</div>
+                      <div>PTO: {selectedTimeEntry.ptoHours}h</div>
+                      <div className="font-medium pt-2">Total: {selectedTimeEntry.totalHours}h</div>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Notes (optional)</Label>
+                    <Textarea placeholder="Add approval notes..." />
+                  </div>
+                </>
+              ) : (
+                <div className="p-4 text-center text-gray-500">
+                  <p>Select pending time entries to approve them.</p>
+                  <p className="text-sm mt-2">There are {mockTimeEntries.filter(e => e.status === 'pending').length} pending entries.</p>
+                </div>
+              )}
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowApproveTimeDialog(false)}>Cancel</Button>
+                <Button className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white" onClick={() => { toast.success('Time entry approved'); setShowApproveTimeDialog(false); setSelectedTimeEntry(null) }}>
+                  <CheckCircle className="w-4 h-4 mr-2" />
+                  Approve
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Schedule Dialog */}
+        <Dialog open={showScheduleDialog} onOpenChange={setShowScheduleDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Work Schedule</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Employee</Label>
+                <select className="w-full p-2 border rounded-md dark:bg-gray-800 dark:border-gray-700">
+                  <option value="">All Employees</option>
+                  {mockEmployees.map((emp) => (
+                    <option key={emp.id} value={emp.id}>{emp.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label>Week</Label>
+                <Input type="week" />
+              </div>
+              <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                <div className="text-sm text-gray-500 mb-2">Standard Schedule</div>
+                <div className="space-y-1 text-sm">
+                  <div className="flex justify-between"><span>Monday - Friday</span><span>9:00 AM - 5:00 PM</span></div>
+                  <div className="flex justify-between"><span>Saturday - Sunday</span><span>Off</span></div>
+                </div>
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowScheduleDialog(false)}>Close</Button>
+                <Button className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white" onClick={() => { toast.success('Schedule updated'); setShowScheduleDialog(false) }}>Save Schedule</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Team View Dialog */}
+        <Dialog open={showTeamViewDialog} onOpenChange={setShowTeamViewDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Team Time Overview</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-3 max-h-96 overflow-y-auto">
+                {mockEmployees.slice(0, 5).map((emp) => (
+                  <div key={emp.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <Avatar className="w-10 h-10">
+                        <AvatarFallback className="bg-gradient-to-br from-blue-400 to-indigo-500 text-white text-sm">
+                          {emp.name.split(' ').map(n => n[0]).join('')}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <div className="font-medium">{emp.name}</div>
+                        <div className="text-sm text-gray-500">{emp.department}</div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="font-medium">40h</div>
+                      <div className="text-sm text-gray-500">This week</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowTeamViewDialog(false)}>Close</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Time Export Dialog */}
+        <Dialog open={showTimeExportDialog} onOpenChange={setShowTimeExportDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Export Time Data</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Date Range</Label>
+                <div className="grid grid-cols-2 gap-2">
+                  <Input type="date" />
+                  <Input type="date" />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Format</Label>
+                <select className="w-full p-2 border rounded-md dark:bg-gray-800 dark:border-gray-700">
+                  <option value="csv">CSV</option>
+                  <option value="xlsx">Excel</option>
+                  <option value="pdf">PDF</option>
+                </select>
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowTimeExportDialog(false)}>Cancel</Button>
+                <Button className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white" onClick={() => { toast.success('Time data exported'); setShowTimeExportDialog(false) }}>
+                  <Download className="w-4 h-4 mr-2" />
+                  Export
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Time Reports Dialog */}
+        <Dialog open={showTimeReportsDialog} onOpenChange={setShowTimeReportsDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Time & Attendance Reports</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-3">
+                {['Hours Summary', 'Overtime Report', 'PTO Usage', 'Attendance Report', 'Timesheet Audit'].map((report) => (
+                  <div key={report} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <BarChart3 className="w-5 h-5 text-gray-500" />
+                      <span className="font-medium">{report}</span>
+                    </div>
+                    <Button variant="outline" size="sm" onClick={() => toast.success(`Generating ${report}...`)}>Generate</Button>
+                  </div>
+                ))}
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowTimeReportsDialog(false)}>Close</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Time Settings Dialog */}
+        <Dialog open={showTimeSettingsDialog} onOpenChange={setShowTimeSettingsDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Time & Attendance Settings</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="font-medium">Overtime Alerts</div>
+                  <div className="text-sm text-gray-500">Alert when approaching overtime</div>
+                </div>
+                <input type="checkbox" defaultChecked className="toggle" />
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="font-medium">Auto-approve Regular Hours</div>
+                  <div className="text-sm text-gray-500">Automatically approve standard hours</div>
+                </div>
+                <input type="checkbox" className="toggle" />
+              </div>
+              <div className="space-y-2">
+                <Label>Overtime Threshold</Label>
+                <Input type="number" placeholder="40" />
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowTimeSettingsDialog(false)}>Cancel</Button>
+                <Button className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white" onClick={() => { toast.success('Settings saved'); setShowTimeSettingsDialog(false) }}>Save</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Pay Frequency Dialog */}
+        <Dialog open={showPayFrequencyDialog} onOpenChange={setShowPayFrequencyDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Edit Pay Frequency</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Pay Frequency</Label>
+                <select className="w-full p-2 border rounded-md dark:bg-gray-800 dark:border-gray-700">
+                  <option value="weekly">Weekly</option>
+                  <option value="bi_weekly">Bi-Weekly</option>
+                  <option value="semi_monthly" selected>Semi-Monthly (1st & 15th)</option>
+                  <option value="monthly">Monthly</option>
+                </select>
+              </div>
+              <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
+                <p className="text-sm text-yellow-700 dark:text-yellow-400">Changing pay frequency will affect all future pay runs.</p>
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowPayFrequencyDialog(false)}>Cancel</Button>
+                <Button className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white" onClick={() => { toast.success('Pay frequency updated'); setShowPayFrequencyDialog(false) }}>Save</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Fiscal Year Dialog */}
+        <Dialog open={showFiscalYearDialog} onOpenChange={setShowFiscalYearDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Edit Fiscal Year</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Fiscal Year Start</Label>
+                <select className="w-full p-2 border rounded-md dark:bg-gray-800 dark:border-gray-700">
+                  <option value="january" selected>January</option>
+                  <option value="april">April</option>
+                  <option value="july">July</option>
+                  <option value="october">October</option>
+                </select>
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowFiscalYearDialog(false)}>Cancel</Button>
+                <Button className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white" onClick={() => { toast.success('Fiscal year updated'); setShowFiscalYearDialog(false) }}>Save</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Currency Dialog */}
+        <Dialog open={showCurrencyDialog} onOpenChange={setShowCurrencyDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Edit Default Currency</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Currency</Label>
+                <select className="w-full p-2 border rounded-md dark:bg-gray-800 dark:border-gray-700">
+                  <option value="usd" selected>USD - US Dollar</option>
+                  <option value="eur">EUR - Euro</option>
+                  <option value="gbp">GBP - British Pound</option>
+                  <option value="cad">CAD - Canadian Dollar</option>
+                </select>
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowCurrencyDialog(false)}>Cancel</Button>
+                <Button className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white" onClick={() => { toast.success('Currency updated'); setShowCurrencyDialog(false) }}>Save</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Bank Account Dialog */}
+        <Dialog open={showBankAccountDialog} onOpenChange={setShowBankAccountDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Manage Bank Account</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                <div className="font-medium mb-2">Current Account</div>
+                <div className="text-sm text-gray-500">
+                  <div>Chase Business Checking</div>
+                  <div>Account: ****4521</div>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Bank Name</Label>
+                <Input placeholder="Enter bank name" />
+              </div>
+              <div className="space-y-2">
+                <Label>Account Number</Label>
+                <Input placeholder="Enter account number" />
+              </div>
+              <div className="space-y-2">
+                <Label>Routing Number</Label>
+                <Input placeholder="Enter routing number" />
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowBankAccountDialog(false)}>Cancel</Button>
+                <Button className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white" onClick={() => { toast.success('Bank account updated'); setShowBankAccountDialog(false) }}>Save</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Auto-Process Dialog */}
+        <Dialog open={showAutoProcessDialog} onOpenChange={setShowAutoProcessDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Configure Auto-Process</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="font-medium">Enable Auto-Process</div>
+                  <div className="text-sm text-gray-500">Automatically process payroll</div>
+                </div>
+                <input type="checkbox" defaultChecked className="toggle" />
+              </div>
+              <div className="space-y-2">
+                <Label>Days Before Pay Date</Label>
+                <select className="w-full p-2 border rounded-md dark:bg-gray-800 dark:border-gray-700">
+                  <option value="1">1 day</option>
+                  <option value="2" selected>2 days</option>
+                  <option value="3">3 days</option>
+                </select>
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowAutoProcessDialog(false)}>Cancel</Button>
+                <Button className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white" onClick={() => { toast.success('Auto-process settings saved'); setShowAutoProcessDialog(false) }}>Save</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Approval Workflow Dialog */}
+        <Dialog open={showApprovalWorkflowDialog} onOpenChange={setShowApprovalWorkflowDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Configure Approval Workflow</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Approval Type</Label>
+                <select className="w-full p-2 border rounded-md dark:bg-gray-800 dark:border-gray-700">
+                  <option value="single">Single Approval</option>
+                  <option value="dual" selected>Dual Approval</option>
+                  <option value="sequential">Sequential Approval</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label>Primary Approver</Label>
+                <select className="w-full p-2 border rounded-md dark:bg-gray-800 dark:border-gray-700">
+                  <option value="">Select Approver</option>
+                  <option value="cfo">CFO</option>
+                  <option value="hr">HR Director</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label>Secondary Approver</Label>
+                <select className="w-full p-2 border rounded-md dark:bg-gray-800 dark:border-gray-700">
+                  <option value="">Select Approver</option>
+                  <option value="ceo">CEO</option>
+                  <option value="controller">Controller</option>
+                </select>
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowApprovalWorkflowDialog(false)}>Cancel</Button>
+                <Button className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white" onClick={() => { toast.success('Workflow updated'); setShowApprovalWorkflowDialog(false) }}>Save</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Access Roles Dialog */}
+        <Dialog open={showAccessRolesDialog} onOpenChange={setShowAccessRolesDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Manage Access Roles</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-3">
+                {[
+                  { role: 'Admin', count: 5, permissions: 'Full access' },
+                  { role: 'Manager', count: 3, permissions: 'View & approve' },
+                  { role: 'Viewer', count: 8, permissions: 'View only' }
+                ].map((role) => (
+                  <div key={role.role} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                    <div>
+                      <div className="font-medium">{role.role}</div>
+                      <div className="text-sm text-gray-500">{role.permissions}</div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Badge className="bg-blue-100 text-blue-700">{role.count} users</Badge>
+                      <Button variant="outline" size="sm" onClick={() => toast.info(`Editing ${role.role} role...`)}>Edit</Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowAccessRolesDialog(false)}>Close</Button>
+                <Button className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white" onClick={() => { toast.success('Adding new role...'); }}>Add Role</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Pay Stubs Dialog */}
+        <Dialog open={showPayStubsDialog} onOpenChange={setShowPayStubsDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Pay Stubs - {selectedEmployee?.name}</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-3">
+                {['Dec 15, 2024', 'Dec 1, 2024', 'Nov 15, 2024', 'Nov 1, 2024'].map((date) => (
+                  <div key={date} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <FileText className="w-5 h-5 text-gray-500" />
+                      <div>
+                        <div className="font-medium">Pay Stub - {date}</div>
+                        <div className="text-sm text-gray-500">Net: {formatCurrencyDetailed(selectedEmployee?.netPay || 0)}</div>
+                      </div>
+                    </div>
+                    <Button variant="outline" size="sm" onClick={() => toast.success(`Downloading pay stub for ${date}...`)}>
+                      <Download className="w-4 h-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowPayStubsDialog(false)}>Close</Button>
+                <Button className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white" onClick={() => { toast.success('All pay stubs downloaded'); setShowPayStubsDialog(false) }}>Download All</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Employee Details Dialog */}
+        <Dialog open={showEditEmployeeDetailsDialog} onOpenChange={setShowEditEmployeeDetailsDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Edit Employee Details</DialogTitle>
+            </DialogHeader>
+            {selectedEmployee && (
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Name</Label>
+                    <Input defaultValue={selectedEmployee.name} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Email</Label>
+                    <Input defaultValue={selectedEmployee.email} />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Department</Label>
+                    <Input defaultValue={selectedEmployee.department} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Role</Label>
+                    <Input defaultValue={selectedEmployee.role} />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Salary</Label>
+                    <Input type="number" defaultValue={selectedEmployee.salary} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Payment Method</Label>
+                    <select className="w-full p-2 border rounded-md dark:bg-gray-800 dark:border-gray-700" defaultValue={selectedEmployee.paymentMethod}>
+                      <option value="direct_deposit">Direct Deposit</option>
+                      <option value="check">Check</option>
+                      <option value="wire_transfer">Wire Transfer</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="flex gap-2 pt-4">
+                  <Button variant="outline" className="flex-1" onClick={() => setShowEditEmployeeDetailsDialog(false)}>Cancel</Button>
+                  <Button className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white" onClick={() => { toast.success('Employee details updated'); setShowEditEmployeeDetailsDialog(false) }}>Save Changes</Button>
+                </div>
+              </div>
+            )}
           </DialogContent>
         </Dialog>
       </div>

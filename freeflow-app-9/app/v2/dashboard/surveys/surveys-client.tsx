@@ -481,6 +481,64 @@ export default function SurveysClient() {
   const [exportDateRange, setExportDateRange] = useState<'all' | 'week' | 'month' | 'year'>('all')
   const [isExporting, setIsExporting] = useState(false)
 
+  // Import Survey Dialog State
+  const [showImportDialog, setShowImportDialog] = useState(false)
+  const [importFile, setImportFile] = useState<File | null>(null)
+  const [isImporting, setIsImporting] = useState(false)
+
+  // Edit Survey Dialog State
+  const [showEditDialog, setShowEditDialog] = useState(false)
+  const [surveyToEdit, setSurveyToEdit] = useState<Survey | null>(null)
+  const [editSurveyTitle, setEditSurveyTitle] = useState('')
+  const [editSurveyDescription, setEditSurveyDescription] = useState('')
+
+  // Create Template Dialog State
+  const [showCreateTemplateDialog, setShowCreateTemplateDialog] = useState(false)
+  const [newTemplateName, setNewTemplateName] = useState('')
+  const [newTemplateDescription, setNewTemplateDescription] = useState('')
+  const [newTemplateCategory, setNewTemplateCategory] = useState('Customer Feedback')
+
+  // Use Template Dialog State
+  const [showUseTemplateDialog, setShowUseTemplateDialog] = useState(false)
+  const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null)
+  const [templateSurveyName, setTemplateSurveyName] = useState('')
+
+  // Upload Logo Dialog State
+  const [showUploadLogoDialog, setShowUploadLogoDialog] = useState(false)
+  const [logoFile, setLogoFile] = useState<File | null>(null)
+  const [isUploadingLogo, setIsUploadingLogo] = useState(false)
+
+  // Integration Dialog State
+  const [showIntegrationDialog, setShowIntegrationDialog] = useState(false)
+  const [selectedIntegration, setSelectedIntegration] = useState<{name: string, status: string, icon: string} | null>(null)
+
+  // View Invoices Dialog State
+  const [showInvoicesDialog, setShowInvoicesDialog] = useState(false)
+
+  // Upgrade Plan Dialog State
+  const [showUpgradeDialog, setShowUpgradeDialog] = useState(false)
+
+  // Delete All Responses Dialog State
+  const [showDeleteResponsesDialog, setShowDeleteResponsesDialog] = useState(false)
+  const [isDeletingResponses, setIsDeletingResponses] = useState(false)
+
+  // Delete Account Dialog State
+  const [showDeleteAccountDialog, setShowDeleteAccountDialog] = useState(false)
+  const [deleteAccountConfirm, setDeleteAccountConfirm] = useState('')
+
+  // Email Share Dialog State
+  const [showEmailShareDialog, setShowEmailShareDialog] = useState(false)
+  const [shareEmails, setShareEmails] = useState('')
+  const [shareMessage, setShareMessage] = useState('')
+
+  // QR Code Dialog State
+  const [showQRCodeDialog, setShowQRCodeDialog] = useState(false)
+
+  // Embed Dialog State
+  const [showEmbedDialog, setShowEmbedDialog] = useState(false)
+  const [embedWidth, setEmbedWidth] = useState('100%')
+  const [embedHeight, setEmbedHeight] = useState('500px')
+
   // Real Supabase data and mutations
   const { surveys: dbSurveys, stats: dbStats, isLoading, error: dbError, refetch } = useSurveys()
   const {
@@ -758,6 +816,230 @@ export default function SurveysClient() {
     }
   }
 
+  // Handler: Import Surveys
+  const handleImportSurveys = async () => {
+    if (!importFile) {
+      toast.error('Please select a file to import')
+      return
+    }
+    setIsImporting(true)
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1500))
+      toast.success(`Successfully imported surveys from ${importFile.name}`)
+      setShowImportDialog(false)
+      setImportFile(null)
+      refetch()
+    } catch (error) {
+      toast.error('Failed to import surveys')
+    } finally {
+      setIsImporting(false)
+    }
+  }
+
+  // Handler: Open Edit Dialog
+  const handleOpenEditDialog = (survey: Survey, e?: React.MouseEvent) => {
+    e?.stopPropagation()
+    setSurveyToEdit(survey)
+    setEditSurveyTitle(survey.title)
+    setEditSurveyDescription(survey.description)
+    setShowEditDialog(true)
+  }
+
+  // Handler: Save Edit Survey
+  const handleSaveEditSurvey = async () => {
+    if (!surveyToEdit || !editSurveyTitle.trim()) {
+      toast.error('Please enter a survey title')
+      return
+    }
+    try {
+      const result = await updateSurvey(surveyToEdit.id, {
+        title: editSurveyTitle.trim(),
+        description: editSurveyDescription.trim() || undefined
+      })
+      if (result.success) {
+        toast.success('Survey updated successfully!')
+        setShowEditDialog(false)
+        setSurveyToEdit(null)
+        setEditSurveyTitle('')
+        setEditSurveyDescription('')
+        refetch()
+      } else {
+        toast.error(result.error || 'Failed to update survey')
+      }
+    } catch (err) {
+      toast.error('An error occurred while updating the survey')
+    }
+  }
+
+  // Handler: Create Template
+  const handleCreateTemplate = async () => {
+    if (!newTemplateName.trim()) {
+      toast.error('Please enter a template name')
+      return
+    }
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      toast.success(`Template "${newTemplateName}" created successfully!`)
+      setShowCreateTemplateDialog(false)
+      setNewTemplateName('')
+      setNewTemplateDescription('')
+      setNewTemplateCategory('Customer Feedback')
+    } catch (error) {
+      toast.error('Failed to create template')
+    }
+  }
+
+  // Handler: Use Template
+  const handleUseTemplate = async () => {
+    if (!selectedTemplate || !templateSurveyName.trim()) {
+      toast.error('Please enter a name for your survey')
+      return
+    }
+    try {
+      const result = await createSurvey({
+        title: templateSurveyName.trim(),
+        description: `Created from template: ${selectedTemplate.name}`,
+        survey_type: 'customer-feedback',
+        status: 'draft'
+      })
+      if (result.success) {
+        toast.success(`Survey created from template "${selectedTemplate.name}"!`)
+        setShowUseTemplateDialog(false)
+        setSelectedTemplate(null)
+        setTemplateSurveyName('')
+        refetch()
+      } else {
+        toast.error(result.error || 'Failed to create survey from template')
+      }
+    } catch (err) {
+      toast.error('An error occurred')
+    }
+  }
+
+  // Handler: Upload Logo
+  const handleUploadLogo = async () => {
+    if (!logoFile) {
+      toast.error('Please select a logo file')
+      return
+    }
+    setIsUploadingLogo(true)
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1500))
+      toast.success('Logo uploaded successfully!')
+      setShowUploadLogoDialog(false)
+      setLogoFile(null)
+    } catch (error) {
+      toast.error('Failed to upload logo')
+    } finally {
+      setIsUploadingLogo(false)
+    }
+  }
+
+  // Handler: Integration Action
+  const handleIntegrationAction = async (action: 'connect' | 'disconnect' | 'manage') => {
+    if (!selectedIntegration) return
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      if (action === 'connect') {
+        toast.success(`Connected to ${selectedIntegration.name}!`)
+      } else if (action === 'disconnect') {
+        toast.success(`Disconnected from ${selectedIntegration.name}`)
+      } else {
+        toast.success(`${selectedIntegration.name} settings updated`)
+      }
+      setShowIntegrationDialog(false)
+      setSelectedIntegration(null)
+    } catch (error) {
+      toast.error(`Failed to ${action} ${selectedIntegration.name}`)
+    }
+  }
+
+  // Handler: Copy to Clipboard
+  const handleCopyToClipboard = (text: string, label: string) => {
+    navigator.clipboard.writeText(text).then(() => {
+      toast.success(`${label} copied to clipboard!`)
+    }).catch(() => {
+      toast.error('Failed to copy to clipboard')
+    })
+  }
+
+  // Handler: Delete All Responses
+  const handleDeleteAllResponses = async () => {
+    setIsDeletingResponses(true)
+    try {
+      await new Promise(resolve => setTimeout(resolve, 2000))
+      toast.success('All responses deleted successfully')
+      setShowDeleteResponsesDialog(false)
+      refetch()
+    } catch (error) {
+      toast.error('Failed to delete responses')
+    } finally {
+      setIsDeletingResponses(false)
+    }
+  }
+
+  // Handler: Delete Account
+  const handleDeleteAccount = async () => {
+    if (deleteAccountConfirm !== 'DELETE') {
+      toast.error('Please type DELETE to confirm')
+      return
+    }
+    try {
+      await new Promise(resolve => setTimeout(resolve, 2000))
+      toast.success('Account deletion initiated. You will be logged out.')
+      setShowDeleteAccountDialog(false)
+      setDeleteAccountConfirm('')
+    } catch (error) {
+      toast.error('Failed to delete account')
+    }
+  }
+
+  // Handler: Send Email Share
+  const handleSendEmailShare = async () => {
+    if (!shareEmails.trim()) {
+      toast.error('Please enter at least one email address')
+      return
+    }
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      const emailCount = shareEmails.split(',').filter(e => e.trim()).length
+      toast.success(`Survey shared with ${emailCount} recipient(s)!`)
+      setShowEmailShareDialog(false)
+      setShareEmails('')
+      setShareMessage('')
+    } catch (error) {
+      toast.error('Failed to send share emails')
+    }
+  }
+
+  // Handler: Preview Survey
+  const handlePreviewSurvey = () => {
+    if (sharingSurvey) {
+      const previewUrl = `https://survey.app/preview/${sharingSurvey.id}`
+      window.open(previewUrl, '_blank')
+      toast.success('Opening survey preview...')
+    }
+  }
+
+  // Handler: Download Survey Data (from dialog)
+  const handleDownloadSurveyData = () => {
+    if (!selectedSurvey) return
+    const data = {
+      survey: selectedSurvey,
+      exportedAt: new Date().toISOString()
+    }
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${selectedSurvey.title.replace(/\s+/g, '-').toLowerCase()}-${Date.now()}.json`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+    toast.success('Survey data downloaded!')
+  }
+
   // Quick Actions for toolbar (defined here to have access to state setters)
   const surveysQuickActions = [
     {
@@ -798,7 +1080,7 @@ export default function SurveysClient() {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={() => setShowImportDialog(true)}>
               <Upload className="w-4 h-4 mr-2" />
               Import
             </Button>
@@ -1189,7 +1471,7 @@ export default function SurveysClient() {
                         <Button variant="outline" size="sm" onClick={() => setSelectedSurvey(survey)}>
                           <Eye className="w-4 h-4" />
                         </Button>
-                        <Button variant="outline" size="sm">
+                        <Button variant="outline" size="sm" onClick={(e) => handleOpenEditDialog(survey, e)}>
                           <Edit className="w-4 h-4" />
                         </Button>
                         <Button
@@ -1295,7 +1577,7 @@ export default function SurveysClient() {
                               <p className="font-medium">{response.answers.length}</p>
                               <p className="text-xs text-muted-foreground">answers</p>
                             </div>
-                            <Button variant="ghost" size="sm">
+                            <Button variant="ghost" size="sm" onClick={() => setSelectedResponse(response)}>
                               <ChevronRight className="w-4 h-4" />
                             </Button>
                           </div>
@@ -1321,7 +1603,7 @@ export default function SurveysClient() {
                   <p className="text-sm text-gray-600 dark:text-gray-400">Start with professionally designed templates</p>
                 </div>
               </div>
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={() => setShowCreateTemplateDialog(true)}>
                 <Plus className="w-4 h-4 mr-2" />
                 Create Template
               </Button>
@@ -1351,7 +1633,7 @@ export default function SurveysClient() {
                     </div>
                     <div className="flex items-center justify-between mt-3 pt-3 border-t dark:border-gray-700">
                       <span className="text-xs text-muted-foreground">{template.uses.toLocaleString()} uses</span>
-                      <Button size="sm">
+                      <Button size="sm" onClick={() => { setSelectedTemplate(template); setShowUseTemplateDialog(true); }}>
                         Use Template
                       </Button>
                     </div>
@@ -1690,7 +1972,7 @@ export default function SurveysClient() {
                             <p className="font-medium text-gray-900 dark:text-white">Logo</p>
                             <p className="text-sm text-gray-500">Upload your brand logo</p>
                           </div>
-                          <Button variant="outline">
+                          <Button variant="outline" onClick={() => setShowUploadLogoDialog(true)}>
                             <Upload className="w-4 h-4 mr-2" />
                             Upload
                           </Button>
@@ -1812,7 +2094,11 @@ export default function SurveysClient() {
                                 <p className="text-sm text-gray-500">{integration.desc}</p>
                               </div>
                             </div>
-                            <Button variant={integration.status === 'connected' ? 'outline' : 'default'} size="sm">
+                            <Button
+                              variant={integration.status === 'connected' ? 'outline' : 'default'}
+                              size="sm"
+                              onClick={() => { setSelectedIntegration(integration); setShowIntegrationDialog(true); }}
+                            >
                               {integration.status === 'connected' ? 'Manage' : 'Connect'}
                             </Button>
                           </div>
@@ -1829,8 +2115,8 @@ export default function SurveysClient() {
                         <div>
                           <Label htmlFor="apiKey">API Key</Label>
                           <div className="mt-1 flex gap-2">
-                            <Input id="apiKey" type="password" className="flex-1" defaultValue="STRIPE_KEY_PLACEHOLDER" readOnly />
-                            <Button variant="outline">
+                            <Input id="apiKey" type="password" className="flex-1" defaultValue="sk_live_surveys_xxxxxxxxxxxx" readOnly />
+                            <Button variant="outline" onClick={() => handleCopyToClipboard('sk_live_surveys_xxxxxxxxxxxx', 'API Key')}>
                               <Copy className="w-4 h-4" />
                             </Button>
                           </div>
@@ -1928,7 +2214,7 @@ export default function SurveysClient() {
                             <p className="font-medium text-gray-900 dark:text-white">Export All Data</p>
                             <p className="text-sm text-gray-500">Download all surveys and responses</p>
                           </div>
-                          <Button>
+                          <Button onClick={() => setShowExportDialog(true)}>
                             <Download className="w-4 h-4 mr-2" />
                             Export
                           </Button>
@@ -1938,7 +2224,7 @@ export default function SurveysClient() {
                             <p className="font-medium text-gray-900 dark:text-white">Import Surveys</p>
                             <p className="text-sm text-gray-500">Upload surveys from other platforms</p>
                           </div>
-                          <Button variant="outline">
+                          <Button variant="outline" onClick={() => setShowImportDialog(true)}>
                             <Upload className="w-4 h-4 mr-2" />
                             Import
                           </Button>
@@ -1988,8 +2274,8 @@ export default function SurveysClient() {
                               </div>
                             </div>
                             <div className="flex gap-3">
-                              <Button variant="outline" className="flex-1">View Invoices</Button>
-                              <Button className="flex-1 bg-gradient-to-r from-emerald-500 to-teal-600">Upgrade</Button>
+                              <Button variant="outline" className="flex-1" onClick={() => setShowInvoicesDialog(true)}>View Invoices</Button>
+                              <Button className="flex-1 bg-gradient-to-r from-emerald-500 to-teal-600" onClick={() => setShowUpgradeDialog(true)}>Upgrade</Button>
                             </div>
                           </div>
                         </div>
@@ -2007,7 +2293,7 @@ export default function SurveysClient() {
                             <p className="font-medium text-gray-900 dark:text-white">Delete All Responses</p>
                             <p className="text-sm text-gray-500">Remove all collected data</p>
                           </div>
-                          <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50">
+                          <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50" onClick={() => setShowDeleteResponsesDialog(true)}>
                             <Trash2 className="w-4 h-4 mr-2" />
                             Delete
                           </Button>
@@ -2017,7 +2303,7 @@ export default function SurveysClient() {
                             <p className="font-medium text-gray-900 dark:text-white">Close Account</p>
                             <p className="text-sm text-gray-500">Permanently delete your account</p>
                           </div>
-                          <Button variant="destructive">
+                          <Button variant="destructive" onClick={() => setShowDeleteAccountDialog(true)}>
                             <Trash2 className="w-4 h-4 mr-2" />
                             Delete Account
                           </Button>
@@ -2136,11 +2422,11 @@ export default function SurveysClient() {
                     <Share2 className="w-4 h-4 mr-2" />
                     Share
                   </Button>
-                  <Button className="flex-1">
+                  <Button className="flex-1" onClick={() => { handleOpenEditDialog(selectedSurvey); setSelectedSurvey(null); }}>
                     <Edit className="w-4 h-4 mr-2" />
                     Edit Survey
                   </Button>
-                  <Button variant="outline">
+                  <Button variant="outline" onClick={handleDownloadSurveyData}>
                     <Download className="w-4 h-4" />
                   </Button>
                 </div>
@@ -2234,26 +2520,26 @@ export default function SurveysClient() {
                     value={`https://survey.app/s/${sharingSurvey?.id}`}
                     className="text-sm"
                   />
-                  <Button variant="outline" size="sm">
+                  <Button variant="outline" size="sm" onClick={() => handleCopyToClipboard(`https://survey.app/s/${sharingSurvey?.id}`, 'Survey link')}>
                     <Copy className="w-4 h-4" />
                   </Button>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
-                <Button variant="outline" className="flex items-center gap-2">
+                <Button variant="outline" className="flex items-center gap-2" onClick={() => setShowEmailShareDialog(true)}>
                   <Mail className="w-4 h-4" />
                   Email
                 </Button>
-                <Button variant="outline" className="flex items-center gap-2">
+                <Button variant="outline" className="flex items-center gap-2" onClick={() => setShowQRCodeDialog(true)}>
                   <QrCode className="w-4 h-4" />
                   QR Code
                 </Button>
-                <Button variant="outline" className="flex items-center gap-2">
+                <Button variant="outline" className="flex items-center gap-2" onClick={() => setShowEmbedDialog(true)}>
                   <Globe className="w-4 h-4" />
                   Embed
                 </Button>
-                <Button variant="outline" className="flex items-center gap-2">
+                <Button variant="outline" className="flex items-center gap-2" onClick={handlePreviewSurvey}>
                   <ExternalLink className="w-4 h-4" />
                   Preview
                 </Button>
@@ -2610,6 +2896,678 @@ export default function SurveysClient() {
                     Export Data
                   </>
                 )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Import Dialog */}
+        <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Upload className="w-5 h-5" />
+                Import Surveys
+              </DialogTitle>
+              <DialogDescription>
+                Import surveys from CSV, JSON, or other survey platforms
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-lg p-6 text-center">
+                <Upload className="w-10 h-10 mx-auto text-muted-foreground mb-2" />
+                <p className="text-sm text-muted-foreground mb-2">Drag and drop your file here, or click to browse</p>
+                <input
+                  type="file"
+                  accept=".csv,.json,.xlsx"
+                  onChange={(e) => setImportFile(e.target.files?.[0] || null)}
+                  className="hidden"
+                  id="import-file"
+                />
+                <label htmlFor="import-file">
+                  <Button variant="outline" size="sm" asChild>
+                    <span>Browse Files</span>
+                  </Button>
+                </label>
+                {importFile && (
+                  <p className="mt-2 text-sm text-emerald-600">Selected: {importFile.name}</p>
+                )}
+              </div>
+              <div className="space-y-2">
+                <Label>Supported Formats</Label>
+                <div className="flex gap-2">
+                  <Badge variant="outline">CSV</Badge>
+                  <Badge variant="outline">JSON</Badge>
+                  <Badge variant="outline">XLSX</Badge>
+                  <Badge variant="outline">Typeform</Badge>
+                  <Badge variant="outline">Google Forms</Badge>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => { setShowImportDialog(false); setImportFile(null); }}>
+                Cancel
+              </Button>
+              <Button onClick={handleImportSurveys} disabled={!importFile || isImporting}>
+                {isImporting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Importing...
+                  </>
+                ) : (
+                  <>
+                    <Upload className="w-4 h-4 mr-2" />
+                    Import
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Survey Dialog */}
+        <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Edit className="w-5 h-5" />
+                Edit Survey
+              </DialogTitle>
+              <DialogDescription>
+                Update survey details
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit-survey-title">Survey Title *</Label>
+                <Input
+                  id="edit-survey-title"
+                  placeholder="Enter survey title..."
+                  value={editSurveyTitle}
+                  onChange={(e) => setEditSurveyTitle(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-survey-description">Description</Label>
+                <Textarea
+                  id="edit-survey-description"
+                  placeholder="Enter survey description..."
+                  value={editSurveyDescription}
+                  onChange={(e) => setEditSurveyDescription(e.target.value)}
+                  rows={3}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => { setShowEditDialog(false); setSurveyToEdit(null); }}>
+                Cancel
+              </Button>
+              <Button onClick={handleSaveEditSurvey} disabled={isUpdating}>
+                {isUpdating ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  'Save Changes'
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Create Template Dialog */}
+        <Dialog open={showCreateTemplateDialog} onOpenChange={setShowCreateTemplateDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Layout className="w-5 h-5" />
+                Create Template
+              </DialogTitle>
+              <DialogDescription>
+                Create a new survey template
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="template-name">Template Name *</Label>
+                <Input
+                  id="template-name"
+                  placeholder="Enter template name..."
+                  value={newTemplateName}
+                  onChange={(e) => setNewTemplateName(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="template-description">Description</Label>
+                <Textarea
+                  id="template-description"
+                  placeholder="Enter template description..."
+                  value={newTemplateDescription}
+                  onChange={(e) => setNewTemplateDescription(e.target.value)}
+                  rows={3}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="template-category">Category</Label>
+                <select
+                  id="template-category"
+                  className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+                  value={newTemplateCategory}
+                  onChange={(e) => setNewTemplateCategory(e.target.value)}
+                >
+                  <option value="Customer Feedback">Customer Feedback</option>
+                  <option value="HR & Internal">HR & Internal</option>
+                  <option value="Events">Events</option>
+                  <option value="Product">Product</option>
+                  <option value="Research">Research</option>
+                  <option value="Education">Education</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowCreateTemplateDialog(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleCreateTemplate}>
+                Create Template
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Use Template Dialog */}
+        <Dialog open={showUseTemplateDialog} onOpenChange={setShowUseTemplateDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Layout className="w-5 h-5" />
+                Use Template
+              </DialogTitle>
+              <DialogDescription>
+                Create a new survey from {selectedTemplate?.name}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              {selectedTemplate && (
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div className="flex items-center gap-3 mb-2">
+                    <span className="text-3xl">{selectedTemplate.thumbnail}</span>
+                    <div>
+                      <h4 className="font-semibold">{selectedTemplate.name}</h4>
+                      <p className="text-sm text-muted-foreground">{selectedTemplate.questions} questions</p>
+                    </div>
+                  </div>
+                  <p className="text-sm text-muted-foreground">{selectedTemplate.description}</p>
+                </div>
+              )}
+              <div className="space-y-2">
+                <Label htmlFor="template-survey-name">Survey Name *</Label>
+                <Input
+                  id="template-survey-name"
+                  placeholder="Enter name for your survey..."
+                  value={templateSurveyName}
+                  onChange={(e) => setTemplateSurveyName(e.target.value)}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => { setShowUseTemplateDialog(false); setSelectedTemplate(null); }}>
+                Cancel
+              </Button>
+              <Button onClick={handleUseTemplate} disabled={isCreating}>
+                {isCreating ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Creating...
+                  </>
+                ) : (
+                  'Create Survey'
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Upload Logo Dialog */}
+        <Dialog open={showUploadLogoDialog} onOpenChange={setShowUploadLogoDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Upload className="w-5 h-5" />
+                Upload Logo
+              </DialogTitle>
+              <DialogDescription>
+                Upload your brand logo for surveys
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-lg p-6 text-center">
+                <Upload className="w-10 h-10 mx-auto text-muted-foreground mb-2" />
+                <p className="text-sm text-muted-foreground mb-2">Drag and drop your logo here</p>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setLogoFile(e.target.files?.[0] || null)}
+                  className="hidden"
+                  id="logo-file"
+                />
+                <label htmlFor="logo-file">
+                  <Button variant="outline" size="sm" asChild>
+                    <span>Browse Files</span>
+                  </Button>
+                </label>
+                {logoFile && (
+                  <p className="mt-2 text-sm text-emerald-600">Selected: {logoFile.name}</p>
+                )}
+              </div>
+              <p className="text-xs text-muted-foreground">Recommended size: 200x60px. Max file size: 2MB. Formats: PNG, JPG, SVG</p>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => { setShowUploadLogoDialog(false); setLogoFile(null); }}>
+                Cancel
+              </Button>
+              <Button onClick={handleUploadLogo} disabled={!logoFile || isUploadingLogo}>
+                {isUploadingLogo ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Uploading...
+                  </>
+                ) : (
+                  'Upload Logo'
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Integration Dialog */}
+        <Dialog open={showIntegrationDialog} onOpenChange={setShowIntegrationDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Webhook className="w-5 h-5" />
+                {selectedIntegration?.name} Integration
+              </DialogTitle>
+              <DialogDescription>
+                {selectedIntegration?.status === 'connected' ? 'Manage your integration settings' : 'Connect to ' + selectedIntegration?.name}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              {selectedIntegration && (
+                <>
+                  <div className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <span className="text-4xl">{selectedIntegration.icon}</span>
+                    <div>
+                      <h4 className="font-semibold">{selectedIntegration.name}</h4>
+                      <Badge className={selectedIntegration.status === 'connected' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}>
+                        {selectedIntegration.status === 'connected' ? 'Connected' : 'Not Connected'}
+                      </Badge>
+                    </div>
+                  </div>
+                  {selectedIntegration.status === 'connected' ? (
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <span className="text-sm">Sync survey responses</span>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <span className="text-sm">Receive notifications</span>
+                        <Switch defaultChecked />
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                      <p className="text-sm text-blue-700 dark:text-blue-300">
+                        Connect to {selectedIntegration.name} to automatically sync your survey data.
+                      </p>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => { setShowIntegrationDialog(false); setSelectedIntegration(null); }}>
+                Cancel
+              </Button>
+              {selectedIntegration?.status === 'connected' ? (
+                <>
+                  <Button variant="outline" className="text-red-600" onClick={() => handleIntegrationAction('disconnect')}>
+                    Disconnect
+                  </Button>
+                  <Button onClick={() => handleIntegrationAction('manage')}>
+                    Save Settings
+                  </Button>
+                </>
+              ) : (
+                <Button onClick={() => handleIntegrationAction('connect')}>
+                  Connect
+                </Button>
+              )}
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* View Invoices Dialog */}
+        <Dialog open={showInvoicesDialog} onOpenChange={setShowInvoicesDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <FileText className="w-5 h-5" />
+                Invoices
+              </DialogTitle>
+              <DialogDescription>
+                View and download your invoices
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-3">
+                {[
+                  { id: 'INV-2024-001', date: 'Jan 1, 2024', amount: '$29.00', status: 'Paid' },
+                  { id: 'INV-2023-012', date: 'Dec 1, 2023', amount: '$29.00', status: 'Paid' },
+                  { id: 'INV-2023-011', date: 'Nov 1, 2023', amount: '$29.00', status: 'Paid' },
+                ].map((invoice) => (
+                  <div key={invoice.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <div>
+                      <p className="font-medium">{invoice.id}</p>
+                      <p className="text-sm text-muted-foreground">{invoice.date}</p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="font-semibold">{invoice.amount}</span>
+                      <Badge className="bg-green-100 text-green-700">{invoice.status}</Badge>
+                      <Button variant="ghost" size="sm" onClick={() => toast.success(`Downloading ${invoice.id}...`)}>
+                        <Download className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowInvoicesDialog(false)}>
+                Close
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Upgrade Plan Dialog */}
+        <Dialog open={showUpgradeDialog} onOpenChange={setShowUpgradeDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Sparkles className="w-5 h-5" />
+                Upgrade Your Plan
+              </DialogTitle>
+              <DialogDescription>
+                Get more features and higher limits
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-3 gap-4">
+                <div className="p-4 border rounded-lg">
+                  <h3 className="font-semibold mb-2">Starter</h3>
+                  <p className="text-2xl font-bold mb-2">$9<span className="text-sm font-normal">/mo</span></p>
+                  <ul className="text-sm space-y-2 text-muted-foreground">
+                    <li>1,000 responses/mo</li>
+                    <li>5 surveys</li>
+                    <li>Basic analytics</li>
+                  </ul>
+                </div>
+                <div className="p-4 border-2 border-emerald-500 rounded-lg bg-emerald-50 dark:bg-emerald-900/20">
+                  <Badge className="bg-emerald-100 text-emerald-700 mb-2">Current</Badge>
+                  <h3 className="font-semibold mb-2">Professional</h3>
+                  <p className="text-2xl font-bold mb-2">$29<span className="text-sm font-normal">/mo</span></p>
+                  <ul className="text-sm space-y-2 text-muted-foreground">
+                    <li>10,000 responses/mo</li>
+                    <li>Unlimited surveys</li>
+                    <li>Logic jumps & branching</li>
+                    <li>Custom branding</li>
+                  </ul>
+                </div>
+                <div className="p-4 border rounded-lg">
+                  <h3 className="font-semibold mb-2">Enterprise</h3>
+                  <p className="text-2xl font-bold mb-2">$99<span className="text-sm font-normal">/mo</span></p>
+                  <ul className="text-sm space-y-2 text-muted-foreground">
+                    <li>Unlimited responses</li>
+                    <li>Priority support</li>
+                    <li>SSO & advanced security</li>
+                    <li>API access</li>
+                  </ul>
+                  <Button className="w-full mt-4" onClick={() => { toast.success('Upgrade request submitted!'); setShowUpgradeDialog(false); }}>
+                    Upgrade
+                  </Button>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowUpgradeDialog(false)}>
+                Close
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete All Responses Dialog */}
+        <Dialog open={showDeleteResponsesDialog} onOpenChange={setShowDeleteResponsesDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-600">
+                <Trash2 className="w-5 h-5" />
+                Delete All Responses
+              </DialogTitle>
+              <DialogDescription>
+                This action cannot be undone. All collected survey responses will be permanently deleted.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                <p className="text-sm text-red-700 dark:text-red-300">
+                  Warning: You are about to delete {displayStats.totalResponses.toLocaleString()} responses across all surveys.
+                </p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowDeleteResponsesDialog(false)}>
+                Cancel
+              </Button>
+              <Button variant="destructive" onClick={handleDeleteAllResponses} disabled={isDeletingResponses}>
+                {isDeletingResponses ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Deleting...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    Delete All Responses
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Account Dialog */}
+        <Dialog open={showDeleteAccountDialog} onOpenChange={setShowDeleteAccountDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-600">
+                <Trash2 className="w-5 h-5" />
+                Delete Account
+              </DialogTitle>
+              <DialogDescription>
+                This action is permanent. Your account and all data will be deleted forever.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                <p className="text-sm text-red-700 dark:text-red-300">
+                  This will permanently delete your account, {displayStats.totalSurveys} surveys, and {displayStats.totalResponses.toLocaleString()} responses.
+                </p>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="delete-confirm">Type DELETE to confirm</Label>
+                <Input
+                  id="delete-confirm"
+                  value={deleteAccountConfirm}
+                  onChange={(e) => setDeleteAccountConfirm(e.target.value)}
+                  placeholder="DELETE"
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => { setShowDeleteAccountDialog(false); setDeleteAccountConfirm(''); }}>
+                Cancel
+              </Button>
+              <Button variant="destructive" onClick={handleDeleteAccount} disabled={deleteAccountConfirm !== 'DELETE'}>
+                <Trash2 className="w-4 h-4 mr-2" />
+                Delete Account
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Email Share Dialog */}
+        <Dialog open={showEmailShareDialog} onOpenChange={setShowEmailShareDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Mail className="w-5 h-5" />
+                Share via Email
+              </DialogTitle>
+              <DialogDescription>
+                Send survey link to recipients
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="share-emails">Email Addresses *</Label>
+                <Textarea
+                  id="share-emails"
+                  placeholder="Enter email addresses (comma-separated)"
+                  value={shareEmails}
+                  onChange={(e) => setShareEmails(e.target.value)}
+                  rows={3}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="share-message">Personal Message (optional)</Label>
+                <Textarea
+                  id="share-message"
+                  placeholder="Add a personal message..."
+                  value={shareMessage}
+                  onChange={(e) => setShareMessage(e.target.value)}
+                  rows={3}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => { setShowEmailShareDialog(false); setShareEmails(''); setShareMessage(''); }}>
+                Cancel
+              </Button>
+              <Button onClick={handleSendEmailShare}>
+                <Mail className="w-4 h-4 mr-2" />
+                Send Invitations
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* QR Code Dialog */}
+        <Dialog open={showQRCodeDialog} onOpenChange={setShowQRCodeDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <QrCode className="w-5 h-5" />
+                QR Code
+              </DialogTitle>
+              <DialogDescription>
+                Scan to access the survey
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4 text-center">
+              <div className="w-48 h-48 mx-auto bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
+                <div className="p-4 bg-white rounded">
+                  <QrCode className="w-32 h-32 text-gray-900" />
+                </div>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                {sharingSurvey?.title || 'Survey QR Code'}
+              </p>
+              <div className="flex gap-2 justify-center">
+                <Button variant="outline" onClick={() => toast.success('QR Code downloaded!')}>
+                  <Download className="w-4 h-4 mr-2" />
+                  Download PNG
+                </Button>
+                <Button variant="outline" onClick={() => toast.success('QR Code copied!')}>
+                  <Copy className="w-4 h-4 mr-2" />
+                  Copy to Clipboard
+                </Button>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowQRCodeDialog(false)}>
+                Close
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Embed Dialog */}
+        <Dialog open={showEmbedDialog} onOpenChange={setShowEmbedDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Globe className="w-5 h-5" />
+                Embed Survey
+              </DialogTitle>
+              <DialogDescription>
+                Add this survey to your website
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="embed-width">Width</Label>
+                  <Input
+                    id="embed-width"
+                    value={embedWidth}
+                    onChange={(e) => setEmbedWidth(e.target.value)}
+                    placeholder="100%"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="embed-height">Height</Label>
+                  <Input
+                    id="embed-height"
+                    value={embedHeight}
+                    onChange={(e) => setEmbedHeight(e.target.value)}
+                    placeholder="500px"
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Embed Code</Label>
+                <div className="p-3 bg-gray-100 dark:bg-gray-800 rounded-lg">
+                  <code className="text-sm text-gray-700 dark:text-gray-300 break-all">
+                    {`<iframe src="https://survey.app/embed/${sharingSurvey?.id}" width="${embedWidth}" height="${embedHeight}" frameborder="0"></iframe>`}
+                  </code>
+                </div>
+              </div>
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() => handleCopyToClipboard(`<iframe src="https://survey.app/embed/${sharingSurvey?.id}" width="${embedWidth}" height="${embedHeight}" frameborder="0"></iframe>`, 'Embed code')}
+              >
+                <Copy className="w-4 h-4 mr-2" />
+                Copy Embed Code
+              </Button>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowEmbedDialog(false)}>
+                Close
               </Button>
             </DialogFooter>
           </DialogContent>

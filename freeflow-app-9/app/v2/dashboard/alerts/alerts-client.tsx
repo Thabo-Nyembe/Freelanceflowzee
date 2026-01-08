@@ -363,6 +363,12 @@ export default function AlertsClient() {
   const [showSilenceDialog, setShowSilenceDialog] = useState(false)
   const [showCreateRuleDialog, setShowCreateRuleDialog] = useState(false)
 
+  // Integration dialogs
+  const [showMonitoringIntegrationDialog, setShowMonitoringIntegrationDialog] = useState(false)
+  const [selectedMonitoringIntegration, setSelectedMonitoringIntegration] = useState<{ name: string; status: string; lastSync: string | null } | null>(null)
+  const [showTicketingIntegrationDialog, setShowTicketingIntegrationDialog] = useState(false)
+  const [selectedTicketingIntegration, setSelectedTicketingIntegration] = useState<{ name: string; status: string; project: string | null } | null>(null)
+
   // Quick actions with dialog triggers
   const alertsQuickActions = [
     { id: '1', label: 'Acknowledge', icon: 'Check', shortcut: 'A', action: () => setShowAcknowledgeDialog(true) },
@@ -1722,7 +1728,14 @@ export default function AlertsClient() {
                                 )}
                               </div>
                             </div>
-                            <Button variant={integration.status === 'connected' ? 'outline' : 'default'} size="sm">
+                            <Button
+                              variant={integration.status === 'connected' ? 'outline' : 'default'}
+                              size="sm"
+                              onClick={() => {
+                                setSelectedMonitoringIntegration(integration)
+                                setShowMonitoringIntegrationDialog(true)
+                              }}
+                            >
                               {integration.status === 'connected' ? 'Configure' : 'Connect'}
                             </Button>
                           </div>
@@ -1754,7 +1767,14 @@ export default function AlertsClient() {
                                 )}
                               </div>
                             </div>
-                            <Button variant={integration.status === 'connected' ? 'outline' : 'default'} size="sm">
+                            <Button
+                              variant={integration.status === 'connected' ? 'outline' : 'default'}
+                              size="sm"
+                              onClick={() => {
+                                setSelectedTicketingIntegration(integration)
+                                setShowTicketingIntegrationDialog(true)
+                              }}
+                            >
                               {integration.status === 'connected' ? 'Configure' : 'Connect'}
                             </Button>
                           </div>
@@ -2633,6 +2653,210 @@ export default function AlertsClient() {
                 <Target className="h-4 w-4 mr-2" />
                 Create Rule
               </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Monitoring Integration Dialog */}
+        <Dialog open={showMonitoringIntegrationDialog} onOpenChange={setShowMonitoringIntegrationDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>
+                {selectedMonitoringIntegration?.status === 'connected' ? 'Configure' : 'Connect'} {selectedMonitoringIntegration?.name}
+              </DialogTitle>
+            </DialogHeader>
+            <div className="py-4 space-y-4">
+              {selectedMonitoringIntegration?.status === 'connected' ? (
+                <>
+                  <p className="text-gray-600 dark:text-gray-300">
+                    Configure your {selectedMonitoringIntegration?.name} integration settings.
+                  </p>
+                  <div className="space-y-2">
+                    <Label>API Endpoint</Label>
+                    <Input placeholder={`https://api.${selectedMonitoringIntegration?.name?.toLowerCase()}.com/v1`} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Sync Interval</Label>
+                    <Select defaultValue="1">
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="1">Every 1 minute</SelectItem>
+                        <SelectItem value="5">Every 5 minutes</SelectItem>
+                        <SelectItem value="15">Every 15 minutes</SelectItem>
+                        <SelectItem value="30">Every 30 minutes</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label>Auto-Import Alerts</Label>
+                      <p className="text-sm text-gray-500">Automatically import alerts from {selectedMonitoringIntegration?.name}</p>
+                    </div>
+                    <Switch defaultChecked />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label>Bidirectional Sync</Label>
+                      <p className="text-sm text-gray-500">Sync status changes back to {selectedMonitoringIntegration?.name}</p>
+                    </div>
+                    <Switch />
+                  </div>
+                  <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <p className="text-sm text-gray-500">Last synced: {selectedMonitoringIntegration?.lastSync || 'Never'}</p>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <p className="text-gray-600 dark:text-gray-300">
+                    Connect your {selectedMonitoringIntegration?.name} account to import alerts and monitoring data.
+                  </p>
+                  <div className="space-y-2">
+                    <Label>API Key</Label>
+                    <Input type="password" placeholder="Enter your API key..." />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>API Endpoint (Optional)</Label>
+                    <Input placeholder={`https://api.${selectedMonitoringIntegration?.name?.toLowerCase()}.com/v1`} />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label>Import Existing Alerts</Label>
+                      <p className="text-sm text-gray-500">Import alerts from the last 24 hours</p>
+                    </div>
+                    <Switch defaultChecked />
+                  </div>
+                </>
+              )}
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setShowMonitoringIntegrationDialog(false)}>Cancel</Button>
+              {selectedMonitoringIntegration?.status === 'connected' ? (
+                <Button className="bg-emerald-600 hover:bg-emerald-700" onClick={() => {
+                  toast.success('Integration Updated', { description: `${selectedMonitoringIntegration?.name} settings have been saved` })
+                  setShowMonitoringIntegrationDialog(false)
+                }}>
+                  <CheckCircle2 className="h-4 w-4 mr-2" />
+                  Save Changes
+                </Button>
+              ) : (
+                <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => {
+                  toast.success('Integration Connected', { description: `${selectedMonitoringIntegration?.name} has been connected successfully` })
+                  setShowMonitoringIntegrationDialog(false)
+                }}>
+                  <Link2 className="h-4 w-4 mr-2" />
+                  Connect
+                </Button>
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Ticketing Integration Dialog */}
+        <Dialog open={showTicketingIntegrationDialog} onOpenChange={setShowTicketingIntegrationDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>
+                {selectedTicketingIntegration?.status === 'connected' ? 'Configure' : 'Connect'} {selectedTicketingIntegration?.name}
+              </DialogTitle>
+            </DialogHeader>
+            <div className="py-4 space-y-4">
+              {selectedTicketingIntegration?.status === 'connected' ? (
+                <>
+                  <p className="text-gray-600 dark:text-gray-300">
+                    Configure your {selectedTicketingIntegration?.name} integration settings.
+                  </p>
+                  <div className="space-y-2">
+                    <Label>Project Key</Label>
+                    <Input defaultValue={selectedTicketingIntegration?.project || ''} placeholder="e.g., OPS" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Default Issue Type</Label>
+                    <Select defaultValue="incident">
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="incident">Incident</SelectItem>
+                        <SelectItem value="bug">Bug</SelectItem>
+                        <SelectItem value="task">Task</SelectItem>
+                        <SelectItem value="story">Story</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Auto-Create Threshold</Label>
+                    <Select defaultValue="critical">
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Alerts</SelectItem>
+                        <SelectItem value="high">High and Above</SelectItem>
+                        <SelectItem value="critical">Critical Only</SelectItem>
+                        <SelectItem value="none">Manual Only</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label>Auto-Create Tickets</Label>
+                      <p className="text-sm text-gray-500">Create tickets automatically for matching alerts</p>
+                    </div>
+                    <Switch defaultChecked />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label>Sync Comments</Label>
+                      <p className="text-sm text-gray-500">Sync comments between alerts and tickets</p>
+                    </div>
+                    <Switch />
+                  </div>
+                </>
+              ) : (
+                <>
+                  <p className="text-gray-600 dark:text-gray-300">
+                    Connect your {selectedTicketingIntegration?.name} account to create tickets from alerts.
+                  </p>
+                  <div className="space-y-2">
+                    <Label>Instance URL</Label>
+                    <Input placeholder={`https://your-company.${selectedTicketingIntegration?.name?.toLowerCase()}.com`} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>API Token</Label>
+                    <Input type="password" placeholder="Enter your API token..." />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Username / Email</Label>
+                    <Input placeholder="your-email@company.com" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Default Project</Label>
+                    <Input placeholder="Project key (e.g., OPS)" />
+                  </div>
+                </>
+              )}
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setShowTicketingIntegrationDialog(false)}>Cancel</Button>
+              {selectedTicketingIntegration?.status === 'connected' ? (
+                <Button className="bg-emerald-600 hover:bg-emerald-700" onClick={() => {
+                  toast.success('Integration Updated', { description: `${selectedTicketingIntegration?.name} settings have been saved` })
+                  setShowTicketingIntegrationDialog(false)
+                }}>
+                  <CheckCircle2 className="h-4 w-4 mr-2" />
+                  Save Changes
+                </Button>
+              ) : (
+                <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => {
+                  toast.success('Integration Connected', { description: `${selectedTicketingIntegration?.name} has been connected successfully` })
+                  setShowTicketingIntegrationDialog(false)
+                }}>
+                  <Link2 className="h-4 w-4 mr-2" />
+                  Connect
+                </Button>
+              )}
             </div>
           </DialogContent>
         </Dialog>

@@ -629,6 +629,59 @@ export default function CiCdClient() {
   const [showLogsPanel, setShowLogsPanel] = useState(false)
   const [yamlEditorOpen, setYamlEditorOpen] = useState(false)
 
+  // Dialog states for various actions
+  const [showRunNewDialog, setShowRunNewDialog] = useState(false)
+  const [showRerunAllDialog, setShowRerunAllDialog] = useState(false)
+  const [showCancelAllDialog, setShowCancelAllDialog] = useState(false)
+  const [showFilterDialog, setShowFilterDialog] = useState(false)
+  const [showRunLogsDialog, setShowRunLogsDialog] = useState(false)
+  const [showAnalyticsDialog, setShowAnalyticsDialog] = useState(false)
+  const [showUploadArtifactDialog, setShowUploadArtifactDialog] = useState(false)
+  const [showDownloadAllDialog, setShowDownloadAllDialog] = useState(false)
+  const [showArchiveDialog, setShowArchiveDialog] = useState(false)
+  const [showCleanUpDialog, setShowCleanUpDialog] = useState(false)
+  const [showArtifactFilterDialog, setShowArtifactFilterDialog] = useState(false)
+  const [showPreviewArtifactDialog, setShowPreviewArtifactDialog] = useState(false)
+  const [showCopyLinkDialog, setShowCopyLinkDialog] = useState(false)
+  const [showNewEnvDialog, setShowNewEnvDialog] = useState(false)
+  const [showAddSecretDialog, setShowAddSecretDialog] = useState(false)
+  const [showVariablesDialog, setShowVariablesDialog] = useState(false)
+  const [showProtectionDialog, setShowProtectionDialog] = useState(false)
+  const [showReviewersDialog, setShowReviewersDialog] = useState(false)
+  const [showDeployDialog, setShowDeployDialog] = useState(false)
+  const [showEnvExportDialog, setShowEnvExportDialog] = useState(false)
+  const [showEnvSyncDialog, setShowEnvSyncDialog] = useState(false)
+  const [showEnvSettingsDialog, setShowEnvSettingsDialog] = useState(false)
+  const [showSecretSettingsDialog, setShowSecretSettingsDialog] = useState(false)
+  const [showDeleteSecretDialog, setShowDeleteSecretDialog] = useState(false)
+  const [showAddRunnerDialog, setShowAddRunnerDialog] = useState(false)
+  const [showConfigureRunnerDialog, setShowConfigureRunnerDialog] = useState(false)
+  const [showLabelsDialog, setShowLabelsDialog] = useState(false)
+  const [showRestartAllDialog, setShowRestartAllDialog] = useState(false)
+  const [showPauseAllDialog, setShowPauseAllDialog] = useState(false)
+  const [showRunnerLogsDialog, setShowRunnerLogsDialog] = useState(false)
+  const [showRunnerExportDialog, setShowRunnerExportDialog] = useState(false)
+  const [showRunnerCleanUpDialog, setShowRunnerCleanUpDialog] = useState(false)
+  const [showRunnerSettingsDialog, setShowRunnerSettingsDialog] = useState(false)
+  const [showExportLogsSettingsDialog, setShowExportLogsSettingsDialog] = useState(false)
+  const [showArchiveOldRunsDialog, setShowArchiveOldRunsDialog] = useState(false)
+  const [showResetStatsDialog, setShowResetStatsDialog] = useState(false)
+  const [showPurgeArtifactsDialog, setShowPurgeArtifactsDialog] = useState(false)
+  const [showDisableWorkflowsDialog, setShowDisableWorkflowsDialog] = useState(false)
+  const [showDeleteAllArtifactsDialog, setShowDeleteAllArtifactsDialog] = useState(false)
+  const [showClearCachesDialog, setShowClearCachesDialog] = useState(false)
+  const [showTestWebhookDialog, setShowTestWebhookDialog] = useState(false)
+  const [showMoreOptionsDialog, setShowMoreOptionsDialog] = useState(false)
+  const [showWorkflowYamlDialog, setShowWorkflowYamlDialog] = useState(false)
+  const [showWorkflowAnalyticsDialog, setShowWorkflowAnalyticsDialog] = useState(false)
+  const [showWorkflowSettingsDialog, setShowWorkflowSettingsDialog] = useState(false)
+  const [showDownloadArtifactDialog, setShowDownloadArtifactDialog] = useState(false)
+  const [showDeleteArtifactDialog, setShowDeleteArtifactDialog] = useState(false)
+  const [selectedArtifact, setSelectedArtifact] = useState<Artifact | null>(null)
+  const [selectedEnvironment, setSelectedEnvironment] = useState<EnvironmentConfig | null>(null)
+  const [selectedSecret, setSelectedSecret] = useState<Secret | null>(null)
+  const [selectedRunner, setSelectedRunner] = useState<Runner | null>(null)
+
   // Ref for webhook secret
   const webhookSecretRef = useRef('whsec_' + Math.random().toString(36).substring(2, 15))
 
@@ -1239,7 +1292,7 @@ export default function CiCdClient() {
                           <Play className="w-4 h-4" />
                           Run
                         </Button>
-                        <Button variant="outline" size="sm">
+                        <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); setShowMoreOptionsDialog(true) }}>
                           <MoreHorizontal className="w-4 h-4" />
                         </Button>
                       </div>
@@ -1398,19 +1451,20 @@ export default function CiCdClient() {
             {/* Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
-                { icon: Play, label: 'Run New', color: 'text-green-500' },
-                { icon: RotateCcw, label: 'Re-run All', color: 'text-blue-500' },
-                { icon: StopCircle, label: 'Cancel All', color: 'text-red-500' },
-                { icon: Filter, label: 'Filter', color: 'text-purple-500' },
-                { icon: Terminal, label: 'View Logs', color: 'text-amber-500' },
-                { icon: BarChart3, label: 'Analytics', color: 'text-pink-500' },
-                { icon: Download, label: 'Export', color: 'text-indigo-500' },
-                { icon: RefreshCw, label: 'Refresh', color: 'text-cyan-500' },
+                { icon: Play, label: 'Run New', color: 'text-green-500', onClick: () => setShowRunNewDialog(true) },
+                { icon: RotateCcw, label: 'Re-run All', color: 'text-blue-500', onClick: () => setShowRerunAllDialog(true) },
+                { icon: StopCircle, label: 'Cancel All', color: 'text-red-500', onClick: () => setShowCancelAllDialog(true) },
+                { icon: Filter, label: 'Filter', color: 'text-purple-500', onClick: () => setShowFilterDialog(true) },
+                { icon: Terminal, label: 'View Logs', color: 'text-amber-500', onClick: () => setShowRunLogsDialog(true) },
+                { icon: BarChart3, label: 'Analytics', color: 'text-pink-500', onClick: () => setShowAnalyticsDialog(true) },
+                { icon: Download, label: 'Export', color: 'text-indigo-500', onClick: handleExportLogs },
+                { icon: RefreshCw, label: 'Refresh', color: 'text-cyan-500', onClick: () => { fetchPipelines(); toast.success('Runs refreshed') } },
               ].map((action, i) => (
                 <Button
                   key={i}
                   variant="outline"
                   className="h-auto py-3 flex flex-col items-center gap-2 hover:scale-105 transition-all duration-200"
+                  onClick={action.onClick}
                 >
                   <action.icon className={`w-5 h-5 ${action.color}`} />
                   <span className="text-xs">{action.label}</span>
@@ -1518,19 +1572,20 @@ export default function CiCdClient() {
             {/* Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
-                { icon: Upload, label: 'Upload', color: 'text-amber-500' },
-                { icon: Download, label: 'Download All', color: 'text-blue-500' },
-                { icon: Archive, label: 'Archive', color: 'text-purple-500' },
-                { icon: Trash2, label: 'Clean Up', color: 'text-red-500' },
-                { icon: Filter, label: 'Filter', color: 'text-green-500' },
-                { icon: Eye, label: 'Preview', color: 'text-pink-500' },
-                { icon: Copy, label: 'Copy Link', color: 'text-indigo-500' },
-                { icon: RefreshCw, label: 'Refresh', color: 'text-cyan-500' },
+                { icon: Upload, label: 'Upload', color: 'text-amber-500', onClick: () => setShowUploadArtifactDialog(true) },
+                { icon: Download, label: 'Download All', color: 'text-blue-500', onClick: () => setShowDownloadAllDialog(true) },
+                { icon: Archive, label: 'Archive', color: 'text-purple-500', onClick: () => setShowArchiveDialog(true) },
+                { icon: Trash2, label: 'Clean Up', color: 'text-red-500', onClick: () => setShowCleanUpDialog(true) },
+                { icon: Filter, label: 'Filter', color: 'text-green-500', onClick: () => setShowArtifactFilterDialog(true) },
+                { icon: Eye, label: 'Preview', color: 'text-pink-500', onClick: () => setShowPreviewArtifactDialog(true) },
+                { icon: Copy, label: 'Copy Link', color: 'text-indigo-500', onClick: () => setShowCopyLinkDialog(true) },
+                { icon: RefreshCw, label: 'Refresh', color: 'text-cyan-500', onClick: () => toast.success('Artifacts refreshed') },
               ].map((action, i) => (
                 <Button
                   key={i}
                   variant="outline"
                   className="h-auto py-3 flex flex-col items-center gap-2 hover:scale-105 transition-all duration-200"
+                  onClick={action.onClick}
                 >
                   <action.icon className={`w-5 h-5 ${action.color}`} />
                   <span className="text-xs">{action.label}</span>
@@ -1580,10 +1635,10 @@ export default function CiCdClient() {
                             <td className="px-6 py-4 text-sm text-gray-500">{artifact.expiresAt}</td>
                             <td className="px-6 py-4">
                               <div className="flex items-center gap-2">
-                                <Button variant="ghost" size="sm">
+                                <Button variant="ghost" size="sm" onClick={() => { setSelectedArtifact(artifact); setShowDownloadArtifactDialog(true) }}>
                                   <Download className="w-4 h-4" />
                                 </Button>
-                                <Button variant="ghost" size="sm">
+                                <Button variant="ghost" size="sm" onClick={() => { setSelectedArtifact(artifact); setShowDeleteArtifactDialog(true) }}>
                                   <Trash2 className="w-4 h-4" />
                                 </Button>
                               </div>
@@ -1630,19 +1685,20 @@ export default function CiCdClient() {
             {/* Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
-                { icon: Plus, label: 'New Env', color: 'text-cyan-500' },
-                { icon: Key, label: 'Add Secret', color: 'text-amber-500' },
-                { icon: Code, label: 'Variables', color: 'text-purple-500' },
-                { icon: Shield, label: 'Protection', color: 'text-green-500' },
-                { icon: Users, label: 'Reviewers', color: 'text-pink-500' },
-                { icon: Rocket, label: 'Deploy', color: 'text-blue-500' },
-                { icon: Download, label: 'Export', color: 'text-indigo-500' },
-                { icon: RefreshCw, label: 'Sync', color: 'text-rose-500' },
+                { icon: Plus, label: 'New Env', color: 'text-cyan-500', onClick: () => setShowNewEnvDialog(true) },
+                { icon: Key, label: 'Add Secret', color: 'text-amber-500', onClick: () => setShowAddSecretDialog(true) },
+                { icon: Code, label: 'Variables', color: 'text-purple-500', onClick: () => setShowVariablesDialog(true) },
+                { icon: Shield, label: 'Protection', color: 'text-green-500', onClick: () => setShowProtectionDialog(true) },
+                { icon: Users, label: 'Reviewers', color: 'text-pink-500', onClick: () => setShowReviewersDialog(true) },
+                { icon: Rocket, label: 'Deploy', color: 'text-blue-500', onClick: () => setShowDeployDialog(true) },
+                { icon: Download, label: 'Export', color: 'text-indigo-500', onClick: () => setShowEnvExportDialog(true) },
+                { icon: RefreshCw, label: 'Sync', color: 'text-rose-500', onClick: () => setShowEnvSyncDialog(true) },
               ].map((action, i) => (
                 <Button
                   key={i}
                   variant="outline"
                   className="h-auto py-3 flex flex-col items-center gap-2 hover:scale-105 transition-all duration-200"
+                  onClick={action.onClick}
                 >
                   <action.icon className={`w-5 h-5 ${action.color}`} />
                   <span className="text-xs">{action.label}</span>
@@ -1652,7 +1708,7 @@ export default function CiCdClient() {
 
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-lg font-semibold">Deployment Environments</h3>
-              <Button className="gap-2">
+              <Button className="gap-2" onClick={() => setShowNewEnvDialog(true)}>
                 <Plus className="w-4 h-4" />
                 New Environment
               </Button>
@@ -1710,7 +1766,7 @@ export default function CiCdClient() {
                       </div>
 
                       <div className="flex items-center gap-2">
-                        <Button variant="outline" size="sm">
+                        <Button variant="outline" size="sm" onClick={() => { setSelectedEnvironment(env); setShowEnvSettingsDialog(true) }}>
                           <Settings className="w-4 h-4" />
                         </Button>
                       </div>
@@ -1724,7 +1780,7 @@ export default function CiCdClient() {
             <div className="mt-8">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold">Secrets</h3>
-                <Button variant="outline" className="gap-2">
+                <Button variant="outline" className="gap-2" onClick={() => setShowAddSecretDialog(true)}>
                   <Plus className="w-4 h-4" />
                   New Secret
                 </Button>
@@ -1761,10 +1817,10 @@ export default function CiCdClient() {
                             <td className="px-6 py-4 text-sm text-gray-500">{secret.updatedAt}</td>
                             <td className="px-6 py-4">
                               <div className="flex items-center gap-2">
-                                <Button variant="ghost" size="sm">
+                                <Button variant="ghost" size="sm" onClick={() => { setSelectedSecret(secret); setShowSecretSettingsDialog(true) }}>
                                   <Settings className="w-4 h-4" />
                                 </Button>
-                                <Button variant="ghost" size="sm">
+                                <Button variant="ghost" size="sm" onClick={() => { setSelectedSecret(secret); setShowDeleteSecretDialog(true) }}>
                                   <Trash2 className="w-4 h-4" />
                                 </Button>
                               </div>
@@ -1811,19 +1867,20 @@ export default function CiCdClient() {
             {/* Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
-                { icon: Plus, label: 'Add Runner', color: 'text-purple-500' },
-                { icon: Cpu, label: 'Configure', color: 'text-blue-500' },
-                { icon: Tag, label: 'Labels', color: 'text-amber-500' },
-                { icon: RefreshCw, label: 'Restart All', color: 'text-green-500' },
-                { icon: Pause, label: 'Pause All', color: 'text-pink-500' },
-                { icon: Terminal, label: 'View Logs', color: 'text-indigo-500' },
-                { icon: Download, label: 'Export', color: 'text-cyan-500' },
-                { icon: Trash2, label: 'Clean Up', color: 'text-red-500' },
+                { icon: Plus, label: 'Add Runner', color: 'text-purple-500', onClick: () => setShowAddRunnerDialog(true) },
+                { icon: Cpu, label: 'Configure', color: 'text-blue-500', onClick: () => setShowConfigureRunnerDialog(true) },
+                { icon: Tag, label: 'Labels', color: 'text-amber-500', onClick: () => setShowLabelsDialog(true) },
+                { icon: RefreshCw, label: 'Restart All', color: 'text-green-500', onClick: () => setShowRestartAllDialog(true) },
+                { icon: Pause, label: 'Pause All', color: 'text-pink-500', onClick: () => setShowPauseAllDialog(true) },
+                { icon: Terminal, label: 'View Logs', color: 'text-indigo-500', onClick: () => setShowRunnerLogsDialog(true) },
+                { icon: Download, label: 'Export', color: 'text-cyan-500', onClick: () => setShowRunnerExportDialog(true) },
+                { icon: Trash2, label: 'Clean Up', color: 'text-red-500', onClick: () => setShowRunnerCleanUpDialog(true) },
               ].map((action, i) => (
                 <Button
                   key={i}
                   variant="outline"
                   className="h-auto py-3 flex flex-col items-center gap-2 hover:scale-105 transition-all duration-200"
+                  onClick={action.onClick}
                 >
                   <action.icon className={`w-5 h-5 ${action.color}`} />
                   <span className="text-xs">{action.label}</span>
@@ -1833,7 +1890,7 @@ export default function CiCdClient() {
 
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-lg font-semibold">Self-Hosted Runners</h3>
-              <Button className="gap-2">
+              <Button className="gap-2" onClick={() => setShowAddRunnerDialog(true)}>
                 <Plus className="w-4 h-4" />
                 Add Runner
               </Button>
@@ -1873,7 +1930,7 @@ export default function CiCdClient() {
                             <Badge key={label} variant="outline" className="text-xs">{label}</Badge>
                           ))}
                         </div>
-                        <Button variant="outline" size="sm">
+                        <Button variant="outline" size="sm" onClick={() => { setSelectedRunner(runner); setShowRunnerSettingsDialog(true) }}>
                           <Settings className="w-4 h-4" />
                         </Button>
                       </div>
@@ -2027,7 +2084,7 @@ export default function CiCdClient() {
                           </div>
                           <Input type="number" defaultValue={7} className="w-20" />
                         </div>
-                        <Button variant="outline" className="w-full gap-2">
+                        <Button variant="outline" className="w-full gap-2" onClick={() => setShowClearCachesDialog(true)}>
                           <Trash2 className="w-4 h-4" />
                           Clear All Caches
                         </Button>
@@ -2199,7 +2256,7 @@ export default function CiCdClient() {
                           <Label>Webhook URL</Label>
                           <div className="flex gap-2">
                             <Input placeholder="https://your-app.com/webhook/ci-cd" />
-                            <Button variant="outline">Test</Button>
+                            <Button variant="outline" onClick={() => setShowTestWebhookDialog(true)}>Test</Button>
                           </div>
                         </div>
                         <div className="space-y-2">
@@ -2302,19 +2359,19 @@ export default function CiCdClient() {
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="grid grid-cols-2 gap-4">
-                          <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2">
+                          <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2" onClick={() => setShowExportLogsSettingsDialog(true)}>
                             <Download className="w-5 h-5" />
                             <span>Export Logs</span>
                           </Button>
-                          <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2">
+                          <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2" onClick={() => setShowArchiveOldRunsDialog(true)}>
                             <Archive className="w-5 h-5" />
                             <span>Archive Old Runs</span>
                           </Button>
-                          <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2">
+                          <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2" onClick={() => setShowResetStatsDialog(true)}>
                             <RefreshCw className="w-5 h-5" />
                             <span>Reset Statistics</span>
                           </Button>
-                          <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 text-red-500 hover:text-red-600">
+                          <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 text-red-500 hover:text-red-600" onClick={() => setShowPurgeArtifactsDialog(true)}>
                             <Trash2 className="w-5 h-5" />
                             <span>Purge Artifacts</span>
                           </Button>
@@ -2338,14 +2395,14 @@ export default function CiCdClient() {
                             <p className="font-medium text-red-700 dark:text-red-400">Disable All Workflows</p>
                             <p className="text-sm text-red-600 dark:text-red-500">Temporarily pause all workflows</p>
                           </div>
-                          <Button variant="destructive" size="sm">Disable</Button>
+                          <Button variant="destructive" size="sm" onClick={() => setShowDisableWorkflowsDialog(true)}>Disable</Button>
                         </div>
                         <div className="flex items-center justify-between p-4 rounded-lg border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20">
                           <div>
                             <p className="font-medium text-red-700 dark:text-red-400">Delete All Artifacts</p>
                             <p className="text-sm text-red-600 dark:text-red-500">Remove all stored artifacts</p>
                           </div>
-                          <Button variant="destructive" size="sm">Delete</Button>
+                          <Button variant="destructive" size="sm" onClick={() => setShowDeleteAllArtifactsDialog(true)}>Delete</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -2462,19 +2519,19 @@ export default function CiCdClient() {
 
                 {/* Actions */}
                 <div className="flex items-center gap-3 pt-4">
-                  <Button className="gap-2">
+                  <Button className="gap-2" onClick={() => { if (selectedWorkflow) handleTriggerWorkflow(selectedWorkflow) }}>
                     <Play className="w-4 h-4" />
                     Run Workflow
                   </Button>
-                  <Button variant="outline" className="gap-2">
+                  <Button variant="outline" className="gap-2" onClick={() => setShowWorkflowYamlDialog(true)}>
                     <FileText className="w-4 h-4" />
                     View YAML
                   </Button>
-                  <Button variant="outline" className="gap-2">
+                  <Button variant="outline" className="gap-2" onClick={() => setShowWorkflowAnalyticsDialog(true)}>
                     <BarChart3 className="w-4 h-4" />
                     View Analytics
                   </Button>
-                  <Button variant="outline" className="gap-2">
+                  <Button variant="outline" className="gap-2" onClick={() => setShowWorkflowSettingsDialog(true)}>
                     <Settings className="w-4 h-4" />
                     Settings
                   </Button>
@@ -2644,6 +2701,1505 @@ export default function CiCdClient() {
                 <Button onClick={handleCreatePipeline} disabled={isSubmitting}>
                   {isSubmitting ? 'Creating...' : 'Create Pipeline'}
                 </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Run New Dialog */}
+        <Dialog open={showRunNewDialog} onOpenChange={setShowRunNewDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Play className="w-5 h-5 text-green-600" />
+                Run New Workflow
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 pt-4">
+              <div className="space-y-2">
+                <Label>Select Workflow</Label>
+                <select className="w-full h-10 px-3 rounded-md border border-input bg-background">
+                  {mockWorkflows.map(w => (
+                    <option key={w.id} value={w.id}>{w.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label>Branch</Label>
+                <Input placeholder="main" defaultValue="main" />
+              </div>
+              <div className="flex justify-end gap-3 pt-4">
+                <Button variant="outline" onClick={() => setShowRunNewDialog(false)}>Cancel</Button>
+                <Button onClick={() => { toast.success('Workflow started'); setShowRunNewDialog(false) }}>Run Workflow</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Re-run All Dialog */}
+        <Dialog open={showRerunAllDialog} onOpenChange={setShowRerunAllDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <RotateCcw className="w-5 h-5 text-blue-600" />
+                Re-run All Failed Workflows
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 pt-4">
+              <p className="text-sm text-muted-foreground">
+                This will re-run all failed workflow runs from the last 24 hours. Are you sure you want to continue?
+              </p>
+              <div className="bg-amber-50 dark:bg-amber-900/20 p-4 rounded-lg">
+                <p className="text-sm text-amber-700 dark:text-amber-400">
+                  {mockRuns.filter(r => r.conclusion === 'failure').length} failed run(s) will be re-triggered.
+                </p>
+              </div>
+              <div className="flex justify-end gap-3 pt-4">
+                <Button variant="outline" onClick={() => setShowRerunAllDialog(false)}>Cancel</Button>
+                <Button onClick={() => { toast.success('Re-running all failed workflows'); setShowRerunAllDialog(false) }}>Re-run All</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Cancel All Dialog */}
+        <Dialog open={showCancelAllDialog} onOpenChange={setShowCancelAllDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <StopCircle className="w-5 h-5 text-red-600" />
+                Cancel All Running Workflows
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 pt-4">
+              <p className="text-sm text-muted-foreground">
+                This will cancel all currently running workflow runs. This action cannot be undone.
+              </p>
+              <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg">
+                <p className="text-sm text-red-700 dark:text-red-400">
+                  {mockRuns.filter(r => r.status === 'in_progress').length} running workflow(s) will be cancelled.
+                </p>
+              </div>
+              <div className="flex justify-end gap-3 pt-4">
+                <Button variant="outline" onClick={() => setShowCancelAllDialog(false)}>Cancel</Button>
+                <Button variant="destructive" onClick={() => { toast.success('All running workflows cancelled'); setShowCancelAllDialog(false) }}>Cancel All</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Filter Dialog */}
+        <Dialog open={showFilterDialog} onOpenChange={setShowFilterDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Filter className="w-5 h-5 text-purple-600" />
+                Filter Runs
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 pt-4">
+              <div className="space-y-2">
+                <Label>Status</Label>
+                <select className="w-full h-10 px-3 rounded-md border border-input bg-background">
+                  <option value="all">All Status</option>
+                  <option value="completed">Completed</option>
+                  <option value="in_progress">In Progress</option>
+                  <option value="failed">Failed</option>
+                  <option value="cancelled">Cancelled</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label>Trigger Type</Label>
+                <select className="w-full h-10 px-3 rounded-md border border-input bg-background">
+                  <option value="all">All Triggers</option>
+                  <option value="push">Push</option>
+                  <option value="pull_request">Pull Request</option>
+                  <option value="schedule">Schedule</option>
+                  <option value="manual">Manual</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label>Branch</Label>
+                <Input placeholder="Filter by branch..." />
+              </div>
+              <div className="space-y-2">
+                <Label>Date Range</Label>
+                <div className="grid grid-cols-2 gap-2">
+                  <Input type="date" />
+                  <Input type="date" />
+                </div>
+              </div>
+              <div className="flex justify-end gap-3 pt-4">
+                <Button variant="outline" onClick={() => setShowFilterDialog(false)}>Reset</Button>
+                <Button onClick={() => { toast.success('Filters applied'); setShowFilterDialog(false) }}>Apply Filters</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Run Logs Dialog */}
+        <Dialog open={showRunLogsDialog} onOpenChange={setShowRunLogsDialog}>
+          <DialogContent className="max-w-4xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Terminal className="w-5 h-5 text-amber-600" />
+                Workflow Logs
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 pt-4">
+              <div className="bg-gray-900 text-gray-100 p-4 rounded-lg font-mono text-sm h-80 overflow-y-auto">
+                <p className="text-green-400">[2024-03-12 10:00:00] Starting workflow...</p>
+                <p className="text-gray-400">[2024-03-12 10:00:01] Checking out repository...</p>
+                <p className="text-gray-400">[2024-03-12 10:00:05] Setting up Node.js 18.x...</p>
+                <p className="text-gray-400">[2024-03-12 10:00:10] Installing dependencies...</p>
+                <p className="text-gray-400">[2024-03-12 10:00:35] Running build...</p>
+                <p className="text-green-400">[2024-03-12 10:00:48] Build completed successfully</p>
+                <p className="text-gray-400">[2024-03-12 10:00:49] Running tests...</p>
+                <p className="text-green-400">[2024-03-12 10:02:15] All tests passed (125 tests)</p>
+                <p className="text-green-400">[2024-03-12 10:02:16] Workflow completed successfully</p>
+              </div>
+              <div className="flex justify-end gap-3">
+                <Button variant="outline" onClick={handleExportLogs}>
+                  <Download className="w-4 h-4 mr-2" />
+                  Export Logs
+                </Button>
+                <Button variant="outline" onClick={() => setShowRunLogsDialog(false)}>Close</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Analytics Dialog */}
+        <Dialog open={showAnalyticsDialog} onOpenChange={setShowAnalyticsDialog}>
+          <DialogContent className="max-w-4xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <BarChart3 className="w-5 h-5 text-pink-600" />
+                CI/CD Analytics
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-6 pt-4">
+              <div className="grid grid-cols-3 gap-4">
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                  <p className="text-3xl font-bold text-green-600">{stats.successRate.toFixed(1)}%</p>
+                  <p className="text-sm text-muted-foreground">Success Rate</p>
+                </div>
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                  <p className="text-3xl font-bold text-blue-600">{formatDuration(Math.round(stats.avgDuration))}</p>
+                  <p className="text-sm text-muted-foreground">Avg Duration</p>
+                </div>
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                  <p className="text-3xl font-bold text-purple-600">{mockWorkflows.reduce((sum, w) => sum + w.runs, 0)}</p>
+                  <p className="text-sm text-muted-foreground">Total Runs</p>
+                </div>
+              </div>
+              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <h4 className="font-semibold mb-4">Run Trends (Last 7 Days)</h4>
+                <div className="h-40 flex items-end justify-around gap-2">
+                  {[65, 80, 45, 90, 75, 85, 70].map((height, i) => (
+                    <div key={i} className="w-full">
+                      <div className="bg-blue-500 rounded-t" style={{ height: `${height}%` }} />
+                      <p className="text-xs text-center mt-1 text-muted-foreground">{['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][i]}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="flex justify-end">
+                <Button variant="outline" onClick={() => setShowAnalyticsDialog(false)}>Close</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Upload Artifact Dialog */}
+        <Dialog open={showUploadArtifactDialog} onOpenChange={setShowUploadArtifactDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Upload className="w-5 h-5 text-amber-600" />
+                Upload Artifact
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 pt-4">
+              <div className="border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-lg p-8 text-center">
+                <Upload className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+                <p className="text-sm text-muted-foreground mb-2">Drag and drop files here, or click to browse</p>
+                <Input type="file" className="hidden" id="artifact-upload" />
+                <Button variant="outline" onClick={() => document.getElementById('artifact-upload')?.click()}>
+                  Select Files
+                </Button>
+              </div>
+              <div className="space-y-2">
+                <Label>Artifact Name</Label>
+                <Input placeholder="e.g., build-output" />
+              </div>
+              <div className="space-y-2">
+                <Label>Retention (days)</Label>
+                <Input type="number" defaultValue={7} />
+              </div>
+              <div className="flex justify-end gap-3 pt-4">
+                <Button variant="outline" onClick={() => setShowUploadArtifactDialog(false)}>Cancel</Button>
+                <Button onClick={() => { toast.success('Artifact uploaded'); setShowUploadArtifactDialog(false) }}>Upload</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Download All Artifacts Dialog */}
+        <Dialog open={showDownloadAllDialog} onOpenChange={setShowDownloadAllDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Download className="w-5 h-5 text-blue-600" />
+                Download All Artifacts
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 pt-4">
+              <p className="text-sm text-muted-foreground">
+                Download all artifacts as a ZIP file. Total size: {formatBytes(mockArtifacts.reduce((sum, a) => sum + a.size, 0))}
+              </p>
+              <div className="space-y-2">
+                {mockArtifacts.map(artifact => (
+                  <div key={artifact.id} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                    <span className="text-sm">{artifact.name}</span>
+                    <span className="text-xs text-muted-foreground">{formatBytes(artifact.size)}</span>
+                  </div>
+                ))}
+              </div>
+              <div className="flex justify-end gap-3 pt-4">
+                <Button variant="outline" onClick={() => setShowDownloadAllDialog(false)}>Cancel</Button>
+                <Button onClick={() => { toast.success('Downloading all artifacts'); setShowDownloadAllDialog(false) }}>Download All</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Archive Dialog */}
+        <Dialog open={showArchiveDialog} onOpenChange={setShowArchiveDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Archive className="w-5 h-5 text-purple-600" />
+                Archive Artifacts
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 pt-4">
+              <p className="text-sm text-muted-foreground">
+                Archive artifacts older than the specified age to cold storage.
+              </p>
+              <div className="space-y-2">
+                <Label>Archive artifacts older than</Label>
+                <select className="w-full h-10 px-3 rounded-md border border-input bg-background">
+                  <option value="7">7 days</option>
+                  <option value="14">14 days</option>
+                  <option value="30">30 days</option>
+                  <option value="90">90 days</option>
+                </select>
+              </div>
+              <div className="flex justify-end gap-3 pt-4">
+                <Button variant="outline" onClick={() => setShowArchiveDialog(false)}>Cancel</Button>
+                <Button onClick={() => { toast.success('Artifacts archived'); setShowArchiveDialog(false) }}>Archive</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Clean Up Dialog */}
+        <Dialog open={showCleanUpDialog} onOpenChange={setShowCleanUpDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Trash2 className="w-5 h-5 text-red-600" />
+                Clean Up Artifacts
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 pt-4">
+              <p className="text-sm text-muted-foreground">
+                Delete expired or old artifacts to free up storage space.
+              </p>
+              <div className="bg-amber-50 dark:bg-amber-900/20 p-4 rounded-lg">
+                <p className="text-sm text-amber-700 dark:text-amber-400">
+                  This will permanently delete the selected artifacts. This action cannot be undone.
+                </p>
+              </div>
+              <div className="space-y-2">
+                <Label>Delete artifacts</Label>
+                <select className="w-full h-10 px-3 rounded-md border border-input bg-background">
+                  <option value="expired">Expired only</option>
+                  <option value="30">Older than 30 days</option>
+                  <option value="90">Older than 90 days</option>
+                  <option value="all">All artifacts</option>
+                </select>
+              </div>
+              <div className="flex justify-end gap-3 pt-4">
+                <Button variant="outline" onClick={() => setShowCleanUpDialog(false)}>Cancel</Button>
+                <Button variant="destructive" onClick={() => { toast.success('Artifacts cleaned up'); setShowCleanUpDialog(false) }}>Clean Up</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Artifact Filter Dialog */}
+        <Dialog open={showArtifactFilterDialog} onOpenChange={setShowArtifactFilterDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Filter className="w-5 h-5 text-green-600" />
+                Filter Artifacts
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 pt-4">
+              <div className="space-y-2">
+                <Label>Workflow</Label>
+                <select className="w-full h-10 px-3 rounded-md border border-input bg-background">
+                  <option value="all">All Workflows</option>
+                  {mockWorkflows.map(w => (
+                    <option key={w.id} value={w.id}>{w.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label>Size Range</Label>
+                <div className="grid grid-cols-2 gap-2">
+                  <Input placeholder="Min size (MB)" type="number" />
+                  <Input placeholder="Max size (MB)" type="number" />
+                </div>
+              </div>
+              <div className="flex justify-end gap-3 pt-4">
+                <Button variant="outline" onClick={() => setShowArtifactFilterDialog(false)}>Reset</Button>
+                <Button onClick={() => { toast.success('Filters applied'); setShowArtifactFilterDialog(false) }}>Apply</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Preview Artifact Dialog */}
+        <Dialog open={showPreviewArtifactDialog} onOpenChange={setShowPreviewArtifactDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Eye className="w-5 h-5 text-pink-600" />
+                Preview Artifact
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 pt-4">
+              <p className="text-sm text-muted-foreground">
+                Select an artifact to preview its contents.
+              </p>
+              <div className="space-y-2">
+                <Label>Select Artifact</Label>
+                <select className="w-full h-10 px-3 rounded-md border border-input bg-background">
+                  {mockArtifacts.map(a => (
+                    <option key={a.id} value={a.id}>{a.name} ({formatBytes(a.size)})</option>
+                  ))}
+                </select>
+              </div>
+              <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
+                <p className="text-sm text-muted-foreground">Artifact preview will appear here...</p>
+              </div>
+              <div className="flex justify-end gap-3 pt-4">
+                <Button variant="outline" onClick={() => setShowPreviewArtifactDialog(false)}>Close</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Copy Link Dialog */}
+        <Dialog open={showCopyLinkDialog} onOpenChange={setShowCopyLinkDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Copy className="w-5 h-5 text-indigo-600" />
+                Copy Artifact Link
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 pt-4">
+              <div className="space-y-2">
+                <Label>Select Artifact</Label>
+                <select className="w-full h-10 px-3 rounded-md border border-input bg-background">
+                  {mockArtifacts.map(a => (
+                    <option key={a.id} value={a.id}>{a.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label>Download Link</Label>
+                <div className="flex gap-2">
+                  <Input readOnly value="https://api.example.com/artifacts/build-artifacts/download" />
+                  <Button variant="outline" onClick={() => { copyToClipboard('https://api.example.com/artifacts/build-artifacts/download', 'Link copied'); setShowCopyLinkDialog(false) }}>
+                    <Copy className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+              <div className="flex justify-end gap-3 pt-4">
+                <Button variant="outline" onClick={() => setShowCopyLinkDialog(false)}>Close</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* New Environment Dialog */}
+        <Dialog open={showNewEnvDialog} onOpenChange={setShowNewEnvDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Plus className="w-5 h-5 text-cyan-600" />
+                Create New Environment
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 pt-4">
+              <div className="space-y-2">
+                <Label>Environment Name</Label>
+                <Input placeholder="e.g., staging-2" />
+              </div>
+              <div className="space-y-2">
+                <Label>Environment URL</Label>
+                <Input placeholder="https://staging-2.example.com" />
+              </div>
+              <div className="flex items-center justify-between p-4 rounded-lg border">
+                <div>
+                  <p className="font-medium">Require Approval</p>
+                  <p className="text-sm text-muted-foreground">Deployments require manual approval</p>
+                </div>
+                <Switch />
+              </div>
+              <div className="flex justify-end gap-3 pt-4">
+                <Button variant="outline" onClick={() => setShowNewEnvDialog(false)}>Cancel</Button>
+                <Button onClick={() => { toast.success('Environment created'); setShowNewEnvDialog(false) }}>Create</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Secret Dialog */}
+        <Dialog open={showAddSecretDialog} onOpenChange={setShowAddSecretDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Key className="w-5 h-5 text-amber-600" />
+                Add New Secret
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 pt-4">
+              <div className="space-y-2">
+                <Label>Secret Name</Label>
+                <Input placeholder="e.g., API_SECRET_KEY" />
+              </div>
+              <div className="space-y-2">
+                <Label>Secret Value</Label>
+                <Input type="password" placeholder="Enter secret value" />
+              </div>
+              <div className="space-y-2">
+                <Label>Scope</Label>
+                <select className="w-full h-10 px-3 rounded-md border border-input bg-background">
+                  <option value="repository">Repository</option>
+                  <option value="environment">Environment</option>
+                  <option value="organization">Organization</option>
+                </select>
+              </div>
+              <div className="flex justify-end gap-3 pt-4">
+                <Button variant="outline" onClick={() => setShowAddSecretDialog(false)}>Cancel</Button>
+                <Button onClick={() => { toast.success('Secret added'); setShowAddSecretDialog(false) }}>Add Secret</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Variables Dialog */}
+        <Dialog open={showVariablesDialog} onOpenChange={setShowVariablesDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Code className="w-5 h-5 text-purple-600" />
+                Environment Variables
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 pt-4">
+              <div className="space-y-2">
+                <Label>Variable Name</Label>
+                <Input placeholder="e.g., NODE_ENV" />
+              </div>
+              <div className="space-y-2">
+                <Label>Variable Value</Label>
+                <Input placeholder="e.g., production" />
+              </div>
+              <div className="space-y-2">
+                <Label>Environment</Label>
+                <select className="w-full h-10 px-3 rounded-md border border-input bg-background">
+                  {mockEnvironments.map(e => (
+                    <option key={e.id} value={e.id}>{e.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex justify-end gap-3 pt-4">
+                <Button variant="outline" onClick={() => setShowVariablesDialog(false)}>Cancel</Button>
+                <Button onClick={() => { toast.success('Variable added'); setShowVariablesDialog(false) }}>Add Variable</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Protection Dialog */}
+        <Dialog open={showProtectionDialog} onOpenChange={setShowProtectionDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Shield className="w-5 h-5 text-green-600" />
+                Environment Protection
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 pt-4">
+              <div className="space-y-2">
+                <Label>Select Environment</Label>
+                <select className="w-full h-10 px-3 rounded-md border border-input bg-background">
+                  {mockEnvironments.map(e => (
+                    <option key={e.id} value={e.id}>{e.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between p-4 rounded-lg border">
+                  <div>
+                    <p className="font-medium">Required Reviewers</p>
+                    <p className="text-sm text-muted-foreground">Require approvals before deployments</p>
+                  </div>
+                  <Switch defaultChecked />
+                </div>
+                <div className="flex items-center justify-between p-4 rounded-lg border">
+                  <div>
+                    <p className="font-medium">Wait Timer</p>
+                    <p className="text-sm text-muted-foreground">Add delay before deployments</p>
+                  </div>
+                  <Switch />
+                </div>
+              </div>
+              <div className="flex justify-end gap-3 pt-4">
+                <Button variant="outline" onClick={() => setShowProtectionDialog(false)}>Cancel</Button>
+                <Button onClick={() => { toast.success('Protection settings updated'); setShowProtectionDialog(false) }}>Save</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Reviewers Dialog */}
+        <Dialog open={showReviewersDialog} onOpenChange={setShowReviewersDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Users className="w-5 h-5 text-pink-600" />
+                Manage Reviewers
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 pt-4">
+              <div className="space-y-2">
+                <Label>Select Environment</Label>
+                <select className="w-full h-10 px-3 rounded-md border border-input bg-background">
+                  {mockEnvironments.map(e => (
+                    <option key={e.id} value={e.id}>{e.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label>Add Reviewer</Label>
+                <div className="flex gap-2">
+                  <Input placeholder="Username or email" />
+                  <Button>Add</Button>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Current Reviewers</Label>
+                <div className="space-y-2">
+                  {['Sarah Chen', 'Mike Johnson'].map(name => (
+                    <div key={name} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                      <span className="text-sm">{name}</span>
+                      <Button variant="ghost" size="sm"><Trash2 className="w-4 h-4" /></Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="flex justify-end gap-3 pt-4">
+                <Button variant="outline" onClick={() => setShowReviewersDialog(false)}>Close</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Deploy Dialog */}
+        <Dialog open={showDeployDialog} onOpenChange={setShowDeployDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Rocket className="w-5 h-5 text-blue-600" />
+                Deploy to Environment
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 pt-4">
+              <div className="space-y-2">
+                <Label>Target Environment</Label>
+                <select className="w-full h-10 px-3 rounded-md border border-input bg-background">
+                  {mockEnvironments.filter(e => e.status === 'active').map(e => (
+                    <option key={e.id} value={e.id}>{e.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label>Branch/Tag</Label>
+                <Input placeholder="main" defaultValue="main" />
+              </div>
+              <div className="bg-amber-50 dark:bg-amber-900/20 p-4 rounded-lg">
+                <p className="text-sm text-amber-700 dark:text-amber-400">
+                  This deployment may require approval from reviewers.
+                </p>
+              </div>
+              <div className="flex justify-end gap-3 pt-4">
+                <Button variant="outline" onClick={() => setShowDeployDialog(false)}>Cancel</Button>
+                <Button onClick={() => { toast.success('Deployment initiated'); setShowDeployDialog(false) }}>Deploy</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Environment Export Dialog */}
+        <Dialog open={showEnvExportDialog} onOpenChange={setShowEnvExportDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Download className="w-5 h-5 text-indigo-600" />
+                Export Environment Config
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 pt-4">
+              <div className="space-y-2">
+                <Label>Select Environments</Label>
+                {mockEnvironments.map(e => (
+                  <div key={e.id} className="flex items-center gap-2">
+                    <input type="checkbox" id={e.id} defaultChecked />
+                    <label htmlFor={e.id} className="text-sm">{e.name}</label>
+                  </div>
+                ))}
+              </div>
+              <div className="space-y-2">
+                <Label>Export Format</Label>
+                <select className="w-full h-10 px-3 rounded-md border border-input bg-background">
+                  <option value="json">JSON</option>
+                  <option value="yaml">YAML</option>
+                </select>
+              </div>
+              <div className="flex justify-end gap-3 pt-4">
+                <Button variant="outline" onClick={() => setShowEnvExportDialog(false)}>Cancel</Button>
+                <Button onClick={() => { toast.success('Configuration exported'); setShowEnvExportDialog(false) }}>Export</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Environment Sync Dialog */}
+        <Dialog open={showEnvSyncDialog} onOpenChange={setShowEnvSyncDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <RefreshCw className="w-5 h-5 text-rose-600" />
+                Sync Environments
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 pt-4">
+              <p className="text-sm text-muted-foreground">
+                Sync variables and settings between environments.
+              </p>
+              <div className="space-y-2">
+                <Label>Source Environment</Label>
+                <select className="w-full h-10 px-3 rounded-md border border-input bg-background">
+                  {mockEnvironments.map(e => (
+                    <option key={e.id} value={e.id}>{e.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label>Target Environment</Label>
+                <select className="w-full h-10 px-3 rounded-md border border-input bg-background">
+                  {mockEnvironments.map(e => (
+                    <option key={e.id} value={e.id}>{e.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex justify-end gap-3 pt-4">
+                <Button variant="outline" onClick={() => setShowEnvSyncDialog(false)}>Cancel</Button>
+                <Button onClick={() => { toast.success('Environments synced'); setShowEnvSyncDialog(false) }}>Sync</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Environment Settings Dialog */}
+        <Dialog open={showEnvSettingsDialog} onOpenChange={setShowEnvSettingsDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Settings className="w-5 h-5 text-gray-600" />
+                Environment Settings - {selectedEnvironment?.name}
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 pt-4">
+              <div className="space-y-2">
+                <Label>Environment URL</Label>
+                <Input defaultValue={selectedEnvironment?.url || ''} />
+              </div>
+              <div className="flex items-center justify-between p-4 rounded-lg border">
+                <div>
+                  <p className="font-medium">Protection Enabled</p>
+                  <p className="text-sm text-muted-foreground">Require approvals for deployments</p>
+                </div>
+                <Switch defaultChecked={selectedEnvironment?.protection} />
+              </div>
+              <div className="flex items-center justify-between p-4 rounded-lg border">
+                <div>
+                  <p className="font-medium">Environment Status</p>
+                  <p className="text-sm text-muted-foreground">Enable or disable this environment</p>
+                </div>
+                <Switch defaultChecked={selectedEnvironment?.status === 'active'} />
+              </div>
+              <div className="flex justify-end gap-3 pt-4">
+                <Button variant="outline" onClick={() => setShowEnvSettingsDialog(false)}>Cancel</Button>
+                <Button onClick={() => { toast.success('Settings saved'); setShowEnvSettingsDialog(false) }}>Save</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Secret Settings Dialog */}
+        <Dialog open={showSecretSettingsDialog} onOpenChange={setShowSecretSettingsDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Settings className="w-5 h-5 text-gray-600" />
+                Edit Secret - {selectedSecret?.name}
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 pt-4">
+              <div className="space-y-2">
+                <Label>Secret Value</Label>
+                <Input type="password" placeholder="Enter new value to update" />
+              </div>
+              <div className="text-sm text-muted-foreground">
+                <p>Scope: {selectedSecret?.scope}</p>
+                <p>Last updated: {selectedSecret?.updatedAt}</p>
+              </div>
+              <div className="flex justify-end gap-3 pt-4">
+                <Button variant="outline" onClick={() => setShowSecretSettingsDialog(false)}>Cancel</Button>
+                <Button onClick={() => { toast.success('Secret updated'); setShowSecretSettingsDialog(false) }}>Update</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Secret Dialog */}
+        <Dialog open={showDeleteSecretDialog} onOpenChange={setShowDeleteSecretDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Trash2 className="w-5 h-5 text-red-600" />
+                Delete Secret
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 pt-4">
+              <p className="text-sm text-muted-foreground">
+                Are you sure you want to delete the secret <strong>{selectedSecret?.name}</strong>? This action cannot be undone.
+              </p>
+              <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg">
+                <p className="text-sm text-red-700 dark:text-red-400">
+                  Workflows using this secret will fail until a new secret is configured.
+                </p>
+              </div>
+              <div className="flex justify-end gap-3 pt-4">
+                <Button variant="outline" onClick={() => setShowDeleteSecretDialog(false)}>Cancel</Button>
+                <Button variant="destructive" onClick={() => { toast.success('Secret deleted'); setShowDeleteSecretDialog(false) }}>Delete</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Runner Dialog */}
+        <Dialog open={showAddRunnerDialog} onOpenChange={setShowAddRunnerDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Plus className="w-5 h-5 text-purple-600" />
+                Add Self-Hosted Runner
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 pt-4">
+              <div className="space-y-2">
+                <Label>Runner Name</Label>
+                <Input placeholder="e.g., my-runner-1" />
+              </div>
+              <div className="space-y-2">
+                <Label>Operating System</Label>
+                <select className="w-full h-10 px-3 rounded-md border border-input bg-background">
+                  <option value="linux">Linux</option>
+                  <option value="windows">Windows</option>
+                  <option value="macos">macOS</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label>Labels (comma separated)</Label>
+                <Input placeholder="e.g., self-hosted, docker" />
+              </div>
+              <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
+                <p className="text-sm font-medium mb-2">Registration Token</p>
+                <code className="text-xs bg-gray-200 dark:bg-gray-700 p-2 rounded block">RUNNER_TOKEN_XXXXXX</code>
+              </div>
+              <div className="flex justify-end gap-3 pt-4">
+                <Button variant="outline" onClick={() => setShowAddRunnerDialog(false)}>Cancel</Button>
+                <Button onClick={() => { toast.success('Runner added'); setShowAddRunnerDialog(false) }}>Add Runner</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Configure Runner Dialog */}
+        <Dialog open={showConfigureRunnerDialog} onOpenChange={setShowConfigureRunnerDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Cpu className="w-5 h-5 text-blue-600" />
+                Configure Runners
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 pt-4">
+              <div className="space-y-2">
+                <Label>Default Runner Group</Label>
+                <select className="w-full h-10 px-3 rounded-md border border-input bg-background">
+                  <option value="default">Default</option>
+                  <option value="self-hosted">Self-Hosted</option>
+                  <option value="gpu">GPU Runners</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label>Concurrency Limit</Label>
+                <Input type="number" defaultValue={20} />
+              </div>
+              <div className="flex items-center justify-between p-4 rounded-lg border">
+                <div>
+                  <p className="font-medium">Auto-scale</p>
+                  <p className="text-sm text-muted-foreground">Automatically scale runners based on demand</p>
+                </div>
+                <Switch />
+              </div>
+              <div className="flex justify-end gap-3 pt-4">
+                <Button variant="outline" onClick={() => setShowConfigureRunnerDialog(false)}>Cancel</Button>
+                <Button onClick={() => { toast.success('Configuration saved'); setShowConfigureRunnerDialog(false) }}>Save</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Labels Dialog */}
+        <Dialog open={showLabelsDialog} onOpenChange={setShowLabelsDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Tag className="w-5 h-5 text-amber-600" />
+                Manage Runner Labels
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 pt-4">
+              <div className="space-y-2">
+                <Label>Add New Label</Label>
+                <div className="flex gap-2">
+                  <Input placeholder="e.g., docker, gpu" />
+                  <Button>Add</Button>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Current Labels</Label>
+                <div className="flex flex-wrap gap-2">
+                  {['ubuntu-latest', 'self-hosted', 'docker', 'gpu'].map(label => (
+                    <Badge key={label} variant="secondary" className="gap-1">
+                      {label}
+                      <button className="ml-1 hover:text-red-500">x</button>
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+              <div className="flex justify-end gap-3 pt-4">
+                <Button variant="outline" onClick={() => setShowLabelsDialog(false)}>Close</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Restart All Runners Dialog */}
+        <Dialog open={showRestartAllDialog} onOpenChange={setShowRestartAllDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <RefreshCw className="w-5 h-5 text-green-600" />
+                Restart All Runners
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 pt-4">
+              <p className="text-sm text-muted-foreground">
+                This will restart all online runners. Running jobs will be cancelled.
+              </p>
+              <div className="bg-amber-50 dark:bg-amber-900/20 p-4 rounded-lg">
+                <p className="text-sm text-amber-700 dark:text-amber-400">
+                  {mockRunners.filter(r => r.status !== 'offline').length} runner(s) will be restarted.
+                </p>
+              </div>
+              <div className="flex justify-end gap-3 pt-4">
+                <Button variant="outline" onClick={() => setShowRestartAllDialog(false)}>Cancel</Button>
+                <Button onClick={() => { toast.success('Runners restarting'); setShowRestartAllDialog(false) }}>Restart All</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Pause All Runners Dialog */}
+        <Dialog open={showPauseAllDialog} onOpenChange={setShowPauseAllDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Pause className="w-5 h-5 text-pink-600" />
+                Pause All Runners
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 pt-4">
+              <p className="text-sm text-muted-foreground">
+                Paused runners will not accept new jobs. Running jobs will complete.
+              </p>
+              <div className="flex justify-end gap-3 pt-4">
+                <Button variant="outline" onClick={() => setShowPauseAllDialog(false)}>Cancel</Button>
+                <Button onClick={() => { toast.success('Runners paused'); setShowPauseAllDialog(false) }}>Pause All</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Runner Logs Dialog */}
+        <Dialog open={showRunnerLogsDialog} onOpenChange={setShowRunnerLogsDialog}>
+          <DialogContent className="max-w-4xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Terminal className="w-5 h-5 text-indigo-600" />
+                Runner Logs
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 pt-4">
+              <div className="space-y-2">
+                <Label>Select Runner</Label>
+                <select className="w-full h-10 px-3 rounded-md border border-input bg-background">
+                  {mockRunners.map(r => (
+                    <option key={r.id} value={r.id}>{r.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="bg-gray-900 text-gray-100 p-4 rounded-lg font-mono text-sm h-60 overflow-y-auto">
+                <p className="text-green-400">[INFO] Runner online</p>
+                <p className="text-gray-400">[INFO] Waiting for jobs...</p>
+                <p className="text-blue-400">[INFO] Job received: CI Pipeline #234</p>
+                <p className="text-gray-400">[INFO] Executing job...</p>
+                <p className="text-green-400">[INFO] Job completed successfully</p>
+              </div>
+              <div className="flex justify-end gap-3">
+                <Button variant="outline" onClick={() => setShowRunnerLogsDialog(false)}>Close</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Runner Export Dialog */}
+        <Dialog open={showRunnerExportDialog} onOpenChange={setShowRunnerExportDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Download className="w-5 h-5 text-cyan-600" />
+                Export Runner Configuration
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 pt-4">
+              <p className="text-sm text-muted-foreground">
+                Export runner configuration for backup or migration.
+              </p>
+              <div className="space-y-2">
+                <Label>Format</Label>
+                <select className="w-full h-10 px-3 rounded-md border border-input bg-background">
+                  <option value="json">JSON</option>
+                  <option value="yaml">YAML</option>
+                </select>
+              </div>
+              <div className="flex justify-end gap-3 pt-4">
+                <Button variant="outline" onClick={() => setShowRunnerExportDialog(false)}>Cancel</Button>
+                <Button onClick={() => { toast.success('Configuration exported'); setShowRunnerExportDialog(false) }}>Export</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Runner Clean Up Dialog */}
+        <Dialog open={showRunnerCleanUpDialog} onOpenChange={setShowRunnerCleanUpDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Trash2 className="w-5 h-5 text-red-600" />
+                Clean Up Runners
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 pt-4">
+              <p className="text-sm text-muted-foreground">
+                Remove offline or stale runners from the runner pool.
+              </p>
+              <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg">
+                <p className="text-sm text-red-700 dark:text-red-400">
+                  {mockRunners.filter(r => r.status === 'offline').length} offline runner(s) will be removed.
+                </p>
+              </div>
+              <div className="flex justify-end gap-3 pt-4">
+                <Button variant="outline" onClick={() => setShowRunnerCleanUpDialog(false)}>Cancel</Button>
+                <Button variant="destructive" onClick={() => { toast.success('Runners cleaned up'); setShowRunnerCleanUpDialog(false) }}>Clean Up</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Runner Settings Dialog */}
+        <Dialog open={showRunnerSettingsDialog} onOpenChange={setShowRunnerSettingsDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Settings className="w-5 h-5 text-gray-600" />
+                Runner Settings - {selectedRunner?.name}
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 pt-4">
+              <div className="space-y-2">
+                <Label>Runner Name</Label>
+                <Input defaultValue={selectedRunner?.name} />
+              </div>
+              <div className="space-y-2">
+                <Label>Labels</Label>
+                <Input defaultValue={selectedRunner?.labels.join(', ')} />
+              </div>
+              <div className="flex items-center justify-between p-4 rounded-lg border">
+                <div>
+                  <p className="font-medium">Accept Jobs</p>
+                  <p className="text-sm text-muted-foreground">Allow this runner to accept new jobs</p>
+                </div>
+                <Switch defaultChecked={selectedRunner?.status !== 'offline'} />
+              </div>
+              <div className="flex justify-end gap-3 pt-4">
+                <Button variant="outline" onClick={() => setShowRunnerSettingsDialog(false)}>Cancel</Button>
+                <Button onClick={() => { toast.success('Settings saved'); setShowRunnerSettingsDialog(false) }}>Save</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Export Logs Settings Dialog */}
+        <Dialog open={showExportLogsSettingsDialog} onOpenChange={setShowExportLogsSettingsDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Download className="w-5 h-5 text-blue-600" />
+                Export Logs
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 pt-4">
+              <div className="space-y-2">
+                <Label>Date Range</Label>
+                <div className="grid grid-cols-2 gap-2">
+                  <Input type="date" />
+                  <Input type="date" />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Log Level</Label>
+                <select className="w-full h-10 px-3 rounded-md border border-input bg-background">
+                  <option value="all">All Levels</option>
+                  <option value="error">Errors Only</option>
+                  <option value="warn">Warnings and Errors</option>
+                </select>
+              </div>
+              <div className="flex justify-end gap-3 pt-4">
+                <Button variant="outline" onClick={() => setShowExportLogsSettingsDialog(false)}>Cancel</Button>
+                <Button onClick={() => { handleExportLogs(); setShowExportLogsSettingsDialog(false) }}>Export</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Archive Old Runs Dialog */}
+        <Dialog open={showArchiveOldRunsDialog} onOpenChange={setShowArchiveOldRunsDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Archive className="w-5 h-5 text-purple-600" />
+                Archive Old Runs
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 pt-4">
+              <p className="text-sm text-muted-foreground">
+                Archive workflow runs older than the specified age.
+              </p>
+              <div className="space-y-2">
+                <Label>Archive runs older than</Label>
+                <select className="w-full h-10 px-3 rounded-md border border-input bg-background">
+                  <option value="30">30 days</option>
+                  <option value="60">60 days</option>
+                  <option value="90">90 days</option>
+                </select>
+              </div>
+              <div className="flex justify-end gap-3 pt-4">
+                <Button variant="outline" onClick={() => setShowArchiveOldRunsDialog(false)}>Cancel</Button>
+                <Button onClick={() => { toast.success('Old runs archived'); setShowArchiveOldRunsDialog(false) }}>Archive</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Reset Stats Dialog */}
+        <Dialog open={showResetStatsDialog} onOpenChange={setShowResetStatsDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <RefreshCw className="w-5 h-5 text-amber-600" />
+                Reset Statistics
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 pt-4">
+              <p className="text-sm text-muted-foreground">
+                This will reset all CI/CD statistics. This action cannot be undone.
+              </p>
+              <div className="bg-amber-50 dark:bg-amber-900/20 p-4 rounded-lg">
+                <p className="text-sm text-amber-700 dark:text-amber-400">
+                  All historical metrics will be cleared.
+                </p>
+              </div>
+              <div className="flex justify-end gap-3 pt-4">
+                <Button variant="outline" onClick={() => setShowResetStatsDialog(false)}>Cancel</Button>
+                <Button variant="destructive" onClick={() => { toast.success('Statistics reset'); setShowResetStatsDialog(false) }}>Reset</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Purge Artifacts Dialog */}
+        <Dialog open={showPurgeArtifactsDialog} onOpenChange={setShowPurgeArtifactsDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Trash2 className="w-5 h-5 text-red-600" />
+                Purge Artifacts
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 pt-4">
+              <p className="text-sm text-muted-foreground">
+                Permanently delete all artifacts to free up storage space.
+              </p>
+              <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg">
+                <p className="text-sm text-red-700 dark:text-red-400">
+                  {formatBytes(mockArtifacts.reduce((sum, a) => sum + a.size, 0))} of storage will be freed. This cannot be undone.
+                </p>
+              </div>
+              <div className="flex justify-end gap-3 pt-4">
+                <Button variant="outline" onClick={() => setShowPurgeArtifactsDialog(false)}>Cancel</Button>
+                <Button variant="destructive" onClick={() => { toast.success('Artifacts purged'); setShowPurgeArtifactsDialog(false) }}>Purge All</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Disable Workflows Dialog */}
+        <Dialog open={showDisableWorkflowsDialog} onOpenChange={setShowDisableWorkflowsDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <AlertTriangle className="w-5 h-5 text-red-600" />
+                Disable All Workflows
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 pt-4">
+              <p className="text-sm text-muted-foreground">
+                This will temporarily pause all workflow execution. No new runs will be triggered.
+              </p>
+              <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg">
+                <p className="text-sm text-red-700 dark:text-red-400">
+                  {mockWorkflows.length} workflow(s) will be disabled.
+                </p>
+              </div>
+              <div className="flex justify-end gap-3 pt-4">
+                <Button variant="outline" onClick={() => setShowDisableWorkflowsDialog(false)}>Cancel</Button>
+                <Button variant="destructive" onClick={() => { toast.success('All workflows disabled'); setShowDisableWorkflowsDialog(false) }}>Disable All</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete All Artifacts Dialog */}
+        <Dialog open={showDeleteAllArtifactsDialog} onOpenChange={setShowDeleteAllArtifactsDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Trash2 className="w-5 h-5 text-red-600" />
+                Delete All Artifacts
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 pt-4">
+              <p className="text-sm text-muted-foreground">
+                Permanently delete all stored artifacts. This action cannot be undone.
+              </p>
+              <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg">
+                <p className="text-sm text-red-700 dark:text-red-400">
+                  {mockArtifacts.length} artifact(s) totaling {formatBytes(mockArtifacts.reduce((sum, a) => sum + a.size, 0))} will be deleted.
+                </p>
+              </div>
+              <div className="flex justify-end gap-3 pt-4">
+                <Button variant="outline" onClick={() => setShowDeleteAllArtifactsDialog(false)}>Cancel</Button>
+                <Button variant="destructive" onClick={() => { toast.success('All artifacts deleted'); setShowDeleteAllArtifactsDialog(false) }}>Delete All</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Clear Caches Dialog */}
+        <Dialog open={showClearCachesDialog} onOpenChange={setShowClearCachesDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Trash2 className="w-5 h-5 text-red-600" />
+                Clear All Caches
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 pt-4">
+              <p className="text-sm text-muted-foreground">
+                This will delete all cached data. Future builds may take longer.
+              </p>
+              <div className="bg-amber-50 dark:bg-amber-900/20 p-4 rounded-lg">
+                <p className="text-sm text-amber-700 dark:text-amber-400">
+                  4.2GB of cache data will be cleared.
+                </p>
+              </div>
+              <div className="flex justify-end gap-3 pt-4">
+                <Button variant="outline" onClick={() => setShowClearCachesDialog(false)}>Cancel</Button>
+                <Button variant="destructive" onClick={() => { toast.success('Caches cleared'); setShowClearCachesDialog(false) }}>Clear All</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Test Webhook Dialog */}
+        <Dialog open={showTestWebhookDialog} onOpenChange={setShowTestWebhookDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Webhook className="w-5 h-5 text-blue-600" />
+                Test Webhook
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 pt-4">
+              <p className="text-sm text-muted-foreground">
+                Send a test payload to verify your webhook configuration.
+              </p>
+              <div className="space-y-2">
+                <Label>Event Type</Label>
+                <select className="w-full h-10 px-3 rounded-md border border-input bg-background">
+                  <option value="workflow_run">Workflow Run</option>
+                  <option value="deployment">Deployment</option>
+                  <option value="push">Push</option>
+                </select>
+              </div>
+              <div className="flex justify-end gap-3 pt-4">
+                <Button variant="outline" onClick={() => setShowTestWebhookDialog(false)}>Cancel</Button>
+                <Button onClick={() => { toast.success('Test webhook sent successfully'); setShowTestWebhookDialog(false) }}>Send Test</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* More Options Dialog */}
+        <Dialog open={showMoreOptionsDialog} onOpenChange={setShowMoreOptionsDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <MoreHorizontal className="w-5 h-5 text-gray-600" />
+                Workflow Options
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-2 pt-4">
+              <Button variant="ghost" className="w-full justify-start gap-2" onClick={() => { setShowMoreOptionsDialog(false); setShowWorkflowYamlDialog(true) }}>
+                <FileText className="w-4 h-4" />
+                View YAML Configuration
+              </Button>
+              <Button variant="ghost" className="w-full justify-start gap-2" onClick={() => { setShowMoreOptionsDialog(false); setShowWorkflowAnalyticsDialog(true) }}>
+                <BarChart3 className="w-4 h-4" />
+                View Analytics
+              </Button>
+              <Button variant="ghost" className="w-full justify-start gap-2" onClick={() => { setShowMoreOptionsDialog(false); setShowWorkflowSettingsDialog(true) }}>
+                <Settings className="w-4 h-4" />
+                Workflow Settings
+              </Button>
+              <Button variant="ghost" className="w-full justify-start gap-2" onClick={() => { handleExportLogs(); setShowMoreOptionsDialog(false) }}>
+                <Download className="w-4 h-4" />
+                Export History
+              </Button>
+              <Button variant="ghost" className="w-full justify-start gap-2 text-red-600" onClick={() => { toast.success('Workflow disabled'); setShowMoreOptionsDialog(false) }}>
+                <StopCircle className="w-4 h-4" />
+                Disable Workflow
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Workflow YAML Dialog */}
+        <Dialog open={showWorkflowYamlDialog} onOpenChange={setShowWorkflowYamlDialog}>
+          <DialogContent className="max-w-3xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <FileText className="w-5 h-5 text-purple-600" />
+                Workflow YAML - {selectedWorkflow?.name}
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 pt-4">
+              <div className="bg-gray-900 text-gray-100 p-4 rounded-lg font-mono text-sm h-80 overflow-y-auto">
+                <pre>{`name: ${selectedWorkflow?.name || 'CI Pipeline'}
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - run: npm install
+      - run: npm run build
+      - run: npm test`}</pre>
+              </div>
+              <div className="flex justify-end gap-3">
+                <Button variant="outline" onClick={() => copyToClipboard('workflow yaml content', 'YAML copied')}>
+                  <Copy className="w-4 h-4 mr-2" />
+                  Copy
+                </Button>
+                <Button variant="outline" onClick={() => setShowWorkflowYamlDialog(false)}>Close</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Workflow Analytics Dialog */}
+        <Dialog open={showWorkflowAnalyticsDialog} onOpenChange={setShowWorkflowAnalyticsDialog}>
+          <DialogContent className="max-w-3xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <BarChart3 className="w-5 h-5 text-pink-600" />
+                Workflow Analytics - {selectedWorkflow?.name}
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-6 pt-4">
+              <div className="grid grid-cols-3 gap-4">
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                  <p className="text-2xl font-bold text-green-600">{selectedWorkflow?.successRate || 94}%</p>
+                  <p className="text-sm text-muted-foreground">Success Rate</p>
+                </div>
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                  <p className="text-2xl font-bold text-blue-600">{selectedWorkflow?.runs || 234}</p>
+                  <p className="text-sm text-muted-foreground">Total Runs</p>
+                </div>
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                  <p className="text-2xl font-bold text-purple-600">{formatDuration(selectedWorkflow?.avgDuration || 185)}</p>
+                  <p className="text-sm text-muted-foreground">Avg Duration</p>
+                </div>
+              </div>
+              <div className="flex justify-end">
+                <Button variant="outline" onClick={() => setShowWorkflowAnalyticsDialog(false)}>Close</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Workflow Settings Dialog */}
+        <Dialog open={showWorkflowSettingsDialog} onOpenChange={setShowWorkflowSettingsDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Settings className="w-5 h-5 text-gray-600" />
+                Workflow Settings - {selectedWorkflow?.name}
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 pt-4">
+              <div className="flex items-center justify-between p-4 rounded-lg border">
+                <div>
+                  <p className="font-medium">Enabled</p>
+                  <p className="text-sm text-muted-foreground">Allow this workflow to run</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+              <div className="flex items-center justify-between p-4 rounded-lg border">
+                <div>
+                  <p className="font-medium">Manual Dispatch</p>
+                  <p className="text-sm text-muted-foreground">Allow manual triggering</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+              <div className="flex items-center justify-between p-4 rounded-lg border">
+                <div>
+                  <p className="font-medium">Concurrency</p>
+                  <p className="text-sm text-muted-foreground">Allow concurrent runs</p>
+                </div>
+                <Switch />
+              </div>
+              <div className="flex justify-end gap-3 pt-4">
+                <Button variant="outline" onClick={() => setShowWorkflowSettingsDialog(false)}>Cancel</Button>
+                <Button onClick={() => { toast.success('Settings saved'); setShowWorkflowSettingsDialog(false) }}>Save</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Download Artifact Dialog */}
+        <Dialog open={showDownloadArtifactDialog} onOpenChange={setShowDownloadArtifactDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Download className="w-5 h-5 text-blue-600" />
+                Download Artifact
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 pt-4">
+              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <p className="font-medium">{selectedArtifact?.name}</p>
+                <p className="text-sm text-muted-foreground">Size: {selectedArtifact ? formatBytes(selectedArtifact.size) : '-'}</p>
+                <p className="text-sm text-muted-foreground">Expires: {selectedArtifact?.expiresAt}</p>
+              </div>
+              <div className="flex justify-end gap-3 pt-4">
+                <Button variant="outline" onClick={() => setShowDownloadArtifactDialog(false)}>Cancel</Button>
+                <Button onClick={() => { toast.success('Download started'); setShowDownloadArtifactDialog(false) }}>Download</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Artifact Dialog */}
+        <Dialog open={showDeleteArtifactDialog} onOpenChange={setShowDeleteArtifactDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Trash2 className="w-5 h-5 text-red-600" />
+                Delete Artifact
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 pt-4">
+              <p className="text-sm text-muted-foreground">
+                Are you sure you want to delete <strong>{selectedArtifact?.name}</strong>? This action cannot be undone.
+              </p>
+              <div className="flex justify-end gap-3 pt-4">
+                <Button variant="outline" onClick={() => setShowDeleteArtifactDialog(false)}>Cancel</Button>
+                <Button variant="destructive" onClick={() => { toast.success('Artifact deleted'); setShowDeleteArtifactDialog(false) }}>Delete</Button>
               </div>
             </div>
           </DialogContent>

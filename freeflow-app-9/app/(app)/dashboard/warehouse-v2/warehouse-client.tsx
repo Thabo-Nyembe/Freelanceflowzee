@@ -416,6 +416,31 @@ export default function WarehouseClient() {
   const [settingsTab, setSettingsTab] = useState('general')
   const [showAddInventoryDialog, setShowAddInventoryDialog] = useState(false)
   const [showCycleCountDialog, setShowCycleCountDialog] = useState(false)
+  const [showScanModeDialog, setShowScanModeDialog] = useState(false)
+  const [showExportDialog, setShowExportDialog] = useState(false)
+  const [showNewTaskDialog, setShowNewTaskDialog] = useState(false)
+  const [showFindSkuDialog, setShowFindSkuDialog] = useState(false)
+  const [showTransferDialog, setShowTransferDialog] = useState(false)
+  const [showLowStockDialog, setShowLowStockDialog] = useState(false)
+  const [showReplenishDialog, setShowReplenishDialog] = useState(false)
+  const [showImportDialog, setShowImportDialog] = useState(false)
+  const [showEditInventoryDialog, setShowEditInventoryDialog] = useState(false)
+  const [showReceivingDialog, setShowReceivingDialog] = useState(false)
+  const [showPickingDialog, setShowPickingDialog] = useState(false)
+  const [showPackingDialog, setShowPackingDialog] = useState(false)
+  const [showShipOrderDialog, setShowShipOrderDialog] = useState(false)
+  const [showAssignTaskDialog, setShowAssignTaskDialog] = useState(false)
+  const [showViewBinsDialog, setShowViewBinsDialog] = useState(false)
+  const [showCycleCountDetailsDialog, setShowCycleCountDetailsDialog] = useState(false)
+  const [showConfigureDialog, setShowConfigureDialog] = useState(false)
+  const [showPriorityRulesDialog, setShowPriorityRulesDialog] = useState(false)
+  const [showPurgeDataDialog, setShowPurgeDataDialog] = useState(false)
+  const [showResetDefaultsDialog, setShowResetDefaultsDialog] = useState(false)
+  const [selectedEditItem, setSelectedEditItem] = useState<InventoryItem | null>(null)
+  const [selectedTask, setSelectedTask] = useState<WarehouseTask | null>(null)
+  const [selectedZone, setSelectedZone] = useState<Zone | null>(null)
+  const [selectedCycleCount, setSelectedCycleCount] = useState<CycleCount | null>(null)
+  const [configureTarget, setConfigureTarget] = useState<string>('')
 
   // Form state for Add Inventory dialog
   const [newInventory, setNewInventory] = useState({
@@ -437,6 +462,59 @@ export default function WarehouseClient() {
     countType: 'full',
     priority: 'normal',
     assignedTo: ''
+  })
+
+  // Form state for New Task dialog
+  const [newTask, setNewTask] = useState({
+    type: 'pick' as TaskType,
+    priority: 'normal' as TaskPriority,
+    itemSku: '',
+    fromLocation: '',
+    toLocation: '',
+    quantity: '',
+    assignedTo: ''
+  })
+
+  // Form state for Transfer dialog
+  const [transferData, setTransferData] = useState({
+    itemSku: '',
+    fromLocation: '',
+    toLocation: '',
+    quantity: ''
+  })
+
+  // Form state for Export dialog
+  const [exportData, setExportData] = useState({
+    format: 'csv',
+    dataType: 'inventory',
+    dateRange: 'all'
+  })
+
+  // Form state for Scan Mode
+  const [scanMode, setScanMode] = useState({
+    mode: 'receiving',
+    continuous: true
+  })
+
+  // Form state for Import dialog
+  const [importData, setImportData] = useState({
+    fileType: 'csv',
+    updateExisting: false
+  })
+
+  // Form state for Task Assignment
+  const [assignTaskData, setAssignTaskData] = useState({
+    assignee: '',
+    priority: 'normal' as TaskPriority
+  })
+
+  // General settings form data
+  const [generalSettings, setGeneralSettings] = useState({
+    warehouseName: 'Main Distribution Center',
+    timezone: 'America/New_York',
+    autoRefresh: true,
+    unitSystem: 'metric',
+    barcodeFormat: 'code128'
   })
 
   // Quick actions with dialog-based workflows
@@ -501,6 +579,437 @@ export default function WarehouseClient() {
         error: 'Failed to start cycle count'
       }
     )
+  }
+
+  // Handler for New Task submission
+  const handleCreateTask = () => {
+    if (!newTask.itemSku || !newTask.fromLocation || !newTask.toLocation) {
+      toast.error('Missing required fields', { description: 'Please fill in SKU and locations' })
+      return
+    }
+
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1500)),
+      {
+        loading: 'Creating task...',
+        success: () => {
+          setShowNewTaskDialog(false)
+          setNewTask({
+            type: 'pick',
+            priority: 'normal',
+            itemSku: '',
+            fromLocation: '',
+            toLocation: '',
+            quantity: '',
+            assignedTo: ''
+          })
+          return `Task created successfully`
+        },
+        error: 'Failed to create task'
+      }
+    )
+  }
+
+  // Handler for Export
+  const handleExport = () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 2000)),
+      {
+        loading: `Exporting ${exportData.dataType} data as ${exportData.format.toUpperCase()}...`,
+        success: () => {
+          setShowExportDialog(false)
+          return `${exportData.dataType} data exported successfully`
+        },
+        error: 'Failed to export data'
+      }
+    )
+  }
+
+  // Handler for Transfer
+  const handleTransfer = () => {
+    if (!transferData.itemSku || !transferData.fromLocation || !transferData.toLocation || !transferData.quantity) {
+      toast.error('Missing required fields', { description: 'Please fill in all transfer details' })
+      return
+    }
+
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1500)),
+      {
+        loading: 'Processing transfer...',
+        success: () => {
+          setShowTransferDialog(false)
+          setTransferData({ itemSku: '', fromLocation: '', toLocation: '', quantity: '' })
+          return `Transfer completed: ${transferData.quantity} units moved`
+        },
+        error: 'Failed to process transfer'
+      }
+    )
+  }
+
+  // Handler for Import
+  const handleImport = () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 2000)),
+      {
+        loading: 'Importing data...',
+        success: () => {
+          setShowImportDialog(false)
+          return `Data imported successfully`
+        },
+        error: 'Failed to import data'
+      }
+    )
+  }
+
+  // Handler for Scan Mode activation
+  const handleActivateScanMode = () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1000)),
+      {
+        loading: 'Activating scan mode...',
+        success: () => {
+          setShowScanModeDialog(false)
+          return `Scan mode activated: ${scanMode.mode}`
+        },
+        error: 'Failed to activate scan mode'
+      }
+    )
+  }
+
+  // Handler for Edit Inventory
+  const handleEditInventory = () => {
+    if (!selectedEditItem) return
+
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1500)),
+      {
+        loading: 'Saving changes...',
+        success: () => {
+          setShowEditInventoryDialog(false)
+          setSelectedEditItem(null)
+          return `Inventory item updated successfully`
+        },
+        error: 'Failed to update inventory item'
+      }
+    )
+  }
+
+  // Handler for Receiving
+  const handleStartReceiving = (shipment: InboundShipment) => {
+    setSelectedShipment(shipment)
+    setShowReceivingDialog(true)
+  }
+
+  const handleProcessReceiving = () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 2000)),
+      {
+        loading: 'Processing receiving...',
+        success: () => {
+          setShowReceivingDialog(false)
+          setSelectedShipment(null)
+          return `Receiving process started for shipment`
+        },
+        error: 'Failed to start receiving'
+      }
+    )
+  }
+
+  // Handler for Picking
+  const handleStartPicking = (order: OutboundOrder) => {
+    setSelectedOrder(order)
+    setShowPickingDialog(true)
+  }
+
+  const handleProcessPicking = () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1500)),
+      {
+        loading: 'Starting picking process...',
+        success: () => {
+          setShowPickingDialog(false)
+          setSelectedOrder(null)
+          return `Picking started for order`
+        },
+        error: 'Failed to start picking'
+      }
+    )
+  }
+
+  // Handler for Packing
+  const handleStartPacking = (order: OutboundOrder) => {
+    setSelectedOrder(order)
+    setShowPackingDialog(true)
+  }
+
+  const handleProcessPacking = () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1500)),
+      {
+        loading: 'Starting packing process...',
+        success: () => {
+          setShowPackingDialog(false)
+          setSelectedOrder(null)
+          return `Packing started for order`
+        },
+        error: 'Failed to start packing'
+      }
+    )
+  }
+
+  // Handler for Shipping
+  const handleShipOrder = (order: OutboundOrder) => {
+    setSelectedOrder(order)
+    setShowShipOrderDialog(true)
+  }
+
+  const handleProcessShipping = () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 2000)),
+      {
+        loading: 'Processing shipment...',
+        success: () => {
+          setShowShipOrderDialog(false)
+          setSelectedOrder(null)
+          return `Order shipped successfully`
+        },
+        error: 'Failed to ship order'
+      }
+    )
+  }
+
+  // Handler for Task Assignment
+  const handleAssignTask = (task: WarehouseTask) => {
+    setSelectedTask(task)
+    setShowAssignTaskDialog(true)
+  }
+
+  const handleProcessAssignment = () => {
+    if (!assignTaskData.assignee) {
+      toast.error('Assignee required', { description: 'Please select a team member' })
+      return
+    }
+
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1000)),
+      {
+        loading: 'Assigning task...',
+        success: () => {
+          setShowAssignTaskDialog(false)
+          setSelectedTask(null)
+          setAssignTaskData({ assignee: '', priority: 'normal' })
+          return `Task assigned to ${assignTaskData.assignee}`
+        },
+        error: 'Failed to assign task'
+      }
+    )
+  }
+
+  // Handler for Task Start
+  const handleStartTask = (task: WarehouseTask) => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1000)),
+      {
+        loading: 'Starting task...',
+        success: `Task ${task.task_number} started`,
+        error: 'Failed to start task'
+      }
+    )
+  }
+
+  // Handler for Task Complete
+  const handleCompleteTask = (task: WarehouseTask) => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1500)),
+      {
+        loading: 'Completing task...',
+        success: `Task ${task.task_number} completed`,
+        error: 'Failed to complete task'
+      }
+    )
+  }
+
+  // Handler for View Bins
+  const handleViewBins = (zone: Zone) => {
+    setSelectedZone(zone)
+    setShowViewBinsDialog(true)
+  }
+
+  // Handler for Cycle Count Details
+  const handleViewCycleCountDetails = (count: CycleCount) => {
+    setSelectedCycleCount(count)
+    setShowCycleCountDetailsDialog(true)
+  }
+
+  // Handler for Starting/Continuing Cycle Count
+  const handleStartCycleCountFromList = (count: CycleCount) => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1000)),
+      {
+        loading: count.status === 'scheduled' ? 'Starting cycle count...' : 'Resuming cycle count...',
+        success: count.status === 'scheduled' ? `Cycle count ${count.count_number} started` : `Cycle count ${count.count_number} resumed`,
+        error: 'Failed to process cycle count'
+      }
+    )
+  }
+
+  // Handler for Configure dialogs
+  const handleOpenConfigure = (target: string) => {
+    setConfigureTarget(target)
+    setShowConfigureDialog(true)
+  }
+
+  const handleSaveConfigure = () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1000)),
+      {
+        loading: 'Saving configuration...',
+        success: () => {
+          setShowConfigureDialog(false)
+          setConfigureTarget('')
+          return `${configureTarget} configuration saved`
+        },
+        error: 'Failed to save configuration'
+      }
+    )
+  }
+
+  // Handler for Priority Rules
+  const handleSavePriorityRules = () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1000)),
+      {
+        loading: 'Saving priority rules...',
+        success: () => {
+          setShowPriorityRulesDialog(false)
+          return 'Priority rules saved successfully'
+        },
+        error: 'Failed to save priority rules'
+      }
+    )
+  }
+
+  // Handler for API Key regeneration
+  const handleRegenerateApiKey = () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1500)),
+      {
+        loading: 'Regenerating API key...',
+        success: 'New API key generated successfully',
+        error: 'Failed to regenerate API key'
+      }
+    )
+  }
+
+  // Handler for Database Optimization
+  const handleOptimizeDatabase = () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 3000)),
+      {
+        loading: 'Optimizing database...',
+        success: 'Database optimization completed',
+        error: 'Failed to optimize database'
+      }
+    )
+  }
+
+  // Handler for Export Configuration
+  const handleExportConfig = () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1500)),
+      {
+        loading: 'Exporting configuration...',
+        success: 'Configuration exported successfully',
+        error: 'Failed to export configuration'
+      }
+    )
+  }
+
+  // Handler for Import Configuration
+  const handleImportConfig = () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 2000)),
+      {
+        loading: 'Importing configuration...',
+        success: 'Configuration imported successfully',
+        error: 'Failed to import configuration'
+      }
+    )
+  }
+
+  // Handler for Purge Data
+  const handlePurgeData = () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 3000)),
+      {
+        loading: 'Purging old data...',
+        success: () => {
+          setShowPurgeDataDialog(false)
+          return 'Old data purged successfully'
+        },
+        error: 'Failed to purge data'
+      }
+    )
+  }
+
+  // Handler for Reset Defaults
+  const handleResetDefaults = () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 2000)),
+      {
+        loading: 'Resetting to defaults...',
+        success: () => {
+          setShowResetDefaultsDialog(false)
+          return 'Settings reset to defaults'
+        },
+        error: 'Failed to reset settings'
+      }
+    )
+  }
+
+  // Handler for Save Settings
+  const handleSaveSettings = () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1500)),
+      {
+        loading: 'Saving settings...',
+        success: 'Settings saved successfully',
+        error: 'Failed to save settings'
+      }
+    )
+  }
+
+  // Handler for inventory item actions from detail dialog
+  const handleInventoryTransfer = () => {
+    if (selectedItem) {
+      setTransferData({
+        itemSku: selectedItem.sku,
+        fromLocation: selectedItem.bin_location,
+        toLocation: '',
+        quantity: ''
+      })
+      setSelectedItem(null)
+      setShowTransferDialog(true)
+    }
+  }
+
+  const handleInventoryCount = () => {
+    if (selectedItem) {
+      setCycleCount({
+        ...cycleCount,
+        zone: selectedItem.zone
+      })
+      setSelectedItem(null)
+      setShowCycleCountDialog(true)
+    }
+  }
+
+  const handleEditItemFromDetail = () => {
+    if (selectedItem) {
+      setSelectedEditItem(selectedItem)
+      setSelectedItem(null)
+      setShowEditInventoryDialog(true)
+    }
   }
 
   // Stats calculations
@@ -675,15 +1184,15 @@ export default function WarehouseClient() {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="outline" className="gap-2">
+            <Button variant="outline" className="gap-2" onClick={() => setShowScanModeDialog(true)}>
               <Scan className="w-4 h-4" />
               Scan Mode
             </Button>
-            <Button variant="outline" className="gap-2">
+            <Button variant="outline" className="gap-2" onClick={() => setShowExportDialog(true)}>
               <Download className="w-4 h-4" />
               Export
             </Button>
-            <Button className="gap-2 bg-gradient-to-r from-cyan-600 to-teal-600 hover:from-cyan-700 hover:to-teal-700">
+            <Button className="gap-2 bg-gradient-to-r from-cyan-600 to-teal-600 hover:from-cyan-700 hover:to-teal-700" onClick={() => setShowNewTaskDialog(true)}>
               <Plus className="w-4 h-4" />
               New Task
             </Button>
@@ -861,16 +1370,16 @@ export default function WarehouseClient() {
             {/* Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
               {[
-                { icon: Plus, label: 'Add Item', color: 'text-green-500' },
-                { icon: Search, label: 'Find SKU', color: 'text-blue-500' },
-                { icon: Move, label: 'Transfer', color: 'text-purple-500' },
-                { icon: ClipboardList, label: 'Cycle Count', color: 'text-orange-500' },
-                { icon: AlertTriangle, label: 'Low Stock', color: 'text-yellow-500' },
-                { icon: RefreshCw, label: 'Replenish', color: 'text-cyan-500' },
-                { icon: Download, label: 'Export', color: 'text-indigo-500' },
-                { icon: Upload, label: 'Import', color: 'text-gray-500' }
+                { icon: Plus, label: 'Add Item', color: 'text-green-500', action: () => setShowAddInventoryDialog(true) },
+                { icon: Search, label: 'Find SKU', color: 'text-blue-500', action: () => setShowFindSkuDialog(true) },
+                { icon: Move, label: 'Transfer', color: 'text-purple-500', action: () => setShowTransferDialog(true) },
+                { icon: ClipboardList, label: 'Cycle Count', color: 'text-orange-500', action: () => setShowCycleCountDialog(true) },
+                { icon: AlertTriangle, label: 'Low Stock', color: 'text-yellow-500', action: () => setShowLowStockDialog(true) },
+                { icon: RefreshCw, label: 'Replenish', color: 'text-cyan-500', action: () => setShowReplenishDialog(true) },
+                { icon: Download, label: 'Export', color: 'text-indigo-500', action: () => setShowExportDialog(true) },
+                { icon: Upload, label: 'Import', color: 'text-gray-500', action: () => setShowImportDialog(true) }
               ].map((action, i) => (
-                <Button key={i} variant="outline" className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200 bg-white/50 dark:bg-gray-800/50">
+                <Button key={i} variant="outline" className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200 bg-white/50 dark:bg-gray-800/50" onClick={action.action}>
                   <action.icon className={`w-5 h-5 ${action.color}`} />
                   <span className="text-xs">{action.label}</span>
                 </Button>
@@ -989,7 +1498,7 @@ export default function WarehouseClient() {
                                 >
                                   <Eye className="w-4 h-4" />
                                 </Button>
-                                <Button variant="ghost" size="sm">
+                                <Button variant="ghost" size="sm" onClick={() => { setSelectedEditItem(item); setShowEditInventoryDialog(true); }}>
                                   <Edit className="w-4 h-4" />
                                 </Button>
                               </div>
@@ -1096,13 +1605,13 @@ export default function WarehouseClient() {
                           View Details
                         </Button>
                         {shipment.status === 'in_transit' && (
-                          <Button size="sm" className="gap-2">
+                          <Button size="sm" className="gap-2" onClick={() => handleStartReceiving(shipment)}>
                             <ArrowDownLeft className="w-4 h-4" />
                             Start Receiving
                           </Button>
                         )}
                         {shipment.status === 'receiving' && (
-                          <Button size="sm" className="gap-2">
+                          <Button size="sm" className="gap-2" onClick={() => handleStartReceiving(shipment)}>
                             <Scan className="w-4 h-4" />
                             Continue Receiving
                           </Button>
@@ -1207,19 +1716,19 @@ export default function WarehouseClient() {
                           View Details
                         </Button>
                         {order.status === 'allocated' && (
-                          <Button size="sm" className="gap-2">
+                          <Button size="sm" className="gap-2" onClick={() => handleStartPicking(order)}>
                             <Package className="w-4 h-4" />
                             Start Picking
                           </Button>
                         )}
                         {order.status === 'picked' && (
-                          <Button size="sm" className="gap-2">
+                          <Button size="sm" className="gap-2" onClick={() => handleStartPacking(order)}>
                             <Box className="w-4 h-4" />
                             Start Packing
                           </Button>
                         )}
                         {order.status === 'packed' && (
-                          <Button size="sm" className="gap-2">
+                          <Button size="sm" className="gap-2" onClick={() => handleShipOrder(order)}>
                             <Truck className="w-4 h-4" />
                             Ship Order
                           </Button>
@@ -1333,19 +1842,19 @@ export default function WarehouseClient() {
                           )}
                           <div className="flex gap-1">
                             {task.status === 'pending' && (
-                              <Button size="sm" className="gap-1">
+                              <Button size="sm" className="gap-1" onClick={() => handleAssignTask(task)}>
                                 <Zap className="w-3 h-3" />
                                 Assign
                               </Button>
                             )}
                             {task.status === 'assigned' && (
-                              <Button size="sm" variant="outline" className="gap-1">
+                              <Button size="sm" variant="outline" className="gap-1" onClick={() => handleStartTask(task)}>
                                 <Activity className="w-3 h-3" />
                                 Start
                               </Button>
                             )}
                             {task.status === 'in_progress' && (
-                              <Button size="sm" className="gap-1 bg-green-600 hover:bg-green-700">
+                              <Button size="sm" className="gap-1 bg-green-600 hover:bg-green-700" onClick={() => handleCompleteTask(task)}>
                                 <CheckCircle2 className="w-3 h-3" />
                                 Complete
                               </Button>
@@ -1453,7 +1962,7 @@ export default function WarehouseClient() {
                       </div>
 
                       <div className="flex justify-end mt-4 pt-4 border-t dark:border-gray-700">
-                        <Button variant="outline" size="sm" className="gap-2">
+                        <Button variant="outline" size="sm" className="gap-2" onClick={() => handleViewBins(zone)}>
                           <Eye className="w-4 h-4" />
                           View Bins
                         </Button>
@@ -1561,15 +2070,15 @@ export default function WarehouseClient() {
                       )}
 
                       <div className="flex justify-end gap-2 mt-4 pt-4 border-t dark:border-gray-700">
-                        <Button variant="outline" size="sm">View Details</Button>
+                        <Button variant="outline" size="sm" onClick={() => handleViewCycleCountDetails(count)}>View Details</Button>
                         {count.status === 'scheduled' && (
-                          <Button size="sm" className="gap-2">
+                          <Button size="sm" className="gap-2" onClick={() => handleStartCycleCountFromList(count)}>
                             <Scan className="w-4 h-4" />
                             Start Count
                           </Button>
                         )}
                         {count.status === 'in_progress' && (
-                          <Button size="sm" className="gap-2">
+                          <Button size="sm" className="gap-2" onClick={() => handleStartCycleCountFromList(count)}>
                             <Scan className="w-4 h-4" />
                             Continue
                           </Button>
@@ -1678,7 +2187,7 @@ export default function WarehouseClient() {
                         </div>
                       </div>
                       <div className="flex justify-end">
-                        <Button className="bg-gradient-to-r from-cyan-600 to-teal-600">Save Changes</Button>
+                        <Button className="bg-gradient-to-r from-cyan-600 to-teal-600" onClick={handleSaveSettings}>Save Changes</Button>
                       </div>
                     </CardContent>
                   </Card>
@@ -1745,7 +2254,7 @@ export default function WarehouseClient() {
                         </div>
                       </div>
                       <div className="flex justify-end">
-                        <Button className="bg-gradient-to-r from-cyan-600 to-teal-600">Save Changes</Button>
+                        <Button className="bg-gradient-to-r from-cyan-600 to-teal-600" onClick={handleSaveSettings}>Save Changes</Button>
                       </div>
                     </CardContent>
                   </Card>
@@ -1800,11 +2309,11 @@ export default function WarehouseClient() {
                             <p className="font-medium">Task Priority Rules</p>
                             <p className="text-sm text-gray-500 dark:text-gray-400">Default priority escalation rules</p>
                           </div>
-                          <Button variant="outline" size="sm">Configure</Button>
+                          <Button variant="outline" size="sm" onClick={() => setShowPriorityRulesDialog(true)}>Configure</Button>
                         </div>
                       </div>
                       <div className="flex justify-end">
-                        <Button className="bg-gradient-to-r from-cyan-600 to-teal-600">Save Changes</Button>
+                        <Button className="bg-gradient-to-r from-cyan-600 to-teal-600" onClick={handleSaveSettings}>Save Changes</Button>
                       </div>
                     </CardContent>
                   </Card>
@@ -1841,7 +2350,7 @@ export default function WarehouseClient() {
                                 </Badge>
                               </div>
                             </div>
-                            <Button variant="outline" size="sm">Configure</Button>
+                            <Button variant="outline" size="sm" onClick={() => handleOpenConfigure(integration.name)}>Configure</Button>
                           </div>
                         ))}
                       </div>
@@ -1855,7 +2364,7 @@ export default function WarehouseClient() {
                         </div>
                         <div className="flex items-center gap-2">
                           <Input value="wms_api_key_••••••••••••••••" readOnly className="flex-1 font-mono text-sm" />
-                          <Button variant="outline" size="sm">Regenerate</Button>
+                          <Button variant="outline" size="sm" onClick={handleRegenerateApiKey}>Regenerate</Button>
                         </div>
                       </div>
                     </CardContent>
@@ -1913,7 +2422,7 @@ export default function WarehouseClient() {
                         </div>
                       </div>
                       <div className="flex justify-end">
-                        <Button className="bg-gradient-to-r from-cyan-600 to-teal-600">Save Changes</Button>
+                        <Button className="bg-gradient-to-r from-cyan-600 to-teal-600" onClick={handleSaveSettings}>Save Changes</Button>
                       </div>
                     </CardContent>
                   </Card>
@@ -1954,7 +2463,7 @@ export default function WarehouseClient() {
                             <p className="font-medium">Database Maintenance</p>
                             <p className="text-sm text-gray-500 dark:text-gray-400">Last optimized: 2 days ago</p>
                           </div>
-                          <Button variant="outline" size="sm" className="gap-2">
+                          <Button variant="outline" size="sm" className="gap-2" onClick={handleOptimizeDatabase}>
                             <RefreshCw className="w-4 h-4" />
                             Optimize Now
                           </Button>
@@ -1964,7 +2473,7 @@ export default function WarehouseClient() {
                             <p className="font-medium">Export Configuration</p>
                             <p className="text-sm text-gray-500 dark:text-gray-400">Backup all warehouse settings</p>
                           </div>
-                          <Button variant="outline" size="sm" className="gap-2">
+                          <Button variant="outline" size="sm" className="gap-2" onClick={handleExportConfig}>
                             <Download className="w-4 h-4" />
                             Export
                           </Button>
@@ -1974,7 +2483,7 @@ export default function WarehouseClient() {
                             <p className="font-medium">Import Configuration</p>
                             <p className="text-sm text-gray-500 dark:text-gray-400">Restore settings from backup</p>
                           </div>
-                          <Button variant="outline" size="sm" className="gap-2">
+                          <Button variant="outline" size="sm" className="gap-2" onClick={handleImportConfig}>
                             <Upload className="w-4 h-4" />
                             Import
                           </Button>
@@ -1986,11 +2495,11 @@ export default function WarehouseClient() {
                           These actions are irreversible. Please proceed with caution.
                         </p>
                         <div className="flex gap-2">
-                          <Button variant="outline" size="sm" className="text-red-600 border-red-300 hover:bg-red-50 dark:text-red-400 dark:border-red-700 dark:hover:bg-red-900/30">
+                          <Button variant="outline" size="sm" className="text-red-600 border-red-300 hover:bg-red-50 dark:text-red-400 dark:border-red-700 dark:hover:bg-red-900/30" onClick={() => setShowPurgeDataDialog(true)}>
                             <Trash2 className="w-4 h-4 mr-2" />
                             Purge Old Data
                           </Button>
-                          <Button variant="outline" size="sm" className="text-red-600 border-red-300 hover:bg-red-50 dark:text-red-400 dark:border-red-700 dark:hover:bg-red-900/30">
+                          <Button variant="outline" size="sm" className="text-red-600 border-red-300 hover:bg-red-50 dark:text-red-400 dark:border-red-700 dark:hover:bg-red-900/30" onClick={() => setShowResetDefaultsDialog(true)}>
                             <RefreshCw className="w-4 h-4 mr-2" />
                             Reset to Defaults
                           </Button>
@@ -2100,15 +2609,15 @@ export default function WarehouseClient() {
               </div>
 
               <div className="flex justify-end gap-2">
-                <Button variant="outline" className="gap-2">
+                <Button variant="outline" className="gap-2" onClick={handleInventoryTransfer}>
                   <Move className="w-4 h-4" />
                   Transfer
                 </Button>
-                <Button variant="outline" className="gap-2">
+                <Button variant="outline" className="gap-2" onClick={handleInventoryCount}>
                   <ClipboardList className="w-4 h-4" />
                   Count
                 </Button>
-                <Button className="gap-2">
+                <Button className="gap-2" onClick={handleEditItemFromDetail}>
                   <Edit className="w-4 h-4" />
                   Edit Item
                 </Button>
@@ -2362,6 +2871,958 @@ export default function WarehouseClient() {
               <Button onClick={handleStartCycleCount} className="gap-2">
                 <ClipboardList className="w-4 h-4" />
                 Start Count
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Scan Mode Dialog */}
+      <Dialog open={showScanModeDialog} onOpenChange={setShowScanModeDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Scan className="w-5 h-5" />
+              Scan Mode
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Scan Mode Type</Label>
+              <Select value={scanMode.mode} onValueChange={(value) => setScanMode({ ...scanMode, mode: value })}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select mode" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="receiving">Receiving Mode</SelectItem>
+                  <SelectItem value="picking">Picking Mode</SelectItem>
+                  <SelectItem value="putaway">Putaway Mode</SelectItem>
+                  <SelectItem value="cycle_count">Cycle Count Mode</SelectItem>
+                  <SelectItem value="inventory">Inventory Lookup</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-center justify-between p-3 border rounded-lg">
+              <div>
+                <p className="font-medium">Continuous Scanning</p>
+                <p className="text-sm text-gray-500">Keep scanning without confirmation</p>
+              </div>
+              <Switch checked={scanMode.continuous} onCheckedChange={(checked) => setScanMode({ ...scanMode, continuous: checked })} />
+            </div>
+            <div className="flex justify-end gap-3 pt-4 border-t">
+              <Button variant="outline" onClick={() => setShowScanModeDialog(false)}>Cancel</Button>
+              <Button onClick={handleActivateScanMode} className="gap-2">
+                <Scan className="w-4 h-4" />
+                Activate
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Export Dialog */}
+      <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Download className="w-5 h-5" />
+              Export Data
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Data Type</Label>
+              <Select value={exportData.dataType} onValueChange={(value) => setExportData({ ...exportData, dataType: value })}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select data type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="inventory">Inventory</SelectItem>
+                  <SelectItem value="orders">Orders</SelectItem>
+                  <SelectItem value="shipments">Shipments</SelectItem>
+                  <SelectItem value="tasks">Tasks</SelectItem>
+                  <SelectItem value="all">All Data</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Export Format</Label>
+              <Select value={exportData.format} onValueChange={(value) => setExportData({ ...exportData, format: value })}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select format" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="csv">CSV</SelectItem>
+                  <SelectItem value="xlsx">Excel (XLSX)</SelectItem>
+                  <SelectItem value="json">JSON</SelectItem>
+                  <SelectItem value="pdf">PDF Report</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Date Range</Label>
+              <Select value={exportData.dateRange} onValueChange={(value) => setExportData({ ...exportData, dateRange: value })}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select date range" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="today">Today</SelectItem>
+                  <SelectItem value="week">Last 7 Days</SelectItem>
+                  <SelectItem value="month">Last 30 Days</SelectItem>
+                  <SelectItem value="quarter">Last Quarter</SelectItem>
+                  <SelectItem value="all">All Time</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex justify-end gap-3 pt-4 border-t">
+              <Button variant="outline" onClick={() => setShowExportDialog(false)}>Cancel</Button>
+              <Button onClick={handleExport} className="gap-2">
+                <Download className="w-4 h-4" />
+                Export
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* New Task Dialog */}
+      <Dialog open={showNewTaskDialog} onOpenChange={setShowNewTaskDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Plus className="w-5 h-5" />
+              Create New Task
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Task Type *</Label>
+                <Select value={newTask.type} onValueChange={(value) => setNewTask({ ...newTask, type: value as TaskType })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="pick">Pick</SelectItem>
+                    <SelectItem value="putaway">Putaway</SelectItem>
+                    <SelectItem value="pack">Pack</SelectItem>
+                    <SelectItem value="count">Count</SelectItem>
+                    <SelectItem value="replenish">Replenish</SelectItem>
+                    <SelectItem value="move">Move</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Priority</Label>
+                <Select value={newTask.priority} onValueChange={(value) => setNewTask({ ...newTask, priority: value as TaskPriority })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select priority" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="low">Low</SelectItem>
+                    <SelectItem value="normal">Normal</SelectItem>
+                    <SelectItem value="high">High</SelectItem>
+                    <SelectItem value="urgent">Urgent</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Item SKU *</Label>
+              <Input placeholder="Enter SKU" value={newTask.itemSku} onChange={(e) => setNewTask({ ...newTask, itemSku: e.target.value })} />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>From Location *</Label>
+                <Input placeholder="e.g., A-01-01-A" value={newTask.fromLocation} onChange={(e) => setNewTask({ ...newTask, fromLocation: e.target.value })} />
+              </div>
+              <div className="space-y-2">
+                <Label>To Location *</Label>
+                <Input placeholder="e.g., B-02-03-C" value={newTask.toLocation} onChange={(e) => setNewTask({ ...newTask, toLocation: e.target.value })} />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Quantity</Label>
+                <Input type="number" placeholder="Enter quantity" value={newTask.quantity} onChange={(e) => setNewTask({ ...newTask, quantity: e.target.value })} />
+              </div>
+              <div className="space-y-2">
+                <Label>Assign To</Label>
+                <Input placeholder="Team member name" value={newTask.assignedTo} onChange={(e) => setNewTask({ ...newTask, assignedTo: e.target.value })} />
+              </div>
+            </div>
+            <div className="flex justify-end gap-3 pt-4 border-t">
+              <Button variant="outline" onClick={() => setShowNewTaskDialog(false)}>Cancel</Button>
+              <Button onClick={handleCreateTask} className="gap-2">
+                <Plus className="w-4 h-4" />
+                Create Task
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Find SKU Dialog */}
+      <Dialog open={showFindSkuDialog} onOpenChange={setShowFindSkuDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Search className="w-5 h-5" />
+              Find SKU
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <Input placeholder="Enter SKU, name, or barcode..." className="pl-10" />
+            </div>
+            <div className="border rounded-lg p-4 max-h-[300px] overflow-y-auto">
+              {mockInventory.slice(0, 3).map((item) => (
+                <div key={item.id} className="flex items-center justify-between p-3 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg cursor-pointer" onClick={() => { setSelectedItem(item); setShowFindSkuDialog(false); }}>
+                  <div>
+                    <p className="font-medium">{item.name}</p>
+                    <p className="text-sm text-gray-500">{item.sku} - {item.bin_location}</p>
+                  </div>
+                  <Badge>{item.quantity_available} available</Badge>
+                </div>
+              ))}
+            </div>
+            <div className="flex justify-end">
+              <Button variant="outline" onClick={() => setShowFindSkuDialog(false)}>Close</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Transfer Dialog */}
+      <Dialog open={showTransferDialog} onOpenChange={setShowTransferDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Move className="w-5 h-5" />
+              Transfer Inventory
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Item SKU *</Label>
+              <Input placeholder="Enter SKU" value={transferData.itemSku} onChange={(e) => setTransferData({ ...transferData, itemSku: e.target.value })} />
+            </div>
+            <div className="space-y-2">
+              <Label>From Location *</Label>
+              <Input placeholder="Current location" value={transferData.fromLocation} onChange={(e) => setTransferData({ ...transferData, fromLocation: e.target.value })} />
+            </div>
+            <div className="space-y-2">
+              <Label>To Location *</Label>
+              <Input placeholder="New location" value={transferData.toLocation} onChange={(e) => setTransferData({ ...transferData, toLocation: e.target.value })} />
+            </div>
+            <div className="space-y-2">
+              <Label>Quantity *</Label>
+              <Input type="number" placeholder="Quantity to transfer" value={transferData.quantity} onChange={(e) => setTransferData({ ...transferData, quantity: e.target.value })} />
+            </div>
+            <div className="flex justify-end gap-3 pt-4 border-t">
+              <Button variant="outline" onClick={() => setShowTransferDialog(false)}>Cancel</Button>
+              <Button onClick={handleTransfer} className="gap-2">
+                <Move className="w-4 h-4" />
+                Transfer
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Low Stock Dialog */}
+      <Dialog open={showLowStockDialog} onOpenChange={setShowLowStockDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="w-5 h-5 text-yellow-500" />
+              Low Stock Items
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="border rounded-lg max-h-[400px] overflow-y-auto">
+              {mockInventory.filter(i => i.status === 'low_stock' || i.status === 'out_of_stock').map((item) => (
+                <div key={item.id} className="flex items-center justify-between p-4 border-b last:border-b-0">
+                  <div>
+                    <p className="font-medium">{item.name}</p>
+                    <p className="text-sm text-gray-500">{item.sku} - Reorder Point: {item.reorder_point}</p>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <div className="text-right">
+                      <p className="font-bold text-lg">{item.quantity_available}</p>
+                      <p className="text-xs text-gray-500">available</p>
+                    </div>
+                    <Badge className={item.status === 'out_of_stock' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'}>
+                      {item.status === 'out_of_stock' ? 'Out of Stock' : 'Low Stock'}
+                    </Badge>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="flex justify-end">
+              <Button variant="outline" onClick={() => setShowLowStockDialog(false)}>Close</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Replenish Dialog */}
+      <Dialog open={showReplenishDialog} onOpenChange={setShowReplenishDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <RefreshCw className="w-5 h-5" />
+              Create Replenishment Task
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Select Item to Replenish</Label>
+              <Select>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select item" />
+                </SelectTrigger>
+                <SelectContent>
+                  {mockInventory.map((item) => (
+                    <SelectItem key={item.id} value={item.sku}>{item.name} ({item.sku})</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>From Location (Reserve)</Label>
+              <Input placeholder="Reserve bin location" />
+            </div>
+            <div className="space-y-2">
+              <Label>To Location (Pick)</Label>
+              <Input placeholder="Pick bin location" />
+            </div>
+            <div className="space-y-2">
+              <Label>Quantity</Label>
+              <Input type="number" placeholder="Replenishment quantity" />
+            </div>
+            <div className="flex justify-end gap-3 pt-4 border-t">
+              <Button variant="outline" onClick={() => setShowReplenishDialog(false)}>Cancel</Button>
+              <Button className="gap-2" onClick={() => { toast.success('Replenishment task created'); setShowReplenishDialog(false); }}>
+                <RefreshCw className="w-4 h-4" />
+                Create Task
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Import Dialog */}
+      <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Upload className="w-5 h-5" />
+              Import Data
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>File Type</Label>
+              <Select value={importData.fileType} onValueChange={(value) => setImportData({ ...importData, fileType: value })}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select file type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="csv">CSV</SelectItem>
+                  <SelectItem value="xlsx">Excel (XLSX)</SelectItem>
+                  <SelectItem value="json">JSON</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="border-2 border-dashed rounded-lg p-8 text-center">
+              <Upload className="w-8 h-8 mx-auto mb-2 text-gray-400" />
+              <p className="text-sm text-gray-500">Drag and drop file here or click to browse</p>
+              <Button variant="outline" size="sm" className="mt-2">Select File</Button>
+            </div>
+            <div className="flex items-center justify-between p-3 border rounded-lg">
+              <div>
+                <p className="font-medium">Update Existing Records</p>
+                <p className="text-sm text-gray-500">Override existing data with imported values</p>
+              </div>
+              <Switch checked={importData.updateExisting} onCheckedChange={(checked) => setImportData({ ...importData, updateExisting: checked })} />
+            </div>
+            <div className="flex justify-end gap-3 pt-4 border-t">
+              <Button variant="outline" onClick={() => setShowImportDialog(false)}>Cancel</Button>
+              <Button onClick={handleImport} className="gap-2">
+                <Upload className="w-4 h-4" />
+                Import
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Inventory Dialog */}
+      <Dialog open={showEditInventoryDialog} onOpenChange={setShowEditInventoryDialog}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Edit className="w-5 h-5" />
+              Edit Inventory Item
+            </DialogTitle>
+          </DialogHeader>
+          {selectedEditItem && (
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>SKU</Label>
+                  <Input defaultValue={selectedEditItem.sku} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Name</Label>
+                  <Input defaultValue={selectedEditItem.name} />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Description</Label>
+                <Input defaultValue={selectedEditItem.description} />
+              </div>
+              <div className="grid grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label>Quantity On Hand</Label>
+                  <Input type="number" defaultValue={selectedEditItem.quantity_on_hand} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Reorder Point</Label>
+                  <Input type="number" defaultValue={selectedEditItem.reorder_point} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Unit Cost</Label>
+                  <Input type="number" step="0.01" defaultValue={selectedEditItem.unit_cost} />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Bin Location</Label>
+                  <Input defaultValue={selectedEditItem.bin_location} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Zone</Label>
+                  <Select defaultValue={selectedEditItem.zone}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {mockZones.map((zone) => (
+                        <SelectItem key={zone.id} value={zone.name}>{zone.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="flex justify-end gap-3 pt-4 border-t">
+                <Button variant="outline" onClick={() => { setShowEditInventoryDialog(false); setSelectedEditItem(null); }}>Cancel</Button>
+                <Button onClick={handleEditInventory} className="gap-2">
+                  <Edit className="w-4 h-4" />
+                  Save Changes
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Receiving Dialog */}
+      <Dialog open={showReceivingDialog} onOpenChange={setShowReceivingDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <ArrowDownLeft className="w-5 h-5" />
+              Receiving Process
+            </DialogTitle>
+          </DialogHeader>
+          {selectedShipment && (
+            <div className="space-y-4 py-4">
+              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <p className="font-medium">{selectedShipment.shipment_number}</p>
+                <p className="text-sm text-gray-500">PO: {selectedShipment.po_number}</p>
+                <p className="text-sm text-gray-500">Supplier: {selectedShipment.supplier}</p>
+              </div>
+              <div className="space-y-2">
+                <Label>Dock Door</Label>
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select dock door" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="dock1">Dock 1</SelectItem>
+                    <SelectItem value="dock2">Dock 2</SelectItem>
+                    <SelectItem value="dock3">Dock 3</SelectItem>
+                    <SelectItem value="dock4">Dock 4</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Assign To</Label>
+                <Input placeholder="Team member name" />
+              </div>
+              <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                <p className="text-sm text-blue-700 dark:text-blue-300">
+                  Expected: {selectedShipment.total_items} items ({selectedShipment.total_units} units)
+                </p>
+              </div>
+              <div className="flex justify-end gap-3 pt-4 border-t">
+                <Button variant="outline" onClick={() => { setShowReceivingDialog(false); setSelectedShipment(null); }}>Cancel</Button>
+                <Button onClick={handleProcessReceiving} className="gap-2">
+                  <ArrowDownLeft className="w-4 h-4" />
+                  Start Receiving
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Picking Dialog */}
+      <Dialog open={showPickingDialog} onOpenChange={setShowPickingDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Package className="w-5 h-5" />
+              Start Picking
+            </DialogTitle>
+          </DialogHeader>
+          {selectedOrder && (
+            <div className="space-y-4 py-4">
+              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <p className="font-medium">{selectedOrder.order_number}</p>
+                <p className="text-sm text-gray-500">Customer: {selectedOrder.customer}</p>
+                <p className="text-sm text-gray-500">Lines: {selectedOrder.total_lines} | Units: {selectedOrder.total_units}</p>
+              </div>
+              <div className="space-y-2">
+                <Label>Assign Picker</Label>
+                <Input placeholder="Team member name" defaultValue={selectedOrder.assigned_to || ''} />
+              </div>
+              <div className="space-y-2">
+                <Label>Pick Cart</Label>
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select cart" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="cart1">Cart 1</SelectItem>
+                    <SelectItem value="cart2">Cart 2</SelectItem>
+                    <SelectItem value="cart3">Cart 3</SelectItem>
+                    <SelectItem value="cart4">Cart 4</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex justify-end gap-3 pt-4 border-t">
+                <Button variant="outline" onClick={() => { setShowPickingDialog(false); setSelectedOrder(null); }}>Cancel</Button>
+                <Button onClick={handleProcessPicking} className="gap-2">
+                  <Package className="w-4 h-4" />
+                  Start Picking
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Packing Dialog */}
+      <Dialog open={showPackingDialog} onOpenChange={setShowPackingDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Box className="w-5 h-5" />
+              Start Packing
+            </DialogTitle>
+          </DialogHeader>
+          {selectedOrder && (
+            <div className="space-y-4 py-4">
+              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <p className="font-medium">{selectedOrder.order_number}</p>
+                <p className="text-sm text-gray-500">Customer: {selectedOrder.customer}</p>
+                <p className="text-sm text-gray-500">Picked Units: {selectedOrder.picked_units}</p>
+              </div>
+              <div className="space-y-2">
+                <Label>Pack Station</Label>
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select station" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="station1">Pack Station 1</SelectItem>
+                    <SelectItem value="station2">Pack Station 2</SelectItem>
+                    <SelectItem value="station3">Pack Station 3</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Box Size</Label>
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select box size" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="small">Small (12x8x6)</SelectItem>
+                    <SelectItem value="medium">Medium (16x12x8)</SelectItem>
+                    <SelectItem value="large">Large (20x16x12)</SelectItem>
+                    <SelectItem value="custom">Custom</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex justify-end gap-3 pt-4 border-t">
+                <Button variant="outline" onClick={() => { setShowPackingDialog(false); setSelectedOrder(null); }}>Cancel</Button>
+                <Button onClick={handleProcessPacking} className="gap-2">
+                  <Box className="w-4 h-4" />
+                  Start Packing
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Ship Order Dialog */}
+      <Dialog open={showShipOrderDialog} onOpenChange={setShowShipOrderDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Truck className="w-5 h-5" />
+              Ship Order
+            </DialogTitle>
+          </DialogHeader>
+          {selectedOrder && (
+            <div className="space-y-4 py-4">
+              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <p className="font-medium">{selectedOrder.order_number}</p>
+                <p className="text-sm text-gray-500">Customer: {selectedOrder.customer}</p>
+                <p className="text-sm text-gray-500">Carrier: {selectedOrder.carrier}</p>
+              </div>
+              <div className="space-y-2">
+                <Label>Tracking Number</Label>
+                <Input placeholder="Enter tracking number" />
+              </div>
+              <div className="space-y-2">
+                <Label>Weight (kg)</Label>
+                <Input type="number" step="0.1" placeholder="Package weight" />
+              </div>
+              <div className="flex items-center justify-between p-3 border rounded-lg">
+                <div>
+                  <p className="font-medium">Print Shipping Label</p>
+                  <p className="text-sm text-gray-500">Generate and print label automatically</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+              <div className="flex justify-end gap-3 pt-4 border-t">
+                <Button variant="outline" onClick={() => { setShowShipOrderDialog(false); setSelectedOrder(null); }}>Cancel</Button>
+                <Button onClick={handleProcessShipping} className="gap-2">
+                  <Truck className="w-4 h-4" />
+                  Ship Order
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Assign Task Dialog */}
+      <Dialog open={showAssignTaskDialog} onOpenChange={setShowAssignTaskDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Zap className="w-5 h-5" />
+              Assign Task
+            </DialogTitle>
+          </DialogHeader>
+          {selectedTask && (
+            <div className="space-y-4 py-4">
+              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <p className="font-medium">{selectedTask.task_number}</p>
+                <p className="text-sm text-gray-500">{selectedTask.item_name}</p>
+                <p className="text-sm text-gray-500">{selectedTask.from_location} to {selectedTask.to_location}</p>
+              </div>
+              <div className="space-y-2">
+                <Label>Assign To *</Label>
+                <Select value={assignTaskData.assignee} onValueChange={(value) => setAssignTaskData({ ...assignTaskData, assignee: value })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select team member" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="John Smith">John Smith</SelectItem>
+                    <SelectItem value="Sarah Williams">Sarah Williams</SelectItem>
+                    <SelectItem value="Mike Johnson">Mike Johnson</SelectItem>
+                    <SelectItem value="Emily Chen">Emily Chen</SelectItem>
+                    <SelectItem value="Tom Wilson">Tom Wilson</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Priority</Label>
+                <Select value={assignTaskData.priority} onValueChange={(value) => setAssignTaskData({ ...assignTaskData, priority: value as TaskPriority })}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="low">Low</SelectItem>
+                    <SelectItem value="normal">Normal</SelectItem>
+                    <SelectItem value="high">High</SelectItem>
+                    <SelectItem value="urgent">Urgent</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex justify-end gap-3 pt-4 border-t">
+                <Button variant="outline" onClick={() => { setShowAssignTaskDialog(false); setSelectedTask(null); }}>Cancel</Button>
+                <Button onClick={handleProcessAssignment} className="gap-2">
+                  <Zap className="w-4 h-4" />
+                  Assign
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* View Bins Dialog */}
+      <Dialog open={showViewBinsDialog} onOpenChange={setShowViewBinsDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Grid3X3 className="w-5 h-5" />
+              Bin Locations - {selectedZone?.name}
+            </DialogTitle>
+          </DialogHeader>
+          {selectedZone && (
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-4 gap-2">
+                {Array.from({ length: 16 }, (_, i) => {
+                  const binCode = `${selectedZone.code}-${String(Math.floor(i/4)+1).padStart(2,'0')}-${String((i%4)+1).padStart(2,'0')}`
+                  const utilization = Math.random() * 100
+                  return (
+                    <div key={i} className={`p-3 rounded-lg border text-center ${
+                      utilization > 80 ? 'bg-red-50 border-red-200 dark:bg-red-900/20' :
+                      utilization > 50 ? 'bg-yellow-50 border-yellow-200 dark:bg-yellow-900/20' :
+                      'bg-green-50 border-green-200 dark:bg-green-900/20'
+                    }`}>
+                      <p className="font-mono text-xs">{binCode}</p>
+                      <p className="text-sm font-medium">{utilization.toFixed(0)}%</p>
+                    </div>
+                  )
+                })}
+              </div>
+              <div className="flex items-center gap-4 text-sm">
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded bg-green-200"></div>
+                  <span>Available (&lt;50%)</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded bg-yellow-200"></div>
+                  <span>Moderate (50-80%)</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded bg-red-200"></div>
+                  <span>Full (&gt;80%)</span>
+                </div>
+              </div>
+              <div className="flex justify-end">
+                <Button variant="outline" onClick={() => { setShowViewBinsDialog(false); setSelectedZone(null); }}>Close</Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Cycle Count Details Dialog */}
+      <Dialog open={showCycleCountDetailsDialog} onOpenChange={setShowCycleCountDetailsDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <ClipboardList className="w-5 h-5" />
+              Cycle Count Details
+            </DialogTitle>
+          </DialogHeader>
+          {selectedCycleCount && (
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <p className="text-sm text-gray-500">Count Number</p>
+                  <p className="font-medium">{selectedCycleCount.count_number}</p>
+                </div>
+                <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <p className="text-sm text-gray-500">Zone</p>
+                  <p className="font-medium">{selectedCycleCount.zone}</p>
+                </div>
+                <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <p className="text-sm text-gray-500">Assigned To</p>
+                  <p className="font-medium">{selectedCycleCount.assigned_to}</p>
+                </div>
+                <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <p className="text-sm text-gray-500">Scheduled Date</p>
+                  <p className="font-medium">{selectedCycleCount.scheduled_date}</p>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span>Progress</span>
+                  <span>{selectedCycleCount.counted_bins} / {selectedCycleCount.total_bins} bins</span>
+                </div>
+                <Progress value={(selectedCycleCount.counted_bins / selectedCycleCount.total_bins) * 100} />
+              </div>
+              <div className="grid grid-cols-2 gap-4 text-center">
+                <div className="p-3 border rounded-lg">
+                  <p className="text-2xl font-bold text-red-600">{selectedCycleCount.variance_items}</p>
+                  <p className="text-sm text-gray-500">Variance Items</p>
+                </div>
+                <div className="p-3 border rounded-lg">
+                  <p className="text-2xl font-bold">{selectedCycleCount.accuracy_percent}%</p>
+                  <p className="text-sm text-gray-500">Accuracy</p>
+                </div>
+              </div>
+              <div className="flex justify-end">
+                <Button variant="outline" onClick={() => { setShowCycleCountDetailsDialog(false); setSelectedCycleCount(null); }}>Close</Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Configure Dialog */}
+      <Dialog open={showConfigureDialog} onOpenChange={setShowConfigureDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Settings className="w-5 h-5" />
+              Configure {configureTarget}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Connection Status</Label>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                <span className="text-sm">Connected</span>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>API Endpoint</Label>
+              <Input placeholder="https://api.example.com" />
+            </div>
+            <div className="space-y-2">
+              <Label>Authentication Key</Label>
+              <Input type="password" placeholder="Enter API key" />
+            </div>
+            <div className="flex items-center justify-between p-3 border rounded-lg">
+              <div>
+                <p className="font-medium">Enable Integration</p>
+                <p className="text-sm text-gray-500">Sync data automatically</p>
+              </div>
+              <Switch defaultChecked />
+            </div>
+            <div className="flex justify-end gap-3 pt-4 border-t">
+              <Button variant="outline" onClick={() => { setShowConfigureDialog(false); setConfigureTarget(''); }}>Cancel</Button>
+              <Button onClick={handleSaveConfigure}>Save Configuration</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Priority Rules Dialog */}
+      <Dialog open={showPriorityRulesDialog} onOpenChange={setShowPriorityRulesDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Sliders className="w-5 h-5" />
+              Task Priority Rules
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-3">
+              <div className="flex items-center justify-between p-3 border rounded-lg">
+                <div>
+                  <p className="font-medium">Auto-escalate overdue tasks</p>
+                  <p className="text-sm text-gray-500">Increase priority after deadline</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+              <div className="space-y-2">
+                <Label>Escalation threshold (hours)</Label>
+                <Input type="number" defaultValue="4" />
+              </div>
+              <div className="flex items-center justify-between p-3 border rounded-lg">
+                <div>
+                  <p className="font-medium">Priority by order value</p>
+                  <p className="text-sm text-gray-500">Higher value orders get higher priority</p>
+                </div>
+                <Switch />
+              </div>
+              <div className="flex items-center justify-between p-3 border rounded-lg">
+                <div>
+                  <p className="font-medium">SLA-based prioritization</p>
+                  <p className="text-sm text-gray-500">Consider customer SLA levels</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+            </div>
+            <div className="flex justify-end gap-3 pt-4 border-t">
+              <Button variant="outline" onClick={() => setShowPriorityRulesDialog(false)}>Cancel</Button>
+              <Button onClick={handleSavePriorityRules}>Save Rules</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Purge Data Confirmation Dialog */}
+      <Dialog open={showPurgeDataDialog} onOpenChange={setShowPurgeDataDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-600">
+              <Trash2 className="w-5 h-5" />
+              Purge Old Data
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+              <p className="text-sm text-red-700 dark:text-red-300">
+                This action will permanently delete historical data older than the retention period. This cannot be undone.
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label>Confirm by typing PURGE</Label>
+              <Input placeholder="Type PURGE to confirm" />
+            </div>
+            <div className="flex justify-end gap-3 pt-4 border-t">
+              <Button variant="outline" onClick={() => setShowPurgeDataDialog(false)}>Cancel</Button>
+              <Button variant="destructive" onClick={handlePurgeData}>
+                <Trash2 className="w-4 h-4 mr-2" />
+                Purge Data
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Reset Defaults Confirmation Dialog */}
+      <Dialog open={showResetDefaultsDialog} onOpenChange={setShowResetDefaultsDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-600">
+              <RefreshCw className="w-5 h-5" />
+              Reset to Defaults
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+              <p className="text-sm text-red-700 dark:text-red-300">
+                This will reset all warehouse settings to their default values. Your custom configurations will be lost.
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label>Confirm by typing RESET</Label>
+              <Input placeholder="Type RESET to confirm" />
+            </div>
+            <div className="flex justify-end gap-3 pt-4 border-t">
+              <Button variant="outline" onClick={() => setShowResetDefaultsDialog(false)}>Cancel</Button>
+              <Button variant="destructive" onClick={handleResetDefaults}>
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Reset Settings
               </Button>
             </div>
           </div>

@@ -407,6 +407,71 @@ export default function ApiClient() {
   const [selectedKeyForEdit, setSelectedKeyForEdit] = useState<ApiKey | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
+  // Additional dialog states for buttons without onClick handlers
+  const [showFilterDialog, setShowFilterDialog] = useState(false)
+  const [showEndpointActionsDialog, setShowEndpointActionsDialog] = useState(false)
+  const [showSendRequestDialog, setShowSendRequestDialog] = useState(false)
+  const [showCodeGenDialog, setShowCodeGenDialog] = useState(false)
+  const [showKeyActionsDialog, setShowKeyActionsDialog] = useState(false)
+  const [showCreateCollectionDialog, setShowCreateCollectionDialog] = useState(false)
+  const [showImportCollectionDialog, setShowImportCollectionDialog] = useState(false)
+  const [showExportCollectionsDialog, setShowExportCollectionsDialog] = useState(false)
+  const [showShareCollectionDialog, setShowShareCollectionDialog] = useState(false)
+  const [showForkCollectionDialog, setShowForkCollectionDialog] = useState(false)
+  const [showGenerateSdkDialog, setShowGenerateSdkDialog] = useState(false)
+  const [showRunAllCollectionsDialog, setShowRunAllCollectionsDialog] = useState(false)
+  const [showArchiveCollectionDialog, setShowArchiveCollectionDialog] = useState(false)
+  const [showSearchHistoryDialog, setShowSearchHistoryDialog] = useState(false)
+  const [showFilterHistoryDialog, setShowFilterHistoryDialog] = useState(false)
+  const [showExportHarDialog, setShowExportHarDialog] = useState(false)
+  const [showClearHistoryDialog, setShowClearHistoryDialog] = useState(false)
+  const [showReplayRequestDialog, setShowReplayRequestDialog] = useState(false)
+  const [showCopyCurlDialog, setShowCopyCurlDialog] = useState(false)
+  const [showInspectRequestDialog, setShowInspectRequestDialog] = useState(false)
+  const [showSaveRequestDialog, setShowSaveRequestDialog] = useState(false)
+  const [showNewMonitorDialog, setShowNewMonitorDialog] = useState(false)
+  const [showStatusPageDialog, setShowStatusPageDialog] = useState(false)
+  const [showAlertsDialog, setShowAlertsDialog] = useState(false)
+  const [showRegionsDialog, setShowRegionsDialog] = useState(false)
+  const [showIntervalsDialog, setShowIntervalsDialog] = useState(false)
+  const [showMonitorAnalyticsDialog, setShowMonitorAnalyticsDialog] = useState(false)
+  const [showSslCheckDialog, setShowSslCheckDialog] = useState(false)
+  const [showMonitorConfigDialog, setShowMonitorConfigDialog] = useState(false)
+  const [showNewWebhookDialog, setShowNewWebhookDialog] = useState(false)
+  const [showTestWebhookDialog, setShowTestWebhookDialog] = useState(false)
+  const [showRetryWebhooksDialog, setShowRetryWebhooksDialog] = useState(false)
+  const [showWebhookLogsDialog, setShowWebhookLogsDialog] = useState(false)
+  const [showWebhookSecretsDialog, setShowWebhookSecretsDialog] = useState(false)
+  const [showWebhookSignaturesDialog, setShowWebhookSignaturesDialog] = useState(false)
+  const [showExportWebhooksDialog, setShowExportWebhooksDialog] = useState(false)
+  const [showWebhookSettingsDialog, setShowWebhookSettingsDialog] = useState(false)
+  const [showRunAllTestsDialog, setShowRunAllTestsDialog] = useState(false)
+  const [showNewTestSuiteDialog, setShowNewTestSuiteDialog] = useState(false)
+  const [showCoverageDialog, setShowCoverageDialog] = useState(false)
+  const [showCiCdDialog, setShowCiCdDialog] = useState(false)
+  const [showTestReportsDialog, setShowTestReportsDialog] = useState(false)
+  const [showScheduleTestsDialog, setShowScheduleTestsDialog] = useState(false)
+  const [showExportTestsDialog, setShowExportTestsDialog] = useState(false)
+  const [showTestSettingsDialog, setShowTestSettingsDialog] = useState(false)
+  const [showRerunFailedDialog, setShowRerunFailedDialog] = useState(false)
+  const [showConfigureOAuthDialog, setShowConfigureOAuthDialog] = useState(false)
+  const [showManageKeysDialog, setShowManageKeysDialog] = useState(false)
+  const [showInviteTeamDialog, setShowInviteTeamDialog] = useState(false)
+  const [showExportCollectionsSettingsDialog, setShowExportCollectionsSettingsDialog] = useState(false)
+  const [showImportCollectionsSettingsDialog, setShowImportCollectionsSettingsDialog] = useState(false)
+  const [showExportEnvironmentsDialog, setShowExportEnvironmentsDialog] = useState(false)
+  const [showGenerateDocsDialog, setShowGenerateDocsDialog] = useState(false)
+  const [showTryEndpointDialog, setShowTryEndpointDialog] = useState(false)
+  const [showEndpointDocsDialog, setShowEndpointDocsDialog] = useState(false)
+  const [showEndpointCodeDialog, setShowEndpointCodeDialog] = useState(false)
+  const [showRunTestSuiteDialog, setShowRunTestSuiteDialog] = useState(false)
+  const [showRerunFailedTestsDialog, setShowRerunFailedTestsDialog] = useState(false)
+  const [showExportTestReportDialog, setShowExportTestReportDialog] = useState(false)
+  const [selectedCodeGenLanguage, setSelectedCodeGenLanguage] = useState<string>('cURL')
+  const [selectedEndpointForActions, setSelectedEndpointForActions] = useState<ApiEndpoint | null>(null)
+  const [selectedKeyForActions, setSelectedKeyForActions] = useState<ApiKey | null>(null)
+  const [requestUrl, setRequestUrl] = useState('')
+
   // Form states
   const [endpointForm, setEndpointForm] = useState<EndpointFormData>({
     name: '',
@@ -784,7 +849,7 @@ export default function ApiClient() {
                 className="pl-10 w-64"
               />
             </div>
-            <Button variant="outline" size="icon">
+            <Button variant="outline" size="icon" onClick={() => setShowFilterDialog(true)}>
               <Filter className="w-4 h-4" />
             </Button>
             <Button className="bg-gradient-to-r from-indigo-500 to-blue-500 text-white" onClick={() => setShowCreateEndpointDialog(true)}>
@@ -938,7 +1003,7 @@ export default function ApiClient() {
                           <code className="text-sm font-mono text-gray-900 dark:text-white">{endpoint.path}</code>
                           <Badge className={getStatusColor(endpoint.status)}>{endpoint.status}</Badge>
                         </div>
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => { e.stopPropagation(); setSelectedEndpointForActions(endpoint); setShowEndpointActionsDialog(true); }}>
                           <MoreVertical className="w-4 h-4" />
                         </Button>
                       </div>
@@ -988,9 +1053,9 @@ export default function ApiClient() {
                   <CardContent className="space-y-4">
                     <div className="flex gap-2">
                       <Badge className={getMethodColor('GET')}>GET</Badge>
-                      <Input placeholder="Enter request URL" className="flex-1 font-mono text-sm" />
+                      <Input placeholder="Enter request URL" className="flex-1 font-mono text-sm" value={requestUrl} onChange={(e) => setRequestUrl(e.target.value)} />
                     </div>
-                    <Button className="w-full bg-gradient-to-r from-indigo-500 to-blue-500 text-white">
+                    <Button className="w-full bg-gradient-to-r from-indigo-500 to-blue-500 text-white" onClick={() => setShowSendRequestDialog(true)}>
                       <Send className="w-4 h-4 mr-2" />
                       Send Request
                     </Button>
@@ -1027,7 +1092,7 @@ export default function ApiClient() {
                   </CardHeader>
                   <CardContent className="space-y-2">
                     {['cURL', 'JavaScript', 'Python', 'Go', 'PHP'].map(lang => (
-                      <Button key={lang} variant="outline" size="sm" className="w-full justify-start">
+                      <Button key={lang} variant="outline" size="sm" className="w-full justify-start" onClick={() => { setSelectedCodeGenLanguage(lang); setShowCodeGenDialog(true); }}>
                         <Code className="w-4 h-4 mr-2" />
                         {lang}
                       </Button>
@@ -1109,7 +1174,7 @@ export default function ApiClient() {
                           </div>
                         </div>
                       </div>
-                      <Button variant="ghost" size="icon">
+                      <Button variant="ghost" size="icon" onClick={() => { setSelectedKeyForActions(key); setShowKeyActionsDialog(true); }}>
                         <MoreVertical className="w-4 h-4" />
                       </Button>
                     </div>
@@ -1121,7 +1186,7 @@ export default function ApiClient() {
                       <Button variant="ghost" size="icon" onClick={() => setShowApiKey({ ...showApiKey, [key.id]: !showApiKey[key.id] })}>
                         {showApiKey[key.id] ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                       </Button>
-                      <Button variant="ghost" size="icon">
+                      <Button variant="ghost" size="icon" onClick={() => { navigator.clipboard.writeText(key.keyPrefix + '••••••••••••••••'); toast.success('Key prefix copied to clipboard'); }}>
                         <Copy className="w-4 h-4" />
                       </Button>
                     </div>
@@ -1191,19 +1256,20 @@ export default function ApiClient() {
             {/* Collections Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: FolderPlus, label: 'New Collection', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
-                { icon: Upload, label: 'Import', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
-                { icon: Download, label: 'Export All', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' },
-                { icon: Users, label: 'Share', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
-                { icon: GitBranch, label: 'Fork', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
-                { icon: FileCode, label: 'Generate SDK', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400' },
-                { icon: PlayCircle, label: 'Run All', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' },
-                { icon: Archive, label: 'Archive', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400' }
+                { icon: FolderPlus, label: 'New Collection', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => setShowCreateCollectionDialog(true) },
+                { icon: Upload, label: 'Import', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', onClick: () => setShowImportCollectionDialog(true) },
+                { icon: Download, label: 'Export All', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', onClick: () => setShowExportCollectionsDialog(true) },
+                { icon: Users, label: 'Share', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => setShowShareCollectionDialog(true) },
+                { icon: GitBranch, label: 'Fork', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', onClick: () => setShowForkCollectionDialog(true) },
+                { icon: FileCode, label: 'Generate SDK', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400', onClick: () => setShowGenerateSdkDialog(true) },
+                { icon: PlayCircle, label: 'Run All', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', onClick: () => setShowRunAllCollectionsDialog(true) },
+                { icon: Archive, label: 'Archive', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400', onClick: () => setShowArchiveCollectionDialog(true) }
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={action.onClick}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1290,19 +1356,20 @@ export default function ApiClient() {
             {/* History Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Search, label: 'Search', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
-                { icon: Filter, label: 'Filter', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400' },
-                { icon: Download, label: 'Export HAR', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
-                { icon: Trash2, label: 'Clear All', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' },
-                { icon: RefreshCw, label: 'Replay', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400' },
-                { icon: Copy, label: 'Copy cURL', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400' },
-                { icon: Eye, label: 'Inspect', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' },
-                { icon: BookmarkPlus, label: 'Save', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' }
+                { icon: Search, label: 'Search', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', onClick: () => setShowSearchHistoryDialog(true) },
+                { icon: Filter, label: 'Filter', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', onClick: () => setShowFilterHistoryDialog(true) },
+                { icon: Download, label: 'Export HAR', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', onClick: () => setShowExportHarDialog(true) },
+                { icon: Trash2, label: 'Clear All', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', onClick: () => setShowClearHistoryDialog(true) },
+                { icon: RefreshCw, label: 'Replay', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400', onClick: () => setShowReplayRequestDialog(true) },
+                { icon: Copy, label: 'Copy cURL', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400', onClick: () => setShowCopyCurlDialog(true) },
+                { icon: Eye, label: 'Inspect', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', onClick: () => setShowInspectRequestDialog(true) },
+                { icon: BookmarkPlus, label: 'Save', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', onClick: () => setShowSaveRequestDialog(true) }
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={action.onClick}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1364,19 +1431,20 @@ export default function ApiClient() {
             {/* Monitors Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Plus, label: 'New Monitor', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400' },
-                { icon: Activity, label: 'Status Page', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
-                { icon: Bell, label: 'Alerts', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' },
-                { icon: Globe, label: 'Regions', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
-                { icon: Clock, label: 'Intervals', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400' },
-                { icon: BarChart3, label: 'Analytics', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400' },
-                { icon: Shield, label: 'SSL Check', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400' },
-                { icon: Settings, label: 'Configure', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400' }
+                { icon: Plus, label: 'New Monitor', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', onClick: () => setShowNewMonitorDialog(true) },
+                { icon: Activity, label: 'Status Page', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', onClick: () => setShowStatusPageDialog(true) },
+                { icon: Bell, label: 'Alerts', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', onClick: () => setShowAlertsDialog(true) },
+                { icon: Globe, label: 'Regions', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', onClick: () => setShowRegionsDialog(true) },
+                { icon: Clock, label: 'Intervals', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400', onClick: () => setShowIntervalsDialog(true) },
+                { icon: BarChart3, label: 'Analytics', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400', onClick: () => setShowMonitorAnalyticsDialog(true) },
+                { icon: Shield, label: 'SSL Check', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', onClick: () => setShowSslCheckDialog(true) },
+                { icon: Settings, label: 'Configure', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400', onClick: () => setShowMonitorConfigDialog(true) }
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={action.onClick}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1459,19 +1527,20 @@ export default function ApiClient() {
             {/* Webhooks Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Plus, label: 'New Webhook', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
-                { icon: Webhook, label: 'Test', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
-                { icon: RefreshCw, label: 'Retry Failed', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
-                { icon: Eye, label: 'View Logs', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400' },
-                { icon: Key, label: 'Secrets', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
-                { icon: Shield, label: 'Signatures', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' },
-                { icon: Download, label: 'Export', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
-                { icon: Settings, label: 'Settings', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400' }
+                { icon: Plus, label: 'New Webhook', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => setShowNewWebhookDialog(true) },
+                { icon: Webhook, label: 'Test', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', onClick: () => setShowTestWebhookDialog(true) },
+                { icon: RefreshCw, label: 'Retry Failed', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => setShowRetryWebhooksDialog(true) },
+                { icon: Eye, label: 'View Logs', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400', onClick: () => setShowWebhookLogsDialog(true) },
+                { icon: Key, label: 'Secrets', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', onClick: () => setShowWebhookSecretsDialog(true) },
+                { icon: Shield, label: 'Signatures', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', onClick: () => setShowWebhookSignaturesDialog(true) },
+                { icon: Download, label: 'Export', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', onClick: () => setShowExportWebhooksDialog(true) },
+                { icon: Settings, label: 'Settings', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400', onClick: () => setShowWebhookSettingsDialog(true) }
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={action.onClick}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1481,7 +1550,7 @@ export default function ApiClient() {
 
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold">Webhooks</h3>
-              <Button>
+              <Button onClick={() => setShowNewWebhookDialog(true)}>
                 <Plus className="w-4 h-4 mr-2" />
                 Create Webhook
               </Button>
@@ -1561,19 +1630,20 @@ export default function ApiClient() {
             {/* Tests Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: PlayCircle, label: 'Run All', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
-                { icon: Plus, label: 'New Suite', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' },
-                { icon: FileCode, label: 'Coverage', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
-                { icon: GitBranch, label: 'CI/CD', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400' },
-                { icon: BarChart3, label: 'Reports', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
-                { icon: Clock, label: 'Schedule', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
-                { icon: Download, label: 'Export', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
-                { icon: Settings, label: 'Settings', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400' }
+                { icon: PlayCircle, label: 'Run All', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', onClick: () => setShowRunAllTestsDialog(true) },
+                { icon: Plus, label: 'New Suite', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', onClick: () => setShowNewTestSuiteDialog(true) },
+                { icon: FileCode, label: 'Coverage', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', onClick: () => setShowCoverageDialog(true) },
+                { icon: GitBranch, label: 'CI/CD', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', onClick: () => setShowCiCdDialog(true) },
+                { icon: BarChart3, label: 'Reports', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => setShowTestReportsDialog(true) },
+                { icon: Clock, label: 'Schedule', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => setShowScheduleTestsDialog(true) },
+                { icon: Download, label: 'Export', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', onClick: () => setShowExportTestsDialog(true) },
+                { icon: Settings, label: 'Settings', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400', onClick: () => setShowTestSettingsDialog(true) }
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={action.onClick}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1597,7 +1667,7 @@ export default function ApiClient() {
                     </>
                   )}
                 </Button>
-                <Button>
+                <Button onClick={() => setShowNewTestSuiteDialog(true)}>
                   <Plus className="w-4 h-4 mr-2" />
                   New Test Suite
                 </Button>
@@ -1694,7 +1764,7 @@ export default function ApiClient() {
                         <p className="text-xs text-gray-500">Failed</p>
                       </div>
                     </div>
-                    <Button className="w-full" variant="outline">
+                    <Button className="w-full" variant="outline" onClick={() => setShowRerunFailedDialog(true)}>
                       <Repeat className="w-4 h-4 mr-2" />
                       Rerun Failed Tests
                     </Button>
@@ -1918,7 +1988,7 @@ export default function ApiClient() {
                       <p className="font-medium text-sm">OAuth 2.0</p>
                       <p className="text-xs text-gray-500">Connected</p>
                     </div>
-                    <Button variant="outline" size="sm">Configure</Button>
+                    <Button variant="outline" size="sm" onClick={() => setShowConfigureOAuthDialog(true)}>Configure</Button>
                   </div>
 
                   <div className="flex items-center gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
@@ -1929,7 +1999,7 @@ export default function ApiClient() {
                       <p className="font-medium text-sm">API Keys</p>
                       <p className="text-xs text-gray-500">{apiKeys.filter(k => k.status === 'active').length} active</p>
                     </div>
-                    <Button variant="outline" size="sm">Manage</Button>
+                    <Button variant="outline" size="sm" onClick={() => setShowManageKeysDialog(true)}>Manage</Button>
                   </div>
 
                   <div className="flex items-center gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
@@ -1940,7 +2010,7 @@ export default function ApiClient() {
                       <p className="font-medium text-sm">Team Access</p>
                       <p className="text-xs text-gray-500">5 members</p>
                     </div>
-                    <Button variant="outline" size="sm">Invite</Button>
+                    <Button variant="outline" size="sm" onClick={() => setShowInviteTeamDialog(true)}>Invite</Button>
                   </div>
                 </CardContent>
               </Card>
@@ -1955,19 +2025,19 @@ export default function ApiClient() {
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <Button variant="outline" className="h-auto py-4 flex-col gap-2">
+                    <Button variant="outline" className="h-auto py-4 flex-col gap-2" onClick={() => setShowExportCollectionsSettingsDialog(true)}>
                       <FileJson className="w-6 h-6" />
                       <span>Export Collections</span>
                     </Button>
-                    <Button variant="outline" className="h-auto py-4 flex-col gap-2">
+                    <Button variant="outline" className="h-auto py-4 flex-col gap-2" onClick={() => setShowImportCollectionsSettingsDialog(true)}>
                       <Upload className="w-6 h-6" />
                       <span>Import Collections</span>
                     </Button>
-                    <Button variant="outline" className="h-auto py-4 flex-col gap-2">
+                    <Button variant="outline" className="h-auto py-4 flex-col gap-2" onClick={() => setShowExportEnvironmentsDialog(true)}>
                       <Variable className="w-6 h-6" />
                       <span>Export Environments</span>
                     </Button>
-                    <Button variant="outline" className="h-auto py-4 flex-col gap-2">
+                    <Button variant="outline" className="h-auto py-4 flex-col gap-2" onClick={() => setShowGenerateDocsDialog(true)}>
                       <FileText className="w-6 h-6" />
                       <span>Generate Docs</span>
                     </Button>
@@ -2064,15 +2134,15 @@ export default function ApiClient() {
                   </div>
 
                   <div className="flex gap-2">
-                    <Button className="flex-1 bg-gradient-to-r from-indigo-500 to-blue-500 text-white">
+                    <Button className="flex-1 bg-gradient-to-r from-indigo-500 to-blue-500 text-white" onClick={() => { setShowTryEndpointDialog(true); }}>
                       <Send className="w-4 h-4 mr-2" />
                       Try It
                     </Button>
-                    <Button variant="outline">
+                    <Button variant="outline" onClick={() => setShowEndpointDocsDialog(true)}>
                       <BookOpen className="w-4 h-4 mr-2" />
                       Docs
                     </Button>
-                    <Button variant="outline">
+                    <Button variant="outline" onClick={() => setShowEndpointCodeDialog(true)}>
                       <Code className="w-4 h-4" />
                     </Button>
                   </div>
@@ -2139,15 +2209,15 @@ export default function ApiClient() {
                   </div>
 
                   <div className="flex gap-2">
-                    <Button className="flex-1 bg-gradient-to-r from-indigo-500 to-blue-500 text-white">
+                    <Button className="flex-1 bg-gradient-to-r from-indigo-500 to-blue-500 text-white" onClick={() => setShowRunTestSuiteDialog(true)}>
                       <PlayCircle className="w-4 h-4 mr-2" />
                       Run Suite
                     </Button>
-                    <Button variant="outline">
+                    <Button variant="outline" onClick={() => setShowRerunFailedTestsDialog(true)}>
                       <Repeat className="w-4 h-4 mr-2" />
                       Rerun Failed
                     </Button>
-                    <Button variant="outline">
+                    <Button variant="outline" onClick={() => setShowExportTestReportDialog(true)}>
                       <FileText className="w-4 h-4 mr-2" />
                       Export Report
                     </Button>
@@ -2453,7 +2523,7 @@ export default function ApiClient() {
             <div className="space-y-4 py-4">
               <div className="flex items-center gap-2 mb-4">
                 <Input placeholder="Search documentation..." className="flex-1" />
-                <Button variant="outline" size="icon">
+                <Button variant="outline" size="icon" onClick={() => toast.success('Searching documentation...')}>
                   <Search className="w-4 h-4" />
                 </Button>
               </div>
@@ -2472,7 +2542,7 @@ export default function ApiClient() {
               </ScrollArea>
               <div className="flex items-center justify-between pt-2 border-t">
                 <span className="text-sm text-gray-500">{endpoints.length} endpoints documented</span>
-                <Button variant="link" size="sm">View full documentation</Button>
+                <Button variant="link" size="sm" onClick={() => { setShowDocsDialog(false); toast.success('Opening full documentation...'); }}>View full documentation</Button>
               </div>
             </div>
             <DialogFooter>
@@ -2796,7 +2866,7 @@ export default function ApiClient() {
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <Input placeholder="Search collections..." className="max-w-xs" />
-                <Button size="sm">
+                <Button size="sm" onClick={() => { setShowCollectionsDialog(false); setShowCreateCollectionDialog(true); }}>
                   <FolderPlus className="w-4 h-4 mr-2" />
                   New Collection
                 </Button>
@@ -3109,6 +3179,2428 @@ export default function ApiClient() {
               <Button variant="outline" onClick={() => setShowKeySettingsDialog(false)}>Cancel</Button>
               <Button onClick={() => { setShowKeySettingsDialog(false); toast.success('Key settings saved'); }}>
                 Save Settings
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Filter Dialog */}
+        <Dialog open={showFilterDialog} onOpenChange={setShowFilterDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Filter className="w-5 h-5 text-gray-600" />
+                Filter Endpoints
+              </DialogTitle>
+              <DialogDescription>Apply filters to narrow down your endpoint list</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Method</Label>
+                <Select defaultValue="all">
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Methods</SelectItem>
+                    <SelectItem value="GET">GET</SelectItem>
+                    <SelectItem value="POST">POST</SelectItem>
+                    <SelectItem value="PUT">PUT</SelectItem>
+                    <SelectItem value="DELETE">DELETE</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Status</Label>
+                <Select defaultValue="all">
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Statuses</SelectItem>
+                    <SelectItem value="active">Active</SelectItem>
+                    <SelectItem value="deprecated">Deprecated</SelectItem>
+                    <SelectItem value="draft">Draft</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Tags</Label>
+                <Input placeholder="Filter by tags..." />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowFilterDialog(false)}>Cancel</Button>
+              <Button onClick={() => { setShowFilterDialog(false); toast.success('Filters applied'); }}>Apply Filters</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Endpoint Actions Dialog */}
+        <Dialog open={showEndpointActionsDialog} onOpenChange={setShowEndpointActionsDialog}>
+          <DialogContent className="max-w-sm">
+            <DialogHeader>
+              <DialogTitle>Endpoint Actions</DialogTitle>
+              <DialogDescription>{selectedEndpointForActions?.name || 'Selected endpoint'}</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-2">
+              <Button variant="outline" className="w-full justify-start" onClick={() => { handleTestEndpoint(selectedEndpointForActions?.name || ''); setShowEndpointActionsDialog(false); }}>
+                <Play className="w-4 h-4 mr-2" /> Test Endpoint
+              </Button>
+              <Button variant="outline" className="w-full justify-start" onClick={() => { setShowEndpointActionsDialog(false); if(selectedEndpointForActions) setSelectedEndpoint(selectedEndpointForActions); }}>
+                <Eye className="w-4 h-4 mr-2" /> View Details
+              </Button>
+              <Button variant="outline" className="w-full justify-start" onClick={() => { navigator.clipboard.writeText(selectedEndpointForActions?.path || ''); toast.success('Path copied'); setShowEndpointActionsDialog(false); }}>
+                <Copy className="w-4 h-4 mr-2" /> Copy Path
+              </Button>
+              <Button variant="outline" className="w-full justify-start text-red-600" onClick={() => { if(selectedEndpointForActions) handleDeleteEndpoint(selectedEndpointForActions.id, selectedEndpointForActions.name); setShowEndpointActionsDialog(false); }}>
+                <Trash2 className="w-4 h-4 mr-2" /> Delete Endpoint
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Send Request Dialog */}
+        <Dialog open={showSendRequestDialog} onOpenChange={setShowSendRequestDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Send className="w-5 h-5 text-blue-600" />
+                Send API Request
+              </DialogTitle>
+              <DialogDescription>Configure and send your API request</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="flex gap-2">
+                <Select defaultValue="GET">
+                  <SelectTrigger className="w-24"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="GET">GET</SelectItem>
+                    <SelectItem value="POST">POST</SelectItem>
+                    <SelectItem value="PUT">PUT</SelectItem>
+                    <SelectItem value="DELETE">DELETE</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Input placeholder="https://api.example.com/endpoint" className="flex-1" defaultValue={requestUrl} />
+              </div>
+              <div className="space-y-2">
+                <Label>Headers</Label>
+                <Textarea placeholder="Content-Type: application/json" className="font-mono text-sm" rows={3} />
+              </div>
+              <div className="space-y-2">
+                <Label>Body (JSON)</Label>
+                <Textarea placeholder='{"key": "value"}' className="font-mono text-sm" rows={5} />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowSendRequestDialog(false)}>Cancel</Button>
+              <Button onClick={() => { setShowSendRequestDialog(false); toast.success('Request sent successfully', { description: 'Response: 200 OK' }); }}>
+                <Send className="w-4 h-4 mr-2" /> Send Request
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Code Generation Dialog */}
+        <Dialog open={showCodeGenDialog} onOpenChange={setShowCodeGenDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Code className="w-5 h-5 text-purple-600" />
+                Generated {selectedCodeGenLanguage} Code
+              </DialogTitle>
+              <DialogDescription>Copy this code snippet to use the API</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="p-4 bg-gray-900 rounded-lg">
+                <pre className="text-sm text-green-400 font-mono overflow-x-auto">
+{selectedCodeGenLanguage === 'cURL' && `curl -X GET "https://api.example.com/v1/users" \\
+  -H "Authorization: Bearer YOUR_API_KEY" \\
+  -H "Content-Type: application/json"`}
+{selectedCodeGenLanguage === 'JavaScript' && `fetch('https://api.example.com/v1/users', {
+  method: 'GET',
+  headers: {
+    'Authorization': 'Bearer YOUR_API_KEY',
+    'Content-Type': 'application/json'
+  }
+})
+.then(response => response.json())
+.then(data => console.log(data));`}
+{selectedCodeGenLanguage === 'Python' && `import requests
+
+response = requests.get(
+    'https://api.example.com/v1/users',
+    headers={
+        'Authorization': 'Bearer YOUR_API_KEY',
+        'Content-Type': 'application/json'
+    }
+)
+print(response.json())`}
+{selectedCodeGenLanguage === 'Go' && `package main
+
+import (
+    "net/http"
+    "fmt"
+)
+
+func main() {
+    req, _ := http.NewRequest("GET", "https://api.example.com/v1/users", nil)
+    req.Header.Set("Authorization", "Bearer YOUR_API_KEY")
+    client := &http.Client{}
+    resp, _ := client.Do(req)
+    fmt.Println(resp)
+}`}
+{selectedCodeGenLanguage === 'PHP' && `<?php
+$ch = curl_init();
+curl_setopt($ch, CURLOPT_URL, 'https://api.example.com/v1/users');
+curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+    'Authorization: Bearer YOUR_API_KEY',
+    'Content-Type: application/json'
+));
+$response = curl_exec($ch);
+curl_close($ch);
+echo $response;
+?>`}
+                </pre>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowCodeGenDialog(false)}>Close</Button>
+              <Button onClick={() => { navigator.clipboard.writeText('Code copied!'); toast.success('Code copied to clipboard'); }}>
+                <Copy className="w-4 h-4 mr-2" /> Copy Code
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* API Key Actions Dialog */}
+        <Dialog open={showKeyActionsDialog} onOpenChange={setShowKeyActionsDialog}>
+          <DialogContent className="max-w-sm">
+            <DialogHeader>
+              <DialogTitle>API Key Actions</DialogTitle>
+              <DialogDescription>{selectedKeyForActions?.name || 'Selected key'}</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-2">
+              <Button variant="outline" className="w-full justify-start" onClick={() => { setShowKeyActionsDialog(false); if(selectedKeyForActions) { setSelectedKeyForEdit(selectedKeyForActions); setShowEditKeyDialog(true); }}}>
+                <Settings className="w-4 h-4 mr-2" /> Edit Key
+              </Button>
+              <Button variant="outline" className="w-full justify-start" onClick={() => { navigator.clipboard.writeText(selectedKeyForActions?.keyPrefix || ''); toast.success('Key prefix copied'); setShowKeyActionsDialog(false); }}>
+                <Copy className="w-4 h-4 mr-2" /> Copy Key Prefix
+              </Button>
+              <Button variant="outline" className="w-full justify-start" onClick={() => { setShowKeyActionsDialog(false); setShowUsageLogDialog(true); }}>
+                <Activity className="w-4 h-4 mr-2" /> View Usage
+              </Button>
+              <Button variant="outline" className="w-full justify-start text-red-600" onClick={() => { if(selectedKeyForActions) handleRevokeApiKey(selectedKeyForActions.id, selectedKeyForActions.name); setShowKeyActionsDialog(false); }}>
+                <Lock className="w-4 h-4 mr-2" /> Revoke Key
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Create Collection Dialog */}
+        <Dialog open={showCreateCollectionDialog} onOpenChange={setShowCreateCollectionDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <FolderPlus className="w-5 h-5 text-purple-600" />
+                Create New Collection
+              </DialogTitle>
+              <DialogDescription>Organize your API requests into a collection</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Collection Name</Label>
+                <Input placeholder="e.g., User Management API" />
+              </div>
+              <div className="space-y-2">
+                <Label>Description</Label>
+                <Textarea placeholder="Describe what this collection contains..." />
+              </div>
+              <div className="space-y-2">
+                <Label>Environment</Label>
+                <Select defaultValue="development">
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="development">Development</SelectItem>
+                    <SelectItem value="staging">Staging</SelectItem>
+                    <SelectItem value="production">Production</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch defaultChecked />
+                <Label>Share with team</Label>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowCreateCollectionDialog(false)}>Cancel</Button>
+              <Button onClick={() => { setShowCreateCollectionDialog(false); toast.success('Collection created successfully'); }}>
+                <FolderPlus className="w-4 h-4 mr-2" /> Create Collection
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Import Collection Dialog */}
+        <Dialog open={showImportCollectionDialog} onOpenChange={setShowImportCollectionDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Upload className="w-5 h-5 text-pink-600" />
+                Import Collection
+              </DialogTitle>
+              <DialogDescription>Import from Postman, OpenAPI, or other formats</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Import Format</Label>
+                <Select defaultValue="postman">
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="postman">Postman Collection v2.1</SelectItem>
+                    <SelectItem value="openapi">OpenAPI 3.0</SelectItem>
+                    <SelectItem value="swagger">Swagger 2.0</SelectItem>
+                    <SelectItem value="insomnia">Insomnia</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="border-2 border-dashed rounded-lg p-8 text-center hover:border-primary transition-colors cursor-pointer">
+                <Upload className="w-8 h-8 mx-auto mb-2 text-gray-400" />
+                <p className="text-sm text-gray-500">Drag and drop or click to upload</p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowImportCollectionDialog(false)}>Cancel</Button>
+              <Button onClick={() => { setShowImportCollectionDialog(false); toast.success('Collection imported successfully'); }}>
+                <Upload className="w-4 h-4 mr-2" /> Import
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Export Collections Dialog */}
+        <Dialog open={showExportCollectionsDialog} onOpenChange={setShowExportCollectionsDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Download className="w-5 h-5 text-rose-600" />
+                Export All Collections
+              </DialogTitle>
+              <DialogDescription>Export your collections in various formats</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Export Format</Label>
+                <Select defaultValue="postman">
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="postman">Postman Collection v2.1</SelectItem>
+                    <SelectItem value="openapi">OpenAPI 3.0</SelectItem>
+                    <SelectItem value="json">JSON</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                {collections.map(c => (
+                  <div key={c.id} className="flex items-center gap-2 p-2 border rounded">
+                    <Switch defaultChecked />
+                    <span className="text-sm">{c.name}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowExportCollectionsDialog(false)}>Cancel</Button>
+              <Button onClick={() => { setShowExportCollectionsDialog(false); toast.success('Collections exported'); }}>
+                <Download className="w-4 h-4 mr-2" /> Export
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Share Collection Dialog */}
+        <Dialog open={showShareCollectionDialog} onOpenChange={setShowShareCollectionDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Users className="w-5 h-5 text-indigo-600" />
+                Share Collection
+              </DialogTitle>
+              <DialogDescription>Share with your team or generate a public link</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Select Collection</Label>
+                <Select>
+                  <SelectTrigger><SelectValue placeholder="Choose a collection" /></SelectTrigger>
+                  <SelectContent>
+                    {collections.map(c => (
+                      <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Invite by Email</Label>
+                <Input placeholder="Enter email addresses..." />
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch />
+                <Label>Generate public link</Label>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowShareCollectionDialog(false)}>Cancel</Button>
+              <Button onClick={() => { setShowShareCollectionDialog(false); toast.success('Collection shared successfully'); }}>
+                <Users className="w-4 h-4 mr-2" /> Share
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Fork Collection Dialog */}
+        <Dialog open={showForkCollectionDialog} onOpenChange={setShowForkCollectionDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <GitBranch className="w-5 h-5 text-violet-600" />
+                Fork Collection
+              </DialogTitle>
+              <DialogDescription>Create a copy of an existing collection</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Source Collection</Label>
+                <Select>
+                  <SelectTrigger><SelectValue placeholder="Select collection to fork" /></SelectTrigger>
+                  <SelectContent>
+                    {collections.map(c => (
+                      <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>New Collection Name</Label>
+                <Input placeholder="My forked collection" />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowForkCollectionDialog(false)}>Cancel</Button>
+              <Button onClick={() => { setShowForkCollectionDialog(false); toast.success('Collection forked successfully'); }}>
+                <GitBranch className="w-4 h-4 mr-2" /> Fork
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Generate SDK Dialog */}
+        <Dialog open={showGenerateSdkDialog} onOpenChange={setShowGenerateSdkDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <FileCode className="w-5 h-5 text-fuchsia-600" />
+                Generate SDK
+              </DialogTitle>
+              <DialogDescription>Auto-generate client SDK from your API</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Target Language</Label>
+                <Select defaultValue="typescript">
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="typescript">TypeScript</SelectItem>
+                    <SelectItem value="javascript">JavaScript</SelectItem>
+                    <SelectItem value="python">Python</SelectItem>
+                    <SelectItem value="go">Go</SelectItem>
+                    <SelectItem value="java">Java</SelectItem>
+                    <SelectItem value="csharp">C#</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Package Name</Label>
+                <Input placeholder="@mycompany/api-client" />
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch defaultChecked />
+                <Label>Include TypeScript definitions</Label>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowGenerateSdkDialog(false)}>Cancel</Button>
+              <Button onClick={() => { setShowGenerateSdkDialog(false); toast.success('SDK generated successfully'); }}>
+                <FileCode className="w-4 h-4 mr-2" /> Generate
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Run All Collections Dialog */}
+        <Dialog open={showRunAllCollectionsDialog} onOpenChange={setShowRunAllCollectionsDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <PlayCircle className="w-5 h-5 text-emerald-600" />
+                Run All Collections
+              </DialogTitle>
+              <DialogDescription>Execute all requests in selected collections</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                {collections.map(c => (
+                  <div key={c.id} className="flex items-center justify-between p-3 border rounded">
+                    <div className="flex items-center gap-2">
+                      <Switch defaultChecked />
+                      <span className="font-medium">{c.name}</span>
+                    </div>
+                    <Badge variant="secondary">{c.requests} requests</Badge>
+                  </div>
+                ))}
+              </div>
+              <div className="space-y-2">
+                <Label>Environment</Label>
+                <Select defaultValue="development">
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="development">Development</SelectItem>
+                    <SelectItem value="staging">Staging</SelectItem>
+                    <SelectItem value="production">Production</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowRunAllCollectionsDialog(false)}>Cancel</Button>
+              <Button onClick={() => { setShowRunAllCollectionsDialog(false); toast.success('Running all collections...'); }}>
+                <PlayCircle className="w-4 h-4 mr-2" /> Run All
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Archive Collection Dialog */}
+        <Dialog open={showArchiveCollectionDialog} onOpenChange={setShowArchiveCollectionDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Archive className="w-5 h-5 text-gray-600" />
+                Archive Collection
+              </DialogTitle>
+              <DialogDescription>Archive unused collections to keep your workspace clean</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Select Collections to Archive</Label>
+                {collections.map(c => (
+                  <div key={c.id} className="flex items-center gap-2 p-2 border rounded">
+                    <Switch />
+                    <span className="text-sm">{c.name}</span>
+                    <span className="text-xs text-gray-500 ml-auto">Last run: {formatTimeAgo(c.lastRun)}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowArchiveCollectionDialog(false)}>Cancel</Button>
+              <Button onClick={() => { setShowArchiveCollectionDialog(false); toast.success('Collections archived'); }}>
+                <Archive className="w-4 h-4 mr-2" /> Archive
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Search History Dialog */}
+        <Dialog open={showSearchHistoryDialog} onOpenChange={setShowSearchHistoryDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Search className="w-5 h-5 text-amber-600" />
+                Search History
+              </DialogTitle>
+              <DialogDescription>Search through your request history</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <Input placeholder="Search by URL, method, or status..." autoFocus />
+              <ScrollArea className="h-48">
+                <div className="space-y-2">
+                  {history.slice(0, 5).map(h => (
+                    <div key={h.id} className="flex items-center gap-2 p-2 border rounded hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer">
+                      <Badge className={getMethodColor(h.method)}>{h.method}</Badge>
+                      <span className="text-sm truncate flex-1">{h.url}</span>
+                      <span className={`text-sm ${getHttpStatusColor(h.status)}`}>{h.status}</span>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowSearchHistoryDialog(false)}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Filter History Dialog */}
+        <Dialog open={showFilterHistoryDialog} onOpenChange={setShowFilterHistoryDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Filter className="w-5 h-5 text-orange-600" />
+                Filter History
+              </DialogTitle>
+              <DialogDescription>Filter request history by various criteria</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Method</Label>
+                  <Select defaultValue="all">
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All</SelectItem>
+                      <SelectItem value="GET">GET</SelectItem>
+                      <SelectItem value="POST">POST</SelectItem>
+                      <SelectItem value="PUT">PUT</SelectItem>
+                      <SelectItem value="DELETE">DELETE</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Status</Label>
+                  <Select defaultValue="all">
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All</SelectItem>
+                      <SelectItem value="2xx">2xx Success</SelectItem>
+                      <SelectItem value="4xx">4xx Client Error</SelectItem>
+                      <SelectItem value="5xx">5xx Server Error</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Date Range</Label>
+                <div className="grid grid-cols-2 gap-2">
+                  <Input type="date" />
+                  <Input type="date" />
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowFilterHistoryDialog(false)}>Cancel</Button>
+              <Button onClick={() => { setShowFilterHistoryDialog(false); toast.success('Filters applied'); }}>Apply Filters</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Export HAR Dialog */}
+        <Dialog open={showExportHarDialog} onOpenChange={setShowExportHarDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Download className="w-5 h-5 text-red-600" />
+                Export HAR File
+              </DialogTitle>
+              <DialogDescription>Export request history as HTTP Archive format</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <p className="text-sm"><strong>Requests to export:</strong> {history.length}</p>
+                <p className="text-sm"><strong>Format:</strong> HAR 1.2</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch defaultChecked />
+                <Label>Include response bodies</Label>
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch defaultChecked />
+                <Label>Include headers</Label>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowExportHarDialog(false)}>Cancel</Button>
+              <Button onClick={() => { setShowExportHarDialog(false); toast.success('HAR file exported'); }}>
+                <Download className="w-4 h-4 mr-2" /> Export HAR
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Clear History Dialog */}
+        <Dialog open={showClearHistoryDialog} onOpenChange={setShowClearHistoryDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Trash2 className="w-5 h-5 text-rose-600" />
+                Clear History
+              </DialogTitle>
+              <DialogDescription>This action cannot be undone</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                <p className="text-sm text-red-700 dark:text-red-300">
+                  You are about to delete {history.length} request records. This action is permanent.
+                </p>
+              </div>
+              <div className="space-y-2">
+                <Label>Clear Options</Label>
+                <div className="flex items-center gap-2">
+                  <Switch defaultChecked />
+                  <span className="text-sm">Clear all history</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Switch />
+                  <span className="text-sm">Keep last 24 hours</span>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowClearHistoryDialog(false)}>Cancel</Button>
+              <Button variant="destructive" onClick={() => { setShowClearHistoryDialog(false); toast.success('History cleared'); }}>
+                <Trash2 className="w-4 h-4 mr-2" /> Clear History
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Replay Request Dialog */}
+        <Dialog open={showReplayRequestDialog} onOpenChange={setShowReplayRequestDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <RefreshCw className="w-5 h-5 text-yellow-600" />
+                Replay Request
+              </DialogTitle>
+              <DialogDescription>Select a request from history to replay</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <ScrollArea className="h-48">
+                <div className="space-y-2">
+                  {history.map(h => (
+                    <div key={h.id} className="flex items-center gap-2 p-2 border rounded hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer">
+                      <Badge className={getMethodColor(h.method)}>{h.method}</Badge>
+                      <span className="text-sm truncate flex-1">{h.url}</span>
+                      <Button size="sm" variant="ghost" onClick={() => { setShowReplayRequestDialog(false); toast.success('Request replayed successfully'); }}>
+                        <RefreshCw className="w-3 h-3" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowReplayRequestDialog(false)}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Copy cURL Dialog */}
+        <Dialog open={showCopyCurlDialog} onOpenChange={setShowCopyCurlDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Copy className="w-5 h-5 text-lime-600" />
+                Copy as cURL
+              </DialogTitle>
+              <DialogDescription>Select a request to copy as cURL command</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <ScrollArea className="h-48">
+                <div className="space-y-2">
+                  {history.map(h => (
+                    <div key={h.id} className="flex items-center gap-2 p-2 border rounded hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer" onClick={() => { navigator.clipboard.writeText(`curl -X ${h.method} "${h.url}"`); toast.success('cURL copied to clipboard'); setShowCopyCurlDialog(false); }}>
+                      <Badge className={getMethodColor(h.method)}>{h.method}</Badge>
+                      <span className="text-sm truncate flex-1">{h.url}</span>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowCopyCurlDialog(false)}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Inspect Request Dialog */}
+        <Dialog open={showInspectRequestDialog} onOpenChange={setShowInspectRequestDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Eye className="w-5 h-5 text-emerald-600" />
+                Inspect Request
+              </DialogTitle>
+              <DialogDescription>View detailed request and response information</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <Tabs defaultValue="request">
+                <TabsList>
+                  <TabsTrigger value="request">Request</TabsTrigger>
+                  <TabsTrigger value="response">Response</TabsTrigger>
+                  <TabsTrigger value="headers">Headers</TabsTrigger>
+                </TabsList>
+                <TabsContent value="request" className="mt-4">
+                  <div className="p-4 bg-gray-900 rounded-lg">
+                    <pre className="text-sm text-green-400 font-mono">GET /api/v1/users HTTP/1.1{'\n'}Host: api.example.com{'\n'}Authorization: Bearer ***</pre>
+                  </div>
+                </TabsContent>
+                <TabsContent value="response" className="mt-4">
+                  <div className="p-4 bg-gray-900 rounded-lg">
+                    <pre className="text-sm text-green-400 font-mono">{'{\n  "users": [...],\n  "total": 100\n}'}</pre>
+                  </div>
+                </TabsContent>
+                <TabsContent value="headers" className="mt-4">
+                  <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg space-y-1">
+                    <p className="text-sm"><strong>Content-Type:</strong> application/json</p>
+                    <p className="text-sm"><strong>X-Request-ID:</strong> abc123</p>
+                  </div>
+                </TabsContent>
+              </Tabs>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowInspectRequestDialog(false)}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Save Request Dialog */}
+        <Dialog open={showSaveRequestDialog} onOpenChange={setShowSaveRequestDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <BookmarkPlus className="w-5 h-5 text-teal-600" />
+                Save Request
+              </DialogTitle>
+              <DialogDescription>Save a request to a collection</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Request Name</Label>
+                <Input placeholder="e.g., Get all users" />
+              </div>
+              <div className="space-y-2">
+                <Label>Collection</Label>
+                <Select>
+                  <SelectTrigger><SelectValue placeholder="Select a collection" /></SelectTrigger>
+                  <SelectContent>
+                    {collections.map(c => (
+                      <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Description (optional)</Label>
+                <Textarea placeholder="Describe this request..." />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowSaveRequestDialog(false)}>Cancel</Button>
+              <Button onClick={() => { setShowSaveRequestDialog(false); toast.success('Request saved to collection'); }}>
+                <BookmarkPlus className="w-4 h-4 mr-2" /> Save Request
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* New Monitor Dialog */}
+        <Dialog open={showNewMonitorDialog} onOpenChange={setShowNewMonitorDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Plus className="w-5 h-5 text-cyan-600" />
+                Create New Monitor
+              </DialogTitle>
+              <DialogDescription>Set up uptime monitoring for your API endpoints</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Monitor Name</Label>
+                <Input placeholder="e.g., API Health Check" />
+              </div>
+              <div className="space-y-2">
+                <Label>Endpoint URL</Label>
+                <Input placeholder="https://api.example.com/health" />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Check Interval</Label>
+                  <Select defaultValue="60">
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="30">30 seconds</SelectItem>
+                      <SelectItem value="60">1 minute</SelectItem>
+                      <SelectItem value="300">5 minutes</SelectItem>
+                      <SelectItem value="600">10 minutes</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Region</Label>
+                  <Select defaultValue="us-east-1">
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="us-east-1">US East</SelectItem>
+                      <SelectItem value="us-west-2">US West</SelectItem>
+                      <SelectItem value="eu-west-1">EU West</SelectItem>
+                      <SelectItem value="ap-southeast-1">Asia Pacific</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch defaultChecked />
+                <Label>Enable alerts on failure</Label>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowNewMonitorDialog(false)}>Cancel</Button>
+              <Button onClick={() => { setShowNewMonitorDialog(false); toast.success('Monitor created successfully'); }}>
+                <Plus className="w-4 h-4 mr-2" /> Create Monitor
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Status Page Dialog */}
+        <Dialog open={showStatusPageDialog} onOpenChange={setShowStatusPageDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Activity className="w-5 h-5 text-teal-600" />
+                Status Page
+              </DialogTitle>
+              <DialogDescription>Public status page for your API services</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                {monitors.map(m => (
+                  <div key={m.id} className="p-4 border rounded-lg">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="font-medium">{m.name}</span>
+                      <Badge className={getMonitorStatusColor(m.status)}>{m.status}</Badge>
+                    </div>
+                    <p className="text-sm text-gray-500">Uptime: {m.uptime}%</p>
+                  </div>
+                ))}
+              </div>
+              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <p className="text-sm"><strong>Public URL:</strong> https://status.example.com</p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowStatusPageDialog(false)}>Close</Button>
+              <Button onClick={() => { navigator.clipboard.writeText('https://status.example.com'); toast.success('Status page URL copied'); }}>
+                <Copy className="w-4 h-4 mr-2" /> Copy URL
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Alerts Dialog */}
+        <Dialog open={showAlertsDialog} onOpenChange={setShowAlertsDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Bell className="w-5 h-5 text-emerald-600" />
+                Alert Configuration
+              </DialogTitle>
+              <DialogDescription>Configure alert notifications for your monitors</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label>Email Alerts</Label>
+                  <p className="text-xs text-gray-500">Send alerts via email</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label>Slack Notifications</Label>
+                  <p className="text-xs text-gray-500">Post alerts to Slack</p>
+                </div>
+                <Switch />
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label>Webhook Alerts</Label>
+                  <p className="text-xs text-gray-500">Send to custom webhook</p>
+                </div>
+                <Switch />
+              </div>
+              <div className="space-y-2">
+                <Label>Alert Threshold</Label>
+                <Select defaultValue="1">
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1">After 1 failure</SelectItem>
+                    <SelectItem value="2">After 2 failures</SelectItem>
+                    <SelectItem value="3">After 3 failures</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowAlertsDialog(false)}>Cancel</Button>
+              <Button onClick={() => { setShowAlertsDialog(false); toast.success('Alert settings saved'); }}>Save Settings</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Regions Dialog */}
+        <Dialog open={showRegionsDialog} onOpenChange={setShowRegionsDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Globe className="w-5 h-5 text-green-600" />
+                Monitoring Regions
+              </DialogTitle>
+              <DialogDescription>Select regions to monitor from</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              {['US East (Virginia)', 'US West (Oregon)', 'EU West (Ireland)', 'Asia Pacific (Singapore)', 'South America (Sao Paulo)'].map(region => (
+                <div key={region} className="flex items-center gap-2 p-2 border rounded">
+                  <Switch defaultChecked={region.includes('US')} />
+                  <span className="text-sm">{region}</span>
+                </div>
+              ))}
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowRegionsDialog(false)}>Cancel</Button>
+              <Button onClick={() => { setShowRegionsDialog(false); toast.success('Regions updated'); }}>Save Changes</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Intervals Dialog */}
+        <Dialog open={showIntervalsDialog} onOpenChange={setShowIntervalsDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Clock className="w-5 h-5 text-lime-600" />
+                Check Intervals
+              </DialogTitle>
+              <DialogDescription>Configure how often monitors check endpoints</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Default Interval</Label>
+                <Select defaultValue="60">
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="30">30 seconds</SelectItem>
+                    <SelectItem value="60">1 minute</SelectItem>
+                    <SelectItem value="300">5 minutes</SelectItem>
+                    <SelectItem value="600">10 minutes</SelectItem>
+                    <SelectItem value="1800">30 minutes</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <p className="text-sm text-gray-500">Shorter intervals provide faster incident detection but increase resource usage.</p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowIntervalsDialog(false)}>Cancel</Button>
+              <Button onClick={() => { setShowIntervalsDialog(false); toast.success('Intervals updated'); }}>Save Changes</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Monitor Analytics Dialog */}
+        <Dialog open={showMonitorAnalyticsDialog} onOpenChange={setShowMonitorAnalyticsDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <BarChart3 className="w-5 h-5 text-yellow-600" />
+                Monitor Analytics
+              </DialogTitle>
+              <DialogDescription>Performance metrics and trends</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="grid grid-cols-4 gap-4">
+                <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                  <p className="text-2xl font-bold text-green-600">99.9%</p>
+                  <p className="text-xs text-gray-500">Avg Uptime</p>
+                </div>
+                <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                  <p className="text-2xl font-bold">45ms</p>
+                  <p className="text-xs text-gray-500">Avg Response</p>
+                </div>
+                <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                  <p className="text-2xl font-bold">5</p>
+                  <p className="text-xs text-gray-500">Incidents</p>
+                </div>
+                <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                  <p className="text-2xl font-bold">2.5m</p>
+                  <p className="text-xs text-gray-500">Avg MTTR</p>
+                </div>
+              </div>
+              <div className="h-48 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
+                <p className="text-gray-500">Response time chart</p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowMonitorAnalyticsDialog(false)}>Close</Button>
+              <Button onClick={() => { toast.success('Analytics report exported'); }}>
+                <Download className="w-4 h-4 mr-2" /> Export Report
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* SSL Check Dialog */}
+        <Dialog open={showSslCheckDialog} onOpenChange={setShowSslCheckDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Shield className="w-5 h-5 text-orange-600" />
+                SSL Certificate Check
+              </DialogTitle>
+              <DialogDescription>Verify SSL certificates for your endpoints</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              {monitors.map(m => (
+                <div key={m.id} className="p-3 border rounded-lg">
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium">{m.endpoint}</span>
+                    <Badge className="bg-green-100 text-green-700">Valid</Badge>
+                  </div>
+                  <p className="text-sm text-gray-500 mt-1">Expires in 45 days</p>
+                </div>
+              ))}
+              <div className="flex items-center gap-2">
+                <Switch defaultChecked />
+                <Label>Alert 30 days before expiry</Label>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowSslCheckDialog(false)}>Close</Button>
+              <Button onClick={() => { toast.success('SSL settings saved'); setShowSslCheckDialog(false); }}>Save Settings</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Monitor Config Dialog */}
+        <Dialog open={showMonitorConfigDialog} onOpenChange={setShowMonitorConfigDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Settings className="w-5 h-5 text-gray-600" />
+                Monitor Configuration
+              </DialogTitle>
+              <DialogDescription>Global settings for all monitors</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label>Enable Monitoring</Label>
+                  <p className="text-xs text-gray-500">Turn all monitors on/off</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+              <div className="space-y-2">
+                <Label>Request Timeout (seconds)</Label>
+                <Input type="number" defaultValue="30" />
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label>Follow Redirects</Label>
+                  <p className="text-xs text-gray-500">Follow HTTP redirects</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label>Verify SSL</Label>
+                  <p className="text-xs text-gray-500">Verify SSL certificates</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowMonitorConfigDialog(false)}>Cancel</Button>
+              <Button onClick={() => { setShowMonitorConfigDialog(false); toast.success('Configuration saved'); }}>Save Settings</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* New Webhook Dialog */}
+        <Dialog open={showNewWebhookDialog} onOpenChange={setShowNewWebhookDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Plus className="w-5 h-5 text-indigo-600" />
+                Create New Webhook
+              </DialogTitle>
+              <DialogDescription>Set up webhook notifications</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Webhook Name</Label>
+                <Input placeholder="e.g., Order Notifications" />
+              </div>
+              <div className="space-y-2">
+                <Label>Webhook URL</Label>
+                <Input placeholder="https://your-server.com/webhook" />
+              </div>
+              <div className="space-y-2">
+                <Label>Events to Subscribe</Label>
+                <div className="grid grid-cols-2 gap-2">
+                  {['order.created', 'order.updated', 'user.created', 'payment.success'].map(event => (
+                    <div key={event} className="flex items-center gap-2">
+                      <Switch />
+                      <span className="text-sm font-mono">{event}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Secret Key (optional)</Label>
+                <Input placeholder="For signature verification" type="password" />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowNewWebhookDialog(false)}>Cancel</Button>
+              <Button onClick={() => { setShowNewWebhookDialog(false); toast.success('Webhook created successfully'); }}>
+                <Plus className="w-4 h-4 mr-2" /> Create Webhook
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Test Webhook Dialog */}
+        <Dialog open={showTestWebhookDialog} onOpenChange={setShowTestWebhookDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Webhook className="w-5 h-5 text-violet-600" />
+                Test Webhook
+              </DialogTitle>
+              <DialogDescription>Send a test event to your webhook</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Select Webhook</Label>
+                <Select>
+                  <SelectTrigger><SelectValue placeholder="Choose a webhook" /></SelectTrigger>
+                  <SelectContent>
+                    {webhooks.map(w => (
+                      <SelectItem key={w.id} value={w.id}>{w.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Test Event</Label>
+                <Select defaultValue="test">
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="test">test.ping</SelectItem>
+                    <SelectItem value="order">order.created</SelectItem>
+                    <SelectItem value="user">user.created</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <p className="text-sm text-gray-500">A test event will be sent to the webhook URL with sample data.</p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowTestWebhookDialog(false)}>Cancel</Button>
+              <Button onClick={() => { setShowTestWebhookDialog(false); toast.success('Test webhook sent successfully'); }}>
+                <Webhook className="w-4 h-4 mr-2" /> Send Test
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Retry Webhooks Dialog */}
+        <Dialog open={showRetryWebhooksDialog} onOpenChange={setShowRetryWebhooksDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <RefreshCw className="w-5 h-5 text-purple-600" />
+                Retry Failed Webhooks
+              </DialogTitle>
+              <DialogDescription>Retry failed webhook deliveries</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+                <p className="text-sm text-amber-700 dark:text-amber-300">
+                  <strong>3</strong> failed deliveries in the last 24 hours
+                </p>
+              </div>
+              <div className="space-y-2">
+                {webhooks.filter(w => !w.isActive).map(w => (
+                  <div key={w.id} className="flex items-center justify-between p-3 border rounded">
+                    <div>
+                      <p className="font-medium">{w.name}</p>
+                      <p className="text-sm text-gray-500">Failed: 2 deliveries</p>
+                    </div>
+                    <Switch defaultChecked />
+                  </div>
+                ))}
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowRetryWebhooksDialog(false)}>Cancel</Button>
+              <Button onClick={() => { setShowRetryWebhooksDialog(false); toast.success('Retrying failed webhooks...'); }}>
+                <RefreshCw className="w-4 h-4 mr-2" /> Retry Selected
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Webhook Logs Dialog */}
+        <Dialog open={showWebhookLogsDialog} onOpenChange={setShowWebhookLogsDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Eye className="w-5 h-5 text-fuchsia-600" />
+                Webhook Logs
+              </DialogTitle>
+              <DialogDescription>View recent webhook deliveries</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <ScrollArea className="h-64">
+                <div className="space-y-2">
+                  {webhooks.flatMap(w => [1, 2].map(i => (
+                    <div key={`${w.id}-${i}`} className="p-3 border rounded-lg">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="font-medium">{w.name}</span>
+                        <Badge className={i === 1 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}>{i === 1 ? 'Success' : 'Failed'}</Badge>
+                      </div>
+                      <p className="text-sm text-gray-500">Event: order.created | {formatTimeAgo(w.lastTriggered)}</p>
+                    </div>
+                  )))}
+                </div>
+              </ScrollArea>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowWebhookLogsDialog(false)}>Close</Button>
+              <Button onClick={() => { toast.success('Logs exported'); }}>
+                <Download className="w-4 h-4 mr-2" /> Export Logs
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Webhook Secrets Dialog */}
+        <Dialog open={showWebhookSecretsDialog} onOpenChange={setShowWebhookSecretsDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Key className="w-5 h-5 text-pink-600" />
+                Webhook Secrets
+              </DialogTitle>
+              <DialogDescription>Manage signing secrets for your webhooks</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              {webhooks.map(w => (
+                <div key={w.id} className="p-3 border rounded-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="font-medium">{w.name}</span>
+                    <Button size="sm" variant="outline" onClick={() => toast.success('New secret generated')}>Regenerate</Button>
+                  </div>
+                  <code className="text-sm font-mono bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">whsec_••••••••••••</code>
+                </div>
+              ))}
+              <div className="p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
+                <p className="text-sm text-amber-700 dark:text-amber-300">
+                  <AlertTriangle className="w-3 h-3 inline mr-1" />
+                  Regenerating secrets will invalidate existing signatures
+                </p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowWebhookSecretsDialog(false)}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Webhook Signatures Dialog */}
+        <Dialog open={showWebhookSignaturesDialog} onOpenChange={setShowWebhookSignaturesDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Shield className="w-5 h-5 text-rose-600" />
+                Signature Verification
+              </DialogTitle>
+              <DialogDescription>Configure webhook signature verification</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label>Enable Signatures</Label>
+                  <p className="text-xs text-gray-500">Sign all webhook payloads</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+              <div className="space-y-2">
+                <Label>Signature Algorithm</Label>
+                <Select defaultValue="sha256">
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="sha256">HMAC-SHA256</SelectItem>
+                    <SelectItem value="sha512">HMAC-SHA512</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="p-4 bg-gray-900 rounded-lg">
+                <p className="text-xs text-gray-400 mb-2">Verification code example:</p>
+                <pre className="text-xs text-green-400 font-mono">const signature = crypto.createHmac(&apos;sha256&apos;, secret).update(payload).digest(&apos;hex&apos;);</pre>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowWebhookSignaturesDialog(false)}>Close</Button>
+              <Button onClick={() => { setShowWebhookSignaturesDialog(false); toast.success('Signature settings saved'); }}>Save Settings</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Export Webhooks Dialog */}
+        <Dialog open={showExportWebhooksDialog} onOpenChange={setShowExportWebhooksDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Download className="w-5 h-5 text-red-600" />
+                Export Webhooks
+              </DialogTitle>
+              <DialogDescription>Export webhook configuration</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Export Format</Label>
+                <Select defaultValue="json">
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="json">JSON</SelectItem>
+                    <SelectItem value="yaml">YAML</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                {webhooks.map(w => (
+                  <div key={w.id} className="flex items-center gap-2 p-2 border rounded">
+                    <Switch defaultChecked />
+                    <span className="text-sm">{w.name}</span>
+                  </div>
+                ))}
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch />
+                <Label>Include secrets (encrypted)</Label>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowExportWebhooksDialog(false)}>Cancel</Button>
+              <Button onClick={() => { setShowExportWebhooksDialog(false); toast.success('Webhooks exported'); }}>
+                <Download className="w-4 h-4 mr-2" /> Export
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Webhook Settings Dialog */}
+        <Dialog open={showWebhookSettingsDialog} onOpenChange={setShowWebhookSettingsDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Settings className="w-5 h-5 text-gray-600" />
+                Webhook Settings
+              </DialogTitle>
+              <DialogDescription>Global webhook configuration</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Request Timeout (seconds)</Label>
+                <Input type="number" defaultValue="30" />
+              </div>
+              <div className="space-y-2">
+                <Label>Max Retries</Label>
+                <Input type="number" defaultValue="3" />
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label>Exponential Backoff</Label>
+                  <p className="text-xs text-gray-500">Increase delay between retries</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label>Log Payloads</Label>
+                  <p className="text-xs text-gray-500">Store webhook payloads for debugging</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowWebhookSettingsDialog(false)}>Cancel</Button>
+              <Button onClick={() => { setShowWebhookSettingsDialog(false); toast.success('Webhook settings saved'); }}>Save Settings</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Run All Tests Dialog */}
+        <Dialog open={showRunAllTestsDialog} onOpenChange={setShowRunAllTestsDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <PlayCircle className="w-5 h-5 text-green-600" />
+                Run All Tests
+              </DialogTitle>
+              <DialogDescription>Execute all test suites</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-medium">Test suites</span>
+                  <Badge>{testSuites.length}</Badge>
+                </div>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-medium">Total tests</span>
+                  <Badge>{testSuites.reduce((sum, s) => sum + s.tests, 0)}</Badge>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Est. duration</span>
+                  <span className="text-sm text-gray-500">{Math.ceil(testSuites.reduce((sum, s) => sum + s.duration, 0) / 1000 / 60)}m</span>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Environment</Label>
+                <Select defaultValue="staging">
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="development">Development</SelectItem>
+                    <SelectItem value="staging">Staging</SelectItem>
+                    <SelectItem value="production">Production</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch defaultChecked />
+                <Label>Stop on first failure</Label>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowRunAllTestsDialog(false)}>Cancel</Button>
+              <Button onClick={() => { setShowRunAllTestsDialog(false); toast.success('Running all tests...'); }}>
+                <PlayCircle className="w-4 h-4 mr-2" /> Run Tests
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* New Test Suite Dialog */}
+        <Dialog open={showNewTestSuiteDialog} onOpenChange={setShowNewTestSuiteDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Plus className="w-5 h-5 text-emerald-600" />
+                Create Test Suite
+              </DialogTitle>
+              <DialogDescription>Create a new test suite for your API</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Suite Name</Label>
+                <Input placeholder="e.g., User API Tests" />
+              </div>
+              <div className="space-y-2">
+                <Label>Description</Label>
+                <Textarea placeholder="Describe what this suite tests..." />
+              </div>
+              <div className="space-y-2">
+                <Label>Environment</Label>
+                <Select defaultValue="staging">
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="development">Development</SelectItem>
+                    <SelectItem value="staging">Staging</SelectItem>
+                    <SelectItem value="production">Production</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Collection (optional)</Label>
+                <Select>
+                  <SelectTrigger><SelectValue placeholder="Link to collection" /></SelectTrigger>
+                  <SelectContent>
+                    {collections.map(c => (
+                      <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowNewTestSuiteDialog(false)}>Cancel</Button>
+              <Button onClick={() => { setShowNewTestSuiteDialog(false); toast.success('Test suite created'); }}>
+                <Plus className="w-4 h-4 mr-2" /> Create Suite
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Coverage Dialog */}
+        <Dialog open={showCoverageDialog} onOpenChange={setShowCoverageDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <FileCode className="w-5 h-5 text-teal-600" />
+                Test Coverage
+              </DialogTitle>
+              <DialogDescription>API endpoint test coverage analysis</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="grid grid-cols-3 gap-4">
+                <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg text-center">
+                  <p className="text-3xl font-bold text-green-600">85%</p>
+                  <p className="text-sm text-gray-500">Overall Coverage</p>
+                </div>
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                  <p className="text-3xl font-bold">{endpoints.length}</p>
+                  <p className="text-sm text-gray-500">Endpoints</p>
+                </div>
+                <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-center">
+                  <p className="text-3xl font-bold text-blue-600">{Math.round(endpoints.length * 0.85)}</p>
+                  <p className="text-sm text-gray-500">Covered</p>
+                </div>
+              </div>
+              <ScrollArea className="h-48">
+                <div className="space-y-2">
+                  {endpoints.slice(0, 6).map(e => (
+                    <div key={e.id} className="flex items-center justify-between p-2 border rounded">
+                      <div className="flex items-center gap-2">
+                        <Badge className={getMethodColor(e.method)}>{e.method}</Badge>
+                        <span className="text-sm">{e.path}</span>
+                      </div>
+                      <Badge className={Math.random() > 0.2 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}>
+                        {Math.random() > 0.2 ? 'Covered' : 'Not covered'}
+                      </Badge>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowCoverageDialog(false)}>Close</Button>
+              <Button onClick={() => { toast.success('Coverage report exported'); }}>
+                <Download className="w-4 h-4 mr-2" /> Export Report
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* CI/CD Dialog */}
+        <Dialog open={showCiCdDialog} onOpenChange={setShowCiCdDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <GitBranch className="w-5 h-5 text-cyan-600" />
+                CI/CD Integration
+              </DialogTitle>
+              <DialogDescription>Integrate tests with your CI/CD pipeline</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Pipeline Provider</Label>
+                <Select defaultValue="github">
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="github">GitHub Actions</SelectItem>
+                    <SelectItem value="gitlab">GitLab CI</SelectItem>
+                    <SelectItem value="jenkins">Jenkins</SelectItem>
+                    <SelectItem value="circleci">CircleCI</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="p-4 bg-gray-900 rounded-lg">
+                <p className="text-xs text-gray-400 mb-2">Add to your workflow:</p>
+                <pre className="text-xs text-green-400 font-mono overflow-x-auto">{`- name: Run API Tests
+  run: npx api-test run --suite all`}</pre>
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch defaultChecked />
+                <Label>Run on every push</Label>
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch defaultChecked />
+                <Label>Require passing tests for merge</Label>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowCiCdDialog(false)}>Cancel</Button>
+              <Button onClick={() => { setShowCiCdDialog(false); toast.success('CI/CD configuration saved'); }}>Save Configuration</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Test Reports Dialog */}
+        <Dialog open={showTestReportsDialog} onOpenChange={setShowTestReportsDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <BarChart3 className="w-5 h-5 text-blue-600" />
+                Test Reports
+              </DialogTitle>
+              <DialogDescription>Historical test results and trends</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="grid grid-cols-4 gap-4">
+                <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg text-center">
+                  <p className="text-2xl font-bold text-green-600">92%</p>
+                  <p className="text-xs text-gray-500">Pass Rate</p>
+                </div>
+                <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                  <p className="text-2xl font-bold">{testSuites.reduce((s, t) => s + t.tests, 0)}</p>
+                  <p className="text-xs text-gray-500">Total Tests</p>
+                </div>
+                <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-center">
+                  <p className="text-2xl font-bold text-blue-600">15</p>
+                  <p className="text-xs text-gray-500">Runs Today</p>
+                </div>
+                <div className="p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg text-center">
+                  <p className="text-2xl font-bold text-amber-600">2.5m</p>
+                  <p className="text-xs text-gray-500">Avg Duration</p>
+                </div>
+              </div>
+              <ScrollArea className="h-48">
+                <div className="space-y-2">
+                  {testSuites.map(s => (
+                    <div key={s.id} className="p-3 border rounded-lg">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="font-medium">{s.name}</span>
+                        <Badge className={getTestStatusColor(s.status)}>{s.status}</Badge>
+                      </div>
+                      <Progress value={(s.passed / s.tests) * 100} className="h-2" />
+                      <p className="text-xs text-gray-500 mt-1">{s.passed}/{s.tests} passed | {formatTimeAgo(s.lastRun)}</p>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowTestReportsDialog(false)}>Close</Button>
+              <Button onClick={() => { toast.success('Report exported'); }}>
+                <Download className="w-4 h-4 mr-2" /> Export Report
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Schedule Tests Dialog */}
+        <Dialog open={showScheduleTestsDialog} onOpenChange={setShowScheduleTestsDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Clock className="w-5 h-5 text-indigo-600" />
+                Schedule Tests
+              </DialogTitle>
+              <DialogDescription>Set up automated test runs</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Schedule</Label>
+                <Select defaultValue="daily">
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="hourly">Every hour</SelectItem>
+                    <SelectItem value="daily">Daily</SelectItem>
+                    <SelectItem value="weekly">Weekly</SelectItem>
+                    <SelectItem value="custom">Custom cron</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Time (UTC)</Label>
+                <Input type="time" defaultValue="00:00" />
+              </div>
+              <div className="space-y-2">
+                <Label>Suites to Run</Label>
+                {testSuites.map(s => (
+                  <div key={s.id} className="flex items-center gap-2 p-2 border rounded">
+                    <Switch defaultChecked />
+                    <span className="text-sm">{s.name}</span>
+                  </div>
+                ))}
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch defaultChecked />
+                <Label>Send report via email</Label>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowScheduleTestsDialog(false)}>Cancel</Button>
+              <Button onClick={() => { setShowScheduleTestsDialog(false); toast.success('Schedule saved'); }}>
+                <Clock className="w-4 h-4 mr-2" /> Save Schedule
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Export Tests Dialog */}
+        <Dialog open={showExportTestsDialog} onOpenChange={setShowExportTestsDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Download className="w-5 h-5 text-violet-600" />
+                Export Tests
+              </DialogTitle>
+              <DialogDescription>Export test suites and results</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Export Format</Label>
+                <Select defaultValue="json">
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="json">JSON</SelectItem>
+                    <SelectItem value="junit">JUnit XML</SelectItem>
+                    <SelectItem value="html">HTML Report</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Include</Label>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Switch defaultChecked />
+                    <span className="text-sm">Test definitions</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Switch defaultChecked />
+                    <span className="text-sm">Last run results</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Switch />
+                    <span className="text-sm">Historical data</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowExportTestsDialog(false)}>Cancel</Button>
+              <Button onClick={() => { setShowExportTestsDialog(false); toast.success('Tests exported'); }}>
+                <Download className="w-4 h-4 mr-2" /> Export
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Test Settings Dialog */}
+        <Dialog open={showTestSettingsDialog} onOpenChange={setShowTestSettingsDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Settings className="w-5 h-5 text-gray-600" />
+                Test Settings
+              </DialogTitle>
+              <DialogDescription>Configure test execution settings</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Request Timeout (ms)</Label>
+                <Input type="number" defaultValue="30000" />
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label>Parallel Execution</Label>
+                  <p className="text-xs text-gray-500">Run tests in parallel</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+              <div className="space-y-2">
+                <Label>Max Workers</Label>
+                <Input type="number" defaultValue="4" />
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label>Retry Failed Tests</Label>
+                  <p className="text-xs text-gray-500">Automatically retry failed tests</p>
+                </div>
+                <Switch />
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label>Verbose Logging</Label>
+                  <p className="text-xs text-gray-500">Show detailed test output</p>
+                </div>
+                <Switch />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowTestSettingsDialog(false)}>Cancel</Button>
+              <Button onClick={() => { setShowTestSettingsDialog(false); toast.success('Test settings saved'); }}>Save Settings</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Rerun Failed Dialog */}
+        <Dialog open={showRerunFailedDialog} onOpenChange={setShowRerunFailedDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Repeat className="w-5 h-5 text-red-600" />
+                Rerun Failed Tests
+              </DialogTitle>
+              <DialogDescription>Retry tests that failed in the last run</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                <p className="text-sm text-red-700 dark:text-red-300">
+                  <strong>{stats.totalTests - stats.passedTests}</strong> tests failed in the last run
+                </p>
+              </div>
+              <ScrollArea className="h-32">
+                <div className="space-y-2">
+                  {testCases.filter(t => t.status === 'failed').map(t => (
+                    <div key={t.id} className="flex items-center gap-2 p-2 border rounded">
+                      <XCircle className="w-4 h-4 text-red-600" />
+                      <span className="text-sm flex-1">{t.name}</span>
+                      <Switch defaultChecked />
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowRerunFailedDialog(false)}>Cancel</Button>
+              <Button onClick={() => { setShowRerunFailedDialog(false); toast.success('Rerunning failed tests...'); }}>
+                <Repeat className="w-4 h-4 mr-2" /> Rerun Selected
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Configure OAuth Dialog */}
+        <Dialog open={showConfigureOAuthDialog} onOpenChange={setShowConfigureOAuthDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Lock className="w-5 h-5 text-green-600" />
+                OAuth 2.0 Configuration
+              </DialogTitle>
+              <DialogDescription>Configure OAuth authentication settings</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Client ID</Label>
+                <Input placeholder="Enter client ID" />
+              </div>
+              <div className="space-y-2">
+                <Label>Client Secret</Label>
+                <Input type="password" placeholder="Enter client secret" />
+              </div>
+              <div className="space-y-2">
+                <Label>Authorization URL</Label>
+                <Input placeholder="https://auth.example.com/authorize" />
+              </div>
+              <div className="space-y-2">
+                <Label>Token URL</Label>
+                <Input placeholder="https://auth.example.com/token" />
+              </div>
+              <div className="space-y-2">
+                <Label>Scopes</Label>
+                <Input placeholder="read write profile" />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowConfigureOAuthDialog(false)}>Cancel</Button>
+              <Button onClick={() => { setShowConfigureOAuthDialog(false); toast.success('OAuth configuration saved'); }}>Save Configuration</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Manage Keys Dialog */}
+        <Dialog open={showManageKeysDialog} onOpenChange={setShowManageKeysDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Key className="w-5 h-5 text-blue-600" />
+                Manage API Keys
+              </DialogTitle>
+              <DialogDescription>View and manage all your API keys</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <Input placeholder="Search keys..." className="max-w-xs" />
+                <Button size="sm" onClick={() => { setShowManageKeysDialog(false); setShowCreateKeyDialog(true); }}>
+                  <Plus className="w-4 h-4 mr-2" /> New Key
+                </Button>
+              </div>
+              <ScrollArea className="h-64">
+                <div className="space-y-2">
+                  {apiKeys.map(key => (
+                    <div key={key.id} className="flex items-center justify-between p-3 border rounded">
+                      <div className="flex items-center gap-3">
+                        <Key className="w-4 h-4 text-gray-400" />
+                        <div>
+                          <p className="font-medium">{key.name}</p>
+                          <p className="text-xs text-gray-500">{key.environment}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge className={getKeyStatusColor(key.status)}>{key.status}</Badge>
+                        <Button size="sm" variant="ghost" onClick={() => { setSelectedKeyForEdit(key); setShowManageKeysDialog(false); setShowEditKeyDialog(true); }}>Edit</Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowManageKeysDialog(false)}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Invite Team Dialog */}
+        <Dialog open={showInviteTeamDialog} onOpenChange={setShowInviteTeamDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <UserCog className="w-5 h-5 text-purple-600" />
+                Invite Team Members
+              </DialogTitle>
+              <DialogDescription>Add members to your API workspace</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Email Addresses</Label>
+                <Textarea placeholder="Enter email addresses, one per line..." rows={4} />
+              </div>
+              <div className="space-y-2">
+                <Label>Role</Label>
+                <Select defaultValue="member">
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="admin">Admin</SelectItem>
+                    <SelectItem value="member">Member</SelectItem>
+                    <SelectItem value="viewer">Viewer</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Personal Message (optional)</Label>
+                <Textarea placeholder="Add a personal message to the invite..." rows={2} />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowInviteTeamDialog(false)}>Cancel</Button>
+              <Button onClick={() => { setShowInviteTeamDialog(false); toast.success('Invitations sent'); }}>
+                <Users className="w-4 h-4 mr-2" /> Send Invites
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Export Collections Settings Dialog */}
+        <Dialog open={showExportCollectionsSettingsDialog} onOpenChange={setShowExportCollectionsSettingsDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <FileJson className="w-5 h-5 text-blue-600" />
+                Export Collections
+              </DialogTitle>
+              <DialogDescription>Export your API collections</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Format</Label>
+                <Select defaultValue="postman">
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="postman">Postman Collection v2.1</SelectItem>
+                    <SelectItem value="openapi">OpenAPI 3.0</SelectItem>
+                    <SelectItem value="json">JSON</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Collections</Label>
+                {collections.map(c => (
+                  <div key={c.id} className="flex items-center gap-2 p-2 border rounded">
+                    <Switch defaultChecked />
+                    <span className="text-sm">{c.name}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowExportCollectionsSettingsDialog(false)}>Cancel</Button>
+              <Button onClick={() => { setShowExportCollectionsSettingsDialog(false); toast.success('Collections exported'); }}>
+                <Download className="w-4 h-4 mr-2" /> Export
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Import Collections Settings Dialog */}
+        <Dialog open={showImportCollectionsSettingsDialog} onOpenChange={setShowImportCollectionsSettingsDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Upload className="w-5 h-5 text-green-600" />
+                Import Collections
+              </DialogTitle>
+              <DialogDescription>Import API collections from file</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Format</Label>
+                <Select defaultValue="postman">
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="postman">Postman Collection</SelectItem>
+                    <SelectItem value="openapi">OpenAPI / Swagger</SelectItem>
+                    <SelectItem value="insomnia">Insomnia</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="border-2 border-dashed rounded-lg p-8 text-center hover:border-primary transition-colors cursor-pointer">
+                <Upload className="w-8 h-8 mx-auto mb-2 text-gray-400" />
+                <p className="text-sm text-gray-500">Drag and drop or click to upload</p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowImportCollectionsSettingsDialog(false)}>Cancel</Button>
+              <Button onClick={() => { setShowImportCollectionsSettingsDialog(false); toast.success('Collections imported'); }}>
+                <Upload className="w-4 h-4 mr-2" /> Import
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Export Environments Dialog */}
+        <Dialog open={showExportEnvironmentsDialog} onOpenChange={setShowExportEnvironmentsDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Variable className="w-5 h-5 text-orange-600" />
+                Export Environments
+              </DialogTitle>
+              <DialogDescription>Export environment variables</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Format</Label>
+                <Select defaultValue="env">
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="env">.env file</SelectItem>
+                    <SelectItem value="json">JSON</SelectItem>
+                    <SelectItem value="yaml">YAML</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Environments</Label>
+                {['Development', 'Staging', 'Production'].map(env => (
+                  <div key={env} className="flex items-center gap-2 p-2 border rounded">
+                    <Switch defaultChecked={env !== 'Production'} />
+                    <span className="text-sm">{env}</span>
+                  </div>
+                ))}
+              </div>
+              <div className="p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
+                <p className="text-sm text-amber-700 dark:text-amber-300">
+                  <AlertTriangle className="w-3 h-3 inline mr-1" />
+                  Sensitive values will be masked
+                </p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowExportEnvironmentsDialog(false)}>Cancel</Button>
+              <Button onClick={() => { setShowExportEnvironmentsDialog(false); toast.success('Environments exported'); }}>
+                <Download className="w-4 h-4 mr-2" /> Export
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Generate Docs Dialog */}
+        <Dialog open={showGenerateDocsDialog} onOpenChange={setShowGenerateDocsDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <FileText className="w-5 h-5 text-purple-600" />
+                Generate Documentation
+              </DialogTitle>
+              <DialogDescription>Auto-generate API documentation</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Output Format</Label>
+                <Select defaultValue="openapi">
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="openapi">OpenAPI 3.0</SelectItem>
+                    <SelectItem value="swagger">Swagger 2.0</SelectItem>
+                    <SelectItem value="markdown">Markdown</SelectItem>
+                    <SelectItem value="html">HTML</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>API Title</Label>
+                <Input placeholder="My API Documentation" />
+              </div>
+              <div className="space-y-2">
+                <Label>Version</Label>
+                <Input placeholder="1.0.0" />
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch defaultChecked />
+                <Label>Include examples</Label>
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch defaultChecked />
+                <Label>Include authentication info</Label>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowGenerateDocsDialog(false)}>Cancel</Button>
+              <Button onClick={() => { setShowGenerateDocsDialog(false); toast.success('Documentation generated'); }}>
+                <FileText className="w-4 h-4 mr-2" /> Generate
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Try Endpoint Dialog */}
+        <Dialog open={showTryEndpointDialog} onOpenChange={setShowTryEndpointDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Send className="w-5 h-5 text-blue-600" />
+                Try Endpoint
+              </DialogTitle>
+              <DialogDescription>{selectedEndpoint?.method} {selectedEndpoint?.path}</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Request Headers</Label>
+                <Textarea className="font-mono text-sm" rows={3} defaultValue="Content-Type: application/json" />
+              </div>
+              {selectedEndpoint?.method !== 'GET' && (
+                <div className="space-y-2">
+                  <Label>Request Body</Label>
+                  <Textarea className="font-mono text-sm" rows={5} placeholder='{"key": "value"}' />
+                </div>
+              )}
+              <div className="space-y-2">
+                <Label>Response</Label>
+                <div className="p-4 bg-gray-900 rounded-lg min-h-[100px]">
+                  <pre className="text-sm text-green-400 font-mono">Click &quot;Send&quot; to see response</pre>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowTryEndpointDialog(false)}>Close</Button>
+              <Button onClick={() => { toast.success('Request sent', { description: 'Response: 200 OK' }); }}>
+                <Send className="w-4 h-4 mr-2" /> Send
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Endpoint Docs Dialog */}
+        <Dialog open={showEndpointDocsDialog} onOpenChange={setShowEndpointDocsDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <BookOpen className="w-5 h-5 text-teal-600" />
+                Endpoint Documentation
+              </DialogTitle>
+              <DialogDescription>{selectedEndpoint?.name}</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <Badge className={selectedEndpoint ? getMethodColor(selectedEndpoint.method) : ''}>{selectedEndpoint?.method}</Badge>
+                <code className="text-sm font-mono">{selectedEndpoint?.path}</code>
+              </div>
+              <div className="space-y-2">
+                <Label>Description</Label>
+                <p className="text-sm text-gray-600 dark:text-gray-300">{selectedEndpoint?.description}</p>
+              </div>
+              <div className="space-y-2">
+                <Label>Authentication</Label>
+                <p className="text-sm">{selectedEndpoint?.authentication}</p>
+              </div>
+              <div className="space-y-2">
+                <Label>Rate Limit</Label>
+                <p className="text-sm">{selectedEndpoint?.rateLimit} requests/minute</p>
+              </div>
+              <div className="space-y-2">
+                <Label>Example Response</Label>
+                <div className="p-4 bg-gray-900 rounded-lg">
+                  <pre className="text-sm text-green-400 font-mono">{'{\n  "success": true,\n  "data": {...}\n}'}</pre>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowEndpointDocsDialog(false)}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Endpoint Code Dialog */}
+        <Dialog open={showEndpointCodeDialog} onOpenChange={setShowEndpointCodeDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Code className="w-5 h-5 text-purple-600" />
+                Code Snippets
+              </DialogTitle>
+              <DialogDescription>Generated code for {selectedEndpoint?.path}</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Language</Label>
+                <Select defaultValue="javascript">
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="curl">cURL</SelectItem>
+                    <SelectItem value="javascript">JavaScript</SelectItem>
+                    <SelectItem value="python">Python</SelectItem>
+                    <SelectItem value="go">Go</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="p-4 bg-gray-900 rounded-lg">
+                <pre className="text-sm text-green-400 font-mono overflow-x-auto">{`fetch('${selectedEndpoint?.path}', {
+  method: '${selectedEndpoint?.method}',
+  headers: {
+    'Authorization': 'Bearer YOUR_API_KEY',
+    'Content-Type': 'application/json'
+  }
+})
+.then(response => response.json())
+.then(data => console.log(data));`}</pre>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowEndpointCodeDialog(false)}>Close</Button>
+              <Button onClick={() => { navigator.clipboard.writeText('Code copied!'); toast.success('Code copied'); }}>
+                <Copy className="w-4 h-4 mr-2" /> Copy
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Run Test Suite Dialog */}
+        <Dialog open={showRunTestSuiteDialog} onOpenChange={setShowRunTestSuiteDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <PlayCircle className="w-5 h-5 text-green-600" />
+                Run Test Suite
+              </DialogTitle>
+              <DialogDescription>{selectedTestSuite?.name}</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-medium">Tests</span>
+                  <Badge>{selectedTestSuite?.tests}</Badge>
+                </div>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-medium">Last run</span>
+                  <span className="text-sm text-gray-500">{selectedTestSuite ? formatTimeAgo(selectedTestSuite.lastRun) : ''}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Coverage</span>
+                  <span className="text-sm text-gray-500">{selectedTestSuite?.coverage}%</span>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Environment</Label>
+                <Select defaultValue={selectedTestSuite?.environment || 'staging'}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="development">Development</SelectItem>
+                    <SelectItem value="staging">Staging</SelectItem>
+                    <SelectItem value="production">Production</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowRunTestSuiteDialog(false)}>Cancel</Button>
+              <Button onClick={() => { setShowRunTestSuiteDialog(false); toast.success('Running test suite...'); }}>
+                <PlayCircle className="w-4 h-4 mr-2" /> Run Suite
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Rerun Failed Tests Dialog */}
+        <Dialog open={showRerunFailedTestsDialog} onOpenChange={setShowRerunFailedTestsDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Repeat className="w-5 h-5 text-orange-600" />
+                Rerun Failed Tests
+              </DialogTitle>
+              <DialogDescription>Retry failed tests from {selectedTestSuite?.name}</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                <p className="text-sm text-red-700 dark:text-red-300">
+                  <strong>{selectedTestSuite?.failed || 0}</strong> tests failed
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch defaultChecked />
+                <Label>Run with verbose logging</Label>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowRerunFailedTestsDialog(false)}>Cancel</Button>
+              <Button onClick={() => { setShowRerunFailedTestsDialog(false); toast.success('Rerunning failed tests...'); }}>
+                <Repeat className="w-4 h-4 mr-2" /> Rerun Failed
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Export Test Report Dialog */}
+        <Dialog open={showExportTestReportDialog} onOpenChange={setShowExportTestReportDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <FileText className="w-5 h-5 text-blue-600" />
+                Export Test Report
+              </DialogTitle>
+              <DialogDescription>Export results from {selectedTestSuite?.name}</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Format</Label>
+                <Select defaultValue="html">
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="html">HTML Report</SelectItem>
+                    <SelectItem value="json">JSON</SelectItem>
+                    <SelectItem value="junit">JUnit XML</SelectItem>
+                    <SelectItem value="pdf">PDF</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch defaultChecked />
+                <Label>Include request/response details</Label>
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch defaultChecked />
+                <Label>Include timing information</Label>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowExportTestReportDialog(false)}>Cancel</Button>
+              <Button onClick={() => { setShowExportTestReportDialog(false); toast.success('Test report exported'); }}>
+                <Download className="w-4 h-4 mr-2" /> Export Report
               </Button>
             </DialogFooter>
           </DialogContent>

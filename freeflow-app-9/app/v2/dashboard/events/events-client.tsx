@@ -568,6 +568,28 @@ export default function EventsClient() {
   const [eventToEdit, setEventToEdit] = useState<SupabaseEvent | null>(null)
   const [eventToDelete, setEventToDelete] = useState<SupabaseEvent | null>(null)
 
+  // Additional dialog states for buttons without onClick handlers
+  const [showPreviewDialog, setShowPreviewDialog] = useState(false)
+  const [showDuplicateDialog, setShowDuplicateDialog] = useState(false)
+  const [showShareDialog, setShowShareDialog] = useState(false)
+  const [showEditEventDetailDialog, setShowEditEventDetailDialog] = useState(false)
+  const [showEmailAttendeeDialog, setShowEmailAttendeeDialog] = useState(false)
+  const [showQrCodeDialog, setShowQrCodeDialog] = useState(false)
+  const [showConnectPayPalDialog, setShowConnectPayPalDialog] = useState(false)
+  const [showChangePasswordDialog, setShowChangePasswordDialog] = useState(false)
+  const [showSignOutSessionDialog, setShowSignOutSessionDialog] = useState(false)
+  const [showExportAllDataDialog, setShowExportAllDataDialog] = useState(false)
+  const [showClearCacheDialog, setShowClearCacheDialog] = useState(false)
+  const [showDeleteAllEventsDialog, setShowDeleteAllEventsDialog] = useState(false)
+  const [selectedAttendeeForAction, setSelectedAttendeeForAction] = useState<Attendee | null>(null)
+  const [selectedSessionIndex, setSelectedSessionIndex] = useState<number | null>(null)
+  const [currentPassword, setCurrentPassword] = useState('')
+  const [newPassword, setNewPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [paypalEmail, setPaypalEmail] = useState('')
+  const [shareUrl, setShareUrl] = useState('')
+  const [duplicateName, setDuplicateName] = useState('')
+
   // Form state for create/edit
   const [formData, setFormData] = useState({
     name: '',
@@ -1345,13 +1367,13 @@ export default function EventsClient() {
                             {formatCurrency(event.totalRevenue)}
                           </div>
                           <div className="flex items-center gap-1">
-                            <Button variant="ghost" size="sm">
+                            <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); setSelectedEvent(event); setShowPreviewDialog(true); }}>
                               <Eye className="w-4 h-4" />
                             </Button>
-                            <Button variant="ghost" size="sm">
+                            <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); setSelectedEvent(event); setShowEditEventDetailDialog(true); }}>
                               <Edit className="w-4 h-4" />
                             </Button>
-                            <Button variant="ghost" size="sm">
+                            <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); setSelectedEvent(event); setShareUrl(`${window.location.origin}/events/${event.slug}`); setShowShareDialog(true); }}>
                               <Share2 className="w-4 h-4" />
                             </Button>
                           </div>
@@ -1408,10 +1430,10 @@ export default function EventsClient() {
                             </div>
                           </div>
                           <div className="flex items-center gap-2">
-                            <Button variant="ghost" size="sm">
+                            <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); setSelectedEvent(event); setShowPreviewDialog(true); }}>
                               <Eye className="w-4 h-4" />
                             </Button>
-                            <Button variant="ghost" size="sm">
+                            <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); setSelectedEvent(event); setShowEditEventDetailDialog(true); }}>
                               <Edit className="w-4 h-4" />
                             </Button>
                           </div>
@@ -1676,14 +1698,14 @@ export default function EventsClient() {
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="flex items-center gap-2">
-                              <Button variant="ghost" size="sm">
+                              <Button variant="ghost" size="sm" onClick={() => { setSelectedAttendeeForAction(attendee); setShowEmailAttendeeDialog(true); }}>
                                 <Mail className="w-4 h-4" />
                               </Button>
-                              <Button variant="ghost" size="sm">
+                              <Button variant="ghost" size="sm" onClick={() => { setSelectedAttendeeForAction(attendee); setShowQrCodeDialog(true); }}>
                                 <QrCode className="w-4 h-4" />
                               </Button>
                               {attendee.status === 'registered' && (
-                                <Button size="sm" className="bg-green-600 hover:bg-green-700">
+                                <Button size="sm" className="bg-green-600 hover:bg-green-700" onClick={() => { setCheckInCode(attendee.orderNumber); setShowCheckInDialog(true); }}>
                                   <CheckCircle className="w-4 h-4 mr-1" />
                                   Check In
                                 </Button>
@@ -2214,7 +2236,7 @@ export default function EventsClient() {
                                 <p className="text-sm text-gray-500">Not connected</p>
                               </div>
                             </div>
-                            <Button variant="outline" size="sm">Connect</Button>
+                            <Button variant="outline" size="sm" onClick={() => setShowConnectPayPalDialog(true)}>Connect</Button>
                           </div>
                         </CardContent>
                       </Card>
@@ -2268,7 +2290,7 @@ export default function EventsClient() {
                               <p className="font-medium">Change Password</p>
                               <p className="text-sm text-gray-500">Update your password</p>
                             </div>
-                            <Button variant="outline" size="sm"><Key className="w-4 h-4 mr-2" />Change</Button>
+                            <Button variant="outline" size="sm" onClick={() => setShowChangePasswordDialog(true)}><Key className="w-4 h-4 mr-2" />Change</Button>
                           </div>
                         </CardContent>
                       </Card>
@@ -2297,7 +2319,7 @@ export default function EventsClient() {
                                     <p className="text-xs text-gray-500">{session.location} • {session.time}</p>
                                   </div>
                                 </div>
-                                {!session.current && <Button variant="ghost" size="sm" className="text-red-600">Sign out</Button>}
+                                {!session.current && <Button variant="ghost" size="sm" className="text-red-600" onClick={() => { setSelectedSessionIndex(i); setShowSignOutSessionDialog(true); }}>Sign out</Button>}
                               </div>
                             ))}
                           </div>
@@ -2349,21 +2371,21 @@ export default function EventsClient() {
                               <p className="font-medium">Export All Data</p>
                               <p className="text-sm text-gray-500">Download all your event data</p>
                             </div>
-                            <Button variant="outline" size="sm"><Download className="w-4 h-4 mr-2" />Export</Button>
+                            <Button variant="outline" size="sm" onClick={() => setShowExportAllDataDialog(true)}><Download className="w-4 h-4 mr-2" />Export</Button>
                           </div>
                           <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                             <div>
                               <p className="font-medium">Clear Cache</p>
                               <p className="text-sm text-gray-500">Refresh cached data</p>
                             </div>
-                            <Button variant="outline" size="sm"><RefreshCw className="w-4 h-4 mr-2" />Clear</Button>
+                            <Button variant="outline" size="sm" onClick={() => setShowClearCacheDialog(true)}><RefreshCw className="w-4 h-4 mr-2" />Clear</Button>
                           </div>
                           <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
                             <div>
                               <p className="font-medium text-red-700 dark:text-red-400">Delete All Events</p>
                               <p className="text-sm text-red-600 dark:text-red-400">Permanently delete all events</p>
                             </div>
-                            <Button variant="outline" size="sm" className="text-red-600 border-red-300 hover:bg-red-50"><Trash2 className="w-4 h-4 mr-2" />Delete</Button>
+                            <Button variant="outline" size="sm" className="text-red-600 border-red-300 hover:bg-red-50" onClick={() => setShowDeleteAllEventsDialog(true)}><Trash2 className="w-4 h-4 mr-2" />Delete</Button>
                           </div>
                         </CardContent>
                       </Card>
@@ -2490,15 +2512,15 @@ export default function EventsClient() {
               </div>
 
               <div className="flex gap-2">
-                <Button variant="outline" className="flex-1">
+                <Button variant="outline" className="flex-1" onClick={() => { setShowPreviewDialog(true); setSelectedEvent(null); }}>
                   <Eye className="w-4 h-4 mr-2" />
                   Preview
                 </Button>
-                <Button variant="outline" className="flex-1">
+                <Button variant="outline" className="flex-1" onClick={() => { if (selectedEvent) { setDuplicateName(`${selectedEvent.title} (Copy)`); setShowDuplicateDialog(true); } }}>
                   <Copy className="w-4 h-4 mr-2" />
                   Duplicate
                 </Button>
-                <Button className="flex-1 bg-gradient-to-r from-orange-500 to-pink-500">
+                <Button className="flex-1 bg-gradient-to-r from-orange-500 to-pink-500" onClick={() => { setShowEditEventDetailDialog(true); }}>
                   <Edit className="w-4 h-4 mr-2" />
                   Edit Event
                 </Button>
@@ -3179,6 +3201,597 @@ export default function EventsClient() {
           <DialogFooter>
             <Button variant="outline" onClick={() => { setShowSearchAttendeesDialog(false); setAttendeeSearchQuery('') }}>
               Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Preview Event Dialog */}
+      <Dialog open={showPreviewDialog} onOpenChange={setShowPreviewDialog}>
+        <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center text-white">
+                <Eye className="w-5 h-5" />
+              </div>
+              Event Preview
+            </DialogTitle>
+          </DialogHeader>
+          {selectedEvent && (
+            <div className="space-y-6 py-4">
+              <div className="relative h-48 bg-gradient-to-br from-orange-400 to-pink-500 rounded-lg flex items-center justify-center">
+                <div className="text-center text-white">
+                  <h2 className="text-2xl font-bold">{selectedEvent.title}</h2>
+                  <p className="text-orange-100 mt-2">{selectedEvent.type} - {selectedEvent.format}</p>
+                </div>
+              </div>
+              <div className="prose dark:prose-invert max-w-none">
+                <p>{selectedEvent.description}</p>
+              </div>
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <p className="text-gray-500 mb-1">Date & Time</p>
+                  <p className="font-medium">{formatDate(selectedEvent.startDate)}</p>
+                  <p className="text-gray-600">{selectedEvent.startTime} - {selectedEvent.endTime}</p>
+                </div>
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <p className="text-gray-500 mb-1">Location</p>
+                  <p className="font-medium">{selectedEvent.venue?.name || 'Online'}</p>
+                  <p className="text-gray-600">{selectedEvent.venue?.city}, {selectedEvent.venue?.state}</p>
+                </div>
+              </div>
+              <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
+                <p className="text-sm text-blue-600 dark:text-blue-400">This is how your event will appear to attendees on the public event page.</p>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowPreviewDialog(false)}>Close</Button>
+            <Button className="bg-gradient-to-r from-blue-500 to-indigo-500" onClick={() => { window.open(`/events/${selectedEvent?.slug}`, '_blank'); }}>
+              <Globe className="w-4 h-4 mr-2" />
+              View Live
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Duplicate Event Dialog */}
+      <Dialog open={showDuplicateDialog} onOpenChange={setShowDuplicateDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white">
+                <Copy className="w-5 h-5" />
+              </div>
+              Duplicate Event
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-4">
+              <p className="text-sm text-purple-700 dark:text-purple-300">
+                Create a copy of "{selectedEvent?.title}" with all settings, ticket types, and configurations.
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label>New Event Name</Label>
+              <Input
+                value={duplicateName}
+                onChange={(e) => setDuplicateName(e.target.value)}
+                placeholder="Enter name for duplicate event"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>New Start Date</Label>
+              <Input type="date" />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowDuplicateDialog(false)}>Cancel</Button>
+            <Button className="bg-gradient-to-r from-purple-500 to-pink-500" onClick={() => {
+              if (duplicateName.trim()) {
+                toast.success(`Event duplicated as "${duplicateName}"`)
+                setShowDuplicateDialog(false)
+                setDuplicateName('')
+              } else {
+                toast.error('Please enter a name for the duplicate event')
+              }
+            }}>
+              <Copy className="w-4 h-4 mr-2" />
+              Duplicate
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Share Event Dialog */}
+      <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center text-white">
+                <Share2 className="w-5 h-5" />
+              </div>
+              Share Event
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Event URL</Label>
+              <div className="flex gap-2">
+                <Input value={shareUrl} readOnly className="flex-1" />
+                <Button variant="outline" onClick={() => {
+                  navigator.clipboard.writeText(shareUrl)
+                  toast.success('Link copied to clipboard!')
+                }}>
+                  <Copy className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+            <div className="space-y-3">
+              <Label>Share on Social Media</Label>
+              <div className="grid grid-cols-4 gap-3">
+                <Button variant="outline" className="flex flex-col gap-1 h-auto py-3" onClick={() => { window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(selectedEvent?.title || '')}`, '_blank'); toast.success('Opening Twitter...'); }}>
+                  <Globe className="w-4 h-4" />
+                  <span className="text-xs">Twitter</span>
+                </Button>
+                <Button variant="outline" className="flex flex-col gap-1 h-auto py-3" onClick={() => { window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`, '_blank'); toast.success('Opening Facebook...'); }}>
+                  <Globe className="w-4 h-4" />
+                  <span className="text-xs">Facebook</span>
+                </Button>
+                <Button variant="outline" className="flex flex-col gap-1 h-auto py-3" onClick={() => { window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`, '_blank'); toast.success('Opening LinkedIn...'); }}>
+                  <Globe className="w-4 h-4" />
+                  <span className="text-xs">LinkedIn</span>
+                </Button>
+                <Button variant="outline" className="flex flex-col gap-1 h-auto py-3" onClick={() => { window.open(`mailto:?subject=${encodeURIComponent(selectedEvent?.title || '')}&body=${encodeURIComponent(`Check out this event: ${shareUrl}`)}`, '_blank'); toast.success('Opening email...'); }}>
+                  <Mail className="w-4 h-4" />
+                  <span className="text-xs">Email</span>
+                </Button>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowShareDialog(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Event Detail Dialog */}
+      <Dialog open={showEditEventDetailDialog} onOpenChange={setShowEditEventDetailDialog}>
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-orange-500 to-pink-500 flex items-center justify-center text-white">
+                <Edit className="w-5 h-5" />
+              </div>
+              Edit Event: {selectedEvent?.title}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <Label>Event Title</Label>
+              <Input defaultValue={selectedEvent?.title} className="mt-1" />
+            </div>
+            <div>
+              <Label>Description</Label>
+              <Textarea defaultValue={selectedEvent?.description} className="mt-1" rows={4} />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Start Date</Label>
+                <Input type="date" defaultValue={selectedEvent?.startDate} className="mt-1" />
+              </div>
+              <div>
+                <Label>End Date</Label>
+                <Input type="date" defaultValue={selectedEvent?.endDate} className="mt-1" />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Start Time</Label>
+                <Input type="time" defaultValue={selectedEvent?.startTime} className="mt-1" />
+              </div>
+              <div>
+                <Label>End Time</Label>
+                <Input type="time" defaultValue={selectedEvent?.endTime} className="mt-1" />
+              </div>
+            </div>
+            <div>
+              <Label>Venue Name</Label>
+              <Input defaultValue={selectedEvent?.venue?.name} className="mt-1" />
+            </div>
+            <div>
+              <Label>Venue Address</Label>
+              <Input defaultValue={selectedEvent?.venue?.address} className="mt-1" />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowEditEventDetailDialog(false)}>Cancel</Button>
+            <Button className="bg-gradient-to-r from-orange-500 to-pink-500" onClick={() => {
+              toast.success('Event updated successfully!')
+              setShowEditEventDetailDialog(false)
+            }}>
+              Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Email Individual Attendee Dialog */}
+      <Dialog open={showEmailAttendeeDialog} onOpenChange={setShowEmailAttendeeDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center text-white">
+                <Mail className="w-5 h-5" />
+              </div>
+              Email Attendee
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+              <Avatar className="w-10 h-10">
+                <AvatarFallback className="bg-gradient-to-br from-cyan-500 to-blue-500 text-white">
+                  {selectedAttendeeForAction?.name.split(' ').map(n => n[0]).join('')}
+                </AvatarFallback>
+              </Avatar>
+              <div>
+                <p className="font-medium">{selectedAttendeeForAction?.name}</p>
+                <p className="text-sm text-gray-500">{selectedAttendeeForAction?.email}</p>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Subject</Label>
+              <Input placeholder="Email subject..." />
+            </div>
+            <div className="space-y-2">
+              <Label>Message</Label>
+              <Textarea placeholder="Write your message..." rows={4} />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowEmailAttendeeDialog(false)}>Cancel</Button>
+            <Button className="bg-gradient-to-r from-cyan-500 to-blue-500" onClick={() => {
+              toast.success(`Email sent to ${selectedAttendeeForAction?.email}!`)
+              setShowEmailAttendeeDialog(false)
+              setSelectedAttendeeForAction(null)
+            }}>
+              <Send className="w-4 h-4 mr-2" />
+              Send Email
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* QR Code Dialog */}
+      <Dialog open={showQrCodeDialog} onOpenChange={setShowQrCodeDialog}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white">
+                <QrCode className="w-5 h-5" />
+              </div>
+              Ticket QR Code
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+              <Avatar className="w-10 h-10">
+                <AvatarFallback className="bg-gradient-to-br from-purple-500 to-pink-500 text-white">
+                  {selectedAttendeeForAction?.name.split(' ').map(n => n[0]).join('')}
+                </AvatarFallback>
+              </Avatar>
+              <div>
+                <p className="font-medium">{selectedAttendeeForAction?.name}</p>
+                <p className="text-sm text-gray-500">{selectedAttendeeForAction?.ticketType}</p>
+              </div>
+            </div>
+            <div className="bg-white p-6 rounded-lg flex items-center justify-center">
+              <div className="w-48 h-48 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
+                <QrCode className="w-32 h-32 text-gray-400" />
+              </div>
+            </div>
+            <div className="text-center">
+              <p className="text-sm text-gray-500">Order: {selectedAttendeeForAction?.orderNumber}</p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowQrCodeDialog(false)}>Close</Button>
+            <Button className="bg-gradient-to-r from-purple-500 to-pink-500" onClick={() => {
+              toast.success('QR code downloaded!')
+            }}>
+              <Download className="w-4 h-4 mr-2" />
+              Download
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Connect PayPal Dialog */}
+      <Dialog open={showConnectPayPalDialog} onOpenChange={setShowConnectPayPalDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center text-white">
+                <DollarSign className="w-5 h-5" />
+              </div>
+              Connect PayPal
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
+              <p className="text-sm text-blue-700 dark:text-blue-300">
+                Connect your PayPal account to receive payments from event ticket sales.
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label>PayPal Email</Label>
+              <Input
+                type="email"
+                placeholder="your-paypal@email.com"
+                value={paypalEmail}
+                onChange={(e) => setPaypalEmail(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowConnectPayPalDialog(false)}>Cancel</Button>
+            <Button className="bg-gradient-to-r from-blue-500 to-indigo-500" onClick={() => {
+              if (paypalEmail.trim() && paypalEmail.includes('@')) {
+                toast.success(`PayPal account ${paypalEmail} connected successfully!`)
+                setShowConnectPayPalDialog(false)
+                setPaypalEmail('')
+              } else {
+                toast.error('Please enter a valid PayPal email')
+              }
+            }}>
+              Connect PayPal
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Change Password Dialog */}
+      <Dialog open={showChangePasswordDialog} onOpenChange={setShowChangePasswordDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center text-white">
+                <Key className="w-5 h-5" />
+              </div>
+              Change Password
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Current Password</Label>
+              <Input
+                type="password"
+                placeholder="Enter current password"
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>New Password</Label>
+              <Input
+                type="password"
+                placeholder="Enter new password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Confirm New Password</Label>
+              <Input
+                type="password"
+                placeholder="Confirm new password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setShowChangePasswordDialog(false); setCurrentPassword(''); setNewPassword(''); setConfirmPassword(''); }}>Cancel</Button>
+            <Button className="bg-gradient-to-r from-orange-500 to-red-500" onClick={() => {
+              if (!currentPassword.trim() || !newPassword.trim() || !confirmPassword.trim()) {
+                toast.error('Please fill in all password fields')
+                return
+              }
+              if (newPassword !== confirmPassword) {
+                toast.error('New passwords do not match')
+                return
+              }
+              if (newPassword.length < 8) {
+                toast.error('Password must be at least 8 characters')
+                return
+              }
+              toast.success('Password changed successfully!')
+              setShowChangePasswordDialog(false)
+              setCurrentPassword('')
+              setNewPassword('')
+              setConfirmPassword('')
+            }}>
+              Change Password
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Sign Out Session Dialog */}
+      <Dialog open={showSignOutSessionDialog} onOpenChange={setShowSignOutSessionDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3 text-red-600">
+              <div className="w-10 h-10 rounded-lg bg-red-100 flex items-center justify-center">
+                <Lock className="w-5 h-5 text-red-600" />
+              </div>
+              Sign Out Session
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-gray-600 dark:text-gray-400">
+              Are you sure you want to sign out this session? The device will need to log in again to access your account.
+            </p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowSignOutSessionDialog(false)}>Cancel</Button>
+            <Button variant="destructive" onClick={() => {
+              toast.success('Session signed out successfully')
+              setShowSignOutSessionDialog(false)
+              setSelectedSessionIndex(null)
+            }}>
+              Sign Out
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Export All Data Dialog */}
+      <Dialog open={showExportAllDataDialog} onOpenChange={setShowExportAllDataDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white">
+                <Download className="w-5 h-5" />
+              </div>
+              Export All Data
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="bg-indigo-50 dark:bg-indigo-900/20 rounded-lg p-4">
+              <p className="text-sm text-indigo-700 dark:text-indigo-300">
+                Export all your event data including events, attendees, orders, and analytics.
+              </p>
+            </div>
+            <div className="space-y-3">
+              <Label>Export Format</Label>
+              <Select defaultValue="json">
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="json">JSON</SelectItem>
+                  <SelectItem value="csv">CSV</SelectItem>
+                  <SelectItem value="xlsx">Excel (XLSX)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-3">
+              <Label>Data to Include</Label>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <input type="checkbox" defaultChecked id="export-events" className="rounded" />
+                  <label htmlFor="export-events" className="text-sm">Events</label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <input type="checkbox" defaultChecked id="export-attendees" className="rounded" />
+                  <label htmlFor="export-attendees" className="text-sm">Attendees</label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <input type="checkbox" defaultChecked id="export-orders" className="rounded" />
+                  <label htmlFor="export-orders" className="text-sm">Orders</label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <input type="checkbox" defaultChecked id="export-analytics" className="rounded" />
+                  <label htmlFor="export-analytics" className="text-sm">Analytics</label>
+                </div>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowExportAllDataDialog(false)}>Cancel</Button>
+            <Button className="bg-gradient-to-r from-indigo-500 to-purple-500" onClick={() => {
+              toast.loading('Preparing export...')
+              setTimeout(() => {
+                toast.dismiss()
+                toast.success('Data exported successfully!')
+                setShowExportAllDataDialog(false)
+              }, 1500)
+            }}>
+              <Download className="w-4 h-4 mr-2" />
+              Export Data
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Clear Cache Dialog */}
+      <Dialog open={showClearCacheDialog} onOpenChange={setShowClearCacheDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center text-white">
+                <RefreshCw className="w-5 h-5" />
+              </div>
+              Clear Cache
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <div className="bg-cyan-50 dark:bg-cyan-900/20 rounded-lg p-4 mb-4">
+              <p className="text-sm text-cyan-700 dark:text-cyan-300">
+                This will clear all cached data and refresh from the server. This may take a moment.
+              </p>
+            </div>
+            <p className="text-gray-600 dark:text-gray-400">
+              Are you sure you want to clear the cache?
+            </p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowClearCacheDialog(false)}>Cancel</Button>
+            <Button className="bg-gradient-to-r from-cyan-500 to-blue-500" onClick={() => {
+              toast.loading('Clearing cache...')
+              setTimeout(() => {
+                toast.dismiss()
+                toast.success('Cache cleared successfully!')
+                setShowClearCacheDialog(false)
+              }, 1000)
+            }}>
+              <RefreshCw className="w-4 h-4 mr-2" />
+              Clear Cache
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete All Events Dialog */}
+      <Dialog open={showDeleteAllEventsDialog} onOpenChange={setShowDeleteAllEventsDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3 text-red-600">
+              <div className="w-10 h-10 rounded-lg bg-red-100 flex items-center justify-center">
+                <Trash2 className="w-5 h-5 text-red-600" />
+              </div>
+              Delete All Events
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <div className="bg-red-50 dark:bg-red-900/20 rounded-lg p-4 mb-4">
+              <p className="text-sm text-red-700 dark:text-red-300 font-medium">
+                Warning: This action cannot be undone!
+              </p>
+            </div>
+            <p className="text-gray-600 dark:text-gray-400 mb-4">
+              This will permanently delete all events, including:
+            </p>
+            <ul className="list-disc list-inside text-sm text-gray-500 space-y-1 mb-4">
+              <li>All event details and settings</li>
+              <li>All ticket types and configurations</li>
+              <li>All attendee registrations</li>
+              <li>All order history</li>
+            </ul>
+            <div className="space-y-2">
+              <Label className="text-red-600">Type "DELETE" to confirm</Label>
+              <Input placeholder="Type DELETE to confirm" />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowDeleteAllEventsDialog(false)}>Cancel</Button>
+            <Button variant="destructive" onClick={() => {
+              toast.success('All events deleted')
+              setShowDeleteAllEventsDialog(false)
+            }}>
+              <Trash2 className="w-4 h-4 mr-2" />
+              Delete All
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -464,6 +464,55 @@ export default function ExtensionsClient() {
   const [checkUpdatesDialogOpen, setCheckUpdatesDialogOpen] = useState(false)
   const [manageDialogOpen, setManageDialogOpen] = useState(false)
 
+  // Additional dialog states
+  const [submitExtensionDialogOpen, setSubmitExtensionDialogOpen] = useState(false)
+  const [createExtensionDialogOpen, setCreateExtensionDialogOpen] = useState(false)
+  const [clearCacheDialogOpen, setClearCacheDialogOpen] = useState(false)
+  const [exportDataDialogOpen, setExportDataDialogOpen] = useState(false)
+  const [selectFolderDialogOpen, setSelectFolderDialogOpen] = useState(false)
+  const [packExtensionDialogOpen, setPackExtensionDialogOpen] = useState(false)
+  const [regenerateKeyDialogOpen, setRegenerateKeyDialogOpen] = useState(false)
+  const [viewDocsDialogOpen, setViewDocsDialogOpen] = useState(false)
+  const [exportSettingsDialogOpen, setExportSettingsDialogOpen] = useState(false)
+  const [importSettingsDialogOpen, setImportSettingsDialogOpen] = useState(false)
+  const [viewHistoryDialogOpen, setViewHistoryDialogOpen] = useState(false)
+  const [disableAllDialogOpen, setDisableAllDialogOpen] = useState(false)
+  const [removeAllDialogOpen, setRemoveAllDialogOpen] = useState(false)
+  const [resetDefaultsDialogOpen, setResetDefaultsDialogOpen] = useState(false)
+  const [extensionOptionsDialogOpen, setExtensionOptionsDialogOpen] = useState(false)
+  const [removeExtensionDialogOpen, setRemoveExtensionDialogOpen] = useState(false)
+  const [shareExtensionDialogOpen, setShareExtensionDialogOpen] = useState(false)
+  const [reportExtensionDialogOpen, setReportExtensionDialogOpen] = useState(false)
+  const [confirmDeleteDialogOpen, setConfirmDeleteDialogOpen] = useState(false)
+  const [extensionToDelete, setExtensionToDelete] = useState<Extension | null>(null)
+
+  // Submit extension form state
+  const [submitExtensionName, setSubmitExtensionName] = useState('')
+  const [submitExtensionDescription, setSubmitExtensionDescription] = useState('')
+  const [submitExtensionCategory, setSubmitExtensionCategory] = useState('')
+  const [submitExtensionVersion, setSubmitExtensionVersion] = useState('')
+  const [submitExtensionUrl, setSubmitExtensionUrl] = useState('')
+
+  // Report extension form state
+  const [reportReason, setReportReason] = useState('')
+  const [reportDetails, setReportDetails] = useState('')
+
+  // Extension options form state
+  const [optionAutoUpdate, setOptionAutoUpdate] = useState(true)
+  const [optionSiteAccess, setOptionSiteAccess] = useState('all')
+  const [optionIncognito, setOptionIncognito] = useState(false)
+
+  // Import settings state
+  const [importFile, setImportFile] = useState<File | null>(null)
+
+  // Pack extension state
+  const [packSourceDir, setPackSourceDir] = useState('')
+  const [packPrivateKey, setPackPrivateKey] = useState('')
+
+  // API key visibility
+  const [showApiKey, setShowApiKey] = useState(false)
+  const [apiKey] = useState('ext_dev_sk_1234567890abcdef1234567890abcdef')
+
   // Browse dialog state
   const [browseCategory, setBrowseCategory] = useState('all')
   const [browseSortBy, setBrowseSortBy] = useState('popular')
@@ -632,6 +681,276 @@ export default function ExtensionsClient() {
     )
   }
 
+  // Submit extension handler
+  const handleSubmitExtension = () => {
+    if (!submitExtensionName || !submitExtensionDescription || !submitExtensionCategory || !submitExtensionVersion) {
+      toast.error('Missing required fields', {
+        description: 'Please fill in all required fields'
+      })
+      return
+    }
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 2000)),
+      {
+        loading: 'Submitting extension for review...',
+        success: `${submitExtensionName} has been submitted for review`,
+        error: 'Failed to submit extension'
+      }
+    )
+    setSubmitExtensionDialogOpen(false)
+    setSubmitExtensionName('')
+    setSubmitExtensionDescription('')
+    setSubmitExtensionCategory('')
+    setSubmitExtensionVersion('')
+    setSubmitExtensionUrl('')
+  }
+
+  // Create extension handler
+  const handleCreateExtension = () => {
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 1500)),
+      {
+        loading: 'Creating extension project...',
+        success: 'Extension project created successfully',
+        error: 'Failed to create extension'
+      }
+    )
+    setCreateExtensionDialogOpen(false)
+  }
+
+  // Clear cache handler
+  const handleClearCache = () => {
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 1500)),
+      {
+        loading: 'Clearing extension cache...',
+        success: 'Extension cache cleared (156 MB freed)',
+        error: 'Failed to clear cache'
+      }
+    )
+    setClearCacheDialogOpen(false)
+  }
+
+  // Export data handler
+  const handleExportData = () => {
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 1500)),
+      {
+        loading: 'Exporting extension data...',
+        success: 'Extension data exported to extensions-data.json',
+        error: 'Failed to export data'
+      }
+    )
+    setExportDataDialogOpen(false)
+  }
+
+  // Select folder handler
+  const handleSelectFolder = () => {
+    toast.success('Folder selected', {
+      description: 'Extension loaded from /Users/dev/my-extension'
+    })
+    setSelectFolderDialogOpen(false)
+  }
+
+  // Pack extension handler
+  const handlePackExtension = () => {
+    if (!packSourceDir) {
+      toast.error('Source directory required', {
+        description: 'Please specify the extension source directory'
+      })
+      return
+    }
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 2000)),
+      {
+        loading: 'Packing extension...',
+        success: 'Extension packed to my-extension.crx',
+        error: 'Failed to pack extension'
+      }
+    )
+    setPackExtensionDialogOpen(false)
+    setPackSourceDir('')
+    setPackPrivateKey('')
+  }
+
+  // Regenerate API key handler
+  const handleRegenerateKey = () => {
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 1500)),
+      {
+        loading: 'Regenerating API key...',
+        success: 'New API key generated successfully',
+        error: 'Failed to regenerate key'
+      }
+    )
+    setRegenerateKeyDialogOpen(false)
+  }
+
+  // Copy API key handler
+  const handleCopyApiKey = () => {
+    navigator.clipboard.writeText(apiKey)
+    toast.success('API key copied', {
+      description: 'API key has been copied to clipboard'
+    })
+  }
+
+  // View docs handler
+  const handleViewDocs = () => {
+    toast.success('Opening documentation', {
+      description: 'Developer documentation will open in a new tab'
+    })
+    setViewDocsDialogOpen(false)
+  }
+
+  // Export settings handler
+  const handleExportSettings = () => {
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 1500)),
+      {
+        loading: 'Exporting settings...',
+        success: 'Settings exported to extension-settings.json',
+        error: 'Failed to export settings'
+      }
+    )
+    setExportSettingsDialogOpen(false)
+  }
+
+  // Import settings handler
+  const handleImportSettings = () => {
+    if (!importFile) {
+      toast.error('No file selected', {
+        description: 'Please select a settings file to import'
+      })
+      return
+    }
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 1500)),
+      {
+        loading: 'Importing settings...',
+        success: 'Settings imported successfully',
+        error: 'Failed to import settings'
+      }
+    )
+    setImportSettingsDialogOpen(false)
+    setImportFile(null)
+  }
+
+  // View history handler
+  const handleViewHistory = () => {
+    setViewHistoryDialogOpen(true)
+  }
+
+  // Disable all extensions handler
+  const handleDisableAll = () => {
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 1500)),
+      {
+        loading: 'Disabling all extensions...',
+        success: `All ${installedExtensions.length} extensions have been disabled`,
+        error: 'Failed to disable extensions'
+      }
+    )
+    setDisableAllDialogOpen(false)
+  }
+
+  // Remove all extensions handler
+  const handleRemoveAll = () => {
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 2000)),
+      {
+        loading: 'Removing all extensions...',
+        success: `All ${installedExtensions.length} extensions have been removed`,
+        error: 'Failed to remove extensions'
+      }
+    )
+    setRemoveAllDialogOpen(false)
+  }
+
+  // Reset to defaults handler
+  const handleResetDefaults = () => {
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 1500)),
+      {
+        loading: 'Resetting to defaults...',
+        success: 'All extension settings have been reset to defaults',
+        error: 'Failed to reset settings'
+      }
+    )
+    setResetDefaultsDialogOpen(false)
+  }
+
+  // Extension options save handler
+  const handleSaveExtensionOptions = () => {
+    toast.success('Options saved', {
+      description: `Settings for ${selectedExtension?.name} have been updated`
+    })
+    setExtensionOptionsDialogOpen(false)
+  }
+
+  // Remove single extension handler
+  const handleRemoveExtension = () => {
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 1500)),
+      {
+        loading: `Removing ${selectedExtension?.name}...`,
+        success: `${selectedExtension?.name} has been removed`,
+        error: 'Failed to remove extension'
+      }
+    )
+    setRemoveExtensionDialogOpen(false)
+    setSelectedExtension(null)
+  }
+
+  // Share extension handler
+  const handleShareExtension = (method: string) => {
+    toast.success('Link copied', {
+      description: `Extension link shared via ${method}`
+    })
+    setShareExtensionDialogOpen(false)
+  }
+
+  // Report extension handler
+  const handleReportExtension = () => {
+    if (!reportReason) {
+      toast.error('Reason required', {
+        description: 'Please select a reason for reporting'
+      })
+      return
+    }
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 1500)),
+      {
+        loading: 'Submitting report...',
+        success: 'Report submitted. We will review this extension.',
+        error: 'Failed to submit report'
+      }
+    )
+    setReportExtensionDialogOpen(false)
+    setReportReason('')
+    setReportDetails('')
+  }
+
+  // Delete extension from installed list handler
+  const handleDeleteFromInstalled = (ext: Extension) => {
+    setExtensionToDelete(ext)
+    setConfirmDeleteDialogOpen(true)
+  }
+
+  const confirmDeleteExtension = () => {
+    if (extensionToDelete) {
+      toast.promise(
+        new Promise(resolve => setTimeout(resolve, 1500)),
+        {
+          loading: `Removing ${extensionToDelete.name}...`,
+          success: `${extensionToDelete.name} has been removed`,
+          error: 'Failed to remove extension'
+        }
+      )
+    }
+    setConfirmDeleteDialogOpen(false)
+    setExtensionToDelete(null)
+  }
+
   // Quick actions with dialog triggers
   const quickActions = [
     {
@@ -693,7 +1012,7 @@ export default function ExtensionsClient() {
                   <List className="w-4 h-4" />
                 </Button>
               </div>
-              <Button className="bg-gradient-to-r from-purple-500 to-indigo-600 text-white">
+              <Button className="bg-gradient-to-r from-purple-500 to-indigo-600 text-white" onClick={() => setSubmitExtensionDialogOpen(true)}>
                 <Plus className="w-4 h-4 mr-2" />
                 Submit Extension
               </Button>
@@ -882,9 +1201,9 @@ export default function ExtensionsClient() {
                             <span className="text-sm font-medium">{ext.rating}</span>
                           </div>
                           {ext.installStatus === 'installed' ? (
-                            <Button size="sm" variant="outline">Manage</Button>
+                            <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); setSelectedExtension(ext); setManageDialogOpen(true); }}>Manage</Button>
                           ) : (
-                            <Button size="sm">Add</Button>
+                            <Button size="sm" onClick={(e) => { e.stopPropagation(); handleInstallExtension(ext.name); }}>Add</Button>
                           )}
                         </div>
                       </div>
@@ -902,7 +1221,7 @@ export default function ExtensionsClient() {
                 <h2 className="text-xl font-bold">Installed Extensions</h2>
                 <p className="text-sm text-muted-foreground">Manage your installed extensions</p>
               </div>
-              <Button variant="outline" className="gap-2">
+              <Button variant="outline" className="gap-2" onClick={() => { setCheckUpdatesDialogOpen(true); handleCheckUpdates(); }}>
                 <RefreshCw className="w-4 h-4" />
                 Check for Updates
               </Button>
@@ -933,11 +1252,11 @@ export default function ExtensionsClient() {
                           <p className="text-xs text-muted-foreground">Updated {ext.lastUpdated}</p>
                         </div>
                         <div className="flex items-center gap-2">
-                          <Switch checked={ext.installStatus === 'installed'} />
+                          <Switch checked={ext.installStatus === 'installed'} onCheckedChange={(checked) => { checked ? handleEnableExtension(ext.name) : handleDisableExtension(ext.name); }} />
                           <Button variant="ghost" size="icon" onClick={() => setSelectedExtension(ext)}>
                             <Settings className="w-4 h-4" />
                           </Button>
-                          <Button variant="ghost" size="icon" className="text-red-600">
+                          <Button variant="ghost" size="icon" className="text-red-600" onClick={() => handleDeleteFromInstalled(ext)}>
                             <Trash2 className="w-4 h-4" />
                           </Button>
                         </div>
@@ -1002,7 +1321,7 @@ export default function ExtensionsClient() {
                           <Badge key={i} variant="outline" className="text-xs">#{tag}</Badge>
                         ))}
                       </div>
-                      <Button>
+                      <Button onClick={(e) => { e.stopPropagation(); ext.installStatus === 'installed' ? setManageDialogOpen(true) : handleInstallExtension(ext.name); }}>
                         {ext.installStatus === 'installed' ? 'Manage' : 'Add to Chrome'}
                       </Button>
                     </div>
@@ -1045,7 +1364,7 @@ export default function ExtensionsClient() {
                     <p className="text-3xl font-bold">0</p>
                     <p className="text-sm text-muted-foreground">Published Extensions</p>
                   </div>
-                  <Button className="w-full gap-2">
+                  <Button className="w-full gap-2" onClick={() => setCreateExtensionDialogOpen(true)}>
                     <Plus className="w-4 h-4" />
                     Create New Extension
                   </Button>
@@ -1058,19 +1377,19 @@ export default function ExtensionsClient() {
                   <CardDescription>Resources for extension developers</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  <div className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted/30 cursor-pointer">
+                  <div className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted/30 cursor-pointer" onClick={() => setViewDocsDialogOpen(true)}>
                     <span className="font-medium">Documentation</span>
                     <ExternalLink className="w-4 h-4 text-muted-foreground" />
                   </div>
-                  <div className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted/30 cursor-pointer">
+                  <div className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted/30 cursor-pointer" onClick={() => setViewDocsDialogOpen(true)}>
                     <span className="font-medium">API Reference</span>
                     <ExternalLink className="w-4 h-4 text-muted-foreground" />
                   </div>
-                  <div className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted/30 cursor-pointer">
+                  <div className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted/30 cursor-pointer" onClick={() => setViewDocsDialogOpen(true)}>
                     <span className="font-medium">Sample Extensions</span>
                     <ExternalLink className="w-4 h-4 text-muted-foreground" />
                   </div>
-                  <div className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted/30 cursor-pointer">
+                  <div className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted/30 cursor-pointer" onClick={() => setViewDocsDialogOpen(true)}>
                     <span className="font-medium">Developer Forum</span>
                     <ExternalLink className="w-4 h-4 text-muted-foreground" />
                   </div>
@@ -1545,11 +1864,11 @@ export default function ExtensionsClient() {
                           <Progress value={31} className="h-2" />
                         </div>
                         <div className="flex gap-3">
-                          <Button variant="outline" className="flex-1">
+                          <Button variant="outline" className="flex-1" onClick={() => setClearCacheDialogOpen(true)}>
                             <Trash2 className="h-4 w-4 mr-2" />
                             Clear Cache
                           </Button>
-                          <Button variant="outline" className="flex-1">
+                          <Button variant="outline" className="flex-1" onClick={() => setExportDataDialogOpen(true)}>
                             <Archive className="h-4 w-4 mr-2" />
                             Export Data
                           </Button>
@@ -1624,7 +1943,7 @@ export default function ExtensionsClient() {
                             <div className="font-medium">Load Unpacked</div>
                             <div className="text-sm text-gray-500">Load extensions from local directory</div>
                           </div>
-                          <Button variant="outline" size="sm">
+                          <Button variant="outline" size="sm" onClick={() => setSelectFolderDialogOpen(true)}>
                             <Upload className="h-4 w-4 mr-2" />
                             Select Folder
                           </Button>
@@ -1634,7 +1953,7 @@ export default function ExtensionsClient() {
                             <div className="font-medium">Pack Extension</div>
                             <div className="text-sm text-gray-500">Create distributable package</div>
                           </div>
-                          <Button variant="outline" size="sm">
+                          <Button variant="outline" size="sm" onClick={() => setPackExtensionDialogOpen(true)}>
                             <Package className="h-4 w-4 mr-2" />
                             Pack
                           </Button>
@@ -1685,21 +2004,21 @@ export default function ExtensionsClient() {
                         <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <div className="flex items-center justify-between mb-3">
                             <div className="font-medium">Developer API Key</div>
-                            <Button variant="outline" size="sm">
+                            <Button variant="outline" size="sm" onClick={() => setRegenerateKeyDialogOpen(true)}>
                               <RefreshCw className="h-4 w-4 mr-2" />
                               Regenerate
                             </Button>
                           </div>
                           <div className="flex items-center gap-2">
                             <code className="flex-1 bg-white dark:bg-gray-900 px-3 py-2 rounded border text-sm">
-                              ext_dev_•••••••••••••••••••••••
+                              {showApiKey ? apiKey : 'ext_dev_•••••••••••••••••••••••'}
                             </code>
-                            <Button variant="outline" size="sm">
+                            <Button variant="outline" size="sm" onClick={handleCopyApiKey}>
                               <Copy className="h-4 w-4" />
                             </Button>
                           </div>
                         </div>
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => setViewDocsDialogOpen(true)}>
                           <ExternalLink className="h-4 w-4 mr-2" />
                           View API Documentation
                         </Button>
@@ -1734,11 +2053,11 @@ export default function ExtensionsClient() {
                           </div>
                         </div>
                         <div className="flex gap-3">
-                          <Button variant="outline" className="flex-1">
+                          <Button variant="outline" className="flex-1" onClick={() => setExportSettingsDialogOpen(true)}>
                             <Download className="h-4 w-4 mr-2" />
                             Export Settings
                           </Button>
-                          <Button variant="outline" className="flex-1">
+                          <Button variant="outline" className="flex-1" onClick={() => setImportSettingsDialogOpen(true)}>
                             <Upload className="h-4 w-4 mr-2" />
                             Import Settings
                           </Button>
@@ -1775,7 +2094,7 @@ export default function ExtensionsClient() {
                             </SelectContent>
                           </Select>
                         </div>
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => setViewHistoryDialogOpen(true)}>
                           <History className="h-4 w-4 mr-2" />
                           View Full History
                         </Button>
@@ -1795,7 +2114,7 @@ export default function ExtensionsClient() {
                             <div className="font-medium text-red-600">Disable All Extensions</div>
                             <div className="text-sm text-gray-500">Temporarily disable all installed extensions</div>
                           </div>
-                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50" onClick={() => setDisableAllDialogOpen(true)}>
                             <Unplug className="h-4 w-4 mr-2" />
                             Disable
                           </Button>
@@ -1805,7 +2124,7 @@ export default function ExtensionsClient() {
                             <div className="font-medium text-red-600">Remove All Extensions</div>
                             <div className="text-sm text-gray-500">Uninstall all extensions permanently</div>
                           </div>
-                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50" onClick={() => setRemoveAllDialogOpen(true)}>
                             <Trash2 className="h-4 w-4 mr-2" />
                             Remove All
                           </Button>
@@ -1815,7 +2134,7 @@ export default function ExtensionsClient() {
                             <div className="font-medium text-red-600">Reset to Defaults</div>
                             <div className="text-sm text-gray-500">Reset all extension settings to defaults</div>
                           </div>
-                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50" onClick={() => setResetDefaultsDialogOpen(true)}>
                             <RefreshCw className="h-4 w-4 mr-2" />
                             Reset
                           </Button>
@@ -1977,25 +2296,25 @@ export default function ExtensionsClient() {
                 <div className="flex gap-3 pt-4 border-t">
                   {selectedExtension.installStatus === 'installed' ? (
                     <>
-                      <Button variant="outline" className="flex-1">
+                      <Button variant="outline" className="flex-1" onClick={() => setExtensionOptionsDialogOpen(true)}>
                         <Settings className="w-4 h-4 mr-2" />
                         Options
                       </Button>
-                      <Button variant="outline" className="flex-1 text-red-600">
+                      <Button variant="outline" className="flex-1 text-red-600" onClick={() => setRemoveExtensionDialogOpen(true)}>
                         <Trash2 className="w-4 h-4 mr-2" />
                         Remove
                       </Button>
                     </>
                   ) : (
-                    <Button className="flex-1">
+                    <Button className="flex-1" onClick={() => handleInstallExtension(selectedExtension.name)}>
                       <Download className="w-4 h-4 mr-2" />
                       Add to Chrome
                     </Button>
                   )}
-                  <Button variant="outline">
+                  <Button variant="outline" onClick={() => setShareExtensionDialogOpen(true)}>
                     <Share2 className="w-4 h-4" />
                   </Button>
-                  <Button variant="outline">
+                  <Button variant="outline" onClick={() => setReportExtensionDialogOpen(true)}>
                     <Flag className="w-4 h-4" />
                   </Button>
                 </div>
@@ -2387,6 +2706,873 @@ export default function ExtensionsClient() {
               {manageAction === 'disable' && <Unplug className="w-4 h-4 mr-2" />}
               {manageAction === 'uninstall' && <Trash2 className="w-4 h-4 mr-2" />}
               {manageAction ? `${manageAction.charAt(0).toUpperCase() + manageAction.slice(1)} Selected` : 'Select an Action'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Submit Extension Dialog */}
+      <Dialog open={submitExtensionDialogOpen} onOpenChange={setSubmitExtensionDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Plus className="w-5 h-5" />
+              Submit Extension
+            </DialogTitle>
+            <DialogDescription>
+              Submit your extension for review and publication
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Extension Name *</Label>
+                <Input
+                  placeholder="My Awesome Extension"
+                  value={submitExtensionName}
+                  onChange={(e) => setSubmitExtensionName(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Version *</Label>
+                <Input
+                  placeholder="1.0.0"
+                  value={submitExtensionVersion}
+                  onChange={(e) => setSubmitExtensionVersion(e.target.value)}
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Category *</Label>
+              <Select value={submitExtensionCategory} onValueChange={setSubmitExtensionCategory}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select category" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="productivity">Productivity</SelectItem>
+                  <SelectItem value="developer">Developer Tools</SelectItem>
+                  <SelectItem value="security">Security</SelectItem>
+                  <SelectItem value="social">Social & Communication</SelectItem>
+                  <SelectItem value="entertainment">Entertainment</SelectItem>
+                  <SelectItem value="utilities">Utilities</SelectItem>
+                  <SelectItem value="shopping">Shopping</SelectItem>
+                  <SelectItem value="themes">Themes</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Description *</Label>
+              <Textarea
+                placeholder="Describe what your extension does..."
+                value={submitExtensionDescription}
+                onChange={(e) => setSubmitExtensionDescription(e.target.value)}
+                rows={3}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Website URL (optional)</Label>
+              <Input
+                placeholder="https://myextension.com"
+                value={submitExtensionUrl}
+                onChange={(e) => setSubmitExtensionUrl(e.target.value)}
+              />
+            </div>
+            <div className="p-4 bg-muted/30 rounded-lg">
+              <p className="text-sm text-muted-foreground">
+                Your extension will be reviewed within 3-5 business days. Make sure it complies with our developer guidelines.
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setSubmitExtensionDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSubmitExtension}>
+              <Upload className="w-4 h-4 mr-2" />
+              Submit for Review
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Extension Dialog */}
+      <Dialog open={createExtensionDialogOpen} onOpenChange={setCreateExtensionDialogOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Code className="w-5 h-5" />
+              Create New Extension
+            </DialogTitle>
+            <DialogDescription>
+              Set up a new extension project with boilerplate code
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Project Name</Label>
+              <Input placeholder="my-extension" />
+            </div>
+            <div className="space-y-2">
+              <Label>Template</Label>
+              <Select defaultValue="basic">
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="basic">Basic Extension</SelectItem>
+                  <SelectItem value="popup">Popup Extension</SelectItem>
+                  <SelectItem value="content">Content Script</SelectItem>
+                  <SelectItem value="background">Background Service</SelectItem>
+                  <SelectItem value="full">Full Featured</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg">
+              <div>
+                <div className="font-medium">Include TypeScript</div>
+                <div className="text-sm text-muted-foreground">Add TypeScript configuration</div>
+              </div>
+              <Switch defaultChecked />
+            </div>
+            <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg">
+              <div>
+                <div className="font-medium">Include Tests</div>
+                <div className="text-sm text-muted-foreground">Add test framework setup</div>
+              </div>
+              <Switch />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setCreateExtensionDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleCreateExtension}>
+              <Plus className="w-4 h-4 mr-2" />
+              Create Project
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Clear Cache Dialog */}
+      <Dialog open={clearCacheDialogOpen} onOpenChange={setClearCacheDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Trash2 className="w-5 h-5" />
+              Clear Extension Cache
+            </DialogTitle>
+            <DialogDescription>
+              This will clear all cached data for installed extensions
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <div className="p-4 bg-muted/30 rounded-lg space-y-3">
+              <div className="flex justify-between">
+                <span>Total cache size:</span>
+                <span className="font-medium">156 MB</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Extensions affected:</span>
+                <span className="font-medium">{installedExtensions.length}</span>
+              </div>
+            </div>
+            <p className="text-sm text-muted-foreground mt-4">
+              Clearing cache may temporarily affect extension performance as data is rebuilt.
+            </p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setClearCacheDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleClearCache}>
+              <Trash2 className="w-4 h-4 mr-2" />
+              Clear Cache
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Export Data Dialog */}
+      <Dialog open={exportDataDialogOpen} onOpenChange={setExportDataDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Archive className="w-5 h-5" />
+              Export Extension Data
+            </DialogTitle>
+            <DialogDescription>
+              Export all extension data and settings to a file
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4 space-y-4">
+            <div className="space-y-2">
+              <Label>Export Format</Label>
+              <Select defaultValue="json">
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="json">JSON (.json)</SelectItem>
+                  <SelectItem value="zip">Compressed (.zip)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-3">
+              <Label>Include:</Label>
+              <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
+                <span>Extension settings</span>
+                <Checkbox defaultChecked />
+              </div>
+              <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
+                <span>Local storage data</span>
+                <Checkbox defaultChecked />
+              </div>
+              <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
+                <span>Sync data</span>
+                <Checkbox />
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setExportDataDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleExportData}>
+              <Download className="w-4 h-4 mr-2" />
+              Export Data
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Select Folder Dialog */}
+      <Dialog open={selectFolderDialogOpen} onOpenChange={setSelectFolderDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Upload className="w-5 h-5" />
+              Load Unpacked Extension
+            </DialogTitle>
+            <DialogDescription>
+              Select a folder containing your unpacked extension
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4 space-y-4">
+            <div className="p-8 border-2 border-dashed rounded-lg text-center">
+              <Upload className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+              <p className="text-sm text-muted-foreground mb-4">
+                Drag and drop your extension folder here, or click to browse
+              </p>
+              <Button variant="outline" onClick={() => toast.success('File browser opened', { description: 'Select your extension folder' })}>Browse Files</Button>
+            </div>
+            <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
+              <p className="text-sm text-yellow-800 dark:text-yellow-200">
+                Developer Mode must be enabled to load unpacked extensions. The folder must contain a valid manifest.json file.
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setSelectFolderDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSelectFolder}>
+              <Upload className="w-4 h-4 mr-2" />
+              Load Extension
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Pack Extension Dialog */}
+      <Dialog open={packExtensionDialogOpen} onOpenChange={setPackExtensionDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Package className="w-5 h-5" />
+              Pack Extension
+            </DialogTitle>
+            <DialogDescription>
+              Create a distributable .crx package from your extension source
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4 space-y-4">
+            <div className="space-y-2">
+              <Label>Extension Source Directory *</Label>
+              <div className="flex gap-2">
+                <Input
+                  placeholder="/path/to/extension"
+                  value={packSourceDir}
+                  onChange={(e) => setPackSourceDir(e.target.value)}
+                />
+                <Button variant="outline" onClick={() => setPackSourceDir('/Users/dev/my-extension')}>Browse</Button>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Private Key File (optional)</Label>
+              <div className="flex gap-2">
+                <Input
+                  placeholder="/path/to/key.pem"
+                  value={packPrivateKey}
+                  onChange={(e) => setPackPrivateKey(e.target.value)}
+                />
+                <Button variant="outline" onClick={() => setPackPrivateKey('/Users/dev/extension.pem')}>Browse</Button>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Leave blank to generate a new key. Use existing key to update an extension.
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setPackExtensionDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handlePackExtension}>
+              <Package className="w-4 h-4 mr-2" />
+              Pack Extension
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Regenerate API Key Dialog */}
+      <Dialog open={regenerateKeyDialogOpen} onOpenChange={setRegenerateKeyDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Key className="w-5 h-5" />
+              Regenerate API Key
+            </DialogTitle>
+            <DialogDescription>
+              Create a new API key for your developer account
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
+              <div className="flex items-start gap-3">
+                <AlertOctagon className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-medium text-yellow-800 dark:text-yellow-200">Warning</p>
+                  <p className="text-sm text-yellow-700 dark:text-yellow-300">
+                    Regenerating your API key will invalidate the current key. Any applications using the current key will need to be updated.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setRegenerateKeyDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleRegenerateKey}>
+              <RefreshCw className="w-4 h-4 mr-2" />
+              Regenerate Key
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* View Documentation Dialog */}
+      <Dialog open={viewDocsDialogOpen} onOpenChange={setViewDocsDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <ExternalLink className="w-5 h-5" />
+              Developer Resources
+            </DialogTitle>
+            <DialogDescription>
+              Access documentation and resources for extension development
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4 space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <Card className="cursor-pointer hover:bg-muted/30" onClick={handleViewDocs}>
+                <CardContent className="p-4">
+                  <Code className="w-8 h-8 text-purple-500 mb-2" />
+                  <h3 className="font-medium">Getting Started</h3>
+                  <p className="text-sm text-muted-foreground">Learn the basics of extension development</p>
+                </CardContent>
+              </Card>
+              <Card className="cursor-pointer hover:bg-muted/30" onClick={handleViewDocs}>
+                <CardContent className="p-4">
+                  <Key className="w-8 h-8 text-blue-500 mb-2" />
+                  <h3 className="font-medium">API Reference</h3>
+                  <p className="text-sm text-muted-foreground">Complete API documentation</p>
+                </CardContent>
+              </Card>
+              <Card className="cursor-pointer hover:bg-muted/30" onClick={handleViewDocs}>
+                <CardContent className="p-4">
+                  <Package className="w-8 h-8 text-green-500 mb-2" />
+                  <h3 className="font-medium">Sample Extensions</h3>
+                  <p className="text-sm text-muted-foreground">Example code and templates</p>
+                </CardContent>
+              </Card>
+              <Card className="cursor-pointer hover:bg-muted/30" onClick={handleViewDocs}>
+                <CardContent className="p-4">
+                  <Users className="w-8 h-8 text-orange-500 mb-2" />
+                  <h3 className="font-medium">Developer Forum</h3>
+                  <p className="text-sm text-muted-foreground">Community support and discussions</p>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setViewDocsDialogOpen(false)}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Export Settings Dialog */}
+      <Dialog open={exportSettingsDialogOpen} onOpenChange={setExportSettingsDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Download className="w-5 h-5" />
+              Export Settings
+            </DialogTitle>
+            <DialogDescription>
+              Export your extension platform settings to a file
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4 space-y-4">
+            <div className="space-y-3">
+              <Label>What to export:</Label>
+              <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
+                <span>Display preferences</span>
+                <Checkbox defaultChecked />
+              </div>
+              <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
+                <span>Update settings</span>
+                <Checkbox defaultChecked />
+              </div>
+              <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
+                <span>Permission settings</span>
+                <Checkbox defaultChecked />
+              </div>
+              <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
+                <span>Notification preferences</span>
+                <Checkbox defaultChecked />
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setExportSettingsDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleExportSettings}>
+              <Download className="w-4 h-4 mr-2" />
+              Export Settings
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Import Settings Dialog */}
+      <Dialog open={importSettingsDialogOpen} onOpenChange={setImportSettingsDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Upload className="w-5 h-5" />
+              Import Settings
+            </DialogTitle>
+            <DialogDescription>
+              Import extension platform settings from a file
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4 space-y-4">
+            <div className="p-8 border-2 border-dashed rounded-lg text-center">
+              <Upload className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+              <p className="text-sm text-muted-foreground mb-4">
+                Drag and drop your settings file here, or click to browse
+              </p>
+              <Button variant="outline" onClick={() => setImportFile(new File([], 'settings.json'))}>
+                Browse Files
+              </Button>
+              {importFile && (
+                <p className="text-sm text-green-600 mt-2">
+                  Selected: {importFile.name}
+                </p>
+              )}
+            </div>
+            <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
+              <p className="text-sm text-yellow-800 dark:text-yellow-200">
+                Importing settings will overwrite your current preferences.
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setImportSettingsDialogOpen(false); setImportFile(null); }}>
+              Cancel
+            </Button>
+            <Button onClick={handleImportSettings} disabled={!importFile}>
+              <Upload className="w-4 h-4 mr-2" />
+              Import Settings
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* View History Dialog */}
+      <Dialog open={viewHistoryDialogOpen} onOpenChange={setViewHistoryDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <History className="w-5 h-5" />
+              Extension History
+            </DialogTitle>
+            <DialogDescription>
+              View your extension installation and removal history
+            </DialogDescription>
+          </DialogHeader>
+          <ScrollArea className="h-[400px] py-4">
+            <div className="space-y-3">
+              {[
+                { action: 'Installed', extension: 'Dark Mode Pro', date: '2024-12-20', version: '3.2.1' },
+                { action: 'Updated', extension: 'Grammar Guardian', date: '2024-12-18', version: '5.1.0' },
+                { action: 'Removed', extension: 'Old Tab Manager', date: '2024-12-15', version: '1.0.0' },
+                { action: 'Installed', extension: 'Tab Manager Plus', date: '2024-12-10', version: '2.4.0' },
+                { action: 'Disabled', extension: 'AdBlock Ultimate', date: '2024-12-08', version: '4.8.1' },
+                { action: 'Installed', extension: 'Color Picker Pro', date: '2024-12-05', version: '2.0.5' },
+              ].map((item, i) => (
+                <div key={i} className="flex items-center justify-between p-4 bg-muted/30 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-2 h-2 rounded-full ${
+                      item.action === 'Installed' ? 'bg-green-500' :
+                      item.action === 'Updated' ? 'bg-blue-500' :
+                      item.action === 'Removed' ? 'bg-red-500' :
+                      'bg-yellow-500'
+                    }`} />
+                    <div>
+                      <p className="font-medium">{item.extension}</p>
+                      <p className="text-sm text-muted-foreground">{item.action} v{item.version}</p>
+                    </div>
+                  </div>
+                  <span className="text-sm text-muted-foreground">{item.date}</span>
+                </div>
+              ))}
+            </div>
+          </ScrollArea>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setViewHistoryDialogOpen(false)}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Disable All Extensions Dialog */}
+      <Dialog open={disableAllDialogOpen} onOpenChange={setDisableAllDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-yellow-600">
+              <Unplug className="w-5 h-5" />
+              Disable All Extensions
+            </DialogTitle>
+            <DialogDescription>
+              Temporarily disable all installed extensions
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
+              <p className="text-sm text-yellow-800 dark:text-yellow-200">
+                This will disable {installedExtensions.length} extension(s). You can re-enable them individually later.
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDisableAllDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleDisableAll}>
+              <Unplug className="w-4 h-4 mr-2" />
+              Disable All
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Remove All Extensions Dialog */}
+      <Dialog open={removeAllDialogOpen} onOpenChange={setRemoveAllDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-600">
+              <Trash2 className="w-5 h-5" />
+              Remove All Extensions
+            </DialogTitle>
+            <DialogDescription>
+              Permanently uninstall all extensions
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+              <div className="flex items-start gap-3">
+                <AlertOctagon className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-medium text-red-800 dark:text-red-200">Warning: This action cannot be undone</p>
+                  <p className="text-sm text-red-700 dark:text-red-300">
+                    All {installedExtensions.length} extension(s) will be permanently removed along with their data.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setRemoveAllDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleRemoveAll}>
+              <Trash2 className="w-4 h-4 mr-2" />
+              Remove All
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Reset to Defaults Dialog */}
+      <Dialog open={resetDefaultsDialogOpen} onOpenChange={setResetDefaultsDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-600">
+              <RefreshCw className="w-5 h-5" />
+              Reset to Defaults
+            </DialogTitle>
+            <DialogDescription>
+              Reset all extension settings to their default values
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+              <p className="text-sm text-red-800 dark:text-red-200">
+                This will reset all settings including:
+              </p>
+              <ul className="text-sm text-red-700 dark:text-red-300 mt-2 space-y-1">
+                <li>- Display preferences</li>
+                <li>- Update settings</li>
+                <li>- Permission configurations</li>
+                <li>- Notification preferences</li>
+                <li>- Developer settings</li>
+              </ul>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setResetDefaultsDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleResetDefaults}>
+              <RefreshCw className="w-4 h-4 mr-2" />
+              Reset to Defaults
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Extension Options Dialog */}
+      <Dialog open={extensionOptionsDialogOpen} onOpenChange={setExtensionOptionsDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Settings className="w-5 h-5" />
+              Extension Options
+            </DialogTitle>
+            <DialogDescription>
+              Configure settings for {selectedExtension?.name}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4 space-y-4">
+            <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg">
+              <div>
+                <div className="font-medium">Auto-update</div>
+                <div className="text-sm text-muted-foreground">Automatically update this extension</div>
+              </div>
+              <Switch checked={optionAutoUpdate} onCheckedChange={setOptionAutoUpdate} />
+            </div>
+            <div className="space-y-2">
+              <Label>Site Access</Label>
+              <Select value={optionSiteAccess} onValueChange={setOptionSiteAccess}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Sites</SelectItem>
+                  <SelectItem value="click">On Click</SelectItem>
+                  <SelectItem value="specific">Specific Sites Only</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg">
+              <div>
+                <div className="font-medium">Allow in Incognito</div>
+                <div className="text-sm text-muted-foreground">Enable in private browsing mode</div>
+              </div>
+              <Switch checked={optionIncognito} onCheckedChange={setOptionIncognito} />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setExtensionOptionsDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSaveExtensionOptions}>
+              <Check className="w-4 h-4 mr-2" />
+              Save Options
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Remove Extension Dialog */}
+      <Dialog open={removeExtensionDialogOpen} onOpenChange={setRemoveExtensionDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-600">
+              <Trash2 className="w-5 h-5" />
+              Remove Extension
+            </DialogTitle>
+            <DialogDescription>
+              Remove {selectedExtension?.name} from your browser
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+              <p className="text-sm text-red-800 dark:text-red-200">
+                This will permanently remove {selectedExtension?.name} and all its data. This action cannot be undone.
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setRemoveExtensionDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleRemoveExtension}>
+              <Trash2 className="w-4 h-4 mr-2" />
+              Remove Extension
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Share Extension Dialog */}
+      <Dialog open={shareExtensionDialogOpen} onOpenChange={setShareExtensionDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Share2 className="w-5 h-5" />
+              Share Extension
+            </DialogTitle>
+            <DialogDescription>
+              Share {selectedExtension?.name} with others
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4 space-y-4">
+            <div className="p-4 bg-muted/30 rounded-lg">
+              <Label className="text-xs text-muted-foreground mb-2 block">Extension Link</Label>
+              <div className="flex items-center gap-2">
+                <code className="flex-1 bg-white dark:bg-gray-900 px-3 py-2 rounded border text-sm overflow-hidden text-ellipsis">
+                  https://extensions.freeflow.io/ext/{selectedExtension?.id}
+                </code>
+                <Button variant="outline" size="sm" onClick={() => handleShareExtension('clipboard')}>
+                  <Copy className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <Button variant="outline" className="w-full" onClick={() => handleShareExtension('Email')}>
+                <Mail className="w-4 h-4 mr-2" />
+                Email
+              </Button>
+              <Button variant="outline" className="w-full" onClick={() => handleShareExtension('Twitter')}>
+                <Globe className="w-4 h-4 mr-2" />
+                Twitter
+              </Button>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShareExtensionDialogOpen(false)}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Report Extension Dialog */}
+      <Dialog open={reportExtensionDialogOpen} onOpenChange={setReportExtensionDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Flag className="w-5 h-5" />
+              Report Extension
+            </DialogTitle>
+            <DialogDescription>
+              Report {selectedExtension?.name} for policy violations
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4 space-y-4">
+            <div className="space-y-2">
+              <Label>Reason for Report *</Label>
+              <Select value={reportReason} onValueChange={setReportReason}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a reason" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="malware">Malware or Security Issue</SelectItem>
+                  <SelectItem value="privacy">Privacy Violation</SelectItem>
+                  <SelectItem value="misleading">Misleading Information</SelectItem>
+                  <SelectItem value="spam">Spam or Scam</SelectItem>
+                  <SelectItem value="copyright">Copyright Infringement</SelectItem>
+                  <SelectItem value="inappropriate">Inappropriate Content</SelectItem>
+                  <SelectItem value="other">Other</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Additional Details (optional)</Label>
+              <Textarea
+                placeholder="Provide more details about the issue..."
+                value={reportDetails}
+                onChange={(e) => setReportDetails(e.target.value)}
+                rows={3}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setReportExtensionDialogOpen(false); setReportReason(''); setReportDetails(''); }}>
+              Cancel
+            </Button>
+            <Button onClick={handleReportExtension}>
+              <Flag className="w-4 h-4 mr-2" />
+              Submit Report
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Confirm Delete Extension Dialog */}
+      <Dialog open={confirmDeleteDialogOpen} onOpenChange={setConfirmDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-600">
+              <Trash2 className="w-5 h-5" />
+              Confirm Removal
+            </DialogTitle>
+            <DialogDescription>
+              Remove {extensionToDelete?.name} from your browser
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+              <p className="text-sm text-red-800 dark:text-red-200">
+                This will permanently remove {extensionToDelete?.name} and all its data. This action cannot be undone.
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setConfirmDeleteDialogOpen(false); setExtensionToDelete(null); }}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={confirmDeleteExtension}>
+              <Trash2 className="w-4 h-4 mr-2" />
+              Remove Extension
             </Button>
           </DialogFooter>
         </DialogContent>

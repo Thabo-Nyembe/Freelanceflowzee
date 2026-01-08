@@ -429,6 +429,27 @@ export default function WarehouseClient() {
   const [showImportDialog, setShowImportDialog] = useState(false)
   const [showScanModeDialog, setShowScanModeDialog] = useState(false)
   const [showNewTaskDialog, setShowNewTaskDialog] = useState(false)
+  const [showEditInventoryDialog, setShowEditInventoryDialog] = useState(false)
+  const [showStartReceivingDialog, setShowStartReceivingDialog] = useState(false)
+  const [showStartPickingDialog, setShowStartPickingDialog] = useState(false)
+  const [showStartPackingDialog, setShowStartPackingDialog] = useState(false)
+  const [showShipOrderDialog, setShowShipOrderDialog] = useState(false)
+  const [showAssignTaskDialog, setShowAssignTaskDialog] = useState(false)
+  const [showViewBinsDialog, setShowViewBinsDialog] = useState(false)
+  const [showViewCycleCountDialog, setShowViewCycleCountDialog] = useState(false)
+  const [showConfigureDialog, setShowConfigureDialog] = useState(false)
+  const [showPurgeDataDialog, setShowPurgeDataDialog] = useState(false)
+  const [showResetDefaultsDialog, setShowResetDefaultsDialog] = useState(false)
+  const [selectedEditItem, setSelectedEditItem] = useState<InventoryItem | null>(null)
+  const [selectedShipmentForReceiving, setSelectedShipmentForReceiving] = useState<InboundShipment | null>(null)
+  const [selectedOrderForPicking, setSelectedOrderForPicking] = useState<OutboundOrder | null>(null)
+  const [selectedOrderForPacking, setSelectedOrderForPacking] = useState<OutboundOrder | null>(null)
+  const [selectedOrderForShipping, setSelectedOrderForShipping] = useState<OutboundOrder | null>(null)
+  const [selectedTaskForAction, setSelectedTaskForAction] = useState<WarehouseTask | null>(null)
+  const [selectedZone, setSelectedZone] = useState<Zone | null>(null)
+  const [selectedCycleCount, setSelectedCycleCount] = useState<CycleCount | null>(null)
+  const [configureTarget, setConfigureTarget] = useState<string>('')
+  const [scanMode, setScanMode] = useState<string>('')
 
   // Form states for dialogs
   const [newInventoryForm, setNewInventoryForm] = useState({
@@ -482,6 +503,29 @@ export default function WarehouseClient() {
     toLocation: '',
     quantity: '',
     assignedTo: '',
+    notes: ''
+  })
+
+  const [editInventoryForm, setEditInventoryForm] = useState({
+    sku: '',
+    name: '',
+    category: '',
+    quantity: '',
+    binLocation: '',
+    zone: '',
+    unitCost: '',
+    reorderPoint: '',
+    description: ''
+  })
+
+  const [assignTaskForm, setAssignTaskForm] = useState({
+    assignedTo: '',
+    notes: ''
+  })
+
+  const [shipOrderForm, setShipOrderForm] = useState({
+    carrier: '',
+    trackingNumber: '',
     notes: ''
   })
 
@@ -769,6 +813,315 @@ export default function WarehouseClient() {
         error: 'Failed to create task'
       }
     )
+  }
+
+  // Handler for editing inventory item
+  const handleEditInventory = () => {
+    if (!editInventoryForm.name || !editInventoryForm.sku) {
+      toast.error('Required fields missing', {
+        description: 'Please fill in SKU and name'
+      })
+      return
+    }
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1500)),
+      {
+        loading: 'Updating inventory item...',
+        success: () => {
+          setShowEditInventoryDialog(false)
+          setSelectedEditItem(null)
+          setEditInventoryForm({
+            sku: '', name: '', category: '', quantity: '', binLocation: '',
+            zone: '', unitCost: '', reorderPoint: '', description: ''
+          })
+          return `Inventory item ${editInventoryForm.sku} updated successfully`
+        },
+        error: 'Failed to update inventory item'
+      }
+    )
+  }
+
+  // Handler for starting receiving process
+  const handleStartReceiving = () => {
+    if (!selectedShipmentForReceiving) return
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1500)),
+      {
+        loading: 'Starting receiving process...',
+        success: () => {
+          setShowStartReceivingDialog(false)
+          setSelectedShipmentForReceiving(null)
+          return `Receiving started for ${selectedShipmentForReceiving.shipment_number}`
+        },
+        error: 'Failed to start receiving'
+      }
+    )
+  }
+
+  // Handler for starting picking process
+  const handleStartPicking = () => {
+    if (!selectedOrderForPicking) return
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1500)),
+      {
+        loading: 'Starting picking process...',
+        success: () => {
+          setShowStartPickingDialog(false)
+          setSelectedOrderForPicking(null)
+          return `Picking started for ${selectedOrderForPicking.order_number}`
+        },
+        error: 'Failed to start picking'
+      }
+    )
+  }
+
+  // Handler for starting packing process
+  const handleStartPacking = () => {
+    if (!selectedOrderForPacking) return
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1500)),
+      {
+        loading: 'Starting packing process...',
+        success: () => {
+          setShowStartPackingDialog(false)
+          setSelectedOrderForPacking(null)
+          return `Packing started for ${selectedOrderForPacking.order_number}`
+        },
+        error: 'Failed to start packing'
+      }
+    )
+  }
+
+  // Handler for shipping order
+  const handleShipOrder = () => {
+    if (!selectedOrderForShipping || !shipOrderForm.carrier || !shipOrderForm.trackingNumber) {
+      toast.error('Required fields missing', {
+        description: 'Please fill in carrier and tracking number'
+      })
+      return
+    }
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1500)),
+      {
+        loading: 'Processing shipment...',
+        success: () => {
+          setShowShipOrderDialog(false)
+          setSelectedOrderForShipping(null)
+          setShipOrderForm({ carrier: '', trackingNumber: '', notes: '' })
+          return `Order ${selectedOrderForShipping.order_number} shipped successfully`
+        },
+        error: 'Failed to ship order'
+      }
+    )
+  }
+
+  // Handler for assigning task
+  const handleAssignTask = () => {
+    if (!selectedTaskForAction || !assignTaskForm.assignedTo) {
+      toast.error('Required fields missing', {
+        description: 'Please select a team member to assign'
+      })
+      return
+    }
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1500)),
+      {
+        loading: 'Assigning task...',
+        success: () => {
+          setShowAssignTaskDialog(false)
+          setSelectedTaskForAction(null)
+          setAssignTaskForm({ assignedTo: '', notes: '' })
+          return `Task ${selectedTaskForAction.task_number} assigned to ${assignTaskForm.assignedTo}`
+        },
+        error: 'Failed to assign task'
+      }
+    )
+  }
+
+  // Handler for starting task
+  const handleStartTask = (task: WarehouseTask) => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1000)),
+      {
+        loading: 'Starting task...',
+        success: () => {
+          return `Task ${task.task_number} started`
+        },
+        error: 'Failed to start task'
+      }
+    )
+  }
+
+  // Handler for completing task
+  const handleCompleteTask = (task: WarehouseTask) => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1000)),
+      {
+        loading: 'Completing task...',
+        success: () => {
+          return `Task ${task.task_number} completed`
+        },
+        error: 'Failed to complete task'
+      }
+    )
+  }
+
+  // Handler for starting cycle count
+  const handleStartCycleCountProcess = (count: CycleCount) => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1500)),
+      {
+        loading: 'Starting cycle count...',
+        success: () => {
+          return `Cycle count ${count.count_number} started`
+        },
+        error: 'Failed to start cycle count'
+      }
+    )
+  }
+
+  // Handler for continuing cycle count
+  const handleContinueCycleCount = (count: CycleCount) => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1000)),
+      {
+        loading: 'Loading cycle count...',
+        success: () => {
+          return `Resuming cycle count ${count.count_number}`
+        },
+        error: 'Failed to load cycle count'
+      }
+    )
+  }
+
+  // Handler for saving settings
+  const handleSaveSettings = (settingType: string) => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1500)),
+      {
+        loading: `Saving ${settingType} settings...`,
+        success: () => {
+          return `${settingType} settings saved successfully`
+        },
+        error: `Failed to save ${settingType} settings`
+      }
+    )
+  }
+
+  // Handler for configure action
+  const handleConfigure = (target: string) => {
+    setConfigureTarget(target)
+    setShowConfigureDialog(true)
+  }
+
+  // Handler for regenerating API key
+  const handleRegenerateApiKey = () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 2000)),
+      {
+        loading: 'Regenerating API key...',
+        success: () => {
+          return 'API key regenerated successfully. Please update your integrations.'
+        },
+        error: 'Failed to regenerate API key'
+      }
+    )
+  }
+
+  // Handler for database optimization
+  const handleOptimizeDatabase = () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 3000)),
+      {
+        loading: 'Optimizing database...',
+        success: () => {
+          return 'Database optimization completed'
+        },
+        error: 'Failed to optimize database'
+      }
+    )
+  }
+
+  // Handler for export configuration
+  const handleExportConfiguration = () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 2000)),
+      {
+        loading: 'Exporting configuration...',
+        success: () => {
+          return 'Configuration exported successfully'
+        },
+        error: 'Failed to export configuration'
+      }
+    )
+  }
+
+  // Handler for import configuration
+  const handleImportConfiguration = () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 2000)),
+      {
+        loading: 'Importing configuration...',
+        success: () => {
+          return 'Configuration imported successfully'
+        },
+        error: 'Failed to import configuration'
+      }
+    )
+  }
+
+  // Handler for purging old data
+  const handlePurgeData = () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 3000)),
+      {
+        loading: 'Purging old data...',
+        success: () => {
+          setShowPurgeDataDialog(false)
+          return 'Old data purged successfully'
+        },
+        error: 'Failed to purge data'
+      }
+    )
+  }
+
+  // Handler for reset to defaults
+  const handleResetDefaults = () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 2500)),
+      {
+        loading: 'Resetting to defaults...',
+        success: () => {
+          setShowResetDefaultsDialog(false)
+          return 'Settings reset to defaults'
+        },
+        error: 'Failed to reset settings'
+      }
+    )
+  }
+
+  // Handler for browse files
+  const handleBrowseFiles = () => {
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.accept = '.csv,.xlsx'
+    input.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0]
+      if (file) {
+        toast.success('File selected', {
+          description: `Ready to import: ${file.name}`
+        })
+      }
+    }
+    input.click()
+  }
+
+  // Handler for scan mode selection
+  const handleScanModeSelect = (mode: string) => {
+    setScanMode(mode)
+    toast.success(`${mode} mode activated`, {
+      description: 'Ready to scan items'
+    })
   }
 
   // Quick actions with real dialog triggers
@@ -1106,7 +1459,21 @@ export default function WarehouseClient() {
                                 >
                                   <Eye className="w-4 h-4" />
                                 </Button>
-                                <Button variant="ghost" size="sm">
+                                <Button variant="ghost" size="sm" onClick={() => {
+                                  setSelectedEditItem(item)
+                                  setEditInventoryForm({
+                                    sku: item.sku,
+                                    name: item.name,
+                                    category: item.category,
+                                    quantity: String(item.quantity_on_hand),
+                                    binLocation: item.bin_location,
+                                    zone: item.zone,
+                                    unitCost: String(item.unit_cost),
+                                    reorderPoint: String(item.reorder_point),
+                                    description: item.description
+                                  })
+                                  setShowEditInventoryDialog(true)
+                                }}>
                                   <Edit className="w-4 h-4" />
                                 </Button>
                               </div>
@@ -1213,13 +1580,19 @@ export default function WarehouseClient() {
                           View Details
                         </Button>
                         {shipment.status === 'in_transit' && (
-                          <Button size="sm" className="gap-2">
+                          <Button size="sm" className="gap-2" onClick={() => {
+                            setSelectedShipmentForReceiving(shipment)
+                            setShowStartReceivingDialog(true)
+                          }}>
                             <ArrowDownLeft className="w-4 h-4" />
                             Start Receiving
                           </Button>
                         )}
                         {shipment.status === 'receiving' && (
-                          <Button size="sm" className="gap-2">
+                          <Button size="sm" className="gap-2" onClick={() => {
+                            setSelectedShipmentForReceiving(shipment)
+                            setShowStartReceivingDialog(true)
+                          }}>
                             <Scan className="w-4 h-4" />
                             Continue Receiving
                           </Button>
@@ -1324,19 +1697,28 @@ export default function WarehouseClient() {
                           View Details
                         </Button>
                         {order.status === 'allocated' && (
-                          <Button size="sm" className="gap-2">
+                          <Button size="sm" className="gap-2" onClick={() => {
+                            setSelectedOrderForPicking(order)
+                            setShowStartPickingDialog(true)
+                          }}>
                             <Package className="w-4 h-4" />
                             Start Picking
                           </Button>
                         )}
                         {order.status === 'picked' && (
-                          <Button size="sm" className="gap-2">
+                          <Button size="sm" className="gap-2" onClick={() => {
+                            setSelectedOrderForPacking(order)
+                            setShowStartPackingDialog(true)
+                          }}>
                             <Box className="w-4 h-4" />
                             Start Packing
                           </Button>
                         )}
                         {order.status === 'packed' && (
-                          <Button size="sm" className="gap-2">
+                          <Button size="sm" className="gap-2" onClick={() => {
+                            setSelectedOrderForShipping(order)
+                            setShowShipOrderDialog(true)
+                          }}>
                             <Truck className="w-4 h-4" />
                             Ship Order
                           </Button>
@@ -1450,19 +1832,22 @@ export default function WarehouseClient() {
                           )}
                           <div className="flex gap-1">
                             {task.status === 'pending' && (
-                              <Button size="sm" className="gap-1">
+                              <Button size="sm" className="gap-1" onClick={() => {
+                                setSelectedTaskForAction(task)
+                                setShowAssignTaskDialog(true)
+                              }}>
                                 <Zap className="w-3 h-3" />
                                 Assign
                               </Button>
                             )}
                             {task.status === 'assigned' && (
-                              <Button size="sm" variant="outline" className="gap-1">
+                              <Button size="sm" variant="outline" className="gap-1" onClick={() => handleStartTask(task)}>
                                 <Activity className="w-3 h-3" />
                                 Start
                               </Button>
                             )}
                             {task.status === 'in_progress' && (
-                              <Button size="sm" className="gap-1 bg-green-600 hover:bg-green-700">
+                              <Button size="sm" className="gap-1 bg-green-600 hover:bg-green-700" onClick={() => handleCompleteTask(task)}>
                                 <CheckCircle2 className="w-3 h-3" />
                                 Complete
                               </Button>
@@ -1570,7 +1955,10 @@ export default function WarehouseClient() {
                       </div>
 
                       <div className="flex justify-end mt-4 pt-4 border-t dark:border-gray-700">
-                        <Button variant="outline" size="sm" className="gap-2">
+                        <Button variant="outline" size="sm" className="gap-2" onClick={() => {
+                          setSelectedZone(zone)
+                          setShowViewBinsDialog(true)
+                        }}>
                           <Eye className="w-4 h-4" />
                           View Bins
                         </Button>
@@ -1678,15 +2066,18 @@ export default function WarehouseClient() {
                       )}
 
                       <div className="flex justify-end gap-2 mt-4 pt-4 border-t dark:border-gray-700">
-                        <Button variant="outline" size="sm">View Details</Button>
+                        <Button variant="outline" size="sm" onClick={() => {
+                          setSelectedCycleCount(count)
+                          setShowViewCycleCountDialog(true)
+                        }}>View Details</Button>
                         {count.status === 'scheduled' && (
-                          <Button size="sm" className="gap-2">
+                          <Button size="sm" className="gap-2" onClick={() => handleStartCycleCountProcess(count)}>
                             <Scan className="w-4 h-4" />
                             Start Count
                           </Button>
                         )}
                         {count.status === 'in_progress' && (
-                          <Button size="sm" className="gap-2">
+                          <Button size="sm" className="gap-2" onClick={() => handleContinueCycleCount(count)}>
                             <Scan className="w-4 h-4" />
                             Continue
                           </Button>
@@ -1795,7 +2186,7 @@ export default function WarehouseClient() {
                         </div>
                       </div>
                       <div className="flex justify-end">
-                        <Button className="bg-gradient-to-r from-cyan-600 to-teal-600">Save Changes</Button>
+                        <Button className="bg-gradient-to-r from-cyan-600 to-teal-600" onClick={() => handleSaveSettings('General')}>Save Changes</Button>
                       </div>
                     </CardContent>
                   </Card>
@@ -1862,7 +2253,7 @@ export default function WarehouseClient() {
                         </div>
                       </div>
                       <div className="flex justify-end">
-                        <Button className="bg-gradient-to-r from-cyan-600 to-teal-600">Save Changes</Button>
+                        <Button className="bg-gradient-to-r from-cyan-600 to-teal-600" onClick={() => handleSaveSettings('Inventory')}>Save Changes</Button>
                       </div>
                     </CardContent>
                   </Card>
@@ -1917,11 +2308,11 @@ export default function WarehouseClient() {
                             <p className="font-medium">Task Priority Rules</p>
                             <p className="text-sm text-gray-500 dark:text-gray-400">Default priority escalation rules</p>
                           </div>
-                          <Button variant="outline" size="sm">Configure</Button>
+                          <Button variant="outline" size="sm" onClick={() => handleConfigure('Task Priority Rules')}>Configure</Button>
                         </div>
                       </div>
                       <div className="flex justify-end">
-                        <Button className="bg-gradient-to-r from-cyan-600 to-teal-600">Save Changes</Button>
+                        <Button className="bg-gradient-to-r from-cyan-600 to-teal-600" onClick={() => handleSaveSettings('Operations')}>Save Changes</Button>
                       </div>
                     </CardContent>
                   </Card>
@@ -1958,7 +2349,7 @@ export default function WarehouseClient() {
                                 </Badge>
                               </div>
                             </div>
-                            <Button variant="outline" size="sm">Configure</Button>
+                            <Button variant="outline" size="sm" onClick={() => handleConfigure(integration.name)}>Configure</Button>
                           </div>
                         ))}
                       </div>
@@ -1972,7 +2363,7 @@ export default function WarehouseClient() {
                         </div>
                         <div className="flex items-center gap-2">
                           <Input value="wms_api_key_••••••••••••••••" readOnly className="flex-1 font-mono text-sm" />
-                          <Button variant="outline" size="sm">Regenerate</Button>
+                          <Button variant="outline" size="sm" onClick={handleRegenerateApiKey}>Regenerate</Button>
                         </div>
                       </div>
                     </CardContent>
@@ -2030,7 +2421,7 @@ export default function WarehouseClient() {
                         </div>
                       </div>
                       <div className="flex justify-end">
-                        <Button className="bg-gradient-to-r from-cyan-600 to-teal-600">Save Changes</Button>
+                        <Button className="bg-gradient-to-r from-cyan-600 to-teal-600" onClick={() => handleSaveSettings('Security')}>Save Changes</Button>
                       </div>
                     </CardContent>
                   </Card>
@@ -2071,7 +2462,7 @@ export default function WarehouseClient() {
                             <p className="font-medium">Database Maintenance</p>
                             <p className="text-sm text-gray-500 dark:text-gray-400">Last optimized: 2 days ago</p>
                           </div>
-                          <Button variant="outline" size="sm" className="gap-2">
+                          <Button variant="outline" size="sm" className="gap-2" onClick={handleOptimizeDatabase}>
                             <RefreshCw className="w-4 h-4" />
                             Optimize Now
                           </Button>
@@ -2081,7 +2472,7 @@ export default function WarehouseClient() {
                             <p className="font-medium">Export Configuration</p>
                             <p className="text-sm text-gray-500 dark:text-gray-400">Backup all warehouse settings</p>
                           </div>
-                          <Button variant="outline" size="sm" className="gap-2">
+                          <Button variant="outline" size="sm" className="gap-2" onClick={handleExportConfiguration}>
                             <Download className="w-4 h-4" />
                             Export
                           </Button>
@@ -2091,7 +2482,7 @@ export default function WarehouseClient() {
                             <p className="font-medium">Import Configuration</p>
                             <p className="text-sm text-gray-500 dark:text-gray-400">Restore settings from backup</p>
                           </div>
-                          <Button variant="outline" size="sm" className="gap-2">
+                          <Button variant="outline" size="sm" className="gap-2" onClick={handleImportConfiguration}>
                             <Upload className="w-4 h-4" />
                             Import
                           </Button>
@@ -2103,11 +2494,11 @@ export default function WarehouseClient() {
                           These actions are irreversible. Please proceed with caution.
                         </p>
                         <div className="flex gap-2">
-                          <Button variant="outline" size="sm" className="text-red-600 border-red-300 hover:bg-red-50 dark:text-red-400 dark:border-red-700 dark:hover:bg-red-900/30">
+                          <Button variant="outline" size="sm" className="text-red-600 border-red-300 hover:bg-red-50 dark:text-red-400 dark:border-red-700 dark:hover:bg-red-900/30" onClick={() => setShowPurgeDataDialog(true)}>
                             <Trash2 className="w-4 h-4 mr-2" />
                             Purge Old Data
                           </Button>
-                          <Button variant="outline" size="sm" className="text-red-600 border-red-300 hover:bg-red-50 dark:text-red-400 dark:border-red-700 dark:hover:bg-red-900/30">
+                          <Button variant="outline" size="sm" className="text-red-600 border-red-300 hover:bg-red-50 dark:text-red-400 dark:border-red-700 dark:hover:bg-red-900/30" onClick={() => setShowResetDefaultsDialog(true)}>
                             <RefreshCw className="w-4 h-4 mr-2" />
                             Reset to Defaults
                           </Button>
@@ -2217,15 +2608,55 @@ export default function WarehouseClient() {
               </div>
 
               <div className="flex justify-end gap-2">
-                <Button variant="outline" className="gap-2">
+                <Button variant="outline" className="gap-2" onClick={() => {
+                  if (selectedItem) {
+                    setTransferForm({
+                      sku: selectedItem.sku,
+                      fromLocation: selectedItem.bin_location,
+                      toLocation: '',
+                      quantity: '',
+                      reason: ''
+                    })
+                    setSelectedItem(null)
+                    setShowTransferDialog(true)
+                  }
+                }}>
                   <Move className="w-4 h-4" />
                   Transfer
                 </Button>
-                <Button variant="outline" className="gap-2">
+                <Button variant="outline" className="gap-2" onClick={() => {
+                  if (selectedItem) {
+                    setCycleCountForm({
+                      zone: selectedItem.zone,
+                      assignedTo: '',
+                      scheduledDate: '',
+                      notes: `Count for item ${selectedItem.sku} at location ${selectedItem.bin_location}`
+                    })
+                    setSelectedItem(null)
+                    setShowCycleCountDialog(true)
+                  }
+                }}>
                   <ClipboardList className="w-4 h-4" />
                   Count
                 </Button>
-                <Button className="gap-2">
+                <Button className="gap-2" onClick={() => {
+                  if (selectedItem) {
+                    setEditInventoryForm({
+                      sku: selectedItem.sku,
+                      name: selectedItem.name,
+                      category: selectedItem.category,
+                      quantity: String(selectedItem.quantity_on_hand),
+                      binLocation: selectedItem.bin_location,
+                      zone: selectedItem.zone,
+                      unitCost: String(selectedItem.unit_cost),
+                      reorderPoint: String(selectedItem.reorder_point),
+                      description: selectedItem.description
+                    })
+                    setSelectedEditItem(selectedItem)
+                    setSelectedItem(null)
+                    setShowEditInventoryDialog(true)
+                  }
+                }}>
                   <Edit className="w-4 h-4" />
                   Edit Item
                 </Button>
@@ -2799,7 +3230,7 @@ export default function WarehouseClient() {
               <p className="text-xs text-gray-400">
                 Supported formats: CSV, XLSX
               </p>
-              <Button variant="outline" className="mt-4">
+              <Button variant="outline" className="mt-4" onClick={handleBrowseFiles}>
                 Browse Files
               </Button>
             </div>
@@ -2860,7 +3291,12 @@ export default function WarehouseClient() {
                   { label: 'Count Items', icon: ClipboardList },
                   { label: 'Move Items', icon: Move },
                 ].map((mode) => (
-                  <Button key={mode.label} variant="outline" className="h-auto py-3 flex flex-col gap-1">
+                  <Button
+                    key={mode.label}
+                    variant={scanMode === mode.label ? 'default' : 'outline'}
+                    className="h-auto py-3 flex flex-col gap-1"
+                    onClick={() => handleScanModeSelect(mode.label)}
+                  >
                     <mode.icon className="w-5 h-5" />
                     <span className="text-xs">{mode.label}</span>
                   </Button>
@@ -3013,6 +3449,727 @@ export default function WarehouseClient() {
             <Button onClick={handleCreateTask} className="bg-gradient-to-r from-cyan-600 to-teal-600">
               <Plus className="w-4 h-4 mr-2" />
               Create Task
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Inventory Dialog */}
+      <Dialog open={showEditInventoryDialog} onOpenChange={setShowEditInventoryDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Edit className="w-5 h-5 text-blue-500" />
+              Edit Inventory Item
+            </DialogTitle>
+            <DialogDescription>
+              Update the details for this inventory item.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="editSku">SKU *</Label>
+                <Input
+                  id="editSku"
+                  value={editInventoryForm.sku}
+                  onChange={(e) => setEditInventoryForm({ ...editInventoryForm, sku: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="editName">Item Name *</Label>
+                <Input
+                  id="editName"
+                  value={editInventoryForm.name}
+                  onChange={(e) => setEditInventoryForm({ ...editInventoryForm, name: e.target.value })}
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="editCategory">Category</Label>
+                <Select
+                  value={editInventoryForm.category}
+                  onValueChange={(value) => setEditInventoryForm({ ...editInventoryForm, category: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Bearings">Bearings</SelectItem>
+                    <SelectItem value="Lubricants">Lubricants</SelectItem>
+                    <SelectItem value="Sensors">Sensors</SelectItem>
+                    <SelectItem value="Chemicals">Chemicals</SelectItem>
+                    <SelectItem value="Valves">Valves</SelectItem>
+                    <SelectItem value="Electronics">Electronics</SelectItem>
+                    <SelectItem value="Raw Materials">Raw Materials</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="editQuantity">Quantity</Label>
+                <Input
+                  id="editQuantity"
+                  type="number"
+                  value={editInventoryForm.quantity}
+                  onChange={(e) => setEditInventoryForm({ ...editInventoryForm, quantity: e.target.value })}
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="editZone">Zone</Label>
+                <Select
+                  value={editInventoryForm.zone}
+                  onValueChange={(value) => setEditInventoryForm({ ...editInventoryForm, zone: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select zone" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {mockZones.map((zone) => (
+                      <SelectItem key={zone.id} value={zone.name}>{zone.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="editBinLocation">Bin Location</Label>
+                <Input
+                  id="editBinLocation"
+                  value={editInventoryForm.binLocation}
+                  onChange={(e) => setEditInventoryForm({ ...editInventoryForm, binLocation: e.target.value })}
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="editUnitCost">Unit Cost ($)</Label>
+                <Input
+                  id="editUnitCost"
+                  type="number"
+                  step="0.01"
+                  value={editInventoryForm.unitCost}
+                  onChange={(e) => setEditInventoryForm({ ...editInventoryForm, unitCost: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="editReorderPoint">Reorder Point</Label>
+                <Input
+                  id="editReorderPoint"
+                  type="number"
+                  value={editInventoryForm.reorderPoint}
+                  onChange={(e) => setEditInventoryForm({ ...editInventoryForm, reorderPoint: e.target.value })}
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="editDescription">Description</Label>
+              <Textarea
+                id="editDescription"
+                value={editInventoryForm.description}
+                onChange={(e) => setEditInventoryForm({ ...editInventoryForm, description: e.target.value })}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowEditInventoryDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleEditInventory} className="bg-gradient-to-r from-blue-500 to-cyan-500">
+              <Edit className="w-4 h-4 mr-2" />
+              Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Start Receiving Dialog */}
+      <Dialog open={showStartReceivingDialog} onOpenChange={setShowStartReceivingDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <ArrowDownLeft className="w-5 h-5 text-cyan-500" />
+              Start Receiving
+            </DialogTitle>
+            <DialogDescription>
+              Begin the receiving process for shipment {selectedShipmentForReceiving?.shipment_number}
+            </DialogDescription>
+          </DialogHeader>
+          {selectedShipmentForReceiving && (
+            <div className="space-y-4 py-4">
+              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg space-y-2">
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-500">Supplier:</span>
+                  <span className="font-medium">{selectedShipmentForReceiving.supplier}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-500">PO Number:</span>
+                  <span className="font-medium">{selectedShipmentForReceiving.po_number}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-500">Total Units:</span>
+                  <span className="font-medium">{selectedShipmentForReceiving.total_units}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-500">Expected Date:</span>
+                  <span className="font-medium">{selectedShipmentForReceiving.expected_date}</span>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Dock Door Assignment</Label>
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select dock door" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Dock 1">Dock 1</SelectItem>
+                    <SelectItem value="Dock 2">Dock 2</SelectItem>
+                    <SelectItem value="Dock 3">Dock 3</SelectItem>
+                    <SelectItem value="Dock 4">Dock 4</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowStartReceivingDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleStartReceiving} className="bg-gradient-to-r from-cyan-500 to-teal-500">
+              <Scan className="w-4 h-4 mr-2" />
+              Start Receiving
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Start Picking Dialog */}
+      <Dialog open={showStartPickingDialog} onOpenChange={setShowStartPickingDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Package className="w-5 h-5 text-orange-500" />
+              Start Picking
+            </DialogTitle>
+            <DialogDescription>
+              Begin picking for order {selectedOrderForPicking?.order_number}
+            </DialogDescription>
+          </DialogHeader>
+          {selectedOrderForPicking && (
+            <div className="space-y-4 py-4">
+              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg space-y-2">
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-500">Customer:</span>
+                  <span className="font-medium">{selectedOrderForPicking.customer}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-500">Total Lines:</span>
+                  <span className="font-medium">{selectedOrderForPicking.total_lines}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-500">Total Units:</span>
+                  <span className="font-medium">{selectedOrderForPicking.total_units}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-500">Ship By:</span>
+                  <span className="font-medium">{selectedOrderForPicking.ship_by_date}</span>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Assign Picker</Label>
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select team member" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="John Smith">John Smith</SelectItem>
+                    <SelectItem value="Emily Chen">Emily Chen</SelectItem>
+                    <SelectItem value="Mike Johnson">Mike Johnson</SelectItem>
+                    <SelectItem value="Sarah Williams">Sarah Williams</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowStartPickingDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleStartPicking} className="bg-gradient-to-r from-orange-500 to-red-500">
+              <Package className="w-4 h-4 mr-2" />
+              Start Picking
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Start Packing Dialog */}
+      <Dialog open={showStartPackingDialog} onOpenChange={setShowStartPackingDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Box className="w-5 h-5 text-purple-500" />
+              Start Packing
+            </DialogTitle>
+            <DialogDescription>
+              Begin packing for order {selectedOrderForPacking?.order_number}
+            </DialogDescription>
+          </DialogHeader>
+          {selectedOrderForPacking && (
+            <div className="space-y-4 py-4">
+              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg space-y-2">
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-500">Customer:</span>
+                  <span className="font-medium">{selectedOrderForPacking.customer}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-500">Picked Units:</span>
+                  <span className="font-medium">{selectedOrderForPacking.picked_units}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-500">Carrier:</span>
+                  <span className="font-medium">{selectedOrderForPacking.carrier}</span>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Packing Station</Label>
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select packing station" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="PACK-STN-01">Pack Station 01</SelectItem>
+                    <SelectItem value="PACK-STN-02">Pack Station 02</SelectItem>
+                    <SelectItem value="PACK-STN-03">Pack Station 03</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowStartPackingDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleStartPacking} className="bg-gradient-to-r from-purple-500 to-indigo-500">
+              <Box className="w-4 h-4 mr-2" />
+              Start Packing
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Ship Order Dialog */}
+      <Dialog open={showShipOrderDialog} onOpenChange={setShowShipOrderDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Truck className="w-5 h-5 text-green-500" />
+              Ship Order
+            </DialogTitle>
+            <DialogDescription>
+              Complete shipping for order {selectedOrderForShipping?.order_number}
+            </DialogDescription>
+          </DialogHeader>
+          {selectedOrderForShipping && (
+            <div className="space-y-4 py-4">
+              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg space-y-2">
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-500">Customer:</span>
+                  <span className="font-medium">{selectedOrderForShipping.customer}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-500">Total Units:</span>
+                  <span className="font-medium">{selectedOrderForShipping.total_units}</span>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="shipCarrier">Carrier *</Label>
+                <Select
+                  value={shipOrderForm.carrier}
+                  onValueChange={(value) => setShipOrderForm({ ...shipOrderForm, carrier: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select carrier" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="FedEx Ground">FedEx Ground</SelectItem>
+                    <SelectItem value="FedEx Express">FedEx Express</SelectItem>
+                    <SelectItem value="UPS Ground">UPS Ground</SelectItem>
+                    <SelectItem value="UPS Express">UPS Express</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="trackingNumber">Tracking Number *</Label>
+                <Input
+                  id="trackingNumber"
+                  placeholder="Enter tracking number"
+                  value={shipOrderForm.trackingNumber}
+                  onChange={(e) => setShipOrderForm({ ...shipOrderForm, trackingNumber: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="shipNotes">Notes</Label>
+                <Textarea
+                  id="shipNotes"
+                  placeholder="Shipping notes..."
+                  value={shipOrderForm.notes}
+                  onChange={(e) => setShipOrderForm({ ...shipOrderForm, notes: e.target.value })}
+                />
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowShipOrderDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleShipOrder} className="bg-gradient-to-r from-green-500 to-emerald-500">
+              <Truck className="w-4 h-4 mr-2" />
+              Ship Order
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Assign Task Dialog */}
+      <Dialog open={showAssignTaskDialog} onOpenChange={setShowAssignTaskDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <User className="w-5 h-5 text-blue-500" />
+              Assign Task
+            </DialogTitle>
+            <DialogDescription>
+              Assign task {selectedTaskForAction?.task_number} to a team member
+            </DialogDescription>
+          </DialogHeader>
+          {selectedTaskForAction && (
+            <div className="space-y-4 py-4">
+              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg space-y-2">
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-500">Task Type:</span>
+                  <span className="font-medium capitalize">{selectedTaskForAction.type}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-500">Item:</span>
+                  <span className="font-medium">{selectedTaskForAction.item_name}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-500">Quantity:</span>
+                  <span className="font-medium">{selectedTaskForAction.quantity}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-500">Est. Time:</span>
+                  <span className="font-medium">{selectedTaskForAction.estimated_minutes} min</span>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Assign To *</Label>
+                <Select
+                  value={assignTaskForm.assignedTo}
+                  onValueChange={(value) => setAssignTaskForm({ ...assignTaskForm, assignedTo: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select team member" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="John Smith">John Smith</SelectItem>
+                    <SelectItem value="Emily Chen">Emily Chen</SelectItem>
+                    <SelectItem value="Mike Johnson">Mike Johnson</SelectItem>
+                    <SelectItem value="Sarah Williams">Sarah Williams</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="assignNotes">Notes</Label>
+                <Textarea
+                  id="assignNotes"
+                  placeholder="Assignment notes..."
+                  value={assignTaskForm.notes}
+                  onChange={(e) => setAssignTaskForm({ ...assignTaskForm, notes: e.target.value })}
+                />
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAssignTaskDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleAssignTask} className="bg-gradient-to-r from-blue-500 to-indigo-500">
+              <Zap className="w-4 h-4 mr-2" />
+              Assign Task
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* View Bins Dialog */}
+      <Dialog open={showViewBinsDialog} onOpenChange={setShowViewBinsDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Grid3X3 className="w-5 h-5 text-green-500" />
+              Bin Locations - {selectedZone?.name}
+            </DialogTitle>
+            <DialogDescription>
+              View and manage bin locations in this zone
+            </DialogDescription>
+          </DialogHeader>
+          {selectedZone && (
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-3 gap-4">
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                  <p className="text-2xl font-bold text-gray-900 dark:text-white">{selectedZone.bin_count}</p>
+                  <p className="text-sm text-gray-500">Total Bins</p>
+                </div>
+                <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg text-center">
+                  <p className="text-2xl font-bold text-green-600">{Math.round(selectedZone.bin_count * 0.7)}</p>
+                  <p className="text-sm text-gray-500">Occupied</p>
+                </div>
+                <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-center">
+                  <p className="text-2xl font-bold text-blue-600">{Math.round(selectedZone.bin_count * 0.3)}</p>
+                  <p className="text-sm text-gray-500">Available</p>
+                </div>
+              </div>
+              <div className="border rounded-lg overflow-hidden">
+                <table className="w-full">
+                  <thead className="bg-gray-50 dark:bg-gray-800">
+                    <tr>
+                      <th className="px-4 py-2 text-left text-sm font-medium text-gray-500">Bin Code</th>
+                      <th className="px-4 py-2 text-left text-sm font-medium text-gray-500">Type</th>
+                      <th className="px-4 py-2 text-right text-sm font-medium text-gray-500">Capacity</th>
+                      <th className="px-4 py-2 text-right text-sm font-medium text-gray-500">Used</th>
+                      <th className="px-4 py-2 text-center text-sm font-medium text-gray-500">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y dark:divide-gray-700">
+                    {[1, 2, 3, 4, 5].map((i) => (
+                      <tr key={i} className="hover:bg-gray-50 dark:hover:bg-gray-800">
+                        <td className="px-4 py-2 font-mono text-sm">{selectedZone.code}-{String(i).padStart(2, '0')}-01</td>
+                        <td className="px-4 py-2 text-sm">Storage</td>
+                        <td className="px-4 py-2 text-sm text-right">100</td>
+                        <td className="px-4 py-2 text-sm text-right">{Math.round(Math.random() * 100)}</td>
+                        <td className="px-4 py-2 text-center">
+                          <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">Active</Badge>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowViewBinsDialog(false)}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* View Cycle Count Dialog */}
+      <Dialog open={showViewCycleCountDialog} onOpenChange={setShowViewCycleCountDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <ClipboardList className="w-5 h-5 text-purple-500" />
+              Cycle Count Details - {selectedCycleCount?.count_number}
+            </DialogTitle>
+          </DialogHeader>
+          {selectedCycleCount && (
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                  <p className="text-2xl font-bold text-gray-900 dark:text-white">{selectedCycleCount.total_bins}</p>
+                  <p className="text-sm text-gray-500">Total Bins</p>
+                </div>
+                <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg text-center">
+                  <p className="text-2xl font-bold text-green-600">{selectedCycleCount.counted_bins}</p>
+                  <p className="text-sm text-gray-500">Counted</p>
+                </div>
+                <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg text-center">
+                  <p className="text-2xl font-bold text-red-600">{selectedCycleCount.variance_items}</p>
+                  <p className="text-sm text-gray-500">Variances</p>
+                </div>
+                <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-center">
+                  <p className="text-2xl font-bold text-blue-600">{selectedCycleCount.accuracy_percent}%</p>
+                  <p className="text-sm text-gray-500">Accuracy</p>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-500">Zone:</span>
+                  <span className="font-medium">{selectedCycleCount.zone}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-500">Assigned To:</span>
+                  <span className="font-medium">{selectedCycleCount.assigned_to}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-500">Scheduled Date:</span>
+                  <span className="font-medium">{selectedCycleCount.scheduled_date}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-500">Variance Value:</span>
+                  <span className={`font-medium ${selectedCycleCount.variance_value > 0 ? 'text-red-600' : 'text-green-600'}`}>
+                    ${selectedCycleCount.variance_value.toFixed(2)}
+                  </span>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <p className="text-sm font-medium">Progress</p>
+                <Progress value={(selectedCycleCount.counted_bins / selectedCycleCount.total_bins) * 100} className="h-3" />
+                <p className="text-xs text-gray-500 text-right">
+                  {selectedCycleCount.counted_bins} / {selectedCycleCount.total_bins} bins counted
+                </p>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowViewCycleCountDialog(false)}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Configure Dialog */}
+      <Dialog open={showConfigureDialog} onOpenChange={setShowConfigureDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Settings className="w-5 h-5 text-gray-500" />
+              Configure {configureTarget}
+            </DialogTitle>
+            <DialogDescription>
+              Adjust settings for {configureTarget}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                <div>
+                  <p className="font-medium">Enable Feature</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Turn this feature on or off</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+              <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                <div>
+                  <p className="font-medium">Auto-sync</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Automatically synchronize data</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+              <div className="space-y-2">
+                <Label>Sync Interval</Label>
+                <Select defaultValue="15">
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="5">Every 5 minutes</SelectItem>
+                    <SelectItem value="15">Every 15 minutes</SelectItem>
+                    <SelectItem value="30">Every 30 minutes</SelectItem>
+                    <SelectItem value="60">Every hour</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowConfigureDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={() => {
+              toast.success(`${configureTarget} configured successfully`)
+              setShowConfigureDialog(false)
+            }} className="bg-gradient-to-r from-cyan-600 to-teal-600">
+              Save Configuration
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Purge Data Dialog */}
+      <Dialog open={showPurgeDataDialog} onOpenChange={setShowPurgeDataDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-600">
+              <Trash2 className="w-5 h-5" />
+              Purge Old Data
+            </DialogTitle>
+            <DialogDescription>
+              This action will permanently delete old data. This cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+              <p className="text-sm text-red-600 dark:text-red-400">
+                Warning: This will delete all historical data older than the retention period. Make sure you have a backup before proceeding.
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label>Data older than</Label>
+              <Select defaultValue="1year">
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="6months">6 months</SelectItem>
+                  <SelectItem value="1year">1 year</SelectItem>
+                  <SelectItem value="2years">2 years</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="confirmPurge">Type "PURGE" to confirm</Label>
+              <Input id="confirmPurge" placeholder="PURGE" />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowPurgeDataDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handlePurgeData} variant="destructive">
+              <Trash2 className="w-4 h-4 mr-2" />
+              Purge Data
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Reset to Defaults Dialog */}
+      <Dialog open={showResetDefaultsDialog} onOpenChange={setShowResetDefaultsDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-600">
+              <RefreshCw className="w-5 h-5" />
+              Reset to Defaults
+            </DialogTitle>
+            <DialogDescription>
+              This will reset all warehouse settings to their default values.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+              <p className="text-sm text-red-600 dark:text-red-400">
+                Warning: All custom configurations will be lost. This includes zone settings, automation rules, and integration configurations.
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="confirmReset">Type "RESET" to confirm</Label>
+              <Input id="confirmReset" placeholder="RESET" />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowResetDefaultsDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleResetDefaults} variant="destructive">
+              <RefreshCw className="w-4 h-4 mr-2" />
+              Reset to Defaults
             </Button>
           </DialogFooter>
         </DialogContent>

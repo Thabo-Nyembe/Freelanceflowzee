@@ -357,6 +357,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
   const [reportToGenerate, setReportToGenerate] = useState('')
   const [showTestCaseOptionsDialog, setShowTestCaseOptionsDialog] = useState(false)
   const [selectedTestCaseForOptions, setSelectedTestCaseForOptions] = useState<typeof mockTestCases[0] | null>(null)
+  const [templateFile, setTemplateFile] = useState<File | null>(null)
 
   // Form states for create test suite
   const [newSuiteForm, setNewSuiteForm] = useState({
@@ -3819,18 +3820,48 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
                 <Upload className="w-12 h-12 mx-auto text-gray-400 mb-4" />
                 <p className="text-gray-600 mb-2">Drag and drop your template file here</p>
                 <p className="text-sm text-gray-500 mb-4">Supports .json, .xml, .xlsx formats</p>
-                <Button variant="outline">
+                <input
+                  type="file"
+                  id="template-file-input"
+                  accept=".json,.xml,.xlsx"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0]
+                    if (file) {
+                      setTemplateFile(file)
+                      toast.success('File selected', { description: `Selected: ${file.name}` })
+                    }
+                  }}
+                />
+                <Button variant="outline" onClick={() => {
+                  const input = document.getElementById('template-file-input') as HTMLInputElement
+                  input?.click()
+                }}>
                   <Upload className="w-4 h-4 mr-2" />
                   Browse Files
                 </Button>
+                {templateFile && (
+                  <p className="mt-2 text-sm text-green-600">Selected: {templateFile.name}</p>
+                )}
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setShowImportTemplateDialog(false)}>Cancel</Button>
-              <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => {
+              <Button variant="outline" onClick={() => {
                 setShowImportTemplateDialog(false)
-                toast.success('Template imported', { description: 'Your template is ready to use' })
-              }}>
+                setTemplateFile(null)
+              }}>Cancel</Button>
+              <Button
+                className="bg-blue-600 hover:bg-blue-700"
+                disabled={!templateFile}
+                onClick={() => {
+                  if (templateFile) {
+                    setShowImportTemplateDialog(false)
+                    toast.success('Template imported', { description: `${templateFile.name} is ready to use` })
+                    setTemplateFile(null)
+                  } else {
+                    toast.error('No file selected', { description: 'Please select a template file first' })
+                  }
+                }}>
                 Import Template
               </Button>
             </DialogFooter>

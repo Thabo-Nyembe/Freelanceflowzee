@@ -364,6 +364,41 @@ export default function VideoStudioClient() {
   const [trackVisibility, setTrackVisibility] = useState({ video: true, audio: true, titles: true })
   const [trackLocks, setTrackLocks] = useState({ video: false, audio: false, titles: false })
 
+  // Dialog states
+  const [showFilterDialog, setShowFilterDialog] = useState(false)
+  const [showNewProjectDialog, setShowNewProjectDialog] = useState(false)
+  const [showAddTrackDialog, setShowAddTrackDialog] = useState(false)
+  const [showUploadDialog, setShowUploadDialog] = useState(false)
+  const [showAutoColorDialog, setShowAutoColorDialog] = useState(false)
+  const [showCaptionsDialog, setShowCaptionsDialog] = useState(false)
+  const [showSceneDetectionDialog, setShowSceneDetectionDialog] = useState(false)
+  const [showAudioEnhanceDialog, setShowAudioEnhanceDialog] = useState(false)
+  const [showAddToQueueDialog, setShowAddToQueueDialog] = useState(false)
+  const [showCloudRenderDialog, setShowCloudRenderDialog] = useState(false)
+  const [showExportSettingsDialog, setShowExportSettingsDialog] = useState(false)
+  const [showSaveSettingsDialog, setShowSaveSettingsDialog] = useState(false)
+  const [showEditPresetDialog, setShowEditPresetDialog] = useState(false)
+  const [showChangeStorageDialog, setShowChangeStorageDialog] = useState(false)
+  const [showClearCacheDialog, setShowClearCacheDialog] = useState(false)
+  const [showClearPreviewDialog, setShowClearPreviewDialog] = useState(false)
+  const [showResetSettingsDialog, setShowResetSettingsDialog] = useState(false)
+  const [showClearDataDialog, setShowClearDataDialog] = useState(false)
+  const [showCreatePresetDialog, setShowCreatePresetDialog] = useState(false)
+  const [showProjectOptionsDialog, setShowProjectOptionsDialog] = useState(false)
+  const [selectedPresetToEdit, setSelectedPresetToEdit] = useState<string | null>(null)
+
+  // Form states
+  const [newProjectName, setNewProjectName] = useState('')
+  const [newProjectResolution, setNewProjectResolution] = useState('1920x1080')
+  const [newProjectFps, setNewProjectFps] = useState('30')
+  const [newTrackType, setNewTrackType] = useState<'video' | 'audio' | 'title'>('video')
+  const [selectedRenderProject, setSelectedRenderProject] = useState('')
+  const [selectedRenderPreset, setSelectedRenderPreset] = useState('1080p')
+  const [newPresetName, setNewPresetName] = useState('')
+  const [newPresetCodec, setNewPresetCodec] = useState('H.264')
+  const [newPresetBitrate, setNewPresetBitrate] = useState('20')
+  const [newPresetResolution, setNewPresetResolution] = useState('1080p')
+
   // Handler functions for track controls
   const handleToggleTrackVisibility = (track: 'video' | 'audio' | 'titles') => {
     setTrackVisibility(prev => ({ ...prev, [track]: !prev[track] }))
@@ -598,6 +633,411 @@ export default function VideoStudioClient() {
     })
   }
 
+  // Handler for creating a new project
+  const handleSubmitNewProject = () => {
+    if (!newProjectName.trim()) {
+      toast.error('Please enter a project name')
+      return
+    }
+    const createPromise = new Promise<void>((resolve) => {
+      setTimeout(() => resolve(), 800)
+    })
+    toast.promise(createPromise, {
+      loading: 'Creating project...',
+      success: `Project "${newProjectName}" created successfully`,
+      error: 'Failed to create project'
+    })
+    setShowNewProjectDialog(false)
+    setNewProjectName('')
+  }
+
+  // Handler for adding a new track
+  const handleAddTrack = () => {
+    const addPromise = new Promise<void>((resolve) => {
+      setTimeout(() => resolve(), 500)
+    })
+    toast.promise(addPromise, {
+      loading: `Adding ${newTrackType} track...`,
+      success: `${newTrackType.charAt(0).toUpperCase() + newTrackType.slice(1)} track added`,
+      error: 'Failed to add track'
+    })
+    setShowAddTrackDialog(false)
+  }
+
+  // Handler for file upload
+  const handleUploadFiles = () => {
+    const uploadPromise = new Promise<void>((resolve) => {
+      setTimeout(() => resolve(), 1500)
+    })
+    toast.promise(uploadPromise, {
+      loading: 'Uploading files...',
+      success: 'Files uploaded successfully',
+      error: 'Failed to upload files'
+    })
+    setShowUploadDialog(false)
+  }
+
+  // Handler for auto color correction
+  const handleAutoColorCorrect = () => {
+    const colorPromise = new Promise<void>((resolve) => {
+      setTimeout(() => resolve(), 2000)
+    })
+    toast.promise(colorPromise, {
+      loading: 'Analyzing footage and applying color correction...',
+      success: 'Auto color correction applied',
+      error: 'Failed to apply color correction'
+    })
+    setShowAutoColorDialog(false)
+  }
+
+  // Handler for generating captions
+  const handleGenerateCaptions = () => {
+    const captionPromise = new Promise<void>((resolve) => {
+      setTimeout(() => resolve(), 3000)
+    })
+    toast.promise(captionPromise, {
+      loading: 'Generating captions using AI...',
+      success: 'Captions generated successfully',
+      error: 'Failed to generate captions'
+    })
+    setShowCaptionsDialog(false)
+  }
+
+  // Handler for scene detection
+  const handleSceneDetection = () => {
+    const scenePromise = new Promise<void>((resolve) => {
+      setTimeout(() => resolve(), 2500)
+    })
+    toast.promise(scenePromise, {
+      loading: 'Detecting scenes...',
+      success: '12 scenes detected and markers added',
+      error: 'Failed to detect scenes'
+    })
+    setShowSceneDetectionDialog(false)
+  }
+
+  // Handler for audio enhancement
+  const handleAudioEnhance = () => {
+    const audioPromise = new Promise<void>((resolve) => {
+      setTimeout(() => resolve(), 2000)
+    })
+    toast.promise(audioPromise, {
+      loading: 'Enhancing audio quality...',
+      success: 'Audio enhanced successfully',
+      error: 'Failed to enhance audio'
+    })
+    setShowAudioEnhanceDialog(false)
+  }
+
+  // Handler for adding to render queue
+  const handleAddToQueue = () => {
+    if (!selectedRenderProject) {
+      toast.error('Please select a project')
+      return
+    }
+    const queuePromise = new Promise<void>((resolve) => {
+      setTimeout(() => resolve(), 500)
+    })
+    toast.promise(queuePromise, {
+      loading: 'Adding to render queue...',
+      success: `Added to queue with ${selectedRenderPreset} preset`,
+      error: 'Failed to add to queue'
+    })
+    setShowAddToQueueDialog(false)
+    setSelectedRenderProject('')
+  }
+
+  // Handler for cloud rendering
+  const handleEnableCloudRender = () => {
+    const cloudPromise = new Promise<void>((resolve) => {
+      setTimeout(() => resolve(), 1000)
+    })
+    toast.promise(cloudPromise, {
+      loading: 'Enabling cloud rendering...',
+      success: 'Cloud rendering enabled - 4x faster processing',
+      error: 'Failed to enable cloud rendering'
+    })
+    setShowCloudRenderDialog(false)
+  }
+
+  // Handler for exporting settings
+  const handleExportSettings = () => {
+    const exportPromise = (async () => {
+      const settings = {
+        resolution: '1920x1080',
+        fps: 30,
+        colorSpace: 'Rec. 709',
+        bitDepth: '8-bit',
+        exportedAt: new Date().toISOString()
+      }
+      const blob = new Blob([JSON.stringify(settings, null, 2)], { type: 'application/json' })
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = 'video-studio-settings.json'
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(url)
+      await new Promise(r => setTimeout(r, 300))
+    })()
+    toast.promise(exportPromise, {
+      loading: 'Exporting settings...',
+      success: 'Settings exported to file',
+      error: 'Failed to export settings'
+    })
+    setShowExportSettingsDialog(false)
+  }
+
+  // Handler for saving settings
+  const handleSaveSettings = () => {
+    const savePromise = new Promise<void>((resolve) => {
+      setTimeout(() => resolve(), 500)
+    })
+    toast.promise(savePromise, {
+      loading: 'Saving settings...',
+      success: 'Settings saved successfully',
+      error: 'Failed to save settings'
+    })
+    setShowSaveSettingsDialog(false)
+  }
+
+  // Handler for editing preset
+  const handleEditPreset = (presetName: string) => {
+    setSelectedPresetToEdit(presetName)
+    setShowEditPresetDialog(true)
+  }
+
+  // Handler for saving edited preset
+  const handleSavePreset = () => {
+    const savePromise = new Promise<void>((resolve) => {
+      setTimeout(() => resolve(), 500)
+    })
+    toast.promise(savePromise, {
+      loading: 'Saving preset...',
+      success: `Preset "${selectedPresetToEdit}" updated`,
+      error: 'Failed to save preset'
+    })
+    setShowEditPresetDialog(false)
+    setSelectedPresetToEdit(null)
+  }
+
+  // Handler for creating custom preset
+  const handleCreatePreset = () => {
+    if (!newPresetName.trim()) {
+      toast.error('Please enter a preset name')
+      return
+    }
+    const createPromise = new Promise<void>((resolve) => {
+      setTimeout(() => resolve(), 500)
+    })
+    toast.promise(createPromise, {
+      loading: 'Creating preset...',
+      success: `Preset "${newPresetName}" created`,
+      error: 'Failed to create preset'
+    })
+    setShowCreatePresetDialog(false)
+    setNewPresetName('')
+  }
+
+  // Handler for changing storage location
+  const handleChangeStorage = () => {
+    const changePromise = new Promise<void>((resolve) => {
+      setTimeout(() => resolve(), 800)
+    })
+    toast.promise(changePromise, {
+      loading: 'Updating storage location...',
+      success: 'Storage location updated',
+      error: 'Failed to change storage location'
+    })
+    setShowChangeStorageDialog(false)
+  }
+
+  // Handler for clearing cache
+  const handleClearCache = () => {
+    const clearPromise = new Promise<void>((resolve) => {
+      setTimeout(() => resolve(), 1500)
+    })
+    toast.promise(clearPromise, {
+      loading: 'Clearing media cache...',
+      success: '12.4 GB of cache cleared',
+      error: 'Failed to clear cache'
+    })
+    setShowClearCacheDialog(false)
+  }
+
+  // Handler for clearing preview files
+  const handleClearPreview = () => {
+    const clearPromise = new Promise<void>((resolve) => {
+      setTimeout(() => resolve(), 1200)
+    })
+    toast.promise(clearPromise, {
+      loading: 'Clearing preview files...',
+      success: '8.2 GB of preview files cleared',
+      error: 'Failed to clear preview files'
+    })
+    setShowClearPreviewDialog(false)
+  }
+
+  // Handler for resetting settings
+  const handleResetSettings = () => {
+    const resetPromise = new Promise<void>((resolve) => {
+      setTimeout(() => resolve(), 500)
+    })
+    toast.promise(resetPromise, {
+      loading: 'Resetting settings...',
+      success: 'All settings reset to defaults',
+      error: 'Failed to reset settings'
+    })
+    setShowResetSettingsDialog(false)
+  }
+
+  // Handler for clearing all data
+  const handleClearAllData = () => {
+    const clearPromise = new Promise<void>((resolve) => {
+      setTimeout(() => resolve(), 2000)
+    })
+    toast.promise(clearPromise, {
+      loading: 'Clearing all local data...',
+      success: 'All local data cleared',
+      error: 'Failed to clear data'
+    })
+    setShowClearDataDialog(false)
+  }
+
+  // Handler for playback skip
+  const handleSkipBack = () => {
+    setCurrentTime(prev => Math.max(0, prev - 10))
+    toast.success('Skipped back 10 seconds')
+  }
+
+  const handleSkipForward = () => {
+    setCurrentTime(prev => prev + 10)
+    toast.success('Skipped forward 10 seconds')
+  }
+
+  // Handler for fullscreen
+  const handleFullscreen = () => {
+    if (document.fullscreenElement) {
+      document.exitFullscreen()
+      toast.success('Exited fullscreen')
+    } else {
+      document.documentElement.requestFullscreen()
+      toast.success('Entered fullscreen')
+    }
+  }
+
+  // Handler for downloading rendered video
+  const handleDownloadRender = (jobName: string) => {
+    const downloadPromise = (async () => {
+      const blob = new Blob(['Video content placeholder'], { type: 'video/mp4' })
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `${jobName}.mp4`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(url)
+      await new Promise(r => setTimeout(r, 300))
+    })()
+    toast.promise(downloadPromise, {
+      loading: `Downloading "${jobName}"...`,
+      success: 'Download started',
+      error: 'Failed to download'
+    })
+  }
+
+  // Handler for sharing rendered video
+  const handleShareRender = (jobName: string) => {
+    const sharePromise = (async () => {
+      await navigator.clipboard.writeText(`https://freeflow.app/share/${jobName.toLowerCase().replace(/\s+/g, '-')}`)
+      await new Promise(r => setTimeout(r, 300))
+    })()
+    toast.promise(sharePromise, {
+      loading: 'Generating share link...',
+      success: 'Share link copied to clipboard',
+      error: 'Failed to generate share link'
+    })
+  }
+
+  // Handler for duplicating asset
+  const handleDuplicateAsset = (assetName: string) => {
+    const duplicatePromise = new Promise<void>((resolve) => {
+      setTimeout(() => resolve(), 500)
+    })
+    toast.promise(duplicatePromise, {
+      loading: `Duplicating "${assetName}"...`,
+      success: `Copy of "${assetName}" created`,
+      error: 'Failed to duplicate asset'
+    })
+    setSelectedAsset(null)
+  }
+
+  // Handler for moving asset
+  const handleMoveAsset = (assetName: string) => {
+    const movePromise = new Promise<void>((resolve) => {
+      setTimeout(() => resolve(), 500)
+    })
+    toast.promise(movePromise, {
+      loading: `Moving "${assetName}"...`,
+      success: `"${assetName}" moved to new location`,
+      error: 'Failed to move asset'
+    })
+    setSelectedAsset(null)
+  }
+
+  // Handler for deleting asset
+  const handleDeleteAsset = (assetName: string) => {
+    const deletePromise = new Promise<void>((resolve) => {
+      setTimeout(() => resolve(), 500)
+    })
+    toast.promise(deletePromise, {
+      loading: `Deleting "${assetName}"...`,
+      success: `"${assetName}" deleted`,
+      error: 'Failed to delete asset'
+    })
+    setSelectedAsset(null)
+  }
+
+  // Handler for opening project in editor
+  const handleOpenInEditor = (projectName: string) => {
+    const openPromise = new Promise<void>((resolve) => {
+      setTimeout(() => resolve(), 800)
+    })
+    toast.promise(openPromise, {
+      loading: `Opening "${projectName}" in editor...`,
+      success: `"${projectName}" opened in editor`,
+      error: 'Failed to open project'
+    })
+    setSelectedProject(null)
+  }
+
+  // Handler for sharing project
+  const handleShareProject = (projectName: string) => {
+    const sharePromise = (async () => {
+      await navigator.clipboard.writeText(`https://freeflow.app/project/${projectName.toLowerCase().replace(/\s+/g, '-')}`)
+      await new Promise(r => setTimeout(r, 300))
+    })()
+    toast.promise(sharePromise, {
+      loading: 'Generating share link...',
+      success: 'Project share link copied to clipboard',
+      error: 'Failed to generate share link'
+    })
+  }
+
+  // Handler for project options menu
+  const handleProjectOptions = (project: VideoProject) => {
+    setSelectedProject(project)
+    setShowProjectOptionsDialog(true)
+  }
+
+  // Handler for applying filter
+  const handleApplyFilter = () => {
+    toast.success('Filters applied')
+    setShowFilterDialog(false)
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50/30 to-rose-50/40 dark:bg-none dark:bg-gray-900 p-6">
       <div className="max-w-[1800px] mx-auto space-y-6">
@@ -622,10 +1062,10 @@ export default function VideoStudioClient() {
                 className="pl-10 w-64"
               />
             </div>
-            <Button variant="outline" size="icon">
+            <Button variant="outline" size="icon" onClick={() => setShowFilterDialog(true)}>
               <Filter className="w-4 h-4" />
             </Button>
-            <Button className="bg-gradient-to-r from-purple-500 to-pink-500 text-white">
+            <Button className="bg-gradient-to-r from-purple-500 to-pink-500 text-white" onClick={() => setShowNewProjectDialog(true)}>
               <Plus className="w-4 h-4 mr-2" />
               New Project
             </Button>
@@ -789,7 +1229,7 @@ export default function VideoStudioClient() {
                   <CardContent className="p-4">
                     <div className="flex items-start justify-between mb-2">
                       <h3 className="font-semibold text-gray-900 dark:text-white">{project.title}</h3>
-                      <Button variant="ghost" size="icon" className="h-8 w-8">
+                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => { e.stopPropagation(); handleProjectOptions(project); }}>
                         <MoreVertical className="w-4 h-4" />
                       </Button>
                     </div>
@@ -844,7 +1284,7 @@ export default function VideoStudioClient() {
                 </div>
                 {/* Playback Controls */}
                 <div className="flex items-center justify-center gap-4 mb-4">
-                  <Button variant="ghost" size="icon">
+                  <Button variant="ghost" size="icon" onClick={handleSkipBack}>
                     <SkipBack className="w-4 h-4" />
                   </Button>
                   <Button
@@ -855,7 +1295,7 @@ export default function VideoStudioClient() {
                   >
                     {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5 ml-0.5" />}
                   </Button>
-                  <Button variant="ghost" size="icon">
+                  <Button variant="ghost" size="icon" onClick={handleSkipForward}>
                     <SkipForward className="w-4 h-4" />
                   </Button>
                   <div className="flex items-center gap-2 ml-4">
@@ -866,7 +1306,7 @@ export default function VideoStudioClient() {
                       <div className="h-full bg-purple-500 rounded-full" style={{ width: `${volume}%` }} />
                     </div>
                   </div>
-                  <Button variant="ghost" size="icon" className="ml-auto">
+                  <Button variant="ghost" size="icon" className="ml-auto" onClick={handleFullscreen}>
                     <Maximize2 className="w-4 h-4" />
                   </Button>
                 </div>
@@ -892,7 +1332,7 @@ export default function VideoStudioClient() {
                     Timeline Tracks
                   </CardTitle>
                   <div className="flex items-center gap-2">
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" onClick={() => setShowAddTrackDialog(true)}>
                       <Plus className="w-3 h-3 mr-1" />
                       Add Track
                     </Button>
@@ -1044,7 +1484,7 @@ export default function VideoStudioClient() {
                 <Upload className="w-12 h-12 mx-auto mb-4 text-gray-400" />
                 <p className="text-gray-600 dark:text-gray-300 font-medium mb-2">Drop files here or click to upload</p>
                 <p className="text-sm text-gray-500 dark:text-gray-400">Support for video, audio, images, and graphics</p>
-                <Button variant="outline" className="mt-4">
+                <Button variant="outline" className="mt-4" onClick={() => setShowUploadDialog(true)}>
                   <Upload className="w-4 h-4 mr-2" />
                   Browse Files
                 </Button>
@@ -1157,19 +1597,19 @@ export default function VideoStudioClient() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    <Button variant="outline" className="w-full justify-start">
+                    <Button variant="outline" className="w-full justify-start" onClick={() => setShowAutoColorDialog(true)}>
                       <Wand2 className="w-4 h-4 mr-2" />
                       Auto Color Correct
                     </Button>
-                    <Button variant="outline" className="w-full justify-start">
+                    <Button variant="outline" className="w-full justify-start" onClick={() => setShowCaptionsDialog(true)}>
                       <Type className="w-4 h-4 mr-2" />
                       Generate Captions
                     </Button>
-                    <Button variant="outline" className="w-full justify-start">
+                    <Button variant="outline" className="w-full justify-start" onClick={() => setShowSceneDetectionDialog(true)}>
                       <Scissors className="w-4 h-4 mr-2" />
                       Scene Detection
                     </Button>
-                    <Button variant="outline" className="w-full justify-start">
+                    <Button variant="outline" className="w-full justify-start" onClick={() => setShowAudioEnhanceDialog(true)}>
                       <Music className="w-4 h-4 mr-2" />
                       Audio Enhancement
                     </Button>
@@ -1220,7 +1660,7 @@ export default function VideoStudioClient() {
                   <CardHeader>
                     <div className="flex items-center justify-between">
                       <CardTitle>Render Queue</CardTitle>
-                      <Button>
+                      <Button onClick={() => setShowAddToQueueDialog(true)}>
                         <Plus className="w-4 h-4 mr-2" />
                         Add to Queue
                       </Button>
@@ -1259,11 +1699,11 @@ export default function VideoStudioClient() {
                             <div className="flex items-center justify-between text-sm">
                               <span className="text-gray-500">Output: {formatFileSize(job.outputSize)}</span>
                               <div className="flex gap-2">
-                                <Button variant="outline" size="sm">
+                                <Button variant="outline" size="sm" onClick={() => handleDownloadRender(job.projectName)}>
                                   <Download className="w-3 h-3 mr-1" />
                                   Download
                                 </Button>
-                                <Button variant="outline" size="sm">
+                                <Button variant="outline" size="sm" onClick={() => handleShareRender(job.projectName)}>
                                   <Share2 className="w-3 h-3 mr-1" />
                                   Share
                                 </Button>
@@ -1313,7 +1753,7 @@ export default function VideoStudioClient() {
                     <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
                       Render projects faster using cloud processing power
                     </p>
-                    <Button className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white">
+                    <Button className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white" onClick={() => setShowCloudRenderDialog(true)}>
                       Enable Cloud Render
                     </Button>
                   </CardContent>
@@ -1413,10 +1853,10 @@ export default function VideoStudioClient() {
                   </div>
                 </div>
                 <div className="flex items-center gap-4">
-                  <Button variant="outline" className="bg-white/20 hover:bg-white/30 text-white border-white/30">
+                  <Button variant="outline" className="bg-white/20 hover:bg-white/30 text-white border-white/30" onClick={() => setShowExportSettingsDialog(true)}>
                     Export Settings
                   </Button>
-                  <Button className="bg-white hover:bg-gray-100 text-gray-800">
+                  <Button className="bg-white hover:bg-gray-100 text-gray-800" onClick={() => setShowSaveSettingsDialog(true)}>
                     Save Changes
                   </Button>
                 </div>
@@ -1620,10 +2060,10 @@ export default function VideoStudioClient() {
                               <p className="font-medium text-gray-900 dark:text-white">{preset.name}</p>
                               <p className="text-sm text-gray-500">{preset.codec} • {preset.bitrate} • {preset.resolution}</p>
                             </div>
-                            <Button variant="outline" size="sm">Edit</Button>
+                            <Button variant="outline" size="sm" onClick={() => handleEditPreset(preset.name)}>Edit</Button>
                           </div>
                         ))}
-                        <Button variant="outline" className="w-full border-dashed">
+                        <Button variant="outline" className="w-full border-dashed" onClick={() => setShowCreatePresetDialog(true)}>
                           <Plus className="w-4 h-4 mr-2" />
                           Create Custom Preset
                         </Button>
@@ -1652,7 +2092,7 @@ export default function VideoStudioClient() {
                                 <p className="text-sm text-gray-500">/Users/Studio/Projects</p>
                               </div>
                             </div>
-                            <Button variant="outline" size="sm">Change</Button>
+                            <Button variant="outline" size="sm" onClick={() => setShowChangeStorageDialog(true)}>Change</Button>
                           </div>
                           <Progress value={65} className="h-2" />
                           <p className="text-xs text-gray-500 mt-1">156 GB used of 240 GB</p>
@@ -1687,14 +2127,14 @@ export default function VideoStudioClient() {
                             <p className="font-medium">Media Cache</p>
                             <p className="text-sm text-gray-500">12.4 GB</p>
                           </div>
-                          <Button variant="outline" size="sm">Clear</Button>
+                          <Button variant="outline" size="sm" onClick={() => setShowClearCacheDialog(true)}>Clear</Button>
                         </div>
                         <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <div>
                             <p className="font-medium">Preview Files</p>
                             <p className="text-sm text-gray-500">8.2 GB</p>
                           </div>
-                          <Button variant="outline" size="sm">Clear</Button>
+                          <Button variant="outline" size="sm" onClick={() => setShowClearPreviewDialog(true)}>Clear</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -1804,14 +2244,14 @@ export default function VideoStudioClient() {
                             <p className="font-medium text-red-700 dark:text-red-400">Reset All Settings</p>
                             <p className="text-xs text-gray-500">Restore default preferences</p>
                           </div>
-                          <Button variant="destructive" size="sm">Reset</Button>
+                          <Button variant="destructive" size="sm" onClick={() => setShowResetSettingsDialog(true)}>Reset</Button>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-white dark:bg-gray-800 rounded-lg border border-red-200 dark:border-red-800">
                           <div>
                             <p className="font-medium text-red-700 dark:text-red-400">Clear All Data</p>
                             <p className="text-xs text-gray-500">Delete all local data</p>
                           </div>
-                          <Button variant="destructive" size="sm">Clear</Button>
+                          <Button variant="destructive" size="sm" onClick={() => setShowClearDataDialog(true)}>Clear</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -1916,15 +2356,15 @@ export default function VideoStudioClient() {
                   </div>
 
                   <div className="flex gap-2">
-                    <Button className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white">
+                    <Button className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white" onClick={() => handleOpenInEditor(selectedProject.title)}>
                       <Pencil className="w-4 h-4 mr-2" />
                       Open in Editor
                     </Button>
-                    <Button variant="outline">
+                    <Button variant="outline" onClick={() => handleExportVideo(selectedProject.title)}>
                       <Download className="w-4 h-4 mr-2" />
                       Export
                     </Button>
-                    <Button variant="outline">
+                    <Button variant="outline" onClick={() => handleShareProject(selectedProject.title)}>
                       <Share2 className="w-4 h-4" />
                     </Button>
                   </div>
@@ -1971,18 +2411,739 @@ export default function VideoStudioClient() {
                 </div>
 
                 <div className="flex gap-2">
-                  <Button variant="outline" className="flex-1">
+                  <Button variant="outline" className="flex-1" onClick={() => handleDuplicateAsset(selectedAsset.name)}>
                     <Copy className="w-4 h-4 mr-2" />
                     Duplicate
                   </Button>
-                  <Button variant="outline" className="flex-1">
+                  <Button variant="outline" className="flex-1" onClick={() => handleMoveAsset(selectedAsset.name)}>
                     <Move className="w-4 h-4 mr-2" />
                     Move
                   </Button>
-                  <Button variant="destructive" size="icon">
+                  <Button variant="destructive" size="icon" onClick={() => handleDeleteAsset(selectedAsset.name)}>
                     <Trash2 className="w-4 h-4" />
                   </Button>
                 </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Filter Dialog */}
+        <Dialog open={showFilterDialog} onOpenChange={setShowFilterDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Filter className="w-5 h-5" />
+                Filter Projects
+              </DialogTitle>
+              <DialogDescription>Refine your project search</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium">Status</label>
+                <select className="mt-1 w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800">
+                  <option value="all">All Statuses</option>
+                  <option value="draft">Draft</option>
+                  <option value="editing">Editing</option>
+                  <option value="rendering">Rendering</option>
+                  <option value="ready">Ready</option>
+                  <option value="published">Published</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-sm font-medium">Resolution</label>
+                <select className="mt-1 w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800">
+                  <option value="all">All Resolutions</option>
+                  <option value="4k">4K (3840x2160)</option>
+                  <option value="1080p">1080p (1920x1080)</option>
+                  <option value="720p">720p (1280x720)</option>
+                  <option value="vertical">Vertical (1080x1920)</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-sm font-medium">Date Range</label>
+                <select className="mt-1 w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800">
+                  <option value="all">All Time</option>
+                  <option value="today">Today</option>
+                  <option value="week">This Week</option>
+                  <option value="month">This Month</option>
+                  <option value="year">This Year</option>
+                </select>
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowFilterDialog(false)}>Cancel</Button>
+                <Button className="flex-1" onClick={handleApplyFilter}>Apply Filters</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* New Project Dialog */}
+        <Dialog open={showNewProjectDialog} onOpenChange={setShowNewProjectDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Plus className="w-5 h-5" />
+                Create New Project
+              </DialogTitle>
+              <DialogDescription>Start a new video project</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium">Project Name</label>
+                <Input
+                  value={newProjectName}
+                  onChange={(e) => setNewProjectName(e.target.value)}
+                  placeholder="Enter project name"
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Resolution</label>
+                <select
+                  value={newProjectResolution}
+                  onChange={(e) => setNewProjectResolution(e.target.value)}
+                  className="mt-1 w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800"
+                >
+                  <option value="3840x2160">4K (3840x2160)</option>
+                  <option value="1920x1080">1080p (1920x1080)</option>
+                  <option value="1280x720">720p (1280x720)</option>
+                  <option value="1080x1920">Vertical (1080x1920)</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-sm font-medium">Frame Rate</label>
+                <select
+                  value={newProjectFps}
+                  onChange={(e) => setNewProjectFps(e.target.value)}
+                  className="mt-1 w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800"
+                >
+                  <option value="24">24 fps (Cinema)</option>
+                  <option value="30">30 fps (Standard)</option>
+                  <option value="60">60 fps (Smooth)</option>
+                </select>
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowNewProjectDialog(false)}>Cancel</Button>
+                <Button className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white" onClick={handleSubmitNewProject}>Create Project</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Track Dialog */}
+        <Dialog open={showAddTrackDialog} onOpenChange={setShowAddTrackDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Plus className="w-5 h-5" />
+                Add New Track
+              </DialogTitle>
+              <DialogDescription>Add a track to your timeline</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium">Track Type</label>
+                <div className="grid grid-cols-3 gap-3 mt-2">
+                  {[
+                    { type: 'video' as const, icon: Video, label: 'Video' },
+                    { type: 'audio' as const, icon: Music, label: 'Audio' },
+                    { type: 'title' as const, icon: Type, label: 'Title' }
+                  ].map((track) => (
+                    <button
+                      key={track.type}
+                      onClick={() => setNewTrackType(track.type)}
+                      className={`p-4 rounded-lg border-2 text-center transition-all ${
+                        newTrackType === track.type
+                          ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20'
+                          : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
+                      }`}
+                    >
+                      <track.icon className={`w-6 h-6 mx-auto mb-2 ${newTrackType === track.type ? 'text-purple-600' : 'text-gray-400'}`} />
+                      <p className="text-sm font-medium">{track.label}</p>
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowAddTrackDialog(false)}>Cancel</Button>
+                <Button className="flex-1" onClick={handleAddTrack}>Add Track</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Upload Dialog */}
+        <Dialog open={showUploadDialog} onOpenChange={setShowUploadDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Upload className="w-5 h-5" />
+                Upload Media
+              </DialogTitle>
+              <DialogDescription>Upload video, audio, or image files</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center">
+                <Upload className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+                <p className="text-gray-600 dark:text-gray-300 font-medium mb-2">Drag and drop files here</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">or click to browse</p>
+                <p className="text-xs text-gray-400">Supported: MP4, MOV, AVI, MP3, WAV, PNG, JPG</p>
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowUploadDialog(false)}>Cancel</Button>
+                <Button className="flex-1" onClick={handleUploadFiles}>Upload Files</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Auto Color Correct Dialog */}
+        <Dialog open={showAutoColorDialog} onOpenChange={setShowAutoColorDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Wand2 className="w-5 h-5" />
+                Auto Color Correction
+              </DialogTitle>
+              <DialogDescription>AI-powered color correction for your footage</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                <h4 className="font-medium mb-2">What this does:</h4>
+                <ul className="text-sm text-gray-600 dark:text-gray-300 space-y-1">
+                  <li>- Analyzes footage color balance</li>
+                  <li>- Adjusts exposure and contrast</li>
+                  <li>- Corrects white balance</li>
+                  <li>- Enhances color vibrancy</li>
+                </ul>
+              </div>
+              <div>
+                <label className="text-sm font-medium">Correction Strength</label>
+                <select className="mt-1 w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800">
+                  <option value="light">Light</option>
+                  <option value="moderate">Moderate</option>
+                  <option value="strong">Strong</option>
+                </select>
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowAutoColorDialog(false)}>Cancel</Button>
+                <Button className="flex-1" onClick={handleAutoColorCorrect}>Apply Correction</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Generate Captions Dialog */}
+        <Dialog open={showCaptionsDialog} onOpenChange={setShowCaptionsDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Type className="w-5 h-5" />
+                Generate Captions
+              </DialogTitle>
+              <DialogDescription>AI-powered automatic caption generation</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium">Language</label>
+                <select className="mt-1 w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800">
+                  <option value="en">English</option>
+                  <option value="es">Spanish</option>
+                  <option value="fr">French</option>
+                  <option value="de">German</option>
+                  <option value="auto">Auto-detect</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-sm font-medium">Caption Style</label>
+                <select className="mt-1 w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800">
+                  <option value="standard">Standard</option>
+                  <option value="minimal">Minimal</option>
+                  <option value="bold">Bold</option>
+                  <option value="animated">Animated</option>
+                </select>
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowCaptionsDialog(false)}>Cancel</Button>
+                <Button className="flex-1" onClick={handleGenerateCaptions}>Generate Captions</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Scene Detection Dialog */}
+        <Dialog open={showSceneDetectionDialog} onOpenChange={setShowSceneDetectionDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Scissors className="w-5 h-5" />
+                Scene Detection
+              </DialogTitle>
+              <DialogDescription>Automatically detect scene changes in your video</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                <h4 className="font-medium mb-2">How it works:</h4>
+                <ul className="text-sm text-gray-600 dark:text-gray-300 space-y-1">
+                  <li>- Analyzes visual changes in footage</li>
+                  <li>- Detects cuts and transitions</li>
+                  <li>- Adds markers at scene boundaries</li>
+                  <li>- Creates clips for easy editing</li>
+                </ul>
+              </div>
+              <div>
+                <label className="text-sm font-medium">Sensitivity</label>
+                <select className="mt-1 w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800">
+                  <option value="low">Low (fewer scenes)</option>
+                  <option value="medium">Medium</option>
+                  <option value="high">High (more scenes)</option>
+                </select>
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowSceneDetectionDialog(false)}>Cancel</Button>
+                <Button className="flex-1" onClick={handleSceneDetection}>Detect Scenes</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Audio Enhancement Dialog */}
+        <Dialog open={showAudioEnhanceDialog} onOpenChange={setShowAudioEnhanceDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Music className="w-5 h-5" />
+                Audio Enhancement
+              </DialogTitle>
+              <DialogDescription>AI-powered audio quality improvement</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium">Enhancement Type</label>
+                <div className="space-y-2 mt-2">
+                  {[
+                    { label: 'Noise Reduction', desc: 'Remove background noise' },
+                    { label: 'Volume Normalization', desc: 'Balance audio levels' },
+                    { label: 'Voice Enhancement', desc: 'Improve speech clarity' },
+                    { label: 'Bass Boost', desc: 'Enhance low frequencies' }
+                  ].map((option, idx) => (
+                    <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                      <div>
+                        <p className="font-medium text-sm">{option.label}</p>
+                        <p className="text-xs text-gray-500">{option.desc}</p>
+                      </div>
+                      <div className="w-12 h-6 rounded-full p-1 cursor-pointer transition-colors bg-purple-600">
+                        <div className="w-4 h-4 rounded-full bg-white translate-x-6" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowAudioEnhanceDialog(false)}>Cancel</Button>
+                <Button className="flex-1" onClick={handleAudioEnhance}>Enhance Audio</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add to Queue Dialog */}
+        <Dialog open={showAddToQueueDialog} onOpenChange={setShowAddToQueueDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Target className="w-5 h-5" />
+                Add to Render Queue
+              </DialogTitle>
+              <DialogDescription>Queue a project for rendering</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium">Select Project</label>
+                <select
+                  value={selectedRenderProject}
+                  onChange={(e) => setSelectedRenderProject(e.target.value)}
+                  className="mt-1 w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800"
+                >
+                  <option value="">Choose a project...</option>
+                  {projects.map(p => (
+                    <option key={p.id} value={p.id}>{p.title}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="text-sm font-medium">Export Preset</label>
+                <select
+                  value={selectedRenderPreset}
+                  onChange={(e) => setSelectedRenderPreset(e.target.value)}
+                  className="mt-1 w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800"
+                >
+                  <option value="4k">4K Ultra HD</option>
+                  <option value="1080p">1080p Full HD</option>
+                  <option value="720p">720p HD</option>
+                  <option value="instagram">Instagram</option>
+                  <option value="youtube">YouTube</option>
+                  <option value="tiktok">TikTok</option>
+                </select>
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowAddToQueueDialog(false)}>Cancel</Button>
+                <Button className="flex-1" onClick={handleAddToQueue}>Add to Queue</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Cloud Render Dialog */}
+        <Dialog open={showCloudRenderDialog} onOpenChange={setShowCloudRenderDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Cloud className="w-5 h-5" />
+                Enable Cloud Rendering
+              </DialogTitle>
+              <DialogDescription>Render your projects faster with cloud processing</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="p-4 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-lg">
+                <h4 className="font-medium mb-2">Cloud Rendering Benefits:</h4>
+                <ul className="text-sm text-gray-600 dark:text-gray-300 space-y-1">
+                  <li>- Up to 4x faster rendering</li>
+                  <li>- No local CPU/GPU load</li>
+                  <li>- Render multiple projects simultaneously</li>
+                  <li>- Priority support included</li>
+                </ul>
+              </div>
+              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div className="flex items-center justify-between">
+                  <span className="font-medium">Monthly Cost</span>
+                  <span className="text-2xl font-bold text-purple-600">$29</span>
+                </div>
+                <p className="text-xs text-gray-500 mt-1">Includes 100 render hours/month</p>
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowCloudRenderDialog(false)}>Not Now</Button>
+                <Button className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white" onClick={handleEnableCloudRender}>Enable Cloud</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Export Settings Dialog */}
+        <Dialog open={showExportSettingsDialog} onOpenChange={setShowExportSettingsDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Download className="w-5 h-5" />
+                Export Settings
+              </DialogTitle>
+              <DialogDescription>Export your studio settings to a file</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <h4 className="font-medium mb-2">Settings to export:</h4>
+                <ul className="text-sm text-gray-600 dark:text-gray-300 space-y-1">
+                  <li>- Project defaults</li>
+                  <li>- Export presets</li>
+                  <li>- UI preferences</li>
+                  <li>- Keyboard shortcuts</li>
+                </ul>
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowExportSettingsDialog(false)}>Cancel</Button>
+                <Button className="flex-1" onClick={handleExportSettings}>Export to File</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Save Settings Dialog */}
+        <Dialog open={showSaveSettingsDialog} onOpenChange={setShowSaveSettingsDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <CheckCircle2 className="w-5 h-5" />
+                Save Settings
+              </DialogTitle>
+              <DialogDescription>Save all your current settings</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p className="text-sm text-gray-600 dark:text-gray-300">
+                This will save all your current studio settings including project defaults, export presets, and preferences.
+              </p>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowSaveSettingsDialog(false)}>Cancel</Button>
+                <Button className="flex-1" onClick={handleSaveSettings}>Save Settings</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Preset Dialog */}
+        <Dialog open={showEditPresetDialog} onOpenChange={setShowEditPresetDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Pencil className="w-5 h-5" />
+                Edit Preset: {selectedPresetToEdit}
+              </DialogTitle>
+              <DialogDescription>Modify export preset settings</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium">Codec</label>
+                <select className="mt-1 w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800">
+                  <option>H.264</option>
+                  <option>H.265 (HEVC)</option>
+                  <option>ProRes 422</option>
+                  <option>ProRes 4444</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-sm font-medium">Bitrate</label>
+                <Input type="text" placeholder="20 Mbps" className="mt-1" />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Resolution</label>
+                <select className="mt-1 w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800">
+                  <option>4K (3840x2160)</option>
+                  <option>1080p (1920x1080)</option>
+                  <option>720p (1280x720)</option>
+                </select>
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowEditPresetDialog(false)}>Cancel</Button>
+                <Button className="flex-1" onClick={handleSavePreset}>Save Preset</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Create Preset Dialog */}
+        <Dialog open={showCreatePresetDialog} onOpenChange={setShowCreatePresetDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Plus className="w-5 h-5" />
+                Create Custom Preset
+              </DialogTitle>
+              <DialogDescription>Create a new export preset</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium">Preset Name</label>
+                <Input
+                  value={newPresetName}
+                  onChange={(e) => setNewPresetName(e.target.value)}
+                  placeholder="My Custom Preset"
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Codec</label>
+                <select
+                  value={newPresetCodec}
+                  onChange={(e) => setNewPresetCodec(e.target.value)}
+                  className="mt-1 w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800"
+                >
+                  <option>H.264</option>
+                  <option>H.265 (HEVC)</option>
+                  <option>ProRes 422</option>
+                  <option>ProRes 4444</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-sm font-medium">Bitrate (Mbps)</label>
+                <Input
+                  value={newPresetBitrate}
+                  onChange={(e) => setNewPresetBitrate(e.target.value)}
+                  placeholder="20"
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Resolution</label>
+                <select
+                  value={newPresetResolution}
+                  onChange={(e) => setNewPresetResolution(e.target.value)}
+                  className="mt-1 w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800"
+                >
+                  <option value="4k">4K (3840x2160)</option>
+                  <option value="1080p">1080p (1920x1080)</option>
+                  <option value="720p">720p (1280x720)</option>
+                </select>
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowCreatePresetDialog(false)}>Cancel</Button>
+                <Button className="flex-1" onClick={handleCreatePreset}>Create Preset</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Change Storage Dialog */}
+        <Dialog open={showChangeStorageDialog} onOpenChange={setShowChangeStorageDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Folder className="w-5 h-5" />
+                Change Storage Location
+              </DialogTitle>
+              <DialogDescription>Select a new location for project files</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium">Current Location</label>
+                <p className="text-sm text-gray-500 mt-1">/Users/Studio/Projects</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium">New Location</label>
+                <div className="flex gap-2 mt-1">
+                  <Input placeholder="/path/to/new/location" className="flex-1" />
+                  <Button variant="outline" onClick={() => toast.info('File browser opened')}>Browse</Button>
+                </div>
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowChangeStorageDialog(false)}>Cancel</Button>
+                <Button className="flex-1" onClick={handleChangeStorage}>Update Location</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Clear Cache Dialog */}
+        <Dialog open={showClearCacheDialog} onOpenChange={setShowClearCacheDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Trash2 className="w-5 h-5" />
+                Clear Media Cache
+              </DialogTitle>
+              <DialogDescription>Remove cached media files to free up space</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
+                <p className="text-sm text-amber-700 dark:text-amber-300">
+                  This will clear 12.4 GB of cached media files. This action cannot be undone but will not affect your projects.
+                </p>
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowClearCacheDialog(false)}>Cancel</Button>
+                <Button variant="destructive" className="flex-1" onClick={handleClearCache}>Clear Cache</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Clear Preview Dialog */}
+        <Dialog open={showClearPreviewDialog} onOpenChange={setShowClearPreviewDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Trash2 className="w-5 h-5" />
+                Clear Preview Files
+              </DialogTitle>
+              <DialogDescription>Remove preview render files</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
+                <p className="text-sm text-amber-700 dark:text-amber-300">
+                  This will clear 8.2 GB of preview files. Previews will be regenerated when you play your timeline.
+                </p>
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowClearPreviewDialog(false)}>Cancel</Button>
+                <Button variant="destructive" className="flex-1" onClick={handleClearPreview}>Clear Previews</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Reset Settings Dialog */}
+        <Dialog open={showResetSettingsDialog} onOpenChange={setShowResetSettingsDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-600">
+                <AlertCircle className="w-5 h-5" />
+                Reset All Settings
+              </DialogTitle>
+              <DialogDescription>This action cannot be undone</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                <p className="text-sm text-red-700 dark:text-red-300">
+                  Are you sure you want to reset all settings to their defaults? This will remove all custom presets and preferences.
+                </p>
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowResetSettingsDialog(false)}>Cancel</Button>
+                <Button variant="destructive" className="flex-1" onClick={handleResetSettings}>Reset All</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Clear All Data Dialog */}
+        <Dialog open={showClearDataDialog} onOpenChange={setShowClearDataDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-600">
+                <AlertCircle className="w-5 h-5" />
+                Clear All Local Data
+              </DialogTitle>
+              <DialogDescription>This action cannot be undone</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                <p className="text-sm text-red-700 dark:text-red-300">
+                  Warning: This will permanently delete all local data including cache, previews, settings, and preferences. Your cloud-synced projects will not be affected.
+                </p>
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowClearDataDialog(false)}>Cancel</Button>
+                <Button variant="destructive" className="flex-1" onClick={handleClearAllData}>Clear All Data</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Project Options Dialog */}
+        <Dialog open={showProjectOptionsDialog} onOpenChange={setShowProjectOptionsDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <MoreVertical className="w-5 h-5" />
+                Project Options
+              </DialogTitle>
+              <DialogDescription>{selectedProject?.title}</DialogDescription>
+            </DialogHeader>
+            {selectedProject && (
+              <div className="space-y-2">
+                <Button variant="outline" className="w-full justify-start" onClick={() => { handleOpenInEditor(selectedProject.title); setShowProjectOptionsDialog(false); }}>
+                  <Pencil className="w-4 h-4 mr-2" />
+                  Open in Editor
+                </Button>
+                <Button variant="outline" className="w-full justify-start" onClick={() => { handleRenderVideo(selectedProject.title); setShowProjectOptionsDialog(false); }}>
+                  <Target className="w-4 h-4 mr-2" />
+                  Render Video
+                </Button>
+                <Button variant="outline" className="w-full justify-start" onClick={() => { handlePublishVideo(selectedProject.title); setShowProjectOptionsDialog(false); }}>
+                  <Share2 className="w-4 h-4 mr-2" />
+                  Publish
+                </Button>
+                <Button variant="outline" className="w-full justify-start" onClick={() => { handleExportVideo(selectedProject.title); setShowProjectOptionsDialog(false); }}>
+                  <Download className="w-4 h-4 mr-2" />
+                  Export
+                </Button>
+                <Button variant="outline" className="w-full justify-start" onClick={() => { handleDuplicateProject(selectedProject.title); setShowProjectOptionsDialog(false); }}>
+                  <Copy className="w-4 h-4 mr-2" />
+                  Duplicate
+                </Button>
+                <Button variant="outline" className="w-full justify-start text-red-600 hover:text-red-700" onClick={() => { toast.success(`"${selectedProject.title}" moved to trash`); setShowProjectOptionsDialog(false); }}>
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Delete
+                </Button>
               </div>
             )}
           </DialogContent>

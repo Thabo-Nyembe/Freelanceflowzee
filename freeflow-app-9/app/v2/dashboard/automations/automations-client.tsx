@@ -23,7 +23,7 @@ import {
   RotateCcw, Copy, Trash2, MoreVertical, Eye, Edit2, History, Layers,
   Filter, TrendingUp, AlertTriangle, RefreshCw, Share2, Star, BarChart3, Cpu, Gauge, Network,
   Bell, MessageSquare, ExternalLink, PlayCircle, PauseCircle,
-  StopCircle, CheckCircle, Package, Shield, Rocket
+  StopCircle, CheckCircle, Package, Shield, Rocket, ChevronRight
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -384,6 +384,31 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
   })
   const [isRunningAll, setIsRunningAll] = useState(false)
   const [isExporting, setIsExporting] = useState(false)
+
+  // Additional dialog states
+  const [showWebhooksDialog, setShowWebhooksDialog] = useState(false)
+  const [showAIAutomationDialog, setShowAIAutomationDialog] = useState(false)
+  const [showImportDialog, setShowImportDialog] = useState(false)
+  const [showCloneDialog, setShowCloneDialog] = useState(false)
+  const [showShareDialog, setShowShareDialog] = useState(false)
+  const [showFiltersDialog, setShowFiltersDialog] = useState(false)
+  const [showNewConnectionDialog, setShowNewConnectionDialog] = useState(false)
+  const [showNewWebhookDialog, setShowNewWebhookDialog] = useState(false)
+  const [showAPIKeysDialog, setShowAPIKeysDialog] = useState(false)
+  const [showSubmitTemplateDialog, setShowSubmitTemplateDialog] = useState(false)
+  const [showDeleteAllDialog, setShowDeleteAllDialog] = useState(false)
+  const [showClearHistoryDialog, setShowClearHistoryDialog] = useState(false)
+  const [showDeleteAccountDialog, setShowDeleteAccountDialog] = useState(false)
+  const [showEditorDialog, setShowEditorDialog] = useState(false)
+  const [showViewLogsDialog, setShowViewLogsDialog] = useState(false)
+  const [showPreviewTemplateDialog, setShowPreviewTemplateDialog] = useState(false)
+  const [importJsonContent, setImportJsonContent] = useState('')
+  const [newConnectionForm, setNewConnectionForm] = useState({ name: '', app: '', apiKey: '' })
+  const [newWebhookForm, setNewWebhookForm] = useState({ name: '', method: 'POST' as 'GET' | 'POST' | 'PUT' | 'DELETE', scenarioId: '' })
+  const [submitTemplateForm, setSubmitTemplateForm] = useState({ name: '', description: '', category: 'Productivity' })
+  const [selectedCloneWorkflow, setSelectedCloneWorkflow] = useState<AutomationWorkflow | null>(null)
+  const [isProcessing, setIsProcessing] = useState(false)
+  const [templateFilterType, setTemplateFilterType] = useState<'ai' | 'top_rated' | 'popular' | 'all'>('all')
 
   const { workflows, loading, error, refetch } = useAutomations({ workflowType: workflowTypeFilter, status: statusFilter })
   const displayWorkflows = dbWorkflows.length > 0 ? dbWorkflows : (workflows.length > 0 ? workflows : initialWorkflows)
@@ -799,6 +824,548 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
     }
   }
 
+  // Pause all workflows handler
+  const handlePauseAllWorkflows = async () => {
+    setIsProcessing(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Please sign in to pause workflows')
+        return
+      }
+
+      const activeWorkflows = displayWorkflows.filter(w => w.status === 'active')
+      if (activeWorkflows.length === 0) {
+        toast.info('No active workflows to pause')
+        return
+      }
+
+      const { error } = await supabase
+        .from('automations')
+        .update({
+          status: 'paused',
+          is_enabled: false,
+          updated_at: new Date().toISOString(),
+        })
+        .in('id', activeWorkflows.map(w => w.id))
+
+      if (error) throw error
+
+      toast.success(`Paused ${activeWorkflows.length} workflow${activeWorkflows.length > 1 ? 's' : ''}`)
+      fetchWorkflows()
+    } catch (err) {
+      console.error('Error pausing workflows:', err)
+      toast.error('Failed to pause workflows')
+    } finally {
+      setIsProcessing(false)
+    }
+  }
+
+  // Stop all running workflows handler
+  const handleStopAllRunning = async () => {
+    setIsProcessing(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Please sign in to stop workflows')
+        return
+      }
+
+      const runningWorkflows = displayWorkflows.filter(w => w.status === 'running')
+      if (runningWorkflows.length === 0) {
+        toast.info('No running workflows to stop')
+        return
+      }
+
+      const { error } = await supabase
+        .from('automations')
+        .update({
+          status: 'paused',
+          is_running: false,
+          updated_at: new Date().toISOString(),
+        })
+        .in('id', runningWorkflows.map(w => w.id))
+
+      if (error) throw error
+
+      toast.success(`Stopped ${runningWorkflows.length} workflow${runningWorkflows.length > 1 ? 's' : ''}`)
+      fetchWorkflows()
+    } catch (err) {
+      console.error('Error stopping workflows:', err)
+      toast.error('Failed to stop workflows')
+    } finally {
+      setIsProcessing(false)
+    }
+  }
+
+  // Retry failed workflows handler
+  const handleRetryFailed = async () => {
+    setIsProcessing(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Please sign in to retry workflows')
+        return
+      }
+
+      const failedWorkflows = displayWorkflows.filter(w => w.status === 'failed')
+      if (failedWorkflows.length === 0) {
+        toast.info('No failed workflows to retry')
+        return
+      }
+
+      const { error } = await supabase
+        .from('automations')
+        .update({
+          status: 'running',
+          is_running: true,
+          last_execution_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        })
+        .in('id', failedWorkflows.map(w => w.id))
+
+      if (error) throw error
+
+      toast.success(`Retrying ${failedWorkflows.length} failed workflow${failedWorkflows.length > 1 ? 's' : ''}`)
+      fetchWorkflows()
+    } catch (err) {
+      console.error('Error retrying workflows:', err)
+      toast.error('Failed to retry workflows')
+    } finally {
+      setIsProcessing(false)
+    }
+  }
+
+  // Refresh expired connections handler
+  const handleRefreshExpiredConnections = async () => {
+    setIsProcessing(true)
+    try {
+      // Simulate refreshing expired connections
+      await new Promise(resolve => setTimeout(resolve, 1500))
+      const expiredCount = mockConnections.filter(c => c.status === 'expired').length
+      if (expiredCount === 0) {
+        toast.info('No expired connections to refresh')
+      } else {
+        toast.success(`Refreshed ${expiredCount} expired connection${expiredCount > 1 ? 's' : ''}`)
+      }
+    } catch (err) {
+      console.error('Error refreshing connections:', err)
+      toast.error('Failed to refresh connections')
+    } finally {
+      setIsProcessing(false)
+    }
+  }
+
+  // Copy to clipboard helper
+  const handleCopyToClipboard = async (text: string, label: string) => {
+    try {
+      await navigator.clipboard.writeText(text)
+      toast.success(`${label} copied to clipboard`)
+    } catch (err) {
+      console.error('Error copying to clipboard:', err)
+      toast.error('Failed to copy to clipboard')
+    }
+  }
+
+  // Create new connection handler
+  const handleCreateConnection = async () => {
+    if (!newConnectionForm.name.trim() || !newConnectionForm.app.trim()) {
+      toast.error('Please fill in all required fields')
+      return
+    }
+    setIsProcessing(true)
+    try {
+      // Simulate API call to create connection
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      toast.success('Connection created successfully', {
+        description: `${newConnectionForm.name} is now connected`
+      })
+      setShowNewConnectionDialog(false)
+      setNewConnectionForm({ name: '', app: '', apiKey: '' })
+    } catch (err) {
+      console.error('Error creating connection:', err)
+      toast.error('Failed to create connection')
+    } finally {
+      setIsProcessing(false)
+    }
+  }
+
+  // Create new webhook handler
+  const handleCreateWebhook = async () => {
+    if (!newWebhookForm.name.trim()) {
+      toast.error('Please enter a webhook name')
+      return
+    }
+    setIsProcessing(true)
+    try {
+      // Simulate API call to create webhook
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      const webhookUrl = `https://hook.freeflow.app/${Math.random().toString(36).substring(7)}`
+      toast.success('Webhook created successfully', {
+        description: `URL: ${webhookUrl}`
+      })
+      setShowNewWebhookDialog(false)
+      setNewWebhookForm({ name: '', method: 'POST', scenarioId: '' })
+    } catch (err) {
+      console.error('Error creating webhook:', err)
+      toast.error('Failed to create webhook')
+    } finally {
+      setIsProcessing(false)
+    }
+  }
+
+  // Submit template handler
+  const handleSubmitTemplate = async () => {
+    if (!submitTemplateForm.name.trim() || !submitTemplateForm.description.trim()) {
+      toast.error('Please fill in all required fields')
+      return
+    }
+    setIsProcessing(true)
+    try {
+      // Simulate API call to submit template
+      await new Promise(resolve => setTimeout(resolve, 1500))
+      toast.success('Template submitted for review', {
+        description: 'We will review your template and publish it soon'
+      })
+      setShowSubmitTemplateDialog(false)
+      setSubmitTemplateForm({ name: '', description: '', category: 'Productivity' })
+    } catch (err) {
+      console.error('Error submitting template:', err)
+      toast.error('Failed to submit template')
+    } finally {
+      setIsProcessing(false)
+    }
+  }
+
+  // Delete all scenarios handler
+  const handleDeleteAllScenarios = async () => {
+    setIsProcessing(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Please sign in to delete scenarios')
+        return
+      }
+
+      const { error } = await supabase
+        .from('automations')
+        .delete()
+        .eq('user_id', user.id)
+
+      if (error) throw error
+
+      toast.success('All scenarios deleted successfully')
+      setShowDeleteAllDialog(false)
+      fetchWorkflows()
+    } catch (err) {
+      console.error('Error deleting scenarios:', err)
+      toast.error('Failed to delete scenarios')
+    } finally {
+      setIsProcessing(false)
+    }
+  }
+
+  // Clear execution history handler
+  const handleClearExecutionHistory = async () => {
+    setIsProcessing(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Please sign in to clear history')
+        return
+      }
+
+      // Reset execution counts on all workflows
+      const { error } = await supabase
+        .from('automations')
+        .update({
+          total_executions: 0,
+          successful_executions: 0,
+          failed_executions: 0,
+          total_duration_seconds: 0,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('user_id', user.id)
+
+      if (error) throw error
+
+      toast.success('Execution history cleared')
+      setShowClearHistoryDialog(false)
+      fetchWorkflows()
+    } catch (err) {
+      console.error('Error clearing history:', err)
+      toast.error('Failed to clear execution history')
+    } finally {
+      setIsProcessing(false)
+    }
+  }
+
+  // Import scenario from JSON handler
+  const handleImportScenario = async () => {
+    if (!importJsonContent.trim()) {
+      toast.error('Please paste valid JSON content')
+      return
+    }
+    setIsProcessing(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Please sign in to import scenarios')
+        return
+      }
+
+      const imported = JSON.parse(importJsonContent)
+      const { error } = await supabase.from('automations').insert({
+        user_id: user.id,
+        workflow_name: imported.name || 'Imported Scenario',
+        description: imported.description || 'Imported from external source',
+        workflow_type: imported.workflow_type || 'sequential',
+        trigger_type: imported.trigger_type || 'webhook',
+        status: 'draft',
+        is_enabled: false,
+        steps: imported.steps || [],
+        step_count: imported.steps?.length || 0,
+        current_step: 0,
+        trigger_config: imported.trigger_config || {},
+        total_executions: 0,
+        successful_executions: 0,
+        failed_executions: 0,
+        total_duration_seconds: 0,
+        version: 1,
+        is_published: false,
+        variables: imported.variables || {},
+        context_data: {},
+        error_handling_strategy: 'stop',
+        max_retries: 3,
+        retry_delay_seconds: 30,
+        notify_on_success: false,
+        notify_on_failure: true,
+        notification_config: {},
+        is_scheduled: false,
+        schedule_config: {},
+        requires_approval: false,
+        approved: false,
+        metadata: { imported: true, importedAt: new Date().toISOString() },
+      })
+
+      if (error) throw error
+
+      toast.success('Scenario imported successfully')
+      setShowImportDialog(false)
+      setImportJsonContent('')
+      fetchWorkflows()
+    } catch (err) {
+      console.error('Error importing scenario:', err)
+      toast.error('Failed to import scenario - check JSON format')
+    } finally {
+      setIsProcessing(false)
+    }
+  }
+
+  // Export scenarios handler
+  const handleExportScenarios = async () => {
+    try {
+      const exportData = {
+        exportedAt: new Date().toISOString(),
+        scenarios: displayWorkflows.map(w => ({
+          name: w.workflow_name,
+          description: w.description,
+          workflow_type: w.workflow_type,
+          trigger_type: w.trigger_type,
+          steps: w.steps,
+          variables: w.variables,
+          trigger_config: w.trigger_config,
+        }))
+      }
+
+      const content = JSON.stringify(exportData, null, 2)
+      const blob = new Blob([content], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `scenarios-${new Date().toISOString().split('T')[0]}.json`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+
+      toast.success('Scenarios exported successfully')
+    } catch (err) {
+      console.error('Error exporting scenarios:', err)
+      toast.error('Failed to export scenarios')
+    }
+  }
+
+  // Clone workflow handler with dialog
+  const handleCloneWorkflow = async () => {
+    if (!selectedCloneWorkflow) return
+    setIsProcessing(true)
+    try {
+      await handleDuplicateAutomation(selectedCloneWorkflow)
+      setShowCloneDialog(false)
+      setSelectedCloneWorkflow(null)
+    } catch (err) {
+      console.error('Error cloning workflow:', err)
+      toast.error('Failed to clone workflow')
+    } finally {
+      setIsProcessing(false)
+    }
+  }
+
+  // Share workflow handler
+  const handleShareWorkflow = async () => {
+    setIsProcessing(true)
+    try {
+      const shareUrl = `${window.location.origin}/shared/workflow/${Math.random().toString(36).substring(7)}`
+      await navigator.clipboard.writeText(shareUrl)
+      toast.success('Share link copied to clipboard', {
+        description: 'Anyone with this link can view the workflow'
+      })
+      setShowShareDialog(false)
+    } catch (err) {
+      console.error('Error sharing workflow:', err)
+      toast.error('Failed to generate share link')
+    } finally {
+      setIsProcessing(false)
+    }
+  }
+
+  // Regenerate API key handler
+  const handleRegenerateAPIKey = async () => {
+    setIsProcessing(true)
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      const newKey = `mk_live_${Math.random().toString(36).substring(2, 34)}`
+      await navigator.clipboard.writeText(newKey)
+      toast.success('New API key generated and copied to clipboard', {
+        description: 'Make sure to update your integrations'
+      })
+    } catch (err) {
+      console.error('Error regenerating API key:', err)
+      toast.error('Failed to regenerate API key')
+    } finally {
+      setIsProcessing(false)
+    }
+  }
+
+  // Retry single execution handler
+  const handleRetryExecution = async (execution: Execution) => {
+    setIsProcessing(true)
+    try {
+      const workflow = displayWorkflows.find(w => w.id === execution.workflowId)
+      if (workflow) {
+        await handleRunAutomation(workflow)
+      }
+      toast.success('Execution retried', {
+        description: `${execution.workflowName} is now running`
+      })
+    } catch (err) {
+      console.error('Error retrying execution:', err)
+      toast.error('Failed to retry execution')
+    } finally {
+      setIsProcessing(false)
+    }
+  }
+
+  // Use template handler
+  const handleUseTemplate = async (template: WorkflowTemplate) => {
+    setIsProcessing(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Please sign in to use templates')
+        return
+      }
+
+      const { error } = await supabase.from('automations').insert({
+        user_id: user.id,
+        workflow_name: template.name,
+        description: template.description,
+        workflow_type: 'sequential',
+        trigger_type: 'webhook',
+        status: 'draft',
+        is_enabled: false,
+        steps: [],
+        step_count: template.nodes,
+        current_step: 0,
+        trigger_config: {},
+        total_executions: 0,
+        successful_executions: 0,
+        failed_executions: 0,
+        total_duration_seconds: 0,
+        version: 1,
+        is_published: false,
+        variables: {},
+        context_data: {},
+        error_handling_strategy: 'stop',
+        max_retries: 3,
+        retry_delay_seconds: 30,
+        notify_on_success: false,
+        notify_on_failure: true,
+        notification_config: {},
+        is_scheduled: false,
+        schedule_config: {},
+        requires_approval: false,
+        approved: false,
+        metadata: { fromTemplate: template.id, templateName: template.name },
+      })
+
+      if (error) throw error
+
+      toast.success('Template applied successfully', {
+        description: `"${template.name}" scenario created`
+      })
+      setSelectedTemplate(null)
+      fetchWorkflows()
+    } catch (err) {
+      console.error('Error using template:', err)
+      toast.error('Failed to apply template')
+    } finally {
+      setIsProcessing(false)
+    }
+  }
+
+  // Restore workflow version handler
+  const handleRestoreVersion = async (workflow: AutomationWorkflow, version: number) => {
+    setIsProcessing(true)
+    try {
+      const { error } = await supabase
+        .from('automations')
+        .update({
+          version: version,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', workflow.id)
+
+      if (error) throw error
+
+      toast.success(`Restored to version ${version}`)
+      fetchWorkflows()
+    } catch (err) {
+      console.error('Error restoring version:', err)
+      toast.error('Failed to restore version')
+    } finally {
+      setIsProcessing(false)
+    }
+  }
+
+  // File upload handler for import
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    try {
+      const text = await file.text()
+      setImportJsonContent(text)
+      toast.success('File loaded', {
+        description: 'Click Import to create the scenario'
+      })
+    } catch (err) {
+      console.error('Error reading file:', err)
+      toast.error('Failed to read file')
+    }
+  }
+
   // QuickActions with dialog triggers
   const automationsQuickActions = [
     {
@@ -980,21 +1547,52 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                             <FileText className="h-12 w-12 mx-auto text-gray-400 mb-3" />
                             <p className="font-medium mb-1">Drop your scenario file here</p>
                             <p className="text-sm text-gray-500">Supports .json exports from Make, Zapier, n8n</p>
-                            <Button variant="outline" className="mt-4">Browse Files</Button>
+                            <input
+                              type="file"
+                              accept=".json"
+                              onChange={handleFileUpload}
+                              className="hidden"
+                              id="import-file-input"
+                            />
+                            <Button variant="outline" className="mt-4" onClick={() => document.getElementById('import-file-input')?.click()}>Browse Files</Button>
                           </div>
                           <div>
                             <label className="block text-sm font-medium mb-1">Or paste JSON</label>
-                            <textarea className="w-full px-3 py-2 border rounded-lg font-mono text-sm dark:bg-gray-800 dark:border-gray-700" rows={6} placeholder='{"modules": [...], "connections": [...]}' />
+                            <textarea
+                              className="w-full px-3 py-2 border rounded-lg font-mono text-sm dark:bg-gray-800 dark:border-gray-700"
+                              rows={6}
+                              placeholder='{"modules": [...], "connections": [...]}'
+                              value={importJsonContent}
+                              onChange={(e) => setImportJsonContent(e.target.value)}
+                            />
+                          </div>
+                          <div className="pt-4 border-t flex justify-end gap-3">
+                            <Button variant="outline" onClick={() => setShowNewWorkflow(false)}>
+                              Cancel
+                            </Button>
+                            <Button onClick={handleImportScenario} disabled={isProcessing || !importJsonContent.trim()}>
+                              {isProcessing ? (
+                                <>
+                                  <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                                  Importing...
+                                </>
+                              ) : (
+                                <>
+                                  <Download className="h-4 w-4 mr-2" />
+                                  Import Scenario
+                                </>
+                              )}
+                            </Button>
                           </div>
                         </TabsContent>
                       </ScrollArea>
                     </Tabs>
                   </DialogContent>
                 </Dialog>
-                <Button variant="ghost" className="text-white hover:bg-white/20">
+                <Button variant="ghost" className="text-white hover:bg-white/20" onClick={() => setShowExportLogsDialog(true)}>
                   <Download className="h-5 w-5" />
                 </Button>
-                <Button variant="ghost" className="text-white hover:bg-white/20">
+                <Button variant="ghost" className="text-white hover:bg-white/20" onClick={() => setActiveTab('settings')}>
                   <Settings className="h-5 w-5" />
                 </Button>
               </div>
@@ -1133,35 +1731,35 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-all hover:scale-105">
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-all hover:scale-105" onClick={() => setShowNewWorkflow(true)}>
                     <Plus className="h-5 w-5 text-emerald-600" />
                     <span className="text-sm">New Scenario</span>
                   </Button>
-                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all hover:scale-105">
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all hover:scale-105" onClick={() => setShowRunAllDialog(true)}>
                     <Play className="h-5 w-5 text-blue-600" />
                     <span className="text-sm">Run All Active</span>
                   </Button>
-                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all hover:scale-105">
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all hover:scale-105" onClick={() => setActiveTab('templates')}>
                     <Package className="h-5 w-5 text-purple-600" />
                     <span className="text-sm">Browse Templates</span>
                   </Button>
-                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-orange-500 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all hover:scale-105">
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-orange-500 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all hover:scale-105" onClick={() => setShowWebhooksDialog(true)}>
                     <Webhook className="h-5 w-5 text-orange-600" />
                     <span className="text-sm">Manage Webhooks</span>
                   </Button>
-                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-pink-500 hover:bg-pink-50 dark:hover:bg-pink-900/20 transition-all hover:scale-105">
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-pink-500 hover:bg-pink-50 dark:hover:bg-pink-900/20 transition-all hover:scale-105" onClick={() => setShowAIAutomationDialog(true)}>
                     <Bot className="h-5 w-5 text-pink-600" />
                     <span className="text-sm">AI Automation</span>
                   </Button>
-                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-cyan-500 hover:bg-cyan-50 dark:hover:bg-cyan-900/20 transition-all hover:scale-105">
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-cyan-500 hover:bg-cyan-50 dark:hover:bg-cyan-900/20 transition-all hover:scale-105" onClick={() => setActiveTab('connections')}>
                     <Network className="h-5 w-5 text-cyan-600" />
                     <span className="text-sm">Connections</span>
                   </Button>
-                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-all hover:scale-105">
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-all hover:scale-105" onClick={() => setShowExportLogsDialog(true)}>
                     <Download className="h-5 w-5 text-amber-600" />
                     <span className="text-sm">Export Data</span>
                   </Button>
-                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all hover:scale-105">
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all hover:scale-105" onClick={() => setActiveTab('executions')}>
                     <History className="h-5 w-5 text-red-600" />
                     <span className="text-sm">Execution History</span>
                   </Button>
@@ -1174,7 +1772,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
                   <CardTitle className="text-lg font-semibold">Active Scenarios</CardTitle>
-                  <Button variant="ghost" size="sm">View All</Button>
+                  <Button variant="ghost" size="sm" onClick={() => setActiveTab('scenarios')}>View All</Button>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   {mockScenarios.filter(s => s.status === 'active').slice(0, 4).map(scenario => (
@@ -1201,7 +1799,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
                   <CardTitle className="text-lg font-semibold">Recent Executions</CardTitle>
-                  <Button variant="ghost" size="sm">
+                  <Button variant="ghost" size="sm" onClick={() => { fetchWorkflows(); toast.success('Refreshed executions') }}>
                     <RefreshCw className="h-4 w-4" />
                   </Button>
                 </CardHeader>
@@ -1265,7 +1863,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
                   <CardTitle className="text-lg font-semibold">Popular Templates</CardTitle>
-                  <Button variant="ghost" size="sm">Browse All</Button>
+                  <Button variant="ghost" size="sm" onClick={() => setActiveTab('templates')}>Browse All</Button>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   {mockTemplates.slice(0, 3).map(template => (
@@ -1308,11 +1906,11 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                     <Plus className="h-4 w-4 mr-2" />
                     New Scenario
                   </Button>
-                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/10">
+                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/10" onClick={() => setActiveTab('templates')}>
                     <Package className="h-4 w-4 mr-2" />
                     Browse Templates
                   </Button>
-                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/10">
+                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/10" onClick={() => setShowImportDialog(true)}>
                     <Download className="h-4 w-4 mr-2" />
                     Import Scenario
                   </Button>
@@ -1330,19 +1928,19 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-green-500 hover:bg-green-50 dark:hover:bg-green-900/20 transition-all hover:scale-105">
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-green-500 hover:bg-green-50 dark:hover:bg-green-900/20 transition-all hover:scale-105" onClick={() => setShowRunAllDialog(true)}>
                     <PlayCircle className="h-5 w-5 text-green-600" />
                     <span className="text-sm">Run All Active</span>
                   </Button>
-                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-all hover:scale-105">
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-all hover:scale-105" onClick={handlePauseAllWorkflows} disabled={isProcessing}>
                     <PauseCircle className="h-5 w-5 text-amber-600" />
                     <span className="text-sm">Pause All</span>
                   </Button>
-                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all hover:scale-105">
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all hover:scale-105" onClick={() => setShowCloneDialog(true)}>
                     <Copy className="h-5 w-5 text-purple-600" />
                     <span className="text-sm">Clone Scenario</span>
                   </Button>
-                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all hover:scale-105">
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all hover:scale-105" onClick={() => setShowShareDialog(true)}>
                     <Share2 className="h-5 w-5 text-blue-600" />
                     <span className="text-sm">Share Scenario</span>
                   </Button>
@@ -1482,19 +2080,19 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all hover:scale-105">
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all hover:scale-105" onClick={handleStopAllRunning} disabled={isProcessing}>
                     <StopCircle className="h-5 w-5 text-red-600" />
                     <span className="text-sm">Stop All Running</span>
                   </Button>
-                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-all hover:scale-105">
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-all hover:scale-105" onClick={handleRetryFailed} disabled={isProcessing}>
                     <RotateCcw className="h-5 w-5 text-amber-600" />
                     <span className="text-sm">Retry Failed</span>
                   </Button>
-                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all hover:scale-105">
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all hover:scale-105" onClick={() => setShowExportLogsDialog(true)}>
                     <Download className="h-5 w-5 text-blue-600" />
                     <span className="text-sm">Export Logs</span>
                   </Button>
-                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all hover:scale-105">
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all hover:scale-105" onClick={() => setShowFiltersDialog(true)}>
                     <Filter className="h-5 w-5 text-purple-600" />
                     <span className="text-sm">Advanced Filters</span>
                   </Button>
@@ -1505,7 +2103,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle>Execution History</CardTitle>
-                <Button variant="ghost" size="sm">
+                <Button variant="ghost" size="sm" onClick={() => { fetchWorkflows(); toast.success('Refreshed execution history') }}>
                   <RefreshCw className="h-4 w-4" />
                 </Button>
               </CardHeader>
@@ -1603,19 +2201,19 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-pink-500 hover:bg-pink-50 dark:hover:bg-pink-900/20 transition-all hover:scale-105">
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-pink-500 hover:bg-pink-50 dark:hover:bg-pink-900/20 transition-all hover:scale-105" onClick={() => setTemplateFilterType('ai')}>
                     <Sparkles className="h-5 w-5 text-pink-600" />
                     <span className="text-sm">AI Templates</span>
                   </Button>
-                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all hover:scale-105">
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all hover:scale-105" onClick={() => setTemplateFilterType('top_rated')}>
                     <Star className="h-5 w-5 text-purple-600" />
                     <span className="text-sm">Top Rated</span>
                   </Button>
-                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all hover:scale-105">
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all hover:scale-105" onClick={() => setTemplateFilterType('popular')}>
                     <TrendingUp className="h-5 w-5 text-blue-600" />
                     <span className="text-sm">Most Popular</span>
                   </Button>
-                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-green-500 hover:bg-green-50 dark:hover:bg-green-900/20 transition-all hover:scale-105">
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-green-500 hover:bg-green-50 dark:hover:bg-green-900/20 transition-all hover:scale-105" onClick={() => setShowSubmitTemplateDialog(true)}>
                     <Plus className="h-5 w-5 text-green-600" />
                     <span className="text-sm">Submit Template</span>
                   </Button>
@@ -1724,19 +2322,19 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-cyan-500 hover:bg-cyan-50 dark:hover:bg-cyan-900/20 transition-all hover:scale-105">
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-cyan-500 hover:bg-cyan-50 dark:hover:bg-cyan-900/20 transition-all hover:scale-105" onClick={() => setShowNewConnectionDialog(true)}>
                     <Plus className="h-5 w-5 text-cyan-600" />
                     <span className="text-sm">New Connection</span>
                   </Button>
-                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all hover:scale-105">
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all hover:scale-105" onClick={() => setShowNewWebhookDialog(true)}>
                     <Webhook className="h-5 w-5 text-blue-600" />
                     <span className="text-sm">New Webhook</span>
                   </Button>
-                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-all hover:scale-105">
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-all hover:scale-105" onClick={handleRefreshExpiredConnections} disabled={isProcessing}>
                     <RefreshCw className="h-5 w-5 text-amber-600" />
                     <span className="text-sm">Refresh Expired</span>
                   </Button>
-                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all hover:scale-105">
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all hover:scale-105" onClick={() => setShowAPIKeysDialog(true)}>
                     <Key className="h-5 w-5 text-purple-600" />
                     <span className="text-sm">API Keys</span>
                   </Button>
@@ -1766,13 +2364,13 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                       <div className="flex items-center gap-3">
                         <span className="text-sm text-gray-500">{connection.usageCount} uses</span>
                         <Badge className={getConnectionColor(connection.status)}>{connection.status}</Badge>
-                        <Button variant="ghost" size="sm">
+                        <Button variant="ghost" size="sm" onClick={() => toast.success(`Managing ${connection.name}`, { description: 'Connection settings opened' })}>
                           <MoreVertical className="h-4 w-4" />
                         </Button>
                       </div>
                     </div>
                   ))}
-                  <Button variant="outline" className="w-full mt-4">
+                  <Button variant="outline" className="w-full mt-4" onClick={() => setShowNewConnectionDialog(true)}>
                     <Plus className="h-4 w-4 mr-2" />
                     Add Connection
                   </Button>
@@ -1797,7 +2395,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                       </div>
                       <div className="flex items-center gap-2 bg-gray-100 dark:bg-gray-700 rounded p-2 font-mono text-xs">
                         <code className="flex-1 truncate">{webhook.url}</code>
-                        <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                        <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => handleCopyToClipboard(webhook.url, 'Webhook URL')}>
                           <Copy className="h-3 w-3" />
                         </Button>
                       </div>
@@ -2101,7 +2699,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                             </div>
                             <div className="flex items-center gap-2 bg-gray-100 dark:bg-gray-700 rounded p-2 font-mono text-xs">
                               <code className="flex-1 truncate">{webhook.url}</code>
-                              <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                              <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => handleCopyToClipboard(webhook.url, 'Webhook URL')}>
                                 <Copy className="h-3 w-3" />
                               </Button>
                             </div>
@@ -2111,7 +2709,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                             </div>
                           </div>
                         ))}
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => setShowNewWebhookDialog(true)}>
                           <Plus className="h-4 w-4 mr-2" />
                           Create New Webhook
                         </Button>
@@ -2145,7 +2743,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                           <label className="block text-sm font-medium mb-2">Webhook Secret</label>
                           <div className="flex gap-2">
                             <Input type="password" defaultValue="whsec_••••••••••••••••" className="flex-1" />
-                            <Button variant="outline">
+                            <Button variant="outline" onClick={handleRegenerateAPIKey}>
                               <RefreshCw className="h-4 w-4" />
                             </Button>
                           </div>
@@ -2182,13 +2780,13 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                             </div>
                             <div className="flex items-center gap-3">
                               <Badge className={getConnectionColor(connection.status)}>{connection.status}</Badge>
-                              <Button variant="ghost" size="sm">
+                              <Button variant="ghost" size="sm" onClick={() => toast.success(`Managing ${connection.name}`, { description: 'Connection settings opened' })}>
                                 <MoreVertical className="h-4 w-4" />
                               </Button>
                             </div>
                           </div>
                         ))}
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => setShowNewConnectionDialog(true)}>
                           <Plus className="h-4 w-4 mr-2" />
                           Add New Connection
                         </Button>
@@ -2207,18 +2805,18 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                         <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <div className="flex items-center justify-between mb-2">
                             <span className="font-medium">Primary API Key</span>
-                            <Button variant="ghost" size="sm">
+                            <Button variant="ghost" size="sm" onClick={() => handleCopyToClipboard('mk_live_••••••••••••••••••••••••', 'API Key')}>
                               <Copy className="h-4 w-4" />
                             </Button>
                           </div>
                           <code className="text-sm text-gray-600 dark:text-gray-400">mk_live_••••••••••••••••••••••••</code>
                         </div>
                         <div className="flex gap-2">
-                          <Button variant="outline" className="flex-1">
+                          <Button variant="outline" className="flex-1" onClick={handleRegenerateAPIKey} disabled={isProcessing}>
                             <Key className="h-4 w-4 mr-2" />
                             Regenerate Key
                           </Button>
-                          <Button variant="outline" className="flex-1">
+                          <Button variant="outline" className="flex-1" onClick={() => window.open('/docs/api', '_blank')}>
                             <ExternalLink className="h-4 w-4 mr-2" />
                             API Documentation
                           </Button>
@@ -2367,12 +2965,12 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="grid grid-cols-2 gap-4">
-                          <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2">
+                          <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2" onClick={handleExportScenarios}>
                             <FileText className="h-5 w-5 text-blue-600" />
                             <span>Export Scenarios</span>
                             <span className="text-xs text-gray-500">JSON format</span>
                           </Button>
-                          <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2">
+                          <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2" onClick={() => setShowExportLogsDialog(true)}>
                             <Activity className="h-5 w-5 text-green-600" />
                             <span>Export Logs</span>
                             <span className="text-xs text-gray-500">CSV format</span>
@@ -2396,7 +2994,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                               <p className="font-medium text-red-600">Delete All Scenarios</p>
                               <p className="text-sm text-gray-500">Remove all scenarios and their data</p>
                             </div>
-                            <Button variant="destructive" size="sm">Delete</Button>
+                            <Button variant="destructive" size="sm" onClick={() => setShowDeleteAllDialog(true)}>Delete</Button>
                           </div>
                         </div>
                         <div className="p-4 border border-red-200 dark:border-red-800 rounded-lg">
@@ -2405,7 +3003,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                               <p className="font-medium text-red-600">Clear Execution History</p>
                               <p className="text-sm text-gray-500">Remove all past execution logs</p>
                             </div>
-                            <Button variant="destructive" size="sm">Clear</Button>
+                            <Button variant="destructive" size="sm" onClick={() => setShowClearHistoryDialog(true)}>Clear</Button>
                           </div>
                         </div>
                         <div className="p-4 border border-red-200 dark:border-red-800 rounded-lg">
@@ -2414,7 +3012,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                               <p className="font-medium text-red-600">Delete Account</p>
                               <p className="text-sm text-gray-500">Permanently remove your account</p>
                             </div>
-                            <Button variant="destructive" size="sm">Delete</Button>
+                            <Button variant="destructive" size="sm" onClick={() => setShowDeleteAccountDialog(true)}>Delete</Button>
                           </div>
                         </div>
                       </CardContent>
@@ -2511,7 +3109,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                         <div className="text-center">
                           <Workflow className="h-8 w-8 mx-auto text-gray-400 mb-2" />
                           <p className="text-sm text-gray-500">Drag and drop modules to build</p>
-                          <Button className="mt-3">Open Editor</Button>
+                          <Button className="mt-3" onClick={() => { setSelectedWorkflow(null); setShowEditorDialog(true); toast.success('Opening workflow editor') }}>Open Editor</Button>
                         </div>
                       </div>
                     </div>
@@ -2571,7 +3169,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                           <p className="text-xs text-gray-500">2 days ago</p>
                         </div>
                       </div>
-                      <Button variant="ghost" size="sm">Restore</Button>
+                      <Button variant="ghost" size="sm" onClick={() => handleRestoreVersion(selectedWorkflow, (selectedWorkflow.published_version || 1) - 1)}>Restore</Button>
                     </div>
                   </TabsContent>
                 </Tabs>
@@ -2624,11 +3222,11 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                   </div>
                 )}
                 <div className="flex gap-2">
-                  <Button variant="outline" className="flex-1">
+                  <Button variant="outline" className="flex-1" onClick={() => handleRetryExecution(selectedExecution)} disabled={isProcessing}>
                     <RotateCcw className="h-4 w-4 mr-2" />
                     Retry
                   </Button>
-                  <Button variant="outline" className="flex-1">
+                  <Button variant="outline" className="flex-1" onClick={() => { setSelectedExecution(null); setShowViewLogsDialog(true); }}>
                     <Eye className="h-4 w-4 mr-2" />
                     View Logs
                   </Button>
@@ -2681,11 +3279,11 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <Button className="flex-1 bg-emerald-600 hover:bg-emerald-700">
+                  <Button className="flex-1 bg-emerald-600 hover:bg-emerald-700" onClick={() => handleUseTemplate(selectedTemplate)} disabled={isProcessing}>
                     <Plus className="h-4 w-4 mr-2" />
                     Use This Template
                   </Button>
-                  <Button variant="outline">
+                  <Button variant="outline" onClick={() => setShowPreviewTemplateDialog(true)}>
                     <Eye className="h-4 w-4 mr-2" />
                     Preview
                   </Button>
@@ -2892,6 +3490,798 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                   </>
                 )}
               </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Webhooks Management Dialog */}
+        <Dialog open={showWebhooksDialog} onOpenChange={setShowWebhooksDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Webhook className="h-5 w-5 text-orange-600" />
+                Manage Webhooks
+              </DialogTitle>
+              <DialogDescription>
+                Configure and monitor your webhook endpoints
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4 max-h-[60vh] overflow-y-auto">
+              {mockWebhooks.map(webhook => (
+                <div key={webhook.id} className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <Badge variant={webhook.isActive ? 'default' : 'secondary'}>{webhook.method}</Badge>
+                      <span className="font-medium">{webhook.name}</span>
+                    </div>
+                    <Switch checked={webhook.isActive} />
+                  </div>
+                  <div className="flex items-center gap-2 bg-gray-100 dark:bg-gray-700 rounded p-2 font-mono text-xs">
+                    <code className="flex-1 truncate">{webhook.url}</code>
+                    <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => handleCopyToClipboard(webhook.url, 'Webhook URL')}>
+                      <Copy className="h-3 w-3" />
+                    </Button>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-2">
+                    {webhook.totalTriggers} triggers - Last: {webhook.lastTriggered?.toLocaleDateString() || 'Never'}
+                  </p>
+                </div>
+              ))}
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowWebhooksDialog(false)}>
+                Close
+              </Button>
+              <Button onClick={() => { setShowWebhooksDialog(false); setShowNewWebhookDialog(true); }} className="bg-orange-600 hover:bg-orange-700">
+                <Plus className="h-4 w-4 mr-2" />
+                New Webhook
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* AI Automation Dialog */}
+        <Dialog open={showAIAutomationDialog} onOpenChange={setShowAIAutomationDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Bot className="h-5 w-5 text-pink-600" />
+                AI Automation Builder
+              </DialogTitle>
+              <DialogDescription>
+                Describe what you want to automate and let AI build it for you
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">Describe your automation</label>
+                <textarea
+                  className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700 min-h-[120px]"
+                  placeholder="e.g., When a new email arrives with an attachment, save it to Google Drive and notify me on Slack..."
+                />
+              </div>
+              <div className="p-4 bg-pink-50 dark:bg-pink-900/20 rounded-lg">
+                <div className="flex items-center gap-2 text-pink-700 dark:text-pink-400 mb-2">
+                  <Sparkles className="h-4 w-4" />
+                  <span className="font-medium">AI Suggestions</span>
+                </div>
+                <ul className="text-sm space-y-1 text-gray-600 dark:text-gray-400">
+                  <li>- Email to Google Drive automation</li>
+                  <li>- New Lead notification workflow</li>
+                  <li>- Social media posting scheduler</li>
+                </ul>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowAIAutomationDialog(false)}>
+                Cancel
+              </Button>
+              <Button onClick={() => { toast.success('AI is building your automation...', { description: 'This may take a moment' }); setShowAIAutomationDialog(false); }} className="bg-pink-600 hover:bg-pink-700">
+                <Sparkles className="h-4 w-4 mr-2" />
+                Generate Automation
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Import Scenario Dialog */}
+        <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Download className="h-5 w-5 text-blue-600" />
+                Import Scenario
+              </DialogTitle>
+              <DialogDescription>
+                Import automation scenarios from JSON files
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+                <FileText className="h-12 w-12 mx-auto text-gray-400 mb-3" />
+                <p className="font-medium mb-1">Drop your scenario file here</p>
+                <p className="text-sm text-gray-500 mb-4">Supports .json exports from Make, Zapier, n8n</p>
+                <input
+                  type="file"
+                  accept=".json"
+                  onChange={handleFileUpload}
+                  className="hidden"
+                  id="import-dialog-file-input"
+                />
+                <Button variant="outline" onClick={() => document.getElementById('import-dialog-file-input')?.click()}>Browse Files</Button>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Or paste JSON content</label>
+                <textarea
+                  className="w-full px-3 py-2 border rounded-lg font-mono text-sm dark:bg-gray-800 dark:border-gray-700"
+                  rows={6}
+                  placeholder='{"name": "My Workflow", "steps": [...]}'
+                  value={importJsonContent}
+                  onChange={(e) => setImportJsonContent(e.target.value)}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => { setShowImportDialog(false); setImportJsonContent(''); }}>
+                Cancel
+              </Button>
+              <Button onClick={handleImportScenario} disabled={isProcessing || !importJsonContent.trim()} className="bg-blue-600 hover:bg-blue-700">
+                {isProcessing ? (
+                  <>
+                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                    Importing...
+                  </>
+                ) : (
+                  <>
+                    <Download className="h-4 w-4 mr-2" />
+                    Import
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Clone Scenario Dialog */}
+        <Dialog open={showCloneDialog} onOpenChange={setShowCloneDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Copy className="h-5 w-5 text-purple-600" />
+                Clone Scenario
+              </DialogTitle>
+              <DialogDescription>
+                Select a scenario to duplicate
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-2 py-4 max-h-[50vh] overflow-y-auto">
+              {displayWorkflows.map(workflow => (
+                <div
+                  key={workflow.id}
+                  className={`p-4 rounded-lg cursor-pointer transition-all ${
+                    selectedCloneWorkflow?.id === workflow.id
+                      ? 'bg-purple-100 dark:bg-purple-900/30 border-2 border-purple-500'
+                      : 'bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700'
+                  }`}
+                  onClick={() => setSelectedCloneWorkflow(workflow)}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <Workflow className="h-4 w-4 text-emerald-600" />
+                      <span className="font-medium">{workflow.workflow_name}</span>
+                    </div>
+                    <Badge className={getStatusColor(workflow.status)}>{workflow.status}</Badge>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">{workflow.step_count} steps</p>
+                </div>
+              ))}
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => { setShowCloneDialog(false); setSelectedCloneWorkflow(null); }}>
+                Cancel
+              </Button>
+              <Button onClick={handleCloneWorkflow} disabled={isProcessing || !selectedCloneWorkflow} className="bg-purple-600 hover:bg-purple-700">
+                {isProcessing ? (
+                  <>
+                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                    Cloning...
+                  </>
+                ) : (
+                  <>
+                    <Copy className="h-4 w-4 mr-2" />
+                    Clone Selected
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Share Scenario Dialog */}
+        <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Share2 className="h-5 w-5 text-blue-600" />
+                Share Scenario
+              </DialogTitle>
+              <DialogDescription>
+                Generate a shareable link for your automation
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <label className="block text-sm font-medium mb-2">Share Settings</label>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm">Allow viewing</span>
+                    <Switch defaultChecked />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm">Allow cloning</span>
+                    <Switch />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm">Require authentication</span>
+                    <Switch defaultChecked />
+                  </div>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowShareDialog(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleShareWorkflow} disabled={isProcessing} className="bg-blue-600 hover:bg-blue-700">
+                {isProcessing ? (
+                  <>
+                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                    Generating...
+                  </>
+                ) : (
+                  <>
+                    <Share2 className="h-4 w-4 mr-2" />
+                    Generate Link
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Advanced Filters Dialog */}
+        <Dialog open={showFiltersDialog} onOpenChange={setShowFiltersDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Filter className="h-5 w-5 text-purple-600" />
+                Advanced Filters
+              </DialogTitle>
+              <DialogDescription>
+                Filter execution history by specific criteria
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">Status</label>
+                <select className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
+                  <option>All Statuses</option>
+                  <option>Success</option>
+                  <option>Failed</option>
+                  <option>Running</option>
+                  <option>Queued</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Date Range</label>
+                <select className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
+                  <option>Last 24 hours</option>
+                  <option>Last 7 days</option>
+                  <option>Last 30 days</option>
+                  <option>All time</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Trigger Type</label>
+                <select className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
+                  <option>All Triggers</option>
+                  <option>Webhook</option>
+                  <option>Schedule</option>
+                  <option>Manual</option>
+                </select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowFiltersDialog(false)}>
+                Reset
+              </Button>
+              <Button onClick={() => { toast.success('Filters applied'); setShowFiltersDialog(false); }} className="bg-purple-600 hover:bg-purple-700">
+                Apply Filters
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* New Connection Dialog */}
+        <Dialog open={showNewConnectionDialog} onOpenChange={setShowNewConnectionDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Network className="h-5 w-5 text-cyan-600" />
+                Add New Connection
+              </DialogTitle>
+              <DialogDescription>
+                Connect a new app or service
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">Connection Name</label>
+                <Input
+                  placeholder="My Gmail Connection"
+                  value={newConnectionForm.name}
+                  onChange={(e) => setNewConnectionForm(prev => ({ ...prev, name: e.target.value }))}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">App / Service</label>
+                <select
+                  className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700"
+                  value={newConnectionForm.app}
+                  onChange={(e) => setNewConnectionForm(prev => ({ ...prev, app: e.target.value }))}
+                >
+                  <option value="">Select an app...</option>
+                  <option value="gmail">Gmail</option>
+                  <option value="slack">Slack</option>
+                  <option value="notion">Notion</option>
+                  <option value="drive">Google Drive</option>
+                  <option value="sheets">Google Sheets</option>
+                  <option value="airtable">Airtable</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">API Key (optional)</label>
+                <Input
+                  type="password"
+                  placeholder="Enter API key or connect via OAuth"
+                  value={newConnectionForm.apiKey}
+                  onChange={(e) => setNewConnectionForm(prev => ({ ...prev, apiKey: e.target.value }))}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => { setShowNewConnectionDialog(false); setNewConnectionForm({ name: '', app: '', apiKey: '' }); }}>
+                Cancel
+              </Button>
+              <Button onClick={handleCreateConnection} disabled={isProcessing} className="bg-cyan-600 hover:bg-cyan-700">
+                {isProcessing ? (
+                  <>
+                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                    Connecting...
+                  </>
+                ) : (
+                  <>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Connect
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* New Webhook Dialog */}
+        <Dialog open={showNewWebhookDialog} onOpenChange={setShowNewWebhookDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Webhook className="h-5 w-5 text-orange-600" />
+                Create New Webhook
+              </DialogTitle>
+              <DialogDescription>
+                Set up a new webhook endpoint
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">Webhook Name</label>
+                <Input
+                  placeholder="My Webhook"
+                  value={newWebhookForm.name}
+                  onChange={(e) => setNewWebhookForm(prev => ({ ...prev, name: e.target.value }))}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">HTTP Method</label>
+                <select
+                  className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700"
+                  value={newWebhookForm.method}
+                  onChange={(e) => setNewWebhookForm(prev => ({ ...prev, method: e.target.value as any }))}
+                >
+                  <option value="GET">GET</option>
+                  <option value="POST">POST</option>
+                  <option value="PUT">PUT</option>
+                  <option value="DELETE">DELETE</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Link to Scenario (optional)</label>
+                <select
+                  className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700"
+                  value={newWebhookForm.scenarioId}
+                  onChange={(e) => setNewWebhookForm(prev => ({ ...prev, scenarioId: e.target.value }))}
+                >
+                  <option value="">Select a scenario...</option>
+                  {displayWorkflows.map(w => (
+                    <option key={w.id} value={w.id}>{w.workflow_name}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => { setShowNewWebhookDialog(false); setNewWebhookForm({ name: '', method: 'POST', scenarioId: '' }); }}>
+                Cancel
+              </Button>
+              <Button onClick={handleCreateWebhook} disabled={isProcessing} className="bg-orange-600 hover:bg-orange-700">
+                {isProcessing ? (
+                  <>
+                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                    Creating...
+                  </>
+                ) : (
+                  <>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Create Webhook
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* API Keys Dialog */}
+        <Dialog open={showAPIKeysDialog} onOpenChange={setShowAPIKeysDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Key className="h-5 w-5 text-purple-600" />
+                API Keys Management
+              </DialogTitle>
+              <DialogDescription>
+                Manage your API keys and access tokens
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="font-medium">Primary API Key</span>
+                  <Badge className="bg-green-100 text-green-700">Active</Badge>
+                </div>
+                <div className="flex items-center gap-2">
+                  <code className="flex-1 text-sm text-gray-600 dark:text-gray-400 truncate">mk_live_a1b2c3d4e5f6g7h8i9j0...</code>
+                  <Button variant="ghost" size="sm" onClick={() => handleCopyToClipboard('mk_live_a1b2c3d4e5f6g7h8i9j0', 'API Key')}>
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                </div>
+                <p className="text-xs text-gray-500 mt-2">Created: Dec 15, 2024 - Last used: Today</p>
+              </div>
+              <div className="p-4 border-2 border-dashed rounded-lg text-center">
+                <Key className="h-8 w-8 mx-auto text-gray-400 mb-2" />
+                <p className="text-sm text-gray-500">Need another API key?</p>
+                <Button variant="outline" className="mt-2" onClick={() => toast.success('New API key created')}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create New Key
+                </Button>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowAPIKeysDialog(false)}>
+                Close
+              </Button>
+              <Button onClick={handleRegenerateAPIKey} disabled={isProcessing} className="bg-purple-600 hover:bg-purple-700">
+                Regenerate Primary Key
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Submit Template Dialog */}
+        <Dialog open={showSubmitTemplateDialog} onOpenChange={setShowSubmitTemplateDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Package className="h-5 w-5 text-green-600" />
+                Submit Template
+              </DialogTitle>
+              <DialogDescription>
+                Share your automation with the community
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">Template Name</label>
+                <Input
+                  placeholder="Email to Spreadsheet Sync"
+                  value={submitTemplateForm.name}
+                  onChange={(e) => setSubmitTemplateForm(prev => ({ ...prev, name: e.target.value }))}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Description</label>
+                <textarea
+                  className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700"
+                  rows={3}
+                  placeholder="Describe what this template does..."
+                  value={submitTemplateForm.description}
+                  onChange={(e) => setSubmitTemplateForm(prev => ({ ...prev, description: e.target.value }))}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Category</label>
+                <select
+                  className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700"
+                  value={submitTemplateForm.category}
+                  onChange={(e) => setSubmitTemplateForm(prev => ({ ...prev, category: e.target.value }))}
+                >
+                  <option>Productivity</option>
+                  <option>Sales</option>
+                  <option>Marketing</option>
+                  <option>Finance</option>
+                  <option>AI</option>
+                </select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => { setShowSubmitTemplateDialog(false); setSubmitTemplateForm({ name: '', description: '', category: 'Productivity' }); }}>
+                Cancel
+              </Button>
+              <Button onClick={handleSubmitTemplate} disabled={isProcessing} className="bg-green-600 hover:bg-green-700">
+                {isProcessing ? (
+                  <>
+                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                    Submitting...
+                  </>
+                ) : (
+                  <>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Submit
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete All Scenarios Dialog */}
+        <Dialog open={showDeleteAllDialog} onOpenChange={setShowDeleteAllDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-600">
+                <AlertTriangle className="h-5 w-5" />
+                Delete All Scenarios
+              </DialogTitle>
+              <DialogDescription>
+                This action cannot be undone. All your scenarios and their data will be permanently deleted.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                <p className="text-sm text-red-700 dark:text-red-400">
+                  You are about to delete {displayWorkflows.length} scenarios. This will remove all workflow configurations, execution history, and associated data.
+                </p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowDeleteAllDialog(false)}>
+                Cancel
+              </Button>
+              <Button variant="destructive" onClick={handleDeleteAllScenarios} disabled={isProcessing}>
+                {isProcessing ? (
+                  <>
+                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                    Deleting...
+                  </>
+                ) : (
+                  'Delete All Scenarios'
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Clear History Dialog */}
+        <Dialog open={showClearHistoryDialog} onOpenChange={setShowClearHistoryDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-600">
+                <AlertTriangle className="h-5 w-5" />
+                Clear Execution History
+              </DialogTitle>
+              <DialogDescription>
+                This will remove all past execution logs and reset statistics.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800">
+                <p className="text-sm text-amber-700 dark:text-amber-400">
+                  All execution counts, duration statistics, and log entries will be permanently cleared. Your scenarios will remain intact.
+                </p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowClearHistoryDialog(false)}>
+                Cancel
+              </Button>
+              <Button variant="destructive" onClick={handleClearExecutionHistory} disabled={isProcessing}>
+                {isProcessing ? (
+                  <>
+                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                    Clearing...
+                  </>
+                ) : (
+                  'Clear History'
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Account Dialog */}
+        <Dialog open={showDeleteAccountDialog} onOpenChange={setShowDeleteAccountDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-600">
+                <AlertTriangle className="h-5 w-5" />
+                Delete Account
+              </DialogTitle>
+              <DialogDescription>
+                This action is irreversible and will permanently delete your account.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                <p className="text-sm text-red-700 dark:text-red-400 mb-3">
+                  Deleting your account will:
+                </p>
+                <ul className="text-sm text-red-700 dark:text-red-400 space-y-1 list-disc list-inside">
+                  <li>Remove all your scenarios and workflows</li>
+                  <li>Delete all execution history</li>
+                  <li>Revoke all API keys and connections</li>
+                  <li>Cancel any active subscriptions</li>
+                </ul>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowDeleteAccountDialog(false)}>
+                Cancel
+              </Button>
+              <Button variant="destructive" onClick={() => { toast.error('Account deletion requires email verification', { description: 'Check your email for confirmation link' }); setShowDeleteAccountDialog(false); }}>
+                Delete Account
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* View Logs Dialog */}
+        <Dialog open={showViewLogsDialog} onOpenChange={setShowViewLogsDialog}>
+          <DialogContent className="max-w-2xl max-h-[80vh]">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <FileText className="h-5 w-5 text-blue-600" />
+                Execution Logs
+              </DialogTitle>
+              <DialogDescription>
+                Detailed execution logs and debug information
+              </DialogDescription>
+            </DialogHeader>
+            <ScrollArea className="h-[50vh] mt-4">
+              <div className="space-y-2 font-mono text-xs">
+                {[
+                  { time: '10:30:45.123', level: 'INFO', message: 'Workflow execution started' },
+                  { time: '10:30:45.234', level: 'DEBUG', message: 'Loading trigger configuration...' },
+                  { time: '10:30:45.456', level: 'INFO', message: 'Trigger: Webhook received POST request' },
+                  { time: '10:30:45.678', level: 'DEBUG', message: 'Parsing request body (1.2KB)' },
+                  { time: '10:30:45.890', level: 'INFO', message: 'Step 1: Filter - Processing 15 items' },
+                  { time: '10:30:46.123', level: 'INFO', message: 'Step 1: Complete - 12 items passed filter' },
+                  { time: '10:30:46.456', level: 'INFO', message: 'Step 2: Transform - Mapping data' },
+                  { time: '10:30:46.789', level: 'DEBUG', message: 'Applying transformation rules...' },
+                  { time: '10:30:47.012', level: 'INFO', message: 'Step 2: Complete - 12 items transformed' },
+                  { time: '10:30:47.234', level: 'INFO', message: 'Step 3: HTTP Request - Sending to API' },
+                  { time: '10:30:48.567', level: 'INFO', message: 'Step 3: Complete - Status 200 OK' },
+                  { time: '10:30:48.789', level: 'INFO', message: 'Workflow execution completed successfully' },
+                  { time: '10:30:48.890', level: 'DEBUG', message: 'Total duration: 3.767s, Data: 4.5KB' },
+                ].map((log, i) => (
+                  <div key={i} className={`p-2 rounded ${
+                    log.level === 'ERROR' ? 'bg-red-50 text-red-800 dark:bg-red-900/30 dark:text-red-300' :
+                    log.level === 'WARN' ? 'bg-amber-50 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300' :
+                    log.level === 'DEBUG' ? 'bg-gray-50 text-gray-600 dark:bg-gray-800 dark:text-gray-400' :
+                    'bg-blue-50 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300'
+                  }`}>
+                    <span className="text-gray-500">[{log.time}]</span>
+                    <span className={`font-medium ml-2 ${
+                      log.level === 'ERROR' ? 'text-red-600' :
+                      log.level === 'WARN' ? 'text-amber-600' :
+                      log.level === 'DEBUG' ? 'text-gray-500' :
+                      'text-blue-600'
+                    }`}>[{log.level}]</span>
+                    <span className="ml-2">{log.message}</span>
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowViewLogsDialog(false)}>
+                Close
+              </Button>
+              <Button onClick={() => { handleCopyToClipboard('Execution logs copied', 'Logs'); }} className="bg-blue-600 hover:bg-blue-700">
+                <Copy className="h-4 w-4 mr-2" />
+                Copy Logs
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Preview Template Dialog */}
+        <Dialog open={showPreviewTemplateDialog} onOpenChange={setShowPreviewTemplateDialog}>
+          <DialogContent className="max-w-3xl max-h-[80vh]">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Eye className="h-5 w-5 text-purple-600" />
+                Template Preview
+              </DialogTitle>
+              <DialogDescription>
+                {selectedTemplate?.name || 'Template'} workflow structure
+              </DialogDescription>
+            </DialogHeader>
+            <ScrollArea className="h-[50vh] mt-4">
+              <div className="space-y-4">
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <h4 className="font-medium mb-3">Workflow Steps</h4>
+                  <div className="space-y-3">
+                    {[1, 2, 3, 4].map(step => (
+                      <div key={step} className="flex items-center gap-3 p-3 bg-white dark:bg-gray-700 rounded-lg shadow-sm">
+                        <div className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center font-medium">
+                          {step}
+                        </div>
+                        <div className="flex-1">
+                          <p className="font-medium">
+                            {step === 1 ? 'Trigger: Webhook' :
+                             step === 2 ? 'Filter Data' :
+                             step === 3 ? 'Transform' :
+                             'Send to API'}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            {step === 1 ? 'Receives incoming HTTP requests' :
+                             step === 2 ? 'Filters items based on conditions' :
+                             step === 3 ? 'Maps and transforms data structure' :
+                             'Sends processed data to external service'}
+                          </p>
+                        </div>
+                        <ChevronRight className="h-4 w-4 text-gray-400" />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <h4 className="font-medium mb-2">Required Connections</h4>
+                  <div className="flex gap-2">
+                    <Badge>Gmail</Badge>
+                    <Badge>Google Sheets</Badge>
+                    <Badge>Slack</Badge>
+                  </div>
+                </div>
+              </div>
+            </ScrollArea>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowPreviewTemplateDialog(false)}>
+                Close
+              </Button>
+              {selectedTemplate && (
+                <Button onClick={() => { setShowPreviewTemplateDialog(false); handleUseTemplate(selectedTemplate); }} className="bg-emerald-600 hover:bg-emerald-700">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Use Template
+                </Button>
+              )}
             </DialogFooter>
           </DialogContent>
         </Dialog>

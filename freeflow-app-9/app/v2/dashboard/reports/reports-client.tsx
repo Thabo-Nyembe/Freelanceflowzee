@@ -371,6 +371,90 @@ export default function ReportsClient() {
   const [newDataSourceConnection, setNewDataSourceConnection] = useState('')
   const [isAddingDataSource, setIsAddingDataSource] = useState(false)
 
+  // Filter Dialog State
+  const [showFilterDialog, setShowFilterDialog] = useState(false)
+  const [filterStatus, setFilterStatus] = useState<string>('all')
+  const [filterType, setFilterType] = useState<string>('all')
+  const [filterDateRange, setFilterDateRange] = useState<string>('all')
+
+  // Import Reports Dialog State
+  const [showImportDialog, setShowImportDialog] = useState(false)
+  const [importFile, setImportFile] = useState<string>('')
+  const [importFormat, setImportFormat] = useState<string>('json')
+  const [isImporting, setIsImporting] = useState(false)
+
+  // Export All Dialog State
+  const [showExportAllDialog, setShowExportAllDialog] = useState(false)
+  const [exportAllFormat, setExportAllFormat] = useState<string>('pdf')
+  const [isExportingAll, setIsExportingAll] = useState(false)
+
+  // Report Actions Menu State
+  const [showReportActionsMenu, setShowReportActionsMenu] = useState<string | null>(null)
+
+  // AI Insights Dialog State
+  const [showAIInsightsDialog, setShowAIInsightsDialog] = useState(false)
+  const [aiAnalysisRunning, setAiAnalysisRunning] = useState(false)
+  const [aiInsightsResults, setAiInsightsResults] = useState<string[]>([])
+
+  // Theme Dialog State
+  const [showThemeDialog, setShowThemeDialog] = useState(false)
+  const [selectedTheme, setSelectedTheme] = useState<string>('default')
+
+  // Publish Report Dialog State
+  const [showPublishDialog, setShowPublishDialog] = useState(false)
+  const [publishVisibility, setPublishVisibility] = useState<string>('team')
+  const [isPublishing, setIsPublishing] = useState(false)
+
+  // Add Connection Dialog State (for Data Sources tab)
+  const [showAddConnectionDialog, setShowAddConnectionDialog] = useState(false)
+
+  // Data Source Settings Dialog State
+  const [showDataSourceSettingsDialog, setShowDataSourceSettingsDialog] = useState(false)
+  const [selectedDataSource, setSelectedDataSource] = useState<DataSource | null>(null)
+
+  // Scheduled Report Settings Dialog State
+  const [showScheduledSettingsDialog, setShowScheduledSettingsDialog] = useState(false)
+  const [selectedScheduledReport, setSelectedScheduledReport] = useState<ScheduledReport | null>(null)
+
+  // Delete All Confirmation Dialog State
+  const [showDeleteAllDialog, setShowDeleteAllDialog] = useState(false)
+  const [isDeletingAll, setIsDeletingAll] = useState(false)
+  const [deleteConfirmText, setDeleteConfirmText] = useState('')
+
+  // Clear Cache Dialog State
+  const [showClearCacheDialog, setShowClearCacheDialog] = useState(false)
+  const [isClearingCache, setIsClearingCache] = useState(false)
+
+  // Edit Report Dialog State
+  const [showEditReportDialog, setShowEditReportDialog] = useState(false)
+  const [editReportName, setEditReportName] = useState('')
+  const [editReportDescription, setEditReportDescription] = useState('')
+  const [isSavingReport, setIsSavingReport] = useState(false)
+
+  // Share Report Dialog State
+  const [showShareReportDialog, setShowShareReportDialog] = useState(false)
+  const [shareEmails, setShareEmails] = useState('')
+  const [sharePermission, setSharePermission] = useState<string>('view')
+  const [isSharing, setIsSharing] = useState(false)
+
+  // Export Report Dialog State
+  const [showExportReportDialog, setShowExportReportDialog] = useState(false)
+  const [exportFormat, setExportFormat] = useState<string>('pdf')
+  const [isExportingReport, setIsExportingReport] = useState(false)
+
+  // Delete Report Dialog State
+  const [showDeleteReportDialog, setShowDeleteReportDialog] = useState(false)
+  const [isDeletingReport, setIsDeletingReport] = useState(false)
+
+  // Connect Integration Dialog State
+  const [showConnectIntegrationDialog, setShowConnectIntegrationDialog] = useState(false)
+  const [integrationApiKey, setIntegrationApiKey] = useState('')
+  const [isConnectingIntegration, setIsConnectingIntegration] = useState(false)
+
+  // API Key State
+  const [showApiKey, setShowApiKey] = useState(false)
+  const [showEmbedSecret, setShowEmbedSecret] = useState(false)
+
   // Quick Actions with real dialogs
   const mockReportsQuickActions = [
     { id: '1', label: 'New Report', icon: 'plus', action: () => setShowNewReportDialog(true), variant: 'default' as const },
@@ -476,6 +560,368 @@ export default function ReportsClient() {
     } finally {
       setIsAddingDataSource(false)
     }
+  }
+
+  // Apply Filters Handler
+  const handleApplyFilters = () => {
+    toast.success('Filters applied', {
+      description: `Status: ${filterStatus}, Type: ${filterType}, Date: ${filterDateRange}`
+    })
+    setShowFilterDialog(false)
+  }
+
+  // Import Reports Handler
+  const handleImportReports = async () => {
+    if (!importFile.trim()) {
+      toast.error('Please enter a file URL or select a file')
+      return
+    }
+    setIsImporting(true)
+    try {
+      await new Promise(resolve => setTimeout(resolve, 2000))
+      toast.success('Reports imported successfully', {
+        description: `Imported reports from ${importFormat.toUpperCase()} file`
+      })
+      setImportFile('')
+      setShowImportDialog(false)
+    } catch (error) {
+      toast.error('Failed to import reports')
+    } finally {
+      setIsImporting(false)
+    }
+  }
+
+  // Export All Reports Handler
+  const handleExportAllReports = async () => {
+    setIsExportingAll(true)
+    try {
+      await new Promise(resolve => setTimeout(resolve, 2000))
+      toast.success('Export started', {
+        description: `Exporting all reports as ${exportAllFormat.toUpperCase()}. Download will begin shortly.`
+      })
+      setShowExportAllDialog(false)
+    } catch (error) {
+      toast.error('Failed to export reports')
+    } finally {
+      setIsExportingAll(false)
+    }
+  }
+
+  // AI Insights Handler
+  const handleRunAIAnalysis = async () => {
+    setAiAnalysisRunning(true)
+    setAiInsightsResults([])
+    try {
+      await new Promise(resolve => setTimeout(resolve, 2500))
+      setAiInsightsResults([
+        'Revenue trend shows 15% growth potential in Q2',
+        'Customer churn risk identified in segment B',
+        'Marketing spend optimization can save 20% budget',
+        'Product feature adoption correlates with retention'
+      ])
+      toast.success('AI analysis complete', {
+        description: 'Found 4 actionable insights'
+      })
+    } catch (error) {
+      toast.error('AI analysis failed')
+    } finally {
+      setAiAnalysisRunning(false)
+    }
+  }
+
+  // Apply Theme Handler
+  const handleApplyTheme = () => {
+    toast.success('Theme applied', {
+      description: `Applied "${selectedTheme}" theme to all reports`
+    })
+    setShowThemeDialog(false)
+  }
+
+  // Publish Report Handler
+  const handlePublishReport = async () => {
+    setIsPublishing(true)
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1500))
+      toast.success('Report published', {
+        description: `Report is now visible to ${publishVisibility === 'public' ? 'everyone' : publishVisibility}`
+      })
+      setShowPublishDialog(false)
+    } catch (error) {
+      toast.error('Failed to publish report')
+    } finally {
+      setIsPublishing(false)
+    }
+  }
+
+  // Refresh Data Source Handler
+  const handleRefreshDataSource = async (source: DataSource) => {
+    toast.info(`Refreshing ${source.name}...`)
+    await new Promise(resolve => setTimeout(resolve, 1500))
+    toast.success('Data source refreshed', {
+      description: `${source.name} has been synced successfully`
+    })
+  }
+
+  // Data Source Settings Handler
+  const handleOpenDataSourceSettings = (source: DataSource) => {
+    setSelectedDataSource(source)
+    setShowDataSourceSettingsDialog(true)
+  }
+
+  // Save Data Source Settings Handler
+  const handleSaveDataSourceSettings = async () => {
+    if (!selectedDataSource) return
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      toast.success('Settings saved', {
+        description: `${selectedDataSource.name} settings updated`
+      })
+      setShowDataSourceSettingsDialog(false)
+      setSelectedDataSource(null)
+    } catch (error) {
+      toast.error('Failed to save settings')
+    }
+  }
+
+  // Scheduled Report Settings Handler
+  const handleOpenScheduledSettings = (schedule: ScheduledReport) => {
+    setSelectedScheduledReport(schedule)
+    setShowScheduledSettingsDialog(true)
+  }
+
+  // Toggle Schedule Status Handler
+  const handleToggleScheduleStatus = async (scheduleId: string, currentStatus: string) => {
+    const newStatus = currentStatus === 'active' ? 'paused' : 'active'
+    toast.success(`Schedule ${newStatus}`, {
+      description: `Report delivery has been ${newStatus}`
+    })
+  }
+
+  // Delete All Reports Handler
+  const handleDeleteAllReports = async () => {
+    if (deleteConfirmText !== 'DELETE ALL') {
+      toast.error('Please type "DELETE ALL" to confirm')
+      return
+    }
+    setIsDeletingAll(true)
+    try {
+      await new Promise(resolve => setTimeout(resolve, 2000))
+      toast.success('All reports deleted', {
+        description: 'All reports have been permanently removed'
+      })
+      setShowDeleteAllDialog(false)
+      setDeleteConfirmText('')
+    } catch (error) {
+      toast.error('Failed to delete reports')
+    } finally {
+      setIsDeletingAll(false)
+    }
+  }
+
+  // Clear Cache Handler
+  const handleClearCache = async () => {
+    setIsClearingCache(true)
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1500))
+      toast.success('Cache cleared', {
+        description: 'All cached data has been refreshed'
+      })
+      setShowClearCacheDialog(false)
+    } catch (error) {
+      toast.error('Failed to clear cache')
+    } finally {
+      setIsClearingCache(false)
+    }
+  }
+
+  // Open Report Handler
+  const handleOpenReport = () => {
+    if (!selectedReport) return
+    toast.success('Opening report', {
+      description: `Loading "${selectedReport.name}" in full view`
+    })
+    // In a real app, this would navigate to the report view
+  }
+
+  // Edit Report Handler
+  const handleOpenEditReport = () => {
+    if (!selectedReport) return
+    setEditReportName(selectedReport.name)
+    setEditReportDescription(selectedReport.description)
+    setShowEditReportDialog(true)
+  }
+
+  const handleSaveReportEdit = async () => {
+    if (!editReportName.trim()) {
+      toast.error('Report name is required')
+      return
+    }
+    setIsSavingReport(true)
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      toast.success('Report updated', {
+        description: `"${editReportName}" has been saved`
+      })
+      setShowEditReportDialog(false)
+    } catch (error) {
+      toast.error('Failed to save report')
+    } finally {
+      setIsSavingReport(false)
+    }
+  }
+
+  // Share Report Handler
+  const handleOpenShareReport = () => {
+    setShareEmails('')
+    setSharePermission('view')
+    setShowShareReportDialog(true)
+  }
+
+  const handleShareReport = async () => {
+    if (!shareEmails.trim()) {
+      toast.error('Please enter at least one email address')
+      return
+    }
+    setIsSharing(true)
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      const emailCount = shareEmails.split(',').length
+      toast.success('Report shared', {
+        description: `Shared with ${emailCount} recipient${emailCount > 1 ? 's' : ''} with ${sharePermission} access`
+      })
+      setShowShareReportDialog(false)
+    } catch (error) {
+      toast.error('Failed to share report')
+    } finally {
+      setIsSharing(false)
+    }
+  }
+
+  // Export Single Report Handler
+  const handleOpenExportReport = () => {
+    setExportFormat('pdf')
+    setShowExportReportDialog(true)
+  }
+
+  const handleExportReport = async () => {
+    if (!selectedReport) return
+    setIsExportingReport(true)
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1500))
+      toast.success('Export started', {
+        description: `"${selectedReport.name}" will be downloaded as ${exportFormat.toUpperCase()}`
+      })
+      setShowExportReportDialog(false)
+    } catch (error) {
+      toast.error('Failed to export report')
+    } finally {
+      setIsExportingReport(false)
+    }
+  }
+
+  // Delete Single Report Handler
+  const handleOpenDeleteReport = () => {
+    setShowDeleteReportDialog(true)
+  }
+
+  const handleDeleteReport = async () => {
+    if (!selectedReport) return
+    setIsDeletingReport(true)
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      toast.success('Report deleted', {
+        description: `"${selectedReport.name}" has been removed`
+      })
+      setShowDeleteReportDialog(false)
+      setSelectedReport(null)
+    } catch (error) {
+      toast.error('Failed to delete report')
+    } finally {
+      setIsDeletingReport(false)
+    }
+  }
+
+  // Connect Integration Handler
+  const handleConnectIntegration = async () => {
+    if (!integrationApiKey.trim()) {
+      toast.error('Please enter an API key')
+      return
+    }
+    setIsConnectingIntegration(true)
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1500))
+      toast.success('Integration connected', {
+        description: 'Redshift has been successfully connected'
+      })
+      setShowConnectIntegrationDialog(false)
+      setIntegrationApiKey('')
+    } catch (error) {
+      toast.error('Failed to connect integration')
+    } finally {
+      setIsConnectingIntegration(false)
+    }
+  }
+
+  // Copy API Key Handler
+  const handleCopyApiKey = () => {
+    navigator.clipboard.writeText('tb_live_xxxxxxxxxxxxxxxx')
+    toast.success('API key copied to clipboard')
+  }
+
+  // Regenerate API Key Handler
+  const handleRegenerateApiKey = async () => {
+    toast.info('Regenerating API key...')
+    await new Promise(resolve => setTimeout(resolve, 1000))
+    toast.success('API key regenerated', {
+      description: 'Your new API key has been generated. Please update your integrations.'
+    })
+  }
+
+  // Copy Embed Secret Handler
+  const handleCopyEmbedSecret = () => {
+    navigator.clipboard.writeText('embed_xxxxxxxxxxxxxxxx')
+    toast.success('Embed secret copied to clipboard')
+  }
+
+  // Add Connection Handler (Data Sources Tab)
+  const handleOpenAddConnection = () => {
+    setNewDataSourceName('')
+    setNewDataSourceType('database')
+    setNewDataSourceConnection('')
+    setShowAddConnectionDialog(true)
+  }
+
+  const handleAddConnection = async () => {
+    if (!newDataSourceName.trim()) {
+      toast.error('Connection name is required')
+      return
+    }
+    if (!newDataSourceConnection.trim()) {
+      toast.error('Connection string is required')
+      return
+    }
+    setIsAddingDataSource(true)
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1500))
+      toast.success('Connection added', {
+        description: `"${newDataSourceName}" is now connected and syncing`
+      })
+      setShowAddConnectionDialog(false)
+      setNewDataSourceName('')
+      setNewDataSourceType('database')
+      setNewDataSourceConnection('')
+    } catch (error) {
+      toast.error('Failed to add connection')
+    } finally {
+      setIsAddingDataSource(false)
+    }
+  }
+
+  // Create Report Continue Handler (from type selection)
+  const handleCreateReportContinue = (type: ReportType) => {
+    setNewReportType(type)
+    setShowCreateDialog(false)
+    setShowNewReportDialog(true)
   }
 
   // Filter reports
@@ -603,31 +1049,7 @@ export default function ReportsClient() {
     )
   }
 
-  // Handlers
-  const handleCreateReport = () => {
-    toast.info('Create Report', {
-      description: 'Opening report builder...'
-    })
-  }
-
-  const handleExportReport = (reportName: string) => {
-    toast.success('Exporting report', {
-      description: `"${reportName}" will be downloaded`
-    })
-  }
-
-  const handleScheduleReport = (reportName: string) => {
-    toast.success('Report scheduled', {
-      description: `"${reportName}" delivery scheduled`
-    })
-  }
-
-  const handleShareReport = (reportName: string) => {
-    toast.success('Link copied', {
-      description: `Share link for "${reportName}" copied`
-    })
-  }
-
+  // Duplicate Report Handler (legacy - for context menu)
   const handleDuplicateReport = (reportName: string) => {
     toast.success('Report duplicated', {
       description: `Copy of "${reportName}" created`
@@ -658,7 +1080,7 @@ export default function ReportsClient() {
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            <Button variant="outline">
+            <Button variant="outline" onClick={() => setShowFilterDialog(true)}>
               <Filter className="h-4 w-4 mr-2" />
               Filters
             </Button>
@@ -866,11 +1288,11 @@ export default function ReportsClient() {
                 <div className="flex items-center justify-between">
                   <CardTitle>All Reports</CardTitle>
                   <div className="flex items-center gap-2">
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" onClick={() => setShowImportDialog(true)}>
                       <Upload className="h-4 w-4 mr-2" />
                       Import
                     </Button>
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" onClick={() => setShowExportAllDialog(true)}>
                       <Download className="h-4 w-4 mr-2" />
                       Export All
                     </Button>
@@ -920,7 +1342,15 @@ export default function ReportsClient() {
                           </Avatar>
                         </div>
 
-                        <Button variant="ghost" size="icon">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            setSelectedReport(report)
+                            setShowReportActionsMenu(showReportActionsMenu === report.id ? null : report.id)
+                          }}
+                        >
                           <MoreHorizontal className="h-4 w-4" />
                         </Button>
                       </div>
@@ -976,19 +1406,19 @@ export default function ReportsClient() {
                   <CardTitle>Quick Actions</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  <Button className="w-full justify-start" variant="outline">
+                  <Button className="w-full justify-start" variant="outline" onClick={() => setShowAIInsightsDialog(true)}>
                     <Sparkles className="h-4 w-4 mr-2 text-purple-600" />
                     AI-Powered Insights
                   </Button>
-                  <Button className="w-full justify-start" variant="outline">
+                  <Button className="w-full justify-start" variant="outline" onClick={() => setShowDataSourcesDialog(true)}>
                     <Database className="h-4 w-4 mr-2 text-blue-600" />
                     Connect Data Source
                   </Button>
-                  <Button className="w-full justify-start" variant="outline">
+                  <Button className="w-full justify-start" variant="outline" onClick={() => setShowThemeDialog(true)}>
                     <Palette className="h-4 w-4 mr-2 text-pink-600" />
                     Apply Theme
                   </Button>
-                  <Button className="w-full justify-start" variant="outline">
+                  <Button className="w-full justify-start" variant="outline" onClick={() => setShowPublishDialog(true)}>
                     <Share2 className="h-4 w-4 mr-2 text-green-600" />
                     Publish Report
                   </Button>
@@ -1024,7 +1454,7 @@ export default function ReportsClient() {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle>Connected Data Sources</CardTitle>
-                  <Button className="bg-purple-600 hover:bg-purple-700">
+                  <Button className="bg-purple-600 hover:bg-purple-700" onClick={handleOpenAddConnection}>
                     <Plus className="h-4 w-4 mr-2" />
                     Add Connection
                   </Button>
@@ -1070,10 +1500,10 @@ export default function ReportsClient() {
                         </div>
 
                         <div className="flex items-center gap-2">
-                          <Button variant="outline" size="sm">
+                          <Button variant="outline" size="sm" onClick={() => handleRefreshDataSource(source)}>
                             <RefreshCw className="h-4 w-4" />
                           </Button>
-                          <Button variant="ghost" size="icon">
+                          <Button variant="ghost" size="icon" onClick={() => handleOpenDataSourceSettings(source)}>
                             <Settings className="h-4 w-4" />
                           </Button>
                         </div>
@@ -1150,8 +1580,11 @@ export default function ReportsClient() {
                       </div>
 
                       <div className="flex items-center gap-2">
-                        <Switch checked={schedule.status === 'active'} />
-                        <Button variant="ghost" size="icon">
+                        <Switch
+                          checked={schedule.status === 'active'}
+                          onCheckedChange={() => handleToggleScheduleStatus(schedule.id, schedule.status)}
+                        />
+                        <Button variant="ghost" size="icon" onClick={() => handleOpenScheduledSettings(schedule)}>
                           <Settings className="h-4 w-4" />
                         </Button>
                       </div>
@@ -1681,7 +2114,7 @@ export default function ReportsClient() {
                               <div className="text-sm text-gray-500">Not connected</div>
                             </div>
                           </div>
-                          <Button variant="outline" size="sm">Connect</Button>
+                          <Button variant="outline" size="sm" onClick={() => setShowConnectIntegrationDialog(true)}>Connect</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -1698,16 +2131,16 @@ export default function ReportsClient() {
                         <div className="space-y-2">
                           <Label>API Key</Label>
                           <div className="flex gap-2">
-                            <Input type="password" value="tb_live_xxxxxxxxxxxxxxxx" readOnly className="font-mono" />
-                            <Button variant="outline">Copy</Button>
-                            <Button variant="outline">Regenerate</Button>
+                            <Input type={showApiKey ? 'text' : 'password'} value="tb_live_xxxxxxxxxxxxxxxx" readOnly className="font-mono" />
+                            <Button variant="outline" onClick={handleCopyApiKey}>Copy</Button>
+                            <Button variant="outline" onClick={handleRegenerateApiKey}>Regenerate</Button>
                           </div>
                         </div>
                         <div className="space-y-2">
                           <Label>Embed Secret</Label>
                           <div className="flex gap-2">
-                            <Input type="password" value="embed_xxxxxxxxxxxxxxxx" readOnly className="font-mono" />
-                            <Button variant="outline">Copy</Button>
+                            <Input type={showEmbedSecret ? 'text' : 'password'} value="embed_xxxxxxxxxxxxxxxx" readOnly className="font-mono" />
+                            <Button variant="outline" onClick={handleCopyEmbedSecret}>Copy</Button>
                           </div>
                         </div>
                         <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
@@ -1818,7 +2251,7 @@ export default function ReportsClient() {
                             <div className="font-medium text-red-700 dark:text-red-400">Delete All Reports</div>
                             <div className="text-sm text-red-600 dark:text-red-500">Permanently delete all reports and data</div>
                           </div>
-                          <Button variant="destructive" size="sm">
+                          <Button variant="destructive" size="sm" onClick={() => setShowDeleteAllDialog(true)}>
                             <Trash2 className="w-4 h-4 mr-2" />
                             Delete All
                           </Button>
@@ -1828,7 +2261,7 @@ export default function ReportsClient() {
                             <div className="font-medium text-red-700 dark:text-red-400">Clear All Caches</div>
                             <div className="text-sm text-red-600 dark:text-red-500">Force refresh all cached data</div>
                           </div>
-                          <Button variant="destructive" size="sm">
+                          <Button variant="destructive" size="sm" onClick={() => setShowClearCacheDialog(true)}>
                             <RefreshCw className="w-4 h-4 mr-2" />
                             Clear
                           </Button>
@@ -1952,23 +2385,23 @@ export default function ReportsClient() {
 
                   {/* Actions */}
                   <div className="flex gap-3 pt-4 border-t">
-                    <Button className="bg-purple-600 hover:bg-purple-700">
+                    <Button className="bg-purple-600 hover:bg-purple-700" onClick={handleOpenReport}>
                       <Eye className="h-4 w-4 mr-2" />
                       Open Report
                     </Button>
-                    <Button variant="outline">
+                    <Button variant="outline" onClick={handleOpenEditReport}>
                       <Edit className="h-4 w-4 mr-2" />
                       Edit
                     </Button>
-                    <Button variant="outline">
+                    <Button variant="outline" onClick={handleOpenShareReport}>
                       <Share2 className="h-4 w-4 mr-2" />
                       Share
                     </Button>
-                    <Button variant="outline">
+                    <Button variant="outline" onClick={handleOpenExportReport}>
                       <Download className="h-4 w-4 mr-2" />
                       Export
                     </Button>
-                    <Button variant="ghost" className="ml-auto text-red-600 hover:text-red-700">
+                    <Button variant="ghost" className="ml-auto text-red-600 hover:text-red-700" onClick={handleOpenDeleteReport}>
                       <Trash2 className="h-4 w-4 mr-2" />
                       Delete
                     </Button>
@@ -1987,22 +2420,34 @@ export default function ReportsClient() {
             </DialogHeader>
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
-                <div className="p-4 border rounded-lg hover:bg-purple-50 dark:hover:bg-purple-900/20 cursor-pointer">
+                <div
+                  className="p-4 border rounded-lg hover:bg-purple-50 dark:hover:bg-purple-900/20 cursor-pointer"
+                  onClick={() => handleCreateReportContinue('dashboard')}
+                >
                   <LayoutDashboard className="h-8 w-8 text-purple-600 mb-2" />
                   <h4 className="font-medium">Dashboard</h4>
                   <p className="text-sm text-gray-500">Interactive data dashboard</p>
                 </div>
-                <div className="p-4 border rounded-lg hover:bg-purple-50 dark:hover:bg-purple-900/20 cursor-pointer">
+                <div
+                  className="p-4 border rounded-lg hover:bg-purple-50 dark:hover:bg-purple-900/20 cursor-pointer"
+                  onClick={() => handleCreateReportContinue('chart')}
+                >
                   <BarChart3 className="h-8 w-8 text-blue-600 mb-2" />
                   <h4 className="font-medium">Chart</h4>
                   <p className="text-sm text-gray-500">Single visualization</p>
                 </div>
-                <div className="p-4 border rounded-lg hover:bg-purple-50 dark:hover:bg-purple-900/20 cursor-pointer">
+                <div
+                  className="p-4 border rounded-lg hover:bg-purple-50 dark:hover:bg-purple-900/20 cursor-pointer"
+                  onClick={() => handleCreateReportContinue('table')}
+                >
                   <Table2 className="h-8 w-8 text-green-600 mb-2" />
                   <h4 className="font-medium">Table Report</h4>
                   <p className="text-sm text-gray-500">Tabular data report</p>
                 </div>
-                <div className="p-4 border rounded-lg hover:bg-purple-50 dark:hover:bg-purple-900/20 cursor-pointer">
+                <div
+                  className="p-4 border rounded-lg hover:bg-purple-50 dark:hover:bg-purple-900/20 cursor-pointer"
+                  onClick={() => handleCreateReportContinue('story')}
+                >
                   <FileText className="h-8 w-8 text-amber-600 mb-2" />
                   <h4 className="font-medium">Story</h4>
                   <p className="text-sm text-gray-500">Narrative with visuals</p>
@@ -2012,7 +2457,7 @@ export default function ReportsClient() {
                 <Button variant="outline" className="flex-1" onClick={() => setShowCreateDialog(false)}>
                   Cancel
                 </Button>
-                <Button className="flex-1 bg-purple-600 hover:bg-purple-700">
+                <Button className="flex-1 bg-purple-600 hover:bg-purple-700" onClick={() => handleCreateReportContinue('dashboard')}>
                   <Plus className="h-4 w-4 mr-2" />
                   Continue
                 </Button>
@@ -2323,7 +2768,7 @@ export default function ReportsClient() {
                             <p>{source.tables} tables</p>
                             <p>{formatNumber(source.rows)} rows</p>
                           </div>
-                          <Button variant="outline" size="sm">
+                          <Button variant="outline" size="sm" onClick={() => handleRefreshDataSource(source)}>
                             <RefreshCw className="h-4 w-4" />
                           </Button>
                         </div>
@@ -2408,6 +2853,878 @@ export default function ReportsClient() {
                 </div>
               </div>
             </ScrollArea>
+          </DialogContent>
+        </Dialog>
+
+        {/* Filter Dialog */}
+        <Dialog open={showFilterDialog} onOpenChange={setShowFilterDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Filter className="h-5 w-5 text-purple-600" />
+                Filter Reports
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Status</Label>
+                <Select value={filterStatus} onValueChange={setFilterStatus}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="All statuses" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Statuses</SelectItem>
+                    <SelectItem value="published">Published</SelectItem>
+                    <SelectItem value="draft">Draft</SelectItem>
+                    <SelectItem value="scheduled">Scheduled</SelectItem>
+                    <SelectItem value="generating">Generating</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Report Type</Label>
+                <Select value={filterType} onValueChange={setFilterType}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="All types" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Types</SelectItem>
+                    <SelectItem value="dashboard">Dashboard</SelectItem>
+                    <SelectItem value="table">Table</SelectItem>
+                    <SelectItem value="chart">Chart</SelectItem>
+                    <SelectItem value="story">Story</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Date Range</Label>
+                <Select value={filterDateRange} onValueChange={setFilterDateRange}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="All time" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Time</SelectItem>
+                    <SelectItem value="today">Today</SelectItem>
+                    <SelectItem value="week">This Week</SelectItem>
+                    <SelectItem value="month">This Month</SelectItem>
+                    <SelectItem value="quarter">This Quarter</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex gap-3 pt-4 border-t">
+                <Button variant="outline" className="flex-1" onClick={() => {
+                  setFilterStatus('all')
+                  setFilterType('all')
+                  setFilterDateRange('all')
+                }}>
+                  Reset
+                </Button>
+                <Button className="flex-1 bg-purple-600 hover:bg-purple-700" onClick={handleApplyFilters}>
+                  Apply Filters
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Import Dialog */}
+        <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Upload className="h-5 w-5 text-blue-600" />
+                Import Reports
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Import Format</Label>
+                <Select value={importFormat} onValueChange={setImportFormat}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="json">JSON</SelectItem>
+                    <SelectItem value="csv">CSV</SelectItem>
+                    <SelectItem value="excel">Excel</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="import-file">File URL or Path</Label>
+                <Input
+                  id="import-file"
+                  placeholder="Enter file URL or paste file path..."
+                  value={importFile}
+                  onChange={(e) => setImportFile(e.target.value)}
+                />
+              </div>
+              <div className="p-4 border-2 border-dashed rounded-lg text-center">
+                <Upload className="h-8 w-8 mx-auto text-gray-400 mb-2" />
+                <p className="text-sm text-gray-500">Drag and drop files here, or click to browse</p>
+              </div>
+              <div className="flex gap-3 pt-4 border-t">
+                <Button variant="outline" className="flex-1" onClick={() => setShowImportDialog(false)} disabled={isImporting}>
+                  Cancel
+                </Button>
+                <Button className="flex-1 bg-blue-600 hover:bg-blue-700" onClick={handleImportReports} disabled={isImporting}>
+                  {isImporting ? (
+                    <>
+                      <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                      Importing...
+                    </>
+                  ) : (
+                    <>
+                      <Upload className="h-4 w-4 mr-2" />
+                      Import
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Export All Dialog */}
+        <Dialog open={showExportAllDialog} onOpenChange={setShowExportAllDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Download className="h-5 w-5 text-green-600" />
+                Export All Reports
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <p className="text-sm text-gray-500">Export all {mockReports.length} reports in your selected format.</p>
+              <div className="space-y-2">
+                <Label>Export Format</Label>
+                <div className="grid grid-cols-4 gap-3">
+                  {['pdf', 'excel', 'csv', 'json'].map((format) => (
+                    <button
+                      key={format}
+                      onClick={() => setExportAllFormat(format)}
+                      className={`p-3 border rounded-lg transition-all ${
+                        exportAllFormat === format
+                          ? 'border-green-500 bg-green-50 dark:bg-green-900/30'
+                          : 'hover:bg-gray-50 dark:hover:bg-gray-800'
+                      }`}
+                    >
+                      <FileText className="h-5 w-5 mx-auto mb-1 text-gray-600" />
+                      <p className="text-xs font-medium">{format.toUpperCase()}</p>
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="flex gap-3 pt-4 border-t">
+                <Button variant="outline" className="flex-1" onClick={() => setShowExportAllDialog(false)} disabled={isExportingAll}>
+                  Cancel
+                </Button>
+                <Button className="flex-1 bg-green-600 hover:bg-green-700" onClick={handleExportAllReports} disabled={isExportingAll}>
+                  {isExportingAll ? (
+                    <>
+                      <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                      Exporting...
+                    </>
+                  ) : (
+                    <>
+                      <Download className="h-4 w-4 mr-2" />
+                      Export All
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* AI Insights Dialog */}
+        <Dialog open={showAIInsightsDialog} onOpenChange={setShowAIInsightsDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Sparkles className="h-5 w-5 text-purple-600" />
+                AI-Powered Insights
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <p className="text-sm text-gray-500">Analyze your data with AI to discover hidden patterns and actionable insights.</p>
+              {aiInsightsResults.length === 0 ? (
+                <div className="p-6 border rounded-lg text-center">
+                  <Sparkles className="h-12 w-12 mx-auto text-purple-400 mb-3" />
+                  <h4 className="font-medium mb-2">Ready to Analyze</h4>
+                  <p className="text-sm text-gray-500 mb-4">Click the button below to start AI analysis on your reports and data sources.</p>
+                  <Button className="bg-purple-600 hover:bg-purple-700" onClick={handleRunAIAnalysis} disabled={aiAnalysisRunning}>
+                    {aiAnalysisRunning ? (
+                      <>
+                        <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                        Analyzing...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="h-4 w-4 mr-2" />
+                        Run AI Analysis
+                      </>
+                    )}
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {aiInsightsResults.map((insight, index) => (
+                    <div key={index} className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg flex items-start gap-3">
+                      <Sparkles className="h-5 w-5 text-purple-600 mt-0.5" />
+                      <div>
+                        <p className="font-medium text-purple-900 dark:text-purple-100">Insight {index + 1}</p>
+                        <p className="text-sm text-purple-700 dark:text-purple-300">{insight}</p>
+                      </div>
+                    </div>
+                  ))}
+                  <Button variant="outline" className="w-full" onClick={handleRunAIAnalysis} disabled={aiAnalysisRunning}>
+                    {aiAnalysisRunning ? 'Analyzing...' : 'Run New Analysis'}
+                  </Button>
+                </div>
+              )}
+              <div className="flex justify-end pt-4 border-t">
+                <Button variant="outline" onClick={() => setShowAIInsightsDialog(false)}>
+                  Close
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Theme Dialog */}
+        <Dialog open={showThemeDialog} onOpenChange={setShowThemeDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Palette className="h-5 w-5 text-pink-600" />
+                Apply Theme
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <p className="text-sm text-gray-500">Select a theme to apply to all your reports.</p>
+              <div className="grid grid-cols-3 gap-3">
+                {[
+                  { id: 'default', name: 'Default', colors: ['#7c3aed', '#3b82f6', '#10b981'] },
+                  { id: 'professional', name: 'Professional', colors: ['#1e40af', '#1e3a8a', '#0f766e'] },
+                  { id: 'vibrant', name: 'Vibrant', colors: ['#dc2626', '#ea580c', '#ca8a04'] },
+                  { id: 'ocean', name: 'Ocean', colors: ['#0891b2', '#0284c7', '#0369a1'] },
+                  { id: 'forest', name: 'Forest', colors: ['#15803d', '#166534', '#14532d'] },
+                  { id: 'sunset', name: 'Sunset', colors: ['#f97316', '#ef4444', '#ec4899'] },
+                ].map((theme) => (
+                  <button
+                    key={theme.id}
+                    onClick={() => setSelectedTheme(theme.id)}
+                    className={`p-3 border rounded-lg transition-all ${
+                      selectedTheme === theme.id
+                        ? 'border-pink-500 bg-pink-50 dark:bg-pink-900/30'
+                        : 'hover:bg-gray-50 dark:hover:bg-gray-800'
+                    }`}
+                  >
+                    <div className="flex gap-1 mb-2">
+                      {theme.colors.map((color, i) => (
+                        <div key={i} className="w-4 h-4 rounded-full" style={{ backgroundColor: color }} />
+                      ))}
+                    </div>
+                    <p className="text-sm font-medium">{theme.name}</p>
+                  </button>
+                ))}
+              </div>
+              <div className="flex gap-3 pt-4 border-t">
+                <Button variant="outline" className="flex-1" onClick={() => setShowThemeDialog(false)}>
+                  Cancel
+                </Button>
+                <Button className="flex-1 bg-pink-600 hover:bg-pink-700" onClick={handleApplyTheme}>
+                  <Palette className="h-4 w-4 mr-2" />
+                  Apply Theme
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Publish Report Dialog */}
+        <Dialog open={showPublishDialog} onOpenChange={setShowPublishDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Share2 className="h-5 w-5 text-green-600" />
+                Publish Report
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <p className="text-sm text-gray-500">Choose who can view your published report.</p>
+              <div className="space-y-3">
+                {[
+                  { id: 'team', name: 'Team Only', description: 'Only team members can view' },
+                  { id: 'organization', name: 'Organization', description: 'Anyone in your organization' },
+                  { id: 'public', name: 'Public', description: 'Anyone with the link can view' },
+                ].map((option) => (
+                  <button
+                    key={option.id}
+                    onClick={() => setPublishVisibility(option.id)}
+                    className={`w-full p-4 border rounded-lg text-left transition-all ${
+                      publishVisibility === option.id
+                        ? 'border-green-500 bg-green-50 dark:bg-green-900/30'
+                        : 'hover:bg-gray-50 dark:hover:bg-gray-800'
+                    }`}
+                  >
+                    <p className="font-medium">{option.name}</p>
+                    <p className="text-sm text-gray-500">{option.description}</p>
+                  </button>
+                ))}
+              </div>
+              <div className="flex gap-3 pt-4 border-t">
+                <Button variant="outline" className="flex-1" onClick={() => setShowPublishDialog(false)} disabled={isPublishing}>
+                  Cancel
+                </Button>
+                <Button className="flex-1 bg-green-600 hover:bg-green-700" onClick={handlePublishReport} disabled={isPublishing}>
+                  {isPublishing ? (
+                    <>
+                      <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                      Publishing...
+                    </>
+                  ) : (
+                    <>
+                      <Share2 className="h-4 w-4 mr-2" />
+                      Publish
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Connection Dialog */}
+        <Dialog open={showAddConnectionDialog} onOpenChange={setShowAddConnectionDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Plus className="h-5 w-5 text-purple-600" />
+                Add Data Connection
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="conn-name">Connection Name *</Label>
+                  <Input
+                    id="conn-name"
+                    placeholder="My Database"
+                    value={newDataSourceName}
+                    onChange={(e) => setNewDataSourceName(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Connection Type</Label>
+                  <Select value={newDataSourceType} onValueChange={(val: DataSourceType) => setNewDataSourceType(val)}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="database">Database</SelectItem>
+                      <SelectItem value="api">REST API</SelectItem>
+                      <SelectItem value="cloud">Cloud Service</SelectItem>
+                      <SelectItem value="file">File Upload</SelectItem>
+                      <SelectItem value="spreadsheet">Spreadsheet</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="conn-string">Connection String *</Label>
+                <Input
+                  id="conn-string"
+                  placeholder={
+                    newDataSourceType === 'database' ? 'postgresql://user:pass@host:5432/db' :
+                    newDataSourceType === 'api' ? 'https://api.example.com/v1' :
+                    'Enter connection details...'
+                  }
+                  value={newDataSourceConnection}
+                  onChange={(e) => setNewDataSourceConnection(e.target.value)}
+                />
+              </div>
+              <div className="flex gap-3 pt-4 border-t">
+                <Button variant="outline" className="flex-1" onClick={() => setShowAddConnectionDialog(false)} disabled={isAddingDataSource}>
+                  Cancel
+                </Button>
+                <Button className="flex-1 bg-purple-600 hover:bg-purple-700" onClick={handleAddConnection} disabled={isAddingDataSource}>
+                  {isAddingDataSource ? (
+                    <>
+                      <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                      Connecting...
+                    </>
+                  ) : (
+                    <>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Connection
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Data Source Settings Dialog */}
+        <Dialog open={showDataSourceSettingsDialog} onOpenChange={setShowDataSourceSettingsDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Settings className="h-5 w-5 text-gray-600" />
+                Data Source Settings
+              </DialogTitle>
+            </DialogHeader>
+            {selectedDataSource && (
+              <div className="space-y-4 py-4">
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <h4 className="font-medium">{selectedDataSource.name}</h4>
+                  <p className="text-sm text-gray-500">{selectedDataSource.connection}</p>
+                </div>
+                <div className="space-y-2">
+                  <Label>Sync Frequency</Label>
+                  <Select defaultValue="hourly">
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="realtime">Real-time</SelectItem>
+                      <SelectItem value="5min">Every 5 minutes</SelectItem>
+                      <SelectItem value="hourly">Hourly</SelectItem>
+                      <SelectItem value="daily">Daily</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                  <div>
+                    <div className="font-medium text-sm">Auto-sync Enabled</div>
+                    <div className="text-xs text-gray-500">Automatically refresh data</div>
+                  </div>
+                  <Switch defaultChecked />
+                </div>
+                <div className="flex gap-3 pt-4 border-t">
+                  <Button variant="outline" className="flex-1" onClick={() => setShowDataSourceSettingsDialog(false)}>
+                    Cancel
+                  </Button>
+                  <Button className="flex-1" onClick={handleSaveDataSourceSettings}>
+                    Save Settings
+                  </Button>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Scheduled Report Settings Dialog */}
+        <Dialog open={showScheduledSettingsDialog} onOpenChange={setShowScheduledSettingsDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Calendar className="h-5 w-5 text-purple-600" />
+                Schedule Settings
+              </DialogTitle>
+            </DialogHeader>
+            {selectedScheduledReport && (
+              <div className="space-y-4 py-4">
+                <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                  <h4 className="font-medium">{selectedScheduledReport.reportName}</h4>
+                  <p className="text-sm text-gray-500">{selectedScheduledReport.schedule}</p>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Frequency</Label>
+                    <Select defaultValue="daily">
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="daily">Daily</SelectItem>
+                        <SelectItem value="weekly">Weekly</SelectItem>
+                        <SelectItem value="monthly">Monthly</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Format</Label>
+                    <Select defaultValue={selectedScheduledReport.format}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="pdf">PDF</SelectItem>
+                        <SelectItem value="excel">Excel</SelectItem>
+                        <SelectItem value="csv">CSV</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label>Recipients</Label>
+                  <Input defaultValue={selectedScheduledReport.recipients.join(', ')} placeholder="email@example.com" />
+                </div>
+                <div className="flex gap-3 pt-4 border-t">
+                  <Button variant="outline" className="flex-1" onClick={() => setShowScheduledSettingsDialog(false)}>
+                    Cancel
+                  </Button>
+                  <Button className="flex-1 bg-purple-600 hover:bg-purple-700" onClick={() => {
+                    toast.success('Schedule updated')
+                    setShowScheduledSettingsDialog(false)
+                  }}>
+                    Save Changes
+                  </Button>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete All Confirmation Dialog */}
+        <Dialog open={showDeleteAllDialog} onOpenChange={setShowDeleteAllDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-600">
+                <Trash2 className="h-5 w-5" />
+                Delete All Reports
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                <p className="text-sm text-red-700 dark:text-red-400">
+                  This action cannot be undone. All {mockReports.length} reports and their associated data will be permanently deleted.
+                </p>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="delete-confirm">Type "DELETE ALL" to confirm</Label>
+                <Input
+                  id="delete-confirm"
+                  placeholder="DELETE ALL"
+                  value={deleteConfirmText}
+                  onChange={(e) => setDeleteConfirmText(e.target.value)}
+                />
+              </div>
+              <div className="flex gap-3 pt-4 border-t">
+                <Button variant="outline" className="flex-1" onClick={() => {
+                  setShowDeleteAllDialog(false)
+                  setDeleteConfirmText('')
+                }} disabled={isDeletingAll}>
+                  Cancel
+                </Button>
+                <Button variant="destructive" className="flex-1" onClick={handleDeleteAllReports} disabled={isDeletingAll || deleteConfirmText !== 'DELETE ALL'}>
+                  {isDeletingAll ? (
+                    <>
+                      <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                      Deleting...
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Delete All
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Clear Cache Dialog */}
+        <Dialog open={showClearCacheDialog} onOpenChange={setShowClearCacheDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-amber-600">
+                <RefreshCw className="h-5 w-5" />
+                Clear All Caches
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <p className="text-sm text-gray-500">
+                This will force refresh all cached data. Reports may load slower temporarily while caches are rebuilt.
+              </p>
+              <div className="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
+                <h4 className="font-medium text-amber-800 dark:text-amber-300 mb-2">What will be cleared:</h4>
+                <ul className="text-sm text-amber-700 dark:text-amber-400 space-y-1">
+                  <li>- Query result caches</li>
+                  <li>- Report rendering caches</li>
+                  <li>- Data extract caches</li>
+                </ul>
+              </div>
+              <div className="flex gap-3 pt-4 border-t">
+                <Button variant="outline" className="flex-1" onClick={() => setShowClearCacheDialog(false)} disabled={isClearingCache}>
+                  Cancel
+                </Button>
+                <Button variant="destructive" className="flex-1" onClick={handleClearCache} disabled={isClearingCache}>
+                  {isClearingCache ? (
+                    <>
+                      <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                      Clearing...
+                    </>
+                  ) : (
+                    <>
+                      <RefreshCw className="h-4 w-4 mr-2" />
+                      Clear Caches
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Report Dialog */}
+        <Dialog open={showEditReportDialog} onOpenChange={setShowEditReportDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Edit className="h-5 w-5 text-blue-600" />
+                Edit Report
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit-name">Report Name</Label>
+                <Input
+                  id="edit-name"
+                  value={editReportName}
+                  onChange={(e) => setEditReportName(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-desc">Description</Label>
+                <Input
+                  id="edit-desc"
+                  value={editReportDescription}
+                  onChange={(e) => setEditReportDescription(e.target.value)}
+                />
+              </div>
+              <div className="flex gap-3 pt-4 border-t">
+                <Button variant="outline" className="flex-1" onClick={() => setShowEditReportDialog(false)} disabled={isSavingReport}>
+                  Cancel
+                </Button>
+                <Button className="flex-1 bg-blue-600 hover:bg-blue-700" onClick={handleSaveReportEdit} disabled={isSavingReport}>
+                  {isSavingReport ? (
+                    <>
+                      <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    'Save Changes'
+                  )}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Share Report Dialog */}
+        <Dialog open={showShareReportDialog} onOpenChange={setShowShareReportDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Share2 className="h-5 w-5 text-green-600" />
+                Share Report
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              {selectedReport && (
+                <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <p className="font-medium">{selectedReport.name}</p>
+                </div>
+              )}
+              <div className="space-y-2">
+                <Label htmlFor="share-emails">Email Addresses</Label>
+                <Input
+                  id="share-emails"
+                  placeholder="email@example.com, team@company.com"
+                  value={shareEmails}
+                  onChange={(e) => setShareEmails(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Permission Level</Label>
+                <Select value={sharePermission} onValueChange={setSharePermission}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="view">View Only</SelectItem>
+                    <SelectItem value="edit">Can Edit</SelectItem>
+                    <SelectItem value="admin">Full Access</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex gap-3 pt-4 border-t">
+                <Button variant="outline" className="flex-1" onClick={() => setShowShareReportDialog(false)} disabled={isSharing}>
+                  Cancel
+                </Button>
+                <Button className="flex-1 bg-green-600 hover:bg-green-700" onClick={handleShareReport} disabled={isSharing}>
+                  {isSharing ? (
+                    <>
+                      <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                      Sharing...
+                    </>
+                  ) : (
+                    <>
+                      <Share2 className="h-4 w-4 mr-2" />
+                      Share
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Export Report Dialog */}
+        <Dialog open={showExportReportDialog} onOpenChange={setShowExportReportDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Download className="h-5 w-5 text-blue-600" />
+                Export Report
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              {selectedReport && (
+                <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <p className="font-medium">{selectedReport.name}</p>
+                </div>
+              )}
+              <div className="space-y-2">
+                <Label>Export Format</Label>
+                <div className="grid grid-cols-4 gap-3">
+                  {['pdf', 'excel', 'csv', 'png'].map((format) => (
+                    <button
+                      key={format}
+                      onClick={() => setExportFormat(format)}
+                      className={`p-3 border rounded-lg transition-all ${
+                        exportFormat === format
+                          ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30'
+                          : 'hover:bg-gray-50 dark:hover:bg-gray-800'
+                      }`}
+                    >
+                      <FileText className="h-5 w-5 mx-auto mb-1 text-gray-600" />
+                      <p className="text-xs font-medium">{format.toUpperCase()}</p>
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="flex gap-3 pt-4 border-t">
+                <Button variant="outline" className="flex-1" onClick={() => setShowExportReportDialog(false)} disabled={isExportingReport}>
+                  Cancel
+                </Button>
+                <Button className="flex-1 bg-blue-600 hover:bg-blue-700" onClick={handleExportReport} disabled={isExportingReport}>
+                  {isExportingReport ? (
+                    <>
+                      <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                      Exporting...
+                    </>
+                  ) : (
+                    <>
+                      <Download className="h-4 w-4 mr-2" />
+                      Export
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Report Dialog */}
+        <Dialog open={showDeleteReportDialog} onOpenChange={setShowDeleteReportDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-600">
+                <Trash2 className="h-5 w-5" />
+                Delete Report
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              {selectedReport && (
+                <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                  <p className="font-medium text-red-800 dark:text-red-300 mb-2">Are you sure you want to delete this report?</p>
+                  <p className="text-sm text-red-700 dark:text-red-400">"{selectedReport.name}"</p>
+                </div>
+              )}
+              <p className="text-sm text-gray-500">This action cannot be undone.</p>
+              <div className="flex gap-3 pt-4 border-t">
+                <Button variant="outline" className="flex-1" onClick={() => setShowDeleteReportDialog(false)} disabled={isDeletingReport}>
+                  Cancel
+                </Button>
+                <Button variant="destructive" className="flex-1" onClick={handleDeleteReport} disabled={isDeletingReport}>
+                  {isDeletingReport ? (
+                    <>
+                      <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                      Deleting...
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Delete
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Connect Integration Dialog */}
+        <Dialog open={showConnectIntegrationDialog} onOpenChange={setShowConnectIntegrationDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Webhook className="h-5 w-5 text-red-600" />
+                Connect Redshift
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="flex items-center gap-3 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div className="w-10 h-10 rounded-lg bg-red-600 flex items-center justify-center">
+                  <span className="text-white font-bold">R</span>
+                </div>
+                <div>
+                  <p className="font-medium">Amazon Redshift</p>
+                  <p className="text-sm text-gray-500">Cloud data warehouse</p>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="redshift-key">API Key / Access Key</Label>
+                <Input
+                  id="redshift-key"
+                  type="password"
+                  placeholder="Enter your Redshift API key..."
+                  value={integrationApiKey}
+                  onChange={(e) => setIntegrationApiKey(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="redshift-endpoint">Cluster Endpoint</Label>
+                <Input
+                  id="redshift-endpoint"
+                  placeholder="your-cluster.region.redshift.amazonaws.com:5439"
+                />
+              </div>
+              <div className="flex gap-3 pt-4 border-t">
+                <Button variant="outline" className="flex-1" onClick={() => setShowConnectIntegrationDialog(false)} disabled={isConnectingIntegration}>
+                  Cancel
+                </Button>
+                <Button className="flex-1 bg-red-600 hover:bg-red-700" onClick={handleConnectIntegration} disabled={isConnectingIntegration}>
+                  {isConnectingIntegration ? (
+                    <>
+                      <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                      Connecting...
+                    </>
+                  ) : (
+                    <>
+                      <Webhook className="h-4 w-4 mr-2" />
+                      Connect
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
           </DialogContent>
         </Dialog>
       </div>
