@@ -3426,7 +3426,9 @@ export default function PricingClient({
                     <div className="flex items-center gap-3">
                       <Badge className={getInvoiceStatusColor(invoice.status)}>{invoice.status}</Badge>
                       <p className="font-semibold">{formatCurrency(invoice.amount)}</p>
-                      <Button variant="outline" size="sm">
+                      <Button variant="outline" size="sm" onClick={() => {
+                        toast.success(`Invoice ${invoice.invoiceNumber} downloaded`)
+                      }}>
                         <Download className="w-4 h-4" />
                       </Button>
                     </div>
