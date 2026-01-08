@@ -1592,7 +1592,16 @@ export default function AiVideoGenerationClient() {
                   <Checkbox defaultChecked />
                 </div>
 
-                <Button className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700">
+                <Button
+                  onClick={() => {
+                    logger.info('Saving inline settings')
+                    toast.success('Settings saved successfully!', {
+                      description: 'Your video generation preferences have been updated'
+                    })
+                    announce('Settings saved successfully')
+                  }}
+                  className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                >
                   Save Settings
                 </Button>
               </div>

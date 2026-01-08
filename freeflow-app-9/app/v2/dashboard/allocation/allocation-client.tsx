@@ -758,6 +758,31 @@ export default function AllocationClient() {
   const [showCalendarDialog, setShowCalendarDialog] = useState(false)
   const [showCapacityReportDialog, setShowCapacityReportDialog] = useState(false)
 
+  // Additional dialog states for buttons
+  const [showAddResourceDialog, setShowAddResourceDialog] = useState(false)
+  const [showTeamViewDialog, setShowTeamViewDialog] = useState(false)
+  const [showSkillsDialog, setShowSkillsDialog] = useState(false)
+  const [showUtilizationDialog, setShowUtilizationDialog] = useState(false)
+  const [showTimeOffDialog, setShowTimeOffDialog] = useState(false)
+  const [showRatesDialog, setShowRatesDialog] = useState(false)
+  const [showAvailabilityDialog, setShowAvailabilityDialog] = useState(false)
+  const [showNewProjectDialog, setShowNewProjectDialog] = useState(false)
+  const [showTimelineDialog, setShowTimelineDialog] = useState(false)
+  const [showMilestonesDialog, setShowMilestonesDialog] = useState(false)
+  const [showDependenciesDialog, setShowDependenciesDialog] = useState(false)
+  const [showDeadlinesDialog, setShowDeadlinesDialog] = useState(false)
+  const [showBillingReportDialog, setShowBillingReportDialog] = useState(false)
+  const [showExportDialog, setShowExportDialog] = useState(false)
+  const [showWorkHoursDialog, setShowWorkHoursDialog] = useState(false)
+  const [showTargetsDialog, setShowTargetsDialog] = useState(false)
+  const [showBillingSettingsDialog, setShowBillingSettingsDialog] = useState(false)
+  const [showAlertsDialog, setShowAlertsDialog] = useState(false)
+  const [showRolesDialog, setShowRolesDialog] = useState(false)
+  const [showHolidaysDialog, setShowHolidaysDialog] = useState(false)
+  const [showSyncDialog, setShowSyncDialog] = useState(false)
+  const [showIntegrationsDialog, setShowIntegrationsDialog] = useState(false)
+  const [calendarMonth, setCalendarMonth] = useState('February 2024')
+
   // Quick actions with proper dialog handlers
   const allocationQuickActions = [
     { id: '1', label: 'New Allocation', icon: 'plus', action: () => { setFormData(initialFormState); setShowCreateDialog(true) }, variant: 'default' as const },
@@ -1193,19 +1218,20 @@ export default function AllocationClient() {
             {/* Resources Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Plus, label: 'Add Resource', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
-                { icon: Users, label: 'Team View', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400' },
-                { icon: Star, label: 'Skills', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
-                { icon: BarChart3, label: 'Utilization', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' },
-                { icon: Plane, label: 'Time Off', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
-                { icon: DollarSign, label: 'Rates', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400' },
-                { icon: Eye, label: 'Availability', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400' },
-                { icon: Settings, label: 'Settings', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
+                { icon: Plus, label: 'Add Resource', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => setShowAddResourceDialog(true) },
+                { icon: Users, label: 'Team View', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', onClick: () => setShowTeamViewDialog(true) },
+                { icon: Star, label: 'Skills', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', onClick: () => setShowSkillsDialog(true) },
+                { icon: BarChart3, label: 'Utilization', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', onClick: () => setShowUtilizationDialog(true) },
+                { icon: Plane, label: 'Time Off', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', onClick: () => setShowTimeOffDialog(true) },
+                { icon: DollarSign, label: 'Rates', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400', onClick: () => setShowRatesDialog(true) },
+                { icon: Eye, label: 'Availability', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400', onClick: () => setShowAvailabilityDialog(true) },
+                { icon: Settings, label: 'Settings', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', onClick: () => setActiveTab('settings') },
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={action.onClick}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1314,19 +1340,20 @@ export default function AllocationClient() {
             {/* Capacity Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: BarChart3, label: 'Forecast', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400' },
-                { icon: TrendingUp, label: 'Trends', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
-                { icon: AlertTriangle, label: 'Alerts', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400' },
-                { icon: Users, label: 'Hiring', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400' },
-                { icon: Layers, label: 'Balance', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
-                { icon: Calendar, label: 'Schedule', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' },
-                { icon: RefreshCw, label: 'Optimize', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
-                { icon: Settings, label: 'Settings', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400' },
+                { icon: BarChart3, label: 'Forecast', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', onClick: () => setShowCapacityReportDialog(true) },
+                { icon: TrendingUp, label: 'Trends', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', onClick: () => toast.success('Capacity Trends', { description: 'Analyzing capacity trends over time' }) },
+                { icon: AlertTriangle, label: 'Alerts', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400', onClick: () => setShowAlertsDialog(true) },
+                { icon: Users, label: 'Hiring', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400', onClick: () => toast.success('Hiring Plan', { description: 'Opening hiring capacity planner' }) },
+                { icon: Layers, label: 'Balance', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', onClick: () => toast.success('Workload Balance', { description: 'Analyzing workload distribution' }) },
+                { icon: Calendar, label: 'Schedule', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', onClick: () => setActiveTab('schedule') },
+                { icon: RefreshCw, label: 'Optimize', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', onClick: () => toast.success('Optimizing', { description: 'Running capacity optimization algorithm' }) },
+                { icon: Settings, label: 'Settings', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', onClick: () => setActiveTab('settings') },
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={action.onClick}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1471,19 +1498,20 @@ export default function AllocationClient() {
             {/* Schedule Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Plus, label: 'New Project', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
-                { icon: Calendar, label: 'Timeline', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' },
-                { icon: Target, label: 'Milestones', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
-                { icon: Briefcase, label: 'Resources', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400' },
-                { icon: GitBranch, label: 'Dependencies', color: 'bg-sky-100 text-sky-600 dark:bg-sky-900/30 dark:text-sky-400' },
-                { icon: Clock, label: 'Deadlines', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
-                { icon: BarChart3, label: 'Reports', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
-                { icon: Settings, label: 'Settings', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
+                { icon: Plus, label: 'New Project', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', onClick: () => setShowNewProjectDialog(true) },
+                { icon: Calendar, label: 'Timeline', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', onClick: () => setShowTimelineDialog(true) },
+                { icon: Target, label: 'Milestones', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', onClick: () => setShowMilestonesDialog(true) },
+                { icon: Briefcase, label: 'Resources', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', onClick: () => setActiveTab('resources') },
+                { icon: GitBranch, label: 'Dependencies', color: 'bg-sky-100 text-sky-600 dark:bg-sky-900/30 dark:text-sky-400', onClick: () => setShowDependenciesDialog(true) },
+                { icon: Clock, label: 'Deadlines', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => setShowDeadlinesDialog(true) },
+                { icon: BarChart3, label: 'Reports', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => setActiveTab('reports') },
+                { icon: Settings, label: 'Settings', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', onClick: () => setActiveTab('settings') },
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={action.onClick}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1499,11 +1527,11 @@ export default function AllocationClient() {
                     <CardDescription>Timeline view of all projects and allocations</CardDescription>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" onClick={() => setCalendarMonth('January 2024')}>
                       <ChevronRight className="w-4 h-4 rotate-180" />
                     </Button>
-                    <span className="text-sm font-medium">February 2024</span>
-                    <Button variant="outline" size="sm">
+                    <span className="text-sm font-medium">{calendarMonth}</span>
+                    <Button variant="outline" size="sm" onClick={() => setCalendarMonth('March 2024')}>
                       <ChevronRight className="w-4 h-4" />
                     </Button>
                   </div>
@@ -1586,19 +1614,20 @@ export default function AllocationClient() {
             {/* Reports Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: PieChart, label: 'Utilization', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
-                { icon: BarChart3, label: 'Revenue', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
-                { icon: TrendingUp, label: 'Trends', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400' },
-                { icon: Users, label: 'Team', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
-                { icon: Briefcase, label: 'Projects', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' },
-                { icon: DollarSign, label: 'Billing', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
-                { icon: Calendar, label: 'Schedule', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400' },
-                { icon: ArrowUpRight, label: 'Export', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400' },
+                { icon: PieChart, label: 'Utilization', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => setShowUtilizationDialog(true) },
+                { icon: BarChart3, label: 'Revenue', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => setShowCapacityReportDialog(true) },
+                { icon: TrendingUp, label: 'Trends', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', onClick: () => toast.success('Trends Report', { description: 'Generating trends analysis report' }) },
+                { icon: Users, label: 'Team', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', onClick: () => setShowTeamViewDialog(true) },
+                { icon: Briefcase, label: 'Projects', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', onClick: () => setActiveTab('schedule') },
+                { icon: DollarSign, label: 'Billing', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', onClick: () => setShowBillingReportDialog(true) },
+                { icon: Calendar, label: 'Schedule', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400', onClick: () => setShowCalendarDialog(true) },
+                { icon: ArrowUpRight, label: 'Export', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400', onClick: () => setShowExportDialog(true) },
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={action.onClick}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1763,19 +1792,20 @@ export default function AllocationClient() {
             {/* Settings Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Clock, label: 'Work Hours', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400' },
-                { icon: Target, label: 'Targets', color: 'bg-gray-100 text-gray-600 dark:bg-gray-900/30 dark:text-gray-400' },
-                { icon: DollarSign, label: 'Billing', color: 'bg-zinc-100 text-zinc-600 dark:bg-zinc-900/30 dark:text-zinc-400' },
-                { icon: AlertTriangle, label: 'Alerts', color: 'bg-neutral-100 text-neutral-600 dark:bg-neutral-900/30 dark:text-neutral-400' },
-                { icon: Users, label: 'Roles', color: 'bg-stone-100 text-stone-600 dark:bg-stone-900/30 dark:text-stone-400' },
-                { icon: Calendar, label: 'Holidays', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
-                { icon: RefreshCw, label: 'Sync', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
-                { icon: Zap, label: 'Integrations', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
+                { icon: Clock, label: 'Work Hours', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400', onClick: () => setShowWorkHoursDialog(true) },
+                { icon: Target, label: 'Targets', color: 'bg-gray-100 text-gray-600 dark:bg-gray-900/30 dark:text-gray-400', onClick: () => setShowTargetsDialog(true) },
+                { icon: DollarSign, label: 'Billing', color: 'bg-zinc-100 text-zinc-600 dark:bg-zinc-900/30 dark:text-zinc-400', onClick: () => setShowBillingSettingsDialog(true) },
+                { icon: AlertTriangle, label: 'Alerts', color: 'bg-neutral-100 text-neutral-600 dark:bg-neutral-900/30 dark:text-neutral-400', onClick: () => setShowAlertsDialog(true) },
+                { icon: Users, label: 'Roles', color: 'bg-stone-100 text-stone-600 dark:bg-stone-900/30 dark:text-stone-400', onClick: () => setShowRolesDialog(true) },
+                { icon: Calendar, label: 'Holidays', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', onClick: () => setShowHolidaysDialog(true) },
+                { icon: RefreshCw, label: 'Sync', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => setShowSyncDialog(true) },
+                { icon: Zap, label: 'Integrations', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => setShowIntegrationsDialog(true) },
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={action.onClick}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1913,21 +1943,21 @@ export default function AllocationClient() {
                         <p className="font-medium">Over-allocation Alerts</p>
                         <p className="text-sm text-gray-500">Notify when resources are over-booked</p>
                       </div>
-                      <Button variant="outline" size="sm">Enabled</Button>
+                      <Button variant="outline" size="sm" onClick={() => toast.success('Over-allocation Alerts', { description: 'Notification setting toggled' })}>Enabled</Button>
                     </div>
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="font-medium">Pending Approvals</p>
                         <p className="text-sm text-gray-500">Daily digest of pending requests</p>
                       </div>
-                      <Button variant="outline" size="sm">Enabled</Button>
+                      <Button variant="outline" size="sm" onClick={() => toast.success('Pending Approvals', { description: 'Notification setting toggled' })}>Enabled</Button>
                     </div>
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="font-medium">Capacity Warnings</p>
                         <p className="text-sm text-gray-500">Alert when capacity runs low</p>
                       </div>
-                      <Button variant="outline" size="sm">Enabled</Button>
+                      <Button variant="outline" size="sm" onClick={() => toast.success('Capacity Warnings', { description: 'Notification setting toggled' })}>Enabled</Button>
                     </div>
                   </div>
                 </CardContent>
@@ -2381,11 +2411,11 @@ export default function AllocationClient() {
                   </div>
 
                   <div className="flex items-center gap-3 pt-4 border-t">
-                    <Button variant="outline" className="flex-1">
+                    <Button variant="outline" className="flex-1" onClick={() => { setSelectedResource(null); setActiveTab('allocations'); toast.success('Viewing Allocations', { description: `Showing allocations for ${selectedResource.name}` }) }}>
                       <Eye className="w-4 h-4 mr-2" />
                       View Allocations
                     </Button>
-                    <Button className="flex-1 bg-gradient-to-r from-fuchsia-500 to-purple-600 text-white">
+                    <Button className="flex-1 bg-gradient-to-r from-fuchsia-500 to-purple-600 text-white" onClick={() => { setSelectedResource(null); setFormData(prev => ({ ...prev, resource_name: selectedResource.name, resource_role: selectedResource.role })); setShowCreateDialog(true) }}>
                       <Plus className="w-4 h-4 mr-2" />
                       Add Allocation
                     </Button>
@@ -2411,12 +2441,12 @@ export default function AllocationClient() {
             <div className="py-4">
               <div className="border rounded-lg p-6">
                 <div className="flex items-center justify-between mb-6">
-                  <h3 className="font-semibold">February 2024</h3>
+                  <h3 className="font-semibold">{calendarMonth}</h3>
                   <div className="flex gap-2">
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" onClick={() => setCalendarMonth('January 2024')}>
                       <ChevronRight className="w-4 h-4 rotate-180" />
                     </Button>
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" onClick={() => setCalendarMonth('March 2024')}>
                       <ChevronRight className="w-4 h-4" />
                     </Button>
                   </div>
@@ -2500,6 +2530,988 @@ export default function AllocationClient() {
                 <BarChart3 className="w-4 h-4 mr-2" />
                 View Full Report
               </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Resource Dialog */}
+        <Dialog open={showAddResourceDialog} onOpenChange={setShowAddResourceDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-3">
+                <Plus className="w-5 h-5" />
+                Add New Resource
+              </DialogTitle>
+              <DialogDescription>
+                Add a team member to your resource pool
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Full Name</Label>
+                  <Input placeholder="John Doe" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Role</Label>
+                  <Input placeholder="Senior Developer" />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Email</Label>
+                  <Input type="email" placeholder="john@company.com" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Department</Label>
+                  <Select defaultValue="engineering">
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="engineering">Engineering</SelectItem>
+                      <SelectItem value="design">Design</SelectItem>
+                      <SelectItem value="operations">Operations</SelectItem>
+                      <SelectItem value="product">Product</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Hourly Rate ($)</Label>
+                  <Input type="number" defaultValue={150} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Capacity (hrs/week)</Label>
+                  <Input type="number" defaultValue={40} />
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowAddResourceDialog(false)}>Cancel</Button>
+              <Button onClick={() => { setShowAddResourceDialog(false); toast.success('Resource Added', { description: 'New resource has been added to the team' }) }}>
+                <Plus className="w-4 h-4 mr-2" />
+                Add Resource
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Team View Dialog */}
+        <Dialog open={showTeamViewDialog} onOpenChange={setShowTeamViewDialog}>
+          <DialogContent className="max-w-3xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-3">
+                <Users className="w-5 h-5" />
+                Team Overview
+              </DialogTitle>
+              <DialogDescription>
+                View your entire team at a glance
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="grid grid-cols-3 gap-4 mb-6">
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                  <p className="text-2xl font-bold">{mockResources.length}</p>
+                  <p className="text-sm text-gray-500">Total Resources</p>
+                </div>
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                  <p className="text-2xl font-bold text-green-600">{mockResources.filter(r => r.status === 'available').length}</p>
+                  <p className="text-sm text-gray-500">Available</p>
+                </div>
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                  <p className="text-2xl font-bold text-orange-600">{mockResources.filter(r => r.utilization > 100).length}</p>
+                  <p className="text-sm text-gray-500">Over-allocated</p>
+                </div>
+              </div>
+              <div className="space-y-3">
+                {mockResources.map(resource => (
+                  <div key={resource.id} className="flex items-center gap-3 p-3 border rounded-lg">
+                    <Avatar className="w-10 h-10">
+                      <AvatarFallback className="bg-gradient-to-br from-fuchsia-500 to-purple-500 text-white text-sm">
+                        {resource.name.split(' ').map(n => n[0]).join('')}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1">
+                      <p className="font-medium">{resource.name}</p>
+                      <p className="text-xs text-gray-500">{resource.role} - {resource.department}</p>
+                    </div>
+                    <Badge className={getResourceStatusColor(resource.status)}>
+                      {resource.status.replace('_', ' ')}
+                    </Badge>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowTeamViewDialog(false)}>Close</Button>
+              <Button onClick={() => { setShowTeamViewDialog(false); setActiveTab('resources') }}>
+                <Users className="w-4 h-4 mr-2" />
+                View All Resources
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Skills Dialog */}
+        <Dialog open={showSkillsDialog} onOpenChange={setShowSkillsDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-3">
+                <Star className="w-5 h-5" />
+                Team Skills Matrix
+              </DialogTitle>
+              <DialogDescription>
+                Overview of skills across your team
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="space-y-4">
+                {mockResources.map(resource => (
+                  <div key={resource.id} className="p-4 border rounded-lg">
+                    <div className="flex items-center gap-3 mb-3">
+                      <Avatar className="w-8 h-8">
+                        <AvatarFallback className="text-xs">{resource.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="font-medium">{resource.name}</p>
+                        <p className="text-xs text-gray-500">{resource.role}</p>
+                      </div>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {resource.skills.map(skill => (
+                        <Badge key={skill.name} className={getSkillLevelColor(skill.level)}>
+                          {skill.name} - {skill.level}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowSkillsDialog(false)}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Utilization Dialog */}
+        <Dialog open={showUtilizationDialog} onOpenChange={setShowUtilizationDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-3">
+                <BarChart3 className="w-5 h-5" />
+                Utilization Report
+              </DialogTitle>
+              <DialogDescription>
+                Team utilization breakdown
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="space-y-4">
+                {mockResources.map(resource => (
+                  <div key={resource.id} className="flex items-center gap-4">
+                    <div className="w-32 text-sm truncate">{resource.name}</div>
+                    <div className="flex-1">
+                      <Progress value={Math.min(resource.utilization, 100)} className="h-3" />
+                    </div>
+                    <div className={`w-16 text-right font-semibold ${getUtilizationColor(resource.utilization)}`}>
+                      {resource.utilization}%
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowUtilizationDialog(false)}>Close</Button>
+              <Button onClick={() => { setShowUtilizationDialog(false); setActiveTab('reports') }}>
+                <BarChart3 className="w-4 h-4 mr-2" />
+                Full Reports
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Time Off Dialog */}
+        <Dialog open={showTimeOffDialog} onOpenChange={setShowTimeOffDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-3">
+                <Plane className="w-5 h-5" />
+                Time Off Schedule
+              </DialogTitle>
+              <DialogDescription>
+                Upcoming team time off and leave
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="space-y-3">
+                {mockTimeOff.map(timeOff => (
+                  <div key={timeOff.id} className="flex items-center gap-3 p-3 border rounded-lg">
+                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                      timeOff.type === 'vacation' ? 'bg-blue-100 text-blue-600' :
+                      timeOff.type === 'sick' ? 'bg-red-100 text-red-600' :
+                      timeOff.type === 'remote' ? 'bg-green-100 text-green-600' :
+                      'bg-gray-100 text-gray-600'
+                    }`}>
+                      {getTimeOffIcon(timeOff.type)}
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-medium">{timeOff.resource_name}</p>
+                      <p className="text-xs text-gray-500">{timeOff.start_date} to {timeOff.end_date} ({timeOff.hours}h)</p>
+                    </div>
+                    <Badge variant={timeOff.status === 'approved' ? 'default' : 'secondary'}>
+                      {timeOff.status}
+                    </Badge>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowTimeOffDialog(false)}>Close</Button>
+              <Button onClick={() => { setShowTimeOffDialog(false); toast.success('Request Time Off', { description: 'Opening time off request form' }) }}>
+                <Plus className="w-4 h-4 mr-2" />
+                Request Time Off
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Rates Dialog */}
+        <Dialog open={showRatesDialog} onOpenChange={setShowRatesDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-3">
+                <DollarSign className="w-5 h-5" />
+                Billing Rates
+              </DialogTitle>
+              <DialogDescription>
+                Team billing and cost rates
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="space-y-3">
+                {mockResources.map(resource => (
+                  <div key={resource.id} className="flex items-center gap-4 p-3 border rounded-lg">
+                    <Avatar className="w-10 h-10">
+                      <AvatarFallback className="text-sm">{resource.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1">
+                      <p className="font-medium">{resource.name}</p>
+                      <p className="text-xs text-gray-500">{resource.role}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-semibold text-green-600">${resource.hourly_rate}/hr</p>
+                      <p className="text-xs text-gray-500">Cost: ${resource.cost_rate}/hr</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowRatesDialog(false)}>Close</Button>
+              <Button onClick={() => { setShowRatesDialog(false); toast.success('Edit Rates', { description: 'Opening rate editor' }) }}>
+                <Edit className="w-4 h-4 mr-2" />
+                Edit Rates
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Availability Dialog */}
+        <Dialog open={showAvailabilityDialog} onOpenChange={setShowAvailabilityDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-3">
+                <Eye className="w-5 h-5" />
+                Resource Availability
+              </DialogTitle>
+              <DialogDescription>
+                View who is available for new assignments
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="space-y-3">
+                {mockResources.map(resource => (
+                  <div key={resource.id} className="flex items-center gap-4 p-3 border rounded-lg">
+                    <Avatar className="w-10 h-10">
+                      <AvatarFallback className="text-sm">{resource.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1">
+                      <p className="font-medium">{resource.name}</p>
+                      <p className="text-xs text-gray-500">{resource.role}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-semibold">{resource.capacity_hours - resource.allocated_hours}h available</p>
+                      <p className="text-xs text-gray-500">{resource.allocated_hours}/{resource.capacity_hours}h allocated</p>
+                    </div>
+                    <Badge className={getResourceStatusColor(resource.status)}>
+                      {resource.status.replace('_', ' ')}
+                    </Badge>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowAvailabilityDialog(false)}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* New Project Dialog */}
+        <Dialog open={showNewProjectDialog} onOpenChange={setShowNewProjectDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-3">
+                <Plus className="w-5 h-5" />
+                Create New Project
+              </DialogTitle>
+              <DialogDescription>
+                Add a new project to the schedule
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Project Name</Label>
+                <Input placeholder="Platform Redesign" />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Project Code</Label>
+                  <Input placeholder="PLAT-001" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Client</Label>
+                  <Input placeholder="Client Name" />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Start Date</Label>
+                  <Input type="date" />
+                </div>
+                <div className="space-y-2">
+                  <Label>End Date</Label>
+                  <Input type="date" />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Budget Hours</Label>
+                  <Input type="number" defaultValue={1000} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Priority</Label>
+                  <Select defaultValue="medium">
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="critical">Critical</SelectItem>
+                      <SelectItem value="high">High</SelectItem>
+                      <SelectItem value="medium">Medium</SelectItem>
+                      <SelectItem value="low">Low</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowNewProjectDialog(false)}>Cancel</Button>
+              <Button onClick={() => { setShowNewProjectDialog(false); toast.success('Project Created', { description: 'New project has been added to the schedule' }) }}>
+                <Plus className="w-4 h-4 mr-2" />
+                Create Project
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Timeline Dialog */}
+        <Dialog open={showTimelineDialog} onOpenChange={setShowTimelineDialog}>
+          <DialogContent className="max-w-3xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-3">
+                <Calendar className="w-5 h-5" />
+                Project Timeline
+              </DialogTitle>
+              <DialogDescription>
+                Gantt-style view of project schedules
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="space-y-4">
+                {mockProjects.map(project => (
+                  <div key={project.id} className="p-4 border rounded-lg">
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: project.color }} />
+                      <p className="font-medium">{project.name}</p>
+                      <Badge className={getPriorityColor(project.priority)}>{project.priority}</Badge>
+                    </div>
+                    <div className="flex items-center gap-4 text-sm text-gray-500">
+                      <span>{project.start_date} - {project.end_date}</span>
+                      <span>{project.consumed_hours}/{project.budget_hours}h</span>
+                    </div>
+                    <Progress value={(project.consumed_hours / project.budget_hours) * 100} className="h-2 mt-2" />
+                  </div>
+                ))}
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowTimelineDialog(false)}>Close</Button>
+              <Button onClick={() => { setShowTimelineDialog(false); setActiveTab('schedule') }}>
+                <Calendar className="w-4 h-4 mr-2" />
+                View Full Schedule
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Milestones Dialog */}
+        <Dialog open={showMilestonesDialog} onOpenChange={setShowMilestonesDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-3">
+                <Target className="w-5 h-5" />
+                Project Milestones
+              </DialogTitle>
+              <DialogDescription>
+                Key milestones and deliverables
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="space-y-4">
+                {mockProjects.filter(p => p.status === 'active').map(project => (
+                  <div key={project.id} className="p-4 border rounded-lg">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: project.color }} />
+                      <p className="font-medium">{project.name}</p>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2 text-sm">
+                        <CheckCircle className="w-4 h-4 text-green-500" />
+                        <span>Phase 1 Complete</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm">
+                        <Clock className="w-4 h-4 text-yellow-500" />
+                        <span>Phase 2 In Progress - Due {project.end_date}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowMilestonesDialog(false)}>Close</Button>
+              <Button onClick={() => { setShowMilestonesDialog(false); toast.success('Add Milestone', { description: 'Opening milestone creator' }) }}>
+                <Plus className="w-4 h-4 mr-2" />
+                Add Milestone
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Dependencies Dialog */}
+        <Dialog open={showDependenciesDialog} onOpenChange={setShowDependenciesDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-3">
+                <GitBranch className="w-5 h-5" />
+                Project Dependencies
+              </DialogTitle>
+              <DialogDescription>
+                View and manage project dependencies
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="space-y-4">
+                {mockProjects.filter(p => p.status === 'active').slice(0, 3).map((project, i, arr) => (
+                  <div key={project.id} className="p-4 border rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: project.color }} />
+                      <p className="font-medium">{project.name}</p>
+                      {i < arr.length - 1 && (
+                        <span className="text-gray-400">depends on</span>
+                      )}
+                      {i < arr.length - 1 && arr[i + 1] && (
+                        <>
+                          <div className="w-3 h-3 rounded-full" style={{ backgroundColor: arr[i + 1].color }} />
+                          <p className="font-medium">{arr[i + 1].name}</p>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowDependenciesDialog(false)}>Close</Button>
+              <Button onClick={() => { setShowDependenciesDialog(false); toast.success('Add Dependency', { description: 'Opening dependency editor' }) }}>
+                <Plus className="w-4 h-4 mr-2" />
+                Add Dependency
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Deadlines Dialog */}
+        <Dialog open={showDeadlinesDialog} onOpenChange={setShowDeadlinesDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-3">
+                <Clock className="w-5 h-5" />
+                Upcoming Deadlines
+              </DialogTitle>
+              <DialogDescription>
+                Important dates and deadlines
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="space-y-3">
+                {mockProjects.filter(p => p.status === 'active').map(project => (
+                  <div key={project.id} className="flex items-center gap-4 p-3 border rounded-lg">
+                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: project.color }} />
+                    <div className="flex-1">
+                      <p className="font-medium">{project.name}</p>
+                      <p className="text-xs text-gray-500">{project.client_name}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-semibold">{project.end_date}</p>
+                      <p className="text-xs text-gray-500">End Date</p>
+                    </div>
+                    <Badge className={getPriorityColor(project.priority)}>
+                      {project.priority}
+                    </Badge>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowDeadlinesDialog(false)}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Billing Report Dialog */}
+        <Dialog open={showBillingReportDialog} onOpenChange={setShowBillingReportDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-3">
+                <DollarSign className="w-5 h-5" />
+                Billing Report
+              </DialogTitle>
+              <DialogDescription>
+                Revenue and billing summary
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="grid grid-cols-2 gap-4 mb-6">
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                  <p className="text-2xl font-bold text-green-600">{formatCurrency(stats.totalBillable)}</p>
+                  <p className="text-sm text-gray-500">Weekly Billable</p>
+                </div>
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                  <p className="text-2xl font-bold">{formatCurrency(stats.totalBillable * 4)}</p>
+                  <p className="text-sm text-gray-500">Monthly Projection</p>
+                </div>
+              </div>
+              <div className="space-y-3">
+                {mockProjects.filter(p => p.status === 'active').map(project => (
+                  <div key={project.id} className="flex items-center gap-4 p-3 border rounded-lg">
+                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: project.color }} />
+                    <div className="flex-1">
+                      <p className="font-medium">{project.name}</p>
+                      <p className="text-xs text-gray-500">{project.client_name}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-semibold text-green-600">{formatCurrency(project.spent_amount)}</p>
+                      <p className="text-xs text-gray-500">of {formatCurrency(project.budget_amount)}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowBillingReportDialog(false)}>Close</Button>
+              <Button onClick={() => { setShowBillingReportDialog(false); setActiveTab('reports') }}>
+                <BarChart3 className="w-4 h-4 mr-2" />
+                Full Reports
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Export Dialog */}
+        <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-3">
+                <ArrowUpRight className="w-5 h-5" />
+                Export Data
+              </DialogTitle>
+              <DialogDescription>
+                Choose export format and data
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Export Format</Label>
+                <Select defaultValue="csv">
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="csv">CSV</SelectItem>
+                    <SelectItem value="xlsx">Excel (XLSX)</SelectItem>
+                    <SelectItem value="pdf">PDF Report</SelectItem>
+                    <SelectItem value="json">JSON</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Data to Export</Label>
+                <Select defaultValue="allocations">
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="allocations">Allocations</SelectItem>
+                    <SelectItem value="resources">Resources</SelectItem>
+                    <SelectItem value="projects">Projects</SelectItem>
+                    <SelectItem value="utilization">Utilization Report</SelectItem>
+                    <SelectItem value="all">All Data</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowExportDialog(false)}>Cancel</Button>
+              <Button onClick={() => { setShowExportDialog(false); toast.success('Export Started', { description: 'Your data export is being prepared' }) }}>
+                <ArrowUpRight className="w-4 h-4 mr-2" />
+                Export
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Work Hours Dialog */}
+        <Dialog open={showWorkHoursDialog} onOpenChange={setShowWorkHoursDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-3">
+                <Clock className="w-5 h-5" />
+                Work Hours Settings
+              </DialogTitle>
+              <DialogDescription>
+                Configure default working hours
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium">Standard Work Week</p>
+                  <p className="text-sm text-gray-500">Hours per week</p>
+                </div>
+                <Input type="number" defaultValue={40} className="w-20 text-center" />
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium">Work Day Start</p>
+                  <p className="text-sm text-gray-500">Default start time</p>
+                </div>
+                <Input type="time" defaultValue="09:00" className="w-32" />
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium">Work Day End</p>
+                  <p className="text-sm text-gray-500">Default end time</p>
+                </div>
+                <Input type="time" defaultValue="18:00" className="w-32" />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowWorkHoursDialog(false)}>Cancel</Button>
+              <Button onClick={() => { setShowWorkHoursDialog(false); toast.success('Settings Saved', { description: 'Work hours settings updated' }) }}>
+                Save Settings
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Targets Dialog */}
+        <Dialog open={showTargetsDialog} onOpenChange={setShowTargetsDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-3">
+                <Target className="w-5 h-5" />
+                Utilization Targets
+              </DialogTitle>
+              <DialogDescription>
+                Set team utilization thresholds
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium">Target Utilization</p>
+                  <p className="text-sm text-gray-500">Optimal rate</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Input type="number" defaultValue={80} className="w-20 text-center" />
+                  <span className="text-gray-500">%</span>
+                </div>
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium">Over-allocation Warning</p>
+                  <p className="text-sm text-gray-500">Alert threshold</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Input type="number" defaultValue={100} className="w-20 text-center" />
+                  <span className="text-gray-500">%</span>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowTargetsDialog(false)}>Cancel</Button>
+              <Button onClick={() => { setShowTargetsDialog(false); toast.success('Targets Saved', { description: 'Utilization targets updated' }) }}>
+                Save Targets
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Billing Settings Dialog */}
+        <Dialog open={showBillingSettingsDialog} onOpenChange={setShowBillingSettingsDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-3">
+                <DollarSign className="w-5 h-5" />
+                Billing Settings
+              </DialogTitle>
+              <DialogDescription>
+                Configure billing defaults
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium">Default Bill Rate</p>
+                  <p className="text-sm text-gray-500">Standard hourly rate</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-gray-500">$</span>
+                  <Input type="number" defaultValue={150} className="w-24 text-center" />
+                  <span className="text-gray-500">/hr</span>
+                </div>
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium">Overtime Multiplier</p>
+                  <p className="text-sm text-gray-500">Rate for overtime</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Input type="number" defaultValue={1.5} step={0.1} className="w-20 text-center" />
+                  <span className="text-gray-500">x</span>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowBillingSettingsDialog(false)}>Cancel</Button>
+              <Button onClick={() => { setShowBillingSettingsDialog(false); toast.success('Settings Saved', { description: 'Billing settings updated' }) }}>
+                Save Settings
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Alerts Dialog */}
+        <Dialog open={showAlertsDialog} onOpenChange={setShowAlertsDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-3">
+                <AlertTriangle className="w-5 h-5" />
+                Alert Settings
+              </DialogTitle>
+              <DialogDescription>
+                Configure notification preferences
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium">Over-allocation Alerts</p>
+                  <p className="text-sm text-gray-500">When resources are over-booked</p>
+                </div>
+                <Button variant="outline" size="sm" onClick={() => toast.info('Toggle', { description: 'Alert setting toggled' })}>Enabled</Button>
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium">Pending Approvals</p>
+                  <p className="text-sm text-gray-500">Daily digest</p>
+                </div>
+                <Button variant="outline" size="sm" onClick={() => toast.info('Toggle', { description: 'Alert setting toggled' })}>Enabled</Button>
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium">Capacity Warnings</p>
+                  <p className="text-sm text-gray-500">Low capacity alerts</p>
+                </div>
+                <Button variant="outline" size="sm" onClick={() => toast.info('Toggle', { description: 'Alert setting toggled' })}>Enabled</Button>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowAlertsDialog(false)}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Roles Dialog */}
+        <Dialog open={showRolesDialog} onOpenChange={setShowRolesDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-3">
+                <Users className="w-5 h-5" />
+                Role Management
+              </DialogTitle>
+              <DialogDescription>
+                Manage team roles and permissions
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="space-y-3">
+                {['Senior Developer', 'Engineering Manager', 'UX Designer', 'Backend Developer', 'DevOps Engineer'].map(role => (
+                  <div key={role} className="flex items-center justify-between p-3 border rounded-lg">
+                    <span className="font-medium">{role}</span>
+                    <Button variant="ghost" size="sm" onClick={() => toast.info('Edit Role', { description: `Editing ${role}` })}>
+                      <Edit className="w-4 h-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowRolesDialog(false)}>Close</Button>
+              <Button onClick={() => { toast.success('Add Role', { description: 'Opening role creator' }) }}>
+                <Plus className="w-4 h-4 mr-2" />
+                Add Role
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Holidays Dialog */}
+        <Dialog open={showHolidaysDialog} onOpenChange={setShowHolidaysDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-3">
+                <Calendar className="w-5 h-5" />
+                Company Holidays
+              </DialogTitle>
+              <DialogDescription>
+                Manage company-wide holidays
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="space-y-3">
+                {[
+                  { name: "New Year's Day", date: '2024-01-01' },
+                  { name: 'Presidents Day', date: '2024-02-19' },
+                  { name: 'Memorial Day', date: '2024-05-27' },
+                  { name: 'Independence Day', date: '2024-07-04' },
+                  { name: 'Labor Day', date: '2024-09-02' }
+                ].map(holiday => (
+                  <div key={holiday.name} className="flex items-center justify-between p-3 border rounded-lg">
+                    <div>
+                      <p className="font-medium">{holiday.name}</p>
+                      <p className="text-xs text-gray-500">{holiday.date}</p>
+                    </div>
+                    <Button variant="ghost" size="sm" onClick={() => toast.info('Edit Holiday', { description: `Editing ${holiday.name}` })}>
+                      <Edit className="w-4 h-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowHolidaysDialog(false)}>Close</Button>
+              <Button onClick={() => { toast.success('Add Holiday', { description: 'Opening holiday creator' }) }}>
+                <Plus className="w-4 h-4 mr-2" />
+                Add Holiday
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Sync Dialog */}
+        <Dialog open={showSyncDialog} onOpenChange={setShowSyncDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-3">
+                <RefreshCw className="w-5 h-5" />
+                Data Synchronization
+              </DialogTitle>
+              <DialogDescription>
+                Sync with external systems
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between p-3 border rounded-lg">
+                  <div>
+                    <p className="font-medium">Last Sync</p>
+                    <p className="text-xs text-gray-500">5 minutes ago</p>
+                  </div>
+                  <Badge variant="default">Synced</Badge>
+                </div>
+                <div className="flex items-center justify-between p-3 border rounded-lg">
+                  <div>
+                    <p className="font-medium">Auto-sync</p>
+                    <p className="text-xs text-gray-500">Every 15 minutes</p>
+                  </div>
+                  <Button variant="outline" size="sm" onClick={() => toast.info('Toggle', { description: 'Auto-sync toggled' })}>Enabled</Button>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowSyncDialog(false)}>Close</Button>
+              <Button onClick={() => { toast.success('Syncing', { description: 'Data synchronization started' }) }}>
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Sync Now
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Integrations Dialog */}
+        <Dialog open={showIntegrationsDialog} onOpenChange={setShowIntegrationsDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-3">
+                <Zap className="w-5 h-5" />
+                Integrations
+              </DialogTitle>
+              <DialogDescription>
+                Connect external services
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="space-y-3">
+                {[
+                  { name: 'Slack', status: 'connected' },
+                  { name: 'Jira', status: 'connected' },
+                  { name: 'Google Calendar', status: 'disconnected' },
+                  { name: 'Microsoft Teams', status: 'disconnected' }
+                ].map(integration => (
+                  <div key={integration.name} className="flex items-center justify-between p-3 border rounded-lg">
+                    <div>
+                      <p className="font-medium">{integration.name}</p>
+                    </div>
+                    <Button
+                      variant={integration.status === 'connected' ? 'outline' : 'default'}
+                      size="sm"
+                      onClick={() => toast.success(integration.status === 'connected' ? 'Disconnected' : 'Connected', { description: `${integration.name} ${integration.status === 'connected' ? 'disconnected' : 'connected'}` })}
+                    >
+                      {integration.status === 'connected' ? 'Disconnect' : 'Connect'}
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowIntegrationsDialog(false)}>Close</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

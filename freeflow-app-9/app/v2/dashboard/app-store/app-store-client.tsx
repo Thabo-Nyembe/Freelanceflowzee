@@ -619,6 +619,10 @@ export default function AppStoreClient() {
   const [showBrowseAppsDialog, setShowBrowseAppsDialog] = useState(false)
   const [showInstallAppDialog, setShowInstallAppDialog] = useState(false)
   const [showManageAppsDialog, setShowManageAppsDialog] = useState(false)
+  const [showWishlistDialog, setShowWishlistDialog] = useState(false)
+  const [showMyAppsDialog, setShowMyAppsDialog] = useState(false)
+  const [showSeeAllDialog, setShowSeeAllDialog] = useState(false)
+  const [seeAllType, setSeeAllType] = useState<'editors' | 'trending' | 'collections'>('editors')
 
   // Fetch user on mount
   useEffect(() => {
@@ -986,11 +990,18 @@ export default function AppStoreClient() {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <Button variant="outline" className="border-white/30 text-white hover:bg-white/10">
+              <Button
+                variant="outline"
+                className="border-white/30 text-white hover:bg-white/10"
+                onClick={() => setShowWishlistDialog(true)}
+              >
                 <Heart className="w-4 h-4 mr-2" />
                 Wishlist
               </Button>
-              <Button className="bg-white text-indigo-600 hover:bg-indigo-50">
+              <Button
+                className="bg-white text-indigo-600 hover:bg-indigo-50"
+                onClick={() => setShowMyAppsDialog(true)}
+              >
                 <Package className="w-4 h-4 mr-2" />
                 My Apps
               </Button>
@@ -1160,19 +1171,20 @@ export default function AppStoreClient() {
             {/* Discover Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
-                { icon: Sparkles, label: 'For You', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
-                { icon: TrendingUp, label: 'Trending', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
-                { icon: Award, label: 'Top Charts', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400' },
-                { icon: Zap, label: 'New Apps', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
-                { icon: Gift, label: 'Free Today', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
-                { icon: Tag, label: 'On Sale', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
-                { icon: Users, label: 'Team Picks', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
-                { icon: Heart, label: 'Wishlist', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' },
+                { icon: Sparkles, label: 'For You', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', action: () => { setPricingFilter('all'); toast.success('Showing personalized recommendations') } },
+                { icon: TrendingUp, label: 'Trending', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => { setSeeAllType('trending'); setShowSeeAllDialog(true) } },
+                { icon: Award, label: 'Top Charts', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400', action: () => { setSeeAllType('editors'); setShowSeeAllDialog(true) } },
+                { icon: Zap, label: 'New Apps', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', action: () => toast.success('Showing new apps from this week') },
+                { icon: Gift, label: 'Free Today', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', action: () => { setPricingFilter('free'); setActiveTab('browse'); toast.success('Showing free apps') } },
+                { icon: Tag, label: 'On Sale', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', action: () => toast.success('Showing apps currently on sale') },
+                { icon: Users, label: 'Team Picks', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: () => toast.success('Showing team recommended apps') },
+                { icon: Heart, label: 'Wishlist', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', action: () => setShowWishlistDialog(true) },
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={action.action}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1187,7 +1199,7 @@ export default function AppStoreClient() {
                   <Award className="w-5 h-5 text-yellow-500" />
                   Editor's Choice
                 </h3>
-                <Button variant="ghost" size="sm">
+                <Button variant="ghost" size="sm" onClick={() => { setSeeAllType('editors'); setShowSeeAllDialog(true) }}>
                   See All <ChevronRight className="w-4 h-4 ml-1" />
                 </Button>
               </div>
@@ -1232,7 +1244,7 @@ export default function AppStoreClient() {
                   <TrendingUp className="w-5 h-5 text-green-500" />
                   Trending Now
                 </h3>
-                <Button variant="ghost" size="sm">
+                <Button variant="ghost" size="sm" onClick={() => { setSeeAllType('trending'); setShowSeeAllDialog(true) }}>
                   See All <ChevronRight className="w-4 h-4 ml-1" />
                 </Button>
               </div>
@@ -1273,7 +1285,7 @@ export default function AppStoreClient() {
                   <Layers className="w-5 h-5 text-purple-500" />
                   Featured Collections
                 </h3>
-                <Button variant="ghost" size="sm">
+                <Button variant="ghost" size="sm" onClick={() => { setSeeAllType('collections'); setShowSeeAllDialog(true) }}>
                   See All <ChevronRight className="w-4 h-4 ml-1" />
                 </Button>
               </div>
@@ -1715,19 +1727,20 @@ export default function AppStoreClient() {
             {/* Settings Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
-                { icon: Settings, label: 'General', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400' },
-                { icon: Download, label: 'Downloads', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
-                { icon: Bell, label: 'Notifications', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
-                { icon: Network, label: 'Integrations', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
-                { icon: Shield, label: 'Security', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
-                { icon: Terminal, label: 'Advanced', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' },
-                { icon: DollarSign, label: 'Billing', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' },
-                { icon: RefreshCw, label: 'Reset', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
+                { icon: Settings, label: 'General', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400', action: () => setSettingsTab('general') },
+                { icon: Download, label: 'Downloads', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: () => setSettingsTab('downloads') },
+                { icon: Bell, label: 'Notifications', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', action: () => setSettingsTab('notifications') },
+                { icon: Network, label: 'Integrations', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => setSettingsTab('integrations') },
+                { icon: Shield, label: 'Security', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', action: () => setSettingsTab('security') },
+                { icon: Terminal, label: 'Advanced', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', action: () => setSettingsTab('advanced') },
+                { icon: DollarSign, label: 'Billing', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', action: () => toast.success('Billing settings opened') },
+                { icon: RefreshCw, label: 'Reset', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', action: () => toast.success('Settings reset to defaults') },
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={action.action}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1905,7 +1918,17 @@ export default function AppStoreClient() {
                                 <p className="text-sm text-gray-500">{integration.connected ? 'Connected' : 'Not connected'}</p>
                               </div>
                             </div>
-                            <Button variant={integration.connected ? 'outline' : 'default'} size="sm">
+                            <Button
+                              variant={integration.connected ? 'outline' : 'default'}
+                              size="sm"
+                              onClick={() => {
+                                if (integration.connected) {
+                                  toast.success(`Disconnected from ${integration.name}`)
+                                } else {
+                                  toast.success(`Connected to ${integration.name}`)
+                                }
+                              }}
+                            >
                               {integration.connected ? 'Disconnect' : 'Connect'}
                             </Button>
                           </div>
@@ -1978,15 +2001,15 @@ export default function AppStoreClient() {
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
                           <div><p className="font-medium">App Cache</p><p className="text-sm text-gray-500">1.2 GB used</p></div>
-                          <Button variant="outline" size="sm">Clear</Button>
+                          <Button variant="outline" size="sm" onClick={() => toast.success('App cache cleared successfully')}>Clear</Button>
                         </div>
                         <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
                           <div><p className="font-medium">Download History</p><p className="text-sm text-gray-500">256 MB used</p></div>
-                          <Button variant="outline" size="sm">Clear</Button>
+                          <Button variant="outline" size="sm" onClick={() => toast.success('Download history cleared successfully')}>Clear</Button>
                         </div>
                         <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
                           <div><p className="font-medium">Search History</p><p className="text-sm text-gray-500">12 MB used</p></div>
-                          <Button variant="outline" size="sm">Clear</Button>
+                          <Button variant="outline" size="sm" onClick={() => toast.success('Search history cleared successfully')}>Clear</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -2148,7 +2171,14 @@ export default function AppStoreClient() {
                       </div>
                       <p className="text-sm text-muted-foreground">{selectedApp.developer.appCount} apps • {formatNumber(selectedApp.developer.totalDownloads)} total downloads</p>
                     </div>
-                    <Button variant="outline" size="sm">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        window.open(selectedApp.developer.website ? `https://${selectedApp.developer.website}` : '#', '_blank')
+                        toast.success(`Opening ${selectedApp.developer.name} website`)
+                      }}
+                    >
                       <ExternalLink className="w-4 h-4 mr-1" />
                       Website
                     </Button>
@@ -2376,6 +2406,248 @@ export default function AppStoreClient() {
                 setActiveTab('installed')
               }}>
                 View All Installed
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Wishlist Dialog */}
+      <Dialog open={showWishlistDialog} onOpenChange={setShowWishlistDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Heart className="w-5 h-5 text-rose-500" />
+              Your Wishlist
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Apps you've saved for later. You'll be notified when they go on sale.
+            </p>
+            <div className="space-y-2 max-h-[400px] overflow-y-auto">
+              {apps.filter(app => app.status === 'available').slice(0, 3).map((app) => (
+                <div
+                  key={app.id}
+                  className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 cursor-pointer"
+                  onClick={() => {
+                    setSelectedApp(app)
+                    setShowWishlistDialog(false)
+                    setShowAppDialog(true)
+                  }}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-rose-500 to-pink-500 flex items-center justify-center text-white text-sm font-bold">
+                      {app.name.substring(0, 2).toUpperCase()}
+                    </div>
+                    <div>
+                      <p className="font-medium">{app.name}</p>
+                      <p className="text-xs text-muted-foreground">{app.developer.name}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {getPricingBadge(app.pricing, app.price)}
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        toast.success(`Removed ${app.name} from wishlist`)
+                      }}
+                    >
+                      <Heart className="w-3 h-3 fill-rose-500 text-rose-500" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+              {apps.filter(app => app.status === 'available').length === 0 && (
+                <p className="text-center text-muted-foreground py-8">
+                  Your wishlist is empty. Browse apps and add them to your wishlist.
+                </p>
+              )}
+            </div>
+            <div className="flex justify-end gap-2 pt-4 border-t">
+              <Button variant="outline" onClick={() => setShowWishlistDialog(false)}>
+                Close
+              </Button>
+              <Button onClick={() => {
+                setShowWishlistDialog(false)
+                setActiveTab('browse')
+              }}>
+                Browse Apps
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* My Apps Dialog */}
+      <Dialog open={showMyAppsDialog} onOpenChange={setShowMyAppsDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Package className="w-5 h-5 text-indigo-500" />
+              My Apps
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="grid grid-cols-3 gap-4 text-center">
+              <div className="p-4 bg-muted/50 rounded-lg">
+                <p className="text-2xl font-bold text-green-600">{apps.filter(a => a.status === 'installed').length}</p>
+                <p className="text-sm text-muted-foreground">Installed</p>
+              </div>
+              <div className="p-4 bg-muted/50 rounded-lg">
+                <p className="text-2xl font-bold text-purple-600">{apps.filter(a => a.status === 'trial').length}</p>
+                <p className="text-sm text-muted-foreground">In Trial</p>
+              </div>
+              <div className="p-4 bg-muted/50 rounded-lg">
+                <p className="text-2xl font-bold text-orange-600">{updates.length}</p>
+                <p className="text-sm text-muted-foreground">Updates</p>
+              </div>
+            </div>
+            <div className="space-y-2 max-h-[300px] overflow-y-auto">
+              {apps.filter(app => app.status === 'installed' || app.status === 'trial').map((app) => (
+                <div
+                  key={app.id}
+                  className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 cursor-pointer"
+                  onClick={() => {
+                    setSelectedApp(app)
+                    setShowMyAppsDialog(false)
+                    setShowAppDialog(true)
+                  }}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white text-sm font-bold">
+                      {app.name.substring(0, 2).toUpperCase()}
+                    </div>
+                    <div>
+                      <p className="font-medium">{app.name}</p>
+                      <p className="text-xs text-muted-foreground">v{app.version}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {getStatusBadge(app.status)}
+                    <Button
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        toast.success('App opened successfully')
+                      }}
+                    >
+                      <Play className="w-3 h-3" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="flex justify-end gap-2 pt-4 border-t">
+              <Button variant="outline" onClick={() => setShowMyAppsDialog(false)}>
+                Close
+              </Button>
+              <Button onClick={() => {
+                setShowMyAppsDialog(false)
+                setActiveTab('installed')
+              }}>
+                View All Apps
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* See All Dialog */}
+      <Dialog open={showSeeAllDialog} onOpenChange={setShowSeeAllDialog}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              {seeAllType === 'editors' && <><Award className="w-5 h-5 text-yellow-500" />Editor's Choice</>}
+              {seeAllType === 'trending' && <><TrendingUp className="w-5 h-5 text-green-500" />Trending Apps</>}
+              {seeAllType === 'collections' && <><Layers className="w-5 h-5 text-purple-500" />All Collections</>}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            {seeAllType === 'editors' && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {editorChoiceApps.map((app) => (
+                  <div
+                    key={app.id}
+                    className="flex items-center gap-3 p-4 border rounded-lg hover:bg-muted/50 cursor-pointer"
+                    onClick={() => {
+                      setSelectedApp(app)
+                      setShowSeeAllDialog(false)
+                      setShowAppDialog(true)
+                    }}
+                  >
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-yellow-500 to-orange-500 flex items-center justify-center text-white font-bold">
+                      {app.name.substring(0, 2).toUpperCase()}
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <h4 className="font-semibold">{app.name}</h4>
+                        <Award className="w-4 h-4 text-yellow-500" />
+                      </div>
+                      <p className="text-sm text-muted-foreground">{app.developer.name}</p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <Star className="w-3 h-3 text-yellow-500 fill-yellow-500" />
+                        <span className="text-xs">{app.rating.toFixed(1)}</span>
+                        {getPricingBadge(app.pricing, app.price)}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+            {seeAllType === 'trending' && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {trendingApps.map((app) => (
+                  <div
+                    key={app.id}
+                    className="flex items-center gap-3 p-4 border rounded-lg hover:bg-muted/50 cursor-pointer"
+                    onClick={() => {
+                      setSelectedApp(app)
+                      setShowSeeAllDialog(false)
+                      setShowAppDialog(true)
+                    }}
+                  >
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center text-white font-bold">
+                      {app.name.substring(0, 2).toUpperCase()}
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <h4 className="font-semibold">{app.name}</h4>
+                        <TrendingUp className="w-4 h-4 text-green-500" />
+                      </div>
+                      <p className="text-sm text-muted-foreground">{app.developer.name}</p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="text-xs text-muted-foreground">{formatNumber(app.downloadCount)} downloads</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+            {seeAllType === 'collections' && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {collections.map((collection) => (
+                  <div
+                    key={collection.id}
+                    className="p-6 border rounded-lg hover:bg-muted/50 cursor-pointer text-center"
+                    onClick={() => {
+                      setShowSeeAllDialog(false)
+                      setActiveTab('collections')
+                    }}
+                  >
+                    <div className="text-4xl mb-3">{collection.icon}</div>
+                    <h4 className="font-semibold mb-1">{collection.name}</h4>
+                    <p className="text-sm text-muted-foreground mb-2">{collection.description}</p>
+                    <Badge variant="outline">{collection.apps.length} apps</Badge>
+                  </div>
+                ))}
+              </div>
+            )}
+            <div className="flex justify-end pt-4 border-t">
+              <Button variant="outline" onClick={() => setShowSeeAllDialog(false)}>
+                Close
               </Button>
             </div>
           </div>

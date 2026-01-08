@@ -102,8 +102,11 @@ export default function AnalyticsAdvancedClient() {
   const [showNewItemDialog, setShowNewItemDialog] = useState(false)
   const [showExportDialog, setShowExportDialog] = useState(false)
   const [showSettingsDialog, setShowSettingsDialog] = useState(false)
+  const [showNewGoalDialog, setShowNewGoalDialog] = useState(false)
   const [newItemName, setNewItemName] = useState('')
   const [exportFormat, setExportFormat] = useState('csv')
+  const [newGoalName, setNewGoalName] = useState('')
+  const [newGoalTarget, setNewGoalTarget] = useState('')
 
   // QUICK ACTIONS with dialog openers
   const analyticsAdvancedQuickActions = [
@@ -637,7 +640,10 @@ export default function AnalyticsAdvancedClient() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">Goals & Targets</h2>
-        <button className="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg text-sm font-medium hover:from-blue-600 hover:to-purple-600 transition-colors">
+        <button
+          onClick={() => setShowNewGoalDialog(true)}
+          className="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg text-sm font-medium hover:from-blue-600 hover:to-purple-600 transition-colors"
+        >
           + New Goal
         </button>
       </div>
@@ -808,7 +814,10 @@ export default function AnalyticsAdvancedClient() {
                   </option>
                 ))}
               </select>
-              <button className="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg text-sm font-medium hover:from-blue-600 hover:to-purple-600 transition-colors">
+              <button
+                onClick={() => setShowExportDialog(true)}
+                className="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg text-sm font-medium hover:from-blue-600 hover:to-purple-600 transition-colors"
+              >
                 Export Report
               </button>
             </div>
@@ -1045,6 +1054,93 @@ export default function AnalyticsAdvancedClient() {
               setShowSettingsDialog(false)
             }}>
               Save Settings
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* New Goal Dialog */}
+      <Dialog open={showNewGoalDialog} onOpenChange={setShowNewGoalDialog}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Create New Goal</DialogTitle>
+            <DialogDescription>
+              Set up a new goal to track your business objectives and KPIs.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="goal-name">Goal Name</Label>
+              <Input
+                id="goal-name"
+                placeholder="e.g., Increase Monthly Revenue"
+                value={newGoalName}
+                onChange={(e) => setNewGoalName(e.target.value)}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="goal-metric">Metric Type</Label>
+              <select
+                id="goal-metric"
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background"
+              >
+                <option value="revenue">Revenue</option>
+                <option value="users">Users</option>
+                <option value="conversion">Conversion Rate</option>
+                <option value="engagement">Engagement</option>
+                <option value="retention">Retention</option>
+                <option value="custom">Custom Metric</option>
+              </select>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="goal-target">Target Value</Label>
+              <Input
+                id="goal-target"
+                type="number"
+                placeholder="e.g., 100000"
+                value={newGoalTarget}
+                onChange={(e) => setNewGoalTarget(e.target.value)}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="goal-start">Start Date</Label>
+                <Input
+                  id="goal-start"
+                  type="date"
+                  defaultValue={new Date().toISOString().split('T')[0]}
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="goal-end">End Date</Label>
+                <Input
+                  id="goal-end"
+                  type="date"
+                  defaultValue={new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]}
+                />
+              </div>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="goal-description">Description (Optional)</Label>
+              <Input
+                id="goal-description"
+                placeholder="Brief description of this goal..."
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowNewGoalDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={() => {
+              toast.success('Goal created', {
+                description: `"${newGoalName || 'New Goal'}" has been added with target ${newGoalTarget || '0'}`
+              })
+              setNewGoalName('')
+              setNewGoalTarget('')
+              setShowNewGoalDialog(false)
+            }}>
+              Create Goal
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -100,6 +100,19 @@ export default function AiVideoStudioClient() {
     <>
       <AIVideoStudio />
 
+      {/* Competitive Upgrade Components */}
+      <div className="max-w-7xl mx-auto px-4 pb-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+          <AIInsightsPanel insights={aiVideoStudioAIInsights} />
+          <PredictiveAnalytics predictions={aiVideoStudioPredictions} />
+          <CollaborationIndicator collaborators={aiVideoStudioCollaborators} />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <QuickActionsToolbar actions={aiVideoStudioQuickActions} />
+          <ActivityFeed activities={aiVideoStudioActivities} />
+        </div>
+      </div>
+
       {/* New Video Project Dialog */}
       <Dialog open={showNewProjectDialog} onOpenChange={setShowNewProjectDialog}>
         <DialogContent>
