@@ -653,6 +653,70 @@ export default function InvoicingClient() {
   const [showSendRemindersDialog, setShowSendRemindersDialog] = useState(false)
   const [showExportReportDialog, setShowExportReportDialog] = useState(false)
 
+  // Additional Dialog States
+  const [showSendAllDialog, setShowSendAllDialog] = useState(false)
+  const [showRecurringDialog, setShowRecurringDialog] = useState(false)
+  const [showEstimatesDialog, setShowEstimatesDialog] = useState(false)
+  const [showPaymentsOverviewDialog, setShowPaymentsOverviewDialog] = useState(false)
+  const [showOverdueDialog, setShowOverdueDialog] = useState(false)
+  const [showExportInvoicesDialog, setShowExportInvoicesDialog] = useState(false)
+  const [showInvoiceReportsDialog, setShowInvoiceReportsDialog] = useState(false)
+
+  // Client Dialog States
+  const [showAddClientDialog, setShowAddClientDialog] = useState(false)
+  const [showCompaniesDialog, setShowCompaniesDialog] = useState(false)
+  const [showEmailAllDialog, setShowEmailAllDialog] = useState(false)
+  const [showStatementsDialog, setShowStatementsDialog] = useState(false)
+  const [showCategoriesDialog, setShowCategoriesDialog] = useState(false)
+  const [showImportClientsDialog, setShowImportClientsDialog] = useState(false)
+  const [showExportClientsDialog, setShowExportClientsDialog] = useState(false)
+  const [showClientReportsDialog, setShowClientReportsDialog] = useState(false)
+
+  // Payment Dialog States
+  const [showPaymentMethodsDialog, setShowPaymentMethodsDialog] = useState(false)
+  const [showRefundsDialog, setShowRefundsDialog] = useState(false)
+  const [showBankDialog, setShowBankDialog] = useState(false)
+  const [showReceiptsDialog, setShowReceiptsDialog] = useState(false)
+  const [showSchedulePaymentsDialog, setShowSchedulePaymentsDialog] = useState(false)
+  const [showExportPaymentsDialog, setShowExportPaymentsDialog] = useState(false)
+  const [showPaymentReportsDialog, setShowPaymentReportsDialog] = useState(false)
+  const [showProcessRecurringDialog, setShowProcessRecurringDialog] = useState(false)
+
+  // Expense Dialog States
+  const [showAddExpenseDialog, setShowAddExpenseDialog] = useState(false)
+  const [showExpenseReceiptsDialog, setShowExpenseReceiptsDialog] = useState(false)
+  const [showExpenseCategoriesDialog, setShowExpenseCategoriesDialog] = useState(false)
+  const [showVendorsDialog, setShowVendorsDialog] = useState(false)
+  const [showApproveExpensesDialog, setShowApproveExpensesDialog] = useState(false)
+  const [showRecurringExpensesDialog, setShowRecurringExpensesDialog] = useState(false)
+  const [showExportExpensesDialog, setShowExportExpensesDialog] = useState(false)
+  const [showExpenseReportsDialog, setShowExpenseReportsDialog] = useState(false)
+
+  // Reports Dialog States
+  const [showRevenueReportDialog, setShowRevenueReportDialog] = useState(false)
+  const [showTrendsReportDialog, setShowTrendsReportDialog] = useState(false)
+  const [showClientReportDialog, setShowClientReportDialog] = useState(false)
+  const [showExpenseReportDialog, setShowExpenseReportDialog] = useState(false)
+  const [showProfitReportDialog, setShowProfitReportDialog] = useState(false)
+  const [showScheduleReportDialog, setShowScheduleReportDialog] = useState(false)
+  const [showExportAllReportsDialog, setShowExportAllReportsDialog] = useState(false)
+  const [showPrintReportDialog, setShowPrintReportDialog] = useState(false)
+
+  // Settings Dialog States
+  const [showExportConfigDialog, setShowExportConfigDialog] = useState(false)
+  const [showPaymentGatewayDialog, setShowPaymentGatewayDialog] = useState(false)
+  const [showRegenerateKeyDialog, setShowRegenerateKeyDialog] = useState(false)
+  const [showDeleteDraftsDialog, setShowDeleteDraftsDialog] = useState(false)
+  const [showResetSettingsDialog, setShowResetSettingsDialog] = useState(false)
+
+  // Invoice/Client Action Dialog States
+  const [showEditInvoiceDialog, setShowEditInvoiceDialog] = useState(false)
+  const [showMoreOptionsDialog, setShowMoreOptionsDialog] = useState(false)
+  const [showEditClientDialog, setShowEditClientDialog] = useState(false)
+  const [showViewClientInvoicesDialog, setShowViewClientInvoicesDialog] = useState(false)
+  const [showCreateClientInvoiceDialog, setShowCreateClientInvoiceDialog] = useState(false)
+  const [selectedGateway, setSelectedGateway] = useState<string | null>(null)
+
   // Quick Actions with proper dialog handlers
   const invoicingQuickActions = [
     { id: '1', label: 'New Invoice', icon: 'FileText', shortcut: 'N', action: () => setShowNewInvoiceDialog(true) },
@@ -775,7 +839,7 @@ export default function InvoicingClient() {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <Button variant="outline" className="border-white/30 text-white hover:bg-white/10">
+              <Button variant="outline" className="border-white/30 text-white hover:bg-white/10" onClick={() => setShowExportReportDialog(true)}>
                 <Download className="w-4 h-4 mr-2" />
                 Export
               </Button>
@@ -937,19 +1001,20 @@ export default function InvoicingClient() {
             {/* Invoices Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Plus, label: 'New Invoice', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
-                { icon: Send, label: 'Send All', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
-                { icon: Repeat, label: 'Recurring', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
-                { icon: Receipt, label: 'Estimates', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
-                { icon: CreditCard, label: 'Payments', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
-                { icon: AlertTriangle, label: 'Overdue', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
-                { icon: Download, label: 'Export', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
-                { icon: BarChart3, label: 'Reports', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400' },
+                { icon: Plus, label: 'New Invoice', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => setShowNewInvoiceDialog(true) },
+                { icon: Send, label: 'Send All', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => setShowSendAllDialog(true) },
+                { icon: Repeat, label: 'Recurring', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => setShowRecurringDialog(true) },
+                { icon: Receipt, label: 'Estimates', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', onClick: () => setShowEstimatesDialog(true) },
+                { icon: CreditCard, label: 'Payments', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', onClick: () => setShowPaymentsOverviewDialog(true) },
+                { icon: AlertTriangle, label: 'Overdue', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', onClick: () => setShowOverdueDialog(true) },
+                { icon: Download, label: 'Export', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', onClick: () => setShowExportInvoicesDialog(true) },
+                { icon: BarChart3, label: 'Reports', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400', onClick: () => setShowInvoiceReportsDialog(true) },
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={action.onClick}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1046,13 +1111,13 @@ export default function InvoicingClient() {
                           )}
                         </div>
                         <div className="flex items-center gap-2">
-                          <Button variant="ghost" size="sm">
+                          <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); handleViewInvoice(invoice); }}>
                             <Eye className="w-4 h-4" />
                           </Button>
-                          <Button variant="ghost" size="sm">
+                          <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); setSelectedInvoice(invoice); setShowEditInvoiceDialog(true); }}>
                             <Edit className="w-4 h-4" />
                           </Button>
-                          <Button variant="ghost" size="sm">
+                          <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); setSelectedInvoice(invoice); setShowMoreOptionsDialog(true); }}>
                             <MoreHorizontal className="w-4 h-4" />
                           </Button>
                         </div>
@@ -1100,19 +1165,20 @@ export default function InvoicingClient() {
             {/* Clients Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Plus, label: 'Add Client', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
-                { icon: Building2, label: 'Companies', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' },
-                { icon: Mail, label: 'Email All', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
-                { icon: FileText, label: 'Statements', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
-                { icon: Tag, label: 'Categories', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
-                { icon: Globe, label: 'Import', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
-                { icon: Download, label: 'Export', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
-                { icon: BarChart3, label: 'Reports', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400' },
+                { icon: Plus, label: 'Add Client', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', onClick: () => setShowAddClientDialog(true) },
+                { icon: Building2, label: 'Companies', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', onClick: () => setShowCompaniesDialog(true) },
+                { icon: Mail, label: 'Email All', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', onClick: () => setShowEmailAllDialog(true) },
+                { icon: FileText, label: 'Statements', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => setShowStatementsDialog(true) },
+                { icon: Tag, label: 'Categories', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => setShowCategoriesDialog(true) },
+                { icon: Globe, label: 'Import', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', onClick: () => setShowImportClientsDialog(true) },
+                { icon: Download, label: 'Export', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => setShowExportClientsDialog(true) },
+                { icon: BarChart3, label: 'Reports', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400', onClick: () => setShowClientReportsDialog(true) },
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={action.onClick}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1177,7 +1243,7 @@ export default function InvoicingClient() {
               ))}
 
               {/* Add Client Card */}
-              <Card className="border-dashed hover:border-primary cursor-pointer dark:bg-gray-800/50">
+              <Card className="border-dashed hover:border-primary cursor-pointer dark:bg-gray-800/50" onClick={() => setShowAddClientDialog(true)}>
                 <CardContent className="p-6 flex flex-col items-center justify-center h-full text-center">
                   <div className="w-14 h-14 rounded-xl bg-muted flex items-center justify-center mb-4">
                     <Plus className="w-6 h-6 text-muted-foreground" />

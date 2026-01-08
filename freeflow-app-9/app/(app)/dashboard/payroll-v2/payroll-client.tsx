@@ -670,6 +670,85 @@ export default function PayrollClient() {
   const [showEmployeeDialog, setShowEmployeeDialog] = useState(false)
   const [showCreateDialog, setShowCreateDialog] = useState(false)
 
+  // Dialog states for buttons
+  const [showExportDialog, setShowExportDialog] = useState(false)
+  const [showImportDialog, setShowImportDialog] = useState(false)
+  const [showFiltersDialog, setShowFiltersDialog] = useState(false)
+  const [showAddEmployeeDialog, setShowAddEmployeeDialog] = useState(false)
+  const [showEmployeeImportDialog, setShowEmployeeImportDialog] = useState(false)
+  const [showEmployeeExportDialog, setShowEmployeeExportDialog] = useState(false)
+  const [showPaymentMethodDialog, setShowPaymentMethodDialog] = useState(false)
+  const [showTaxFormsDialog, setShowTaxFormsDialog] = useState(false)
+  const [showNotifyAllDialog, setShowNotifyAllDialog] = useState(false)
+  const [showEmployeeReportsDialog, setShowEmployeeReportsDialog] = useState(false)
+  const [showEmployeeSettingsDialog, setShowEmployeeSettingsDialog] = useState(false)
+  const [showFileTaxesDialog, setShowFileTaxesDialog] = useState(false)
+  const [showCalculateTaxDialog, setShowCalculateTaxDialog] = useState(false)
+  const [showDeadlinesDialog, setShowDeadlinesDialog] = useState(false)
+  const [showTaxFormsDownloadDialog, setShowTaxFormsDownloadDialog] = useState(false)
+  const [showComplianceDialog, setShowComplianceDialog] = useState(false)
+  const [showTaxHistoryDialog, setShowTaxHistoryDialog] = useState(false)
+  const [showTaxReportsDialog, setShowTaxReportsDialog] = useState(false)
+  const [showTaxSettingsDialog, setShowTaxSettingsDialog] = useState(false)
+  const [showAddBenefitDialog, setShowAddBenefitDialog] = useState(false)
+  const [showHealthBenefitsDialog, setShowHealthBenefitsDialog] = useState(false)
+  const [showInsuranceDialog, setShowInsuranceDialog] = useState(false)
+  const [show401kDialog, setShow401kDialog] = useState(false)
+  const [showEnrollmentDialog, setShowEnrollmentDialog] = useState(false)
+  const [showBenefitDocumentsDialog, setShowBenefitDocumentsDialog] = useState(false)
+  const [showBenefitReportsDialog, setShowBenefitReportsDialog] = useState(false)
+  const [showBenefitSettingsDialog, setShowBenefitSettingsDialog] = useState(false)
+  const [showNewTimeEntryDialog, setShowNewTimeEntryDialog] = useState(false)
+  const [showClockInDialog, setShowClockInDialog] = useState(false)
+  const [showApproveTimeDialog, setShowApproveTimeDialog] = useState(false)
+  const [showScheduleDialog, setShowScheduleDialog] = useState(false)
+  const [showTeamViewDialog, setShowTeamViewDialog] = useState(false)
+  const [showTimeExportDialog, setShowTimeExportDialog] = useState(false)
+  const [showTimeReportsDialog, setShowTimeReportsDialog] = useState(false)
+  const [showTimeSettingsDialog, setShowTimeSettingsDialog] = useState(false)
+  const [showPayFrequencyDialog, setShowPayFrequencyDialog] = useState(false)
+  const [showFiscalYearDialog, setShowFiscalYearDialog] = useState(false)
+  const [showCurrencyDialog, setShowCurrencyDialog] = useState(false)
+  const [showBankAccountDialog, setShowBankAccountDialog] = useState(false)
+  const [showAutoProcessDialog, setShowAutoProcessDialog] = useState(false)
+  const [showApprovalWorkflowDialog, setShowApprovalWorkflowDialog] = useState(false)
+  const [showAccessRolesDialog, setShowAccessRolesDialog] = useState(false)
+  const [showPayStubsDialog, setShowPayStubsDialog] = useState(false)
+  const [showEditEmployeeDetailsDialog, setShowEditEmployeeDetailsDialog] = useState(false)
+  const [showDownloadTaxReportsDialog, setShowDownloadTaxReportsDialog] = useState(false)
+  const [showGenerateW2Dialog, setShowGenerateW2Dialog] = useState(false)
+  const [showGenerate1099Dialog, setShowGenerate1099Dialog] = useState(false)
+  const [showFileQuarterlyTaxesDialog, setShowFileQuarterlyTaxesDialog] = useState(false)
+  const [selectedTimeEntryId, setSelectedTimeEntryId] = useState<string | null>(null)
+  const [showApproveTimeEntryDialog, setShowApproveTimeEntryDialog] = useState(false)
+  const [showRejectTimeEntryDialog, setShowRejectTimeEntryDialog] = useState(false)
+
+  // Form states for dialogs
+  const [exportFormat, setExportFormat] = useState('csv')
+  const [importFile, setImportFile] = useState<File | null>(null)
+  const [filterStatus, setFilterStatus] = useState('')
+  const [filterDateFrom, setFilterDateFrom] = useState('')
+  const [filterDateTo, setFilterDateTo] = useState('')
+  const [newEmployeeName, setNewEmployeeName] = useState('')
+  const [newEmployeeEmail, setNewEmployeeEmail] = useState('')
+  const [newEmployeeDepartment, setNewEmployeeDepartment] = useState('')
+  const [newEmployeeRole, setNewEmployeeRole] = useState('')
+  const [newEmployeeSalary, setNewEmployeeSalary] = useState('')
+  const [notificationSubject, setNotificationSubject] = useState('')
+  const [notificationMessage, setNotificationMessage] = useState('')
+  const [taxYear, setTaxYear] = useState('2024')
+  const [taxQuarter, setTaxQuarter] = useState('Q4')
+  const [benefitName, setBenefitName] = useState('')
+  const [benefitProvider, setBenefitProvider] = useState('')
+  const [benefitType, setBenefitType] = useState('health')
+  const [timeEntryDate, setTimeEntryDate] = useState('')
+  const [timeEntryHours, setTimeEntryHours] = useState('')
+  const [timeEntryEmployee, setTimeEntryEmployee] = useState('')
+  const [payFrequency, setPayFrequency] = useState('semi_monthly')
+  const [fiscalYearStart, setFiscalYearStart] = useState('january')
+  const [defaultCurrency, setDefaultCurrency] = useState('USD')
+  const [rejectionReason, setRejectionReason] = useState('')
+
   // Database State
   const [dbPayrollRuns, setDbPayrollRuns] = useState<DbPayrollRun[]>([])
   const [loading, setLoading] = useState(true)
@@ -968,11 +1047,11 @@ export default function PayrollClient() {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={() => setShowExportDialog(true)}>
               <Download className="w-4 h-4 mr-2" />
               Export
             </Button>
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={() => setShowImportDialog(true)}>
               <Upload className="w-4 h-4 mr-2" />
               Import
             </Button>
@@ -1120,7 +1199,7 @@ export default function PayrollClient() {
               className="pl-10"
             />
           </div>
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" onClick={() => setShowFiltersDialog(true)}>
             <Filter className="w-4 h-4 mr-2" />
             Filters
           </Button>
@@ -1566,25 +1645,70 @@ export default function PayrollClient() {
 
             {/* Employees Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
-              {[
-                { icon: UserPlus, label: 'Add Employee', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
-                { icon: Upload, label: 'Import', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
-                { icon: Download, label: 'Export', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
-                { icon: CreditCard, label: 'Payment', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
-                { icon: FileText, label: 'Tax Forms', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400' },
-                { icon: Mail, label: 'Notify All', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
-                { icon: BarChart3, label: 'Reports', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' },
-                { icon: Settings, label: 'Settings', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400' }
-              ].map((action, idx) => (
-                <Button
-                  key={idx}
-                  variant="ghost"
-                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
-                >
-                  <action.icon className="w-5 h-5" />
-                  <span className="text-xs font-medium">{action.label}</span>
-                </Button>
-              ))}
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 hover:scale-105 transition-all duration-200"
+                onClick={() => setShowAddEmployeeDialog(true)}
+              >
+                <UserPlus className="w-5 h-5" />
+                <span className="text-xs font-medium">Add Employee</span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400 hover:scale-105 transition-all duration-200"
+                onClick={() => setShowEmployeeImportDialog(true)}
+              >
+                <Upload className="w-5 h-5" />
+                <span className="text-xs font-medium">Import</span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400 hover:scale-105 transition-all duration-200"
+                onClick={() => setShowEmployeeExportDialog(true)}
+              >
+                <Download className="w-5 h-5" />
+                <span className="text-xs font-medium">Export</span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400 hover:scale-105 transition-all duration-200"
+                onClick={() => setShowPaymentMethodDialog(true)}
+              >
+                <CreditCard className="w-5 h-5" />
+                <span className="text-xs font-medium">Payment</span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400 hover:scale-105 transition-all duration-200"
+                onClick={() => setShowTaxFormsDialog(true)}
+              >
+                <FileText className="w-5 h-5" />
+                <span className="text-xs font-medium">Tax Forms</span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400 hover:scale-105 transition-all duration-200"
+                onClick={() => setShowNotifyAllDialog(true)}
+              >
+                <Mail className="w-5 h-5" />
+                <span className="text-xs font-medium">Notify All</span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400 hover:scale-105 transition-all duration-200"
+                onClick={() => setShowEmployeeReportsDialog(true)}
+              >
+                <BarChart3 className="w-5 h-5" />
+                <span className="text-xs font-medium">Reports</span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400 hover:scale-105 transition-all duration-200"
+                onClick={() => setShowEmployeeSettingsDialog(true)}
+              >
+                <Settings className="w-5 h-5" />
+                <span className="text-xs font-medium">Settings</span>
+              </Button>
             </div>
 
             <div className="grid gap-4">
@@ -1685,25 +1809,70 @@ export default function PayrollClient() {
 
             {/* Taxes Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
-              {[
-                { icon: FileText, label: 'File Taxes', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
-                { icon: Calculator, label: 'Calculate', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400' },
-                { icon: Calendar, label: 'Deadlines', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
-                { icon: Download, label: 'Forms', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' },
-                { icon: Shield, label: 'Compliance', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400' },
-                { icon: History, label: 'History', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400' },
-                { icon: BarChart3, label: 'Reports', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
-                { icon: Settings, label: 'Settings', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400' }
-              ].map((action, idx) => (
-                <Button
-                  key={idx}
-                  variant="ghost"
-                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
-                >
-                  <action.icon className="w-5 h-5" />
-                  <span className="text-xs font-medium">{action.label}</span>
-                </Button>
-              ))}
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400 hover:scale-105 transition-all duration-200"
+                onClick={() => setShowFileTaxesDialog(true)}
+              >
+                <FileText className="w-5 h-5" />
+                <span className="text-xs font-medium">File Taxes</span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400 hover:scale-105 transition-all duration-200"
+                onClick={() => setShowCalculateTaxDialog(true)}
+              >
+                <Calculator className="w-5 h-5" />
+                <span className="text-xs font-medium">Calculate</span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400 hover:scale-105 transition-all duration-200"
+                onClick={() => setShowDeadlinesDialog(true)}
+              >
+                <Calendar className="w-5 h-5" />
+                <span className="text-xs font-medium">Deadlines</span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400 hover:scale-105 transition-all duration-200"
+                onClick={() => setShowTaxFormsDownloadDialog(true)}
+              >
+                <Download className="w-5 h-5" />
+                <span className="text-xs font-medium">Forms</span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400 hover:scale-105 transition-all duration-200"
+                onClick={() => setShowComplianceDialog(true)}
+              >
+                <Shield className="w-5 h-5" />
+                <span className="text-xs font-medium">Compliance</span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400 hover:scale-105 transition-all duration-200"
+                onClick={() => setShowTaxHistoryDialog(true)}
+              >
+                <History className="w-5 h-5" />
+                <span className="text-xs font-medium">History</span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400 hover:scale-105 transition-all duration-200"
+                onClick={() => setShowTaxReportsDialog(true)}
+              >
+                <BarChart3 className="w-5 h-5" />
+                <span className="text-xs font-medium">Reports</span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400 hover:scale-105 transition-all duration-200"
+                onClick={() => setShowTaxSettingsDialog(true)}
+              >
+                <Settings className="w-5 h-5" />
+                <span className="text-xs font-medium">Settings</span>
+              </Button>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -1789,19 +1958,19 @@ export default function PayrollClient() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-2">
-                    <Button variant="outline" className="w-full justify-start">
+                    <Button variant="outline" className="w-full justify-start" onClick={() => setShowDownloadTaxReportsDialog(true)}>
                       <Download className="w-4 h-4 mr-2" />
                       Download Tax Reports
                     </Button>
-                    <Button variant="outline" className="w-full justify-start">
+                    <Button variant="outline" className="w-full justify-start" onClick={() => setShowGenerateW2Dialog(true)}>
                       <FileText className="w-4 h-4 mr-2" />
                       Generate W-2 Forms
                     </Button>
-                    <Button variant="outline" className="w-full justify-start">
+                    <Button variant="outline" className="w-full justify-start" onClick={() => setShowGenerate1099Dialog(true)}>
                       <FileText className="w-4 h-4 mr-2" />
                       Generate 1099 Forms
                     </Button>
-                    <Button variant="outline" className="w-full justify-start">
+                    <Button variant="outline" className="w-full justify-start" onClick={() => setShowFileQuarterlyTaxesDialog(true)}>
                       <Send className="w-4 h-4 mr-2" />
                       File Quarterly Taxes
                     </Button>
@@ -1839,25 +2008,70 @@ export default function PayrollClient() {
 
             {/* Benefits Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
-              {[
-                { icon: Plus, label: 'Add Plan', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
-                { icon: Heart, label: 'Health', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' },
-                { icon: Shield, label: 'Insurance', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
-                { icon: Briefcase, label: '401k', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400' },
-                { icon: Users, label: 'Enrollment', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
-                { icon: FileText, label: 'Documents', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400' },
-                { icon: BarChart3, label: 'Reports', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400' },
-                { icon: Settings, label: 'Settings', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400' }
-              ].map((action, idx) => (
-                <Button
-                  key={idx}
-                  variant="ghost"
-                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
-                >
-                  <action.icon className="w-5 h-5" />
-                  <span className="text-xs font-medium">{action.label}</span>
-                </Button>
-              ))}
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400 hover:scale-105 transition-all duration-200"
+                onClick={() => setShowAddBenefitDialog(true)}
+              >
+                <Plus className="w-5 h-5" />
+                <span className="text-xs font-medium">Add Plan</span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400 hover:scale-105 transition-all duration-200"
+                onClick={() => setShowHealthBenefitsDialog(true)}
+              >
+                <Heart className="w-5 h-5" />
+                <span className="text-xs font-medium">Health</span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400 hover:scale-105 transition-all duration-200"
+                onClick={() => setShowInsuranceDialog(true)}
+              >
+                <Shield className="w-5 h-5" />
+                <span className="text-xs font-medium">Insurance</span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400 hover:scale-105 transition-all duration-200"
+                onClick={() => setShow401kDialog(true)}
+              >
+                <Briefcase className="w-5 h-5" />
+                <span className="text-xs font-medium">401k</span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400 hover:scale-105 transition-all duration-200"
+                onClick={() => setShowEnrollmentDialog(true)}
+              >
+                <Users className="w-5 h-5" />
+                <span className="text-xs font-medium">Enrollment</span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400 hover:scale-105 transition-all duration-200"
+                onClick={() => setShowBenefitDocumentsDialog(true)}
+              >
+                <FileText className="w-5 h-5" />
+                <span className="text-xs font-medium">Documents</span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400 hover:scale-105 transition-all duration-200"
+                onClick={() => setShowBenefitReportsDialog(true)}
+              >
+                <BarChart3 className="w-5 h-5" />
+                <span className="text-xs font-medium">Reports</span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400 hover:scale-105 transition-all duration-200"
+                onClick={() => setShowBenefitSettingsDialog(true)}
+              >
+                <Settings className="w-5 h-5" />
+                <span className="text-xs font-medium">Settings</span>
+              </Button>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -1934,25 +2148,70 @@ export default function PayrollClient() {
 
             {/* Time Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
-              {[
-                { icon: Plus, label: 'New Entry', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400' },
-                { icon: Clock, label: 'Clock In', color: 'bg-sky-100 text-sky-600 dark:bg-sky-900/30 dark:text-sky-400' },
-                { icon: CheckCircle, label: 'Approve', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
-                { icon: Calendar, label: 'Schedule', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
-                { icon: Users, label: 'Team View', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
-                { icon: Download, label: 'Export', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
-                { icon: BarChart3, label: 'Reports', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400' },
-                { icon: Settings, label: 'Settings', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400' }
-              ].map((action, idx) => (
-                <Button
-                  key={idx}
-                  variant="ghost"
-                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
-                >
-                  <action.icon className="w-5 h-5" />
-                  <span className="text-xs font-medium">{action.label}</span>
-                </Button>
-              ))}
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400 hover:scale-105 transition-all duration-200"
+                onClick={() => setShowNewTimeEntryDialog(true)}
+              >
+                <Plus className="w-5 h-5" />
+                <span className="text-xs font-medium">New Entry</span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-sky-100 text-sky-600 dark:bg-sky-900/30 dark:text-sky-400 hover:scale-105 transition-all duration-200"
+                onClick={() => setShowClockInDialog(true)}
+              >
+                <Clock className="w-5 h-5" />
+                <span className="text-xs font-medium">Clock In</span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 hover:scale-105 transition-all duration-200"
+                onClick={() => setShowApproveTimeDialog(true)}
+              >
+                <CheckCircle className="w-5 h-5" />
+                <span className="text-xs font-medium">Approve</span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400 hover:scale-105 transition-all duration-200"
+                onClick={() => setShowScheduleDialog(true)}
+              >
+                <Calendar className="w-5 h-5" />
+                <span className="text-xs font-medium">Schedule</span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400 hover:scale-105 transition-all duration-200"
+                onClick={() => setShowTeamViewDialog(true)}
+              >
+                <Users className="w-5 h-5" />
+                <span className="text-xs font-medium">Team View</span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400 hover:scale-105 transition-all duration-200"
+                onClick={() => setShowTimeExportDialog(true)}
+              >
+                <Download className="w-5 h-5" />
+                <span className="text-xs font-medium">Export</span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400 hover:scale-105 transition-all duration-200"
+                onClick={() => setShowTimeReportsDialog(true)}
+              >
+                <BarChart3 className="w-5 h-5" />
+                <span className="text-xs font-medium">Reports</span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400 hover:scale-105 transition-all duration-200"
+                onClick={() => setShowTimeSettingsDialog(true)}
+              >
+                <Settings className="w-5 h-5" />
+                <span className="text-xs font-medium">Settings</span>
+              </Button>
             </div>
 
             <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">

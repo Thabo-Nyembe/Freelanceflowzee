@@ -488,6 +488,30 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
   const [showMergeDialog, setShowMergeDialog] = useState(false)
   const [showExportDialog, setShowExportDialog] = useState(false)
 
+  // Additional Dialog States for Buttons
+  const [showSettingsDialog, setShowSettingsDialog] = useState(false)
+  const [showCreateSegmentDialog, setShowCreateSegmentDialog] = useState(false)
+  const [showEditCategoryDialog, setShowEditCategoryDialog] = useState(false)
+  const [showAddCategoryDialog, setShowAddCategoryDialog] = useState(false)
+  const [showConfigureStatusDialog, setShowConfigureStatusDialog] = useState(false)
+  const [showVerifyDomainDialog, setShowVerifyDomainDialog] = useState(false)
+  const [showTestConnectionDialog, setShowTestConnectionDialog] = useState(false)
+  const [showConnectSlackDialog, setShowConnectSlackDialog] = useState(false)
+  const [showCopyApiKeyDialog, setShowCopyApiKeyDialog] = useState(false)
+  const [showRegenerateApiKeyDialog, setShowRegenerateApiKeyDialog] = useState(false)
+  const [showRegenerateWebhookSecretDialog, setShowRegenerateWebhookSecretDialog] = useState(false)
+  const [showTestWebhookDialog, setShowTestWebhookDialog] = useState(false)
+  const [showIntegrationConfigDialog, setShowIntegrationConfigDialog] = useState(false)
+  const [showResetVotesDialog, setShowResetVotesDialog] = useState(false)
+  const [showArchiveAllDialog, setShowArchiveAllDialog] = useState(false)
+  const [showDeletePortalDialog, setShowDeletePortalDialog] = useState(false)
+  const [showVoteDialog, setShowVoteDialog] = useState(false)
+  const [showCommentDialog, setShowCommentDialog] = useState(false)
+  const [showShareDialog, setShowShareDialog] = useState(false)
+  const [selectedCategoryForEdit, setSelectedCategoryForEdit] = useState<string | null>(null)
+  const [selectedStatusForConfigure, setSelectedStatusForConfigure] = useState<string | null>(null)
+  const [selectedIntegration, setSelectedIntegration] = useState<{name: string, connected: boolean} | null>(null)
+
   // Data State
   const [feedbackItems, setFeedbackItems] = useState<DBFeedback[]>([])
   const [loading, setLoading] = useState(true)
@@ -729,7 +753,7 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={() => setShowSettingsDialog(true)}>
               <Settings className="w-4 h-4 mr-2" />
               Settings
             </Button>
@@ -931,7 +955,7 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                       <div className="flex gap-4">
                         {/* Vote Column */}
                         <div className="flex flex-col items-center gap-1 min-w-[60px]">
-                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={(e) => { e.stopPropagation(); handleVote(idea) }}>
                             <ArrowUp className="w-4 h-4" />
                           </Button>
                           <span className="text-xl font-bold text-gray-900 dark:text-white">{idea.votes}</span>
@@ -1112,7 +1136,7 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
           <TabsContent value="segments" className="space-y-4">
             <div className="flex justify-between items-center">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">User Segments</h3>
-              <Button variant="outline">
+              <Button variant="outline" onClick={() => setShowCreateSegmentDialog(true)}>
                 <Plus className="w-4 h-4 mr-2" />
                 Create Segment
               </Button>
@@ -1336,12 +1360,12 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                               <span className="font-medium">{cat}</span>
                               <div className="flex items-center gap-2">
                                 <Switch defaultChecked />
-                                <Button variant="ghost" size="sm">Edit</Button>
+                                <Button variant="ghost" size="sm" onClick={() => { setSelectedCategoryForEdit(cat); setShowEditCategoryDialog(true) }}>Edit</Button>
                               </div>
                             </div>
                           ))}
                         </div>
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => setShowAddCategoryDialog(true)}>
                           <Plus className="w-4 h-4 mr-2" />
                           Add Category
                         </Button>
@@ -1368,7 +1392,7 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                                 <div className={`w-3 h-3 rounded-full bg-${item.color}-500`} />
                                 <span className="font-medium">{item.status}</span>
                               </div>
-                              <Button variant="ghost" size="sm">Configure</Button>
+                              <Button variant="ghost" size="sm" onClick={() => { setSelectedStatusForConfigure(item.status); setShowConfigureStatusDialog(true) }}>Configure</Button>
                             </div>
                           ))}
                         </div>
@@ -1472,7 +1496,7 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                             Add a CNAME record pointing to portal.feedback.app
                           </p>
                         </div>
-                        <Button variant="outline">Verify Domain</Button>
+                        <Button variant="outline" onClick={() => setShowVerifyDomainDialog(true)}>Verify Domain</Button>
                       </CardContent>
                     </Card>
                   </div>
@@ -1575,11 +1599,11 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                           <Input defaultValue="#product-feedback" />
                         </div>
                         <div className="flex gap-2">
-                          <Button variant="outline" className="flex-1">
+                          <Button variant="outline" className="flex-1" onClick={() => setShowTestConnectionDialog(true)}>
                             <RefreshCw className="w-4 h-4 mr-2" />
                             Test Connection
                           </Button>
-                          <Button className="flex-1">Connect Slack</Button>
+                          <Button className="flex-1" onClick={() => setShowConnectSlackDialog(true)}>Connect Slack</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -1741,10 +1765,10 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                           <Label>API Key</Label>
                           <div className="flex gap-2">
                             <Input type="password" defaultValue="fb_live_xxxxxxxxxxxxxxxxxx" readOnly className="flex-1 font-mono" />
-                            <Button variant="outline" size="icon">
+                            <Button variant="outline" size="icon" onClick={() => { navigator.clipboard.writeText('fb_live_xxxxxxxxxxxxxxxxxx'); toast.success('API key copied to clipboard') }}>
                               <Copy className="w-4 h-4" />
                             </Button>
-                            <Button variant="outline" size="icon">
+                            <Button variant="outline" size="icon" onClick={() => setShowRegenerateApiKeyDialog(true)}>
                               <RefreshCw className="w-4 h-4" />
                             </Button>
                           </div>
@@ -1787,7 +1811,7 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                           <Label>Webhook Secret</Label>
                           <div className="flex gap-2">
                             <Input type="password" defaultValue="whsec_xxxxxxxxxx" className="flex-1 font-mono" />
-                            <Button variant="outline" size="icon">
+                            <Button variant="outline" size="icon" onClick={() => setShowRegenerateWebhookSecretDialog(true)}>
                               <RefreshCw className="w-4 h-4" />
                             </Button>
                           </div>
@@ -1803,7 +1827,7 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                             ))}
                           </div>
                         </div>
-                        <Button variant="outline">
+                        <Button variant="outline" onClick={() => setShowTestWebhookDialog(true)}>
                           <RefreshCw className="w-4 h-4 mr-2" />
                           Test Webhook
                         </Button>
@@ -1833,7 +1857,7 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                                 </Badge>
                               </div>
                               <p className="text-sm text-gray-500 mb-3">{integration.description}</p>
-                              <Button variant="outline" size="sm" className="w-full">
+                              <Button variant="outline" size="sm" className="w-full" onClick={() => { setSelectedIntegration(integration); setShowIntegrationConfigDialog(true) }}>
                                 {integration.connected ? 'Configure' : 'Connect'}
                               </Button>
                             </div>
@@ -1982,7 +2006,7 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                             <div className="font-medium">Reset All Votes</div>
                             <p className="text-sm text-gray-500">Clear all votes from all ideas</p>
                           </div>
-                          <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50">
+                          <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50" onClick={() => setShowResetVotesDialog(true)}>
                             Reset Votes
                           </Button>
                         </div>
@@ -1991,7 +2015,7 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                             <div className="font-medium">Archive All Ideas</div>
                             <p className="text-sm text-gray-500">Archive all existing ideas</p>
                           </div>
-                          <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50">
+                          <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50" onClick={() => setShowArchiveAllDialog(true)}>
                             Archive All
                           </Button>
                         </div>
@@ -2000,7 +2024,7 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                             <div className="font-medium">Delete Portal</div>
                             <p className="text-sm text-gray-500">Permanently delete this feedback portal</p>
                           </div>
-                          <Button variant="destructive">
+                          <Button variant="destructive" onClick={() => setShowDeletePortalDialog(true)}>
                             Delete Portal
                           </Button>
                         </div>
@@ -2063,7 +2087,7 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                 <div className="space-y-6">
                   <div className="flex items-center gap-6">
                     <div className="flex flex-col items-center">
-                      <Button variant="outline" size="sm" className="mb-1">
+                      <Button variant="outline" size="sm" className="mb-1" onClick={() => handleVote(selectedIdea)}>
                         <ArrowUp className="w-4 h-4" />
                       </Button>
                       <span className="text-2xl font-bold">{selectedIdea.votes}</span>
@@ -2127,15 +2151,15 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                   </div>
 
                   <div className="flex gap-2">
-                    <Button className="flex-1">
+                    <Button className="flex-1" onClick={() => { handleVote(selectedIdea); setShowVoteDialog(true) }}>
                       <ThumbsUp className="w-4 h-4 mr-2" />
                       Vote
                     </Button>
-                    <Button variant="outline">
+                    <Button variant="outline" onClick={() => setShowCommentDialog(true)}>
                       <MessageSquare className="w-4 h-4 mr-2" />
                       Comment
                     </Button>
-                    <Button variant="outline">
+                    <Button variant="outline" onClick={() => setShowShareDialog(true)}>
                       <Link2 className="w-4 h-4 mr-2" />
                       Share
                     </Button>
@@ -2496,6 +2520,764 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                 >
                   <Download className="w-4 h-4 mr-2" />
                   Export Data
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Settings Dialog */}
+        <Dialog open={showSettingsDialog} onOpenChange={setShowSettingsDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Settings className="w-5 h-5 text-gray-500" />
+                Quick Settings
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Portal Name</Label>
+                <Input defaultValue="Feedback Portal" />
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label>Public Portal</Label>
+                  <p className="text-sm text-gray-500">Anyone can view and submit ideas</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label>Email Notifications</Label>
+                  <p className="text-sm text-gray-500">Receive email updates</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" onClick={() => setShowSettingsDialog(false)} className="flex-1">
+                  Cancel
+                </Button>
+                <Button onClick={() => { toast.success('Settings saved'); setShowSettingsDialog(false) }} className="flex-1">
+                  Save Settings
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Create Segment Dialog */}
+        <Dialog open={showCreateSegmentDialog} onOpenChange={setShowCreateSegmentDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Users className="w-5 h-5 text-blue-500" />
+                Create User Segment
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Segment Name</Label>
+                <Input placeholder="e.g., Power Users, Enterprise, New Users" />
+              </div>
+              <div className="space-y-2">
+                <Label>Description</Label>
+                <Input placeholder="Describe what defines this segment" />
+              </div>
+              <div className="space-y-2">
+                <Label>Filter Criteria</Label>
+                <Select defaultValue="plan">
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select filter field" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="plan">Plan Type</SelectItem>
+                    <SelectItem value="ideas">Ideas Submitted</SelectItem>
+                    <SelectItem value="votes">Total Votes</SelectItem>
+                    <SelectItem value="joined">Join Date</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Operator</Label>
+                  <Select defaultValue="equals">
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="equals">Equals</SelectItem>
+                      <SelectItem value="greater_than">Greater Than</SelectItem>
+                      <SelectItem value="less_than">Less Than</SelectItem>
+                      <SelectItem value="within">Within</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Value</Label>
+                  <Input placeholder="e.g., enterprise, 10, 30d" />
+                </div>
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" onClick={() => setShowCreateSegmentDialog(false)} className="flex-1">
+                  Cancel
+                </Button>
+                <Button onClick={() => { toast.success('Segment created successfully'); setShowCreateSegmentDialog(false) }} className="flex-1">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Create Segment
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Category Dialog */}
+        <Dialog open={showEditCategoryDialog} onOpenChange={setShowEditCategoryDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Edit Category: {selectedCategoryForEdit}</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Category Name</Label>
+                <Input defaultValue={selectedCategoryForEdit || ''} />
+              </div>
+              <div className="space-y-2">
+                <Label>Category Color</Label>
+                <Select defaultValue="blue">
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="blue">Blue</SelectItem>
+                    <SelectItem value="green">Green</SelectItem>
+                    <SelectItem value="purple">Purple</SelectItem>
+                    <SelectItem value="orange">Orange</SelectItem>
+                    <SelectItem value="red">Red</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label>Enabled</Label>
+                  <p className="text-sm text-gray-500">Show this category to users</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" onClick={() => setShowEditCategoryDialog(false)} className="flex-1">
+                  Cancel
+                </Button>
+                <Button onClick={() => { toast.success('Category updated'); setShowEditCategoryDialog(false) }} className="flex-1">
+                  Save Changes
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Category Dialog */}
+        <Dialog open={showAddCategoryDialog} onOpenChange={setShowAddCategoryDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Plus className="w-5 h-5 text-green-500" />
+                Add New Category
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Category Name</Label>
+                <Input placeholder="e.g., Documentation, Security, Mobile" />
+              </div>
+              <div className="space-y-2">
+                <Label>Category Color</Label>
+                <Select defaultValue="blue">
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="blue">Blue</SelectItem>
+                    <SelectItem value="green">Green</SelectItem>
+                    <SelectItem value="purple">Purple</SelectItem>
+                    <SelectItem value="orange">Orange</SelectItem>
+                    <SelectItem value="red">Red</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Description (Optional)</Label>
+                <Input placeholder="Brief description of this category" />
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" onClick={() => setShowAddCategoryDialog(false)} className="flex-1">
+                  Cancel
+                </Button>
+                <Button onClick={() => { toast.success('Category added'); setShowAddCategoryDialog(false) }} className="flex-1">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Category
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Configure Status Dialog */}
+        <Dialog open={showConfigureStatusDialog} onOpenChange={setShowConfigureStatusDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Configure Status: {selectedStatusForConfigure}</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Status Name</Label>
+                <Input defaultValue={selectedStatusForConfigure || ''} />
+              </div>
+              <div className="space-y-2">
+                <Label>Status Color</Label>
+                <Select defaultValue="blue">
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="blue">Blue</SelectItem>
+                    <SelectItem value="green">Green</SelectItem>
+                    <SelectItem value="purple">Purple</SelectItem>
+                    <SelectItem value="amber">Amber</SelectItem>
+                    <SelectItem value="red">Red</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label>Notify Subscribers</Label>
+                  <p className="text-sm text-gray-500">Send email when status changes to this</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label>Show on Roadmap</Label>
+                  <p className="text-sm text-gray-500">Display ideas with this status on roadmap</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" onClick={() => setShowConfigureStatusDialog(false)} className="flex-1">
+                  Cancel
+                </Button>
+                <Button onClick={() => { toast.success('Status configuration saved'); setShowConfigureStatusDialog(false) }} className="flex-1">
+                  Save Configuration
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Verify Domain Dialog */}
+        <Dialog open={showVerifyDomainDialog} onOpenChange={setShowVerifyDomainDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Globe className="w-5 h-5 text-blue-500" />
+                Verify Custom Domain
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+                <p className="text-sm text-blue-800 dark:text-blue-300">
+                  Make sure you have added the CNAME record before verifying.
+                </p>
+              </div>
+              <div className="space-y-2">
+                <Label>Domain to Verify</Label>
+                <Input placeholder="feedback.yourcompany.com" />
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-amber-500" />
+                  <span className="text-sm text-gray-600">DNS propagation may take up to 48 hours</span>
+                </div>
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" onClick={() => setShowVerifyDomainDialog(false)} className="flex-1">
+                  Cancel
+                </Button>
+                <Button onClick={() => { toast.success('Domain verification initiated - checking DNS records'); setShowVerifyDomainDialog(false) }} className="flex-1">
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                  Verify Now
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Test Connection Dialog */}
+        <Dialog open={showTestConnectionDialog} onOpenChange={setShowTestConnectionDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <RefreshCw className="w-5 h-5 text-blue-500" />
+                Test Slack Connection
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-800">
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  This will send a test message to your configured Slack channel to verify the webhook is working correctly.
+                </p>
+              </div>
+              <div className="space-y-2">
+                <Label>Test Channel</Label>
+                <Input defaultValue="#product-feedback" />
+              </div>
+              <div className="space-y-2">
+                <Label>Test Message</Label>
+                <Input defaultValue="This is a test notification from Feedback Portal" />
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" onClick={() => setShowTestConnectionDialog(false)} className="flex-1">
+                  Cancel
+                </Button>
+                <Button onClick={() => { toast.success('Test message sent to Slack'); setShowTestConnectionDialog(false) }} className="flex-1">
+                  <Send className="w-4 h-4 mr-2" />
+                  Send Test
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Connect Slack Dialog */}
+        <Dialog open={showConnectSlackDialog} onOpenChange={setShowConnectSlackDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Bell className="w-5 h-5 text-purple-500" />
+                Connect to Slack
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="p-4 rounded-lg bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800">
+                <p className="text-sm text-purple-800 dark:text-purple-300">
+                  Connect your Slack workspace to receive real-time feedback notifications.
+                </p>
+              </div>
+              <div className="space-y-2">
+                <Label>Slack Workspace</Label>
+                <Input placeholder="your-workspace.slack.com" />
+              </div>
+              <div className="space-y-2">
+                <Label>Default Channel</Label>
+                <Input placeholder="#product-feedback" />
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label>New Ideas</Label>
+                  <p className="text-sm text-gray-500">Notify for new ideas</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label>Status Changes</Label>
+                  <p className="text-sm text-gray-500">Notify for status updates</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" onClick={() => setShowConnectSlackDialog(false)} className="flex-1">
+                  Cancel
+                </Button>
+                <Button onClick={() => { toast.success('Slack workspace connected successfully'); setShowConnectSlackDialog(false) }} className="flex-1">
+                  Connect Slack
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Regenerate API Key Dialog */}
+        <Dialog open={showRegenerateApiKeyDialog} onOpenChange={setShowRegenerateApiKeyDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-amber-600">
+                <AlertOctagon className="w-5 h-5" />
+                Regenerate API Key
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="p-4 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800">
+                <p className="text-sm text-amber-800 dark:text-amber-300">
+                  Warning: This will invalidate your current API key. All applications using the current key will stop working immediately.
+                </p>
+              </div>
+              <div className="space-y-2">
+                <Label>Type "REGENERATE" to confirm</Label>
+                <Input placeholder="REGENERATE" />
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" onClick={() => setShowRegenerateApiKeyDialog(false)} className="flex-1">
+                  Cancel
+                </Button>
+                <Button variant="destructive" onClick={() => { toast.success('API key regenerated - copy your new key'); setShowRegenerateApiKeyDialog(false) }} className="flex-1">
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                  Regenerate Key
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Regenerate Webhook Secret Dialog */}
+        <Dialog open={showRegenerateWebhookSecretDialog} onOpenChange={setShowRegenerateWebhookSecretDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-amber-600">
+                <AlertOctagon className="w-5 h-5" />
+                Regenerate Webhook Secret
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="p-4 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800">
+                <p className="text-sm text-amber-800 dark:text-amber-300">
+                  Warning: This will invalidate your current webhook secret. You will need to update the secret in your webhook handler.
+                </p>
+              </div>
+              <div className="space-y-2">
+                <Label>Type "REGENERATE" to confirm</Label>
+                <Input placeholder="REGENERATE" />
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" onClick={() => setShowRegenerateWebhookSecretDialog(false)} className="flex-1">
+                  Cancel
+                </Button>
+                <Button variant="destructive" onClick={() => { toast.success('Webhook secret regenerated'); setShowRegenerateWebhookSecretDialog(false) }} className="flex-1">
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                  Regenerate Secret
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Test Webhook Dialog */}
+        <Dialog open={showTestWebhookDialog} onOpenChange={setShowTestWebhookDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Webhook className="w-5 h-5 text-blue-500" />
+                Test Webhook
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-800">
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Send a test webhook payload to your configured endpoint.
+                </p>
+              </div>
+              <div className="space-y-2">
+                <Label>Event Type</Label>
+                <Select defaultValue="idea.created">
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="idea.created">idea.created</SelectItem>
+                    <SelectItem value="idea.voted">idea.voted</SelectItem>
+                    <SelectItem value="idea.status_changed">idea.status_changed</SelectItem>
+                    <SelectItem value="comment.created">comment.created</SelectItem>
+                    <SelectItem value="nps.submitted">nps.submitted</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" onClick={() => setShowTestWebhookDialog(false)} className="flex-1">
+                  Cancel
+                </Button>
+                <Button onClick={() => { toast.success('Test webhook sent - check your endpoint'); setShowTestWebhookDialog(false) }} className="flex-1">
+                  <Send className="w-4 h-4 mr-2" />
+                  Send Test Webhook
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Integration Config Dialog */}
+        <Dialog open={showIntegrationConfigDialog} onOpenChange={setShowIntegrationConfigDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Link2 className="w-5 h-5 text-blue-500" />
+                {selectedIntegration?.connected ? `Configure ${selectedIntegration?.name}` : `Connect ${selectedIntegration?.name}`}
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              {selectedIntegration?.connected ? (
+                <>
+                  <div className="p-4 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
+                    <div className="flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-green-600" />
+                      <span className="text-sm text-green-800 dark:text-green-300">
+                        {selectedIntegration?.name} is connected
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label>Sync Ideas</Label>
+                      <p className="text-sm text-gray-500">Auto-sync ideas to {selectedIntegration?.name}</p>
+                    </div>
+                    <Switch defaultChecked />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label>Two-way Sync</Label>
+                      <p className="text-sm text-gray-500">Sync status changes back</p>
+                    </div>
+                    <Switch />
+                  </div>
+                  <div className="flex gap-2 pt-4">
+                    <Button variant="outline" onClick={() => { toast.success(`${selectedIntegration?.name} disconnected`); setShowIntegrationConfigDialog(false) }} className="flex-1 text-red-600">
+                      Disconnect
+                    </Button>
+                    <Button onClick={() => { toast.success('Integration settings saved'); setShowIntegrationConfigDialog(false) }} className="flex-1">
+                      Save Settings
+                    </Button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+                    <p className="text-sm text-blue-800 dark:text-blue-300">
+                      Connect to {selectedIntegration?.name} to sync feedback and issues.
+                    </p>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>API Token / Key</Label>
+                    <Input type="password" placeholder={`Enter your ${selectedIntegration?.name} API key`} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Project / Workspace ID</Label>
+                    <Input placeholder="Enter your project or workspace ID" />
+                  </div>
+                  <div className="flex gap-2 pt-4">
+                    <Button variant="outline" onClick={() => setShowIntegrationConfigDialog(false)} className="flex-1">
+                      Cancel
+                    </Button>
+                    <Button onClick={() => { toast.success(`${selectedIntegration?.name} connected successfully`); setShowIntegrationConfigDialog(false) }} className="flex-1">
+                      <Link2 className="w-4 h-4 mr-2" />
+                      Connect
+                    </Button>
+                  </div>
+                </>
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Reset Votes Confirmation Dialog */}
+        <Dialog open={showResetVotesDialog} onOpenChange={setShowResetVotesDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-600">
+                <AlertOctagon className="w-5 h-5" />
+                Reset All Votes
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+                <p className="text-sm text-red-800 dark:text-red-300">
+                  Warning: This action cannot be undone. All votes on all ideas will be permanently reset to zero.
+                </p>
+              </div>
+              <div className="space-y-2">
+                <Label>Type "RESET VOTES" to confirm</Label>
+                <Input placeholder="RESET VOTES" />
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" onClick={() => setShowResetVotesDialog(false)} className="flex-1">
+                  Cancel
+                </Button>
+                <Button variant="destructive" onClick={() => { toast.success('All votes have been reset'); setShowResetVotesDialog(false) }} className="flex-1">
+                  Reset All Votes
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Archive All Confirmation Dialog */}
+        <Dialog open={showArchiveAllDialog} onOpenChange={setShowArchiveAllDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-600">
+                <AlertOctagon className="w-5 h-5" />
+                Archive All Ideas
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+                <p className="text-sm text-red-800 dark:text-red-300">
+                  Warning: This will archive all existing ideas. They can be restored later but will no longer appear in the active view.
+                </p>
+              </div>
+              <div className="space-y-2">
+                <Label>Type "ARCHIVE ALL" to confirm</Label>
+                <Input placeholder="ARCHIVE ALL" />
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" onClick={() => setShowArchiveAllDialog(false)} className="flex-1">
+                  Cancel
+                </Button>
+                <Button variant="destructive" onClick={() => { toast.success('All ideas have been archived'); setShowArchiveAllDialog(false) }} className="flex-1">
+                  Archive All Ideas
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Portal Confirmation Dialog */}
+        <Dialog open={showDeletePortalDialog} onOpenChange={setShowDeletePortalDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-600">
+                <AlertOctagon className="w-5 h-5" />
+                Delete Feedback Portal
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+                <p className="text-sm text-red-800 dark:text-red-300">
+                  Danger: This action is permanent and cannot be undone. All ideas, votes, comments, and settings will be permanently deleted.
+                </p>
+              </div>
+              <div className="space-y-2">
+                <Label>Type "DELETE PORTAL" to confirm</Label>
+                <Input placeholder="DELETE PORTAL" />
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" onClick={() => setShowDeletePortalDialog(false)} className="flex-1">
+                  Cancel
+                </Button>
+                <Button variant="destructive" onClick={() => { toast.error('Portal deleted permanently'); setShowDeletePortalDialog(false) }} className="flex-1">
+                  Delete Portal Forever
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Vote Confirmation Dialog */}
+        <Dialog open={showVoteDialog} onOpenChange={setShowVoteDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <ThumbsUp className="w-5 h-5 text-green-500" />
+                Vote Recorded
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="p-4 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-center">
+                <CheckCircle2 className="w-12 h-12 text-green-500 mx-auto mb-3" />
+                <p className="text-green-800 dark:text-green-300 font-medium">
+                  Thank you for your vote!
+                </p>
+                <p className="text-sm text-green-600 dark:text-green-400 mt-1">
+                  Your vote helps prioritize this idea.
+                </p>
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label>Subscribe to Updates</Label>
+                  <p className="text-sm text-gray-500">Get notified when status changes</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button onClick={() => setShowVoteDialog(false)} className="flex-1">
+                  Done
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Comment Dialog */}
+        <Dialog open={showCommentDialog} onOpenChange={setShowCommentDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <MessageSquare className="w-5 h-5 text-blue-500" />
+                Add Comment
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Your Comment</Label>
+                <textarea
+                  className="w-full p-3 rounded-lg border resize-none h-32 dark:bg-gray-800 dark:border-gray-700"
+                  placeholder="Share your thoughts on this idea..."
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label>Subscribe to this idea</Label>
+                  <p className="text-sm text-gray-500">Get notified of new comments</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" onClick={() => setShowCommentDialog(false)} className="flex-1">
+                  Cancel
+                </Button>
+                <Button onClick={() => { toast.success('Comment posted successfully'); setShowCommentDialog(false) }} className="flex-1">
+                  <Send className="w-4 h-4 mr-2" />
+                  Post Comment
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Share Dialog */}
+        <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Link2 className="w-5 h-5 text-blue-500" />
+                Share Idea
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Share Link</Label>
+                <div className="flex gap-2">
+                  <Input value={`https://feedback.app/idea/${selectedIdea?.id || ''}`} readOnly className="flex-1" />
+                  <Button variant="outline" size="icon" onClick={() => { navigator.clipboard.writeText(`https://feedback.app/idea/${selectedIdea?.id || ''}`); toast.success('Link copied to clipboard') }}>
+                    <Copy className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Share via</Label>
+                <div className="grid grid-cols-3 gap-2">
+                  <Button variant="outline" className="flex-1" onClick={() => { toast.success('Opening Twitter share'); setShowShareDialog(false) }}>
+                    Twitter
+                  </Button>
+                  <Button variant="outline" className="flex-1" onClick={() => { toast.success('Opening LinkedIn share'); setShowShareDialog(false) }}>
+                    LinkedIn
+                  </Button>
+                  <Button variant="outline" className="flex-1" onClick={() => { toast.success('Opening email'); setShowShareDialog(false) }}>
+                    Email
+                  </Button>
+                </div>
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button onClick={() => setShowShareDialog(false)} className="flex-1">
+                  Done
                 </Button>
               </div>
             </div>

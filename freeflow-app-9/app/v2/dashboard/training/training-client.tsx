@@ -571,6 +571,36 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
   const [currentLessonName, setCurrentLessonName] = useState<string>('')
   const [currentCertificate, setCurrentCertificate] = useState<{ courseName: string; url?: string } | null>(null)
 
+  // New dialog states for buttons without onClick handlers
+  const [showSettingsDialog, setShowSettingsDialog] = useState(false)
+  const [showContinueLearningDialog, setShowContinueLearningDialog] = useState(false)
+  const [showStartPathDialog, setShowStartPathDialog] = useState(false)
+  const [showViewRequirementsDialog, setShowViewRequirementsDialog] = useState(false)
+  const [showConfigureChannelDialog, setShowConfigureChannelDialog] = useState(false)
+  const [showConfigureIntegrationDialog, setShowConfigureIntegrationDialog] = useState(false)
+  const [showConnectIntegrationDialog, setShowConnectIntegrationDialog] = useState(false)
+  const [showRegenerateApiKeyDialog, setShowRegenerateApiKeyDialog] = useState(false)
+  const [showViewApiDocsDialog, setShowViewApiDocsDialog] = useState(false)
+  const [showDeleteWebhookDialog, setShowDeleteWebhookDialog] = useState(false)
+  const [showAddWebhookDialog, setShowAddWebhookDialog] = useState(false)
+  const [showExportDataDialog, setShowExportDataDialog] = useState(false)
+  const [showImportTranscriptDialog, setShowImportTranscriptDialog] = useState(false)
+  const [showClearDownloadsDialog, setShowClearDownloadsDialog] = useState(false)
+  const [showResetProgressDialog, setShowResetProgressDialog] = useState(false)
+  const [showDeleteHistoryDialog, setShowDeleteHistoryDialog] = useState(false)
+  const [showRevokeAllCertsDialog, setShowRevokeAllCertsDialog] = useState(false)
+
+  // Selected items for dialogs
+  const [selectedEnrollment, setSelectedEnrollment] = useState<Enrollment | null>(null)
+  const [selectedPath, setSelectedPath] = useState<LearningPath | null>(null)
+  const [selectedCertification, setSelectedCertification] = useState<Certification | null>(null)
+  const [selectedIntegration, setSelectedIntegration] = useState<string | null>(null)
+  const [selectedWebhook, setSelectedWebhook] = useState<{ url: string; events: string[]; status: string } | null>(null)
+
+  // Form data for new dialogs
+  const [webhookForm, setWebhookForm] = useState({ url: '', events: '' })
+  const [importFile, setImportFile] = useState<File | null>(null)
+
   // Form states
   const [courseForm, setCourseForm] = useState<CourseFormData>(defaultCourseForm)
   const [enrollmentForm, setEnrollmentForm] = useState<EnrollmentFormData>(defaultEnrollmentForm)
@@ -819,7 +849,7 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
               <Plus className="w-4 h-4 mr-2" />
               Create Course
             </Button>
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={() => setShowSettingsDialog(true)}>
               <Settings className="w-4 h-4 mr-2" />
               Settings
             </Button>
@@ -1214,7 +1244,13 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
                           <span className="text-sm font-medium">{enrollment.progress}%</span>
                         </div>
                       </div>
-                      <Button className="bg-emerald-600 hover:bg-emerald-700 text-white">
+                      <Button
+                        className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                        onClick={() => {
+                          setSelectedEnrollment(enrollment)
+                          setShowContinueLearningDialog(true)
+                        }}
+                      >
                         {enrollment.status === 'completed' ? 'Review' : 'Continue'}
                       </Button>
                     </div>
@@ -1263,7 +1299,13 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
                       ))}
                     </div>
 
-                    <Button className="w-full bg-emerald-600 hover:bg-emerald-700 text-white">
+                    <Button
+                      className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"
+                      onClick={() => {
+                        setSelectedPath(path)
+                        setShowStartPathDialog(true)
+                      }}
+                    >
                       Start Learning Path
                     </Button>
                   </CardContent>
@@ -1287,7 +1329,16 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
                       <div>Valid for: {cert.validityPeriod}</div>
                       <div>{cert.earnedCount.toLocaleString()} earned</div>
                     </div>
-                    <Button variant="outline" className="w-full">View Requirements</Button>
+                    <Button
+                      variant="outline"
+                      className="w-full"
+                      onClick={() => {
+                        setSelectedCertification(cert)
+                        setShowViewRequirementsDialog(true)
+                      }}
+                    >
+                      View Requirements
+                    </Button>
                   </CardContent>
                 </Card>
               ))}
@@ -1837,7 +1888,7 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
                             </div>
                             <Badge className="ml-auto bg-green-100 text-green-700">Active</Badge>
                           </div>
-                          <Button variant="outline" size="sm">Configure Channel</Button>
+                          <Button variant="outline" size="sm" onClick={() => setShowConfigureChannelDialog(true)}>Configure Channel</Button>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <div>
@@ -1887,10 +1938,28 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
                             {integration.connected ? (
                               <div className="flex items-center gap-2">
                                 <Badge className="bg-green-100 text-green-700">Connected</Badge>
-                                <Button variant="ghost" size="sm">Configure</Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => {
+                                    setSelectedIntegration(integration.name)
+                                    setShowConfigureIntegrationDialog(true)
+                                  }}
+                                >
+                                  Configure
+                                </Button>
                               </div>
                             ) : (
-                              <Button variant="outline" size="sm">Connect</Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  setSelectedIntegration(integration.name)
+                                  setShowConnectIntegrationDialog(true)
+                                }}
+                              >
+                                Connect
+                              </Button>
                             )}
                           </div>
                         ))}
@@ -1908,7 +1977,7 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
                         <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <div className="flex items-center justify-between mb-3">
                             <div className="font-medium">API Key</div>
-                            <Button variant="outline" size="sm">
+                            <Button variant="outline" size="sm" onClick={() => setShowRegenerateApiKeyDialog(true)}>
                               <RefreshCw className="h-4 w-4 mr-2" />
                               Regenerate
                             </Button>
@@ -1917,7 +1986,14 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
                             <code className="flex-1 bg-white dark:bg-gray-900 px-3 py-2 rounded border text-sm">
                               lms_live_•••••••••••••••••••••••
                             </code>
-                            <Button variant="outline" size="sm">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                navigator.clipboard.writeText('lms_live_xxxxxxxxxxxxxxxxxxxx')
+                                toast.success('API Key Copied', { description: 'API key has been copied to clipboard' })
+                              }}
+                            >
                               <Copy className="h-4 w-4" />
                             </Button>
                           </div>
@@ -1932,7 +2008,7 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
                             <div className="text-sm text-gray-500">Avg Response Time</div>
                           </div>
                         </div>
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => setShowViewApiDocsDialog(true)}>
                           <ExternalLink className="h-4 w-4 mr-2" />
                           View API Documentation
                         </Button>
@@ -1963,14 +2039,21 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
                               </div>
                               <div className="flex items-center gap-2">
                                 <Badge className="bg-green-100 text-green-700">{webhook.status}</Badge>
-                                <Button variant="ghost" size="sm">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => {
+                                    setSelectedWebhook(webhook)
+                                    setShowDeleteWebhookDialog(true)
+                                  }}
+                                >
                                   <Trash2 className="h-4 w-4" />
                                 </Button>
                               </div>
                             </div>
                           ))}
                         </div>
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => setShowAddWebhookDialog(true)}>
                           <Plus className="h-4 w-4 mr-2" />
                           Add Webhook
                         </Button>
@@ -2149,11 +2232,11 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
                           </div>
                         </div>
                         <div className="flex gap-3">
-                          <Button variant="outline" className="flex-1">
+                          <Button variant="outline" className="flex-1" onClick={() => setShowExportDataDialog(true)}>
                             <Download className="h-4 w-4 mr-2" />
                             Export Learning Data
                           </Button>
-                          <Button variant="outline" className="flex-1">
+                          <Button variant="outline" className="flex-1" onClick={() => setShowImportTranscriptDialog(true)}>
                             <Upload className="h-4 w-4 mr-2" />
                             Import Transcript
                           </Button>
@@ -2203,7 +2286,7 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
                             </SelectContent>
                           </Select>
                         </div>
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => setShowClearDownloadsDialog(true)}>
                           <Trash2 className="h-4 w-4 mr-2" />
                           Clear Downloaded Content
                         </Button>
@@ -2223,7 +2306,7 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
                             <div className="font-medium text-red-600">Reset Progress</div>
                             <div className="text-sm text-gray-500">Reset all course progress (keeps certificates)</div>
                           </div>
-                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50" onClick={() => setShowResetProgressDialog(true)}>
                             <RotateCcw className="h-4 w-4 mr-2" />
                             Reset
                           </Button>
@@ -2233,7 +2316,7 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
                             <div className="font-medium text-red-600">Delete Learning History</div>
                             <div className="text-sm text-gray-500">Permanently delete all learning data</div>
                           </div>
-                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50" onClick={() => setShowDeleteHistoryDialog(true)}>
                             <Trash2 className="h-4 w-4 mr-2" />
                             Delete
                           </Button>
@@ -2243,7 +2326,7 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
                             <div className="font-medium text-red-600">Revoke All Certificates</div>
                             <div className="text-sm text-gray-500">Remove all earned certifications</div>
                           </div>
-                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50" onClick={() => setShowRevokeAllCertsDialog(true)}>
                             <Archive className="h-4 w-4 mr-2" />
                             Revoke
                           </Button>
@@ -2874,6 +2957,933 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
                   Download PDF
                 </Button>
               )}
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Settings Dialog */}
+        <Dialog open={showSettingsDialog} onOpenChange={setShowSettingsDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Settings className="w-5 h-5 text-emerald-600" />
+                Quick Settings
+              </DialogTitle>
+              <DialogDescription>
+                Manage your learning platform settings
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="font-medium">Dark Mode</div>
+                    <div className="text-sm text-gray-500">Use dark theme</div>
+                  </div>
+                  <Switch />
+                </div>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="font-medium">Email Notifications</div>
+                    <div className="text-sm text-gray-500">Receive email updates</div>
+                  </div>
+                  <Switch defaultChecked />
+                </div>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="font-medium">Auto-play Videos</div>
+                    <div className="text-sm text-gray-500">Automatically play next lesson</div>
+                  </div>
+                  <Switch defaultChecked />
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowSettingsDialog(false)}>
+                Close
+              </Button>
+              <Button
+                className="bg-emerald-600 hover:bg-emerald-700"
+                onClick={() => {
+                  toast.success('Settings Saved', { description: 'Your preferences have been updated' })
+                  setShowSettingsDialog(false)
+                }}
+              >
+                Save Settings
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Continue Learning Dialog */}
+        <Dialog open={showContinueLearningDialog} onOpenChange={setShowContinueLearningDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <PlayCircle className="w-5 h-5 text-emerald-600" />
+                {selectedEnrollment?.status === 'completed' ? 'Review Course' : 'Continue Learning'}
+              </DialogTitle>
+              <DialogDescription>
+                {selectedEnrollment?.course.title}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              {selectedEnrollment && (
+                <>
+                  <div className="p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg border border-emerald-200 dark:border-emerald-800">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="p-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg">
+                        <BookOpen className="h-6 w-6 text-emerald-600" />
+                      </div>
+                      <div>
+                        <div className="font-medium">{selectedEnrollment.course.title}</div>
+                        <div className="text-sm text-gray-500">{selectedEnrollment.progress}% complete</div>
+                      </div>
+                    </div>
+                    <Progress value={selectedEnrollment.progress} className="h-2" />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3 text-sm">
+                    <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                      <div className="text-gray-500">Time Spent</div>
+                      <div className="font-medium">{selectedEnrollment.timeSpent}</div>
+                    </div>
+                    <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                      <div className="text-gray-500">Score</div>
+                      <div className="font-medium">{selectedEnrollment.score || 'N/A'}%</div>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowContinueLearningDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                className="bg-emerald-600 hover:bg-emerald-700"
+                onClick={() => {
+                  toast.success('Course Opened', { description: `Resuming "${selectedEnrollment?.course.title}"` })
+                  setShowContinueLearningDialog(false)
+                }}
+              >
+                <Play className="w-4 h-4 mr-2" />
+                {selectedEnrollment?.status === 'completed' ? 'Start Review' : 'Continue'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Start Learning Path Dialog */}
+        <Dialog open={showStartPathDialog} onOpenChange={setShowStartPathDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Target className="w-5 h-5 text-emerald-600" />
+                Start Learning Path
+              </DialogTitle>
+              <DialogDescription>
+                {selectedPath?.title}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              {selectedPath && (
+                <>
+                  <p className="text-gray-600 dark:text-gray-400">{selectedPath.description}</p>
+                  <div className="grid grid-cols-3 gap-3 text-sm">
+                    <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                      <div className="text-2xl font-bold text-emerald-600">{selectedPath.courses.length}</div>
+                      <div className="text-gray-500">Courses</div>
+                    </div>
+                    <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                      <div className="text-2xl font-bold text-emerald-600">{selectedPath.duration}</div>
+                      <div className="text-gray-500">Duration</div>
+                    </div>
+                    <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                      <div className="text-2xl font-bold text-emerald-600">{selectedPath.skills.length}</div>
+                      <div className="text-gray-500">Skills</div>
+                    </div>
+                  </div>
+                  <div>
+                    <div className="font-medium mb-2">Skills you will learn:</div>
+                    <div className="flex flex-wrap gap-2">
+                      {selectedPath.skills.map(skill => (
+                        <Badge key={skill} variant="secondary">{skill}</Badge>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowStartPathDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                className="bg-emerald-600 hover:bg-emerald-700"
+                onClick={() => {
+                  toast.success('Learning Path Started', { description: `You have enrolled in "${selectedPath?.title}"` })
+                  setShowStartPathDialog(false)
+                }}
+              >
+                <Play className="w-4 h-4 mr-2" />
+                Start Path
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* View Requirements Dialog */}
+        <Dialog open={showViewRequirementsDialog} onOpenChange={setShowViewRequirementsDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Award className="w-5 h-5 text-yellow-600" />
+                Certification Requirements
+              </DialogTitle>
+              <DialogDescription>
+                {selectedCertification?.name}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              {selectedCertification && (
+                <>
+                  <p className="text-gray-600 dark:text-gray-400">{selectedCertification.description}</p>
+                  <div className="space-y-2">
+                    <div className="font-medium">Requirements:</div>
+                    <ul className="space-y-2">
+                      {selectedCertification.requirements.map((req, index) => (
+                        <li key={index} className="flex items-start gap-2 text-sm">
+                          <CheckCircle2 className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
+                          <span>{req}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
+                    <div className="text-sm">
+                      <span className="font-medium">Validity:</span> {selectedCertification.validityPeriod}
+                    </div>
+                    <div className="text-sm text-gray-500">
+                      {selectedCertification.earnedCount.toLocaleString()} professionals have earned this certification
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowViewRequirementsDialog(false)}>
+                Close
+              </Button>
+              <Button
+                className="bg-yellow-600 hover:bg-yellow-700"
+                onClick={() => {
+                  toast.success('Starting Certification Path', { description: `Beginning requirements for "${selectedCertification?.name}"` })
+                  setShowViewRequirementsDialog(false)
+                }}
+              >
+                Start Certification
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Configure Slack Channel Dialog */}
+        <Dialog open={showConfigureChannelDialog} onOpenChange={setShowConfigureChannelDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Slack className="w-5 h-5 text-emerald-600" />
+                Configure Slack Channel
+              </DialogTitle>
+              <DialogDescription>
+                Choose which Slack channel to send notifications to
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Channel</Label>
+                <Select defaultValue="learning">
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="learning">#learning</SelectItem>
+                    <SelectItem value="general">#general</SelectItem>
+                    <SelectItem value="team">#team-updates</SelectItem>
+                    <SelectItem value="achievements">#achievements</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="text-sm">Send course completions</div>
+                  <Switch defaultChecked />
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="text-sm">Send certificate awards</div>
+                  <Switch defaultChecked />
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="text-sm">Send milestone achievements</div>
+                  <Switch />
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowConfigureChannelDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                className="bg-emerald-600 hover:bg-emerald-700"
+                onClick={() => {
+                  toast.success('Channel Configured', { description: 'Slack integration settings have been updated' })
+                  setShowConfigureChannelDialog(false)
+                }}
+              >
+                Save Configuration
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Configure Integration Dialog */}
+        <Dialog open={showConfigureIntegrationDialog} onOpenChange={setShowConfigureIntegrationDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Link2 className="w-5 h-5 text-emerald-600" />
+                Configure {selectedIntegration}
+              </DialogTitle>
+              <DialogDescription>
+                Update integration settings for {selectedIntegration}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-green-600" />
+                  <span className="font-medium text-green-700">Connected</span>
+                </div>
+              </div>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="text-sm">Auto-sync courses</div>
+                  <Switch defaultChecked />
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="text-sm">Import progress</div>
+                  <Switch defaultChecked />
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="text-sm">Share completions</div>
+                  <Switch />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Sync Frequency</Label>
+                <Select defaultValue="daily">
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="realtime">Real-time</SelectItem>
+                    <SelectItem value="hourly">Hourly</SelectItem>
+                    <SelectItem value="daily">Daily</SelectItem>
+                    <SelectItem value="weekly">Weekly</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                className="text-red-600 border-red-300"
+                onClick={() => {
+                  toast.success('Disconnected', { description: `${selectedIntegration} has been disconnected` })
+                  setShowConfigureIntegrationDialog(false)
+                }}
+              >
+                Disconnect
+              </Button>
+              <Button
+                className="bg-emerald-600 hover:bg-emerald-700"
+                onClick={() => {
+                  toast.success('Settings Saved', { description: `${selectedIntegration} settings updated` })
+                  setShowConfigureIntegrationDialog(false)
+                }}
+              >
+                Save Changes
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Connect Integration Dialog */}
+        <Dialog open={showConnectIntegrationDialog} onOpenChange={setShowConnectIntegrationDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Link2 className="w-5 h-5 text-emerald-600" />
+                Connect {selectedIntegration}
+              </DialogTitle>
+              <DialogDescription>
+                Connect your {selectedIntegration} account to sync your learning progress
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                <div className="text-sm text-blue-700 dark:text-blue-400">
+                  You will be redirected to {selectedIntegration} to authorize the connection. Your credentials are never stored on our servers.
+                </div>
+              </div>
+              <div className="space-y-2">
+                <div className="font-medium text-sm">What you will get:</div>
+                <ul className="space-y-1 text-sm text-gray-600">
+                  <li className="flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-green-500" />
+                    Import completed courses
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-green-500" />
+                    Sync progress automatically
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-green-500" />
+                    Access course catalog
+                  </li>
+                </ul>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowConnectIntegrationDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                className="bg-emerald-600 hover:bg-emerald-700"
+                onClick={() => {
+                  toast.success('Connecting...', { description: `Redirecting to ${selectedIntegration}` })
+                  setShowConnectIntegrationDialog(false)
+                }}
+              >
+                <ExternalLink className="w-4 h-4 mr-2" />
+                Connect
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Regenerate API Key Dialog */}
+        <Dialog open={showRegenerateApiKeyDialog} onOpenChange={setShowRegenerateApiKeyDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Key className="w-5 h-5 text-yellow-600" />
+                Regenerate API Key
+              </DialogTitle>
+              <DialogDescription>
+                This will invalidate your current API key and create a new one
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
+                <div className="flex items-center gap-2 mb-2">
+                  <AlertOctagon className="w-5 h-5 text-yellow-600" />
+                  <span className="font-medium text-yellow-700">Warning</span>
+                </div>
+                <div className="text-sm text-yellow-700 dark:text-yellow-400">
+                  Any applications using the current API key will stop working immediately. Make sure to update all integrations with the new key.
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowRegenerateApiKeyDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={() => {
+                  toast.success('API Key Regenerated', { description: 'Your new API key is ready. Make sure to copy it now.' })
+                  setShowRegenerateApiKeyDialog(false)
+                }}
+              >
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Regenerate Key
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* View API Documentation Dialog */}
+        <Dialog open={showViewApiDocsDialog} onOpenChange={setShowViewApiDocsDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Database className="w-5 h-5 text-emerald-600" />
+                API Documentation
+              </DialogTitle>
+              <DialogDescription>
+                Learn how to integrate with our Learning Management System API
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-3">
+                <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div className="font-medium mb-1">Base URL</div>
+                  <code className="text-sm text-emerald-600">https://api.lms.example.com/v1</code>
+                </div>
+                <div className="space-y-2">
+                  <div className="font-medium">Available Endpoints:</div>
+                  <ul className="space-y-1 text-sm">
+                    <li className="flex items-center gap-2">
+                      <Badge variant="secondary" className="text-xs">GET</Badge>
+                      <code>/courses</code> - List all courses
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <Badge variant="secondary" className="text-xs">GET</Badge>
+                      <code>/enrollments</code> - Get enrollments
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <Badge variant="secondary" className="text-xs">POST</Badge>
+                      <code>/enrollments</code> - Create enrollment
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <Badge variant="secondary" className="text-xs">GET</Badge>
+                      <code>/progress</code> - Get progress data
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowViewApiDocsDialog(false)}>
+                Close
+              </Button>
+              <Button
+                className="bg-emerald-600 hover:bg-emerald-700"
+                onClick={() => {
+                  window.open('https://docs.example.com/api', '_blank')
+                  setShowViewApiDocsDialog(false)
+                }}
+              >
+                <ExternalLink className="w-4 h-4 mr-2" />
+                Full Documentation
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Webhook Dialog */}
+        <Dialog open={showDeleteWebhookDialog} onOpenChange={setShowDeleteWebhookDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-600">
+                <Trash2 className="w-5 h-5" />
+                Delete Webhook
+              </DialogTitle>
+              <DialogDescription>
+                Are you sure you want to delete this webhook?
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              {selectedWebhook && (
+                <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <code className="text-sm break-all">{selectedWebhook.url}</code>
+                  <div className="flex gap-1 mt-2">
+                    {selectedWebhook.events.map(event => (
+                      <Badge key={event} variant="secondary" className="text-xs">{event}</Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+              <div className="text-sm text-gray-500">
+                This action cannot be undone. The endpoint will stop receiving events immediately.
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowDeleteWebhookDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={() => {
+                  toast.success('Webhook Deleted', { description: 'The webhook has been removed' })
+                  setShowDeleteWebhookDialog(false)
+                }}
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                Delete Webhook
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Webhook Dialog */}
+        <Dialog open={showAddWebhookDialog} onOpenChange={setShowAddWebhookDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Webhook className="w-5 h-5 text-emerald-600" />
+                Add Webhook
+              </DialogTitle>
+              <DialogDescription>
+                Create a new webhook endpoint to receive events
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="webhook-url">Endpoint URL</Label>
+                <Input
+                  id="webhook-url"
+                  placeholder="https://api.yourapp.com/webhooks"
+                  value={webhookForm.url}
+                  onChange={(e) => setWebhookForm({ ...webhookForm, url: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Events to Subscribe</Label>
+                <div className="space-y-2">
+                  {['course.completed', 'cert.earned', 'enrollment.created', 'progress.updated'].map(event => (
+                    <div key={event} className="flex items-center gap-2">
+                      <input type="checkbox" id={event} className="rounded" />
+                      <label htmlFor={event} className="text-sm">{event}</label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowAddWebhookDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                className="bg-emerald-600 hover:bg-emerald-700"
+                onClick={() => {
+                  if (!webhookForm.url) {
+                    toast.error('URL Required', { description: 'Please enter a webhook URL' })
+                    return
+                  }
+                  toast.success('Webhook Created', { description: 'Your webhook has been configured' })
+                  setWebhookForm({ url: '', events: '' })
+                  setShowAddWebhookDialog(false)
+                }}
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Create Webhook
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Export Learning Data Dialog */}
+        <Dialog open={showExportDataDialog} onOpenChange={setShowExportDataDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Download className="w-5 h-5 text-emerald-600" />
+                Export Learning Data
+              </DialogTitle>
+              <DialogDescription>
+                Download your complete learning history and progress
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Export Format</Label>
+                <Select defaultValue="csv">
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="csv">CSV (Spreadsheet)</SelectItem>
+                    <SelectItem value="json">JSON (Developer)</SelectItem>
+                    <SelectItem value="pdf">PDF (Report)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Include</Label>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <input type="checkbox" id="courses" className="rounded" defaultChecked />
+                    <label htmlFor="courses" className="text-sm">Course enrollments</label>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <input type="checkbox" id="progress" className="rounded" defaultChecked />
+                    <label htmlFor="progress" className="text-sm">Progress data</label>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <input type="checkbox" id="certs" className="rounded" defaultChecked />
+                    <label htmlFor="certs" className="text-sm">Certificates</label>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <input type="checkbox" id="quizzes" className="rounded" />
+                    <label htmlFor="quizzes" className="text-sm">Quiz results</label>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowExportDataDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                className="bg-emerald-600 hover:bg-emerald-700"
+                onClick={() => {
+                  toast.success('Export Started', { description: 'Your data is being prepared for download' })
+                  setShowExportDataDialog(false)
+                }}
+              >
+                <Download className="w-4 h-4 mr-2" />
+                Export Data
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Import Transcript Dialog */}
+        <Dialog open={showImportTranscriptDialog} onOpenChange={setShowImportTranscriptDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Upload className="w-5 h-5 text-emerald-600" />
+                Import Transcript
+              </DialogTitle>
+              <DialogDescription>
+                Upload external learning records to your profile
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center">
+                <Upload className="w-12 h-12 mx-auto text-gray-400 mb-3" />
+                <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                  Drag and drop your transcript file here, or click to browse
+                </div>
+                <Button variant="outline" size="sm">
+                  Choose File
+                </Button>
+                <div className="text-xs text-gray-500 mt-2">
+                  Supported formats: CSV, JSON, PDF
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Source Platform</Label>
+                <Select defaultValue="other">
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="linkedin">LinkedIn Learning</SelectItem>
+                    <SelectItem value="coursera">Coursera</SelectItem>
+                    <SelectItem value="udemy">Udemy</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowImportTranscriptDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                className="bg-emerald-600 hover:bg-emerald-700"
+                onClick={() => {
+                  toast.success('Import Started', { description: 'Processing your transcript...' })
+                  setShowImportTranscriptDialog(false)
+                }}
+              >
+                <Upload className="w-4 h-4 mr-2" />
+                Import
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Clear Downloaded Content Dialog */}
+        <Dialog open={showClearDownloadsDialog} onOpenChange={setShowClearDownloadsDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Trash2 className="w-5 h-5 text-yellow-600" />
+                Clear Downloaded Content
+              </DialogTitle>
+              <DialogDescription>
+                Remove all offline course content from your device
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
+                <div className="flex items-center gap-3 mb-2">
+                  <Smartphone className="w-5 h-5 text-yellow-600" />
+                  <span className="font-medium">4.8 GB will be freed</span>
+                </div>
+                <div className="text-sm text-gray-600">
+                  Your progress and certificates will not be affected. You can re-download content anytime.
+                </div>
+              </div>
+              <div className="text-sm text-gray-500">
+                This includes all videos, documents, and course materials saved for offline access.
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowClearDownloadsDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={() => {
+                  toast.success('Downloads Cleared', { description: '4.8 GB of storage freed' })
+                  setShowClearDownloadsDialog(false)
+                }}
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                Clear All
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Reset Progress Dialog */}
+        <Dialog open={showResetProgressDialog} onOpenChange={setShowResetProgressDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-600">
+                <RotateCcw className="w-5 h-5" />
+                Reset Progress
+              </DialogTitle>
+              <DialogDescription>
+                Reset all your course progress to start fresh
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                <div className="flex items-center gap-2 mb-2">
+                  <AlertOctagon className="w-5 h-5 text-red-600" />
+                  <span className="font-medium text-red-700">Warning</span>
+                </div>
+                <div className="text-sm text-red-700 dark:text-red-400">
+                  This will reset progress for all courses. Your certificates will be kept, but you will need to retake all courses.
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Type "RESET" to confirm</Label>
+                <Input placeholder="RESET" />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowResetProgressDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={() => {
+                  toast.success('Progress Reset', { description: 'All course progress has been reset' })
+                  setShowResetProgressDialog(false)
+                }}
+              >
+                <RotateCcw className="w-4 h-4 mr-2" />
+                Reset Progress
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Learning History Dialog */}
+        <Dialog open={showDeleteHistoryDialog} onOpenChange={setShowDeleteHistoryDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-600">
+                <Trash2 className="w-5 h-5" />
+                Delete Learning History
+              </DialogTitle>
+              <DialogDescription>
+                Permanently delete all your learning data
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                <div className="flex items-center gap-2 mb-2">
+                  <AlertOctagon className="w-5 h-5 text-red-600" />
+                  <span className="font-medium text-red-700">Danger</span>
+                </div>
+                <div className="text-sm text-red-700 dark:text-red-400">
+                  This action is irreversible. All enrollments, progress data, quiz scores, and learning history will be permanently deleted.
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Type "DELETE ALL DATA" to confirm</Label>
+                <Input placeholder="DELETE ALL DATA" />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowDeleteHistoryDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={() => {
+                  toast.success('History Deleted', { description: 'All learning history has been permanently deleted' })
+                  setShowDeleteHistoryDialog(false)
+                }}
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                Delete All
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Revoke All Certificates Dialog */}
+        <Dialog open={showRevokeAllCertsDialog} onOpenChange={setShowRevokeAllCertsDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-600">
+                <Archive className="w-5 h-5" />
+                Revoke All Certificates
+              </DialogTitle>
+              <DialogDescription>
+                Remove all earned certifications from your profile
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                <div className="flex items-center gap-2 mb-2">
+                  <AlertOctagon className="w-5 h-5 text-red-600" />
+                  <span className="font-medium text-red-700">Warning</span>
+                </div>
+                <div className="text-sm text-red-700 dark:text-red-400">
+                  This will revoke all {mockStats.certificationsEarned} certificates you have earned. You will need to complete the courses again to re-earn them.
+                </div>
+              </div>
+              <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div className="text-sm font-medium mb-2">Certificates to be revoked:</div>
+                <ul className="text-sm text-gray-600 space-y-1">
+                  {mockCertifications.slice(0, 2).map(cert => (
+                    <li key={cert.id} className="flex items-center gap-2">
+                      <Award className="w-4 h-4 text-yellow-500" />
+                      {cert.name}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div className="space-y-2">
+                <Label>Type "REVOKE ALL" to confirm</Label>
+                <Input placeholder="REVOKE ALL" />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowRevokeAllCertsDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={() => {
+                  toast.success('Certificates Revoked', { description: 'All certificates have been removed from your profile' })
+                  setShowRevokeAllCertsDialog(false)
+                }}
+              >
+                <Archive className="w-4 h-4 mr-2" />
+                Revoke All
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

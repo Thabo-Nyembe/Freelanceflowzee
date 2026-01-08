@@ -870,7 +870,7 @@ export default function MotionGraphicsClient({
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={() => setShowSettingsDialog(true)}>
               <Settings className="w-4 h-4 mr-2" />
               Settings
             </Button>
@@ -1155,7 +1155,7 @@ export default function MotionGraphicsClient({
                     <p className="text-2xl font-bold">60</p>
                     <p className="text-purple-100 text-sm">FPS</p>
                   </div>
-                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10" onClick={() => setShowAddLayerDialog(true)}>
                     <Plus className="h-4 w-4 mr-2" />
                     Add Layer
                   </Button>
@@ -1363,15 +1363,15 @@ export default function MotionGraphicsClient({
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-2">
-                      <Button variant="outline" className="w-full justify-start text-sm h-9">
+                      <Button variant="outline" className="w-full justify-start text-sm h-9" onClick={() => handleApplyPreset('Glow Effect')}>
                         <Sparkles className="w-4 h-4 mr-2" />
                         Glow Effect
                       </Button>
-                      <Button variant="outline" className="w-full justify-start text-sm h-9">
+                      <Button variant="outline" className="w-full justify-start text-sm h-9" onClick={() => handleApplyPreset('Drop Shadow')}>
                         <Blend className="w-4 h-4 mr-2" />
                         Drop Shadow
                       </Button>
-                      <Button variant="ghost" className="w-full justify-start text-sm h-9">
+                      <Button variant="ghost" className="w-full justify-start text-sm h-9" onClick={() => setShowAddEffectDialog(true)}>
                         <Plus className="w-4 h-4 mr-2" />
                         Add Effect
                       </Button>
@@ -1401,7 +1401,7 @@ export default function MotionGraphicsClient({
                     <p className="text-2xl font-bold">8</p>
                     <p className="text-green-100 text-sm">Categories</p>
                   </div>
-                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10" onClick={() => setShowCreatePresetDialog(true)}>
                     <Plus className="h-4 w-4 mr-2" />
                     Create
                   </Button>
@@ -1431,7 +1431,7 @@ export default function MotionGraphicsClient({
 
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold">All Presets</h2>
-              <Button>
+              <Button onClick={() => setShowCreatePresetDialog(true)}>
                 <Plus className="w-4 h-4 mr-2" />
                 Create Preset
               </Button>
@@ -1475,7 +1475,16 @@ export default function MotionGraphicsClient({
                     <p className="text-2xl font-bold">{mockRenderQueue.filter(j => j.status === 'completed').length}</p>
                     <p className="text-orange-100 text-sm">Completed</p>
                   </div>
-                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10" onClick={() => {
+                    toast.promise(
+                      new Promise(resolve => setTimeout(resolve, 800)),
+                      {
+                        loading: 'Starting all render jobs...',
+                        success: 'All render jobs started',
+                        error: 'Failed to start render jobs'
+                      }
+                    )
+                  }}>
                     <Play className="h-4 w-4 mr-2" />
                     Start All
                   </Button>
@@ -1505,7 +1514,16 @@ export default function MotionGraphicsClient({
 
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold">All Jobs</h2>
-              <Button className="bg-gradient-to-r from-green-500 to-emerald-600 text-white">
+              <Button className="bg-gradient-to-r from-green-500 to-emerald-600 text-white" onClick={() => {
+                toast.promise(
+                  new Promise(resolve => setTimeout(resolve, 800)),
+                  {
+                    loading: 'Starting all render jobs...',
+                    success: 'All render jobs started',
+                    error: 'Failed to start render jobs'
+                  }
+                )
+              }}>
                 <Play className="w-4 h-4 mr-2" />
                 Start All
               </Button>
@@ -1546,22 +1564,46 @@ export default function MotionGraphicsClient({
                       </div>
                       <div className="flex items-center gap-2">
                         {job.status === 'queued' && (
-                          <Button size="sm" variant="outline">
+                          <Button size="sm" variant="outline" onClick={() => {
+                            toast.promise(
+                              new Promise(resolve => setTimeout(resolve, 600)),
+                              {
+                                loading: `Starting render for "${job.animationTitle}"...`,
+                                success: `Render started for "${job.animationTitle}"`,
+                                error: 'Failed to start render'
+                              }
+                            )
+                          }}>
                             <Play className="w-4 h-4" />
                           </Button>
                         )}
                         {job.status === 'rendering' && (
-                          <Button size="sm" variant="outline">
+                          <Button size="sm" variant="outline" onClick={() => {
+                            toast.promise(
+                              new Promise(resolve => setTimeout(resolve, 400)),
+                              {
+                                loading: `Pausing render for "${job.animationTitle}"...`,
+                                success: `Render paused for "${job.animationTitle}"`,
+                                error: 'Failed to pause render'
+                              }
+                            )
+                          }}>
                             <Pause className="w-4 h-4" />
                           </Button>
                         )}
                         {job.status === 'completed' && (
-                          <Button size="sm">
+                          <Button size="sm" onClick={() => {
+                            setSelectedRenderJobId(job.id)
+                            setShowDownloadDialog(true)
+                          }}>
                             <Download className="w-4 h-4 mr-2" />
                             Download
                           </Button>
                         )}
-                        <Button size="sm" variant="ghost">
+                        <Button size="sm" variant="ghost" onClick={() => {
+                          setSelectedRenderJobId(job.id)
+                          setShowDeleteJobDialog(true)
+                        }}>
                           <Trash2 className="w-4 h-4" />
                         </Button>
                       </div>
@@ -1591,7 +1633,7 @@ export default function MotionGraphicsClient({
                     <p className="text-2xl font-bold">{stats.totalViews.toLocaleString()}</p>
                     <p className="text-indigo-100 text-sm">Total Views</p>
                   </div>
-                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10" onClick={() => setShowExportAnalyticsDialog(true)}>
                     <Download className="h-4 w-4 mr-2" />
                     Export
                   </Button>
@@ -1721,7 +1763,7 @@ export default function MotionGraphicsClient({
                 </div>
                 <div className="flex items-center gap-4">
                   <Badge className="bg-green-500/20 text-green-300 border-green-500/30">Active</Badge>
-                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10" onClick={() => setShowExportConfigDialog(true)}>
                     <Download className="h-4 w-4 mr-2" />
                     Export Config
                   </Button>
@@ -1967,7 +2009,7 @@ export default function MotionGraphicsClient({
                           </div>
                           <Progress value={45} className="h-2" />
                         </div>
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => setShowClearCacheDialog(true)}>
                           <Trash2 className="w-4 h-4 mr-2" />
                           Clear Cache
                         </Button>
@@ -2121,7 +2163,7 @@ export default function MotionGraphicsClient({
                           <label className="block text-sm font-medium mb-2">API Key</label>
                           <div className="flex gap-2">
                             <Input value="mg_••••••••••••" readOnly className="font-mono" />
-                            <Button variant="outline">Regenerate</Button>
+                            <Button variant="outline" onClick={() => setShowRegenerateApiKeyDialog(true)}>Regenerate</Button>
                           </div>
                         </div>
                       </CardContent>
@@ -2161,14 +2203,14 @@ export default function MotionGraphicsClient({
                             <p className="font-medium">Reset All Settings</p>
                             <p className="text-sm text-gray-500">Restore factory defaults</p>
                           </div>
-                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50">Reset</Button>
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50" onClick={() => setShowResetSettingsDialog(true)}>Reset</Button>
                         </div>
                         <div className="flex items-center justify-between">
                           <div>
                             <p className="font-medium">Clear All Projects</p>
                             <p className="text-sm text-gray-500">Delete all project data</p>
                           </div>
-                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50">Delete All</Button>
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50" onClick={() => setShowDeleteAllDialog(true)}>Delete All</Button>
                         </div>
                       </CardContent>
                     </Card>

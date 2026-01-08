@@ -375,6 +375,11 @@ export default function ThreeDModelingClient() {
   const [previewRenderJob, setPreviewRenderJob] = useState<RenderJob | null>(null)
   const [downloadRenderJob, setDownloadRenderJob] = useState<RenderJob | null>(null)
 
+  // Scene hierarchy state
+  const [sceneHierarchy, setSceneHierarchy] = useState<SceneObject[]>(mockSceneHierarchy)
+  const [showSceneNodePropertiesDialog, setShowSceneNodePropertiesDialog] = useState(false)
+  const [selectedSceneNode, setSelectedSceneNode] = useState<SceneObject | null>(null)
+
   // Viewport state
   const [zoomLevel, setZoomLevel] = useState(100)
   const [showGrid, setShowGrid] = useState(true)
@@ -464,16 +469,29 @@ export default function ThreeDModelingClient() {
         <div
           className="flex items-center gap-2 py-1 px-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded cursor-pointer"
           style={{ paddingLeft: `${depth * 16 + 8}px` }}
+          onDoubleClick={() => openNodePropertiesDialog(node)}
         >
           {hasChildren && (
-            <button className="w-4 h-4 flex items-center justify-center">
+            <button
+              className="w-4 h-4 flex items-center justify-center"
+              onClick={(e) => {
+                e.stopPropagation()
+                toggleNodeExpanded(node.id)
+              }}
+            >
               {node.expanded ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
             </button>
           )}
           {!hasChildren && <span className="w-4" />}
           {getTypeIcon()}
           <span className="text-sm flex-1 truncate">{node.name}</span>
-          <button className="opacity-50 hover:opacity-100">
+          <button
+            className="opacity-50 hover:opacity-100"
+            onClick={(e) => {
+              e.stopPropagation()
+              toggleNodeVisibility(node.id, node.name)
+            }}
+          >
             {node.visible ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
           </button>
           {node.locked && <Lock className="w-3 h-3 text-red-500" />}
@@ -510,6 +528,46 @@ export default function ThreeDModelingClient() {
     toast.success('Project saved', {
       description: 'All changes have been saved'
     })
+  }
+
+  // Scene hierarchy toggle functions
+  const toggleNodeExpanded = (nodeId: string) => {
+    const updateNodes = (nodes: SceneObject[]): SceneObject[] => {
+      return nodes.map(node => {
+        if (node.id === nodeId) {
+          return { ...node, expanded: !node.expanded }
+        }
+        if (node.children && node.children.length > 0) {
+          return { ...node, children: updateNodes(node.children) }
+        }
+        return node
+      })
+    }
+    setSceneHierarchy(updateNodes(sceneHierarchy))
+  }
+
+  const toggleNodeVisibility = (nodeId: string, nodeName: string) => {
+    const updateNodes = (nodes: SceneObject[]): SceneObject[] => {
+      return nodes.map(node => {
+        if (node.id === nodeId) {
+          const newVisible = !node.visible
+          toast.info(newVisible ? 'Object Visible' : 'Object Hidden', {
+            description: `${nodeName} is now ${newVisible ? 'visible' : 'hidden'}`
+          })
+          return { ...node, visible: newVisible }
+        }
+        if (node.children && node.children.length > 0) {
+          return { ...node, children: updateNodes(node.children) }
+        }
+        return node
+      })
+    }
+    setSceneHierarchy(updateNodes(sceneHierarchy))
+  }
+
+  const openNodePropertiesDialog = (node: SceneObject) => {
+    setSelectedSceneNode(node)
+    setShowSceneNodePropertiesDialog(true)
   }
 
   return (
@@ -911,7 +969,7 @@ export default function ThreeDModelingClient() {
                 </CardHeader>
                 <CardContent className="p-2">
                   <ScrollArea className="h-[400px]">
-                    {mockSceneHierarchy.map(node => renderSceneNode(node))}
+                    {sceneHierarchy.map(node => renderSceneNode(node))}
                   </ScrollArea>
                 </CardContent>
               </Card>
@@ -2822,6 +2880,133 @@ export default function ThreeDModelingClient() {
               </Button>
             </div>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Scene Node Properties Dialog */}
+      <Dialog open={showSceneNodePropertiesDialog} onOpenChange={setShowSceneNodePropertiesDialog}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              {selectedSceneNode?.type === 'mesh' && <Box className="w-5 h-5 text-blue-500" />}
+              {selectedSceneNode?.type === 'light' && <Lightbulb className="w-5 h-5 text-yellow-500" />}
+              {selectedSceneNode?.type === 'camera' && <Camera className="w-5 h-5 text-purple-500" />}
+              {selectedSceneNode?.type === 'group' && <Folder className="w-5 h-5 text-orange-500" />}
+              {selectedSceneNode?.type === 'empty' && <Circle className="w-5 h-5 text-gray-500" />}
+              {selectedSceneNode?.name || 'Node'} Properties
+            </DialogTitle>
+          </DialogHeader>
+          {selectedSceneNode && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Name</Label>
+                  <Input defaultValue={selectedSceneNode.name} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Type</Label>
+                  <Select defaultValue={selectedSceneNode.type}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="mesh">Mesh</SelectItem>
+                      <SelectItem value="light">Light</SelectItem>
+                      <SelectItem value="camera">Camera</SelectItem>
+                      <SelectItem value="group">Group</SelectItem>
+                      <SelectItem value="empty">Empty</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label>Visibility</Label>
+                    <p className="text-xs text-gray-500">Toggle object visibility in viewport</p>
+                  </div>
+                  <Switch
+                    checked={selectedSceneNode.visible}
+                    onCheckedChange={() => {
+                      toggleNodeVisibility(selectedSceneNode.id, selectedSceneNode.name)
+                      setSelectedSceneNode({ ...selectedSceneNode, visible: !selectedSceneNode.visible })
+                    }}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label>Locked</Label>
+                    <p className="text-xs text-gray-500">Prevent accidental modifications</p>
+                  </div>
+                  <Switch checked={selectedSceneNode.locked} />
+                </div>
+              </div>
+
+              {selectedSceneNode.type === 'mesh' && (
+                <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg space-y-2">
+                  <Label className="text-blue-700 dark:text-blue-400">Mesh Properties</Label>
+                  <div className="grid grid-cols-3 gap-2 text-sm">
+                    <div>
+                      <span className="text-gray-500">Position</span>
+                      <p className="font-mono">0, 0, 0</p>
+                    </div>
+                    <div>
+                      <span className="text-gray-500">Rotation</span>
+                      <p className="font-mono">0, 0, 0</p>
+                    </div>
+                    <div>
+                      <span className="text-gray-500">Scale</span>
+                      <p className="font-mono">1, 1, 1</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {selectedSceneNode.type === 'light' && (
+                <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg space-y-2">
+                  <Label className="text-yellow-700 dark:text-yellow-400">Light Properties</Label>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm">Intensity</span>
+                      <span className="text-sm font-mono">1.0</span>
+                    </div>
+                    <Slider defaultValue={[100]} max={200} step={1} />
+                  </div>
+                </div>
+              )}
+
+              {selectedSceneNode.type === 'camera' && (
+                <div className="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg space-y-2">
+                  <Label className="text-purple-700 dark:text-purple-400">Camera Properties</Label>
+                  <div className="grid grid-cols-2 gap-2 text-sm">
+                    <div>
+                      <span className="text-gray-500">Focal Length</span>
+                      <p className="font-mono">50mm</p>
+                    </div>
+                    <div>
+                      <span className="text-gray-500">Sensor Size</span>
+                      <p className="font-mono">36mm</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowSceneNodePropertiesDialog(false)}>
+                  Cancel
+                </Button>
+                <Button className="flex-1 gap-2" onClick={() => {
+                  toast.success('Node properties updated', { description: `${selectedSceneNode.name} has been modified` })
+                  setShowSceneNodePropertiesDialog(false)
+                }}>
+                  <CheckCircle2 className="w-4 h-4" />
+                  Apply Changes
+                </Button>
+              </div>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>

@@ -483,6 +483,10 @@ export default function CollaborationClient() {
   const [newTeamDescription, setNewTeamDescription] = useState('')
   const [selectedIntegration, setSelectedIntegration] = useState<Integration | null>(null)
   const [activityFilter, setActivityFilter] = useState<string>('all')
+  const [selectedWorkspaceColor, setSelectedWorkspaceColor] = useState<string>('#3B82F6')
+  const [selectedAccentColor, setSelectedAccentColor] = useState<string>('#3B82F6')
+  const [showColorPickerDialog, setShowColorPickerDialog] = useState(false)
+  const [colorPickerType, setColorPickerType] = useState<'workspace' | 'accent'>('workspace')
 
   const filteredBoards = useMemo(() => {
     return mockBoards.filter(board => {
@@ -1711,7 +1715,17 @@ export default function CollaborationClient() {
                         <div><Label>Workspace Color</Label>
                           <div className="flex gap-2 mt-2">
                             {['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'].map(color => (
-                              <button key={color} className="w-8 h-8 rounded-full border-2 border-white shadow-md hover:scale-110 transition-transform" style={{ backgroundColor: color }} />
+                              <button
+                                key={color}
+                                className={`w-8 h-8 rounded-full border-2 shadow-md hover:scale-110 transition-transform ${selectedWorkspaceColor === color ? 'border-gray-900 dark:border-white ring-2 ring-offset-2 ring-blue-500' : 'border-white'}`}
+                                style={{ backgroundColor: color }}
+                                onClick={() => {
+                                  setSelectedWorkspaceColor(color);
+                                  toast.success('Workspace color updated', {
+                                    description: `Color changed to ${color}`
+                                  });
+                                }}
+                              />
                             ))}
                           </div>
                         </div>
@@ -1997,7 +2011,17 @@ export default function CollaborationClient() {
                       <div><Label>Accent Color</Label>
                         <div className="flex gap-2 mt-2">
                           {['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'].map(color => (
-                            <button key={color} className="w-8 h-8 rounded-full border-2 border-white shadow-md" style={{ backgroundColor: color }} />
+                            <button
+                              key={color}
+                              className={`w-8 h-8 rounded-full border-2 shadow-md hover:scale-110 transition-transform ${selectedAccentColor === color ? 'border-gray-900 dark:border-white ring-2 ring-offset-2 ring-blue-500' : 'border-white'}`}
+                              style={{ backgroundColor: color }}
+                              onClick={() => {
+                                setSelectedAccentColor(color);
+                                toast.success('Accent color updated', {
+                                  description: `Theme accent changed to ${color}`
+                                });
+                              }}
+                            />
                           ))}
                         </div>
                       </div>

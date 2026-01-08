@@ -389,6 +389,71 @@ export default function ClientZoneClient() {
   const [reminderDate, setReminderDate] = useState('')
   const [reminderNote, setReminderNote] = useState('')
 
+  // View All Clients Dialog State
+  const [showAllClientsDialog, setShowAllClientsDialog] = useState(false)
+
+  // View All Deliverables Dialog State
+  const [showAllDeliverablesDialog, setShowAllDeliverablesDialog] = useState(false)
+
+  // Upload Deliverable Dialog State
+  const [showUploadDeliverableDialog, setShowUploadDeliverableDialog] = useState(false)
+  const [deliverableTitle, setDeliverableTitle] = useState('')
+  const [deliverableProject, setDeliverableProject] = useState('')
+  const [deliverableNotes, setDeliverableNotes] = useState('')
+  const [isUploadingDeliverable, setIsUploadingDeliverable] = useState(false)
+
+  // Message Client Dialog State
+  const [showMessageClientDialog, setShowMessageClientDialog] = useState(false)
+  const [messageClientId, setMessageClientId] = useState('')
+  const [messageSubject, setMessageSubject] = useState('')
+  const [messageContent, setMessageContent] = useState('')
+  const [isSendingMessage, setIsSendingMessage] = useState(false)
+
+  // Create Invoice Dialog State
+  const [showCreateInvoiceDialog, setShowCreateInvoiceDialog] = useState(false)
+  const [invoiceClientId, setInvoiceClientId] = useState('')
+  const [invoiceAmount, setInvoiceAmount] = useState('')
+  const [invoiceDescription, setInvoiceDescription] = useState('')
+  const [invoiceDueDate, setInvoiceDueDate] = useState('')
+  const [isCreatingInvoice, setIsCreatingInvoice] = useState(false)
+
+  // View Reports Dialog State
+  const [showReportsDialog, setShowReportsDialog] = useState(false)
+  const [reportType, setReportType] = useState<'revenue' | 'clients' | 'projects'>('revenue')
+  const [reportPeriod, setReportPeriod] = useState<'week' | 'month' | 'quarter' | 'year'>('month')
+
+  // AI Review & Approve Dialog State
+  const [showAIReviewDialog, setShowAIReviewDialog] = useState(false)
+  const [aiReviewSelection, setAiReviewSelection] = useState<number | null>(null)
+  const [aiReviewFeedback, setAiReviewFeedback] = useState('')
+
+  // View AI Progress Dialog State
+  const [showAIProgressDialog, setShowAIProgressDialog] = useState(false)
+
+  // Update Preferences Dialog State
+  const [showPreferencesDialog, setShowPreferencesDialog] = useState(false)
+  const [prefStyle, setPrefStyle] = useState('modern')
+  const [prefColors, setPrefColors] = useState('vibrant')
+  const [prefIndustry, setPrefIndustry] = useState('technology')
+
+  // Update Contact Info Dialog State
+  const [showContactInfoDialog, setShowContactInfoDialog] = useState(false)
+  const [contactEmail, setContactEmail] = useState('')
+  const [contactPhone, setContactPhone] = useState('')
+  const [contactCompany, setContactCompany] = useState('')
+
+  // Change Password Dialog State
+  const [showPasswordDialog, setShowPasswordDialog] = useState(false)
+  const [currentPassword, setCurrentPassword] = useState('')
+  const [newPassword, setNewPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [isChangingPassword, setIsChangingPassword] = useState(false)
+
+  // Export Data Dialog State (Settings tab)
+  const [showDataExportDialog, setShowDataExportDialog] = useState(false)
+  const [dataExportType, setDataExportType] = useState<'all' | 'projects' | 'messages' | 'invoices'>('all')
+  const [isExportingData, setIsExportingData] = useState(false)
+
   // Quick Actions with real dialog workflows
   const clientZoneQuickActions = [
     { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => {
@@ -1254,6 +1319,234 @@ export default function ClientZoneClient() {
     toast.info('File upload initiated')
   }
 
+  // ============================================================================
+  // HANDLER 28: UPLOAD DELIVERABLE
+  // ============================================================================
+  const handleUploadDeliverable = async () => {
+    if (!deliverableTitle.trim()) {
+      toast.error('Please enter a deliverable title')
+      return
+    }
+    if (!deliverableProject) {
+      toast.error('Please select a project')
+      return
+    }
+
+    setIsUploadingDeliverable(true)
+    logger.info('Uploading deliverable', { title: deliverableTitle, project: deliverableProject, userId })
+
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1200))
+      toast.success('Deliverable uploaded successfully!', {
+        description: `"${deliverableTitle}" has been added to the project`
+      })
+      setShowUploadDeliverableDialog(false)
+      setDeliverableTitle('')
+      setDeliverableProject('')
+      setDeliverableNotes('')
+    } catch (error: any) {
+      logger.error('Failed to upload deliverable', { error, userId })
+      toast.error('Failed to upload deliverable', { description: error.message || 'Please try again' })
+    } finally {
+      setIsUploadingDeliverable(false)
+    }
+  }
+
+  // ============================================================================
+  // HANDLER 29: MESSAGE CLIENT
+  // ============================================================================
+  const handleMessageClient = async () => {
+    if (!messageClientId) {
+      toast.error('Please select a client')
+      return
+    }
+    if (!messageContent.trim()) {
+      toast.error('Please enter a message')
+      return
+    }
+
+    setIsSendingMessage(true)
+    logger.info('Sending message to client', { clientId: messageClientId, subject: messageSubject, userId })
+
+    try {
+      await new Promise(resolve => setTimeout(resolve, 800))
+      toast.success('Message sent successfully!', {
+        description: 'Your client will be notified'
+      })
+      setShowMessageClientDialog(false)
+      setMessageClientId('')
+      setMessageSubject('')
+      setMessageContent('')
+    } catch (error: any) {
+      logger.error('Failed to send message', { error, userId })
+      toast.error('Failed to send message', { description: error.message || 'Please try again' })
+    } finally {
+      setIsSendingMessage(false)
+    }
+  }
+
+  // ============================================================================
+  // HANDLER 30: CREATE INVOICE
+  // ============================================================================
+  const handleCreateInvoice = async () => {
+    if (!invoiceClientId) {
+      toast.error('Please select a client')
+      return
+    }
+    if (!invoiceAmount || parseFloat(invoiceAmount) <= 0) {
+      toast.error('Please enter a valid amount')
+      return
+    }
+    if (!invoiceDueDate) {
+      toast.error('Please select a due date')
+      return
+    }
+
+    setIsCreatingInvoice(true)
+    logger.info('Creating invoice', { clientId: invoiceClientId, amount: invoiceAmount, userId })
+
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      toast.success('Invoice created successfully!', {
+        description: `Invoice for ${formatCurrency(parseFloat(invoiceAmount))} has been generated`
+      })
+      setShowCreateInvoiceDialog(false)
+      setInvoiceClientId('')
+      setInvoiceAmount('')
+      setInvoiceDescription('')
+      setInvoiceDueDate('')
+    } catch (error: any) {
+      logger.error('Failed to create invoice', { error, userId })
+      toast.error('Failed to create invoice', { description: error.message || 'Please try again' })
+    } finally {
+      setIsCreatingInvoice(false)
+    }
+  }
+
+  // ============================================================================
+  // HANDLER 31: AI REVIEW & APPROVE
+  // ============================================================================
+  const handleAIReviewApprove = async () => {
+    if (aiReviewSelection === null) {
+      toast.error('Please select a design option')
+      return
+    }
+
+    logger.info('AI design approved', { selection: aiReviewSelection, feedback: aiReviewFeedback, userId })
+
+    try {
+      await new Promise(resolve => setTimeout(resolve, 800))
+      toast.success('Design approved!', {
+        description: `Option ${aiReviewSelection + 1} has been selected and approved`
+      })
+      setShowAIReviewDialog(false)
+      setAiReviewSelection(null)
+      setAiReviewFeedback('')
+    } catch (error: any) {
+      logger.error('Failed to approve AI design', { error, userId })
+      toast.error('Failed to approve design', { description: error.message || 'Please try again' })
+    }
+  }
+
+  // ============================================================================
+  // HANDLER 32: UPDATE PREFERENCES
+  // ============================================================================
+  const handleUpdatePreferences = async () => {
+    logger.info('Updating preferences', { style: prefStyle, colors: prefColors, industry: prefIndustry, userId })
+
+    try {
+      await new Promise(resolve => setTimeout(resolve, 600))
+      toast.success('Preferences updated!', {
+        description: 'Your style preferences have been saved'
+      })
+      setShowPreferencesDialog(false)
+    } catch (error: any) {
+      logger.error('Failed to update preferences', { error, userId })
+      toast.error('Failed to update preferences', { description: error.message || 'Please try again' })
+    }
+  }
+
+  // ============================================================================
+  // HANDLER 33: UPDATE CONTACT INFO
+  // ============================================================================
+  const handleUpdateContactInfo = async () => {
+    if (!contactEmail.trim()) {
+      toast.error('Please enter an email address')
+      return
+    }
+
+    logger.info('Updating contact info', { email: contactEmail, phone: contactPhone, userId })
+
+    try {
+      await new Promise(resolve => setTimeout(resolve, 700))
+      toast.success('Contact info updated!', {
+        description: 'Your contact information has been saved'
+      })
+      setShowContactInfoDialog(false)
+    } catch (error: any) {
+      logger.error('Failed to update contact info', { error, userId })
+      toast.error('Failed to update contact info', { description: error.message || 'Please try again' })
+    }
+  }
+
+  // ============================================================================
+  // HANDLER 34: CHANGE PASSWORD
+  // ============================================================================
+  const handleChangePassword = async () => {
+    if (!currentPassword) {
+      toast.error('Please enter your current password')
+      return
+    }
+    if (!newPassword || newPassword.length < 8) {
+      toast.error('New password must be at least 8 characters')
+      return
+    }
+    if (newPassword !== confirmPassword) {
+      toast.error('Passwords do not match')
+      return
+    }
+
+    setIsChangingPassword(true)
+    logger.info('Changing password', { userId })
+
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      toast.success('Password changed successfully!', {
+        description: 'Your password has been updated'
+      })
+      setShowPasswordDialog(false)
+      setCurrentPassword('')
+      setNewPassword('')
+      setConfirmPassword('')
+    } catch (error: any) {
+      logger.error('Failed to change password', { error, userId })
+      toast.error('Failed to change password', { description: error.message || 'Please try again' })
+    } finally {
+      setIsChangingPassword(false)
+    }
+  }
+
+  // ============================================================================
+  // HANDLER 35: EXPORT DATA (Settings)
+  // ============================================================================
+  const handleExportDataSettings = async () => {
+    setIsExportingData(true)
+    logger.info('Exporting data from settings', { type: dataExportType, userId })
+
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1500))
+      toast.success('Data export ready!', {
+        description: `Your ${dataExportType} data has been exported`
+      })
+      setShowDataExportDialog(false)
+    } catch (error: any) {
+      logger.error('Failed to export data', { error, userId })
+      toast.error('Failed to export data', { description: error.message || 'Please try again' })
+    } finally {
+      setIsExportingData(false)
+    }
+  }
+
   // A+++ LOADING STATE
   if (isLoading) {
     return (
@@ -1563,7 +1856,7 @@ export default function ClientZoneClient() {
                         </div>
                       ))}
                     </div>
-                    <Button variant="outline" className="w-full">
+                    <Button variant="outline" className="w-full" onClick={() => setShowAllClientsDialog(true)}>
                       <Users className="w-4 h-4 mr-2" />
                       View All Clients
                     </Button>
@@ -1596,7 +1889,7 @@ export default function ClientZoneClient() {
                         </div>
                       ))}
                     </div>
-                    <Button variant="outline" className="w-full">
+                    <Button variant="outline" className="w-full" onClick={() => setShowAllDeliverablesDialog(true)}>
                       <Eye className="w-4 h-4 mr-2" />
                       View All Deliverables
                     </Button>
@@ -1610,19 +1903,19 @@ export default function ClientZoneClient() {
                     Quick Actions
                   </h3>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                    <Button variant="outline" className="flex-col h-auto py-3 bg-white dark:bg-gray-900">
+                    <Button variant="outline" className="flex-col h-auto py-3 bg-white dark:bg-gray-900" onClick={() => setShowUploadDeliverableDialog(true)}>
                       <Upload className="w-5 h-5 mb-1" />
                       <span className="text-xs">Upload Deliverable</span>
                     </Button>
-                    <Button variant="outline" className="flex-col h-auto py-3 bg-white dark:bg-gray-900">
+                    <Button variant="outline" className="flex-col h-auto py-3 bg-white dark:bg-gray-900" onClick={() => setShowMessageClientDialog(true)}>
                       <MessageSquare className="w-5 h-5 mb-1" />
                       <span className="text-xs">Message Client</span>
                     </Button>
-                    <Button variant="outline" className="flex-col h-auto py-3 bg-white dark:bg-gray-900">
+                    <Button variant="outline" className="flex-col h-auto py-3 bg-white dark:bg-gray-900" onClick={() => setShowCreateInvoiceDialog(true)}>
                       <Receipt className="w-5 h-5 mb-1" />
                       <span className="text-xs">Create Invoice</span>
                     </Button>
-                    <Button variant="outline" className="flex-col h-auto py-3 bg-white dark:bg-gray-900">
+                    <Button variant="outline" className="flex-col h-auto py-3 bg-white dark:bg-gray-900" onClick={() => setShowReportsDialog(true)}>
                       <BarChart3 className="w-5 h-5 mb-1" />
                       <span className="text-xs">View Reports</span>
                     </Button>
@@ -2081,7 +2374,7 @@ export default function ClientZoneClient() {
                           <Badge className="bg-purple-100 text-purple-800">Ready for Review</Badge>
                         </div>
                         <p className="text-sm text-gray-600 mb-3">3 AI-generated logo concepts based on your preferences</p>
-                        <Button size="sm" className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white">
+                        <Button size="sm" className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white" onClick={() => setShowAIReviewDialog(true)}>
                           <Eye className="h-3 w-3 mr-1" />
                           Review & Approve
                         </Button>
@@ -2092,7 +2385,7 @@ export default function ClientZoneClient() {
                           <Badge className="bg-blue-100 text-blue-800">In Progress</Badge>
                         </div>
                         <p className="text-sm text-gray-600 mb-3">AI analyzing your brand preferences to suggest color schemes</p>
-                        <Button size="sm" variant="outline">
+                        <Button size="sm" variant="outline" onClick={() => setShowAIProgressDialog(true)}>
                           <Palette className="h-3 w-3 mr-1" />
                           View Progress
                         </Button>
@@ -2117,7 +2410,7 @@ export default function ClientZoneClient() {
                           <Badge variant="outline">Selected</Badge>
                         </div>
                       </div>
-                      <Button size="sm" variant="outline" className="mt-3">
+                      <Button size="sm" variant="outline" className="mt-3" onClick={() => setShowPreferencesDialog(true)}>
                         <Settings className="h-3 w-3 mr-1" />
                         Update Preferences
                       </Button>
@@ -2299,7 +2592,12 @@ export default function ClientZoneClient() {
                       <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50">
                         <p className="font-medium mb-2">Contact Information</p>
                         <p className="text-sm text-gray-600 mb-2">Email: {dashboardData?.email || 'N/A'}</p>
-                        <Button size="sm" variant="outline">
+                        <Button size="sm" variant="outline" onClick={() => {
+                          setContactEmail(dashboardData?.email || '')
+                          setContactPhone(dashboardData?.phone || '')
+                          setContactCompany(dashboardData?.company || '')
+                          setShowContactInfoDialog(true)
+                        }}>
                           <Edit className="h-3 w-3 mr-1" />
                           Update Contact Info
                         </Button>
@@ -2307,7 +2605,7 @@ export default function ClientZoneClient() {
                       <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50">
                         <p className="font-medium mb-2">Password & Security</p>
                         <p className="text-sm text-gray-600 mb-2">Last updated: 30 days ago</p>
-                        <Button size="sm" variant="outline">
+                        <Button size="sm" variant="outline" onClick={() => setShowPasswordDialog(true)}>
                           <Shield className="h-3 w-3 mr-1" />
                           Change Password
                         </Button>
@@ -2315,7 +2613,7 @@ export default function ClientZoneClient() {
                       <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50">
                         <p className="font-medium mb-2">Download Data</p>
                         <p className="text-sm text-gray-600 mb-2">Export your project data and communications</p>
-                        <Button size="sm" variant="outline">
+                        <Button size="sm" variant="outline" onClick={() => setShowDataExportDialog(true)}>
                           <Download className="h-3 w-3 mr-1" />
                           Export Data
                         </Button>
@@ -2798,6 +3096,690 @@ export default function ClientZoneClient() {
             <Button onClick={handleCreateReminder} className="bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-700 hover:to-orange-700 text-white">
               <Bell className="w-4 h-4 mr-2" />
               Create Reminder
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* View All Clients Dialog */}
+      <Dialog open={showAllClientsDialog} onOpenChange={setShowAllClientsDialog}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Users className="w-5 h-5 text-purple-600" />
+              All Clients
+            </DialogTitle>
+            <DialogDescription>
+              View and manage all your clients in one place.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4 max-h-[400px] overflow-y-auto">
+            {[
+              { name: 'Acme Corp', projects: 2, status: 'Active', revenue: 15000, color: 'blue' },
+              { name: 'Tech Startup Inc', projects: 1, status: 'Review', revenue: 8500, color: 'yellow' },
+              { name: 'Design Agency', projects: 1, status: 'Active', revenue: 12000, color: 'green' },
+              { name: 'Marketing Pro', projects: 3, status: 'Active', revenue: 22000, color: 'purple' },
+              { name: 'Global Enterprises', projects: 2, status: 'Completed', revenue: 35000, color: 'emerald' },
+            ].map((client, idx) => (
+              <div key={idx} className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Avatar className="h-10 w-10">
+                      <AvatarFallback className="bg-gradient-to-br from-purple-500 to-blue-500 text-white">
+                        {client.name.substring(0, 2).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <p className="font-medium text-gray-900 dark:text-gray-100">{client.name}</p>
+                      <p className="text-sm text-gray-500">{client.projects} project(s) - {formatCurrency(client.revenue)}</p>
+                    </div>
+                  </div>
+                  <Badge className={`bg-${client.color}-100 text-${client.color}-700`}>{client.status}</Badge>
+                </div>
+              </div>
+            ))}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAllClientsDialog(false)}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* View All Deliverables Dialog */}
+      <Dialog open={showAllDeliverablesDialog} onOpenChange={setShowAllDeliverablesDialog}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Eye className="w-5 h-5 text-green-600" />
+              All Deliverables
+            </DialogTitle>
+            <DialogDescription>
+              Track all pending and completed deliverables across projects.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4 max-h-[400px] overflow-y-auto">
+            {[
+              { project: 'Website Redesign', client: 'Acme Corp', type: 'Milestone 3', amount: 2500, status: 'pending' },
+              { project: 'Mobile App', client: 'Tech Startup', type: 'Final Delivery', amount: 5000, status: 'pending' },
+              { project: 'Brand Identity', client: 'Design Agency', type: 'Logo Design', amount: 1200, status: 'pending' },
+              { project: 'Marketing Campaign', client: 'Marketing Pro', type: 'Phase 2', amount: 3500, status: 'approved' },
+              { project: 'E-commerce Platform', client: 'Global Enterprises', type: 'MVP', amount: 8000, status: 'approved' },
+            ].map((deliverable, idx) => (
+              <div key={idx} className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+                <div className="flex items-center justify-between mb-2">
+                  <div>
+                    <p className="font-medium text-gray-900 dark:text-gray-100">{deliverable.project}</p>
+                    <p className="text-sm text-gray-500">{deliverable.client} - {deliverable.type}</p>
+                  </div>
+                  <p className="font-bold text-blue-600">{formatCurrency(deliverable.amount)}</p>
+                </div>
+                <Badge className={deliverable.status === 'approved' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}>
+                  {deliverable.status === 'approved' ? 'Approved' : 'Awaiting Approval'}
+                </Badge>
+              </div>
+            ))}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAllDeliverablesDialog(false)}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Upload Deliverable Dialog */}
+      <Dialog open={showUploadDeliverableDialog} onOpenChange={setShowUploadDeliverableDialog}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Upload className="w-5 h-5 text-blue-600" />
+              Upload Deliverable
+            </DialogTitle>
+            <DialogDescription>
+              Upload a new deliverable for your client.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="deliverable-title">Deliverable Title</Label>
+              <Input
+                id="deliverable-title"
+                placeholder="Enter deliverable title..."
+                value={deliverableTitle}
+                onChange={(e) => setDeliverableTitle(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="deliverable-project">Select Project</Label>
+              <Select value={deliverableProject} onValueChange={setDeliverableProject}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Choose a project" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="project-1">Website Redesign - Acme Corp</SelectItem>
+                  <SelectItem value="project-2">Mobile App - Tech Startup</SelectItem>
+                  <SelectItem value="project-3">Brand Identity - Design Agency</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Upload Files</Label>
+              <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6 text-center cursor-pointer hover:border-blue-500 transition-colors" onClick={handleUploadFile}>
+                <Upload className="w-8 h-8 mx-auto text-gray-400 mb-2" />
+                <p className="text-sm text-gray-600">Click to upload or drag and drop</p>
+                <p className="text-xs text-gray-500 mt-1">PDF, PNG, JPG, ZIP up to 50MB</p>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="deliverable-notes">Notes (Optional)</Label>
+              <Textarea
+                id="deliverable-notes"
+                placeholder="Add notes for the client..."
+                value={deliverableNotes}
+                onChange={(e) => setDeliverableNotes(e.target.value)}
+                rows={2}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowUploadDeliverableDialog(false)} disabled={isUploadingDeliverable}>
+              Cancel
+            </Button>
+            <Button onClick={handleUploadDeliverable} disabled={isUploadingDeliverable} className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white">
+              {isUploadingDeliverable ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Upload className="w-4 h-4 mr-2" />}
+              {isUploadingDeliverable ? 'Uploading...' : 'Upload Deliverable'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Message Client Dialog */}
+      <Dialog open={showMessageClientDialog} onOpenChange={setShowMessageClientDialog}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <MessageSquare className="w-5 h-5 text-green-600" />
+              Message Client
+            </DialogTitle>
+            <DialogDescription>
+              Send a message to your client.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="message-client">Select Client</Label>
+              <Select value={messageClientId} onValueChange={setMessageClientId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Choose a client" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="client-1">Acme Corp - John Smith</SelectItem>
+                  <SelectItem value="client-2">Tech Startup Inc - Sarah Lee</SelectItem>
+                  <SelectItem value="client-3">Design Agency - Mike Johnson</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="message-subject">Subject</Label>
+              <Input
+                id="message-subject"
+                placeholder="Enter subject..."
+                value={messageSubject}
+                onChange={(e) => setMessageSubject(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="message-content">Message</Label>
+              <Textarea
+                id="message-content"
+                placeholder="Type your message..."
+                value={messageContent}
+                onChange={(e) => setMessageContent(e.target.value)}
+                rows={4}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowMessageClientDialog(false)} disabled={isSendingMessage}>
+              Cancel
+            </Button>
+            <Button onClick={handleMessageClient} disabled={isSendingMessage} className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white">
+              {isSendingMessage ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Send className="w-4 h-4 mr-2" />}
+              {isSendingMessage ? 'Sending...' : 'Send Message'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Invoice Dialog */}
+      <Dialog open={showCreateInvoiceDialog} onOpenChange={setShowCreateInvoiceDialog}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Receipt className="w-5 h-5 text-purple-600" />
+              Create Invoice
+            </DialogTitle>
+            <DialogDescription>
+              Create a new invoice for your client.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="invoice-client">Select Client</Label>
+              <Select value={invoiceClientId} onValueChange={setInvoiceClientId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Choose a client" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="client-1">Acme Corp</SelectItem>
+                  <SelectItem value="client-2">Tech Startup Inc</SelectItem>
+                  <SelectItem value="client-3">Design Agency</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="invoice-amount">Amount (USD)</Label>
+              <Input
+                id="invoice-amount"
+                type="number"
+                placeholder="0.00"
+                value={invoiceAmount}
+                onChange={(e) => setInvoiceAmount(e.target.value)}
+                min="0"
+                step="0.01"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="invoice-description">Description</Label>
+              <Textarea
+                id="invoice-description"
+                placeholder="Describe the services..."
+                value={invoiceDescription}
+                onChange={(e) => setInvoiceDescription(e.target.value)}
+                rows={2}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="invoice-due-date">Due Date</Label>
+              <Input
+                id="invoice-due-date"
+                type="date"
+                value={invoiceDueDate}
+                onChange={(e) => setInvoiceDueDate(e.target.value)}
+                min={new Date().toISOString().split('T')[0]}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCreateInvoiceDialog(false)} disabled={isCreatingInvoice}>
+              Cancel
+            </Button>
+            <Button onClick={handleCreateInvoice} disabled={isCreatingInvoice} className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white">
+              {isCreatingInvoice ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Receipt className="w-4 h-4 mr-2" />}
+              {isCreatingInvoice ? 'Creating...' : 'Create Invoice'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* View Reports Dialog */}
+      <Dialog open={showReportsDialog} onOpenChange={setShowReportsDialog}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <BarChart3 className="w-5 h-5 text-blue-600" />
+              Reports & Analytics
+            </DialogTitle>
+            <DialogDescription>
+              View detailed reports and analytics for your freelance business.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Report Type</Label>
+                <Select value={reportType} onValueChange={(value: 'revenue' | 'clients' | 'projects') => setReportType(value)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="revenue">Revenue Report</SelectItem>
+                    <SelectItem value="clients">Client Report</SelectItem>
+                    <SelectItem value="projects">Project Report</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Time Period</Label>
+                <Select value={reportPeriod} onValueChange={(value: 'week' | 'month' | 'quarter' | 'year') => setReportPeriod(value)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="week">This Week</SelectItem>
+                    <SelectItem value="month">This Month</SelectItem>
+                    <SelectItem value="quarter">This Quarter</SelectItem>
+                    <SelectItem value="year">This Year</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="grid grid-cols-3 gap-4 mt-4">
+              <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 text-center">
+                <p className="text-2xl font-bold text-blue-600">{formatCurrency(24500)}</p>
+                <p className="text-sm text-gray-600">Total Revenue</p>
+              </div>
+              <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4 text-center">
+                <p className="text-2xl font-bold text-green-600">8</p>
+                <p className="text-sm text-gray-600">Active Clients</p>
+              </div>
+              <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-4 text-center">
+                <p className="text-2xl font-bold text-purple-600">12</p>
+                <p className="text-sm text-gray-600">Projects</p>
+              </div>
+            </div>
+            <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 mt-4">
+              <p className="text-sm text-gray-600 text-center">Detailed chart and analytics would display here</p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowReportsDialog(false)}>
+              Close
+            </Button>
+            <Button className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white">
+              <Download className="w-4 h-4 mr-2" />
+              Export Report
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* AI Review & Approve Dialog */}
+      <Dialog open={showAIReviewDialog} onOpenChange={setShowAIReviewDialog}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Brain className="w-5 h-5 text-purple-600" />
+              Review AI-Generated Designs
+            </DialogTitle>
+            <DialogDescription>
+              Select and approve one of the AI-generated logo concepts.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="grid grid-cols-3 gap-4">
+              {[0, 1, 2].map((index) => (
+                <div
+                  key={index}
+                  className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
+                    aiReviewSelection === index
+                      ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20'
+                      : 'border-gray-200 dark:border-gray-700 hover:border-purple-300'
+                  }`}
+                  onClick={() => setAiReviewSelection(index)}
+                >
+                  <div className="aspect-square bg-gradient-to-br from-purple-200 to-blue-200 dark:from-purple-800 dark:to-blue-800 rounded-lg mb-2 flex items-center justify-center">
+                    <span className="text-2xl font-bold text-purple-600 dark:text-purple-300">Logo {index + 1}</span>
+                  </div>
+                  <p className="text-sm text-center font-medium">Option {index + 1}</p>
+                </div>
+              ))}
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="ai-feedback">Feedback (Optional)</Label>
+              <Textarea
+                id="ai-feedback"
+                placeholder="Add any feedback or modifications needed..."
+                value={aiReviewFeedback}
+                onChange={(e) => setAiReviewFeedback(e.target.value)}
+                rows={2}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAIReviewDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleAIReviewApprove} className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white">
+              <CheckCircle className="w-4 h-4 mr-2" />
+              Approve Selection
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* AI Progress Dialog */}
+      <Dialog open={showAIProgressDialog} onOpenChange={setShowAIProgressDialog}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Palette className="w-5 h-5 text-blue-600" />
+              AI Color Palette Progress
+            </DialogTitle>
+            <DialogDescription>
+              Track the progress of AI-generated color palette suggestions.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">Analyzing brand preferences</span>
+                <Badge className="bg-green-100 text-green-700">Complete</Badge>
+              </div>
+              <Progress value={100} className="h-2" />
+            </div>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">Generating color combinations</span>
+                <Badge className="bg-blue-100 text-blue-700">In Progress</Badge>
+              </div>
+              <Progress value={65} className="h-2" />
+            </div>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">Creating palette variations</span>
+                <Badge className="bg-gray-100 text-gray-700">Pending</Badge>
+              </div>
+              <Progress value={0} className="h-2" />
+            </div>
+            <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 mt-4">
+              <p className="text-sm text-blue-800 dark:text-blue-200">
+                Estimated completion: 15 minutes. You will be notified when the color palette options are ready.
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAIProgressDialog(false)}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Update Preferences Dialog */}
+      <Dialog open={showPreferencesDialog} onOpenChange={setShowPreferencesDialog}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Settings className="w-5 h-5 text-gray-600" />
+              Update Style Preferences
+            </DialogTitle>
+            <DialogDescription>
+              Customize your design preferences for AI-generated content.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Design Style</Label>
+              <Select value={prefStyle} onValueChange={setPrefStyle}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="modern">Modern & Minimalist</SelectItem>
+                  <SelectItem value="classic">Classic & Elegant</SelectItem>
+                  <SelectItem value="bold">Bold & Dynamic</SelectItem>
+                  <SelectItem value="playful">Playful & Creative</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Color Preference</Label>
+              <Select value={prefColors} onValueChange={setPrefColors}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="vibrant">Vibrant & Colorful</SelectItem>
+                  <SelectItem value="muted">Muted & Soft</SelectItem>
+                  <SelectItem value="monochrome">Monochrome</SelectItem>
+                  <SelectItem value="earthy">Earthy & Natural</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Industry Focus</Label>
+              <Select value={prefIndustry} onValueChange={setPrefIndustry}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="technology">Technology</SelectItem>
+                  <SelectItem value="healthcare">Healthcare</SelectItem>
+                  <SelectItem value="finance">Finance</SelectItem>
+                  <SelectItem value="creative">Creative & Arts</SelectItem>
+                  <SelectItem value="retail">Retail & E-commerce</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowPreferencesDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleUpdatePreferences} className="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white">
+              <CheckCircle className="w-4 h-4 mr-2" />
+              Save Preferences
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Update Contact Info Dialog */}
+      <Dialog open={showContactInfoDialog} onOpenChange={setShowContactInfoDialog}>
+        <DialogContent className="sm:max-w-[450px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Edit className="w-5 h-5 text-blue-600" />
+              Update Contact Information
+            </DialogTitle>
+            <DialogDescription>
+              Update your contact details.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="contact-email">Email Address</Label>
+              <Input
+                id="contact-email"
+                type="email"
+                placeholder="your@email.com"
+                value={contactEmail}
+                onChange={(e) => setContactEmail(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="contact-phone">Phone Number</Label>
+              <Input
+                id="contact-phone"
+                type="tel"
+                placeholder="+1 (555) 000-0000"
+                value={contactPhone}
+                onChange={(e) => setContactPhone(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="contact-company">Company Name</Label>
+              <Input
+                id="contact-company"
+                placeholder="Your Company"
+                value={contactCompany}
+                onChange={(e) => setContactCompany(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowContactInfoDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleUpdateContactInfo} className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white">
+              <CheckCircle className="w-4 h-4 mr-2" />
+              Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Change Password Dialog */}
+      <Dialog open={showPasswordDialog} onOpenChange={setShowPasswordDialog}>
+        <DialogContent className="sm:max-w-[450px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Shield className="w-5 h-5 text-green-600" />
+              Change Password
+            </DialogTitle>
+            <DialogDescription>
+              Update your account password for security.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="current-password">Current Password</Label>
+              <Input
+                id="current-password"
+                type="password"
+                placeholder="Enter current password"
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="new-password">New Password</Label>
+              <Input
+                id="new-password"
+                type="password"
+                placeholder="Enter new password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+              />
+              <p className="text-xs text-gray-500">Must be at least 8 characters</p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="confirm-password">Confirm New Password</Label>
+              <Input
+                id="confirm-password"
+                type="password"
+                placeholder="Confirm new password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowPasswordDialog(false)} disabled={isChangingPassword}>
+              Cancel
+            </Button>
+            <Button onClick={handleChangePassword} disabled={isChangingPassword} className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white">
+              {isChangingPassword ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Shield className="w-4 h-4 mr-2" />}
+              {isChangingPassword ? 'Changing...' : 'Change Password'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Export Data Dialog (Settings Tab) */}
+      <Dialog open={showDataExportDialog} onOpenChange={setShowDataExportDialog}>
+        <DialogContent className="sm:max-w-[450px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Download className="w-5 h-5 text-purple-600" />
+              Export Your Data
+            </DialogTitle>
+            <DialogDescription>
+              Download a copy of your project data and communications.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Data to Export</Label>
+              <Select value={dataExportType} onValueChange={(value: 'all' | 'projects' | 'messages' | 'invoices') => setDataExportType(value)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Data</SelectItem>
+                  <SelectItem value="projects">Projects Only</SelectItem>
+                  <SelectItem value="messages">Messages Only</SelectItem>
+                  <SelectItem value="invoices">Invoices Only</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Your data will be exported as a ZIP file containing JSON and PDF documents.
+                This may take a few minutes depending on the amount of data.
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowDataExportDialog(false)} disabled={isExportingData}>
+              Cancel
+            </Button>
+            <Button onClick={handleExportDataSettings} disabled={isExportingData} className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white">
+              {isExportingData ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Download className="w-4 h-4 mr-2" />}
+              {isExportingData ? 'Exporting...' : 'Export Data'}
             </Button>
           </DialogFooter>
         </DialogContent>
