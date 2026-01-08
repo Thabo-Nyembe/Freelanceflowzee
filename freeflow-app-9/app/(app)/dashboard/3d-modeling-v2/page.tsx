@@ -5,5 +5,5 @@ import ThreeDModelingClient from './3d-modeling-client'
 export default function Page() {
   // Auth is handled by NextAuth middleware
   // Data fetching is handled by the client component's hooks
-  return <ThreeDModelingClient initialModels={[]} />
+  return <ThreeDModelingClient />
 }

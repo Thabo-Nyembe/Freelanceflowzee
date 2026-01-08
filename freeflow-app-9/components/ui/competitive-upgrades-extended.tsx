@@ -910,12 +910,14 @@ interface QuickAction {
 interface QuickActionsToolbarProps {
   actions: QuickAction[]
   position?: 'bottom' | 'top' | 'floating'
+  variant?: 'default' | 'grid' | 'compact' | 'inline'
   className?: string
 }
 
 export function QuickActionsToolbar({
   actions = [],
   position = 'bottom',
+  variant = 'default',
   className
 }: QuickActionsToolbarProps) {
   const [isExpanded, setIsExpanded] = React.useState(false)
@@ -938,6 +940,92 @@ export function QuickActionsToolbar({
     floating: 'fixed bottom-20 right-4',
   }
 
+  // Grid variant - displays actions in a grid layout (non-fixed position)
+  if (variant === 'grid') {
+    return (
+      <div
+        className={cn(
+          "p-4 bg-background border rounded-xl",
+          className
+        )}
+      >
+        <h4 className="text-sm font-medium mb-3">Quick Actions</h4>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+          {actions.map((action) => (
+            <Button
+              key={action.id}
+              variant="outline"
+              size="sm"
+              className="h-auto py-3 px-3 flex flex-col items-center gap-2 hover:bg-muted"
+              onClick={action.action}
+            >
+              {action.icon}
+              <span className="text-xs font-medium text-center">{action.label}</span>
+            </Button>
+          ))}
+        </div>
+      </div>
+    )
+  }
+
+  // Compact variant - horizontal list of small buttons
+  if (variant === 'compact') {
+    return (
+      <div
+        className={cn(
+          "flex items-center gap-1 p-1 bg-background border rounded-lg",
+          className
+        )}
+      >
+        {actions.map((action) => (
+          <TooltipProvider key={action.id}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 px-2"
+                  onClick={action.action}
+                >
+                  {action.icon}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <span>{action.label}</span>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        ))}
+      </div>
+    )
+  }
+
+  // Inline variant - horizontal list with labels
+  if (variant === 'inline') {
+    return (
+      <div
+        className={cn(
+          "flex flex-wrap items-center gap-2",
+          className
+        )}
+      >
+        {actions.map((action) => (
+          <Button
+            key={action.id}
+            variant="outline"
+            size="sm"
+            className="h-8"
+            onClick={action.action}
+          >
+            {action.icon}
+            <span className="ml-2">{action.label}</span>
+          </Button>
+        ))}
+      </div>
+    )
+  }
+
+  // Default variant - floating toolbar with expand functionality
   return (
     <motion.div
       className={cn(

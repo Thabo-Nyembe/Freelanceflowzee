@@ -2,7 +2,7 @@
 
 export const dynamic = 'force-dynamic';
 
-import { useState, useEffect, useReducer, useMemo } from 'react'
+import React, { useState, useEffect, useReducer, useMemo } from 'react'
 import { PageHeader } from '@/components/ui/page-header'
 import { CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'

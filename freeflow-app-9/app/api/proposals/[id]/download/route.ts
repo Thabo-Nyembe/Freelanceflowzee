@@ -1,18 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/utils/supabase/server'
+import { createClient } from '@/lib/supabase/server'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const supabase = await createClient()
 
     // Fetch proposal data
     const { data: proposal, error } = await supabase
       .from('proposals')
       .select('*')
-      .eq('id', params.id)
+      .eq('id', id)
       .single()
 
     if (error) {
@@ -26,7 +27,7 @@ export async function GET(
     return new NextResponse(pdfContent, {
       headers: {
         'Content-Type': 'application/pdf',
-        'Content-Disposition': `attachment; filename="proposal-${proposal.proposal_number || params.id}.pdf"`,
+        'Content-Disposition': `attachment; filename="proposal-${proposal.proposal_number || id}.pdf"`,
       },
     })
   } catch (error) {
