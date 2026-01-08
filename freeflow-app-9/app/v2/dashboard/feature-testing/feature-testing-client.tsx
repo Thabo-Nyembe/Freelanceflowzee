@@ -16,10 +16,29 @@ export const dynamic = 'force-dynamic';
 
 import * as React from 'react'
 import { useRouter } from 'next/navigation'
-import { memo, useMemo, useCallback, useTransition } from 'react'
+import { memo, useMemo, useCallback, useTransition, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { Switch } from '@/components/ui/switch'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import {
   CheckCircle,
   XCircle,
@@ -27,7 +46,12 @@ import {
   AlertCircle,
   ExternalLink,
   Play,
-  RefreshCw
+  RefreshCw,
+  Plus,
+  Download,
+  Settings,
+  Zap,
+  TestTube
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
@@ -379,11 +403,7 @@ const featureTestingActivities = [
   { id: '3', user: 'System', action: 'generated', target: 'weekly report', timestamp: '1h ago', type: 'info' as const },
 ]
 
-const featureTestingQuickActions = [
-  { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => toast.success('Test Created', { description: 'New feature test ready' }) },
-  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => toast.success('Data Exported', { description: 'Test results exported' }) },
-  { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => toast.success('Settings', { description: 'Testing settings opened' }) },
-]
+// Quick actions will be defined inside component to access state setters
 
 export default function FeatureTestingClient() {
   // A+++ STATE MANAGEMENT
@@ -399,6 +419,38 @@ export default function FeatureTestingClient() {
 
   // useTransition for non-blocking test operations
   const [isPending, startTransition] = useTransition()
+
+  // Dialog states for quick actions
+  const [showNewTestDialog, setShowNewTestDialog] = useState(false)
+  const [showExportDialog, setShowExportDialog] = useState(false)
+  const [showSettingsDialog, setShowSettingsDialog] = useState(false)
+
+  // Form states for new test dialog
+  const [newTestName, setNewTestName] = useState('')
+  const [newTestPath, setNewTestPath] = useState('')
+  const [newTestCategory, setNewTestCategory] = useState('')
+  const [newTestDescription, setNewTestDescription] = useState('')
+
+  // Form states for export dialog
+  const [exportFormat, setExportFormat] = useState('json')
+  const [includePassedTests, setIncludePassedTests] = useState(true)
+  const [includeFailedTests, setIncludeFailedTests] = useState(true)
+  const [includeWarningTests, setIncludeWarningTests] = useState(true)
+  const [includePendingTests, setIncludePendingTests] = useState(false)
+
+  // Form states for settings dialog
+  const [autoRunTests, setAutoRunTests] = useState(false)
+  const [testTimeout, setTestTimeout] = useState('5000')
+  const [parallelTests, setParallelTests] = useState(false)
+  const [notifyOnComplete, setNotifyOnComplete] = useState(true)
+  const [verboseLogging, setVerboseLogging] = useState(false)
+
+  // Quick actions with dialog openers
+  const featureTestingQuickActions = useMemo(() => [
+    { id: '1', label: 'New Test', icon: 'Plus', shortcut: 'N', action: () => setShowNewTestDialog(true) },
+    { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => setShowExportDialog(true) },
+    { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => setShowSettingsDialog(true) },
+  ], [])
 
   // A+++ LOAD FEATURE TESTING DATA
   React.useEffect(() => {
@@ -494,6 +546,174 @@ export default function FeatureTestingClient() {
   }), [tests])
 
   const { total: totalTests, passed: passedTests, failed: failedTests, warning: warningTests } = testStatistics
+
+  // Handler for creating a new test
+  const handleCreateTest = useCallback(() => {
+    if (!newTestName.trim() || !newTestPath.trim() || !newTestCategory.trim()) {
+      toast.error('Missing required fields', { description: 'Please fill in name, path, and category' })
+      return
+    }
+
+    const newTest: FeatureTest = {
+      id: `custom-${Date.now()}`,
+      name: newTestName.trim(),
+      path: newTestPath.startsWith('/') ? newTestPath.trim() : `/${newTestPath.trim()}`,
+      category: newTestCategory.trim(),
+      description: newTestDescription.trim() || 'Custom test case',
+      status: 'pending'
+    }
+
+    setTests(prev => [...prev, newTest])
+    toast.success('Test Created', { description: `Added "${newTestName}" to ${newTestCategory}` })
+
+    // Reset form
+    setNewTestName('')
+    setNewTestPath('')
+    setNewTestCategory('')
+    setNewTestDescription('')
+    setShowNewTestDialog(false)
+  }, [newTestName, newTestPath, newTestCategory, newTestDescription])
+
+  // Handler for exporting test results
+  const handleExportResults = useCallback(() => {
+    const filteredTests = tests.filter(test => {
+      if (test.status === 'passed' && !includePassedTests) return false
+      if (test.status === 'failed' && !includeFailedTests) return false
+      if (test.status === 'warning' && !includeWarningTests) return false
+      if (test.status === 'pending' && !includePendingTests) return false
+      return true
+    })
+
+    const exportData = {
+      exportedAt: new Date().toISOString(),
+      summary: {
+        total: filteredTests.length,
+        passed: filteredTests.filter(t => t.status === 'passed').length,
+        failed: filteredTests.filter(t => t.status === 'failed').length,
+        warning: filteredTests.filter(t => t.status === 'warning').length,
+        pending: filteredTests.filter(t => t.status === 'pending').length,
+      },
+      tests: filteredTests.map(test => ({
+        id: test.id,
+        name: test.name,
+        path: test.path,
+        category: test.category,
+        description: test.description,
+        status: test.status,
+        issues: test.issues || [],
+        dependencies: test.dependencies || [],
+        result: testResults[test.id] || null
+      }))
+    }
+
+    let content: string
+    let mimeType: string
+    let fileExtension: string
+
+    if (exportFormat === 'json') {
+      content = JSON.stringify(exportData, null, 2)
+      mimeType = 'application/json'
+      fileExtension = 'json'
+    } else if (exportFormat === 'csv') {
+      const headers = ['ID', 'Name', 'Path', 'Category', 'Description', 'Status', 'Issues']
+      const rows = filteredTests.map(test => [
+        test.id,
+        test.name,
+        test.path,
+        test.category,
+        test.description,
+        test.status,
+        (test.issues || []).join('; ')
+      ])
+      content = [headers.join(','), ...rows.map(row => row.map(cell => `"${cell}"`).join(','))].join('\n')
+      mimeType = 'text/csv'
+      fileExtension = 'csv'
+    } else {
+      // Markdown format
+      content = `# Feature Testing Report\n\n`
+      content += `**Exported:** ${new Date().toLocaleString()}\n\n`
+      content += `## Summary\n\n`
+      content += `- Total Tests: ${exportData.summary.total}\n`
+      content += `- Passed: ${exportData.summary.passed}\n`
+      content += `- Failed: ${exportData.summary.failed}\n`
+      content += `- Warnings: ${exportData.summary.warning}\n`
+      content += `- Pending: ${exportData.summary.pending}\n\n`
+      content += `## Test Results\n\n`
+
+      Object.entries(groupedTests).forEach(([category, categoryTests]) => {
+        const filteredCategoryTests = categoryTests.filter(t => filteredTests.find(ft => ft.id === t.id))
+        if (filteredCategoryTests.length > 0) {
+          content += `### ${category}\n\n`
+          filteredCategoryTests.forEach(test => {
+            const statusEmoji = test.status === 'passed' ? 'check' : test.status === 'failed' ? 'x' : test.status === 'warning' ? 'warning' : 'clock'
+            content += `- [${statusEmoji}] **${test.name}** (${test.path})\n`
+            content += `  - ${test.description}\n`
+            if (test.issues && test.issues.length > 0) {
+              content += `  - Issues: ${test.issues.join(', ')}\n`
+            }
+          })
+          content += '\n'
+        }
+      })
+
+      mimeType = 'text/markdown'
+      fileExtension = 'md'
+    }
+
+    const blob = new Blob([content], { type: mimeType })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `feature-testing-report-${new Date().toISOString().split('T')[0]}.${fileExtension}`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+
+    toast.success('Export Complete', { description: `Downloaded ${filteredTests.length} test results as ${exportFormat.toUpperCase()}` })
+    setShowExportDialog(false)
+  }, [tests, testResults, groupedTests, exportFormat, includePassedTests, includeFailedTests, includeWarningTests, includePendingTests])
+
+  // Handler for saving settings
+  const handleSaveSettings = useCallback(() => {
+    // Save settings to localStorage for persistence
+    const settings = {
+      autoRunTests,
+      testTimeout: parseInt(testTimeout),
+      parallelTests,
+      notifyOnComplete,
+      verboseLogging
+    }
+
+    localStorage.setItem('featureTestingSettings', JSON.stringify(settings))
+    toast.success('Settings Saved', {
+      description: `Timeout: ${testTimeout}ms, Parallel: ${parallelTests ? 'Yes' : 'No'}, Notifications: ${notifyOnComplete ? 'On' : 'Off'}`
+    })
+    setShowSettingsDialog(false)
+  }, [autoRunTests, testTimeout, parallelTests, notifyOnComplete, verboseLogging])
+
+  // Load settings from localStorage on mount
+  React.useEffect(() => {
+    const savedSettings = localStorage.getItem('featureTestingSettings')
+    if (savedSettings) {
+      try {
+        const settings = JSON.parse(savedSettings)
+        if (settings.autoRunTests !== undefined) setAutoRunTests(settings.autoRunTests)
+        if (settings.testTimeout !== undefined) setTestTimeout(String(settings.testTimeout))
+        if (settings.parallelTests !== undefined) setParallelTests(settings.parallelTests)
+        if (settings.notifyOnComplete !== undefined) setNotifyOnComplete(settings.notifyOnComplete)
+        if (settings.verboseLogging !== undefined) setVerboseLogging(settings.verboseLogging)
+      } catch (e) {
+        console.error('Failed to load settings:', e)
+      }
+    }
+  }, [])
+
+  // Get unique categories for the dropdown
+  const availableCategories = useMemo(() => {
+    const categories = new Set(tests.map(t => t.category))
+    return Array.from(categories)
+  }, [tests])
 
   // A+++ LOADING STATE
   if (isLoading) {
@@ -639,6 +859,229 @@ export default function FeatureTestingClient() {
           ))}
         </div>
       </div>
+
+      {/* New Test Dialog */}
+      <Dialog open={showNewTestDialog} onOpenChange={setShowNewTestDialog}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <TestTube className="h-5 w-5 text-blue-600" />
+              Create New Feature Test
+            </DialogTitle>
+            <DialogDescription>
+              Add a custom feature test to the testing suite. Fill in the details below to create a new test case.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="testName">Test Name *</Label>
+              <Input
+                id="testName"
+                placeholder="e.g., User Authentication"
+                value={newTestName}
+                onChange={(e) => setNewTestName(e.target.value)}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="testPath">Route Path *</Label>
+              <Input
+                id="testPath"
+                placeholder="e.g., /dashboard/auth"
+                value={newTestPath}
+                onChange={(e) => setNewTestPath(e.target.value)}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="testCategory">Category *</Label>
+              <Select value={newTestCategory} onValueChange={setNewTestCategory}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select or type a category" />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableCategories.map((cat) => (
+                    <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                  ))}
+                  <SelectItem value="Custom">Custom Category</SelectItem>
+                </SelectContent>
+              </Select>
+              {newTestCategory === 'Custom' && (
+                <Input
+                  placeholder="Enter custom category name"
+                  onChange={(e) => setNewTestCategory(e.target.value)}
+                />
+              )}
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="testDescription">Description</Label>
+              <Textarea
+                id="testDescription"
+                placeholder="Describe what this test verifies..."
+                value={newTestDescription}
+                onChange={(e) => setNewTestDescription(e.target.value)}
+                rows={3}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowNewTestDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleCreateTest} className="gap-2">
+              <Plus className="h-4 w-4" />
+              Create Test
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Export Dialog */}
+      <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Download className="h-5 w-5 text-green-600" />
+              Export Test Results
+            </DialogTitle>
+            <DialogDescription>
+              Export your feature testing results in various formats. Filter which test statuses to include.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label>Export Format</Label>
+              <Select value={exportFormat} onValueChange={setExportFormat}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="json">JSON (Detailed)</SelectItem>
+                  <SelectItem value="csv">CSV (Spreadsheet)</SelectItem>
+                  <SelectItem value="md">Markdown (Report)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-3">
+              <Label>Include Test Statuses</Label>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4 text-green-600" />
+                  <span className="text-sm">Passed Tests ({tests.filter(t => t.status === 'passed').length})</span>
+                </div>
+                <Switch checked={includePassedTests} onCheckedChange={setIncludePassedTests} />
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <XCircle className="h-4 w-4 text-red-600" />
+                  <span className="text-sm">Failed Tests ({tests.filter(t => t.status === 'failed').length})</span>
+                </div>
+                <Switch checked={includeFailedTests} onCheckedChange={setIncludeFailedTests} />
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <AlertCircle className="h-4 w-4 text-yellow-600" />
+                  <span className="text-sm">Warning Tests ({tests.filter(t => t.status === 'warning').length})</span>
+                </div>
+                <Switch checked={includeWarningTests} onCheckedChange={setIncludeWarningTests} />
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Clock className="h-4 w-4 text-gray-400" />
+                  <span className="text-sm">Pending Tests ({tests.filter(t => t.status === 'pending').length})</span>
+                </div>
+                <Switch checked={includePendingTests} onCheckedChange={setIncludePendingTests} />
+              </div>
+            </div>
+            <div className="p-3 bg-muted rounded-lg">
+              <div className="text-sm text-muted-foreground">
+                <strong>Preview:</strong> {tests.filter(test => {
+                  if (test.status === 'passed' && !includePassedTests) return false
+                  if (test.status === 'failed' && !includeFailedTests) return false
+                  if (test.status === 'warning' && !includeWarningTests) return false
+                  if (test.status === 'pending' && !includePendingTests) return false
+                  return true
+                }).length} tests will be exported
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowExportDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleExportResults} className="gap-2">
+              <Download className="h-4 w-4" />
+              Export Results
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Settings Dialog */}
+      <Dialog open={showSettingsDialog} onOpenChange={setShowSettingsDialog}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Settings className="h-5 w-5 text-purple-600" />
+              Testing Settings
+            </DialogTitle>
+            <DialogDescription>
+              Configure how feature tests are executed and managed.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label>Auto-run Tests on Load</Label>
+                <p className="text-sm text-muted-foreground">Automatically start testing when page loads</p>
+              </div>
+              <Switch checked={autoRunTests} onCheckedChange={setAutoRunTests} />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="timeout">Test Timeout (milliseconds)</Label>
+              <Select value={testTimeout} onValueChange={setTestTimeout}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="3000">3 seconds (Fast)</SelectItem>
+                  <SelectItem value="5000">5 seconds (Default)</SelectItem>
+                  <SelectItem value="10000">10 seconds (Slow)</SelectItem>
+                  <SelectItem value="30000">30 seconds (Very Slow)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label>Parallel Test Execution</Label>
+                <p className="text-sm text-muted-foreground">Run multiple tests simultaneously</p>
+              </div>
+              <Switch checked={parallelTests} onCheckedChange={setParallelTests} />
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label>Notifications</Label>
+                <p className="text-sm text-muted-foreground">Show notifications when tests complete</p>
+              </div>
+              <Switch checked={notifyOnComplete} onCheckedChange={setNotifyOnComplete} />
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label>Verbose Logging</Label>
+                <p className="text-sm text-muted-foreground">Log detailed test information to console</p>
+              </div>
+              <Switch checked={verboseLogging} onCheckedChange={setVerboseLogging} />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowSettingsDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSaveSettings} className="gap-2">
+              <Zap className="h-4 w-4" />
+              Save Settings
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

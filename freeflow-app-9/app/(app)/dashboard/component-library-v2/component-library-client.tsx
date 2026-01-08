@@ -362,13 +362,6 @@ const mockComponentLibActivities = [
   { id: '3', user: 'UX Writer', action: 'added', target: 'usage guidelines for Modal', timestamp: '2h ago', type: 'info' as const },
 ]
 
-const mockComponentLibQuickActions = [
-  { id: '1', label: 'New Component', icon: 'Plus', shortcut: 'N', action: () => toast.success('Component scaffold created! Add props and variants') },
-  { id: '2', label: 'Browse', icon: 'Layers', shortcut: 'B', action: () => toast.success('Component Browser - 47 components, 12 categories') },
-  { id: '3', label: 'Playground', icon: 'Play', shortcut: 'P', action: () => toast.success('Playground Mode - Interactive testing environment ready') },
-  { id: '4', label: 'Docs', icon: 'BookOpen', shortcut: 'D', action: () => toast.success('Component Docs - Full API reference, examples, and guidelines') },
-]
-
 export default function ComponentLibraryClient() {
   const [activeTab, setActiveTab] = useState('components')
   const [searchQuery, setSearchQuery] = useState('')
@@ -382,6 +375,20 @@ export default function ComponentLibraryClient() {
   const [iconSearch, setIconSearch] = useState('')
   const [settingsTab, setSettingsTab] = useState('display')
   const [showApiKey, setShowApiKey] = useState(false)
+
+  // Dialog states for quick actions
+  const [showNewComponentDialog, setShowNewComponentDialog] = useState(false)
+  const [showBrowseDialog, setShowBrowseDialog] = useState(false)
+  const [showPlaygroundDialog, setShowPlaygroundDialog] = useState(false)
+  const [showDocsDialog, setShowDocsDialog] = useState(false)
+
+  // Quick actions with proper dialog handlers
+  const mockComponentLibQuickActions = [
+    { id: '1', label: 'New Component', icon: 'Plus', shortcut: 'N', action: () => setShowNewComponentDialog(true) },
+    { id: '2', label: 'Browse', icon: 'Layers', shortcut: 'B', action: () => setShowBrowseDialog(true) },
+    { id: '3', label: 'Playground', icon: 'Play', shortcut: 'P', action: () => setShowPlaygroundDialog(true) },
+    { id: '4', label: 'Docs', icon: 'BookOpen', shortcut: 'D', action: () => setShowDocsDialog(true) },
+  ]
 
   const filteredComponents = useMemo(() => {
     let filtered = [...mockComponents]
@@ -2071,6 +2078,291 @@ export default function App() {
             </DialogContent>
           </Dialog>
         )}
+
+        {/* New Component Dialog */}
+        <Dialog open={showNewComponentDialog} onOpenChange={setShowNewComponentDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Plus className="h-5 w-5 text-violet-600" />
+                Create New Component
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Component Name</Label>
+                <Input placeholder="e.g., Button, Card, Modal..." />
+              </div>
+              <div className="space-y-2">
+                <Label>Category</Label>
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories.map(cat => (
+                      <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Description</Label>
+                <Input placeholder="Brief description of the component" />
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowNewComponentDialog(false)}>
+                  Cancel
+                </Button>
+                <Button className="flex-1 bg-violet-600 hover:bg-violet-700" onClick={() => {
+                  setShowNewComponentDialog(false)
+                  toast.success('Component scaffold created!', { description: 'Add props and variants to complete setup' })
+                }}>
+                  Create Component
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Browse Components Dialog */}
+        <Dialog open={showBrowseDialog} onOpenChange={setShowBrowseDialog}>
+          <DialogContent className="max-w-2xl max-h-[80vh]">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Layers className="h-5 w-5 text-violet-600" />
+                Component Browser
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Input placeholder="Search 47 components across 12 categories..." className="pl-10" />
+              </div>
+              <ScrollArea className="h-[400px]">
+                <div className="grid grid-cols-2 gap-3">
+                  {mockComponents.map(comp => (
+                    <div
+                      key={comp.id}
+                      className="p-4 border rounded-lg hover:border-violet-300 hover:bg-violet-50 dark:hover:bg-violet-900/20 cursor-pointer transition-all"
+                      onClick={() => {
+                        setShowBrowseDialog(false)
+                        setSelectedComponent(comp)
+                      }}
+                    >
+                      <div className="flex items-center gap-2 mb-2">
+                        <Puzzle className="h-4 w-4 text-violet-600" />
+                        <span className="font-medium">{comp.displayName}</span>
+                        <Badge className={`text-xs ${getStatusColor(comp.status)}`}>{comp.status}</Badge>
+                      </div>
+                      <p className="text-sm text-gray-500 line-clamp-2">{comp.description}</p>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+              <div className="flex justify-end">
+                <Button variant="outline" onClick={() => setShowBrowseDialog(false)}>Close</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Playground Dialog */}
+        <Dialog open={showPlaygroundDialog} onOpenChange={setShowPlaygroundDialog}>
+          <DialogContent className="max-w-4xl max-h-[90vh]">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Play className="h-5 w-5 text-violet-600" />
+                Component Playground
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label>Select Component</Label>
+                    <Select>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Choose a component" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {mockComponents.map(comp => (
+                          <SelectItem key={comp.id} value={comp.id}>{comp.displayName}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Props Editor</Label>
+                    <div className="p-4 border rounded-lg bg-gray-50 dark:bg-gray-800">
+                      <div className="flex items-center justify-between mb-2">
+                        <Label className="text-sm">variant</Label>
+                        <Select defaultValue="primary">
+                          <SelectTrigger className="w-32 h-8">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="primary">primary</SelectItem>
+                            <SelectItem value="secondary">secondary</SelectItem>
+                            <SelectItem value="outline">outline</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="flex items-center justify-between mb-2">
+                        <Label className="text-sm">size</Label>
+                        <Select defaultValue="md">
+                          <SelectTrigger className="w-32 h-8">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="sm">sm</SelectItem>
+                            <SelectItem value="md">md</SelectItem>
+                            <SelectItem value="lg">lg</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <Label className="text-sm">disabled</Label>
+                        <Switch />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label>Preview</Label>
+                  <div className="p-8 border rounded-lg bg-white dark:bg-gray-900 min-h-[200px] flex items-center justify-center">
+                    <Button>Sample Button</Button>
+                  </div>
+                  <Label>Generated Code</Label>
+                  <div className="p-4 bg-gray-900 rounded-lg">
+                    <pre className="text-sm text-gray-100"><code>{`<Button variant="primary" size="md">\n  Sample Button\n</Button>`}</code></pre>
+                  </div>
+                </div>
+              </div>
+              <div className="flex gap-2 justify-end">
+                <Button variant="outline" onClick={() => setShowPlaygroundDialog(false)}>Close</Button>
+                <Button className="bg-violet-600 hover:bg-violet-700" onClick={() => {
+                  handleCopyCode('<Button variant="primary" size="md">Sample Button</Button>')
+                }}>
+                  <Copy className="h-4 w-4 mr-2" />
+                  Copy Code
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Documentation Dialog */}
+        <Dialog open={showDocsDialog} onOpenChange={setShowDocsDialog}>
+          <DialogContent className="max-w-3xl max-h-[80vh]">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <BookOpen className="h-5 w-5 text-violet-600" />
+                Component Documentation
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <Tabs defaultValue="getting-started">
+                <TabsList className="w-full justify-start">
+                  <TabsTrigger value="getting-started">Getting Started</TabsTrigger>
+                  <TabsTrigger value="api">API Reference</TabsTrigger>
+                  <TabsTrigger value="examples">Examples</TabsTrigger>
+                  <TabsTrigger value="guidelines">Guidelines</TabsTrigger>
+                </TabsList>
+                <TabsContent value="getting-started" className="mt-4">
+                  <ScrollArea className="h-[400px]">
+                    <div className="space-y-4 pr-4">
+                      <h3 className="text-lg font-semibold">Installation</h3>
+                      <div className="p-4 bg-gray-900 rounded-lg">
+                        <code className="text-gray-100">npm install @kazi/ui-components</code>
+                      </div>
+                      <h3 className="text-lg font-semibold">Basic Usage</h3>
+                      <p className="text-gray-600">Import components from the library and use them in your React application:</p>
+                      <div className="p-4 bg-gray-900 rounded-lg">
+                        <pre className="text-sm text-gray-100"><code>{`import { Button, Card, Input } from '@kazi/ui-components'\n\nexport function MyComponent() {\n  return (\n    <Card>\n      <Input placeholder="Enter text..." />\n      <Button>Submit</Button>\n    </Card>\n  )\n}`}</code></pre>
+                      </div>
+                      <h3 className="text-lg font-semibold">Theming</h3>
+                      <p className="text-gray-600">Customize the design system using CSS variables or the theme provider.</p>
+                    </div>
+                  </ScrollArea>
+                </TabsContent>
+                <TabsContent value="api" className="mt-4">
+                  <ScrollArea className="h-[400px]">
+                    <div className="space-y-4">
+                      <p className="text-gray-600">Full API reference for all {mockComponents.length * 12} components.</p>
+                      {mockComponents.slice(0, 3).map(comp => (
+                        <div key={comp.id} className="p-4 border rounded-lg">
+                          <h4 className="font-semibold mb-2">{comp.displayName}</h4>
+                          <table className="w-full text-sm">
+                            <thead>
+                              <tr className="text-left text-gray-500">
+                                <th className="pb-2">Prop</th>
+                                <th className="pb-2">Type</th>
+                                <th className="pb-2">Default</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {comp.props.slice(0, 3).map(prop => (
+                                <tr key={prop.name}>
+                                  <td className="py-1"><code className="text-violet-600">{prop.name}</code></td>
+                                  <td className="py-1 text-gray-500">{prop.type}</td>
+                                  <td className="py-1 text-gray-400">{prop.defaultValue || '-'}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                </TabsContent>
+                <TabsContent value="examples" className="mt-4">
+                  <ScrollArea className="h-[400px]">
+                    <div className="space-y-4">
+                      <p className="text-gray-600">Interactive examples and code snippets.</p>
+                      {mockComponents.slice(0, 2).map(comp => (
+                        <div key={comp.id}>
+                          {comp.examples.map(ex => (
+                            <div key={ex.id} className="p-4 border rounded-lg mb-4">
+                              <h4 className="font-semibold mb-1">{ex.title}</h4>
+                              <p className="text-sm text-gray-500 mb-3">{ex.description}</p>
+                              <div className="p-3 bg-gray-900 rounded-lg">
+                                <code className="text-sm text-gray-100">{ex.code}</code>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                </TabsContent>
+                <TabsContent value="guidelines" className="mt-4">
+                  <ScrollArea className="h-[400px]">
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-semibold">Design Guidelines</h3>
+                      <p className="text-gray-600">Follow these guidelines to ensure consistency across your application.</p>
+                      <div className="p-4 bg-violet-50 dark:bg-violet-900/20 rounded-lg">
+                        <h4 className="font-medium text-violet-700 dark:text-violet-300 mb-2">Accessibility First</h4>
+                        <p className="text-sm text-violet-600 dark:text-violet-400">All components meet WCAG 2.1 AA standards. Ensure proper labeling and keyboard navigation.</p>
+                      </div>
+                      <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                        <h4 className="font-medium text-blue-700 dark:text-blue-300 mb-2">Consistent Spacing</h4>
+                        <p className="text-sm text-blue-600 dark:text-blue-400">Use design tokens for spacing to maintain visual consistency.</p>
+                      </div>
+                      <div className="p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg">
+                        <h4 className="font-medium text-emerald-700 dark:text-emerald-300 mb-2">Responsive Design</h4>
+                        <p className="text-sm text-emerald-600 dark:text-emerald-400">Components are mobile-first and adapt to all screen sizes.</p>
+                      </div>
+                    </div>
+                  </ScrollArea>
+                </TabsContent>
+              </Tabs>
+              <div className="flex justify-end">
+                <Button variant="outline" onClick={() => setShowDocsDialog(false)}>Close</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   )

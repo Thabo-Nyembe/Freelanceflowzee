@@ -315,20 +315,7 @@ const mockProductsActivities = [
   { id: '3', user: 'Inventory', action: 'Restocked', target: 'API Credits Pack', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'update' as const },
 ]
 
-const mockProductsQuickActions = [
-  { id: '1', label: 'New Product', icon: 'plus', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1000)),
-    { loading: 'Creating new product...', success: 'Product created successfully', error: 'Failed to create product' }
-  ), variant: 'default' as const },
-  { id: '2', label: 'Update Pricing', icon: 'dollar', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1200)),
-    { loading: 'Updating product pricing...', success: 'Pricing updated successfully', error: 'Failed to update pricing' }
-  ), variant: 'default' as const },
-  { id: '3', label: 'Analytics', icon: 'chart', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 800)),
-    { loading: 'Loading product analytics...', success: 'Analytics loaded successfully', error: 'Failed to load analytics' }
-  ), variant: 'outline' as const },
-]
+// QuickActions will be defined inside the component to use state setters
 
 export default function ProductsClient({ initialProducts }: ProductsClientProps) {
   const [activeTab, setActiveTab] = useState('catalog')
@@ -341,6 +328,28 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
   const [showCreateCoupon, setShowCreateCoupon] = useState(false)
   const [showCreatePrice, setShowCreatePrice] = useState(false)
   const [settingsTab, setSettingsTab] = useState('general')
+
+  // QuickAction Dialog States
+  const [showQuickNewProduct, setShowQuickNewProduct] = useState(false)
+  const [showQuickUpdatePricing, setShowQuickUpdatePricing] = useState(false)
+  const [showQuickAnalytics, setShowQuickAnalytics] = useState(false)
+
+  // QuickAction Form States
+  const [quickProductName, setQuickProductName] = useState('')
+  const [quickProductDescription, setQuickProductDescription] = useState('')
+  const [quickProductCategory, setQuickProductCategory] = useState('subscription')
+  const [quickProductPrice, setQuickProductPrice] = useState('')
+  const [quickPricingProduct, setQuickPricingProduct] = useState('')
+  const [quickNewPrice, setQuickNewPrice] = useState('')
+  const [quickPricingType, setQuickPricingType] = useState<'one_time' | 'recurring'>('recurring')
+  const [quickBillingInterval, setQuickBillingInterval] = useState<BillingInterval>('month')
+
+  // QuickActions with dialog triggers
+  const mockProductsQuickActions = [
+    { id: '1', label: 'New Product', icon: 'plus', action: () => setShowQuickNewProduct(true), variant: 'default' as const },
+    { id: '2', label: 'Update Pricing', icon: 'dollar', action: () => setShowQuickUpdatePricing(true), variant: 'default' as const },
+    { id: '3', label: 'Analytics', icon: 'chart', action: () => setShowQuickAnalytics(true), variant: 'outline' as const },
+  ]
 
   const { data: products } = useProducts({
     status: selectedCategory === 'all' ? undefined : selectedCategory,
@@ -1904,6 +1913,328 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                 </div>
               </div>
             )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Quick New Product Dialog */}
+        <Dialog open={showQuickNewProduct} onOpenChange={setShowQuickNewProduct}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <div className="w-8 h-8 bg-gradient-to-br from-violet-500 to-purple-600 rounded-lg flex items-center justify-center">
+                  <Plus className="w-4 h-4 text-white" />
+                </div>
+                Quick Create Product
+              </DialogTitle>
+              <DialogDescription>
+                Create a new product with basic details. You can edit more settings later.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Product Name</label>
+                <Input
+                  placeholder="e.g., Premium Plan"
+                  value={quickProductName}
+                  onChange={(e) => setQuickProductName(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Description</label>
+                <Input
+                  placeholder="Brief description of your product"
+                  value={quickProductDescription}
+                  onChange={(e) => setQuickProductDescription(e.target.value)}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Category</label>
+                  <select
+                    className="w-full p-2 border rounded-md bg-white dark:bg-gray-800"
+                    value={quickProductCategory}
+                    onChange={(e) => setQuickProductCategory(e.target.value)}
+                  >
+                    <option value="subscription">Subscription</option>
+                    <option value="one_time">One-time Purchase</option>
+                    <option value="credits">Credits Pack</option>
+                    <option value="add-on">Add-on</option>
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Base Price (USD)</label>
+                  <Input
+                    type="number"
+                    placeholder="49.00"
+                    value={quickProductPrice}
+                    onChange={(e) => setQuickProductPrice(e.target.value)}
+                  />
+                </div>
+              </div>
+              <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                  <CheckCircle className="w-4 h-4 text-green-500" />
+                  <span>Product will be created as a draft for review</span>
+                </div>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                className="flex-1"
+                onClick={() => {
+                  setShowQuickNewProduct(false)
+                  setQuickProductName('')
+                  setQuickProductDescription('')
+                  setQuickProductPrice('')
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                className="flex-1 bg-violet-600 hover:bg-violet-700"
+                disabled={!quickProductName || !quickProductPrice}
+                onClick={() => {
+                  toast.success('Product created successfully', {
+                    description: `${quickProductName} has been created as a draft`
+                  })
+                  setShowQuickNewProduct(false)
+                  setQuickProductName('')
+                  setQuickProductDescription('')
+                  setQuickProductPrice('')
+                }}
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Create Product
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Quick Update Pricing Dialog */}
+        <Dialog open={showQuickUpdatePricing} onOpenChange={setShowQuickUpdatePricing}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <div className="w-8 h-8 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg flex items-center justify-center">
+                  <DollarSign className="w-4 h-4 text-white" />
+                </div>
+                Update Product Pricing
+              </DialogTitle>
+              <DialogDescription>
+                Quickly update pricing for an existing product.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Select Product</label>
+                <select
+                  className="w-full p-2 border rounded-md bg-white dark:bg-gray-800"
+                  value={quickPricingProduct}
+                  onChange={(e) => setQuickPricingProduct(e.target.value)}
+                >
+                  <option value="">Choose a product...</option>
+                  {mockProducts.map((product) => (
+                    <option key={product.id} value={product.id}>
+                      {product.name} - Current: {formatPrice(product.prices[0]?.unitAmount || 0)}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              {quickPricingProduct && (
+                <>
+                  <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                    <div className="text-sm font-medium text-blue-700 dark:text-blue-400">Current Pricing</div>
+                    <div className="mt-2 space-y-1">
+                      {mockProducts.find(p => p.id === quickPricingProduct)?.prices.map((price) => (
+                        <div key={price.id} className="flex items-center justify-between text-sm">
+                          <span>{price.nickname}</span>
+                          <span className="font-semibold">
+                            {formatPrice(price.unitAmount, price.currency)}
+                            {price.billingInterval && `/${price.billingInterval}`}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Pricing Type</label>
+                      <select
+                        className="w-full p-2 border rounded-md bg-white dark:bg-gray-800"
+                        value={quickPricingType}
+                        onChange={(e) => setQuickPricingType(e.target.value as 'one_time' | 'recurring')}
+                      >
+                        <option value="recurring">Recurring</option>
+                        <option value="one_time">One-time</option>
+                      </select>
+                    </div>
+                    {quickPricingType === 'recurring' && (
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">Billing Interval</label>
+                        <select
+                          className="w-full p-2 border rounded-md bg-white dark:bg-gray-800"
+                          value={quickBillingInterval}
+                          onChange={(e) => setQuickBillingInterval(e.target.value as BillingInterval)}
+                        >
+                          <option value="month">Monthly</option>
+                          <option value="year">Yearly</option>
+                          <option value="week">Weekly</option>
+                        </select>
+                      </div>
+                    )}
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">New Price (USD)</label>
+                    <Input
+                      type="number"
+                      placeholder="Enter new price"
+                      value={quickNewPrice}
+                      onChange={(e) => setQuickNewPrice(e.target.value)}
+                    />
+                  </div>
+                  <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
+                    <div className="flex items-center gap-2 text-sm text-yellow-700 dark:text-yellow-400">
+                      <Clock className="w-4 h-4" />
+                      <span>New prices will apply to new subscriptions only</span>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                className="flex-1"
+                onClick={() => {
+                  setShowQuickUpdatePricing(false)
+                  setQuickPricingProduct('')
+                  setQuickNewPrice('')
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                className="flex-1 bg-green-600 hover:bg-green-700"
+                disabled={!quickPricingProduct || !quickNewPrice}
+                onClick={() => {
+                  const productName = mockProducts.find(p => p.id === quickPricingProduct)?.name
+                  toast.success('Pricing updated successfully', {
+                    description: `New ${quickPricingType === 'recurring' ? quickBillingInterval + 'ly' : 'one-time'} price of $${quickNewPrice} set for ${productName}`
+                  })
+                  setShowQuickUpdatePricing(false)
+                  setQuickPricingProduct('')
+                  setQuickNewPrice('')
+                }}
+              >
+                <DollarSign className="w-4 h-4 mr-2" />
+                Update Pricing
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Quick Analytics Dialog */}
+        <Dialog open={showQuickAnalytics} onOpenChange={setShowQuickAnalytics}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center">
+                  <BarChart3 className="w-4 h-4 text-white" />
+                </div>
+                Product Analytics Overview
+              </DialogTitle>
+              <DialogDescription>
+                Quick snapshot of your product performance metrics.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              {/* Summary Stats */}
+              <div className="grid grid-cols-4 gap-4">
+                <div className="p-3 bg-violet-50 dark:bg-violet-900/20 rounded-lg text-center">
+                  <p className="text-2xl font-bold text-violet-600">{formatCurrency(totalRevenue * 100)}</p>
+                  <p className="text-xs text-gray-500">Total Revenue</p>
+                </div>
+                <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-center">
+                  <p className="text-2xl font-bold text-blue-600">{formatCurrency(totalMRR * 100)}</p>
+                  <p className="text-xs text-gray-500">MRR</p>
+                </div>
+                <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg text-center">
+                  <p className="text-2xl font-bold text-green-600">{totalSubscribers.toLocaleString()}</p>
+                  <p className="text-xs text-gray-500">Subscribers</p>
+                </div>
+                <div className="p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg text-center">
+                  <p className="text-2xl font-bold text-orange-600">{avgConversion.toFixed(1)}%</p>
+                  <p className="text-xs text-gray-500">Conversion</p>
+                </div>
+              </div>
+
+              {/* Top Products */}
+              <div className="space-y-2">
+                <h4 className="text-sm font-medium">Top Performing Products</h4>
+                <div className="space-y-2">
+                  {mockProducts.sort((a, b) => b.revenue - a.revenue).slice(0, 3).map((product, idx) => {
+                    const maxRevenue = Math.max(...mockProducts.map(p => p.revenue))
+                    const percent = (product.revenue / maxRevenue) * 100
+                    return (
+                      <div key={product.id} className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-medium text-gray-500">#{idx + 1}</span>
+                            <span className="font-medium">{product.name}</span>
+                            <Badge className={getStatusColor(product.status)}>{product.status}</Badge>
+                          </div>
+                          <span className="font-bold">{formatCurrency(product.revenue * 100)}</span>
+                        </div>
+                        <Progress value={percent} className="h-1.5" />
+                        <div className="flex items-center justify-between mt-2 text-xs text-gray-500">
+                          <span>{product.subscribers.toLocaleString()} subscribers</span>
+                          <span>{product.conversionRate}% conversion</span>
+                          <span>{product.churnRate}% churn</span>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+
+              {/* Quick Insights */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                  <div className="flex items-center gap-2 mb-1">
+                    <ArrowUpRight className="w-4 h-4 text-green-500" />
+                    <span className="text-sm font-medium text-green-700 dark:text-green-400">Growth</span>
+                  </div>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">MRR up 12.5% this month</p>
+                </div>
+                <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Target className="w-4 h-4 text-blue-500" />
+                    <span className="text-sm font-medium text-blue-700 dark:text-blue-400">Opportunity</span>
+                  </div>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Enterprise tier has highest LTV</p>
+                </div>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                className="flex-1"
+                onClick={() => setShowQuickAnalytics(false)}
+              >
+                Close
+              </Button>
+              <Button
+                className="flex-1 bg-violet-600 hover:bg-violet-700"
+                onClick={() => {
+                  setShowQuickAnalytics(false)
+                  setActiveTab('analytics')
+                }}
+              >
+                <BarChart3 className="w-4 h-4 mr-2" />
+                View Full Analytics
+              </Button>
+            </div>
           </DialogContent>
         </Dialog>
       </div>

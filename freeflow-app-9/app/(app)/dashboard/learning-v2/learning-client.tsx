@@ -539,12 +539,7 @@ const mockLearningActivities = [
   { id: '3', user: 'Mike Johnson', action: 'shared', target: 'study notes', timestamp: '2h ago', type: 'info' as const },
 ]
 
-const mockLearningQuickActions = [
-  { id: '1', label: 'Continue', icon: 'Play', shortcut: 'C', action: () => toast.success('Resuming: React Advanced Patterns - Chapter 4') },
-  { id: '2', label: 'Browse', icon: 'BookOpen', shortcut: 'B', action: () => toast.success('Course library ready - browse 150+ courses across 12 categories') },
-  { id: '3', label: 'Certificates', icon: 'Award', shortcut: 'R', action: () => toast.success('Certificates loaded - you have earned 3 certificates') },
-  { id: '4', label: 'Study Plan', icon: 'Calendar', shortcut: 'P', action: () => toast.success('Study plan loaded - next: Complete 2 chapters by Friday') },
-]
+// Note: mockLearningQuickActions moved inside component to access state setters
 
 // ============================================================================
 // COMPONENT
@@ -562,6 +557,20 @@ export default function LearningClient() {
   const [settingsTab, setSettingsTab] = useState('general')
   const [showCreatePathModal, setShowCreatePathModal] = useState(false)
   const [showCreateCollectionModal, setShowCreateCollectionModal] = useState(false)
+
+  // Quick Actions dialog states
+  const [showContinueLearningDialog, setShowContinueLearningDialog] = useState(false)
+  const [showBrowseCoursesDialog, setShowBrowseCoursesDialog] = useState(false)
+  const [showCertificatesDialog, setShowCertificatesDialog] = useState(false)
+  const [showStudyPlanDialog, setShowStudyPlanDialog] = useState(false)
+
+  // Quick actions with dialog openers
+  const learningQuickActions = useMemo(() => [
+    { id: '1', label: 'Continue', icon: 'Play', shortcut: 'C', action: () => setShowContinueLearningDialog(true) },
+    { id: '2', label: 'Browse', icon: 'BookOpen', shortcut: 'B', action: () => setShowBrowseCoursesDialog(true) },
+    { id: '3', label: 'Certificates', icon: 'Award', shortcut: 'R', action: () => setShowCertificatesDialog(true) },
+    { id: '4', label: 'Study Plan', icon: 'Calendar', shortcut: 'P', action: () => setShowStudyPlanDialog(true) },
+  ], [])
 
   // Form state for new learning path
   const [newPathForm, setNewPathForm] = useState({
@@ -2085,7 +2094,7 @@ export default function LearningClient() {
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockLearningQuickActions}
+            actions={learningQuickActions}
             variant="grid"
           />
         </div>
@@ -2338,6 +2347,186 @@ export default function LearningClient() {
             <Button onClick={handleCreatePath} disabled={pathsMutating} className="bg-teal-600 hover:bg-teal-700">
               {pathsMutating ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Plus className="w-4 h-4 mr-2" />}
               Create Path
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Continue Learning Dialog */}
+      <Dialog open={showContinueLearningDialog} onOpenChange={setShowContinueLearningDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Play className="w-5 h-5 text-emerald-600" />
+              Continue Learning
+            </DialogTitle>
+            <DialogDescription>Pick up where you left off</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="p-4 bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 rounded-xl border border-emerald-100 dark:border-emerald-800">
+              <h4 className="font-semibold text-emerald-900 dark:text-emerald-100">React Advanced Patterns</h4>
+              <p className="text-sm text-emerald-700 dark:text-emerald-300 mt-1">Chapter 4: State Management</p>
+              <div className="flex items-center gap-3 mt-3">
+                <div className="flex-1 h-2 bg-emerald-200 dark:bg-emerald-800 rounded-full overflow-hidden">
+                  <div className="h-full w-[65%] bg-emerald-500 rounded-full" />
+                </div>
+                <span className="text-sm font-medium text-emerald-600 dark:text-emerald-400">65%</span>
+              </div>
+            </div>
+            <div className="text-sm text-gray-500 dark:text-gray-400">
+              <p>Last accessed: 2 hours ago</p>
+              <p>Time remaining: ~45 minutes</p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowContinueLearningDialog(false)}>Cancel</Button>
+            <Button className="bg-emerald-600 hover:bg-emerald-700" onClick={() => {
+              setShowContinueLearningDialog(false)
+              toast.success('Resuming course', { description: 'Loading React Advanced Patterns - Chapter 4' })
+            }}>
+              <Play className="w-4 h-4 mr-2" />
+              Resume
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Browse Courses Dialog */}
+      <Dialog open={showBrowseCoursesDialog} onOpenChange={setShowBrowseCoursesDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <BookOpen className="w-5 h-5 text-blue-600" />
+              Browse Courses
+            </DialogTitle>
+            <DialogDescription>Explore 150+ courses across 12 categories</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <Input placeholder="Search courses..." className="pl-10" />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              {['Technology', 'Business', 'Leadership', 'Data Science', 'Design', 'Marketing'].map((category) => (
+                <button
+                  key={category}
+                  onClick={() => {
+                    setShowBrowseCoursesDialog(false)
+                    setActiveTab('explore')
+                    toast.success(`Browsing ${category} courses`)
+                  }}
+                  className="p-3 text-left bg-gray-50 dark:bg-gray-900 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-700 transition-colors"
+                >
+                  <p className="font-medium">{category}</p>
+                  <p className="text-xs text-gray-500 mt-1">25+ courses</p>
+                </button>
+              ))}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowBrowseCoursesDialog(false)}>Cancel</Button>
+            <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => {
+              setShowBrowseCoursesDialog(false)
+              setActiveTab('explore')
+            }}>
+              View All Courses
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Certificates Dialog */}
+      <Dialog open={showCertificatesDialog} onOpenChange={setShowCertificatesDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Award className="w-5 h-5 text-amber-600" />
+              Your Certificates
+            </DialogTitle>
+            <DialogDescription>You have earned 3 certificates</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 py-4">
+            {[
+              { name: 'JavaScript Fundamentals', date: 'Dec 15, 2024', score: '95%' },
+              { name: 'React Development', date: 'Nov 28, 2024', score: '88%' },
+              { name: 'Node.js Basics', date: 'Oct 10, 2024', score: '92%' },
+            ].map((cert, i) => (
+              <div key={i} className="flex items-center justify-between p-4 bg-gradient-to-r from-amber-50 to-yellow-50 dark:from-amber-900/20 dark:to-yellow-900/20 rounded-xl border border-amber-200 dark:border-amber-800">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-gradient-to-br from-amber-400 to-yellow-500 rounded-full flex items-center justify-center text-white">
+                    <Award className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <p className="font-medium">{cert.name}</p>
+                    <p className="text-xs text-gray-500">Earned {cert.date} - Score: {cert.score}</p>
+                  </div>
+                </div>
+                <Button variant="outline" size="sm" onClick={() => toast.success('Downloading certificate...')}>
+                  <Download className="w-4 h-4" />
+                </Button>
+              </div>
+            ))}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCertificatesDialog(false)}>Close</Button>
+            <Button className="bg-amber-600 hover:bg-amber-700" onClick={() => {
+              setShowCertificatesDialog(false)
+              toast.success('Sharing certificates to LinkedIn...')
+            }}>
+              <Share2 className="w-4 h-4 mr-2" />
+              Share All
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Study Plan Dialog */}
+      <Dialog open={showStudyPlanDialog} onOpenChange={setShowStudyPlanDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Calendar className="w-5 h-5 text-purple-600" />
+              Your Study Plan
+            </DialogTitle>
+            <DialogDescription>Weekly learning goals and schedule</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-xl border border-purple-200 dark:border-purple-800">
+              <div className="flex items-center justify-between mb-2">
+                <span className="font-medium text-purple-900 dark:text-purple-100">Weekly Goal</span>
+                <span className="text-sm font-medium text-purple-600 dark:text-purple-400">3.5 / 5 hours</span>
+              </div>
+              <div className="h-3 bg-purple-200 dark:bg-purple-800 rounded-full overflow-hidden">
+                <div className="h-full w-[70%] bg-gradient-to-r from-purple-500 to-pink-500 rounded-full" />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <h4 className="font-medium text-sm text-gray-700 dark:text-gray-300">This Week's Tasks</h4>
+              <div className="space-y-2">
+                {[
+                  { task: 'Complete React Chapter 4', due: 'Today', done: false },
+                  { task: 'Take JavaScript quiz', due: 'Tomorrow', done: false },
+                  { task: 'Review Node.js notes', due: 'Friday', done: false },
+                ].map((item, i) => (
+                  <div key={i} className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                    <input type="checkbox" className="w-4 h-4 rounded border-gray-300" />
+                    <div className="flex-1">
+                      <p className="text-sm font-medium">{item.task}</p>
+                      <p className="text-xs text-gray-500">Due: {item.due}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowStudyPlanDialog(false)}>Close</Button>
+            <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => {
+              setShowStudyPlanDialog(false)
+              toast.success('Study plan updated')
+            }}>
+              <Settings className="w-4 h-4 mr-2" />
+              Edit Plan
             </Button>
           </DialogFooter>
         </DialogContent>

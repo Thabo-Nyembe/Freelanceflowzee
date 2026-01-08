@@ -245,20 +245,7 @@ const mockPermissionsActivities = [
   { id: '3', user: 'System', action: 'Blocked', target: 'Suspicious login attempt from unknown IP', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'warning' as const },
 ]
 
-const mockPermissionsQuickActions = [
-  { id: '1', label: 'Add User', icon: 'plus', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1000)),
-    { loading: 'Opening user creation form...', success: 'Ready to add user', error: 'Failed to open form' }
-  ), variant: 'default' as const },
-  { id: '2', label: 'Create Role', icon: 'shield', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 900)),
-    { loading: 'Preparing role configuration...', success: 'Role editor ready', error: 'Failed to load role editor' }
-  ), variant: 'default' as const },
-  { id: '3', label: 'Audit Log', icon: 'file', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1200)),
-    { loading: 'Loading audit logs...', success: 'Audit logs loaded', error: 'Failed to load audit logs' }
-  ), variant: 'outline' as const },
-]
+// Quick actions will be defined inside the component to access state setters
 
 export default function PermissionsClient({ initialRoles, initialPermissions }: PermissionsClientProps) {
   const supabase = createClient()
@@ -275,6 +262,78 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
   const [settingsTab, setSettingsTab] = useState('security')
   const [showAPIKeyDialog, setShowAPIKeyDialog] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+
+  // Dialog states for replacing toast-only actions
+  const [showAdvancedFiltersDialog, setShowAdvancedFiltersDialog] = useState(false)
+  const [showUserOptionsDialog, setShowUserOptionsDialog] = useState(false)
+  const [showCreatePolicyDialog, setShowCreatePolicyDialog] = useState(false)
+  const [showAddApplicationDialog, setShowAddApplicationDialog] = useState(false)
+  const [showExportLogsDialog, setShowExportLogsDialog] = useState(false)
+  const [showCopyTokenDialog, setShowCopyTokenDialog] = useState(false)
+  const [showRegenerateTokenDialog, setShowRegenerateTokenDialog] = useState(false)
+  const [showAddMappingDialog, setShowAddMappingDialog] = useState(false)
+  const [showAPIKeyOptionsDialog, setShowAPIKeyOptionsDialog] = useState(false)
+  const [showAddWebhookDialog, setShowAddWebhookDialog] = useState(false)
+  const [showDirectoryConfigDialog, setShowDirectoryConfigDialog] = useState(false)
+  const [showHRIntegrationDialog, setShowHRIntegrationDialog] = useState(false)
+  const [showExportDataDialog, setShowExportDataDialog] = useState(false)
+  const [showResetPermissionsDialog, setShowResetPermissionsDialog] = useState(false)
+  const [showRevokeSessionsDialog, setShowRevokeSessionsDialog] = useState(false)
+  const [showDeleteAPIKeysDialog, setShowDeleteAPIKeysDialog] = useState(false)
+  const [showEditUserDialog, setShowEditUserDialog] = useState(false)
+  const [showResetPasswordDialog, setShowResetPasswordDialog] = useState(false)
+  const [showLockAccountDialog, setShowLockAccountDialog] = useState(false)
+  const [showAddMembersDialog, setShowAddMembersDialog] = useState(false)
+  const [showEditGroupDialog, setShowEditGroupDialog] = useState(false)
+  const [showAssignUsersDialog, setShowAssignUsersDialog] = useState(false)
+  const [showEditRoleDialog, setShowEditRoleDialog] = useState(false)
+  const [selectedUserForOptions, setSelectedUserForOptions] = useState<User | null>(null)
+  const [selectedDirectoryIntegration, setSelectedDirectoryIntegration] = useState<{ name: string; status: string } | null>(null)
+  const [selectedHRIntegration, setSelectedHRIntegration] = useState<{ name: string; connected: boolean } | null>(null)
+  const [selectedAPIKey, setSelectedAPIKey] = useState<{ name: string; prefix: string } | null>(null)
+
+  // Form states for new dialogs
+  const [newPolicy, setNewPolicy] = useState({
+    name: '',
+    description: '',
+    type: 'sign_on' as PolicyType,
+    priority: 1
+  })
+  const [newApplication, setNewApplication] = useState({
+    name: '',
+    type: 'saml' as 'saml' | 'oidc' | 'spa' | 'native',
+    ssoEnabled: true
+  })
+  const [newWebhook, setNewWebhook] = useState({
+    url: '',
+    events: [] as string[]
+  })
+  const [newMapping, setNewMapping] = useState({
+    source: '',
+    target: '',
+    required: false
+  })
+  const [newAPIKey, setNewAPIKey] = useState({
+    name: '',
+    environment: 'production' as 'production' | 'development' | 'staging'
+  })
+  const [exportLogsOptions, setExportLogsOptions] = useState({
+    format: 'json' as 'json' | 'csv',
+    dateRange: '7d' as '24h' | '7d' | '30d' | '90d'
+  })
+  const [filterOptions, setFilterOptions] = useState({
+    department: '',
+    role: '',
+    mfaStatus: 'all' as 'all' | 'enabled' | 'disabled',
+    loginActivity: 'all' as 'all' | 'active' | 'inactive' | 'never'
+  })
+
+  // Quick actions defined inside component to access state setters
+  const permissionsQuickActions = [
+    { id: '1', label: 'Add User', icon: 'plus', action: () => setShowCreateUser(true), variant: 'default' as const },
+    { id: '2', label: 'Create Role', icon: 'shield', action: () => setShowCreateRole(true), variant: 'default' as const },
+    { id: '3', label: 'Audit Log', icon: 'file', action: () => setActiveTab('audit'), variant: 'outline' as const },
+  ]
 
   // Form state for creating new role
   const [newRole, setNewRole] = useState({
@@ -751,10 +810,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
                       <option value="suspended">Suspended</option>
                       <option value="locked">Locked</option>
                     </select>
-                    <Button variant="outline" className="gap-2" onClick={() => toast.promise(
-                      new Promise(resolve => setTimeout(resolve, 800)),
-                      { loading: 'Loading advanced filters...', success: 'Filters panel ready', error: 'Failed to load filters' }
-                    )}>
+                    <Button variant="outline" className="gap-2" onClick={() => setShowAdvancedFiltersDialog(true)}>
                       <Filter className="w-4 h-4" />
                       More Filters
                     </Button>
@@ -811,10 +867,8 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
                             </div>
                             <Button variant="ghost" size="sm" onClick={(e) => {
                               e.stopPropagation()
-                              toast.promise(
-                                new Promise(resolve => setTimeout(resolve, 600)),
-                                { loading: 'Loading user options...', success: 'Options menu ready', error: 'Failed to load options' }
-                              )
+                              setSelectedUserForOptions(user)
+                              setShowUserOptionsDialog(true)
                             }}>
                               <MoreHorizontal className="w-4 h-4" />
                             </Button>
@@ -924,10 +978,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold">Security Policies</h3>
-                <Button className="bg-purple-600 hover:bg-purple-700 gap-2" onClick={() => toast.promise(
-                  new Promise(resolve => setTimeout(resolve, 900)),
-                  { loading: 'Opening policy creator...', success: 'Policy creator ready', error: 'Failed to open policy creator' }
-                )}>
+                <Button className="bg-purple-600 hover:bg-purple-700 gap-2" onClick={() => setShowCreatePolicyDialog(true)}>
                   <Plus className="w-4 h-4" />
                   Create Policy
                 </Button>
@@ -973,10 +1024,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold">Applications</h3>
-                <Button className="bg-purple-600 hover:bg-purple-700 gap-2" onClick={() => toast.promise(
-                  new Promise(resolve => setTimeout(resolve, 1000)),
-                  { loading: 'Opening application wizard...', success: 'Application wizard ready', error: 'Failed to open wizard' }
-                )}>
+                <Button className="bg-purple-600 hover:bg-purple-700 gap-2" onClick={() => setShowAddApplicationDialog(true)}>
                   <Plus className="w-4 h-4" />
                   Add Application
                 </Button>
@@ -1037,10 +1085,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold">System Logs</h3>
-                <Button variant="outline" className="gap-2" onClick={() => toast.promise(
-                  new Promise(resolve => setTimeout(resolve, 1500)),
-                  { loading: 'Exporting audit logs...', success: 'Audit logs exported successfully', error: 'Failed to export logs' }
-                )}>
+                <Button variant="outline" className="gap-2" onClick={() => setShowExportLogsDialog(true)}>
                   <Download className="w-4 h-4" />
                   Export Logs
                 </Button>
@@ -1501,16 +1546,10 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
                           <Label>Bearer Token</Label>
                           <div className="flex items-center gap-2 mt-1">
                             <Input type="password" value="STRIPE_KEY_PLACEHOLDER" disabled className="font-mono" />
-                            <Button variant="outline" size="sm" onClick={() => toast.promise(
-                              new Promise(resolve => setTimeout(resolve, 500)),
-                              { loading: 'Copying token...', success: 'Bearer token copied to clipboard', error: 'Failed to copy token' }
-                            )}><Copy className="w-4 h-4" /></Button>
+                            <Button variant="outline" size="sm" onClick={() => setShowCopyTokenDialog(true)}><Copy className="w-4 h-4" /></Button>
                           </div>
                         </div>
-                        <Button variant="outline" className="w-full" onClick={() => toast.promise(
-                          new Promise(resolve => setTimeout(resolve, 1200)),
-                          { loading: 'Regenerating SCIM token...', success: 'New token generated successfully', error: 'Failed to regenerate token' }
-                        )}>
+                        <Button variant="outline" className="w-full" onClick={() => setShowRegenerateTokenDialog(true)}>
                           <RefreshCw className="w-4 h-4 mr-2" />
                           Regenerate Token
                         </Button>
@@ -1537,10 +1576,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
                             {mapping.required && <Badge variant="outline" className="flex-shrink-0">Required</Badge>}
                           </div>
                         ))}
-                        <Button variant="outline" className="w-full" onClick={() => toast.promise(
-                          new Promise(resolve => setTimeout(resolve, 700)),
-                          { loading: 'Opening attribute mapper...', success: 'Ready to add new mapping', error: 'Failed to open mapper' }
-                        )}>
+                        <Button variant="outline" className="w-full" onClick={() => setShowAddMappingDialog(true)}>
                           <Plus className="w-4 h-4 mr-2" />
                           Add Mapping
                         </Button>
@@ -1586,10 +1622,10 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
                                   <p className="text-gray-400">Created: {key.created}</p>
                                 </div>
                                 <Badge className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">{key.status}</Badge>
-                                <Button variant="ghost" size="icon" onClick={() => toast.promise(
-                                  new Promise(resolve => setTimeout(resolve, 600)),
-                                  { loading: 'Loading API key options...', success: 'Options menu ready', error: 'Failed to load options' }
-                                )}><MoreHorizontal className="w-4 h-4" /></Button>
+                                <Button variant="ghost" size="icon" onClick={() => {
+                                  setSelectedAPIKey({ name: key.name, prefix: key.prefix })
+                                  setShowAPIKeyOptionsDialog(true)
+                                }}><MoreHorizontal className="w-4 h-4" /></Button>
                               </div>
                             </div>
                           ))}
@@ -1643,10 +1679,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
                           </div>
                           <p className="text-xs text-gray-500">Events: user.created, user.updated, user.deleted</p>
                         </div>
-                        <Button variant="outline" className="w-full" onClick={() => toast.promise(
-                          new Promise(resolve => setTimeout(resolve, 800)),
-                          { loading: 'Opening webhook configuration...', success: 'Webhook form ready', error: 'Failed to open webhook form' }
-                        )}>
+                        <Button variant="outline" className="w-full" onClick={() => setShowAddWebhookDialog(true)}>
                           <Plus className="w-4 h-4 mr-2" />
                           Add Webhook
                         </Button>
@@ -1686,12 +1719,10 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
                               <Badge className={integration.status === 'connected' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400'}>
                                 {integration.status}
                               </Badge>
-                              <Button variant="outline" size="sm" onClick={() => toast.promise(
-                                new Promise(resolve => setTimeout(resolve, 1000)),
-                                integration.status === 'connected'
-                                  ? { loading: `Loading ${integration.name} configuration...`, success: `${integration.name} settings ready`, error: 'Failed to load configuration' }
-                                  : { loading: `Connecting to ${integration.name}...`, success: `${integration.name} connected successfully`, error: 'Connection failed' }
-                              )}>
+                              <Button variant="outline" size="sm" onClick={() => {
+                                setSelectedDirectoryIntegration({ name: integration.name, status: integration.status })
+                                setShowDirectoryConfigDialog(true)
+                              }}>
                                 {integration.status === 'connected' ? 'Configure' : 'Connect'}
                               </Button>
                             </div>
@@ -1714,12 +1745,10 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
                         ].map(hr => (
                           <div key={hr.name} className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
                             <span className="font-medium">{hr.name}</span>
-                            <Button variant={hr.connected ? 'outline' : 'default'} size="sm" onClick={() => toast.promise(
-                              new Promise(resolve => setTimeout(resolve, 1100)),
-                              hr.connected
-                                ? { loading: `Opening ${hr.name} settings...`, success: `${hr.name} configuration ready`, error: 'Failed to open settings' }
-                                : { loading: `Connecting to ${hr.name}...`, success: `${hr.name} connected successfully`, error: 'Connection failed' }
-                            )}>
+                            <Button variant={hr.connected ? 'outline' : 'default'} size="sm" onClick={() => {
+                              setSelectedHRIntegration({ name: hr.name, connected: hr.connected })
+                              setShowHRIntegrationDialog(true)
+                            }}>
                               {hr.connected ? 'Configure' : 'Connect'}
                             </Button>
                           </div>
@@ -1835,10 +1864,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
                             </SelectContent>
                           </Select>
                         </div>
-                        <Button variant="outline" className="w-full" onClick={() => toast.promise(
-                          new Promise(resolve => setTimeout(resolve, 2000)),
-                          { loading: 'Exporting all encrypted data...', success: 'Data export complete - check downloads', error: 'Export failed' }
-                        )}>
+                        <Button variant="outline" className="w-full" onClick={() => setShowExportDataDialog(true)}>
                           <Download className="w-4 h-4 mr-2" />
                           Export All Data
                         </Button>
@@ -1857,10 +1883,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
                               <h4 className="font-medium text-red-800 dark:text-red-400">Reset All Permissions</h4>
                               <p className="text-sm text-red-600 dark:text-red-400/80">This will reset all custom permissions to defaults</p>
                             </div>
-                            <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50 dark:hover:bg-red-900/30" onClick={() => toast.promise(
-                              new Promise(resolve => setTimeout(resolve, 1500)),
-                              { loading: 'Resetting all permissions to defaults...', success: 'All permissions reset successfully', error: 'Failed to reset permissions' }
-                            )}>
+                            <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50 dark:hover:bg-red-900/30" onClick={() => setShowResetPermissionsDialog(true)}>
                               Reset
                             </Button>
                           </div>
@@ -1871,10 +1894,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
                               <h4 className="font-medium text-red-800 dark:text-red-400">Revoke All Sessions</h4>
                               <p className="text-sm text-red-600 dark:text-red-400/80">Force all users to re-authenticate</p>
                             </div>
-                            <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50 dark:hover:bg-red-900/30" onClick={() => toast.promise(
-                              new Promise(resolve => setTimeout(resolve, 1800)),
-                              { loading: 'Revoking all active sessions...', success: 'All sessions revoked - users must re-authenticate', error: 'Failed to revoke sessions' }
-                            )}>
+                            <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50 dark:hover:bg-red-900/30" onClick={() => setShowRevokeSessionsDialog(true)}>
                               Revoke
                             </Button>
                           </div>
@@ -1885,10 +1905,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
                               <h4 className="font-medium text-red-800 dark:text-red-400">Delete All API Keys</h4>
                               <p className="text-sm text-red-600 dark:text-red-400/80">Revoke all API access immediately</p>
                             </div>
-                            <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50 dark:hover:bg-red-900/30" onClick={() => toast.promise(
-                              new Promise(resolve => setTimeout(resolve, 1200)),
-                              { loading: 'Deleting all API keys...', success: 'All API keys deleted successfully', error: 'Failed to delete API keys' }
-                            )}>
+                            <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50 dark:hover:bg-red-900/30" onClick={() => setShowDeleteAPIKeysDialog(true)}>
                               Delete
                             </Button>
                           </div>
@@ -2002,10 +2019,24 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
             <AIInsightsPanel
               insights={mockPermissionsAIInsights}
               title="Security Intelligence"
-              onInsightAction={(insight) => toast.promise(
-                new Promise(resolve => setTimeout(resolve, 800)),
-                { loading: `Processing ${insight.title}...`, success: `${insight.title} action completed`, error: 'Action failed' }
-              )}
+              onInsightAction={async (insight) => {
+                setIsLoading(true)
+                await new Promise(resolve => setTimeout(resolve, 800))
+                switch (insight.type) {
+                  case 'warning':
+                    toast.warning(insight.title, { description: 'Security review initiated' })
+                    break
+                  case 'success':
+                    toast.success(insight.title, { description: 'Recommendation applied successfully' })
+                    break
+                  case 'info':
+                    toast.info(insight.title, { description: 'Analytics review in progress' })
+                    break
+                  default:
+                    toast.success(`${insight.title} action completed`)
+                }
+                setIsLoading(false)
+              }}
             />
           </div>
           <div className="space-y-6">
@@ -2027,7 +2058,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockPermissionsQuickActions}
+            actions={permissionsQuickActions}
             variant="grid"
           />
         </div>
@@ -2112,24 +2143,15 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
                 )}
 
                 <div className="flex items-center gap-2 pt-4 border-t">
-                  <Button className="flex-1 bg-purple-600 hover:bg-purple-700" onClick={() => toast.promise(
-                    new Promise(resolve => setTimeout(resolve, 800)),
-                    { loading: 'Opening user editor...', success: 'User editor ready', error: 'Failed to open editor' }
-                  )}>
+                  <Button className="flex-1 bg-purple-600 hover:bg-purple-700" onClick={() => setShowEditUserDialog(true)}>
                     <Edit className="w-4 h-4 mr-2" />
                     Edit User
                   </Button>
-                  <Button variant="outline" className="flex-1" onClick={() => toast.promise(
-                    new Promise(resolve => setTimeout(resolve, 1000)),
-                    { loading: 'Sending password reset email...', success: 'Password reset email sent', error: 'Failed to send reset email' }
-                  )}>
+                  <Button variant="outline" className="flex-1" onClick={() => setShowResetPasswordDialog(true)}>
                     <KeyRound className="w-4 h-4 mr-2" />
                     Reset Password
                   </Button>
-                  <Button variant="outline" onClick={() => toast.promise(
-                    new Promise(resolve => setTimeout(resolve, 600)),
-                    { loading: 'Locking user account...', success: 'User account locked', error: 'Failed to lock account' }
-                  )}>
+                  <Button variant="outline" onClick={() => setShowLockAccountDialog(true)}>
                     <LockKeyhole className="w-4 h-4" />
                   </Button>
                 </div>
@@ -2167,17 +2189,11 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
                 </div>
 
                 <div className="flex items-center gap-2 pt-4 border-t">
-                  <Button className="flex-1 bg-purple-600 hover:bg-purple-700" onClick={() => toast.promise(
-                    new Promise(resolve => setTimeout(resolve, 700)),
-                    { loading: 'Opening member selection...', success: 'Ready to add members', error: 'Failed to open member selector' }
-                  )}>
+                  <Button className="flex-1 bg-purple-600 hover:bg-purple-700" onClick={() => setShowAddMembersDialog(true)}>
                     <UserPlus className="w-4 h-4 mr-2" />
                     Add Members
                   </Button>
-                  <Button variant="outline" className="flex-1" onClick={() => toast.promise(
-                    new Promise(resolve => setTimeout(resolve, 600)),
-                    { loading: 'Opening group editor...', success: 'Group editor ready', error: 'Failed to open editor' }
-                  )}>
+                  <Button variant="outline" className="flex-1" onClick={() => setShowEditGroupDialog(true)}>
                     <Edit className="w-4 h-4 mr-2" />
                     Edit
                   </Button>
@@ -2219,18 +2235,12 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
                 </div>
 
                 <div className="flex items-center gap-2 pt-4 border-t">
-                  <Button className="flex-1 bg-purple-600 hover:bg-purple-700" onClick={() => toast.promise(
-                    new Promise(resolve => setTimeout(resolve, 800)),
-                    { loading: 'Opening user assignment...', success: 'Ready to assign users', error: 'Failed to open assignment' }
-                  )}>
+                  <Button className="flex-1 bg-purple-600 hover:bg-purple-700" onClick={() => setShowAssignUsersDialog(true)}>
                     <UserPlus className="w-4 h-4 mr-2" />
                     Assign Users
                   </Button>
                   {selectedRole.isEditable && (
-                    <Button variant="outline" className="flex-1" onClick={() => toast.promise(
-                      new Promise(resolve => setTimeout(resolve, 700)),
-                      { loading: 'Opening role editor...', success: 'Role editor ready', error: 'Failed to open editor' }
-                    )}>
+                    <Button variant="outline" className="flex-1" onClick={() => setShowEditRoleDialog(true)}>
                       <Edit className="w-4 h-4 mr-2" />
                       Edit
                     </Button>
@@ -2417,6 +2427,1253 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
               <Button variant="outline" onClick={() => setShowCreateGroup(false)}>Cancel</Button>
               <Button className="bg-purple-600 hover:bg-purple-700" onClick={handleCreateGroup} disabled={isLoading}>
                 {isLoading ? 'Creating...' : 'Create Group'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Advanced Filters Dialog */}
+        <Dialog open={showAdvancedFiltersDialog} onOpenChange={setShowAdvancedFiltersDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Filter className="w-5 h-5 text-purple-600" />
+                Advanced User Filters
+              </DialogTitle>
+              <DialogDescription>Configure advanced filter criteria for user search</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label>Department</Label>
+                <Select value={filterOptions.department} onValueChange={(v) => setFilterOptions({ ...filterOptions, department: v })}>
+                  <SelectTrigger className="mt-1"><SelectValue placeholder="All departments" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">All Departments</SelectItem>
+                    <SelectItem value="Engineering">Engineering</SelectItem>
+                    <SelectItem value="Product">Product</SelectItem>
+                    <SelectItem value="Sales">Sales</SelectItem>
+                    <SelectItem value="Marketing">Marketing</SelectItem>
+                    <SelectItem value="IT">IT</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Role</Label>
+                <Select value={filterOptions.role} onValueChange={(v) => setFilterOptions({ ...filterOptions, role: v })}>
+                  <SelectTrigger className="mt-1"><SelectValue placeholder="All roles" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">All Roles</SelectItem>
+                    <SelectItem value="admin">Admin</SelectItem>
+                    <SelectItem value="manager">Manager</SelectItem>
+                    <SelectItem value="standard">Standard</SelectItem>
+                    <SelectItem value="system">System</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>MFA Status</Label>
+                <Select value={filterOptions.mfaStatus} onValueChange={(v) => setFilterOptions({ ...filterOptions, mfaStatus: v as 'all' | 'enabled' | 'disabled' })}>
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All</SelectItem>
+                    <SelectItem value="enabled">MFA Enabled</SelectItem>
+                    <SelectItem value="disabled">MFA Disabled</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Login Activity</Label>
+                <Select value={filterOptions.loginActivity} onValueChange={(v) => setFilterOptions({ ...filterOptions, loginActivity: v as 'all' | 'active' | 'inactive' | 'never' })}>
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All</SelectItem>
+                    <SelectItem value="active">Active (last 7 days)</SelectItem>
+                    <SelectItem value="inactive">Inactive (30+ days)</SelectItem>
+                    <SelectItem value="never">Never logged in</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setFilterOptions({ department: '', role: '', mfaStatus: 'all', loginActivity: 'all' })}>Reset</Button>
+              <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => {
+                toast.success('Filters applied', { description: 'User list has been filtered' })
+                setShowAdvancedFiltersDialog(false)
+              }}>Apply Filters</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* User Options Dialog */}
+        <Dialog open={showUserOptionsDialog} onOpenChange={setShowUserOptionsDialog}>
+          <DialogContent className="max-w-sm">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <UserCog className="w-5 h-5 text-purple-600" />
+                User Actions
+              </DialogTitle>
+              <DialogDescription>{selectedUserForOptions?.displayName}</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-2">
+              <Button variant="outline" className="w-full justify-start gap-2" onClick={() => {
+                setSelectedUser(selectedUserForOptions)
+                setShowUserOptionsDialog(false)
+              }}>
+                <Users className="w-4 h-4" />
+                View Profile
+              </Button>
+              <Button variant="outline" className="w-full justify-start gap-2" onClick={() => {
+                setShowUserOptionsDialog(false)
+                setShowEditUserDialog(true)
+              }}>
+                <Edit className="w-4 h-4" />
+                Edit User
+              </Button>
+              <Button variant="outline" className="w-full justify-start gap-2" onClick={() => {
+                setShowUserOptionsDialog(false)
+                setShowResetPasswordDialog(true)
+              }}>
+                <KeyRound className="w-4 h-4" />
+                Reset Password
+              </Button>
+              <Button variant="outline" className="w-full justify-start gap-2" onClick={async () => {
+                setIsLoading(true)
+                await new Promise(resolve => setTimeout(resolve, 500))
+                toast.success('Session revoked', { description: `All sessions for ${selectedUserForOptions?.displayName} have been revoked` })
+                setIsLoading(false)
+                setShowUserOptionsDialog(false)
+              }}>
+                <LockKeyhole className="w-4 h-4" />
+                Revoke Sessions
+              </Button>
+              <Button variant="outline" className="w-full justify-start gap-2 text-red-600 hover:bg-red-50" onClick={() => {
+                setShowUserOptionsDialog(false)
+                setShowLockAccountDialog(true)
+              }}>
+                <AlertTriangle className="w-4 h-4" />
+                Suspend Account
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Create Policy Dialog */}
+        <Dialog open={showCreatePolicyDialog} onOpenChange={setShowCreatePolicyDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <FileText className="w-5 h-5 text-purple-600" />
+                Create Security Policy
+              </DialogTitle>
+              <DialogDescription>Define a new security policy for your organization</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label>Policy Name</Label>
+                <Input
+                  value={newPolicy.name}
+                  onChange={(e) => setNewPolicy({ ...newPolicy, name: e.target.value })}
+                  placeholder="Enter policy name"
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label>Description</Label>
+                <Textarea
+                  value={newPolicy.description}
+                  onChange={(e) => setNewPolicy({ ...newPolicy, description: e.target.value })}
+                  placeholder="Describe the policy purpose..."
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label>Policy Type</Label>
+                <Select value={newPolicy.type} onValueChange={(v) => setNewPolicy({ ...newPolicy, type: v as PolicyType })}>
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="sign_on">Sign-On Policy</SelectItem>
+                    <SelectItem value="password">Password Policy</SelectItem>
+                    <SelectItem value="mfa">MFA Policy</SelectItem>
+                    <SelectItem value="session">Session Policy</SelectItem>
+                    <SelectItem value="access">Access Policy</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Priority</Label>
+                <Input
+                  type="number"
+                  value={newPolicy.priority}
+                  onChange={(e) => setNewPolicy({ ...newPolicy, priority: parseInt(e.target.value) || 1 })}
+                  min="1"
+                  max="100"
+                  className="mt-1"
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowCreatePolicyDialog(false)}>Cancel</Button>
+              <Button className="bg-purple-600 hover:bg-purple-700" onClick={async () => {
+                if (!newPolicy.name) {
+                  toast.error('Validation Error', { description: 'Policy name is required' })
+                  return
+                }
+                setIsLoading(true)
+                await new Promise(resolve => setTimeout(resolve, 800))
+                toast.success('Policy created', { description: `${newPolicy.name} has been created successfully` })
+                setNewPolicy({ name: '', description: '', type: 'sign_on', priority: 1 })
+                setShowCreatePolicyDialog(false)
+                setIsLoading(false)
+              }} disabled={isLoading}>
+                {isLoading ? 'Creating...' : 'Create Policy'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Application Dialog */}
+        <Dialog open={showAddApplicationDialog} onOpenChange={setShowAddApplicationDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Layers className="w-5 h-5 text-purple-600" />
+                Add Application
+              </DialogTitle>
+              <DialogDescription>Configure a new SSO application</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label>Application Name</Label>
+                <Input
+                  value={newApplication.name}
+                  onChange={(e) => setNewApplication({ ...newApplication, name: e.target.value })}
+                  placeholder="Enter application name"
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label>Application Type</Label>
+                <Select value={newApplication.type} onValueChange={(v) => setNewApplication({ ...newApplication, type: v as 'saml' | 'oidc' | 'spa' | 'native' })}>
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="saml">SAML 2.0</SelectItem>
+                    <SelectItem value="oidc">OpenID Connect</SelectItem>
+                    <SelectItem value="spa">Single Page App (SPA)</SelectItem>
+                    <SelectItem value="native">Native/Mobile App</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div>
+                  <p className="font-medium">Enable SSO</p>
+                  <p className="text-sm text-gray-500">Allow single sign-on access</p>
+                </div>
+                <Switch checked={newApplication.ssoEnabled} onCheckedChange={(v) => setNewApplication({ ...newApplication, ssoEnabled: v })} />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowAddApplicationDialog(false)}>Cancel</Button>
+              <Button className="bg-purple-600 hover:bg-purple-700" onClick={async () => {
+                if (!newApplication.name) {
+                  toast.error('Validation Error', { description: 'Application name is required' })
+                  return
+                }
+                setIsLoading(true)
+                await new Promise(resolve => setTimeout(resolve, 1000))
+                toast.success('Application added', { description: `${newApplication.name} has been added successfully` })
+                setNewApplication({ name: '', type: 'saml', ssoEnabled: true })
+                setShowAddApplicationDialog(false)
+                setIsLoading(false)
+              }} disabled={isLoading}>
+                {isLoading ? 'Adding...' : 'Add Application'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Export Logs Dialog */}
+        <Dialog open={showExportLogsDialog} onOpenChange={setShowExportLogsDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Download className="w-5 h-5 text-purple-600" />
+                Export Audit Logs
+              </DialogTitle>
+              <DialogDescription>Configure export options for audit logs</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label>Export Format</Label>
+                <Select value={exportLogsOptions.format} onValueChange={(v) => setExportLogsOptions({ ...exportLogsOptions, format: v as 'json' | 'csv' })}>
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="json">JSON</SelectItem>
+                    <SelectItem value="csv">CSV</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Date Range</Label>
+                <Select value={exportLogsOptions.dateRange} onValueChange={(v) => setExportLogsOptions({ ...exportLogsOptions, dateRange: v as '24h' | '7d' | '30d' | '90d' })}>
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="24h">Last 24 hours</SelectItem>
+                    <SelectItem value="7d">Last 7 days</SelectItem>
+                    <SelectItem value="30d">Last 30 days</SelectItem>
+                    <SelectItem value="90d">Last 90 days</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowExportLogsDialog(false)}>Cancel</Button>
+              <Button className="bg-purple-600 hover:bg-purple-700" onClick={async () => {
+                setIsLoading(true)
+                await new Promise(resolve => setTimeout(resolve, 1500))
+                const filename = `audit-logs-${new Date().toISOString().split('T')[0]}.${exportLogsOptions.format}`
+                toast.success('Export complete', { description: `Downloaded ${filename}` })
+                setShowExportLogsDialog(false)
+                setIsLoading(false)
+              }} disabled={isLoading}>
+                {isLoading ? 'Exporting...' : 'Export Logs'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Copy Token Dialog */}
+        <Dialog open={showCopyTokenDialog} onOpenChange={setShowCopyTokenDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Copy className="w-5 h-5 text-purple-600" />
+                Copy Bearer Token
+              </DialogTitle>
+              <DialogDescription>Copy the SCIM bearer token to your clipboard</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+                <p className="text-sm text-yellow-800 dark:text-yellow-200">
+                  <AlertTriangle className="w-4 h-4 inline mr-2" />
+                  This token provides full SCIM API access. Keep it secure and never share it publicly.
+                </p>
+              </div>
+              <div>
+                <Label>Token (hidden for security)</Label>
+                <Input type="password" value="scim_token_xxxxxxxxxxxxxxxxxx" disabled className="mt-1 font-mono" />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowCopyTokenDialog(false)}>Cancel</Button>
+              <Button className="bg-purple-600 hover:bg-purple-700" onClick={async () => {
+                await navigator.clipboard.writeText('scim_token_xxxxxxxxxxxxxxxxxx')
+                toast.success('Token copied', { description: 'Bearer token has been copied to clipboard' })
+                setShowCopyTokenDialog(false)
+              }}>
+                <Copy className="w-4 h-4 mr-2" />
+                Copy Token
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Regenerate Token Dialog */}
+        <Dialog open={showRegenerateTokenDialog} onOpenChange={setShowRegenerateTokenDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-orange-600">
+                <RefreshCw className="w-5 h-5" />
+                Regenerate SCIM Token
+              </DialogTitle>
+              <DialogDescription>This will invalidate the current token</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="p-4 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg">
+                <p className="text-sm text-orange-800 dark:text-orange-200">
+                  <AlertTriangle className="w-4 h-4 inline mr-2" />
+                  Warning: Regenerating the token will immediately revoke the current token. All integrations using the old token will stop working.
+                </p>
+              </div>
+              <p className="text-sm text-gray-500">
+                Make sure you update all services that use this token before proceeding.
+              </p>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowRegenerateTokenDialog(false)}>Cancel</Button>
+              <Button className="bg-orange-600 hover:bg-orange-700" onClick={async () => {
+                setIsLoading(true)
+                await new Promise(resolve => setTimeout(resolve, 1200))
+                toast.success('Token regenerated', { description: 'New SCIM token has been generated. Please copy it now.' })
+                setShowRegenerateTokenDialog(false)
+                setIsLoading(false)
+              }} disabled={isLoading}>
+                {isLoading ? 'Regenerating...' : 'Regenerate Token'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Mapping Dialog */}
+        <Dialog open={showAddMappingDialog} onOpenChange={setShowAddMappingDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Link2 className="w-5 h-5 text-purple-600" />
+                Add Attribute Mapping
+              </DialogTitle>
+              <DialogDescription>Map an IdP attribute to a user field</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label>Source Attribute (IdP)</Label>
+                <Input
+                  value={newMapping.source}
+                  onChange={(e) => setNewMapping({ ...newMapping, source: e.target.value })}
+                  placeholder="e.g., user.department"
+                  className="mt-1 font-mono"
+                />
+              </div>
+              <div>
+                <Label>Target Field (User)</Label>
+                <Input
+                  value={newMapping.target}
+                  onChange={(e) => setNewMapping({ ...newMapping, target: e.target.value })}
+                  placeholder="e.g., department"
+                  className="mt-1 font-mono"
+                />
+              </div>
+              <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div>
+                  <p className="font-medium">Required Field</p>
+                  <p className="text-sm text-gray-500">Mark as mandatory</p>
+                </div>
+                <Switch checked={newMapping.required} onCheckedChange={(v) => setNewMapping({ ...newMapping, required: v })} />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowAddMappingDialog(false)}>Cancel</Button>
+              <Button className="bg-purple-600 hover:bg-purple-700" onClick={async () => {
+                if (!newMapping.source || !newMapping.target) {
+                  toast.error('Validation Error', { description: 'Source and target fields are required' })
+                  return
+                }
+                setIsLoading(true)
+                await new Promise(resolve => setTimeout(resolve, 700))
+                toast.success('Mapping added', { description: `${newMapping.source} -> ${newMapping.target}` })
+                setNewMapping({ source: '', target: '', required: false })
+                setShowAddMappingDialog(false)
+                setIsLoading(false)
+              }} disabled={isLoading}>
+                {isLoading ? 'Adding...' : 'Add Mapping'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* API Key Options Dialog */}
+        <Dialog open={showAPIKeyOptionsDialog} onOpenChange={setShowAPIKeyOptionsDialog}>
+          <DialogContent className="max-w-sm">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Key className="w-5 h-5 text-purple-600" />
+                API Key Options
+              </DialogTitle>
+              <DialogDescription>{selectedAPIKey?.name}</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-2">
+              <Button variant="outline" className="w-full justify-start gap-2" onClick={async () => {
+                await navigator.clipboard.writeText(`${selectedAPIKey?.prefix}xxxxxxxxxxxx`)
+                toast.success('API key copied', { description: 'Key has been copied to clipboard' })
+                setShowAPIKeyOptionsDialog(false)
+              }}>
+                <Copy className="w-4 h-4" />
+                Copy API Key
+              </Button>
+              <Button variant="outline" className="w-full justify-start gap-2" onClick={async () => {
+                setIsLoading(true)
+                await new Promise(resolve => setTimeout(resolve, 800))
+                toast.success('API key rotated', { description: 'New key has been generated' })
+                setIsLoading(false)
+                setShowAPIKeyOptionsDialog(false)
+              }}>
+                <RefreshCw className="w-4 h-4" />
+                Rotate Key
+              </Button>
+              <Button variant="outline" className="w-full justify-start gap-2 text-red-600 hover:bg-red-50" onClick={async () => {
+                setIsLoading(true)
+                await new Promise(resolve => setTimeout(resolve, 600))
+                toast.success('API key revoked', { description: `${selectedAPIKey?.name} has been revoked` })
+                setIsLoading(false)
+                setShowAPIKeyOptionsDialog(false)
+              }}>
+                <AlertTriangle className="w-4 h-4" />
+                Revoke Key
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Webhook Dialog */}
+        <Dialog open={showAddWebhookDialog} onOpenChange={setShowAddWebhookDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Zap className="w-5 h-5 text-purple-600" />
+                Add Webhook
+              </DialogTitle>
+              <DialogDescription>Configure a new webhook endpoint</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label>Webhook URL</Label>
+                <Input
+                  value={newWebhook.url}
+                  onChange={(e) => setNewWebhook({ ...newWebhook, url: e.target.value })}
+                  placeholder="https://api.example.com/webhooks"
+                  className="mt-1 font-mono"
+                />
+              </div>
+              <div>
+                <Label className="mb-2 block">Events to Subscribe</Label>
+                <div className="space-y-2">
+                  {['user.created', 'user.updated', 'user.deleted', 'group.member_added', 'group.member_removed'].map(event => (
+                    <div key={event} className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        id={event}
+                        checked={newWebhook.events.includes(event)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setNewWebhook({ ...newWebhook, events: [...newWebhook.events, event] })
+                          } else {
+                            setNewWebhook({ ...newWebhook, events: newWebhook.events.filter(ev => ev !== event) })
+                          }
+                        }}
+                        className="rounded"
+                      />
+                      <label htmlFor={event} className="text-sm font-mono">{event}</label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowAddWebhookDialog(false)}>Cancel</Button>
+              <Button className="bg-purple-600 hover:bg-purple-700" onClick={async () => {
+                if (!newWebhook.url) {
+                  toast.error('Validation Error', { description: 'Webhook URL is required' })
+                  return
+                }
+                setIsLoading(true)
+                await new Promise(resolve => setTimeout(resolve, 800))
+                toast.success('Webhook added', { description: 'Webhook endpoint has been configured' })
+                setNewWebhook({ url: '', events: [] })
+                setShowAddWebhookDialog(false)
+                setIsLoading(false)
+              }} disabled={isLoading}>
+                {isLoading ? 'Adding...' : 'Add Webhook'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Directory Config Dialog */}
+        <Dialog open={showDirectoryConfigDialog} onOpenChange={setShowDirectoryConfigDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Network className="w-5 h-5 text-purple-600" />
+                {selectedDirectoryIntegration?.status === 'connected' ? 'Configure' : 'Connect'} {selectedDirectoryIntegration?.name}
+              </DialogTitle>
+              <DialogDescription>
+                {selectedDirectoryIntegration?.status === 'connected'
+                  ? 'Manage directory integration settings'
+                  : 'Set up connection to directory service'}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              {selectedDirectoryIntegration?.status === 'connected' ? (
+                <>
+                  <div className="flex items-center justify-between p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                    <div className="flex items-center gap-2">
+                      <CheckCircle className="w-5 h-5 text-green-600" />
+                      <span className="font-medium text-green-800 dark:text-green-200">Connected</span>
+                    </div>
+                    <Button variant="outline" size="sm" onClick={async () => {
+                      setIsLoading(true)
+                      await new Promise(resolve => setTimeout(resolve, 1000))
+                      toast.success('Sync complete', { description: 'Directory synchronized successfully' })
+                      setIsLoading(false)
+                    }} disabled={isLoading}>
+                      <RefreshCw className="w-4 h-4 mr-2" />
+                      Sync Now
+                    </Button>
+                  </div>
+                  <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <div>
+                      <p className="font-medium">Auto-Sync</p>
+                      <p className="text-sm text-gray-500">Sync every 15 minutes</p>
+                    </div>
+                    <Switch defaultChecked />
+                  </div>
+                  <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <div>
+                      <p className="font-medium">Sync Groups</p>
+                      <p className="text-sm text-gray-500">Import directory groups</p>
+                    </div>
+                    <Switch defaultChecked />
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div>
+                    <Label>Server URL</Label>
+                    <Input placeholder="ldap://ldap.example.com:389" className="mt-1 font-mono" />
+                  </div>
+                  <div>
+                    <Label>Bind DN</Label>
+                    <Input placeholder="cn=admin,dc=example,dc=com" className="mt-1 font-mono" />
+                  </div>
+                  <div>
+                    <Label>Bind Password</Label>
+                    <Input type="password" placeholder="Enter password" className="mt-1" />
+                  </div>
+                  <div>
+                    <Label>Base DN</Label>
+                    <Input placeholder="dc=example,dc=com" className="mt-1 font-mono" />
+                  </div>
+                </>
+              )}
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowDirectoryConfigDialog(false)}>
+                {selectedDirectoryIntegration?.status === 'connected' ? 'Close' : 'Cancel'}
+              </Button>
+              {selectedDirectoryIntegration?.status !== 'connected' && (
+                <Button className="bg-purple-600 hover:bg-purple-700" onClick={async () => {
+                  setIsLoading(true)
+                  await new Promise(resolve => setTimeout(resolve, 1500))
+                  toast.success('Connected', { description: `${selectedDirectoryIntegration?.name} has been connected` })
+                  setShowDirectoryConfigDialog(false)
+                  setIsLoading(false)
+                }} disabled={isLoading}>
+                  {isLoading ? 'Connecting...' : 'Connect'}
+                </Button>
+              )}
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* HR Integration Dialog */}
+        <Dialog open={showHRIntegrationDialog} onOpenChange={setShowHRIntegrationDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Building className="w-5 h-5 text-purple-600" />
+                {selectedHRIntegration?.connected ? 'Configure' : 'Connect'} {selectedHRIntegration?.name}
+              </DialogTitle>
+              <DialogDescription>
+                {selectedHRIntegration?.connected
+                  ? 'Manage HR system integration settings'
+                  : 'Set up connection to HR platform'}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              {selectedHRIntegration?.connected ? (
+                <>
+                  <div className="flex items-center justify-between p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                    <div className="flex items-center gap-2">
+                      <CheckCircle className="w-5 h-5 text-green-600" />
+                      <span className="font-medium text-green-800 dark:text-green-200">Connected</span>
+                    </div>
+                    <Button variant="outline" size="sm" onClick={async () => {
+                      setIsLoading(true)
+                      await new Promise(resolve => setTimeout(resolve, 1000))
+                      toast.success('Sync complete', { description: 'HR data synchronized successfully' })
+                      setIsLoading(false)
+                    }} disabled={isLoading}>
+                      <RefreshCw className="w-4 h-4 mr-2" />
+                      Sync Now
+                    </Button>
+                  </div>
+                  <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <div>
+                      <p className="font-medium">Auto-provision</p>
+                      <p className="text-sm text-gray-500">Create users from HR data</p>
+                    </div>
+                    <Switch defaultChecked />
+                  </div>
+                  <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <div>
+                      <p className="font-medium">Sync Department</p>
+                      <p className="text-sm text-gray-500">Update user departments</p>
+                    </div>
+                    <Switch defaultChecked />
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div>
+                    <Label>API Key</Label>
+                    <Input type="password" placeholder="Enter API key" className="mt-1 font-mono" />
+                  </div>
+                  <div>
+                    <Label>Subdomain / Company ID</Label>
+                    <Input placeholder="your-company" className="mt-1" />
+                  </div>
+                </>
+              )}
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowHRIntegrationDialog(false)}>
+                {selectedHRIntegration?.connected ? 'Close' : 'Cancel'}
+              </Button>
+              {!selectedHRIntegration?.connected && (
+                <Button className="bg-purple-600 hover:bg-purple-700" onClick={async () => {
+                  setIsLoading(true)
+                  await new Promise(resolve => setTimeout(resolve, 1500))
+                  toast.success('Connected', { description: `${selectedHRIntegration?.name} has been connected` })
+                  setShowHRIntegrationDialog(false)
+                  setIsLoading(false)
+                }} disabled={isLoading}>
+                  {isLoading ? 'Connecting...' : 'Connect'}
+                </Button>
+              )}
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Export Data Dialog */}
+        <Dialog open={showExportDataDialog} onOpenChange={setShowExportDataDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Download className="w-5 h-5 text-purple-600" />
+                Export All Data
+              </DialogTitle>
+              <DialogDescription>Export encrypted data backup</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                <p className="text-sm text-blue-800 dark:text-blue-200">
+                  This will export all user data, roles, policies, and configurations in an encrypted format.
+                </p>
+              </div>
+              <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div>
+                  <p className="font-medium">Include Audit Logs</p>
+                  <p className="text-sm text-gray-500">Last 90 days of logs</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+              <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div>
+                  <p className="font-medium">Include API Keys</p>
+                  <p className="text-sm text-gray-500">Encrypted key hashes</p>
+                </div>
+                <Switch />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowExportDataDialog(false)}>Cancel</Button>
+              <Button className="bg-purple-600 hover:bg-purple-700" onClick={async () => {
+                setIsLoading(true)
+                await new Promise(resolve => setTimeout(resolve, 2000))
+                toast.success('Export complete', { description: 'Data export has been downloaded' })
+                setShowExportDataDialog(false)
+                setIsLoading(false)
+              }} disabled={isLoading}>
+                {isLoading ? 'Exporting...' : 'Export Data'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Reset Permissions Dialog */}
+        <Dialog open={showResetPermissionsDialog} onOpenChange={setShowResetPermissionsDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-600">
+                <AlertTriangle className="w-5 h-5" />
+                Reset All Permissions
+              </DialogTitle>
+              <DialogDescription>This action cannot be undone</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                <p className="text-sm text-red-800 dark:text-red-200">
+                  <strong>Warning:</strong> This will reset all custom roles and permissions to their default state. Users may lose access to resources.
+                </p>
+              </div>
+              <div>
+                <Label>Type "RESET" to confirm</Label>
+                <Input placeholder="RESET" className="mt-1" />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowResetPermissionsDialog(false)}>Cancel</Button>
+              <Button className="bg-red-600 hover:bg-red-700" onClick={async () => {
+                setIsLoading(true)
+                await new Promise(resolve => setTimeout(resolve, 1500))
+                toast.success('Permissions reset', { description: 'All permissions have been reset to defaults' })
+                setShowResetPermissionsDialog(false)
+                setIsLoading(false)
+              }} disabled={isLoading}>
+                {isLoading ? 'Resetting...' : 'Reset Permissions'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Revoke Sessions Dialog */}
+        <Dialog open={showRevokeSessionsDialog} onOpenChange={setShowRevokeSessionsDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-600">
+                <AlertTriangle className="w-5 h-5" />
+                Revoke All Sessions
+              </DialogTitle>
+              <DialogDescription>Force all users to re-authenticate</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                <p className="text-sm text-red-800 dark:text-red-200">
+                  <strong>Warning:</strong> This will immediately log out all users across all devices. They will need to sign in again.
+                </p>
+              </div>
+              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <p className="text-sm">Active sessions that will be revoked: <strong>156</strong></p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowRevokeSessionsDialog(false)}>Cancel</Button>
+              <Button className="bg-red-600 hover:bg-red-700" onClick={async () => {
+                setIsLoading(true)
+                await new Promise(resolve => setTimeout(resolve, 1800))
+                toast.success('Sessions revoked', { description: 'All users must re-authenticate' })
+                setShowRevokeSessionsDialog(false)
+                setIsLoading(false)
+              }} disabled={isLoading}>
+                {isLoading ? 'Revoking...' : 'Revoke All Sessions'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete API Keys Dialog */}
+        <Dialog open={showDeleteAPIKeysDialog} onOpenChange={setShowDeleteAPIKeysDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-600">
+                <AlertTriangle className="w-5 h-5" />
+                Delete All API Keys
+              </DialogTitle>
+              <DialogDescription>This will break all API integrations</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                <p className="text-sm text-red-800 dark:text-red-200">
+                  <strong>Warning:</strong> Deleting all API keys will immediately revoke API access. All integrations will stop working.
+                </p>
+              </div>
+              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <p className="text-sm">API keys that will be deleted: <strong>3</strong></p>
+              </div>
+              <div>
+                <Label>Type "DELETE" to confirm</Label>
+                <Input placeholder="DELETE" className="mt-1" />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowDeleteAPIKeysDialog(false)}>Cancel</Button>
+              <Button className="bg-red-600 hover:bg-red-700" onClick={async () => {
+                setIsLoading(true)
+                await new Promise(resolve => setTimeout(resolve, 1200))
+                toast.success('API keys deleted', { description: 'All API keys have been revoked' })
+                setShowDeleteAPIKeysDialog(false)
+                setIsLoading(false)
+              }} disabled={isLoading}>
+                {isLoading ? 'Deleting...' : 'Delete All Keys'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit User Dialog */}
+        <Dialog open={showEditUserDialog} onOpenChange={setShowEditUserDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Edit className="w-5 h-5 text-purple-600" />
+                Edit User
+              </DialogTitle>
+              <DialogDescription>Update user information for {selectedUser?.displayName}</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>First Name</Label>
+                  <Input defaultValue={selectedUser?.firstName} className="mt-1" />
+                </div>
+                <div>
+                  <Label>Last Name</Label>
+                  <Input defaultValue={selectedUser?.lastName} className="mt-1" />
+                </div>
+              </div>
+              <div>
+                <Label>Email</Label>
+                <Input defaultValue={selectedUser?.email} className="mt-1" />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Department</Label>
+                  <Input defaultValue={selectedUser?.department} className="mt-1" />
+                </div>
+                <div>
+                  <Label>Title</Label>
+                  <Input defaultValue={selectedUser?.title} className="mt-1" />
+                </div>
+              </div>
+              <div>
+                <Label>Status</Label>
+                <Select defaultValue={selectedUser?.status}>
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="active">Active</SelectItem>
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="suspended">Suspended</SelectItem>
+                    <SelectItem value="locked">Locked</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowEditUserDialog(false)}>Cancel</Button>
+              <Button className="bg-purple-600 hover:bg-purple-700" onClick={async () => {
+                setIsLoading(true)
+                await new Promise(resolve => setTimeout(resolve, 800))
+                toast.success('User updated', { description: `${selectedUser?.displayName} has been updated` })
+                setShowEditUserDialog(false)
+                setIsLoading(false)
+              }} disabled={isLoading}>
+                {isLoading ? 'Saving...' : 'Save Changes'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Reset Password Dialog */}
+        <Dialog open={showResetPasswordDialog} onOpenChange={setShowResetPasswordDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <KeyRound className="w-5 h-5 text-purple-600" />
+                Reset Password
+              </DialogTitle>
+              <DialogDescription>Send a password reset email to {selectedUser?.email}</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                <p className="text-sm text-blue-800 dark:text-blue-200">
+                  The user will receive an email with a link to reset their password. The link expires in 24 hours.
+                </p>
+              </div>
+              <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div>
+                  <p className="font-medium">Force password change on next login</p>
+                  <p className="text-sm text-gray-500">User must set new password</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowResetPasswordDialog(false)}>Cancel</Button>
+              <Button className="bg-purple-600 hover:bg-purple-700" onClick={async () => {
+                setIsLoading(true)
+                await new Promise(resolve => setTimeout(resolve, 1000))
+                toast.success('Reset email sent', { description: `Password reset email sent to ${selectedUser?.email}` })
+                setShowResetPasswordDialog(false)
+                setIsLoading(false)
+              }} disabled={isLoading}>
+                {isLoading ? 'Sending...' : 'Send Reset Email'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Lock Account Dialog */}
+        <Dialog open={showLockAccountDialog} onOpenChange={setShowLockAccountDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-orange-600">
+                <LockKeyhole className="w-5 h-5" />
+                Lock Account
+              </DialogTitle>
+              <DialogDescription>Suspend access for {selectedUser?.displayName || selectedUserForOptions?.displayName}</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="p-4 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg">
+                <p className="text-sm text-orange-800 dark:text-orange-200">
+                  Locking this account will immediately revoke all active sessions and prevent the user from signing in.
+                </p>
+              </div>
+              <div>
+                <Label>Reason for suspension</Label>
+                <Textarea placeholder="Enter reason..." className="mt-1" />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowLockAccountDialog(false)}>Cancel</Button>
+              <Button className="bg-orange-600 hover:bg-orange-700" onClick={async () => {
+                setIsLoading(true)
+                await new Promise(resolve => setTimeout(resolve, 600))
+                toast.success('Account locked', { description: `${selectedUser?.displayName || selectedUserForOptions?.displayName} has been suspended` })
+                setShowLockAccountDialog(false)
+                setIsLoading(false)
+              }} disabled={isLoading}>
+                {isLoading ? 'Locking...' : 'Lock Account'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Members Dialog */}
+        <Dialog open={showAddMembersDialog} onOpenChange={setShowAddMembersDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <UserPlus className="w-5 h-5 text-purple-600" />
+                Add Members to {selectedGroup?.name}
+              </DialogTitle>
+              <DialogDescription>Select users to add to this group</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Input placeholder="Search users..." className="pl-10" />
+              </div>
+              <div className="max-h-64 overflow-y-auto space-y-2">
+                {mockUsers.filter(u => !selectedGroup?.name.includes(u.groups[0])).map(user => (
+                  <div key={user.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <Avatar className="w-8 h-8">
+                        <AvatarFallback className="bg-purple-500 text-white text-xs">
+                          {user.firstName[0]}{user.lastName[0]}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="text-sm font-medium">{user.displayName}</p>
+                        <p className="text-xs text-gray-500">{user.email}</p>
+                      </div>
+                    </div>
+                    <Button variant="outline" size="sm">Add</Button>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowAddMembersDialog(false)}>Done</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Group Dialog */}
+        <Dialog open={showEditGroupDialog} onOpenChange={setShowEditGroupDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Edit className="w-5 h-5 text-purple-600" />
+                Edit Group
+              </DialogTitle>
+              <DialogDescription>Update group information for {selectedGroup?.name}</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label>Group Name</Label>
+                <Input defaultValue={selectedGroup?.name} className="mt-1" />
+              </div>
+              <div>
+                <Label>Description</Label>
+                <Textarea defaultValue={selectedGroup?.description} className="mt-1" />
+              </div>
+              <div>
+                <Label>Group Type</Label>
+                <Select defaultValue={selectedGroup?.type}>
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="custom">Custom</SelectItem>
+                    <SelectItem value="okta">Okta</SelectItem>
+                    <SelectItem value="app">Application</SelectItem>
+                    <SelectItem value="built_in">Built-in</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowEditGroupDialog(false)}>Cancel</Button>
+              <Button className="bg-purple-600 hover:bg-purple-700" onClick={async () => {
+                setIsLoading(true)
+                await new Promise(resolve => setTimeout(resolve, 600))
+                toast.success('Group updated', { description: `${selectedGroup?.name} has been updated` })
+                setShowEditGroupDialog(false)
+                setIsLoading(false)
+              }} disabled={isLoading}>
+                {isLoading ? 'Saving...' : 'Save Changes'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Assign Users Dialog */}
+        <Dialog open={showAssignUsersDialog} onOpenChange={setShowAssignUsersDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <UserPlus className="w-5 h-5 text-purple-600" />
+                Assign Users to {selectedRole?.displayName}
+              </DialogTitle>
+              <DialogDescription>Select users to assign this role</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Input placeholder="Search users..." className="pl-10" />
+              </div>
+              <div className="max-h-64 overflow-y-auto space-y-2">
+                {mockUsers.map(user => (
+                  <div key={user.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <Avatar className="w-8 h-8">
+                        <AvatarFallback className="bg-purple-500 text-white text-xs">
+                          {user.firstName[0]}{user.lastName[0]}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="text-sm font-medium">{user.displayName}</p>
+                        <p className="text-xs text-gray-500">{user.email}</p>
+                      </div>
+                    </div>
+                    <Button variant="outline" size="sm" onClick={async () => {
+                      await handleAssignUserToRole(user.id, selectedRole?.id || '')
+                    }}>Assign</Button>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowAssignUsersDialog(false)}>Done</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Role Dialog */}
+        <Dialog open={showEditRoleDialog} onOpenChange={setShowEditRoleDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Edit className="w-5 h-5 text-purple-600" />
+                Edit Role
+              </DialogTitle>
+              <DialogDescription>Update role configuration for {selectedRole?.displayName}</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label>Display Name</Label>
+                <Input defaultValue={selectedRole?.displayName} className="mt-1" />
+              </div>
+              <div>
+                <Label>Description</Label>
+                <Textarea defaultValue={selectedRole?.description} className="mt-1" />
+              </div>
+              <div>
+                <Label>Role Level</Label>
+                <Select defaultValue={selectedRole?.level}>
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="basic">Basic</SelectItem>
+                    <SelectItem value="standard">Standard</SelectItem>
+                    <SelectItem value="manager">Manager</SelectItem>
+                    <SelectItem value="admin">Admin</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="mb-2 block">Permissions</Label>
+                <div className="max-h-32 overflow-y-auto space-y-1">
+                  {selectedRole?.permissions.map(perm => (
+                    <Badge key={perm} variant="outline" className="mr-1 font-mono text-xs">{perm}</Badge>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowEditRoleDialog(false)}>Cancel</Button>
+              <Button className="bg-purple-600 hover:bg-purple-700" onClick={async () => {
+                setIsLoading(true)
+                await new Promise(resolve => setTimeout(resolve, 700))
+                toast.success('Role updated', { description: `${selectedRole?.displayName} has been updated` })
+                setShowEditRoleDialog(false)
+                setIsLoading(false)
+              }} disabled={isLoading}>
+                {isLoading ? 'Saving...' : 'Save Changes'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Create API Key Dialog */}
+        <Dialog open={showAPIKeyDialog} onOpenChange={setShowAPIKeyDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Key className="w-5 h-5 text-purple-600" />
+                Create API Key
+              </DialogTitle>
+              <DialogDescription>Generate a new API key for programmatic access</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label>Key Name</Label>
+                <Input
+                  value={newAPIKey.name}
+                  onChange={(e) => setNewAPIKey({ ...newAPIKey, name: e.target.value })}
+                  placeholder="e.g., Production API Key"
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label>Environment</Label>
+                <Select value={newAPIKey.environment} onValueChange={(v) => setNewAPIKey({ ...newAPIKey, environment: v as 'production' | 'development' | 'staging' })}>
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="production">Production</SelectItem>
+                    <SelectItem value="staging">Staging</SelectItem>
+                    <SelectItem value="development">Development</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+                <p className="text-sm text-yellow-800 dark:text-yellow-200">
+                  <AlertTriangle className="w-4 h-4 inline mr-2" />
+                  Make sure to copy the API key after creation. It will only be shown once.
+                </p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowAPIKeyDialog(false)}>Cancel</Button>
+              <Button className="bg-purple-600 hover:bg-purple-700" onClick={async () => {
+                if (!newAPIKey.name) {
+                  toast.error('Validation Error', { description: 'Key name is required' })
+                  return
+                }
+                setIsLoading(true)
+                await new Promise(resolve => setTimeout(resolve, 1000))
+                toast.success('API key created', { description: 'New API key has been generated. Copy it now!' })
+                setNewAPIKey({ name: '', environment: 'production' })
+                setShowAPIKeyDialog(false)
+                setIsLoading(false)
+              }} disabled={isLoading}>
+                {isLoading ? 'Creating...' : 'Create API Key'}
               </Button>
             </DialogFooter>
           </DialogContent>

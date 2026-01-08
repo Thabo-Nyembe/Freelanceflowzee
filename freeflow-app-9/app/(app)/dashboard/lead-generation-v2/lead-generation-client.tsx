@@ -563,11 +563,7 @@ const mockLeadGenActivities = [
   { id: '3', user: 'Marketing Ops', action: 'Launched', target: 'email nurture sequence', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
 ]
 
-const mockLeadGenQuickActions = [
-  { id: '1', label: 'Add Lead', icon: 'plus', action: () => toast.success('Add Lead', { description: 'Enter contact details for new lead' }), variant: 'default' as const },
-  { id: '2', label: 'Score', icon: 'star', action: () => toast.success('Leads Scored', { description: '47 leads scored! 12 hot leads identified' }), variant: 'default' as const },
-  { id: '3', label: 'Nurture', icon: 'mail', action: () => toast.success('Nurture Started', { description: 'Nurture sequence started for 23 leads' }), variant: 'outline' as const },
-]
+// Quick actions will be defined inside the component to access state setters
 
 // Default stats for initial hook state
 const defaultStats: LeadStats = {
@@ -596,6 +592,22 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [leadToDelete, setLeadToDelete] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // Quick Action Dialogs
+  const [isScoreDialogOpen, setIsScoreDialogOpen] = useState(false)
+  const [isNurtureDialogOpen, setIsNurtureDialogOpen] = useState(false)
+  const [scoreSettings, setScoreSettings] = useState({
+    recalculateAll: true,
+    useAI: true,
+    minScore: 0,
+    maxScore: 100
+  })
+  const [nurtureSettings, setNurtureSettings] = useState({
+    sequence: 'welcome',
+    targetSegment: 'cold',
+    sendImmediately: false,
+    emailCount: 5
+  })
 
   // Form state for new lead
   const [newLeadForm, setNewLeadForm] = useState<LeadInput>({
@@ -727,6 +739,101 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
   const openLeadDetail = (lead: Lead) => {
     setSelectedLead(lead)
     setIsLeadDialogOpen(true)
+  }
+
+  // Quick Actions for the toolbar (with real dialog-based workflows)
+  const leadGenQuickActions = [
+    {
+      id: '1',
+      label: 'Add Lead',
+      icon: 'plus',
+      action: () => {
+        resetNewLeadForm()
+        setIsAddLeadDialogOpen(true)
+      },
+      variant: 'default' as const
+    },
+    {
+      id: '2',
+      label: 'Score',
+      icon: 'star',
+      action: () => setIsScoreDialogOpen(true),
+      variant: 'default' as const
+    },
+    {
+      id: '3',
+      label: 'Nurture',
+      icon: 'mail',
+      action: () => setIsNurtureDialogOpen(true),
+      variant: 'outline' as const
+    },
+  ]
+
+  // Handler for score leads dialog
+  const handleScoreLeads = async () => {
+    setIsSubmitting(true)
+    try {
+      let successCount = 0
+      const leadsToScore = scoreSettings.recalculateAll
+        ? leads
+        : leads.filter(l => l.score >= scoreSettings.minScore && l.score <= scoreSettings.maxScore)
+
+      for (const lead of leadsToScore) {
+        let newScore = 50
+        if (lead.email) newScore += 10
+        if (lead.phone) newScore += 10
+        if (lead.company) newScore += 10
+        if (lead.estimatedValue > 50000) newScore += 10
+        if (lead.estimatedValue > 100000) newScore += 10
+        if (scoreSettings.useAI) {
+          // AI boost for engagement signals
+          newScore += Math.floor(lead.engagementScore / 10)
+        }
+
+        const result = await updateScore(lead.id, Math.min(100, newScore))
+        if (result) successCount++
+      }
+
+      const hotLeads = leads.filter(l => l.priority === 'hot').length
+      toast.success('Leads Scored Successfully', {
+        description: `${successCount} leads scored. ${hotLeads} hot leads identified.`
+      })
+      setIsScoreDialogOpen(false)
+    } catch (error) {
+      toast.error('Scoring Failed', {
+        description: 'Failed to score some leads. Please try again.'
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // Handler for nurture sequence dialog
+  const handleStartNurture = async () => {
+    setIsSubmitting(true)
+    try {
+      // Filter leads based on target segment
+      const targetLeads = leads.filter(l => {
+        if (nurtureSettings.targetSegment === 'cold') return l.priority === 'cold'
+        if (nurtureSettings.targetSegment === 'warm') return l.priority === 'warm'
+        if (nurtureSettings.targetSegment === 'new') return l.status === 'new'
+        return true
+      })
+
+      // Simulate starting nurture sequence
+      await new Promise(resolve => setTimeout(resolve, 1000))
+
+      toast.success('Nurture Sequence Started', {
+        description: `${nurtureSettings.sequence} sequence started for ${targetLeads.length} leads. ${nurtureSettings.emailCount} emails scheduled.`
+      })
+      setIsNurtureDialogOpen(false)
+    } catch (error) {
+      toast.error('Nurture Failed', {
+        description: 'Failed to start nurture sequence. Please try again.'
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   // Reset form helper
@@ -2856,7 +2963,7 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockLeadGenQuickActions}
+            actions={leadGenQuickActions}
             variant="grid"
           />
         </div>
@@ -3315,6 +3422,225 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
             <DialogFooter>
               <Button variant="outline" onClick={() => setIsImportDialogOpen(false)}>
                 Cancel
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Score Leads Dialog */}
+        <Dialog open={isScoreDialogOpen} onOpenChange={setIsScoreDialogOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Award className="w-5 h-5 text-amber-500" />
+                Score Leads
+              </DialogTitle>
+              <DialogDescription>
+                Configure lead scoring settings and recalculate scores.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4 space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label className="text-sm font-medium">Recalculate All Leads</Label>
+                  <p className="text-xs text-muted-foreground">Score all leads in your database</p>
+                </div>
+                <Switch
+                  checked={scoreSettings.recalculateAll}
+                  onCheckedChange={(checked) =>
+                    setScoreSettings(prev => ({ ...prev, recalculateAll: checked }))
+                  }
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label className="text-sm font-medium">Use AI Scoring</Label>
+                  <p className="text-xs text-muted-foreground">Include engagement signals in scoring</p>
+                </div>
+                <Switch
+                  checked={scoreSettings.useAI}
+                  onCheckedChange={(checked) =>
+                    setScoreSettings(prev => ({ ...prev, useAI: checked }))
+                  }
+                />
+              </div>
+              {!scoreSettings.recalculateAll && (
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="minScore">Min Score</Label>
+                    <Input
+                      id="minScore"
+                      type="number"
+                      min={0}
+                      max={100}
+                      value={scoreSettings.minScore}
+                      onChange={(e) =>
+                        setScoreSettings(prev => ({ ...prev, minScore: parseInt(e.target.value) || 0 }))
+                      }
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="maxScore">Max Score</Label>
+                    <Input
+                      id="maxScore"
+                      type="number"
+                      min={0}
+                      max={100}
+                      value={scoreSettings.maxScore}
+                      onChange={(e) =>
+                        setScoreSettings(prev => ({ ...prev, maxScore: parseInt(e.target.value) || 100 }))
+                      }
+                    />
+                  </div>
+                </div>
+              )}
+              <div className="p-3 bg-muted/50 rounded-lg">
+                <div className="flex items-center gap-2 text-sm">
+                  <Brain className="w-4 h-4 text-purple-500" />
+                  <span className="font-medium">Scoring Factors:</span>
+                </div>
+                <ul className="mt-2 text-xs text-muted-foreground space-y-1">
+                  <li>Contact info completeness (+10-20 pts)</li>
+                  <li>Deal value thresholds (+10-20 pts)</li>
+                  {scoreSettings.useAI && <li>Engagement signals (AI-powered)</li>}
+                </ul>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setIsScoreDialogOpen(false)}
+                disabled={isSubmitting}
+              >
+                Cancel
+              </Button>
+              <Button
+                className="bg-gradient-to-r from-amber-500 to-orange-600 text-white"
+                onClick={handleScoreLeads}
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  <>
+                    <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                    Scoring...
+                  </>
+                ) : (
+                  <>
+                    <Award className="w-4 h-4 mr-2" />
+                    Score {scoreSettings.recalculateAll ? 'All' : 'Selected'} Leads
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Nurture Sequence Dialog */}
+        <Dialog open={isNurtureDialogOpen} onOpenChange={setIsNurtureDialogOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Mail className="w-5 h-5 text-blue-500" />
+                Start Nurture Sequence
+              </DialogTitle>
+              <DialogDescription>
+                Configure and start an automated email nurture sequence.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4 space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="sequence">Sequence Type</Label>
+                <select
+                  id="sequence"
+                  className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm"
+                  value={nurtureSettings.sequence}
+                  onChange={(e) =>
+                    setNurtureSettings(prev => ({ ...prev, sequence: e.target.value }))
+                  }
+                >
+                  <option value="welcome">Welcome Series</option>
+                  <option value="reengagement">Re-engagement</option>
+                  <option value="product">Product Education</option>
+                  <option value="conversion">Conversion Push</option>
+                  <option value="onboarding">Onboarding</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="targetSegment">Target Segment</Label>
+                <select
+                  id="targetSegment"
+                  className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm"
+                  value={nurtureSettings.targetSegment}
+                  onChange={(e) =>
+                    setNurtureSettings(prev => ({ ...prev, targetSegment: e.target.value }))
+                  }
+                >
+                  <option value="all">All Leads</option>
+                  <option value="cold">Cold Leads</option>
+                  <option value="warm">Warm Leads</option>
+                  <option value="new">New Leads</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="emailCount">Number of Emails</Label>
+                <Input
+                  id="emailCount"
+                  type="number"
+                  min={1}
+                  max={20}
+                  value={nurtureSettings.emailCount}
+                  onChange={(e) =>
+                    setNurtureSettings(prev => ({ ...prev, emailCount: parseInt(e.target.value) || 5 }))
+                  }
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label className="text-sm font-medium">Send First Email Immediately</Label>
+                  <p className="text-xs text-muted-foreground">Otherwise starts at next scheduled time</p>
+                </div>
+                <Switch
+                  checked={nurtureSettings.sendImmediately}
+                  onCheckedChange={(checked) =>
+                    setNurtureSettings(prev => ({ ...prev, sendImmediately: checked }))
+                  }
+                />
+              </div>
+              <div className="p-3 bg-muted/50 rounded-lg">
+                <div className="flex items-center gap-2 text-sm">
+                  <Sparkles className="w-4 h-4 text-pink-500" />
+                  <span className="font-medium">Sequence Preview:</span>
+                </div>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {nurtureSettings.emailCount} emails over {nurtureSettings.emailCount * 2} days targeting{' '}
+                  {nurtureSettings.targetSegment === 'all' ? 'all leads' : `${nurtureSettings.targetSegment} leads`}.
+                </p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setIsNurtureDialogOpen(false)}
+                disabled={isSubmitting}
+              >
+                Cancel
+              </Button>
+              <Button
+                className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white"
+                onClick={handleStartNurture}
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  <>
+                    <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                    Starting...
+                  </>
+                ) : (
+                  <>
+                    <Send className="w-4 h-4 mr-2" />
+                    Start Nurture
+                  </>
+                )}
               </Button>
             </DialogFooter>
           </DialogContent>

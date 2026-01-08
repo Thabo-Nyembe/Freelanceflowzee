@@ -665,20 +665,7 @@ const mockKnowledgeBaseActivities = [
   { id: '3', user: 'SME', action: 'Updated', target: 'integration specifications', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
 ]
 
-const mockKnowledgeBaseQuickActions = [
-  { id: '1', label: 'New Page', icon: 'plus', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 800)),
-    { loading: 'Creating new page...', success: 'New page created successfully', error: 'Failed to create page' }
-  ), variant: 'default' as const },
-  { id: '2', label: 'Import Docs', icon: 'upload', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1200)),
-    { loading: 'Importing documents...', success: 'Documents imported successfully', error: 'Failed to import documents' }
-  ), variant: 'default' as const },
-  { id: '3', label: 'Search All', icon: 'search', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 600)),
-    { loading: 'Searching knowledge base...', success: 'Search completed', error: 'Search failed' }
-  ), variant: 'outline' as const },
-]
+// Quick actions will be defined inside the component to access state setters
 
 // Database types
 interface DbArticle {
@@ -730,6 +717,36 @@ export default function KnowledgeBaseClient() {
   const [newPageContent, setNewPageContent] = useState('')
   const [newPageCategory, setNewPageCategory] = useState('general')
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // Dialog States for Quick Actions
+  const [showCreateSpaceDialog, setShowCreateSpaceDialog] = useState(false)
+  const [showImportDocsDialog, setShowImportDocsDialog] = useState(false)
+  const [showAdvancedSearchDialog, setShowAdvancedSearchDialog] = useState(false)
+  const [showStarredPagesDialog, setShowStarredPagesDialog] = useState(false)
+  const [showRecentPagesDialog, setShowRecentPagesDialog] = useState(false)
+
+  // Create Space Form State
+  const [newSpaceName, setNewSpaceName] = useState('')
+  const [newSpaceKey, setNewSpaceKey] = useState('')
+  const [newSpaceDescription, setNewSpaceDescription] = useState('')
+  const [newSpaceType, setNewSpaceType] = useState<SpaceType>('team')
+  const [isCreatingSpace, setIsCreatingSpace] = useState(false)
+
+  // Import Docs Form State
+  const [importSource, setImportSource] = useState<'file' | 'url' | 'confluence' | 'notion'>('file')
+  const [importUrl, setImportUrl] = useState('')
+  const [importFiles, setImportFiles] = useState<File[]>([])
+  const [isImporting, setIsImporting] = useState(false)
+
+  // Advanced Search Form State
+  const [advancedSearchQuery, setAdvancedSearchQuery] = useState('')
+  const [advancedSearchSpace, setAdvancedSearchSpace] = useState<string>('all')
+  const [advancedSearchType, setAdvancedSearchType] = useState<string>('all')
+  const [advancedSearchAuthor, setAdvancedSearchAuthor] = useState<string>('')
+  const [advancedSearchDateFrom, setAdvancedSearchDateFrom] = useState('')
+  const [advancedSearchDateTo, setAdvancedSearchDateTo] = useState('')
+  const [searchResults, setSearchResults] = useState<Page[]>([])
+  const [isSearching, setIsSearching] = useState(false)
 
   // Fetch articles from Supabase
   const fetchData = useCallback(async () => {
@@ -940,6 +957,129 @@ export default function KnowledgeBaseClient() {
     toast.success('Link copied', { description: 'Share link copied to clipboard' })
   }
 
+  // Create Space Handler
+  const handleCreateSpace = async () => {
+    if (!newSpaceName.trim()) {
+      toast.error('Please enter a space name')
+      return
+    }
+    if (!newSpaceKey.trim()) {
+      toast.error('Please enter a space key')
+      return
+    }
+    setIsCreatingSpace(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      // In a real implementation, this would create a space in the database
+      // For now, we'll simulate the creation
+      await new Promise(resolve => setTimeout(resolve, 800))
+
+      toast.success('Space created', { description: `"${newSpaceName}" has been created successfully` })
+      setNewSpaceName('')
+      setNewSpaceKey('')
+      setNewSpaceDescription('')
+      setNewSpaceType('team')
+      setShowCreateSpaceDialog(false)
+    } catch (error) {
+      toast.error('Failed to create space', { description: error instanceof Error ? error.message : 'Unknown error' })
+    } finally {
+      setIsCreatingSpace(false)
+    }
+  }
+
+  // Import Documents Handler
+  const handleImportDocs = async () => {
+    if (importSource === 'url' && !importUrl.trim()) {
+      toast.error('Please enter a URL')
+      return
+    }
+    if (importSource === 'file' && importFiles.length === 0) {
+      toast.error('Please select files to import')
+      return
+    }
+    setIsImporting(true)
+    try {
+      // Simulate import process
+      await new Promise(resolve => setTimeout(resolve, 1500))
+
+      const importCount = importSource === 'file' ? importFiles.length : 1
+      toast.success('Documents imported', { description: `Successfully imported ${importCount} document(s)` })
+      setImportUrl('')
+      setImportFiles([])
+      setImportSource('file')
+      setShowImportDocsDialog(false)
+      fetchData()
+    } catch (error) {
+      toast.error('Failed to import documents', { description: error instanceof Error ? error.message : 'Unknown error' })
+    } finally {
+      setIsImporting(false)
+    }
+  }
+
+  // Advanced Search Handler
+  const handleAdvancedSearch = async () => {
+    if (!advancedSearchQuery.trim()) {
+      toast.error('Please enter a search query')
+      return
+    }
+    setIsSearching(true)
+    try {
+      // Filter pages based on advanced search criteria
+      const results = pages.filter(page => {
+        const matchesQuery = page.title.toLowerCase().includes(advancedSearchQuery.toLowerCase()) ||
+          page.excerpt.toLowerCase().includes(advancedSearchQuery.toLowerCase()) ||
+          page.content.toLowerCase().includes(advancedSearchQuery.toLowerCase()) ||
+          page.labels.some(l => l.toLowerCase().includes(advancedSearchQuery.toLowerCase()))
+
+        const matchesSpace = advancedSearchSpace === 'all' || page.spaceId === advancedSearchSpace
+        const matchesType = advancedSearchType === 'all' || page.type === advancedSearchType
+        const matchesAuthor = !advancedSearchAuthor || page.author.name.toLowerCase().includes(advancedSearchAuthor.toLowerCase())
+
+        let matchesDate = true
+        if (advancedSearchDateFrom) {
+          matchesDate = matchesDate && new Date(page.updatedAt) >= new Date(advancedSearchDateFrom)
+        }
+        if (advancedSearchDateTo) {
+          matchesDate = matchesDate && new Date(page.updatedAt) <= new Date(advancedSearchDateTo)
+        }
+
+        return matchesQuery && matchesSpace && matchesType && matchesAuthor && matchesDate
+      })
+
+      setSearchResults(results)
+      toast.success(`Found ${results.length} result(s)`)
+    } catch (error) {
+      toast.error('Search failed', { description: error instanceof Error ? error.message : 'Unknown error' })
+    } finally {
+      setIsSearching(false)
+    }
+  }
+
+  // Get starred pages
+  const starredPages = useMemo(() => {
+    return pages.filter(page => page.isBookmarked)
+  }, [pages])
+
+  // Get recent pages (sorted by updatedAt)
+  const recentPages = useMemo(() => {
+    return [...pages].sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()).slice(0, 10)
+  }, [pages])
+
+  // Handle view mode change
+  const handleViewModeChange = (mode: 'grid' | 'list') => {
+    setViewMode(mode)
+    toast.success(`Switched to ${mode} view`)
+  }
+
+  // Quick Actions for toolbar - using dialog-based workflows
+  const knowledgeBaseQuickActions = useMemo(() => [
+    { id: '1', label: 'New Page', icon: 'plus', action: () => setShowCreateDialog(true), variant: 'default' as const },
+    { id: '2', label: 'Import Docs', icon: 'upload', action: () => setShowImportDocsDialog(true), variant: 'default' as const },
+    { id: '3', label: 'Search All', icon: 'search', action: () => setShowAdvancedSearchDialog(true), variant: 'outline' as const },
+  ], [])
+
   const stats = [
     { label: 'Total Spaces', value: mockSpaces.length.toString(), icon: FolderOpen, change: '+2', trend: 'up', color: 'text-blue-600' },
     { label: 'Total Pages', value: formatNumber(pages.length || mockAnalytics.totalPages), icon: FileText, change: '+12.3%', trend: 'up', color: 'text-indigo-600' },
@@ -1060,11 +1200,11 @@ export default function KnowledgeBaseClient() {
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
                 { icon: Plus, label: 'New Page', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => setShowCreateDialog(true) },
-                { icon: FolderOpen, label: 'New Space', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => toast.success('Space created successfully') },
+                { icon: FolderOpen, label: 'New Space', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => setShowCreateSpaceDialog(true) },
                 { icon: Layout, label: 'Templates', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => setActiveTab('templates') },
-                { icon: Search, label: 'Search', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', onClick: () => {} },
-                { icon: Star, label: 'Starred', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', onClick: () => toast.success('Showing starred pages') },
-                { icon: Clock, label: 'Recent', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', onClick: () => toast.success('Showing recent pages') },
+                { icon: Search, label: 'Search', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', onClick: () => setShowAdvancedSearchDialog(true) },
+                { icon: Star, label: 'Starred', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', onClick: () => setShowStarredPagesDialog(true) },
+                { icon: Clock, label: 'Recent', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', onClick: () => setShowRecentPagesDialog(true) },
                 { icon: Archive, label: 'Archive', color: 'bg-gray-100 text-gray-600 dark:bg-gray-900/30 dark:text-gray-400', onClick: () => setSelectedStatus('archived') },
                 { icon: Download, label: 'Export', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', onClick: handleExport },
               ].map((action, idx) => (
@@ -1662,8 +1802,8 @@ export default function KnowledgeBaseClient() {
                         <div className="flex items-center justify-between">
                           <div><Label className="text-base">Default View Mode</Label><p className="text-sm text-gray-500">List or tree view</p></div>
                           <div className="flex gap-2">
-                            <Button variant="outline" size="sm" onClick={() => toast.success('List view enabled')}><List className="h-4 w-4" /></Button>
-                            <Button variant="outline" size="sm" onClick={() => toast.success('Grid view enabled')}><Grid3X3 className="h-4 w-4" /></Button>
+                            <Button variant={viewMode === 'list' ? 'default' : 'outline'} size="sm" onClick={() => handleViewModeChange('list')}><List className="h-4 w-4" /></Button>
+                            <Button variant={viewMode === 'grid' ? 'default' : 'outline'} size="sm" onClick={() => handleViewModeChange('grid')}><Grid3X3 className="h-4 w-4" /></Button>
                           </div>
                         </div>
                         <div className="flex items-center justify-between">
@@ -1876,7 +2016,7 @@ export default function KnowledgeBaseClient() {
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockKnowledgeBaseQuickActions}
+            actions={knowledgeBaseQuickActions}
             variant="grid"
           />
         </div>
@@ -2124,6 +2264,452 @@ export default function KnowledgeBaseClient() {
               {isSubmitting ? 'Creating...' : 'Create Page'}
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Space Dialog */}
+      <Dialog open={showCreateSpaceDialog} onOpenChange={setShowCreateSpaceDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FolderOpen className="w-5 h-5 text-blue-600" />
+              Create New Space
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <Label htmlFor="spaceName">Space Name</Label>
+              <Input
+                id="spaceName"
+                value={newSpaceName}
+                onChange={(e) => {
+                  setNewSpaceName(e.target.value)
+                  if (!newSpaceKey || newSpaceKey === newSpaceName.substring(0, 4).toUpperCase()) {
+                    setNewSpaceKey(e.target.value.substring(0, 4).toUpperCase().replace(/[^A-Z]/g, ''))
+                  }
+                }}
+                placeholder="e.g., Engineering Documentation"
+              />
+            </div>
+            <div>
+              <Label htmlFor="spaceKey">Space Key</Label>
+              <Input
+                id="spaceKey"
+                value={newSpaceKey}
+                onChange={(e) => setNewSpaceKey(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').substring(0, 6))}
+                placeholder="e.g., ENG"
+                maxLength={6}
+              />
+              <p className="text-xs text-gray-500 mt-1">Unique identifier (2-6 characters)</p>
+            </div>
+            <div>
+              <Label htmlFor="spaceType">Space Type</Label>
+              <select
+                id="spaceType"
+                value={newSpaceType}
+                onChange={(e) => setNewSpaceType(e.target.value as SpaceType)}
+                className="w-full p-2 border rounded-lg bg-white dark:bg-gray-700 dark:border-gray-600"
+              >
+                <option value="team">Team Space</option>
+                <option value="personal">Personal Space</option>
+                <option value="project">Project Space</option>
+                <option value="documentation">Documentation</option>
+              </select>
+            </div>
+            <div>
+              <Label htmlFor="spaceDescription">Description</Label>
+              <Textarea
+                id="spaceDescription"
+                value={newSpaceDescription}
+                onChange={(e) => setNewSpaceDescription(e.target.value)}
+                placeholder="Describe the purpose of this space..."
+                rows={3}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCreateSpaceDialog(false)}>Cancel</Button>
+            <Button onClick={handleCreateSpace} disabled={isCreatingSpace} className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white">
+              {isCreatingSpace ? 'Creating...' : 'Create Space'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Import Documents Dialog */}
+      <Dialog open={showImportDocsDialog} onOpenChange={setShowImportDocsDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Download className="w-5 h-5 text-purple-600" />
+              Import Documents
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <Label>Import Source</Label>
+              <div className="grid grid-cols-2 gap-2 mt-2">
+                {[
+                  { value: 'file', label: 'Local Files', icon: FileText },
+                  { value: 'url', label: 'From URL', icon: Globe },
+                  { value: 'confluence', label: 'Confluence', icon: BookOpen },
+                  { value: 'notion', label: 'Notion', icon: Layout },
+                ].map((source) => (
+                  <Button
+                    key={source.value}
+                    variant={importSource === source.value ? 'default' : 'outline'}
+                    className="flex items-center gap-2 justify-start"
+                    onClick={() => setImportSource(source.value as typeof importSource)}
+                  >
+                    <source.icon className="w-4 h-4" />
+                    {source.label}
+                  </Button>
+                ))}
+              </div>
+            </div>
+
+            {importSource === 'file' && (
+              <div>
+                <Label>Select Files</Label>
+                <div className="mt-2 border-2 border-dashed rounded-lg p-6 text-center hover:border-purple-400 transition-colors cursor-pointer">
+                  <input
+                    type="file"
+                    multiple
+                    accept=".md,.txt,.html,.doc,.docx,.pdf"
+                    onChange={(e) => setImportFiles(Array.from(e.target.files || []))}
+                    className="hidden"
+                    id="file-import"
+                  />
+                  <label htmlFor="file-import" className="cursor-pointer">
+                    <Download className="w-8 h-8 mx-auto text-gray-400 mb-2" />
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      Click to upload or drag and drop
+                    </p>
+                    <p className="text-xs text-gray-400 mt-1">
+                      Supports MD, TXT, HTML, DOC, DOCX, PDF
+                    </p>
+                  </label>
+                </div>
+                {importFiles.length > 0 && (
+                  <div className="mt-2 space-y-1">
+                    {importFiles.map((file, idx) => (
+                      <div key={idx} className="flex items-center gap-2 text-sm text-gray-600">
+                        <FileText className="w-4 h-4" />
+                        {file.name}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {importSource === 'url' && (
+              <div>
+                <Label htmlFor="importUrl">URL</Label>
+                <Input
+                  id="importUrl"
+                  value={importUrl}
+                  onChange={(e) => setImportUrl(e.target.value)}
+                  placeholder="https://example.com/document"
+                />
+              </div>
+            )}
+
+            {(importSource === 'confluence' || importSource === 'notion') && (
+              <div className="space-y-3">
+                <div>
+                  <Label htmlFor="importUrl">Workspace URL</Label>
+                  <Input
+                    id="importUrl"
+                    value={importUrl}
+                    onChange={(e) => setImportUrl(e.target.value)}
+                    placeholder={importSource === 'confluence' ? 'your-domain.atlassian.net' : 'www.notion.so/your-workspace'}
+                  />
+                </div>
+                <p className="text-xs text-gray-500">
+                  You will be redirected to authorize access to your {importSource === 'confluence' ? 'Confluence' : 'Notion'} workspace.
+                </p>
+              </div>
+            )}
+
+            <div>
+              <Label>Import Options</Label>
+              <div className="mt-2 space-y-2">
+                <div className="flex items-center gap-2">
+                  <Switch id="preserveFormatting" defaultChecked />
+                  <Label htmlFor="preserveFormatting" className="text-sm font-normal">Preserve formatting</Label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Switch id="importAttachments" defaultChecked />
+                  <Label htmlFor="importAttachments" className="text-sm font-normal">Import attachments</Label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Switch id="createDrafts" />
+                  <Label htmlFor="createDrafts" className="text-sm font-normal">Import as drafts</Label>
+                </div>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowImportDocsDialog(false)}>Cancel</Button>
+            <Button onClick={handleImportDocs} disabled={isImporting} className="bg-gradient-to-r from-purple-500 to-pink-600 text-white">
+              {isImporting ? 'Importing...' : 'Import Documents'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Advanced Search Dialog */}
+      <Dialog open={showAdvancedSearchDialog} onOpenChange={setShowAdvancedSearchDialog}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-hidden">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Search className="w-5 h-5 text-teal-600" />
+              Advanced Search
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <Label htmlFor="advancedSearchQuery">Search Query</Label>
+              <Input
+                id="advancedSearchQuery"
+                value={advancedSearchQuery}
+                onChange={(e) => setAdvancedSearchQuery(e.target.value)}
+                placeholder="Enter search terms..."
+                onKeyDown={(e) => e.key === 'Enter' && handleAdvancedSearch()}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="advancedSearchSpace">Space</Label>
+                <select
+                  id="advancedSearchSpace"
+                  value={advancedSearchSpace}
+                  onChange={(e) => setAdvancedSearchSpace(e.target.value)}
+                  className="w-full p-2 border rounded-lg bg-white dark:bg-gray-700 dark:border-gray-600"
+                >
+                  <option value="all">All Spaces</option>
+                  {mockSpaces.map(space => (
+                    <option key={space.id} value={space.id}>{space.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <Label htmlFor="advancedSearchType">Content Type</Label>
+                <select
+                  id="advancedSearchType"
+                  value={advancedSearchType}
+                  onChange={(e) => setAdvancedSearchType(e.target.value)}
+                  className="w-full p-2 border rounded-lg bg-white dark:bg-gray-700 dark:border-gray-600"
+                >
+                  <option value="all">All Types</option>
+                  <option value="page">Pages</option>
+                  <option value="how-to">How-To Guides</option>
+                  <option value="meeting-notes">Meeting Notes</option>
+                  <option value="decision">Decisions</option>
+                  <option value="blog">Blog Posts</option>
+                </select>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="advancedSearchAuthor">Author</Label>
+                <Input
+                  id="advancedSearchAuthor"
+                  value={advancedSearchAuthor}
+                  onChange={(e) => setAdvancedSearchAuthor(e.target.value)}
+                  placeholder="Author name..."
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <Label htmlFor="advancedSearchDateFrom">From Date</Label>
+                  <Input
+                    id="advancedSearchDateFrom"
+                    type="date"
+                    value={advancedSearchDateFrom}
+                    onChange={(e) => setAdvancedSearchDateFrom(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="advancedSearchDateTo">To Date</Label>
+                  <Input
+                    id="advancedSearchDateTo"
+                    type="date"
+                    value={advancedSearchDateTo}
+                    onChange={(e) => setAdvancedSearchDateTo(e.target.value)}
+                  />
+                </div>
+              </div>
+            </div>
+            <Button onClick={handleAdvancedSearch} disabled={isSearching} className="w-full bg-gradient-to-r from-teal-500 to-cyan-600 text-white">
+              {isSearching ? 'Searching...' : 'Search'}
+            </Button>
+
+            {/* Search Results */}
+            {searchResults.length > 0 && (
+              <div className="mt-4">
+                <Label className="mb-2 block">Results ({searchResults.length})</Label>
+                <ScrollArea className="h-48 border rounded-lg">
+                  <div className="p-2 space-y-2">
+                    {searchResults.map(page => (
+                      <div
+                        key={page.id}
+                        className="p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer"
+                        onClick={() => {
+                          setShowAdvancedSearchDialog(false)
+                          openPageDialog(page)
+                        }}
+                      >
+                        <div className="flex items-center justify-between">
+                          <h4 className="font-medium text-gray-900 dark:text-white">{page.title}</h4>
+                          <Badge className={getStatusColor(page.status)}>{page.status}</Badge>
+                        </div>
+                        <p className="text-sm text-gray-500 line-clamp-1 mt-1">{page.excerpt}</p>
+                        <div className="flex items-center gap-3 mt-2 text-xs text-gray-400">
+                          <span>{page.spaceName}</span>
+                          <span>{page.author.name}</span>
+                          <span>{formatNumber(page.views)} views</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </ScrollArea>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Starred Pages Dialog */}
+      <Dialog open={showStarredPagesDialog} onOpenChange={setShowStarredPagesDialog}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-hidden">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Star className="w-5 h-5 text-amber-500" />
+              Starred Pages
+            </DialogTitle>
+          </DialogHeader>
+          <ScrollArea className="h-[60vh] mt-4">
+            <div className="space-y-3 pr-4">
+              {starredPages.length === 0 ? (
+                <div className="text-center py-12">
+                  <Star className="w-12 h-12 mx-auto text-gray-300 mb-4" />
+                  <h3 className="text-lg font-medium text-gray-600 dark:text-gray-400">No Starred Pages</h3>
+                  <p className="text-sm text-gray-500 mt-1">Star your favorite pages to access them quickly</p>
+                </div>
+              ) : (
+                starredPages.map(page => {
+                  const TypeIcon = getPageTypeIcon(page.type)
+                  return (
+                    <Card
+                      key={page.id}
+                      className="hover:shadow-md transition-all cursor-pointer"
+                      onClick={() => {
+                        setShowStarredPagesDialog(false)
+                        openPageDialog(page)
+                      }}
+                    >
+                      <CardContent className="p-4 flex items-start gap-4">
+                        <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center text-white flex-shrink-0">
+                          <TypeIcon className="w-5 h-5" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between mb-1">
+                            <h4 className="font-semibold text-gray-900 dark:text-white truncate">{page.title}</h4>
+                            <Badge className={getStatusColor(page.status)}>{page.status}</Badge>
+                          </div>
+                          <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-1">{page.excerpt}</p>
+                          <div className="flex items-center gap-3 mt-2 text-xs text-gray-400">
+                            <span className="flex items-center gap-1">
+                              <FolderOpen className="w-3 h-3" />
+                              {page.spaceKey}
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <Eye className="w-3 h-3" />
+                              {formatNumber(page.views)}
+                            </span>
+                            <span>{page.author.name}</span>
+                          </div>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleBookmark(page)
+                          }}
+                        >
+                          <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  )
+                })
+              )}
+            </div>
+          </ScrollArea>
+        </DialogContent>
+      </Dialog>
+
+      {/* Recent Pages Dialog */}
+      <Dialog open={showRecentPagesDialog} onOpenChange={setShowRecentPagesDialog}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-hidden">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Clock className="w-5 h-5 text-green-600" />
+              Recently Updated Pages
+            </DialogTitle>
+          </DialogHeader>
+          <ScrollArea className="h-[60vh] mt-4">
+            <div className="space-y-3 pr-4">
+              {recentPages.length === 0 ? (
+                <div className="text-center py-12">
+                  <Clock className="w-12 h-12 mx-auto text-gray-300 mb-4" />
+                  <h3 className="text-lg font-medium text-gray-600 dark:text-gray-400">No Recent Pages</h3>
+                  <p className="text-sm text-gray-500 mt-1">Pages you view or edit will appear here</p>
+                </div>
+              ) : (
+                recentPages.map((page, index) => {
+                  const TypeIcon = getPageTypeIcon(page.type)
+                  return (
+                    <Card
+                      key={page.id}
+                      className="hover:shadow-md transition-all cursor-pointer"
+                      onClick={() => {
+                        setShowRecentPagesDialog(false)
+                        openPageDialog(page)
+                      }}
+                    >
+                      <CardContent className="p-4 flex items-start gap-4">
+                        <div className="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center text-green-600 dark:text-green-400 font-medium text-sm flex-shrink-0">
+                          {index + 1}
+                        </div>
+                        <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center text-white flex-shrink-0">
+                          <TypeIcon className="w-5 h-5" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between mb-1">
+                            <h4 className="font-semibold text-gray-900 dark:text-white truncate">{page.title}</h4>
+                            <Badge className={getStatusColor(page.status)}>{page.status}</Badge>
+                          </div>
+                          <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-1">{page.excerpt}</p>
+                          <div className="flex items-center gap-3 mt-2 text-xs text-gray-400">
+                            <span className="flex items-center gap-1">
+                              <FolderOpen className="w-3 h-3" />
+                              {page.spaceKey}
+                            </span>
+                            <span>Updated {new Date(page.updatedAt).toLocaleDateString()}</span>
+                            <span>{page.author.name}</span>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )
+                })
+              )}
+            </div>
+          </ScrollArea>
         </DialogContent>
       </Dialog>
     </div>

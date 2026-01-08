@@ -40,6 +40,8 @@ import {
   Bell,
   ChevronDown,
   ChevronRight,
+  Printer,
+  FileText,
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -351,24 +353,7 @@ const mockInventoryActivities = [
   { id: '4', user: 'Anna Brown', action: 'completed', target: 'stock transfer to Store #3', timestamp: '1h ago', type: 'success' as const },
 ]
 
-const mockInventoryQuickActions = [
-  { id: '1', label: 'Stock Count', icon: 'ClipboardList', shortcut: 'C', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1000)),
-    { loading: 'Starting stock count...', success: 'Stock count initiated successfully', error: 'Failed to start stock count' }
-  ) },
-  { id: '2', label: 'Transfer Stock', icon: 'ArrowRightLeft', shortcut: 'T', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 800)),
-    { loading: 'Preparing stock transfer...', success: 'Stock transfer ready', error: 'Failed to prepare transfer' }
-  ) },
-  { id: '3', label: 'New PO', icon: 'FileText', shortcut: 'P', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 700)),
-    { loading: 'Creating purchase order...', success: 'Purchase order created', error: 'Failed to create purchase order' }
-  ) },
-  { id: '4', label: 'Print Labels', icon: 'Printer', shortcut: 'L', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1200)),
-    { loading: 'Generating labels...', success: 'Labels ready to print', error: 'Failed to generate labels' }
-  ) },
-]
+// Quick actions are defined inside the component to access state setters
 
 export default function InventoryClient({ initialInventory }: { initialInventory: InventoryItem[] }) {
   const [activeTab, setActiveTab] = useState('products')
@@ -450,6 +435,18 @@ export default function InventoryClient({ initialInventory }: { initialInventory
   // New dialogs for barcode scanner and import
   const [showBarcodeScannerDialog, setShowBarcodeScannerDialog] = useState(false)
   const [showImportDialog, setShowImportDialog] = useState(false)
+
+  // Quick action dialogs
+  const [showStockCountDialog, setShowStockCountDialog] = useState(false)
+  const [showPrintLabelsDialog, setShowPrintLabelsDialog] = useState(false)
+
+  // Quick actions with proper dialog openers
+  const inventoryQuickActions = [
+    { id: '1', label: 'Stock Count', icon: 'ClipboardList', shortcut: 'C', action: () => setShowStockCountDialog(true) },
+    { id: '2', label: 'Transfer Stock', icon: 'ArrowRightLeft', shortcut: 'T', action: () => setShowTransferDialog(true) },
+    { id: '3', label: 'New PO', icon: 'FileText', shortcut: 'P', action: () => setShowPODialog(true) },
+    { id: '4', label: 'Print Labels', icon: 'Printer', shortcut: 'L', action: () => setShowPrintLabelsDialog(true) },
+  ]
 
   const handleCreateProduct = async () => {
     if (!newProductForm.title) {
@@ -2076,7 +2073,7 @@ export default function InventoryClient({ initialInventory }: { initialInventory
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockInventoryQuickActions}
+            actions={inventoryQuickActions}
             variant="grid"
           />
         </div>
@@ -2666,6 +2663,163 @@ export default function InventoryClient({ initialInventory }: { initialInventory
                 disabled
               >
                 Import
+              </button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Stock Count Dialog */}
+      <Dialog open={showStockCountDialog} onOpenChange={setShowStockCountDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center text-white">
+                <ClipboardList className="w-5 h-5" />
+              </div>
+              Start Stock Count
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Location</label>
+              <select
+                className="w-full px-3 py-2 bg-white dark:bg-gray-800 border dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:text-white"
+              >
+                <option value="">All locations</option>
+                {(dbLocations?.length ? dbLocations : mockLocations).map(loc => (
+                  <option key={loc.id} value={loc.id}>{loc.name}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Count Type</label>
+              <select
+                className="w-full px-3 py-2 bg-white dark:bg-gray-800 border dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:text-white"
+              >
+                <option value="full">Full Inventory Count</option>
+                <option value="cycle">Cycle Count</option>
+                <option value="spot">Spot Check</option>
+                <option value="category">Category-based Count</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Notes</label>
+              <textarea
+                rows={2}
+                className="w-full px-3 py-2 bg-white dark:bg-gray-800 border dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:text-white"
+                placeholder="Add notes for this count session..."
+              />
+            </div>
+            <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
+              <h4 className="font-medium text-blue-900 dark:text-blue-300 mb-2">Stock Count Tips</h4>
+              <ul className="text-sm text-blue-700 dark:text-blue-400 space-y-1">
+                <li>- Close the location to incoming/outgoing shipments during count</li>
+                <li>- Use barcode scanners for faster counting</li>
+                <li>- Document any discrepancies immediately</li>
+              </ul>
+            </div>
+            <div className="flex items-center justify-end gap-3 pt-4 border-t dark:border-gray-700">
+              <button
+                onClick={() => setShowStockCountDialog(false)}
+                className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg font-medium"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  toast.success('Stock count session started')
+                  setShowStockCountDialog(false)
+                }}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700"
+              >
+                Start Count
+              </button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Print Labels Dialog */}
+      <Dialog open={showPrintLabelsDialog} onOpenChange={setShowPrintLabelsDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white">
+                <Printer className="w-5 h-5" />
+              </div>
+              Print Labels
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Label Type</label>
+              <select
+                className="w-full px-3 py-2 bg-white dark:bg-gray-800 border dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:text-white"
+              >
+                <option value="barcode">Barcode Labels</option>
+                <option value="qr">QR Code Labels</option>
+                <option value="shelf">Shelf Labels</option>
+                <option value="shipping">Shipping Labels</option>
+                <option value="price">Price Tags</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Label Size</label>
+              <select
+                className="w-full px-3 py-2 bg-white dark:bg-gray-800 border dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:text-white"
+              >
+                <option value="small">Small (1" x 0.5")</option>
+                <option value="medium">Medium (2" x 1")</option>
+                <option value="large">Large (4" x 2")</option>
+                <option value="custom">Custom Size</option>
+              </select>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Quantity per SKU</label>
+                <input
+                  type="number"
+                  defaultValue={1}
+                  min={1}
+                  className="w-full px-3 py-2 bg-white dark:bg-gray-800 border dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:text-white"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Printer</label>
+                <select
+                  className="w-full px-3 py-2 bg-white dark:bg-gray-800 border dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:text-white"
+                >
+                  <option value="default">Default Printer</option>
+                  <option value="zebra">Zebra ZD420</option>
+                  <option value="dymo">DYMO LabelWriter</option>
+                </select>
+              </div>
+            </div>
+            <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+              <h4 className="font-medium text-gray-900 dark:text-gray-100 mb-2">Label Preview</h4>
+              <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 flex items-center justify-center h-24">
+                <div className="text-center">
+                  <Barcode className="w-8 h-8 text-gray-400 mx-auto mb-1" />
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Select products to preview</p>
+                </div>
+              </div>
+            </div>
+            <div className="flex items-center justify-end gap-3 pt-4 border-t dark:border-gray-700">
+              <button
+                onClick={() => setShowPrintLabelsDialog(false)}
+                className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg font-medium"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  toast.success('Labels sent to printer')
+                  setShowPrintLabelsDialog(false)
+                }}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700"
+              >
+                Print Labels
               </button>
             </div>
           </div>

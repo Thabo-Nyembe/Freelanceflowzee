@@ -70,21 +70,6 @@ const auditTrailActivities = [
   { id: '3', user: 'System', action: 'generated', target: 'weekly report', timestamp: '1h ago', type: 'info' as const },
 ]
 
-const auditTrailQuickActions = [
-  { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 800)),
-    { loading: 'Creating new audit entry...', success: 'Audit entry created successfully', error: 'Failed to create audit entry' }
-  ) },
-  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1500)),
-    { loading: 'Exporting audit trail...', success: 'Audit trail exported successfully', error: 'Failed to export audit trail' }
-  ) },
-  { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 500)),
-    { loading: 'Loading settings...', success: 'Settings loaded', error: 'Failed to load settings' }
-  ) },
-]
-
 export default function AuditTrailClient() {
   // AUTHENTICATION
   const { userId, loading: userLoading } = useCurrentUser()
@@ -113,6 +98,183 @@ export default function AuditTrailClient() {
     severityLevels: [],
     searchQuery: ''
   })
+
+  // DIALOG STATES FOR QUICK ACTIONS
+  const [showNewEntryDialog, setShowNewEntryDialog] = useState(false)
+  const [showExportDialog, setShowExportDialog] = useState(false)
+  const [showSettingsDialog, setShowSettingsDialog] = useState(false)
+
+  // NEW ENTRY FORM STATE
+  const [newEntryForm, setNewEntryForm] = useState({
+    action: '',
+    description: '',
+    severity: 'low' as SeverityLevel,
+    activityType: 'create' as ActivityType,
+    entityType: 'file' as EntityType
+  })
+  const [isCreatingEntry, setIsCreatingEntry] = useState(false)
+
+  // EXPORT DIALOG STATE
+  const [exportOptions, setExportOptions] = useState({
+    format: 'csv' as 'csv' | 'json' | 'pdf',
+    dateRange: 'all' as 'all' | 'today' | 'week' | 'month' | 'custom',
+    includeUserInfo: true,
+    includeIpAddresses: true,
+    includeChangeDetails: true,
+    includeMetadata: false
+  })
+  const [isExporting, setIsExporting] = useState(false)
+
+  // SETTINGS DIALOG STATE
+  const [auditSettings, setAuditSettings] = useState({
+    retentionPeriod: '90',
+    enableRealTimeAlerts: true,
+    alertSeverityThreshold: 'high' as SeverityLevel,
+    enableEmailNotifications: false,
+    notificationEmail: '',
+    enableSlackNotifications: false,
+    slackWebhookUrl: '',
+    autoArchiveOldLogs: true
+  })
+  const [isSavingSettings, setIsSavingSettings] = useState(false)
+
+  // QUICK ACTIONS WITH REAL DIALOG HANDLERS
+  const auditTrailQuickActions = [
+    { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => setShowNewEntryDialog(true) },
+    { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => setShowExportDialog(true) },
+    { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => setShowSettingsDialog(true) },
+  ]
+
+  // HANDLER: Create new audit entry
+  const handleCreateEntry = async () => {
+    if (!userId) {
+      toast.error('Please log in to create an audit entry')
+      return
+    }
+
+    if (!newEntryForm.action.trim()) {
+      toast.error('Please enter an action name')
+      return
+    }
+
+    setIsCreatingEntry(true)
+    try {
+      logger.info('Creating new audit entry', { userId, form: newEntryForm })
+
+      const { createAuditLog } = await import('@/lib/audit-trail-queries')
+
+      await createAuditLog({
+        userId,
+        userName: 'Current User',
+        action: newEntryForm.action,
+        description: newEntryForm.description || `Manual audit entry: ${newEntryForm.action}`,
+        activityType: newEntryForm.activityType,
+        entityType: newEntryForm.entityType,
+        entityId: `manual-${Date.now()}`,
+        severity: newEntryForm.severity,
+        ipAddress: '127.0.0.1',
+        userAgent: navigator.userAgent,
+        location: 'Manual Entry',
+        metadata: { source: 'manual', createdVia: 'audit-trail-ui' }
+      })
+
+      toast.success('Audit entry created successfully')
+      setShowNewEntryDialog(false)
+      setNewEntryForm({
+        action: '',
+        description: '',
+        severity: 'low',
+        activityType: 'create',
+        entityType: 'file'
+      })
+
+      // Refresh the logs
+      window.location.reload()
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to create audit entry'
+      logger.error('Failed to create audit entry', { error: err, userId })
+      toast.error(errorMessage)
+    } finally {
+      setIsCreatingEntry(false)
+    }
+  }
+
+  // HANDLER: Export with options
+  const handleExportWithOptions = async () => {
+    if (!userId) {
+      toast.error('Please log in to export logs')
+      return
+    }
+
+    setIsExporting(true)
+    try {
+      logger.info('Exporting audit logs with options', { userId, options: exportOptions })
+
+      const { exportAuditLogs } = await import('@/lib/audit-trail-queries')
+
+      const exportData = await exportAuditLogs(
+        userId,
+        filters.activityTypes.length || filters.entityTypes.length || filters.severityLevels.length ? {
+          activityTypes: filters.activityTypes.length > 0 ? filters.activityTypes : undefined,
+          entityTypes: filters.entityTypes.length > 0 ? filters.entityTypes : undefined,
+          severityLevels: filters.severityLevels.length > 0 ? filters.severityLevels : undefined,
+          searchQuery: filters.searchQuery || undefined
+        } : undefined,
+        exportOptions.format
+      )
+
+      // Create and download file
+      const mimeTypes = {
+        csv: 'text/csv',
+        json: 'application/json',
+        pdf: 'application/pdf'
+      }
+
+      const blob = new Blob([exportData], { type: mimeTypes[exportOptions.format] })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `audit-logs-${new Date().toISOString().split('T')[0]}.${exportOptions.format}`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+
+      toast.success(`Audit logs exported as ${exportOptions.format.toUpperCase()}`)
+      setShowExportDialog(false)
+      announce('Audit logs exported successfully', 'polite')
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to export logs'
+      logger.error('Failed to export logs', { error: err, userId })
+      toast.error(errorMessage)
+    } finally {
+      setIsExporting(false)
+    }
+  }
+
+  // HANDLER: Save audit settings
+  const handleSaveSettings = async () => {
+    setIsSavingSettings(true)
+    try {
+      logger.info('Saving audit settings', { settings: auditSettings })
+
+      // Simulate API call to save settings
+      await new Promise(resolve => setTimeout(resolve, 800))
+
+      // In a real app, this would save to the database
+      localStorage.setItem('auditTrailSettings', JSON.stringify(auditSettings))
+
+      toast.success('Audit trail settings saved successfully')
+      setShowSettingsDialog(false)
+      announce('Settings saved', 'polite')
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to save settings'
+      logger.error('Failed to save settings', { error: err })
+      toast.error(errorMessage)
+    } finally {
+      setIsSavingSettings(false)
+    }
+  }
 
   // A+++ LOAD AUDIT TRAIL DATA
   useEffect(() => {
@@ -852,6 +1014,395 @@ export default function AuditTrailClient() {
                   <div className="p-2 rounded-lg bg-muted/30 font-mono text-xs break-all">
                     {selectedLog.userAgent}
                   </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* NEW ENTRY DIALOG */}
+        {showNewEntryDialog && (
+          <div
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            onClick={() => setShowNewEntryDialog(false)}
+          >
+            <div
+              className="bg-white dark:bg-gray-900 rounded-lg shadow-2xl max-w-lg w-full p-6"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-xl font-bold">Create New Audit Entry</h3>
+                <button
+                  onClick={() => setShowNewEntryDialog(false)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2">Action Name *</label>
+                  <input
+                    type="text"
+                    placeholder="e.g., Manual system check, Security review..."
+                    value={newEntryForm.action}
+                    onChange={(e) => setNewEntryForm({ ...newEntryForm, action: e.target.value })}
+                    className="w-full px-4 py-2 rounded-lg bg-muted border border-transparent focus:border-red-500 focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-2">Description</label>
+                  <textarea
+                    placeholder="Describe the audit entry..."
+                    value={newEntryForm.description}
+                    onChange={(e) => setNewEntryForm({ ...newEntryForm, description: e.target.value })}
+                    rows={3}
+                    className="w-full px-4 py-2 rounded-lg bg-muted border border-transparent focus:border-red-500 focus:outline-none resize-none"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Severity</label>
+                    <select
+                      value={newEntryForm.severity}
+                      onChange={(e) => setNewEntryForm({ ...newEntryForm, severity: e.target.value as SeverityLevel })}
+                      className="w-full px-4 py-2 rounded-lg bg-muted"
+                    >
+                      <option value="low">Low</option>
+                      <option value="medium">Medium</option>
+                      <option value="high">High</option>
+                      <option value="critical">Critical</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Activity Type</label>
+                    <select
+                      value={newEntryForm.activityType}
+                      onChange={(e) => setNewEntryForm({ ...newEntryForm, activityType: e.target.value as ActivityType })}
+                      className="w-full px-4 py-2 rounded-lg bg-muted"
+                    >
+                      <option value="create">Create</option>
+                      <option value="update">Update</option>
+                      <option value="delete">Delete</option>
+                      <option value="login">Login</option>
+                      <option value="logout">Logout</option>
+                      <option value="permission-change">Permission Change</option>
+                      <option value="data-access">Data Access</option>
+                      <option value="system">System</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-2">Entity Type</label>
+                  <select
+                    value={newEntryForm.entityType}
+                    onChange={(e) => setNewEntryForm({ ...newEntryForm, entityType: e.target.value as EntityType })}
+                    className="w-full px-4 py-2 rounded-lg bg-muted"
+                  >
+                    <option value="file">File</option>
+                    <option value="user">User</option>
+                    <option value="project">Project</option>
+                    <option value="document">Document</option>
+                    <option value="system">System</option>
+                    <option value="permission">Permission</option>
+                    <option value="setting">Setting</option>
+                  </select>
+                </div>
+
+                <div className="flex gap-3 pt-4">
+                  <button
+                    onClick={() => setShowNewEntryDialog(false)}
+                    className="flex-1 px-4 py-2 rounded-lg bg-muted hover:bg-muted/80 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleCreateEntry}
+                    disabled={isCreatingEntry || !newEntryForm.action.trim()}
+                    className="flex-1 px-4 py-2 rounded-lg bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isCreatingEntry ? 'Creating...' : 'Create Entry'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* EXPORT DIALOG */}
+        {showExportDialog && (
+          <div
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            onClick={() => setShowExportDialog(false)}
+          >
+            <div
+              className="bg-white dark:bg-gray-900 rounded-lg shadow-2xl max-w-lg w-full p-6"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-xl font-bold">Export Audit Logs</h3>
+                <button
+                  onClick={() => setShowExportDialog(false)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2">Export Format</label>
+                  <div className="grid grid-cols-3 gap-2">
+                    {(['csv', 'json', 'pdf'] as const).map((format) => (
+                      <button
+                        key={format}
+                        onClick={() => setExportOptions({ ...exportOptions, format })}
+                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                          exportOptions.format === format
+                            ? 'bg-red-500 text-white'
+                            : 'bg-muted hover:bg-muted/80'
+                        }`}
+                      >
+                        {format.toUpperCase()}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-2">Date Range</label>
+                  <select
+                    value={exportOptions.dateRange}
+                    onChange={(e) => setExportOptions({ ...exportOptions, dateRange: e.target.value as typeof exportOptions.dateRange })}
+                    className="w-full px-4 py-2 rounded-lg bg-muted"
+                  >
+                    <option value="all">All Time</option>
+                    <option value="today">Today</option>
+                    <option value="week">This Week</option>
+                    <option value="month">This Month</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-3">Include in Export</label>
+                  <div className="space-y-2">
+                    <label className="flex items-center gap-3 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={exportOptions.includeUserInfo}
+                        onChange={(e) => setExportOptions({ ...exportOptions, includeUserInfo: e.target.checked })}
+                        className="w-4 h-4 rounded border-gray-300 text-red-500 focus:ring-red-500"
+                      />
+                      <span className="text-sm">User Information</span>
+                    </label>
+                    <label className="flex items-center gap-3 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={exportOptions.includeIpAddresses}
+                        onChange={(e) => setExportOptions({ ...exportOptions, includeIpAddresses: e.target.checked })}
+                        className="w-4 h-4 rounded border-gray-300 text-red-500 focus:ring-red-500"
+                      />
+                      <span className="text-sm">IP Addresses</span>
+                    </label>
+                    <label className="flex items-center gap-3 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={exportOptions.includeChangeDetails}
+                        onChange={(e) => setExportOptions({ ...exportOptions, includeChangeDetails: e.target.checked })}
+                        className="w-4 h-4 rounded border-gray-300 text-red-500 focus:ring-red-500"
+                      />
+                      <span className="text-sm">Change Details</span>
+                    </label>
+                    <label className="flex items-center gap-3 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={exportOptions.includeMetadata}
+                        onChange={(e) => setExportOptions({ ...exportOptions, includeMetadata: e.target.checked })}
+                        className="w-4 h-4 rounded border-gray-300 text-red-500 focus:ring-red-500"
+                      />
+                      <span className="text-sm">Metadata</span>
+                    </label>
+                  </div>
+                </div>
+
+                <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800">
+                  <div className="text-sm text-blue-700 dark:text-blue-300">
+                    <strong>Note:</strong> Export will include {auditLogs.length} log entries based on current filters.
+                  </div>
+                </div>
+
+                <div className="flex gap-3 pt-4">
+                  <button
+                    onClick={() => setShowExportDialog(false)}
+                    className="flex-1 px-4 py-2 rounded-lg bg-muted hover:bg-muted/80 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleExportWithOptions}
+                    disabled={isExporting}
+                    className="flex-1 px-4 py-2 rounded-lg bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isExporting ? 'Exporting...' : `Export as ${exportOptions.format.toUpperCase()}`}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* SETTINGS DIALOG */}
+        {showSettingsDialog && (
+          <div
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            onClick={() => setShowSettingsDialog(false)}
+          >
+            <div
+              className="bg-white dark:bg-gray-900 rounded-lg shadow-2xl max-w-lg w-full p-6 max-h-[90vh] overflow-y-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-xl font-bold">Audit Trail Settings</h3>
+                <button
+                  onClick={() => setShowSettingsDialog(false)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <div className="space-y-6">
+                {/* Retention Settings */}
+                <div>
+                  <h4 className="font-semibold mb-3 flex items-center gap-2">
+                    <span>📅</span>
+                    <span>Retention Settings</span>
+                  </h4>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Log Retention Period (days)</label>
+                    <select
+                      value={auditSettings.retentionPeriod}
+                      onChange={(e) => setAuditSettings({ ...auditSettings, retentionPeriod: e.target.value })}
+                      className="w-full px-4 py-2 rounded-lg bg-muted"
+                    >
+                      <option value="30">30 days</option>
+                      <option value="60">60 days</option>
+                      <option value="90">90 days</option>
+                      <option value="180">180 days</option>
+                      <option value="365">1 year</option>
+                      <option value="730">2 years</option>
+                      <option value="unlimited">Unlimited</option>
+                    </select>
+                  </div>
+                  <label className="flex items-center gap-3 cursor-pointer mt-3">
+                    <input
+                      type="checkbox"
+                      checked={auditSettings.autoArchiveOldLogs}
+                      onChange={(e) => setAuditSettings({ ...auditSettings, autoArchiveOldLogs: e.target.checked })}
+                      className="w-4 h-4 rounded border-gray-300 text-red-500 focus:ring-red-500"
+                    />
+                    <span className="text-sm">Auto-archive logs before deletion</span>
+                  </label>
+                </div>
+
+                {/* Alert Settings */}
+                <div className="border-t pt-6">
+                  <h4 className="font-semibold mb-3 flex items-center gap-2">
+                    <span>🔔</span>
+                    <span>Alert Settings</span>
+                  </h4>
+                  <label className="flex items-center gap-3 cursor-pointer mb-4">
+                    <input
+                      type="checkbox"
+                      checked={auditSettings.enableRealTimeAlerts}
+                      onChange={(e) => setAuditSettings({ ...auditSettings, enableRealTimeAlerts: e.target.checked })}
+                      className="w-4 h-4 rounded border-gray-300 text-red-500 focus:ring-red-500"
+                    />
+                    <span className="text-sm">Enable real-time alerts</span>
+                  </label>
+                  {auditSettings.enableRealTimeAlerts && (
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Alert Severity Threshold</label>
+                      <select
+                        value={auditSettings.alertSeverityThreshold}
+                        onChange={(e) => setAuditSettings({ ...auditSettings, alertSeverityThreshold: e.target.value as SeverityLevel })}
+                        className="w-full px-4 py-2 rounded-lg bg-muted"
+                      >
+                        <option value="low">Low and above</option>
+                        <option value="medium">Medium and above</option>
+                        <option value="high">High and above</option>
+                        <option value="critical">Critical only</option>
+                      </select>
+                    </div>
+                  )}
+                </div>
+
+                {/* Notification Settings */}
+                <div className="border-t pt-6">
+                  <h4 className="font-semibold mb-3 flex items-center gap-2">
+                    <span>📧</span>
+                    <span>Notification Settings</span>
+                  </h4>
+                  <div className="space-y-4">
+                    <label className="flex items-center gap-3 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={auditSettings.enableEmailNotifications}
+                        onChange={(e) => setAuditSettings({ ...auditSettings, enableEmailNotifications: e.target.checked })}
+                        className="w-4 h-4 rounded border-gray-300 text-red-500 focus:ring-red-500"
+                      />
+                      <span className="text-sm">Enable email notifications</span>
+                    </label>
+                    {auditSettings.enableEmailNotifications && (
+                      <input
+                        type="email"
+                        placeholder="notification@example.com"
+                        value={auditSettings.notificationEmail}
+                        onChange={(e) => setAuditSettings({ ...auditSettings, notificationEmail: e.target.value })}
+                        className="w-full px-4 py-2 rounded-lg bg-muted border border-transparent focus:border-red-500 focus:outline-none"
+                      />
+                    )}
+
+                    <label className="flex items-center gap-3 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={auditSettings.enableSlackNotifications}
+                        onChange={(e) => setAuditSettings({ ...auditSettings, enableSlackNotifications: e.target.checked })}
+                        className="w-4 h-4 rounded border-gray-300 text-red-500 focus:ring-red-500"
+                      />
+                      <span className="text-sm">Enable Slack notifications</span>
+                    </label>
+                    {auditSettings.enableSlackNotifications && (
+                      <input
+                        type="url"
+                        placeholder="https://hooks.slack.com/services/..."
+                        value={auditSettings.slackWebhookUrl}
+                        onChange={(e) => setAuditSettings({ ...auditSettings, slackWebhookUrl: e.target.value })}
+                        className="w-full px-4 py-2 rounded-lg bg-muted border border-transparent focus:border-red-500 focus:outline-none"
+                      />
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex gap-3 pt-4 border-t">
+                  <button
+                    onClick={() => setShowSettingsDialog(false)}
+                    className="flex-1 px-4 py-2 rounded-lg bg-muted hover:bg-muted/80 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleSaveSettings}
+                    disabled={isSavingSettings}
+                    className="flex-1 px-4 py-2 rounded-lg bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isSavingSettings ? 'Saving...' : 'Save Settings'}
+                  </button>
                 </div>
               </div>
             </div>

@@ -143,6 +143,31 @@ const initialFormData: RegistrationFormData = {
   payment_status: 'pending'
 }
 
+// Event Form Data Interface
+interface EventFormData {
+  name: string
+  type: RegistrationType
+  description: string
+  date: string
+  endDate: string
+  location: string
+  isVirtual: boolean
+  virtualLink: string
+  capacity: number
+}
+
+const initialEventFormData: EventFormData = {
+  name: '',
+  type: 'event',
+  description: '',
+  date: '',
+  endDate: '',
+  location: '',
+  isVirtual: false,
+  virtualLink: '',
+  capacity: 100
+}
+
 // ============================================================================
 // TYPE DEFINITIONS - Salesforce Level Event Registration
 // ============================================================================
@@ -744,8 +769,8 @@ const mockRegistrationsActivities = [
   { id: '3', user: 'Marketing', action: 'Created', target: 'early bird reminder campaign', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
 ]
 
-const mockRegistrationsQuickActions = [
-  { id: '1', label: 'New Event', icon: 'plus', action: () => toast.info('Create new event', { description: 'Use the Events tab to create a new event' }), variant: 'default' as const },
+// Quick actions without New Event (defined inside component for state access)
+const mockRegistrationsQuickActionsBase = [
   { id: '2', label: 'Import List', icon: 'upload', action: () => {
     const input = document.createElement('input')
     input.type = 'file'
@@ -794,9 +819,11 @@ export default function RegistrationsClient() {
   const [showCreateDialog, setShowCreateDialog] = useState(false)
   const [showEditDialog, setShowEditDialog] = useState(false)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [showNewEventDialog, setShowNewEventDialog] = useState(false)
 
   // Form State
   const [formData, setFormData] = useState<RegistrationFormData>(initialFormData)
+  const [eventFormData, setEventFormData] = useState<EventFormData>(initialEventFormData)
 
   // Loading States
   const [isLoading, setIsLoading] = useState(true)
@@ -991,6 +1018,63 @@ export default function RegistrationsClient() {
       setIsSaving(false)
     }
   }
+
+  // Create new event
+  const handleCreateEvent = async () => {
+    try {
+      setIsSaving(true)
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('You must be logged in to create an event')
+        return
+      }
+
+      // Validate required fields
+      if (!eventFormData.name || !eventFormData.date || !eventFormData.location) {
+        toast.error('Please fill in all required fields')
+        return
+      }
+
+      const eventData = {
+        user_id: user.id,
+        name: eventFormData.name,
+        type: eventFormData.type,
+        description: eventFormData.description || null,
+        date: eventFormData.date,
+        end_date: eventFormData.endDate || null,
+        location: eventFormData.location,
+        is_virtual: eventFormData.isVirtual,
+        virtual_link: eventFormData.virtualLink || null,
+        capacity: eventFormData.capacity,
+        status: 'draft'
+      }
+
+      const { error } = await supabase
+        .from('events')
+        .insert(eventData)
+
+      if (error) throw error
+
+      toast.success('Event created successfully', {
+        description: `${eventFormData.name} has been created`
+      })
+      setShowNewEventDialog(false)
+      setEventFormData(initialEventFormData)
+    } catch (error: any) {
+      console.error('Error creating event:', error)
+      toast.error('Failed to create event', {
+        description: error.message
+      })
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  // Quick actions with state access
+  const registrationsQuickActions = [
+    { id: '1', label: 'New Event', icon: 'plus', action: () => setShowNewEventDialog(true), variant: 'default' as const },
+    ...mockRegistrationsQuickActionsBase
+  ]
 
   // Check in attendee
   const handleCheckIn = async (registration: DbRegistration) => {
@@ -2354,7 +2438,7 @@ export default function RegistrationsClient() {
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockRegistrationsQuickActions}
+            actions={registrationsQuickActions}
             variant="grid"
           />
         </div>
@@ -2794,6 +2878,118 @@ export default function RegistrationsClient() {
               disabled={isSaving}
             >
               {isSaving ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Deleting...</> : 'Delete'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* New Event Dialog */}
+      <Dialog open={showNewEventDialog} onOpenChange={setShowNewEventDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Create New Event</DialogTitle>
+            <DialogDescription>Set up a new event for registrations</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Event Name *</Label>
+              <Input
+                placeholder="Tech Innovation Summit 2025"
+                value={eventFormData.name}
+                onChange={(e) => setEventFormData({ ...eventFormData, name: e.target.value })}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Event Type</Label>
+                <Select
+                  value={eventFormData.type}
+                  onValueChange={(value: RegistrationType) => setEventFormData({ ...eventFormData, type: value })}
+                >
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="event">Event</SelectItem>
+                    <SelectItem value="webinar">Webinar</SelectItem>
+                    <SelectItem value="conference">Conference</SelectItem>
+                    <SelectItem value="workshop">Workshop</SelectItem>
+                    <SelectItem value="training">Training</SelectItem>
+                    <SelectItem value="meetup">Meetup</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Capacity</Label>
+                <Input
+                  type="number"
+                  placeholder="100"
+                  value={eventFormData.capacity}
+                  onChange={(e) => setEventFormData({ ...eventFormData, capacity: parseInt(e.target.value) || 100 })}
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Description</Label>
+              <Input
+                placeholder="Brief description of the event"
+                value={eventFormData.description}
+                onChange={(e) => setEventFormData({ ...eventFormData, description: e.target.value })}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Start Date *</Label>
+                <Input
+                  type="datetime-local"
+                  value={eventFormData.date}
+                  onChange={(e) => setEventFormData({ ...eventFormData, date: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>End Date</Label>
+                <Input
+                  type="datetime-local"
+                  value={eventFormData.endDate}
+                  onChange={(e) => setEventFormData({ ...eventFormData, endDate: e.target.value })}
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Location *</Label>
+              <Input
+                placeholder="San Francisco Convention Center"
+                value={eventFormData.location}
+                onChange={(e) => setEventFormData({ ...eventFormData, location: e.target.value })}
+              />
+            </div>
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="virtual-event"
+                checked={eventFormData.isVirtual}
+                onCheckedChange={(checked) => setEventFormData({ ...eventFormData, isVirtual: checked })}
+              />
+              <Label htmlFor="virtual-event">Virtual / Hybrid Event</Label>
+            </div>
+            {eventFormData.isVirtual && (
+              <div className="space-y-2">
+                <Label>Virtual Meeting Link</Label>
+                <Input
+                  placeholder="https://zoom.us/j/..."
+                  value={eventFormData.virtualLink}
+                  onChange={(e) => setEventFormData({ ...eventFormData, virtualLink: e.target.value })}
+                />
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => {
+              setShowNewEventDialog(false)
+              setEventFormData(initialEventFormData)
+            }}>Cancel</Button>
+            <Button
+              onClick={handleCreateEvent}
+              disabled={isSaving || !eventFormData.name || !eventFormData.date || !eventFormData.location}
+            >
+              {isSaving ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Creating...</> : 'Create Event'}
             </Button>
           </DialogFooter>
         </DialogContent>

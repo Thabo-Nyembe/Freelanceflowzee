@@ -596,20 +596,7 @@ const mockProfileActivities = [
   { id: '3', user: 'HR', action: 'Viewed', target: 'your profile', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'update' as const },
 ]
 
-const mockProfileQuickActions = [
-  { id: '1', label: 'Edit Profile', icon: 'edit', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 500)),
-    { loading: 'Opening profile editor...', success: 'Profile editor ready', error: 'Failed to open editor' }
-  ), variant: 'default' as const },
-  { id: '2', label: 'Add Skill', icon: 'plus', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 600)),
-    { loading: 'Adding skill...', success: 'Skill added to profile', error: 'Failed to add skill' }
-  ), variant: 'default' as const },
-  { id: '3', label: 'Download CV', icon: 'download', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1500)),
-    { loading: 'Generating CV...', success: 'CV downloaded successfully', error: 'Failed to download CV' }
-  ), variant: 'outline' as const },
-]
+// mockProfileQuickActions will be defined inside the component to access state setters
 
 // Database types
 interface UserProfile {
@@ -718,6 +705,67 @@ export default function ProfileClient() {
   const [showPeopleSearch, setShowPeopleSearch] = useState(false)
   const [showJobSearch, setShowJobSearch] = useState(false)
   const [showPostComposer, setShowPostComposer] = useState(false)
+
+  // New Dialog States for replacing toast-only patterns
+  const [showSkillQuizDialog, setShowSkillQuizDialog] = useState(false)
+  const [showPinSkillDialog, setShowPinSkillDialog] = useState(false)
+  const [showEndorseRequestDialog, setShowEndorseRequestDialog] = useState(false)
+  const [showAddBadgeDialog, setShowAddBadgeDialog] = useState(false)
+  const [showSkillGoalsDialog, setShowSkillGoalsDialog] = useState(false)
+  const [showSkillTrendsDialog, setShowSkillTrendsDialog] = useState(false)
+  const [showCompaniesDialog, setShowCompaniesDialog] = useState(false)
+  const [showAlumniDialog, setShowAlumniDialog] = useState(false)
+  const [showGroupsDialog, setShowGroupsDialog] = useState(false)
+  const [showSalaryInfoDialog, setShowSalaryInfoDialog] = useState(false)
+  const [showReferralsDialog, setShowReferralsDialog] = useState(false)
+  const [showCreateEventDialog, setShowCreateEventDialog] = useState(false)
+  const [showHashtagsDialog, setShowHashtagsDialog] = useState(false)
+  const [showSchedulePostDialog, setShowSchedulePostDialog] = useState(false)
+  const [showCoverStoryDialog, setShowCoverStoryDialog] = useState(false)
+  const [showConnectDialog, setShowConnectDialog] = useState(false)
+  const [showMessageDialog, setShowMessageDialog] = useState(false)
+  const [showMoreOptionsDialog, setShowMoreOptionsDialog] = useState(false)
+  const [showDownloadCVDialog, setShowDownloadCVDialog] = useState(false)
+  const [showAddSkillDialog, setShowAddSkillDialog] = useState(false)
+  const [showJobApplyDialog, setShowJobApplyDialog] = useState<Job | null>(null)
+  const [showEndorseSkillDialog, setShowEndorseSkillDialog] = useState<string | null>(null)
+  const [showChatDialog, setShowChatDialog] = useState<Connection | null>(null)
+  const [showSessionSignOutDialog, setShowSessionSignOutDialog] = useState<number | null>(null)
+  const [showConnectGoogleDialog, setShowConnectGoogleDialog] = useState(false)
+
+  // Form states for dialogs
+  const [newSkillName, setNewSkillName] = useState('')
+  const [newSkillCategory, setNewSkillCategory] = useState('General')
+  const [cvFormat, setCvFormat] = useState<'pdf' | 'docx'>('pdf')
+  const [cvIncludeSections, setCvIncludeSections] = useState({
+    summary: true,
+    experience: true,
+    education: true,
+    skills: true,
+    certifications: true,
+    projects: false
+  })
+  const [eventFormData, setEventFormData] = useState({
+    title: '',
+    description: '',
+    date: '',
+    time: '',
+    location: '',
+    isOnline: false
+  })
+  const [schedulePostData, setSchedulePostData] = useState({
+    content: '',
+    scheduledDate: '',
+    scheduledTime: ''
+  })
+  const [connectionMessage, setConnectionMessage] = useState('')
+  const [messageContent, setMessageContent] = useState('')
+  const [quizSelectedSkill, setQuizSelectedSkill] = useState('')
+  const [skillGoalData, setSkillGoalData] = useState({
+    skill: '',
+    targetLevel: 'advanced',
+    deadline: ''
+  })
 
   // Data State
   const [profile, setProfile] = useState<UserProfile | null>(null)
@@ -1034,6 +1082,13 @@ export default function ProfileClient() {
     societies: []
   })) : mockEducation
 
+  // Define mockProfileQuickActions with dialog setters
+  const mockProfileQuickActions = [
+    { id: '1', label: 'Edit Profile', icon: 'edit', action: () => setActiveTab('settings'), variant: 'default' as const },
+    { id: '2', label: 'Add Skill', icon: 'plus', action: () => setShowAddSkillDialog(true), variant: 'default' as const },
+    { id: '3', label: 'Download CV', icon: 'download', action: () => setShowDownloadCVDialog(true), variant: 'outline' as const },
+  ]
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:bg-none dark:bg-gray-900">
       <div className="p-6">
@@ -1100,10 +1155,7 @@ export default function ProfileClient() {
                   size="sm"
                   variant="secondary"
                   className="absolute bottom-2 right-2"
-                  onClick={() => toast.promise(
-                    new Promise(resolve => setTimeout(resolve, 800)),
-                    { loading: 'Loading cover story...', success: 'Cover story ready to play', error: 'Failed to load cover story' }
-                  )}
+                  onClick={() => setShowCoverStoryDialog(true)}
                 >
                   <Play className="w-3 h-3 mr-1" />
                   Cover Story
@@ -1169,30 +1221,21 @@ export default function ProfileClient() {
                   <div className="flex gap-3">
                     <Button
                       className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white"
-                      onClick={() => toast.promise(
-                        new Promise(resolve => setTimeout(resolve, 1000)),
-                        { loading: 'Sending connection request...', success: 'Connection request sent successfully', error: 'Failed to send connection request' }
-                      )}
+                      onClick={() => setShowConnectDialog(true)}
                     >
                       <UserPlus className="w-4 h-4 mr-2" />
                       Connect
                     </Button>
                     <Button
                       variant="outline"
-                      onClick={() => toast.promise(
-                        new Promise(resolve => setTimeout(resolve, 600)),
-                        { loading: 'Opening message composer...', success: 'Message composer ready', error: 'Failed to open message composer' }
-                      )}
+                      onClick={() => setShowMessageDialog(true)}
                     >
                       <MessageSquare className="w-4 h-4 mr-2" />
                       Message
                     </Button>
                     <Button
                       variant="outline"
-                      onClick={() => toast.promise(
-                        new Promise(resolve => setTimeout(resolve, 400)),
-                        { loading: 'Loading options...', success: 'More options available', error: 'Failed to load options' }
-                      )}
+                      onClick={() => setShowMoreOptionsDialog(true)}
                     >
                       <MoreHorizontal className="w-4 h-4" />
                     </Button>
@@ -1270,7 +1313,7 @@ export default function ProfileClient() {
               <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
                 {[
                   { icon: Edit, label: 'Edit Profile', color: 'from-blue-500 to-indigo-600', onClick: () => setActiveTab('settings') },
-                  { icon: Camera, label: 'Update Photo', color: 'from-purple-500 to-pink-600', onClick: () => { setShowPhotoUploader(true); toast.success('Photo uploader ready', { description: 'Select an image to update your profile photo' }) } },
+                  { icon: Camera, label: 'Update Photo', color: 'from-purple-500 to-pink-600', onClick: () => setShowPhotoUploader(true) },
                   { icon: Share2, label: 'Share Profile', color: 'from-green-500 to-emerald-600', onClick: handleShareProfile },
                   { icon: Download, label: 'Export PDF', color: 'from-orange-500 to-amber-600', onClick: handleDownloadPDF },
                   { icon: UserPlus, label: 'Grow Network', color: 'from-cyan-500 to-blue-600', onClick: () => setActiveTab('network') },
@@ -1341,7 +1384,7 @@ export default function ProfileClient() {
                           </div>
                         ))}
                       </div>
-                      <Button variant="link" className="w-full mt-2 text-blue-600" onClick={() => { setActiveTab('overview'); toast.success('Profile viewers', { description: 'Showing all profile views for your account' }) }}>View all {stats.profileViews} views</Button>
+                      <Button variant="link" className="w-full mt-2 text-blue-600" onClick={() => setShowAnalytics(true)}>View all {stats.profileViews} views</Button>
                     </CardContent>
                   </Card>
                 </div>
@@ -1442,14 +1485,14 @@ export default function ProfileClient() {
               {/* Quick Actions */}
               <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
                 {[
-                  { icon: Plus, label: 'Add Position', color: 'from-blue-500 to-indigo-600', action: () => { setShowPositionForm(true); toast.success('Position form ready', { description: 'Add your work experience' }) } },
-                  { icon: Award, label: 'Add Cert', color: 'from-purple-500 to-pink-600', action: () => { setShowCertForm(true); toast.success('Certification form ready', { description: 'Add your certifications' }) } },
-                  { icon: GraduationCap, label: 'Add Education', color: 'from-green-500 to-emerald-600', action: () => { setShowEducationForm(true); toast.success('Education form ready', { description: 'Add your education background' }) } },
-                  { icon: Trophy, label: 'Add Award', color: 'from-orange-500 to-amber-600', action: () => { setShowAwardForm(true); toast.success('Award form ready', { description: 'Add your honors and awards' }) } },
-                  { icon: BookOpen, label: 'Add Project', color: 'from-cyan-500 to-blue-600', action: () => { setShowProjectForm(true); toast.success('Project form ready', { description: 'Add your project details' }) } },
-                  { icon: Heart, label: 'Volunteer', color: 'from-pink-500 to-rose-600', action: () => { setShowVolunteerForm(true); toast.success('Volunteer form ready', { description: 'Add your volunteer experience' }) } },
-                  { icon: FileText, label: 'Publication', color: 'from-indigo-500 to-purple-600', action: () => { setShowPublicationForm(true); toast.success('Publication form ready', { description: 'Add your publications' }) } },
-                  { icon: Languages, label: 'Languages', color: 'from-yellow-500 to-orange-600', action: () => { setShowLanguagesForm(true); toast.success('Languages form ready', { description: 'Add your language proficiencies' }) } },
+                  { icon: Plus, label: 'Add Position', color: 'from-blue-500 to-indigo-600', action: () => setShowPositionForm(true) },
+                  { icon: Award, label: 'Add Cert', color: 'from-purple-500 to-pink-600', action: () => setShowCertForm(true) },
+                  { icon: GraduationCap, label: 'Add Education', color: 'from-green-500 to-emerald-600', action: () => setShowEducationForm(true) },
+                  { icon: Trophy, label: 'Add Award', color: 'from-orange-500 to-amber-600', action: () => setShowAwardForm(true) },
+                  { icon: BookOpen, label: 'Add Project', color: 'from-cyan-500 to-blue-600', action: () => setShowProjectForm(true) },
+                  { icon: Heart, label: 'Volunteer', color: 'from-pink-500 to-rose-600', action: () => setShowVolunteerForm(true) },
+                  { icon: FileText, label: 'Publication', color: 'from-indigo-500 to-purple-600', action: () => setShowPublicationForm(true) },
+                  { icon: Languages, label: 'Languages', color: 'from-yellow-500 to-orange-600', action: () => setShowLanguagesForm(true) },
                 ].map((action, i) => (
                   <Button
                     key={i}
@@ -1469,7 +1512,7 @@ export default function ProfileClient() {
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <CardTitle className="flex items-center gap-2"><Briefcase className="w-5 h-5 text-blue-600" />Experience</CardTitle>
-                    <Button size="sm" className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white" onClick={() => { setShowPositionForm(true); toast.success('Experience form ready', { description: 'Add your work experience' }) }}><Plus className="w-4 h-4 mr-1" />Add</Button>
+                    <Button size="sm" className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white" onClick={() => setShowPositionForm(true)}><Plus className="w-4 h-4 mr-1" />Add</Button>
                   </div>
                 </CardHeader>
                 <CardContent>
@@ -1613,14 +1656,14 @@ export default function ProfileClient() {
               {/* Quick Actions */}
               <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
                 {[
-                  { icon: Plus, label: 'Add Skill', color: 'from-green-500 to-emerald-600', action: () => { const skillName = prompt('Enter skill name:'); if (skillName) handleAddSkill(skillName); } },
-                  { icon: CheckCircle, label: 'Take Quiz', color: 'from-blue-500 to-indigo-600', action: () => { toast.success('Skill assessment ready', { description: 'Skill quiz loaded and ready to begin' }) } },
-                  { icon: Star, label: 'Pin Skill', color: 'from-yellow-500 to-orange-600', action: () => { toast.success('Skill pinned', { description: 'Skill pinned to top of profile' }) } },
-                  { icon: ThumbsUp, label: 'Get Endorsed', color: 'from-purple-500 to-pink-600', action: () => { toast.success('Endorsement requests sent', { description: 'Endorsement requests sent to your connections' }) } },
-                  { icon: Award, label: 'Add Badge', color: 'from-cyan-500 to-blue-600', action: () => { toast.success('Badge selector loaded', { description: 'Select a badge to add to your profile' }) } },
-                  { icon: Target, label: 'Skill Goals', color: 'from-orange-500 to-red-600', action: () => { toast.success('Skill goals loaded', { description: 'Set your skill development goals' }) } },
-                  { icon: TrendingUp, label: 'Skill Trends', color: 'from-indigo-500 to-purple-600', action: () => { toast.success('Skill trends analyzed', { description: 'View trending skills in your industry' }) } },
-                  { icon: RefreshCw, label: 'Reorder', color: 'from-pink-500 to-rose-600', action: () => { setShowSkillReorderMode(true); toast.success('Reorder mode enabled', { description: 'Drag skills to reorder them' }) } },
+                  { icon: Plus, label: 'Add Skill', color: 'from-green-500 to-emerald-600', action: () => setShowAddSkillDialog(true) },
+                  { icon: CheckCircle, label: 'Take Quiz', color: 'from-blue-500 to-indigo-600', action: () => setShowSkillQuizDialog(true) },
+                  { icon: Star, label: 'Pin Skill', color: 'from-yellow-500 to-orange-600', action: () => setShowPinSkillDialog(true) },
+                  { icon: ThumbsUp, label: 'Get Endorsed', color: 'from-purple-500 to-pink-600', action: () => setShowEndorseRequestDialog(true) },
+                  { icon: Award, label: 'Add Badge', color: 'from-cyan-500 to-blue-600', action: () => setShowAddBadgeDialog(true) },
+                  { icon: Target, label: 'Skill Goals', color: 'from-orange-500 to-red-600', action: () => setShowSkillGoalsDialog(true) },
+                  { icon: TrendingUp, label: 'Skill Trends', color: 'from-indigo-500 to-purple-600', action: () => setShowSkillTrendsDialog(true) },
+                  { icon: RefreshCw, label: 'Reorder', color: 'from-pink-500 to-rose-600', action: () => setShowSkillReorderMode(true) },
                 ].map((action, i) => (
                   <Button
                     key={i}
@@ -1655,10 +1698,7 @@ export default function ProfileClient() {
                       <Button
                         size="sm"
                         className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white"
-                        onClick={() => {
-                          const skillName = prompt('Enter skill name:')
-                          if (skillName) handleAddSkill(skillName)
-                        }}
+                        onClick={() => setShowAddSkillDialog(true)}
                       >
                         <Plus className="w-4 h-4 mr-1" />Add Skill
                       </Button>
@@ -1698,7 +1738,7 @@ export default function ProfileClient() {
                             <Badge className={getAssessmentColor(skill.assessmentStatus)}>
                               {skill.assessmentStatus === 'not-taken' ? 'Take Quiz' : skill.assessmentStatus.replace('-', ' ')}
                             </Badge>
-                            <Button variant="outline" size="sm" onClick={() => toast.success('Skill endorsed', { description: 'You endorsed ' + skill.name })}>Endorse</Button>
+                            <Button variant="outline" size="sm" onClick={() => setShowEndorseSkillDialog(skill.name)}>Endorse</Button>
                             <Button
                               variant="ghost"
                               size="icon"
@@ -1757,14 +1797,14 @@ export default function ProfileClient() {
               {/* Quick Actions */}
               <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
                 {[
-                  { icon: Plus, label: 'Add Featured', color: 'from-yellow-500 to-orange-600', action: () => { setShowFeaturedForm(true); toast.success('Featured selector ready', { description: 'Choose content to feature on your profile' }) } },
-                  { icon: FileText, label: 'New Article', color: 'from-blue-500 to-indigo-600', action: () => { setShowArticleEditor(true); toast.success('Article editor ready', { description: 'Start writing your article' }) } },
-                  { icon: Link2, label: 'Add Link', color: 'from-purple-500 to-pink-600', action: () => { setShowLinkForm(true); toast.success('Link form ready', { description: 'Add an external link to feature' }) } },
-                  { icon: Newspaper, label: 'Newsletter', color: 'from-green-500 to-emerald-600', action: () => { setShowNewsletterSettings(true); toast.success('Newsletter settings loaded', { description: 'Configure your newsletter settings' }) } },
-                  { icon: Image, label: 'Add Media', color: 'from-cyan-500 to-blue-600', action: () => { setShowMediaUploader(true); toast.success('Media uploader ready', { description: 'Upload images or documents' }) } },
-                  { icon: Podcast, label: 'Podcast', color: 'from-orange-500 to-red-600', action: () => { setShowPodcastForm(true); toast.success('Podcast form ready', { description: 'Add your podcast episodes' }) } },
-                  { icon: Video, label: 'Add Video', color: 'from-pink-500 to-rose-600', action: () => { setShowVideoUploader(true); toast.success('Video uploader ready', { description: 'Upload or link a video' }) } },
-                  { icon: RefreshCw, label: 'Reorder', color: 'from-indigo-500 to-purple-600', action: () => { setShowFeaturedReorder(true); toast.success('Reorder mode enabled', { description: 'Drag items to reorder featured content' }) } },
+                  { icon: Plus, label: 'Add Featured', color: 'from-yellow-500 to-orange-600', action: () => setShowFeaturedForm(true) },
+                  { icon: FileText, label: 'New Article', color: 'from-blue-500 to-indigo-600', action: () => setShowArticleEditor(true) },
+                  { icon: Link2, label: 'Add Link', color: 'from-purple-500 to-pink-600', action: () => setShowLinkForm(true) },
+                  { icon: Newspaper, label: 'Newsletter', color: 'from-green-500 to-emerald-600', action: () => setShowNewsletterSettings(true) },
+                  { icon: Image, label: 'Add Media', color: 'from-cyan-500 to-blue-600', action: () => setShowMediaUploader(true) },
+                  { icon: Podcast, label: 'Podcast', color: 'from-orange-500 to-red-600', action: () => setShowPodcastForm(true) },
+                  { icon: Video, label: 'Add Video', color: 'from-pink-500 to-rose-600', action: () => setShowVideoUploader(true) },
+                  { icon: RefreshCw, label: 'Reorder', color: 'from-indigo-500 to-purple-600', action: () => setShowFeaturedReorder(true) },
                 ].map((action, i) => (
                   <Button
                     key={i}
@@ -1784,7 +1824,7 @@ export default function ProfileClient() {
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <CardTitle className="flex items-center gap-2"><Star className="w-5 h-5 text-blue-600" />Featured</CardTitle>
-                    <Button size="sm" onClick={() => { setShowFeaturedForm(true); toast.success('Featured form ready', { description: 'Add your featured content' }) }}><Plus className="w-4 h-4 mr-1" />Add Featured</Button>
+                    <Button size="sm" onClick={() => setShowFeaturedForm(true)}><Plus className="w-4 h-4 mr-1" />Add Featured</Button>
                   </div>
                 </CardHeader>
                 <CardContent>
@@ -1859,14 +1899,14 @@ export default function ProfileClient() {
               {/* Quick Actions */}
               <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
                 {[
-                  { icon: UserPlus, label: 'Add Contacts', color: 'from-cyan-500 to-blue-600', action: () => { setShowContactImporter(true); toast.success('Contact importer ready', { description: 'Import contacts from your address book' }) } },
-                  { icon: Search, label: 'Find People', color: 'from-blue-500 to-indigo-600', action: () => { setShowPeopleSearch(true); toast.success('People search ready', { description: 'Search for professionals in your field' }) } },
-                  { icon: Users, label: 'My Network', color: 'from-purple-500 to-pink-600', action: () => { setActiveTab('network'); toast.success('Network loaded', { description: 'View all your connections' }) } },
-                  { icon: MessageSquare, label: 'Messages', color: 'from-green-500 to-emerald-600', action: () => { setActiveTab('network'); toast.success('Messages loaded', { description: 'View your messages' }) } },
-                  { icon: Mail, label: 'Invitations', color: 'from-orange-500 to-amber-600', action: () => { setActiveTab('network'); toast.success('Invitations loaded', { description: 'View pending invitations' }) } },
-                  { icon: Building2, label: 'Companies', color: 'from-pink-500 to-rose-600', action: () => { toast.success('Companies loaded', { description: 'Browse companies in your network' }) } },
-                  { icon: GraduationCap, label: 'Alumni', color: 'from-indigo-500 to-purple-600', action: () => { toast.success('Alumni loaded', { description: 'Find alumni from your schools' }) } },
-                  { icon: Globe, label: 'Groups', color: 'from-yellow-500 to-orange-600', action: () => { toast.success('Groups loaded', { description: 'Discover professional groups' }) } },
+                  { icon: UserPlus, label: 'Add Contacts', color: 'from-cyan-500 to-blue-600', action: () => setShowContactImporter(true) },
+                  { icon: Search, label: 'Find People', color: 'from-blue-500 to-indigo-600', action: () => setShowPeopleSearch(true) },
+                  { icon: Users, label: 'My Network', color: 'from-purple-500 to-pink-600', action: () => setActiveTab('network') },
+                  { icon: MessageSquare, label: 'Messages', color: 'from-green-500 to-emerald-600', action: () => setShowMessageDialog(true) },
+                  { icon: Mail, label: 'Invitations', color: 'from-orange-500 to-amber-600', action: () => setActiveTab('network') },
+                  { icon: Building2, label: 'Companies', color: 'from-pink-500 to-rose-600', action: () => setShowCompaniesDialog(true) },
+                  { icon: GraduationCap, label: 'Alumni', color: 'from-indigo-500 to-purple-600', action: () => setShowAlumniDialog(true) },
+                  { icon: Globe, label: 'Groups', color: 'from-yellow-500 to-orange-600', action: () => setShowGroupsDialog(true) },
                 ].map((action, i) => (
                   <Button
                     key={i}
@@ -1903,7 +1943,7 @@ export default function ProfileClient() {
                         </div>
                         <div className="flex items-center gap-3">
                           <Badge className={getConnectionStatusColor(connection.status)}>{connection.status}</Badge>
-                          <Button variant="outline" size="sm" onClick={() => toast.success('Chat opened', { description: `Chat with ${connection.name} ready` })}><MessageSquare className="w-4 h-4" /></Button>
+                          <Button variant="outline" size="sm" onClick={() => setShowChatDialog(connection)}><MessageSquare className="w-4 h-4" /></Button>
                         </div>
                       </div>
                     ))}
@@ -1953,14 +1993,14 @@ export default function ProfileClient() {
               {/* Quick Actions */}
               <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
                 {[
-                  { icon: Search, label: 'Search Jobs', color: 'from-indigo-500 to-purple-600', action: () => { setShowJobSearch(true); toast.success('Job search ready', { description: 'Search for job opportunities' }) } },
-                  { icon: Bookmark, label: 'Saved Jobs', color: 'from-blue-500 to-indigo-600', action: () => { setActiveTab('jobs'); toast.success('Saved jobs loaded', { description: 'View your saved jobs' }) } },
-                  { icon: Bell, label: 'Job Alerts', color: 'from-purple-500 to-pink-600', action: () => { setActiveTab('jobs'); toast.success('Job alerts loaded', { description: 'Manage your job alerts' }) } },
-                  { icon: Target, label: 'Preferences', color: 'from-green-500 to-emerald-600', action: () => { setActiveTab('settings'); toast.success('Preferences loaded', { description: 'Set your job preferences' }) } },
-                  { icon: FileText, label: 'Applications', color: 'from-orange-500 to-amber-600', action: () => { setActiveTab('jobs'); toast.success('Applications loaded', { description: 'View your job applications' }) } },
-                  { icon: Building2, label: 'Companies', color: 'from-cyan-500 to-blue-600', action: () => { toast.success('Companies loaded', { description: 'Browse hiring companies' }) } },
-                  { icon: TrendingUp, label: 'Salary Info', color: 'from-pink-500 to-rose-600', action: () => { toast.success('Salary data loaded', { description: 'View salary insights for your industry' }) } },
-                  { icon: Users, label: 'Referrals', color: 'from-yellow-500 to-orange-600', action: () => { toast.success('Referrals loaded', { description: 'Request referrals from your connections' }) } },
+                  { icon: Search, label: 'Search Jobs', color: 'from-indigo-500 to-purple-600', action: () => setShowJobSearch(true) },
+                  { icon: Bookmark, label: 'Saved Jobs', color: 'from-blue-500 to-indigo-600', action: () => setActiveTab('jobs') },
+                  { icon: Bell, label: 'Job Alerts', color: 'from-purple-500 to-pink-600', action: () => setActiveTab('jobs') },
+                  { icon: Target, label: 'Preferences', color: 'from-green-500 to-emerald-600', action: () => setActiveTab('settings') },
+                  { icon: FileText, label: 'Applications', color: 'from-orange-500 to-amber-600', action: () => setActiveTab('jobs') },
+                  { icon: Building2, label: 'Companies', color: 'from-cyan-500 to-blue-600', action: () => setShowCompaniesDialog(true) },
+                  { icon: TrendingUp, label: 'Salary Info', color: 'from-pink-500 to-rose-600', action: () => setShowSalaryInfoDialog(true) },
+                  { icon: Users, label: 'Referrals', color: 'from-yellow-500 to-orange-600', action: () => setShowReferralsDialog(true) },
                 ].map((action, i) => (
                   <Button
                     key={i}
@@ -2004,8 +2044,8 @@ export default function ProfileClient() {
                           <Badge className="bg-green-100 text-green-700">{job.matchScore}% match</Badge>
                           {job.isEasyApply && <Badge variant="outline">Easy Apply</Badge>}
                           <div className="flex gap-2">
-                            <Button variant="ghost" size="icon" onClick={() => toast.success(job.isSaved ? 'Job removed from saved' : 'Job saved successfully', { description: job.isSaved ? 'Removed from your saved jobs' : 'Added to your saved jobs' })}><Bookmark className={`w-4 h-4 ${job.isSaved ? 'fill-current text-blue-600' : ''}`} /></Button>
-                            <Button size="sm" onClick={() => toast.success('Application submitted', { description: `Applied to ${job.title} successfully` })}>Apply</Button>
+                            <Button variant="ghost" size="icon" onClick={() => toast.success(job.isSaved ? 'Job removed from saved' : 'Job saved successfully')}><Bookmark className={`w-4 h-4 ${job.isSaved ? 'fill-current text-blue-600' : ''}`} /></Button>
+                            <Button size="sm" onClick={() => setShowJobApplyDialog(job)}>Apply</Button>
                           </div>
                         </div>
                       </div>
@@ -2056,14 +2096,14 @@ export default function ProfileClient() {
               {/* Quick Actions */}
               <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
                 {[
-                  { icon: Plus, label: 'New Post', color: 'from-pink-500 to-rose-600', action: () => { setShowPostComposer(true); toast.success('Post composer ready', { description: 'Create your new post' }) } },
-                  { icon: FileText, label: 'Write Article', color: 'from-blue-500 to-indigo-600', action: () => { setShowArticleEditor(true); toast.success('Article editor ready', { description: 'Write your article' }) } },
-                  { icon: Image, label: 'Share Photo', color: 'from-purple-500 to-pink-600', action: () => { setShowMediaUploader(true); toast.success('Photo uploader ready', { description: 'Select a photo to share' }) } },
-                  { icon: Video, label: 'Post Video', color: 'from-green-500 to-emerald-600', action: () => { setShowVideoUploader(true); toast.success('Video uploader ready', { description: 'Upload or record a video' }) } },
-                  { icon: Calendar, label: 'Create Event', color: 'from-orange-500 to-amber-600', action: () => { toast.success('Event creator ready', { description: 'Create your event' }) } },
-                  { icon: BarChart3, label: 'Analytics', color: 'from-cyan-500 to-blue-600', action: () => { setShowAnalytics(true); toast.success('Analytics loaded', { description: 'View your activity analytics' }) } },
-                  { icon: Hash, label: 'Hashtags', color: 'from-indigo-500 to-purple-600', action: () => { toast.success('Hashtag trends loaded', { description: 'Discover trending hashtags' }) } },
-                  { icon: Clock, label: 'Schedule', color: 'from-yellow-500 to-orange-600', action: () => { toast.success('Post scheduler ready', { description: 'Schedule your posts' }) } },
+                  { icon: Plus, label: 'New Post', color: 'from-pink-500 to-rose-600', action: () => setShowPostComposer(true) },
+                  { icon: FileText, label: 'Write Article', color: 'from-blue-500 to-indigo-600', action: () => setShowArticleEditor(true) },
+                  { icon: Image, label: 'Share Photo', color: 'from-purple-500 to-pink-600', action: () => setShowMediaUploader(true) },
+                  { icon: Video, label: 'Post Video', color: 'from-green-500 to-emerald-600', action: () => setShowVideoUploader(true) },
+                  { icon: Calendar, label: 'Create Event', color: 'from-orange-500 to-amber-600', action: () => setShowCreateEventDialog(true) },
+                  { icon: BarChart3, label: 'Analytics', color: 'from-cyan-500 to-blue-600', action: () => setShowAnalytics(true) },
+                  { icon: Hash, label: 'Hashtags', color: 'from-indigo-500 to-purple-600', action: () => setShowHashtagsDialog(true) },
+                  { icon: Clock, label: 'Schedule', color: 'from-yellow-500 to-orange-600', action: () => setShowSchedulePostDialog(true) },
                 ].map((action, i) => (
                   <Button
                     key={i}
@@ -2539,7 +2579,7 @@ export default function ProfileClient() {
                                     <p className="text-xs text-gray-500">{session.location} • {session.time}</p>
                                   </div>
                                 </div>
-                                {!session.current && <Button variant="ghost" size="sm" className="text-red-600" onClick={() => toast.success('Session ended', { description: 'Signed out successfully' })}>Sign out</Button>}
+                                {!session.current && <Button variant="ghost" size="sm" className="text-red-600" onClick={() => setShowSessionSignOutDialog(i)}>Sign out</Button>}
                               </div>
                             ))}
                           </div>
@@ -2614,7 +2654,7 @@ export default function ProfileClient() {
                                 <p className="text-sm text-gray-500">Not connected</p>
                               </div>
                             </div>
-                            <Button variant="outline" size="sm" onClick={() => toast.success('Google connected', { description: 'Google account connected successfully' })}>Connect</Button>
+                            <Button variant="outline" size="sm" onClick={() => setShowConnectGoogleDialog(true)}>Connect</Button>
                           </div>
                         </CardContent>
                       </Card>
@@ -2747,6 +2787,1038 @@ export default function ProfileClient() {
                     </div>
                   ))}
                 </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          {/* Add Skill Dialog */}
+          <Dialog open={showAddSkillDialog} onOpenChange={setShowAddSkillDialog}>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2"><Zap className="w-5 h-5 text-blue-600" />Add New Skill</DialogTitle>
+                <DialogDescription>Add a skill to showcase your expertise</DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div>
+                  <Label htmlFor="skillName">Skill Name</Label>
+                  <Input
+                    id="skillName"
+                    placeholder="e.g., React, Project Management, Python"
+                    value={newSkillName}
+                    onChange={(e) => setNewSkillName(e.target.value)}
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="skillCategory">Category</Label>
+                  <Input
+                    id="skillCategory"
+                    placeholder="e.g., Frontend, Backend, Soft Skills"
+                    value={newSkillCategory}
+                    onChange={(e) => setNewSkillCategory(e.target.value)}
+                    className="mt-1"
+                  />
+                </div>
+              </div>
+              <div className="flex justify-end gap-3">
+                <Button variant="outline" onClick={() => setShowAddSkillDialog(false)}>Cancel</Button>
+                <Button
+                  className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white"
+                  onClick={() => {
+                    if (newSkillName.trim()) {
+                      handleAddSkill(newSkillName, newSkillCategory)
+                      setNewSkillName('')
+                      setNewSkillCategory('General')
+                      setShowAddSkillDialog(false)
+                    }
+                  }}
+                >
+                  Add Skill
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          {/* Download CV Dialog */}
+          <Dialog open={showDownloadCVDialog} onOpenChange={setShowDownloadCVDialog}>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2"><Download className="w-5 h-5 text-blue-600" />Download CV</DialogTitle>
+                <DialogDescription>Customize your CV export options</DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div>
+                  <Label>Format</Label>
+                  <div className="flex gap-4 mt-2">
+                    <Button
+                      variant={cvFormat === 'pdf' ? 'default' : 'outline'}
+                      onClick={() => setCvFormat('pdf')}
+                      className="flex-1"
+                    >
+                      <FileText className="w-4 h-4 mr-2" />PDF
+                    </Button>
+                    <Button
+                      variant={cvFormat === 'docx' ? 'default' : 'outline'}
+                      onClick={() => setCvFormat('docx')}
+                      className="flex-1"
+                    >
+                      <FileText className="w-4 h-4 mr-2" />DOCX
+                    </Button>
+                  </div>
+                </div>
+                <div>
+                  <Label>Include Sections</Label>
+                  <div className="space-y-2 mt-2">
+                    {Object.entries(cvIncludeSections).map(([key, value]) => (
+                      <div key={key} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                        <span className="capitalize">{key}</span>
+                        <Switch
+                          checked={value}
+                          onCheckedChange={(checked) => setCvIncludeSections(prev => ({ ...prev, [key]: checked }))}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <div className="flex justify-end gap-3">
+                <Button variant="outline" onClick={() => setShowDownloadCVDialog(false)}>Cancel</Button>
+                <Button
+                  className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white"
+                  onClick={() => {
+                    toast.success('CV Generated', { description: `Your ${cvFormat.toUpperCase()} CV is ready for download` })
+                    setShowDownloadCVDialog(false)
+                  }}
+                >
+                  <Download className="w-4 h-4 mr-2" />Download
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          {/* Cover Story Dialog */}
+          <Dialog open={showCoverStoryDialog} onOpenChange={setShowCoverStoryDialog}>
+            <DialogContent className="max-w-2xl">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2"><Play className="w-5 h-5 text-blue-600" />Cover Story</DialogTitle>
+                <DialogDescription>Your video introduction</DialogDescription>
+              </DialogHeader>
+              <div className="aspect-video bg-gray-900 rounded-lg flex items-center justify-center">
+                <div className="text-center">
+                  <Play className="w-16 h-16 text-white/60 mx-auto mb-2" />
+                  <p className="text-white/60">Video player placeholder</p>
+                  <p className="text-sm text-white/40">Your cover story video would play here</p>
+                </div>
+              </div>
+              <div className="flex justify-end">
+                <Button variant="outline" onClick={() => setShowCoverStoryDialog(false)}>Close</Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          {/* Connect Dialog */}
+          <Dialog open={showConnectDialog} onOpenChange={setShowConnectDialog}>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2"><UserPlus className="w-5 h-5 text-blue-600" />Send Connection Request</DialogTitle>
+                <DialogDescription>Add a personal note to your connection request</DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <Avatar>
+                    <AvatarFallback>JD</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <p className="font-medium">John Doe</p>
+                    <p className="text-sm text-gray-500">Software Engineer</p>
+                  </div>
+                </div>
+                <div>
+                  <Label htmlFor="connectionMessage">Personal Note (optional)</Label>
+                  <textarea
+                    id="connectionMessage"
+                    className="w-full mt-1 p-3 border rounded-lg resize-none h-24 dark:bg-gray-800 dark:border-gray-700"
+                    placeholder="Hi! I'd like to connect with you..."
+                    value={connectionMessage}
+                    onChange={(e) => setConnectionMessage(e.target.value)}
+                  />
+                </div>
+              </div>
+              <div className="flex justify-end gap-3">
+                <Button variant="outline" onClick={() => setShowConnectDialog(false)}>Cancel</Button>
+                <Button
+                  className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white"
+                  onClick={() => {
+                    toast.success('Connection request sent')
+                    setConnectionMessage('')
+                    setShowConnectDialog(false)
+                  }}
+                >
+                  Send Request
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          {/* Message Dialog */}
+          <Dialog open={showMessageDialog} onOpenChange={setShowMessageDialog}>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2"><MessageSquare className="w-5 h-5 text-blue-600" />Send Message</DialogTitle>
+                <DialogDescription>Start a conversation</DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div>
+                  <Label htmlFor="messageContent">Your Message</Label>
+                  <textarea
+                    id="messageContent"
+                    className="w-full mt-1 p-3 border rounded-lg resize-none h-32 dark:bg-gray-800 dark:border-gray-700"
+                    placeholder="Write your message..."
+                    value={messageContent}
+                    onChange={(e) => setMessageContent(e.target.value)}
+                  />
+                </div>
+              </div>
+              <div className="flex justify-end gap-3">
+                <Button variant="outline" onClick={() => setShowMessageDialog(false)}>Cancel</Button>
+                <Button
+                  className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white"
+                  onClick={() => {
+                    toast.success('Message sent')
+                    setMessageContent('')
+                    setShowMessageDialog(false)
+                  }}
+                >
+                  Send Message
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          {/* More Options Dialog */}
+          <Dialog open={showMoreOptionsDialog} onOpenChange={setShowMoreOptionsDialog}>
+            <DialogContent className="max-w-sm">
+              <DialogHeader>
+                <DialogTitle>More Options</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-2 py-4">
+                {[
+                  { icon: Share2, label: 'Share Profile', action: () => { handleShareProfile(); setShowMoreOptionsDialog(false); } },
+                  { icon: Download, label: 'Download as PDF', action: () => { setShowDownloadCVDialog(true); setShowMoreOptionsDialog(false); } },
+                  { icon: Bell, label: 'Follow for Updates', action: () => { toast.success('Following for updates'); setShowMoreOptionsDialog(false); } },
+                  { icon: Shield, label: 'Report Profile', action: () => { toast.info('Report submitted'); setShowMoreOptionsDialog(false); } },
+                  { icon: Lock, label: 'Block User', action: () => { toast.info('User blocked'); setShowMoreOptionsDialog(false); } },
+                ].map((option, i) => (
+                  <Button
+                    key={i}
+                    variant="ghost"
+                    className="w-full justify-start"
+                    onClick={option.action}
+                  >
+                    <option.icon className="w-4 h-4 mr-2" />
+                    {option.label}
+                  </Button>
+                ))}
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          {/* Skill Quiz Dialog */}
+          <Dialog open={showSkillQuizDialog} onOpenChange={setShowSkillQuizDialog}>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2"><CheckCircle className="w-5 h-5 text-blue-600" />Take Skill Assessment</DialogTitle>
+                <DialogDescription>Verify your skills with an assessment quiz</DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div>
+                  <Label>Select a Skill to Assess</Label>
+                  <div className="grid grid-cols-2 gap-2 mt-2">
+                    {mockSkills.slice(0, 6).map((skill) => (
+                      <Button
+                        key={skill.id}
+                        variant={quizSelectedSkill === skill.name ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setQuizSelectedSkill(skill.name)}
+                      >
+                        {skill.name}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+                <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                  <h4 className="font-medium text-blue-700 dark:text-blue-300">About the Assessment</h4>
+                  <ul className="text-sm text-blue-600 dark:text-blue-400 mt-2 space-y-1">
+                    <li>15 multiple choice questions</li>
+                    <li>20 minutes time limit</li>
+                    <li>Pass with 70% or higher</li>
+                    <li>Earn a verified badge on your profile</li>
+                  </ul>
+                </div>
+              </div>
+              <div className="flex justify-end gap-3">
+                <Button variant="outline" onClick={() => setShowSkillQuizDialog(false)}>Cancel</Button>
+                <Button
+                  className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white"
+                  disabled={!quizSelectedSkill}
+                  onClick={() => {
+                    toast.success('Assessment Started', { description: `Good luck with your ${quizSelectedSkill} assessment!` })
+                    setShowSkillQuizDialog(false)
+                    setQuizSelectedSkill('')
+                  }}
+                >
+                  Start Assessment
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          {/* Pin Skill Dialog */}
+          <Dialog open={showPinSkillDialog} onOpenChange={setShowPinSkillDialog}>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2"><Star className="w-5 h-5 text-yellow-500" />Pin Skills</DialogTitle>
+                <DialogDescription>Select up to 3 skills to pin at the top of your profile</DialogDescription>
+              </DialogHeader>
+              <div className="space-y-2 py-4">
+                {mockSkills.map((skill) => (
+                  <div
+                    key={skill.id}
+                    className={`flex items-center justify-between p-3 rounded-lg cursor-pointer transition-colors ${
+                      skill.isPinned ? 'bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200' : 'bg-gray-50 dark:bg-gray-800 hover:bg-gray-100'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <Zap className="w-4 h-4 text-blue-600" />
+                      <span className="font-medium">{skill.name}</span>
+                      <Badge className={getSkillLevelColor(skill.level)}>{skill.level}</Badge>
+                    </div>
+                    <Switch checked={skill.isPinned} />
+                  </div>
+                ))}
+              </div>
+              <div className="flex justify-end gap-3">
+                <Button variant="outline" onClick={() => setShowPinSkillDialog(false)}>Cancel</Button>
+                <Button
+                  className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white"
+                  onClick={() => {
+                    toast.success('Skills pinned successfully')
+                    setShowPinSkillDialog(false)
+                  }}
+                >
+                  Save Pinned Skills
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          {/* Endorse Request Dialog */}
+          <Dialog open={showEndorseRequestDialog} onOpenChange={setShowEndorseRequestDialog}>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2"><ThumbsUp className="w-5 h-5 text-purple-600" />Request Endorsements</DialogTitle>
+                <DialogDescription>Ask your connections to endorse your skills</DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div>
+                  <Label>Select Skills to Get Endorsed</Label>
+                  <div className="grid grid-cols-2 gap-2 mt-2">
+                    {mockSkills.slice(0, 6).map((skill) => (
+                      <div key={skill.id} className="flex items-center gap-2 p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                        <Switch />
+                        <span className="text-sm">{skill.name}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <Label>Select Connections to Ask</Label>
+                  <div className="space-y-2 mt-2">
+                    {mockConnections.slice(0, 3).map((conn) => (
+                      <div key={conn.id} className="flex items-center gap-3 p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                        <Switch />
+                        <Avatar className="w-8 h-8">
+                          <AvatarImage src={conn.avatar} />
+                          <AvatarFallback>{conn.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                        </Avatar>
+                        <span className="text-sm">{conn.name}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <div className="flex justify-end gap-3">
+                <Button variant="outline" onClick={() => setShowEndorseRequestDialog(false)}>Cancel</Button>
+                <Button
+                  className="bg-gradient-to-r from-purple-600 to-pink-600 text-white"
+                  onClick={() => {
+                    toast.success('Endorsement requests sent')
+                    setShowEndorseRequestDialog(false)
+                  }}
+                >
+                  Send Requests
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          {/* Add Badge Dialog */}
+          <Dialog open={showAddBadgeDialog} onOpenChange={setShowAddBadgeDialog}>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2"><Award className="w-5 h-5 text-cyan-600" />Add Badge</DialogTitle>
+                <DialogDescription>Select a badge to display on your profile</DialogDescription>
+              </DialogHeader>
+              <div className="grid grid-cols-2 gap-4 py-4">
+                {[
+                  { name: 'Open to Work', icon: Target, color: 'from-green-500 to-emerald-600' },
+                  { name: 'Hiring', icon: Briefcase, color: 'from-purple-500 to-indigo-600' },
+                  { name: 'Top Voice', icon: Mic, color: 'from-orange-500 to-amber-600' },
+                  { name: 'Creator', icon: Sparkles, color: 'from-pink-500 to-rose-600' },
+                  { name: 'Mentor', icon: GraduationCap, color: 'from-blue-500 to-cyan-600' },
+                  { name: 'Verified', icon: CheckCircle, color: 'from-blue-500 to-indigo-600' },
+                ].map((badge, i) => (
+                  <Button
+                    key={i}
+                    variant="outline"
+                    className="h-auto py-4 flex flex-col gap-2"
+                    onClick={() => {
+                      toast.success(`${badge.name} badge added`)
+                      setShowAddBadgeDialog(false)
+                    }}
+                  >
+                    <div className={`p-2 rounded-lg bg-gradient-to-br ${badge.color}`}>
+                      <badge.icon className="w-5 h-5 text-white" />
+                    </div>
+                    <span className="text-sm font-medium">{badge.name}</span>
+                  </Button>
+                ))}
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          {/* Skill Goals Dialog */}
+          <Dialog open={showSkillGoalsDialog} onOpenChange={setShowSkillGoalsDialog}>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2"><Target className="w-5 h-5 text-orange-600" />Set Skill Goals</DialogTitle>
+                <DialogDescription>Track your skill development progress</DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div>
+                  <Label>Skill to Improve</Label>
+                  <Input
+                    placeholder="e.g., TypeScript, Leadership"
+                    value={skillGoalData.skill}
+                    onChange={(e) => setSkillGoalData(prev => ({ ...prev, skill: e.target.value }))}
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label>Target Level</Label>
+                  <div className="flex gap-2 mt-2">
+                    {['intermediate', 'advanced', 'expert'].map((level) => (
+                      <Button
+                        key={level}
+                        variant={skillGoalData.targetLevel === level ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setSkillGoalData(prev => ({ ...prev, targetLevel: level }))}
+                        className="capitalize"
+                      >
+                        {level}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <Label>Target Date</Label>
+                  <Input
+                    type="date"
+                    value={skillGoalData.deadline}
+                    onChange={(e) => setSkillGoalData(prev => ({ ...prev, deadline: e.target.value }))}
+                    className="mt-1"
+                  />
+                </div>
+              </div>
+              <div className="flex justify-end gap-3">
+                <Button variant="outline" onClick={() => setShowSkillGoalsDialog(false)}>Cancel</Button>
+                <Button
+                  className="bg-gradient-to-r from-orange-500 to-red-500 text-white"
+                  onClick={() => {
+                    toast.success('Skill goal set', { description: `Goal: Reach ${skillGoalData.targetLevel} in ${skillGoalData.skill}` })
+                    setSkillGoalData({ skill: '', targetLevel: 'advanced', deadline: '' })
+                    setShowSkillGoalsDialog(false)
+                  }}
+                >
+                  Set Goal
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          {/* Skill Trends Dialog */}
+          <Dialog open={showSkillTrendsDialog} onOpenChange={setShowSkillTrendsDialog}>
+            <DialogContent className="max-w-lg">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2"><TrendingUp className="w-5 h-5 text-indigo-600" />Skill Trends</DialogTitle>
+                <DialogDescription>Trending skills in your industry</DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                {[
+                  { skill: 'AI/Machine Learning', growth: '+45%', demand: 'Very High' },
+                  { skill: 'Cloud Architecture', growth: '+32%', demand: 'High' },
+                  { skill: 'Kubernetes', growth: '+28%', demand: 'High' },
+                  { skill: 'TypeScript', growth: '+24%', demand: 'High' },
+                  { skill: 'React', growth: '+18%', demand: 'Very High' },
+                ].map((trend, i) => (
+                  <div key={i} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <div>
+                      <p className="font-medium">{trend.skill}</p>
+                      <p className="text-sm text-gray-500">Demand: {trend.demand}</p>
+                    </div>
+                    <div className="text-right">
+                      <Badge className="bg-green-100 text-green-700">{trend.growth}</Badge>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="flex justify-end">
+                <Button variant="outline" onClick={() => setShowSkillTrendsDialog(false)}>Close</Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          {/* Companies Dialog */}
+          <Dialog open={showCompaniesDialog} onOpenChange={setShowCompaniesDialog}>
+            <DialogContent className="max-w-lg">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2"><Building2 className="w-5 h-5 text-blue-600" />Companies</DialogTitle>
+                <DialogDescription>Browse companies in your network</DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                {[
+                  { name: 'Google', industry: 'Technology', followers: '15M', jobs: 234 },
+                  { name: 'Microsoft', industry: 'Technology', followers: '12M', jobs: 187 },
+                  { name: 'Apple', industry: 'Technology', followers: '14M', jobs: 156 },
+                  { name: 'Amazon', industry: 'E-commerce', followers: '10M', jobs: 312 },
+                ].map((company, i) => (
+                  <div key={i} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <Avatar>
+                        <AvatarFallback>{company.name[0]}</AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="font-medium">{company.name}</p>
+                        <p className="text-sm text-gray-500">{company.industry} - {company.followers} followers</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <Badge variant="outline">{company.jobs} jobs</Badge>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="flex justify-end">
+                <Button variant="outline" onClick={() => setShowCompaniesDialog(false)}>Close</Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          {/* Alumni Dialog */}
+          <Dialog open={showAlumniDialog} onOpenChange={setShowAlumniDialog}>
+            <DialogContent className="max-w-lg">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2"><GraduationCap className="w-5 h-5 text-purple-600" />Alumni Network</DialogTitle>
+                <DialogDescription>Find alumni from your schools</DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                {displayEducation.map((edu, i) => (
+                  <div key={i} className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <div className="flex items-center gap-3 mb-3">
+                      <GraduationCap className="w-5 h-5 text-purple-600" />
+                      <div>
+                        <p className="font-medium">{edu.school}</p>
+                        <p className="text-sm text-gray-500">{edu.degree}, {edu.field}</p>
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <Badge variant="outline">2,500+ alumni on FreeFlow</Badge>
+                      <Badge variant="outline">45 mutual connections</Badge>
+                    </div>
+                    <Button variant="link" className="p-0 h-auto mt-2 text-purple-600">
+                      Browse {edu.school} Alumni
+                    </Button>
+                  </div>
+                ))}
+              </div>
+              <div className="flex justify-end">
+                <Button variant="outline" onClick={() => setShowAlumniDialog(false)}>Close</Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          {/* Groups Dialog */}
+          <Dialog open={showGroupsDialog} onOpenChange={setShowGroupsDialog}>
+            <DialogContent className="max-w-lg">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2"><Globe className="w-5 h-5 text-blue-600" />Professional Groups</DialogTitle>
+                <DialogDescription>Discover and join professional groups</DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                {[
+                  { name: 'React Developers', members: '125K', posts: '50/week' },
+                  { name: 'Software Engineering Leaders', members: '89K', posts: '35/week' },
+                  { name: 'Tech Startups', members: '234K', posts: '120/week' },
+                  { name: 'Product Managers Network', members: '156K', posts: '80/week' },
+                ].map((group, i) => (
+                  <div key={i} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                        <Users className="w-4 h-4 text-blue-600" />
+                      </div>
+                      <div>
+                        <p className="font-medium">{group.name}</p>
+                        <p className="text-sm text-gray-500">{group.members} members - {group.posts}</p>
+                      </div>
+                    </div>
+                    <Button size="sm">Join</Button>
+                  </div>
+                ))}
+              </div>
+              <div className="flex justify-end">
+                <Button variant="outline" onClick={() => setShowGroupsDialog(false)}>Close</Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          {/* Salary Info Dialog */}
+          <Dialog open={showSalaryInfoDialog} onOpenChange={setShowSalaryInfoDialog}>
+            <DialogContent className="max-w-lg">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2"><TrendingUp className="w-5 h-5 text-green-600" />Salary Insights</DialogTitle>
+                <DialogDescription>Salary data for your industry and role</DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-lg">
+                  <h4 className="font-medium">Senior Software Engineer</h4>
+                  <p className="text-sm text-gray-500">San Francisco Bay Area</p>
+                  <div className="mt-3">
+                    <div className="flex justify-between text-sm mb-1">
+                      <span>Salary Range</span>
+                      <span className="font-medium">$180K - $350K</span>
+                    </div>
+                    <Progress value={65} className="h-2" />
+                    <div className="flex justify-between text-xs text-gray-500 mt-1">
+                      <span>$180K</span>
+                      <span>Median: $245K</span>
+                      <span>$350K</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="space-y-3">
+                  <h4 className="font-medium">Salary by Company</h4>
+                  {[
+                    { company: 'Google', range: '$220K - $380K' },
+                    { company: 'Meta', range: '$200K - $350K' },
+                    { company: 'Apple', range: '$190K - $320K' },
+                    { company: 'Netflix', range: '$250K - $400K' },
+                  ].map((item, i) => (
+                    <div key={i} className="flex justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                      <span>{item.company}</span>
+                      <span className="font-medium text-green-600">{item.range}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="flex justify-end">
+                <Button variant="outline" onClick={() => setShowSalaryInfoDialog(false)}>Close</Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          {/* Referrals Dialog */}
+          <Dialog open={showReferralsDialog} onOpenChange={setShowReferralsDialog}>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2"><Users className="w-5 h-5 text-blue-600" />Request Referral</DialogTitle>
+                <DialogDescription>Ask your connections for a referral</DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div>
+                  <Label>Select Connection</Label>
+                  <div className="space-y-2 mt-2">
+                    {mockConnections.filter(c => c.status === 'connected').map((conn) => (
+                      <div key={conn.id} className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg cursor-pointer hover:bg-gray-100">
+                        <Avatar>
+                          <AvatarImage src={conn.avatar} />
+                          <AvatarFallback>{conn.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <p className="font-medium">{conn.name}</p>
+                          <p className="text-sm text-gray-500">{conn.company}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <Label>Company You Are Applying To</Label>
+                  <Input placeholder="e.g., Google, Microsoft" className="mt-1" />
+                </div>
+                <div>
+                  <Label>Position</Label>
+                  <Input placeholder="e.g., Senior Software Engineer" className="mt-1" />
+                </div>
+              </div>
+              <div className="flex justify-end gap-3">
+                <Button variant="outline" onClick={() => setShowReferralsDialog(false)}>Cancel</Button>
+                <Button
+                  className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white"
+                  onClick={() => {
+                    toast.success('Referral request sent')
+                    setShowReferralsDialog(false)
+                  }}
+                >
+                  Request Referral
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          {/* Create Event Dialog */}
+          <Dialog open={showCreateEventDialog} onOpenChange={setShowCreateEventDialog}>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2"><Calendar className="w-5 h-5 text-orange-600" />Create Event</DialogTitle>
+                <DialogDescription>Create a professional event</DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div>
+                  <Label>Event Title</Label>
+                  <Input
+                    placeholder="e.g., Tech Meetup, Webinar"
+                    value={eventFormData.title}
+                    onChange={(e) => setEventFormData(prev => ({ ...prev, title: e.target.value }))}
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label>Description</Label>
+                  <textarea
+                    className="w-full mt-1 p-3 border rounded-lg resize-none h-20 dark:bg-gray-800 dark:border-gray-700"
+                    placeholder="Describe your event..."
+                    value={eventFormData.description}
+                    onChange={(e) => setEventFormData(prev => ({ ...prev, description: e.target.value }))}
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label>Date</Label>
+                    <Input
+                      type="date"
+                      value={eventFormData.date}
+                      onChange={(e) => setEventFormData(prev => ({ ...prev, date: e.target.value }))}
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label>Time</Label>
+                    <Input
+                      type="time"
+                      value={eventFormData.time}
+                      onChange={(e) => setEventFormData(prev => ({ ...prev, time: e.target.value }))}
+                      className="mt-1"
+                    />
+                  </div>
+                </div>
+                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <span>Online Event</span>
+                  <Switch
+                    checked={eventFormData.isOnline}
+                    onCheckedChange={(checked) => setEventFormData(prev => ({ ...prev, isOnline: checked }))}
+                  />
+                </div>
+                {!eventFormData.isOnline && (
+                  <div>
+                    <Label>Location</Label>
+                    <Input
+                      placeholder="Event location"
+                      value={eventFormData.location}
+                      onChange={(e) => setEventFormData(prev => ({ ...prev, location: e.target.value }))}
+                      className="mt-1"
+                    />
+                  </div>
+                )}
+              </div>
+              <div className="flex justify-end gap-3">
+                <Button variant="outline" onClick={() => setShowCreateEventDialog(false)}>Cancel</Button>
+                <Button
+                  className="bg-gradient-to-r from-orange-500 to-amber-500 text-white"
+                  onClick={() => {
+                    toast.success('Event created', { description: eventFormData.title })
+                    setEventFormData({ title: '', description: '', date: '', time: '', location: '', isOnline: false })
+                    setShowCreateEventDialog(false)
+                  }}
+                >
+                  Create Event
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          {/* Hashtags Dialog */}
+          <Dialog open={showHashtagsDialog} onOpenChange={setShowHashtagsDialog}>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2"><Hash className="w-5 h-5 text-indigo-600" />Trending Hashtags</DialogTitle>
+                <DialogDescription>Popular hashtags in your industry</DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                {[
+                  { tag: '#TechIndustry', posts: '125K posts' },
+                  { tag: '#SoftwareEngineering', posts: '89K posts' },
+                  { tag: '#ReactJS', posts: '234K posts' },
+                  { tag: '#CareerGrowth', posts: '156K posts' },
+                  { tag: '#TechHiring', posts: '67K posts' },
+                  { tag: '#AI', posts: '345K posts' },
+                  { tag: '#StartupLife', posts: '78K posts' },
+                  { tag: '#RemoteWork', posts: '198K posts' },
+                ].map((hashtag, i) => (
+                  <div key={i} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg cursor-pointer hover:bg-gray-100">
+                    <span className="font-medium text-blue-600">{hashtag.tag}</span>
+                    <span className="text-sm text-gray-500">{hashtag.posts}</span>
+                  </div>
+                ))}
+              </div>
+              <div className="flex justify-end">
+                <Button variant="outline" onClick={() => setShowHashtagsDialog(false)}>Close</Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          {/* Schedule Post Dialog */}
+          <Dialog open={showSchedulePostDialog} onOpenChange={setShowSchedulePostDialog}>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2"><Clock className="w-5 h-5 text-blue-600" />Schedule Post</DialogTitle>
+                <DialogDescription>Schedule your post for later</DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div>
+                  <Label>Post Content</Label>
+                  <textarea
+                    className="w-full mt-1 p-3 border rounded-lg resize-none h-24 dark:bg-gray-800 dark:border-gray-700"
+                    placeholder="What do you want to share?"
+                    value={schedulePostData.content}
+                    onChange={(e) => setSchedulePostData(prev => ({ ...prev, content: e.target.value }))}
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label>Date</Label>
+                    <Input
+                      type="date"
+                      value={schedulePostData.scheduledDate}
+                      onChange={(e) => setSchedulePostData(prev => ({ ...prev, scheduledDate: e.target.value }))}
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label>Time</Label>
+                    <Input
+                      type="time"
+                      value={schedulePostData.scheduledTime}
+                      onChange={(e) => setSchedulePostData(prev => ({ ...prev, scheduledTime: e.target.value }))}
+                      className="mt-1"
+                    />
+                  </div>
+                </div>
+                <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                  <p className="text-sm text-blue-700 dark:text-blue-300">
+                    Best times to post: Tuesday-Thursday, 8-10 AM or 5-6 PM
+                  </p>
+                </div>
+              </div>
+              <div className="flex justify-end gap-3">
+                <Button variant="outline" onClick={() => setShowSchedulePostDialog(false)}>Cancel</Button>
+                <Button
+                  className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white"
+                  onClick={() => {
+                    toast.success('Post scheduled', { description: `Scheduled for ${schedulePostData.scheduledDate} at ${schedulePostData.scheduledTime}` })
+                    setSchedulePostData({ content: '', scheduledDate: '', scheduledTime: '' })
+                    setShowSchedulePostDialog(false)
+                  }}
+                >
+                  Schedule Post
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          {/* Job Apply Dialog */}
+          <Dialog open={!!showJobApplyDialog} onOpenChange={() => setShowJobApplyDialog(null)}>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2"><Briefcase className="w-5 h-5 text-blue-600" />Apply for Position</DialogTitle>
+                <DialogDescription>{showJobApplyDialog?.title} at {showJobApplyDialog?.company}</DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <Avatar>
+                      <AvatarImage src={showJobApplyDialog?.companyLogo} />
+                      <AvatarFallback>{showJobApplyDialog?.company?.[0]}</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <p className="font-medium">{showJobApplyDialog?.title}</p>
+                      <p className="text-sm text-gray-500">{showJobApplyDialog?.company} - {showJobApplyDialog?.location}</p>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <Label>Resume</Label>
+                  <div className="mt-1 p-4 border-2 border-dashed rounded-lg text-center">
+                    <FileText className="w-8 h-8 mx-auto text-gray-400 mb-2" />
+                    <p className="text-sm text-gray-500">Using profile as resume</p>
+                    <Button variant="link" size="sm">Upload different resume</Button>
+                  </div>
+                </div>
+                <div>
+                  <Label>Cover Letter (optional)</Label>
+                  <textarea
+                    className="w-full mt-1 p-3 border rounded-lg resize-none h-24 dark:bg-gray-800 dark:border-gray-700"
+                    placeholder="Add a cover letter..."
+                  />
+                </div>
+              </div>
+              <div className="flex justify-end gap-3">
+                <Button variant="outline" onClick={() => setShowJobApplyDialog(null)}>Cancel</Button>
+                <Button
+                  className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white"
+                  onClick={() => {
+                    toast.success('Application submitted', { description: `Applied to ${showJobApplyDialog?.title}` })
+                    setShowJobApplyDialog(null)
+                  }}
+                >
+                  Submit Application
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          {/* Endorse Skill Dialog */}
+          <Dialog open={!!showEndorseSkillDialog} onOpenChange={() => setShowEndorseSkillDialog(null)}>
+            <DialogContent className="max-w-sm">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2"><ThumbsUp className="w-5 h-5 text-blue-600" />Endorse Skill</DialogTitle>
+                <DialogDescription>Endorse {showEndorseSkillDialog}</DialogDescription>
+              </DialogHeader>
+              <div className="py-4">
+                <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-center">
+                  <Zap className="w-12 h-12 mx-auto text-blue-600 mb-2" />
+                  <h4 className="font-medium text-lg">{showEndorseSkillDialog}</h4>
+                  <p className="text-sm text-gray-500 mt-1">Click confirm to endorse this skill</p>
+                </div>
+              </div>
+              <div className="flex justify-end gap-3">
+                <Button variant="outline" onClick={() => setShowEndorseSkillDialog(null)}>Cancel</Button>
+                <Button
+                  className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white"
+                  onClick={() => {
+                    toast.success('Skill endorsed', { description: `You endorsed ${showEndorseSkillDialog}` })
+                    setShowEndorseSkillDialog(null)
+                  }}
+                >
+                  Confirm Endorsement
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          {/* Chat Dialog */}
+          <Dialog open={!!showChatDialog} onOpenChange={() => setShowChatDialog(null)}>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  <Avatar className="w-8 h-8">
+                    <AvatarImage src={showChatDialog?.avatar} />
+                    <AvatarFallback>{showChatDialog?.name?.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                  </Avatar>
+                  {showChatDialog?.name}
+                </DialogTitle>
+                <DialogDescription>{showChatDialog?.headline}</DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div className="h-64 bg-gray-50 dark:bg-gray-800 rounded-lg p-4 overflow-y-auto">
+                  <div className="text-center text-gray-500 text-sm">
+                    Start a conversation with {showChatDialog?.name}
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <Input placeholder="Type a message..." className="flex-1" />
+                  <Button className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
+                    Send
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          {/* Session Sign Out Dialog */}
+          <Dialog open={showSessionSignOutDialog !== null} onOpenChange={() => setShowSessionSignOutDialog(null)}>
+            <DialogContent className="max-w-sm">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2 text-red-600"><Lock className="w-5 h-5" />Sign Out Session</DialogTitle>
+                <DialogDescription>Are you sure you want to sign out this session?</DialogDescription>
+              </DialogHeader>
+              <div className="py-4">
+                <p className="text-sm text-gray-500">
+                  This will immediately end the session on the selected device. You will need to sign in again to access your account from that device.
+                </p>
+              </div>
+              <div className="flex justify-end gap-3">
+                <Button variant="outline" onClick={() => setShowSessionSignOutDialog(null)}>Cancel</Button>
+                <Button
+                  variant="destructive"
+                  onClick={() => {
+                    toast.success('Session ended', { description: 'Successfully signed out from device' })
+                    setShowSessionSignOutDialog(null)
+                  }}
+                >
+                  Sign Out
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          {/* Connect Google Dialog */}
+          <Dialog open={showConnectGoogleDialog} onOpenChange={setShowConnectGoogleDialog}>
+            <DialogContent className="max-w-sm">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2"><Globe className="w-5 h-5 text-blue-600" />Connect Google Account</DialogTitle>
+                <DialogDescription>Link your Google account for easier sign-in</DialogDescription>
+              </DialogHeader>
+              <div className="py-4">
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                  <div className="w-16 h-16 mx-auto bg-white rounded-full flex items-center justify-center shadow mb-3">
+                    <Globe className="w-8 h-8 text-blue-500" />
+                  </div>
+                  <p className="text-sm text-gray-500">
+                    Connect your Google account to enable single sign-on and import contacts.
+                  </p>
+                </div>
+              </div>
+              <div className="flex justify-end gap-3">
+                <Button variant="outline" onClick={() => setShowConnectGoogleDialog(false)}>Cancel</Button>
+                <Button
+                  className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white"
+                  onClick={() => {
+                    toast.success('Google account connected')
+                    setShowConnectGoogleDialog(false)
+                  }}
+                >
+                  Connect Google
+                </Button>
               </div>
             </DialogContent>
           </Dialog>

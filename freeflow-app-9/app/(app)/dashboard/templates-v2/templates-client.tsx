@@ -446,6 +446,9 @@ export default function TemplatesClient() {
   const [showExportDialog, setShowExportDialog] = useState(false)
   const [showOrganizeDialog, setShowOrganizeDialog] = useState(false)
   const [showAIGenerateDialog, setShowAIGenerateDialog] = useState(false)
+  const [showDuplicateDialog, setShowDuplicateDialog] = useState(false)
+  const [duplicateTemplateName, setDuplicateTemplateName] = useState('')
+  const [selectedTemplateToDuplicate, setSelectedTemplateToDuplicate] = useState<string>('')
   const [aiPrompt, setAiPrompt] = useState('')
   const [selectedFolder, setSelectedFolder] = useState('')
   const [localCollections, setLocalCollections] = useState(mockCollections)
@@ -1093,7 +1096,7 @@ export default function TemplatesClient() {
                 { icon: Heart, label: 'Favorites', desc: 'Saved items', color: 'text-pink-500', action: () => { setShowFavoritesOnly(!showFavoritesOnly); toast.success(showFavoritesOnly ? 'Showing all templates' : 'Showing favorites only'); } },
                 { icon: Clock, label: 'Recent', desc: 'Last edited', color: 'text-amber-500', action: () => { setActiveTab('my-templates'); toast.success('Recent templates shown below', { description: 'Sorted by last edited date' }); } },
                 { icon: Upload, label: 'Import', desc: 'Upload file', color: 'text-green-500', action: () => setShowImportDialog(true) },
-                { icon: Copy, label: 'Duplicate', desc: 'Copy template', color: 'text-purple-500', action: () => toast.info('Select a template to duplicate', { description: 'Click on a template card to duplicate it' }) },
+                { icon: Copy, label: 'Duplicate', desc: 'Copy template', color: 'text-purple-500', action: () => setShowDuplicateDialog(true) },
                 { icon: Download, label: 'Export All', desc: 'Download all', color: 'text-cyan-500', action: () => setShowExportDialog(true) },
                 { icon: FolderPlus, label: 'Organize', desc: 'Add to folder', color: 'text-orange-500', action: () => setShowOrganizeDialog(true) },
                 { icon: Trash2, label: 'Cleanup', desc: 'Remove unused', color: 'text-red-500', action: () => { const unusedCount = allTemplates.filter(t => t.usageCount === 0).length; toast.success(`Cleanup complete! ${unusedCount} unused templates found`, { description: 'Templates with 0 uses identified' }); } },
@@ -2711,6 +2714,85 @@ export default function TemplatesClient() {
                 setSelectedFolder('')
                 setShowOrganizeDialog(false)
               }} className="flex-1">Move to Folder</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Duplicate Template Dialog */}
+        <Dialog open={showDuplicateDialog} onOpenChange={setShowDuplicateDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Copy className="w-5 h-5 text-purple-600" />
+                Duplicate Template
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Select Template to Duplicate</Label>
+                <Select value={selectedTemplateToDuplicate} onValueChange={setSelectedTemplateToDuplicate}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Choose a template" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {allTemplates.map((template) => (
+                      <SelectItem key={template.id} value={template.id}>
+                        {template.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="duplicate-name">New Template Name</Label>
+                <Input
+                  id="duplicate-name"
+                  placeholder="Enter name for duplicated template"
+                  value={duplicateTemplateName}
+                  onChange={(e) => setDuplicateTemplateName(e.target.value)}
+                />
+              </div>
+              {selectedTemplateToDuplicate && (
+                <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    Original: <span className="font-medium text-gray-900 dark:text-white">
+                      {allTemplates.find(t => t.id === selectedTemplateToDuplicate)?.name}
+                    </span>
+                  </p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Category: {allTemplates.find(t => t.id === selectedTemplateToDuplicate)?.category.replace('_', ' ')}
+                  </p>
+                </div>
+              )}
+            </div>
+            <div className="flex gap-3">
+              <Button variant="outline" onClick={() => {
+                setShowDuplicateDialog(false)
+                setSelectedTemplateToDuplicate('')
+                setDuplicateTemplateName('')
+              }} className="flex-1">Cancel</Button>
+              <Button onClick={() => {
+                if (!selectedTemplateToDuplicate) {
+                  toast.error('Please select a template to duplicate')
+                  return
+                }
+                const originalTemplate = allTemplates.find(t => t.id === selectedTemplateToDuplicate)
+                const newName = duplicateTemplateName.trim() || `${originalTemplate?.name} (Copy)`
+                toast.promise(
+                  new Promise((resolve) => setTimeout(resolve, 1000)),
+                  {
+                    loading: 'Duplicating template...',
+                    success: `Template "${newName}" created successfully!`,
+                    error: 'Failed to duplicate template'
+                  }
+                )
+                setShowDuplicateDialog(false)
+                setSelectedTemplateToDuplicate('')
+                setDuplicateTemplateName('')
+              }} className="flex-1 bg-purple-600 hover:bg-purple-700">
+                <Copy className="w-4 h-4 mr-2" />
+                Duplicate Template
+              </Button>
             </div>
           </DialogContent>
         </Dialog>

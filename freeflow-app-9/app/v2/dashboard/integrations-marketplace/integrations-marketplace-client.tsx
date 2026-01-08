@@ -468,11 +468,7 @@ const mockIntegrationsActivities = [
   { id: '3', user: 'DevOps', action: 'Flagged', target: 'Deprecated API in Stripe integration', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'warning' as const },
 ]
 
-const mockIntegrationsQuickActions = [
-  { id: '1', label: 'Browse Apps', icon: 'search', action: () => toast.success('Marketplace loaded'), variant: 'default' as const },
-  { id: '2', label: 'Install App', icon: 'plus', action: () => toast.success('Ready to install app'), variant: 'default' as const },
-  { id: '3', label: 'View Logs', icon: 'file', action: () => toast.success('Logs loaded successfully'), variant: 'outline' as const },
-]
+// Quick actions are defined inside the component to access state setters
 
 export default function IntegrationsMarketplaceClient({ initialIntegrations, initialStats }: IntegrationsMarketplaceClientProps) {
   const { integrations, stats } = useMarketplaceIntegrations(initialIntegrations, initialStats)
@@ -485,6 +481,39 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
   const [selectedPlan, setSelectedPlan] = useState<PricingPlan | null>(null)
   const [sortBy, setSortBy] = useState<'popular' | 'rating' | 'newest'>('popular')
   const [settingsTab, setSettingsTab] = useState('general')
+
+  // Dialog states for quick actions
+  const [showBrowseAppsDialog, setShowBrowseAppsDialog] = useState(false)
+  const [showInstallAppDialog, setShowInstallAppDialog] = useState(false)
+  const [showLogsDialog, setShowLogsDialog] = useState(false)
+  const [browseSearchQuery, setBrowseSearchQuery] = useState('')
+  const [selectedAppToInstall, setSelectedAppToInstall] = useState<AppListing | null>(null)
+  const [installStep, setInstallStep] = useState<'select' | 'plan' | 'confirm'>('select')
+  const [selectedInstallPlan, setSelectedInstallPlan] = useState<PricingPlan | null>(null)
+  const [logsFilter, setLogsFilter] = useState<'all' | 'success' | 'error' | 'warning'>('all')
+
+  // Mock logs data
+  const integrationLogs = [
+    { id: '1', timestamp: new Date().toISOString(), type: 'success' as const, app: 'Stripe', event: 'Payment webhook received', details: 'Order #12345 payment confirmed' },
+    { id: '2', timestamp: new Date(Date.now() - 300000).toISOString(), type: 'success' as const, app: 'Slack', event: 'Message sent', details: 'Notification delivered to #general' },
+    { id: '3', timestamp: new Date(Date.now() - 600000).toISOString(), type: 'error' as const, app: 'HubSpot', event: 'Sync failed', details: 'API rate limit exceeded' },
+    { id: '4', timestamp: new Date(Date.now() - 900000).toISOString(), type: 'warning' as const, app: 'Zapier', event: 'Zap paused', details: 'Task limit approaching' },
+    { id: '5', timestamp: new Date(Date.now() - 1200000).toISOString(), type: 'success' as const, app: 'Segment', event: 'Event tracked', details: 'page_view event recorded' },
+    { id: '6', timestamp: new Date(Date.now() - 1500000).toISOString(), type: 'info' as const, app: 'Intercom', event: 'User identified', details: 'New user session started' },
+    { id: '7', timestamp: new Date(Date.now() - 1800000).toISOString(), type: 'error' as const, app: 'Plaid', event: 'Connection lost', details: 'Bank connection expired' },
+    { id: '8', timestamp: new Date(Date.now() - 2100000).toISOString(), type: 'success' as const, app: 'Stripe', event: 'Subscription created', details: 'Pro plan subscription started' },
+  ]
+
+  const filteredLogs = logsFilter === 'all'
+    ? integrationLogs
+    : integrationLogs.filter(log => log.type === logsFilter)
+
+  // Quick actions with real dialog functionality
+  const mockIntegrationsQuickActions = [
+    { id: '1', label: 'Browse Apps', icon: 'search', action: () => setShowBrowseAppsDialog(true), variant: 'default' as const },
+    { id: '2', label: 'Install App', icon: 'plus', action: () => { setInstallStep('select'); setShowInstallAppDialog(true) }, variant: 'default' as const },
+    { id: '3', label: 'View Logs', icon: 'file', action: () => setShowLogsDialog(true), variant: 'outline' as const },
+  ]
 
   const filteredApps = useMemo(() => {
     let apps = [...mockApps]
@@ -1810,6 +1839,356 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
           />
         </div>
       </div>
+
+      {/* Browse Apps Dialog */}
+      <Dialog open={showBrowseAppsDialog} onOpenChange={setShowBrowseAppsDialog}>
+        <DialogContent className="max-w-3xl max-h-[80vh]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Search className="w-5 h-5 text-teal-600" />
+              Browse Marketplace Apps
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <Input
+                placeholder="Search apps by name, category, or tag..."
+                value={browseSearchQuery}
+                onChange={(e) => setBrowseSearchQuery(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            <ScrollArea className="h-[400px]">
+              <div className="grid grid-cols-2 gap-3">
+                {mockApps
+                  .filter(app =>
+                    browseSearchQuery === '' ||
+                    app.name.toLowerCase().includes(browseSearchQuery.toLowerCase()) ||
+                    app.category.toLowerCase().includes(browseSearchQuery.toLowerCase()) ||
+                    app.tags.some(tag => tag.toLowerCase().includes(browseSearchQuery.toLowerCase()))
+                  )
+                  .map(app => (
+                    <Card
+                      key={app.id}
+                      className="cursor-pointer hover:border-teal-300 transition-colors"
+                      onClick={() => {
+                        setShowBrowseAppsDialog(false)
+                        setSelectedApp(app)
+                      }}
+                    >
+                      <CardContent className="p-3">
+                        <div className="flex items-start gap-3">
+                          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-teal-500 to-blue-600 flex items-center justify-center text-white font-bold text-sm">
+                            {app.icon}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                              <h4 className="font-semibold text-sm truncate">{app.name}</h4>
+                              {app.verified && <Verified className="w-3 h-3 text-blue-500" />}
+                            </div>
+                            <p className="text-xs text-gray-500 line-clamp-1">{app.shortDescription}</p>
+                            <div className="flex items-center gap-2 mt-1">
+                              <Badge variant="outline" className="text-xs">{app.category}</Badge>
+                              {app.status === 'installed' && (
+                                <Badge className="bg-green-100 text-green-700 text-xs">Installed</Badge>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+              </div>
+            </ScrollArea>
+            <div className="flex justify-between items-center pt-2 border-t">
+              <span className="text-sm text-gray-500">
+                {mockApps.filter(app =>
+                  browseSearchQuery === '' ||
+                  app.name.toLowerCase().includes(browseSearchQuery.toLowerCase()) ||
+                  app.category.toLowerCase().includes(browseSearchQuery.toLowerCase())
+                ).length} apps found
+              </span>
+              <Button variant="outline" onClick={() => setShowBrowseAppsDialog(false)}>
+                Close
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Install App Dialog */}
+      <Dialog open={showInstallAppDialog} onOpenChange={(open) => {
+        setShowInstallAppDialog(open)
+        if (!open) {
+          setSelectedAppToInstall(null)
+          setSelectedInstallPlan(null)
+          setInstallStep('select')
+        }
+      }}>
+        <DialogContent className="max-w-2xl max-h-[80vh]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Plus className="w-5 h-5 text-teal-600" />
+              {installStep === 'select' && 'Select App to Install'}
+              {installStep === 'plan' && `Choose Plan for ${selectedAppToInstall?.name}`}
+              {installStep === 'confirm' && 'Confirm Installation'}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            {installStep === 'select' && (
+              <>
+                <p className="text-sm text-gray-500">Choose an app from our marketplace to install</p>
+                <ScrollArea className="h-[350px]">
+                  <div className="space-y-2">
+                    {mockApps
+                      .filter(app => app.status !== 'installed')
+                      .map(app => (
+                        <Card
+                          key={app.id}
+                          className={`cursor-pointer transition-all ${selectedAppToInstall?.id === app.id ? 'border-teal-500 bg-teal-50 dark:bg-teal-900/20' : 'hover:border-teal-300'}`}
+                          onClick={() => setSelectedAppToInstall(app)}
+                        >
+                          <CardContent className="p-3">
+                            <div className="flex items-center gap-3">
+                              <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-teal-500 to-blue-600 flex items-center justify-center text-white font-bold">
+                                {app.icon}
+                              </div>
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2">
+                                  <h4 className="font-semibold">{app.name}</h4>
+                                  {app.verified && <Verified className="w-4 h-4 text-blue-500" />}
+                                </div>
+                                <p className="text-sm text-gray-500">{app.shortDescription}</p>
+                                <div className="flex items-center gap-2 mt-1 text-xs text-gray-500">
+                                  <span>{renderStars(app.rating)}</span>
+                                  <span>{app.rating}</span>
+                                  <span>•</span>
+                                  <span>{formatInstalls(app.installCount)} installs</span>
+                                </div>
+                              </div>
+                              {selectedAppToInstall?.id === app.id && (
+                                <CheckCircle className="w-5 h-5 text-teal-600" />
+                              )}
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                  </div>
+                </ScrollArea>
+                <div className="flex justify-end gap-2 pt-2 border-t">
+                  <Button variant="outline" onClick={() => setShowInstallAppDialog(false)}>
+                    Cancel
+                  </Button>
+                  <Button
+                    className="bg-teal-600 hover:bg-teal-700"
+                    disabled={!selectedAppToInstall}
+                    onClick={() => setInstallStep('plan')}
+                  >
+                    Continue
+                  </Button>
+                </div>
+              </>
+            )}
+
+            {installStep === 'plan' && selectedAppToInstall && (
+              <>
+                <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-teal-500 to-blue-600 flex items-center justify-center text-white font-bold">
+                    {selectedAppToInstall.icon}
+                  </div>
+                  <div>
+                    <h4 className="font-semibold">{selectedAppToInstall.name}</h4>
+                    <p className="text-sm text-gray-500">by {selectedAppToInstall.developer.name}</p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  {selectedAppToInstall.pricing.map(plan => (
+                    <Card
+                      key={plan.id}
+                      className={`cursor-pointer transition-all ${selectedInstallPlan?.id === plan.id ? 'border-teal-500 bg-teal-50 dark:bg-teal-900/20' : 'hover:border-teal-300'} ${plan.popular ? 'ring-2 ring-teal-200' : ''}`}
+                      onClick={() => setSelectedInstallPlan(plan)}
+                    >
+                      <CardContent className="p-4">
+                        {plan.popular && (
+                          <Badge className="bg-teal-600 mb-2">Popular</Badge>
+                        )}
+                        <h4 className="font-semibold">{plan.name}</h4>
+                        <div className="text-2xl font-bold mt-1">
+                          {plan.price === 0 ? 'Free' : `$${plan.price}`}
+                          {plan.price > 0 && <span className="text-sm font-normal text-gray-500">/{plan.interval}</span>}
+                        </div>
+                        <ul className="mt-3 space-y-1">
+                          {plan.features.slice(0, 3).map((feature, idx) => (
+                            <li key={idx} className="text-xs text-gray-600 flex items-start gap-1">
+                              <CheckCircle className="w-3 h-3 text-green-500 flex-shrink-0 mt-0.5" />
+                              {feature}
+                            </li>
+                          ))}
+                        </ul>
+                        {selectedInstallPlan?.id === plan.id && (
+                          <div className="mt-2 text-center">
+                            <CheckCircle className="w-5 h-5 text-teal-600 mx-auto" />
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+                <div className="flex justify-between gap-2 pt-2 border-t">
+                  <Button variant="outline" onClick={() => setInstallStep('select')}>
+                    Back
+                  </Button>
+                  <Button
+                    className="bg-teal-600 hover:bg-teal-700"
+                    disabled={!selectedInstallPlan}
+                    onClick={() => setInstallStep('confirm')}
+                  >
+                    Continue
+                  </Button>
+                </div>
+              </>
+            )}
+
+            {installStep === 'confirm' && selectedAppToInstall && selectedInstallPlan && (
+              <>
+                <Card>
+                  <CardContent className="p-4">
+                    <h4 className="font-semibold mb-3">Installation Summary</h4>
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-teal-500 to-blue-600 flex items-center justify-center text-white font-bold">
+                            {selectedAppToInstall.icon}
+                          </div>
+                          <div>
+                            <h5 className="font-medium">{selectedAppToInstall.name}</h5>
+                            <p className="text-xs text-gray-500">{selectedInstallPlan.name} Plan</p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className="font-semibold">
+                            {selectedInstallPlan.price === 0 ? 'Free' : `$${selectedInstallPlan.price}/${selectedInstallPlan.interval}`}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="p-3 border rounded-lg">
+                        <h5 className="font-medium text-sm mb-2">Required Permissions</h5>
+                        <div className="space-y-1">
+                          {selectedAppToInstall.permissions.filter(p => p.required).map((perm, idx) => (
+                            <div key={idx} className="flex items-center gap-2 text-xs">
+                              <Shield className="w-3 h-3 text-gray-400" />
+                              <code className="bg-gray-100 dark:bg-gray-800 px-1 rounded">{perm.scope}</code>
+                              <span className="text-gray-500">- {perm.description}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+                <div className="flex justify-between gap-2 pt-2 border-t">
+                  <Button variant="outline" onClick={() => setInstallStep('plan')}>
+                    Back
+                  </Button>
+                  <Button
+                    className="bg-teal-600 hover:bg-teal-700"
+                    onClick={() => {
+                      toast.success(`${selectedAppToInstall.name} installed successfully with ${selectedInstallPlan.name} plan`)
+                      setShowInstallAppDialog(false)
+                      setSelectedAppToInstall(null)
+                      setSelectedInstallPlan(null)
+                      setInstallStep('select')
+                    }}
+                  >
+                    <CheckCircle className="w-4 h-4 mr-2" />
+                    Install App
+                  </Button>
+                </div>
+              </>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* View Logs Dialog */}
+      <Dialog open={showLogsDialog} onOpenChange={setShowLogsDialog}>
+        <DialogContent className="max-w-3xl max-h-[80vh]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Code className="w-5 h-5 text-teal-600" />
+              Integration Logs
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex gap-2">
+                {(['all', 'success', 'error', 'warning'] as const).map(filter => (
+                  <Button
+                    key={filter}
+                    size="sm"
+                    variant={logsFilter === filter ? 'default' : 'outline'}
+                    className={logsFilter === filter ? 'bg-teal-600' : ''}
+                    onClick={() => setLogsFilter(filter)}
+                  >
+                    {filter === 'all' ? 'All' : filter.charAt(0).toUpperCase() + filter.slice(1)}
+                  </Button>
+                ))}
+              </div>
+              <Button variant="outline" size="sm" onClick={() => toast.success('Logs refreshed')}>
+                <RefreshCw className="w-4 h-4 mr-1" />
+                Refresh
+              </Button>
+            </div>
+            <ScrollArea className="h-[400px]">
+              <div className="space-y-2">
+                {filteredLogs.map(log => (
+                  <div
+                    key={log.id}
+                    className={`p-3 rounded-lg border ${
+                      log.type === 'success' ? 'bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-800' :
+                      log.type === 'error' ? 'bg-red-50 border-red-200 dark:bg-red-900/20 dark:border-red-800' :
+                      log.type === 'warning' ? 'bg-yellow-50 border-yellow-200 dark:bg-yellow-900/20 dark:border-yellow-800' :
+                      'bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800'
+                    }`}
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className={`w-2 h-2 rounded-full ${
+                          log.type === 'success' ? 'bg-green-500' :
+                          log.type === 'error' ? 'bg-red-500' :
+                          log.type === 'warning' ? 'bg-yellow-500' :
+                          'bg-blue-500'
+                        }`} />
+                        <span className="font-medium text-sm">{log.app}</span>
+                        <Badge variant="outline" className="text-xs">{log.event}</Badge>
+                      </div>
+                      <span className="text-xs text-gray-500">
+                        {new Date(log.timestamp).toLocaleTimeString()}
+                      </span>
+                    </div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-1 ml-4">{log.details}</p>
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+            <div className="flex justify-between items-center pt-2 border-t">
+              <span className="text-sm text-gray-500">{filteredLogs.length} log entries</span>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" onClick={() => {
+                  toast.success('Logs exported to CSV')
+                }}>
+                  <Download className="w-4 h-4 mr-1" />
+                  Export
+                </Button>
+                <Button variant="outline" onClick={() => setShowLogsDialog(false)}>
+                  Close
+                </Button>
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* App Detail Dialog */}
       <Dialog open={!!selectedApp} onOpenChange={() => setSelectedApp(null)}>

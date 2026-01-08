@@ -2087,7 +2087,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
                           <Switch defaultChecked />
                         </div>
 
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => setShowExportDataDialog(true)}>
                           <Download className="w-4 h-4 mr-2" />
                           Export All Data
                         </Button>
@@ -2127,10 +2127,10 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
                         </div>
 
                         <div className="flex gap-2">
-                          <Button variant="outline" className="flex-1">
+                          <Button variant="outline" className="flex-1" onClick={() => setShowManageSubscriptionDialog(true)}>
                             Manage Subscription
                           </Button>
-                          <Button className="flex-1 bg-violet-600 hover:bg-violet-700">
+                          <Button className="flex-1 bg-violet-600 hover:bg-violet-700" onClick={() => setShowUpgradePlanDialog(true)}>
                             Upgrade Plan
                           </Button>
                         </div>
@@ -2152,7 +2152,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
                             <p className="font-medium text-red-700 dark:text-red-400">Purge All Contacts</p>
                             <p className="text-sm text-red-600 dark:text-red-500">Remove all subscriber data</p>
                           </div>
-                          <Button variant="destructive" size="sm">Purge</Button>
+                          <Button variant="destructive" size="sm" onClick={() => setShowPurgeContactsDialog(true)}>Purge</Button>
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
@@ -2160,7 +2160,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
                             <p className="font-medium text-red-700 dark:text-red-400">Delete All Campaigns</p>
                             <p className="text-sm text-red-600 dark:text-red-500">Remove all campaign history</p>
                           </div>
-                          <Button variant="destructive" size="sm">Delete</Button>
+                          <Button variant="destructive" size="sm" onClick={() => setShowDeleteCampaignsDialog(true)}>Delete</Button>
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
@@ -2168,7 +2168,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
                             <p className="font-medium text-red-700 dark:text-red-400">Close Account</p>
                             <p className="text-sm text-red-600 dark:text-red-500">Permanently delete your account</p>
                           </div>
-                          <Button variant="destructive" size="sm">Close</Button>
+                          <Button variant="destructive" size="sm" onClick={() => setShowCloseAccountDialog(true)}>Close</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -2413,6 +2413,529 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
                 className="bg-violet-600 hover:bg-violet-700"
               >
                 {isSaving ? 'Saving...' : 'Save Changes'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Import Contacts Dialog */}
+      <Dialog open={showImportContactsDialog} onOpenChange={setShowImportContactsDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Import Contacts</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Upload a CSV file with your contacts. The file should include columns for email, name, and any custom fields.
+            </p>
+            <div className="border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-lg p-8 text-center">
+              <div className="text-gray-400 mb-2">Drag and drop your CSV file here</div>
+              <div className="text-sm text-gray-500">or</div>
+              <Button variant="outline" className="mt-2">Browse Files</Button>
+            </div>
+            <div className="flex justify-end gap-3 pt-4">
+              <Button variant="outline" onClick={() => setShowImportContactsDialog(false)}>Cancel</Button>
+              <Button className="bg-violet-600 hover:bg-violet-700">Import</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Automation Dialog */}
+      <Dialog open={showCreateAutomationDialog} onOpenChange={setShowCreateAutomationDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Create Automation</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Automation Name</Label>
+              <Input placeholder="e.g., Welcome Series" />
+            </div>
+            <div className="space-y-2">
+              <Label>Description</Label>
+              <Input placeholder="Describe what this automation does" />
+            </div>
+            <div className="space-y-2">
+              <Label>Trigger</Label>
+              <Select defaultValue="event">
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="event">When event occurs</SelectItem>
+                  <SelectItem value="segment">When user enters segment</SelectItem>
+                  <SelectItem value="time">Time-based schedule</SelectItem>
+                  <SelectItem value="api">API trigger</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex justify-end gap-3 pt-4">
+              <Button variant="outline" onClick={() => setShowCreateAutomationDialog(false)}>Cancel</Button>
+              <Button className="bg-violet-600 hover:bg-violet-700">Create Automation</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Series Dialog */}
+      <Dialog open={showCreateSeriesDialog} onOpenChange={setShowCreateSeriesDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Create Series</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Series Name</Label>
+              <Input placeholder="e.g., Onboarding Journey" />
+            </div>
+            <div className="space-y-2">
+              <Label>Description</Label>
+              <Input placeholder="Describe the purpose of this series" />
+            </div>
+            <div className="space-y-2">
+              <Label>Entry Trigger</Label>
+              <Select defaultValue="signup">
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="signup">User signs up</SelectItem>
+                  <SelectItem value="purchase">User makes purchase</SelectItem>
+                  <SelectItem value="segment">User enters segment</SelectItem>
+                  <SelectItem value="manual">Manual enrollment</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex justify-end gap-3 pt-4">
+              <Button variant="outline" onClick={() => setShowCreateSeriesDialog(false)}>Cancel</Button>
+              <Button className="bg-violet-600 hover:bg-violet-700">Create Series</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Template Dialog */}
+      <Dialog open={showCreateTemplateDialog} onOpenChange={setShowCreateTemplateDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Create Template</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Template Name</Label>
+              <Input placeholder="e.g., Monthly Newsletter" />
+            </div>
+            <div className="space-y-2">
+              <Label>Category</Label>
+              <Select defaultValue="engagement">
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="onboarding">Onboarding</SelectItem>
+                  <SelectItem value="engagement">Engagement</SelectItem>
+                  <SelectItem value="promotions">Promotions</SelectItem>
+                  <SelectItem value="product">Product Updates</SelectItem>
+                  <SelectItem value="transactional">Transactional</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Start From</Label>
+              <Select defaultValue="blank">
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="blank">Blank Template</SelectItem>
+                  <SelectItem value="basic">Basic Layout</SelectItem>
+                  <SelectItem value="newsletter">Newsletter</SelectItem>
+                  <SelectItem value="promotional">Promotional</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex justify-end gap-3 pt-4">
+              <Button variant="outline" onClick={() => setShowCreateTemplateDialog(false)}>Cancel</Button>
+              <Button className="bg-violet-600 hover:bg-violet-700">Create Template</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Segment Dialog */}
+      <Dialog open={showCreateSegmentDialog} onOpenChange={setShowCreateSegmentDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Create Segment</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Segment Name</Label>
+              <Input placeholder="e.g., Active Premium Users" />
+            </div>
+            <div className="space-y-2">
+              <Label>Description</Label>
+              <Input placeholder="Describe who belongs in this segment" />
+            </div>
+            <div className="space-y-2">
+              <Label>Filter By</Label>
+              <Select defaultValue="activity">
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="activity">User Activity</SelectItem>
+                  <SelectItem value="subscription">Subscription Status</SelectItem>
+                  <SelectItem value="location">Location</SelectItem>
+                  <SelectItem value="custom">Custom Attribute</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex justify-end gap-3 pt-4">
+              <Button variant="outline" onClick={() => setShowCreateSegmentDialog(false)}>Cancel</Button>
+              <Button className="bg-violet-600 hover:bg-violet-700">Create Segment</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Define Event Dialog */}
+      <Dialog open={showDefineEventDialog} onOpenChange={setShowDefineEventDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Define Event</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Event Name</Label>
+              <Input placeholder="e.g., purchase.completed" />
+              <p className="text-xs text-gray-500">Use lowercase letters, dots, and underscores only</p>
+            </div>
+            <div className="space-y-2">
+              <Label>Description</Label>
+              <Input placeholder="When this event should be tracked" />
+            </div>
+            <div className="space-y-2">
+              <Label>Event Properties (optional)</Label>
+              <Input placeholder="e.g., amount, product_id, category" />
+            </div>
+            <div className="flex justify-end gap-3 pt-4">
+              <Button variant="outline" onClick={() => setShowDefineEventDialog(false)}>Cancel</Button>
+              <Button className="bg-violet-600 hover:bg-violet-700">Define Event</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Configure DMARC Dialog */}
+      <Dialog open={showConfigureDmarcDialog} onOpenChange={setShowConfigureDmarcDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Configure DMARC Policy</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              DMARC helps protect your domain from unauthorized use and improves email deliverability.
+            </p>
+            <div className="space-y-2">
+              <Label>Policy Mode</Label>
+              <Select defaultValue="none">
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">None (Monitor Only)</SelectItem>
+                  <SelectItem value="quarantine">Quarantine</SelectItem>
+                  <SelectItem value="reject">Reject</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+              <Label className="text-sm font-medium">Add this DNS record:</Label>
+              <code className="block mt-2 text-xs bg-gray-100 dark:bg-gray-700 p-2 rounded">
+                _dmarc.yourdomain.com TXT "v=DMARC1; p=none; rua=mailto:dmarc@yourdomain.com"
+              </code>
+            </div>
+            <div className="flex justify-end gap-3 pt-4">
+              <Button variant="outline" onClick={() => setShowConfigureDmarcDialog(false)}>Cancel</Button>
+              <Button className="bg-violet-600 hover:bg-violet-700">Save Configuration</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Webhook Dialog */}
+      <Dialog open={showAddWebhookDialog} onOpenChange={setShowAddWebhookDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Add Webhook Endpoint</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Endpoint URL</Label>
+              <Input placeholder="https://your-service.com/webhook" />
+            </div>
+            <div className="space-y-2">
+              <Label>Endpoint Name</Label>
+              <Input placeholder="e.g., CRM Integration" />
+            </div>
+            <div className="space-y-2">
+              <Label>Events to Send</Label>
+              <div className="grid grid-cols-2 gap-2 mt-2">
+                {['Email Sent', 'Email Opened', 'Link Clicked', 'Unsubscribed', 'Bounced', 'Complained'].map((event) => (
+                  <div key={event} className="flex items-center space-x-2">
+                    <Switch id={`webhook-${event}`} />
+                    <Label htmlFor={`webhook-${event}`} className="text-sm">{event}</Label>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="flex justify-end gap-3 pt-4">
+              <Button variant="outline" onClick={() => setShowAddWebhookDialog(false)}>Cancel</Button>
+              <Button className="bg-violet-600 hover:bg-violet-700">Add Endpoint</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Manage Subscription Dialog */}
+      <Dialog open={showManageSubscriptionDialog} onOpenChange={setShowManageSubscriptionDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Manage Subscription</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="p-4 bg-violet-50 dark:bg-violet-900/20 border border-violet-200 dark:border-violet-800 rounded-lg">
+              <div className="flex justify-between items-center">
+                <div>
+                  <p className="font-medium text-violet-800 dark:text-violet-400">Pro Plan</p>
+                  <p className="text-sm text-violet-600 dark:text-violet-500">$99/month</p>
+                </div>
+                <Badge className="bg-violet-600">Current Plan</Badge>
+              </div>
+            </div>
+            <div className="space-y-3">
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600 dark:text-gray-400">Next billing date</span>
+                <span className="font-medium">January 15, 2026</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600 dark:text-gray-400">Payment method</span>
+                <span className="font-medium">Visa ending in 4242</span>
+              </div>
+            </div>
+            <div className="flex justify-end gap-3 pt-4">
+              <Button variant="outline" onClick={() => setShowManageSubscriptionDialog(false)}>Close</Button>
+              <Button variant="outline">Update Payment</Button>
+              <Button variant="destructive">Cancel Subscription</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Upgrade Plan Dialog */}
+      <Dialog open={showUpgradePlanDialog} onOpenChange={setShowUpgradePlanDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Upgrade Your Plan</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="grid grid-cols-3 gap-4">
+              {[
+                { name: 'Pro', price: '$99', features: ['100K contacts', 'Unlimited campaigns', 'Basic automation'] },
+                { name: 'Business', price: '$249', features: ['500K contacts', 'Advanced automation', 'Priority support'] },
+                { name: 'Enterprise', price: 'Custom', features: ['Unlimited contacts', 'Custom integrations', 'Dedicated support'] }
+              ].map((plan) => (
+                <div key={plan.name} className={`p-4 border rounded-lg ${plan.name === 'Business' ? 'border-violet-500 bg-violet-50 dark:bg-violet-900/20' : 'border-gray-200 dark:border-gray-700'}`}>
+                  <h4 className="font-semibold">{plan.name}</h4>
+                  <p className="text-2xl font-bold mt-1">{plan.price}<span className="text-sm font-normal text-gray-500">/mo</span></p>
+                  <ul className="mt-3 space-y-1">
+                    {plan.features.map((f) => (
+                      <li key={f} className="text-sm text-gray-600 dark:text-gray-400">- {f}</li>
+                    ))}
+                  </ul>
+                  <Button variant={plan.name === 'Business' ? 'default' : 'outline'} className="w-full mt-4" size="sm">
+                    {plan.name === 'Pro' ? 'Current' : 'Select'}
+                  </Button>
+                </div>
+              ))}
+            </div>
+            <div className="flex justify-end gap-3 pt-4">
+              <Button variant="outline" onClick={() => setShowUpgradePlanDialog(false)}>Cancel</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Export Data Dialog */}
+      <Dialog open={showExportDataDialog} onOpenChange={setShowExportDataDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Export All Data</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Export all your broadcast data including campaigns, contacts, and analytics.
+            </p>
+            <div className="space-y-2">
+              <Label>Export Format</Label>
+              <Select defaultValue="csv">
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="csv">CSV</SelectItem>
+                  <SelectItem value="json">JSON</SelectItem>
+                  <SelectItem value="xlsx">Excel (XLSX)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Data to Include</Label>
+              <div className="space-y-2 mt-2">
+                {['Contacts', 'Campaigns', 'Analytics', 'Automations', 'Templates'].map((item) => (
+                  <div key={item} className="flex items-center space-x-2">
+                    <Switch id={`export-${item}`} defaultChecked />
+                    <Label htmlFor={`export-${item}`}>{item}</Label>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="flex justify-end gap-3 pt-4">
+              <Button variant="outline" onClick={() => setShowExportDataDialog(false)}>Cancel</Button>
+              <Button className="bg-violet-600 hover:bg-violet-700">Start Export</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Purge Contacts Dialog */}
+      <Dialog open={showPurgeContactsDialog} onOpenChange={setShowPurgeContactsDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="text-red-600">Purge All Contacts</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+              <p className="text-sm text-red-700 dark:text-red-400">
+                This action will permanently delete all your contacts and subscriber data. This cannot be undone.
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label>Type "PURGE" to confirm</Label>
+              <Input placeholder="PURGE" />
+            </div>
+            <div className="flex justify-end gap-3 pt-4">
+              <Button variant="outline" onClick={() => setShowPurgeContactsDialog(false)}>Cancel</Button>
+              <Button variant="destructive">Purge All Contacts</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Campaigns Dialog */}
+      <Dialog open={showDeleteCampaignsDialog} onOpenChange={setShowDeleteCampaignsDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="text-red-600">Delete All Campaigns</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+              <p className="text-sm text-red-700 dark:text-red-400">
+                This action will permanently delete all campaigns, including their analytics and history. This cannot be undone.
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label>Type "DELETE" to confirm</Label>
+              <Input placeholder="DELETE" />
+            </div>
+            <div className="flex justify-end gap-3 pt-4">
+              <Button variant="outline" onClick={() => setShowDeleteCampaignsDialog(false)}>Cancel</Button>
+              <Button variant="destructive">Delete All Campaigns</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Close Account Dialog */}
+      <Dialog open={showCloseAccountDialog} onOpenChange={setShowCloseAccountDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="text-red-600">Close Account</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+              <p className="text-sm text-red-700 dark:text-red-400">
+                This will permanently delete your account and all associated data. Your subscription will be cancelled. This action cannot be undone.
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label>Please tell us why you are leaving (optional)</Label>
+              <textarea
+                placeholder="Your feedback helps us improve..."
+                className="w-full min-h-[80px] px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Type "CLOSE ACCOUNT" to confirm</Label>
+              <Input placeholder="CLOSE ACCOUNT" />
+            </div>
+            <div className="flex justify-end gap-3 pt-4">
+              <Button variant="outline" onClick={() => setShowCloseAccountDialog(false)}>Cancel</Button>
+              <Button variant="destructive">Close My Account</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Configure App Dialog */}
+      <Dialog open={showConfigureAppDialog} onOpenChange={setShowConfigureAppDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>{selectedApp ? `Configure ${selectedApp}` : 'Configure Integration'}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            {selectedApp && ['Shopify', 'Stripe'].includes(selectedApp) ? (
+              <>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Manage your {selectedApp} integration settings.
+                </p>
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <span>Sync Contacts</span>
+                    <Switch defaultChecked />
+                  </div>
+                  <div className="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <span>Track Events</span>
+                    <Switch defaultChecked />
+                  </div>
+                  <div className="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <span>Auto-segment Users</span>
+                    <Switch />
+                  </div>
+                </div>
+              </>
+            ) : (
+              <>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Connect your {selectedApp} account to sync data and enable automations.
+                </p>
+                <div className="space-y-2">
+                  <Label>API Key</Label>
+                  <Input placeholder="Enter your API key" />
+                </div>
+                <div className="space-y-2">
+                  <Label>API Secret</Label>
+                  <Input type="password" placeholder="Enter your API secret" />
+                </div>
+              </>
+            )}
+            <div className="flex justify-end gap-3 pt-4">
+              <Button variant="outline" onClick={() => { setShowConfigureAppDialog(false); setSelectedApp(null); }}>Cancel</Button>
+              <Button className="bg-violet-600 hover:bg-violet-700">
+                {selectedApp && ['Shopify', 'Stripe'].includes(selectedApp) ? 'Save Settings' : 'Connect'}
               </Button>
             </div>
           </div>

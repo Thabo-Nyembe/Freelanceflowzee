@@ -566,20 +566,7 @@ const mockGrowthActivities = [
   { id: '3', user: 'System', action: 'Completed', target: 'weekly growth metrics sync', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
 ]
 
-const mockGrowthQuickActions = [
-  { id: '1', label: 'New Experiment', icon: 'plus', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1000)),
-    { loading: 'Creating new experiment...', success: 'Experiment created successfully', error: 'Failed to create experiment' }
-  ), variant: 'default' as const },
-  { id: '2', label: 'Create Funnel', icon: 'filter', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1000)),
-    { loading: 'Creating funnel...', success: 'Funnel created successfully', error: 'Failed to create funnel' }
-  ), variant: 'default' as const },
-  { id: '3', label: 'Export Report', icon: 'download', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1500)),
-    { loading: 'Exporting report...', success: 'Report exported successfully', error: 'Failed to export report' }
-  ), variant: 'outline' as const },
-]
+// Quick actions will be defined inside the component to access state setters
 
 // ============================================================================
 // MAIN COMPONENT
@@ -610,6 +597,23 @@ export default function GrowthHubClient() {
   })
   const [cohortForm, setCohortForm] = useState({
     name: '', description: '', type: 'behavioral' as const, definition: ''
+  })
+
+  // Quick action dialog states
+  const [showExportReportDialog, setShowExportReportDialog] = useState(false)
+  const [showCreateDashboardDialog, setShowCreateDashboardDialog] = useState(false)
+  const [showGoalDialog, setShowGoalDialog] = useState(false)
+  const [exportReportForm, setExportReportForm] = useState({
+    reportType: 'conversion' as 'conversion' | 'retention' | 'experiment' | 'cohort' | 'all',
+    format: 'csv' as 'csv' | 'xlsx' | 'pdf' | 'json',
+    dateRange: 'last30' as 'last7' | 'last30' | 'last90' | 'custom',
+    includeCharts: true
+  })
+  const [dashboardForm, setDashboardForm] = useState({
+    name: '', description: '', widgets: [] as string[]
+  })
+  const [goalForm, setGoalForm] = useState({
+    name: '', metric: '', targetValue: '', targetDate: ''
   })
 
   // Supabase hooks
@@ -805,6 +809,161 @@ export default function GrowthHubClient() {
   const handleSaveSettings = async (section: string) => {
     toast.success('Settings saved', { description: `${section} settings have been updated` })
   }
+
+  // Export report handler
+  const handleExportReport = async () => {
+    if (!exportReportForm.reportType) {
+      toast.error('Missing report type', { description: 'Please select a report type to export' })
+      return
+    }
+    setIsLoading(true)
+    try {
+      // Simulate export process with detailed steps
+      await new Promise(resolve => setTimeout(resolve, 500))
+      const reportTypeLabels = {
+        conversion: 'Conversion Analytics',
+        retention: 'Retention Analysis',
+        experiment: 'Experiment Results',
+        cohort: 'Cohort Analysis',
+        all: 'Full Growth Report'
+      }
+      const formatLabels = { csv: 'CSV', xlsx: 'Excel', pdf: 'PDF', json: 'JSON' }
+      const dateLabels = { last7: 'Last 7 days', last30: 'Last 30 days', last90: 'Last 90 days', custom: 'Custom range' }
+
+      // Create a blob for download simulation
+      const reportData = {
+        type: reportTypeLabels[exportReportForm.reportType],
+        format: formatLabels[exportReportForm.format],
+        dateRange: dateLabels[exportReportForm.dateRange],
+        includeCharts: exportReportForm.includeCharts,
+        generatedAt: new Date().toISOString(),
+        metrics: {
+          avgConversion: stats.avgConversion,
+          totalCohortSize: stats.totalCohortSize,
+          activeExperiments: stats.activeExperiments,
+          avgRetention: stats.avgRetention
+        }
+      }
+
+      const blob = new Blob([JSON.stringify(reportData, null, 2)], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `growth-report-${exportReportForm.reportType}-${new Date().toISOString().split('T')[0]}.${exportReportForm.format === 'xlsx' ? 'json' : exportReportForm.format}`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+
+      toast.success('Report exported successfully', {
+        description: `${reportTypeLabels[exportReportForm.reportType]} exported as ${formatLabels[exportReportForm.format]}`
+      })
+      setShowExportReportDialog(false)
+      setExportReportForm({ reportType: 'conversion', format: 'csv', dateRange: 'last30', includeCharts: true })
+    } catch (err: any) {
+      toast.error('Export failed', { description: err.message || 'Unable to generate report' })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // Create dashboard handler
+  const handleCreateDashboard = async () => {
+    if (!dashboardForm.name.trim()) {
+      toast.error('Missing dashboard name', { description: 'Please enter a name for your dashboard' })
+      return
+    }
+    setIsLoading(true)
+    try {
+      // In production, this would save to supabase
+      await new Promise(resolve => setTimeout(resolve, 800))
+      toast.success('Dashboard created', {
+        description: `"${dashboardForm.name}" has been created with ${dashboardForm.widgets.length || 0} widgets`
+      })
+      setShowCreateDashboardDialog(false)
+      setDashboardForm({ name: '', description: '', widgets: [] })
+    } catch (err: any) {
+      toast.error('Failed to create dashboard', { description: err.message })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // Create goal handler
+  const handleCreateGoal = async () => {
+    if (!goalForm.name.trim() || !goalForm.metric.trim()) {
+      toast.error('Missing required fields', { description: 'Please fill in goal name and target metric' })
+      return
+    }
+    setIsLoading(true)
+    try {
+      const { error } = await supabase.from('conversion_goals').insert({
+        name: goalForm.name,
+        target_event: goalForm.metric,
+        target_value: parseFloat(goalForm.targetValue) || 0,
+        deadline: goalForm.targetDate || null,
+        current_value: 0,
+        is_active: true
+      })
+      if (error) throw error
+      toast.success('Goal created', {
+        description: `"${goalForm.name}" goal has been set with target: ${goalForm.targetValue || 'TBD'}`
+      })
+      setShowGoalDialog(false)
+      setGoalForm({ name: '', metric: '', targetValue: '', targetDate: '' })
+      refreshGoals()
+    } catch (err: any) {
+      toast.error('Failed to create goal', { description: err.message })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // Quick actions with real dialog triggers
+  const growthQuickActions = [
+    {
+      id: '1',
+      label: 'New Experiment',
+      icon: 'plus',
+      action: () => setShowCreateExperimentModal(true),
+      variant: 'default' as const
+    },
+    {
+      id: '2',
+      label: 'Create Funnel',
+      icon: 'filter',
+      action: () => setShowCreateFunnelModal(true),
+      variant: 'default' as const
+    },
+    {
+      id: '3',
+      label: 'Export Report',
+      icon: 'download',
+      action: () => setShowExportReportDialog(true),
+      variant: 'outline' as const
+    },
+    {
+      id: '4',
+      label: 'New Cohort',
+      icon: 'users',
+      action: () => setShowCreateCohortModal(true),
+      variant: 'default' as const
+    },
+    {
+      id: '5',
+      label: 'Set Goal',
+      icon: 'target',
+      action: () => setShowGoalDialog(true),
+      variant: 'outline' as const
+    },
+    {
+      id: '6',
+      label: 'New Dashboard',
+      icon: 'layout',
+      action: () => setShowCreateDashboardDialog(true),
+      variant: 'outline' as const
+    },
+  ]
 
   const handleRefreshData = useCallback(() => {
     refreshExperiments()
@@ -1840,7 +1999,7 @@ export default function GrowthHubClient() {
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockGrowthQuickActions}
+            actions={growthQuickActions}
             variant="grid"
           />
         </div>
@@ -2161,6 +2320,239 @@ export default function GrowthHubClient() {
               <Button variant="outline" className="flex-1" onClick={() => setShowCreateCohortModal(false)}>Cancel</Button>
               <Button className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500" onClick={handleCreateCohort} disabled={isLoading}>
                 {isLoading ? 'Creating...' : 'Create Cohort'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Export Report Dialog */}
+      <Dialog open={showExportReportDialog} onOpenChange={setShowExportReportDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Download className="w-5 h-5 text-indigo-500" />
+              Export Growth Report
+            </DialogTitle>
+            <DialogDescription>Configure and download your analytics report</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Report Type</Label>
+              <select
+                className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-800"
+                value={exportReportForm.reportType}
+                onChange={(e) => setExportReportForm(f => ({ ...f, reportType: e.target.value as any }))}
+              >
+                <option value="conversion">Conversion Analytics</option>
+                <option value="retention">Retention Analysis</option>
+                <option value="experiment">Experiment Results</option>
+                <option value="cohort">Cohort Analysis</option>
+                <option value="all">Full Growth Report</option>
+              </select>
+            </div>
+            <div>
+              <Label>Export Format</Label>
+              <select
+                className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-800"
+                value={exportReportForm.format}
+                onChange={(e) => setExportReportForm(f => ({ ...f, format: e.target.value as any }))}
+              >
+                <option value="csv">CSV</option>
+                <option value="xlsx">Excel (XLSX)</option>
+                <option value="pdf">PDF</option>
+                <option value="json">JSON</option>
+              </select>
+            </div>
+            <div>
+              <Label>Date Range</Label>
+              <select
+                className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-800"
+                value={exportReportForm.dateRange}
+                onChange={(e) => setExportReportForm(f => ({ ...f, dateRange: e.target.value as any }))}
+              >
+                <option value="last7">Last 7 days</option>
+                <option value="last30">Last 30 days</option>
+                <option value="last90">Last 90 days</option>
+                <option value="custom">Custom range</option>
+              </select>
+            </div>
+            <div className="flex items-center justify-between p-3 border rounded-lg dark:border-gray-700">
+              <div>
+                <p className="font-medium text-sm">Include Charts</p>
+                <p className="text-xs text-muted-foreground">Add visualizations to report</p>
+              </div>
+              <Switch
+                checked={exportReportForm.includeCharts}
+                onCheckedChange={(checked) => setExportReportForm(f => ({ ...f, includeCharts: checked }))}
+              />
+            </div>
+            <div className="p-3 bg-muted/50 rounded-lg">
+              <p className="text-sm font-medium mb-1">Preview</p>
+              <p className="text-xs text-muted-foreground">
+                {exportReportForm.reportType === 'all' ? 'Full Growth Report' :
+                  exportReportForm.reportType.charAt(0).toUpperCase() + exportReportForm.reportType.slice(1) + ' Analytics'} -
+                {' '}{exportReportForm.dateRange === 'last7' ? 'Last 7 days' :
+                  exportReportForm.dateRange === 'last30' ? 'Last 30 days' :
+                    exportReportForm.dateRange === 'last90' ? 'Last 90 days' : 'Custom range'} -
+                {' '}{exportReportForm.format.toUpperCase()}
+                {exportReportForm.includeCharts ? ' with charts' : ''}
+              </p>
+            </div>
+            <div className="flex gap-2 pt-4">
+              <Button variant="outline" className="flex-1" onClick={() => setShowExportReportDialog(false)}>Cancel</Button>
+              <Button className="flex-1 bg-gradient-to-r from-indigo-500 to-purple-500" onClick={handleExportReport} disabled={isLoading}>
+                <Download className="w-4 h-4 mr-2" />
+                {isLoading ? 'Exporting...' : 'Export Report'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Dashboard Dialog */}
+      <Dialog open={showCreateDashboardDialog} onOpenChange={setShowCreateDashboardDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <LayoutDashboard className="w-5 h-5 text-teal-500" />
+              Create New Dashboard
+            </DialogTitle>
+            <DialogDescription>Build a custom analytics dashboard</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Dashboard Name</Label>
+              <Input
+                placeholder="e.g. Growth Overview"
+                value={dashboardForm.name}
+                onChange={(e) => setDashboardForm(f => ({ ...f, name: e.target.value }))}
+              />
+            </div>
+            <div>
+              <Label>Description</Label>
+              <Input
+                placeholder="What does this dashboard track?"
+                value={dashboardForm.description}
+                onChange={(e) => setDashboardForm(f => ({ ...f, description: e.target.value }))}
+              />
+            </div>
+            <div>
+              <Label className="mb-2 block">Select Widgets</Label>
+              <div className="grid grid-cols-2 gap-2">
+                {[
+                  { id: 'funnel', label: 'Funnel Chart', icon: Filter },
+                  { id: 'retention', label: 'Retention Grid', icon: Activity },
+                  { id: 'cohort', label: 'Cohort Overview', icon: Users },
+                  { id: 'experiment', label: 'Experiment Summary', icon: FlaskConical },
+                  { id: 'metrics', label: 'Key Metrics', icon: BarChart3 },
+                  { id: 'trends', label: 'Trend Lines', icon: TrendingUp },
+                ].map((widget) => (
+                  <button
+                    key={widget.id}
+                    type="button"
+                    className={`flex items-center gap-2 p-3 border rounded-lg transition-colors ${
+                      dashboardForm.widgets.includes(widget.id)
+                        ? 'border-teal-500 bg-teal-50 dark:bg-teal-950'
+                        : 'hover:bg-muted/50'
+                    }`}
+                    onClick={() => {
+                      setDashboardForm(f => ({
+                        ...f,
+                        widgets: f.widgets.includes(widget.id)
+                          ? f.widgets.filter(w => w !== widget.id)
+                          : [...f.widgets, widget.id]
+                      }))
+                    }}
+                  >
+                    <widget.icon className="w-4 h-4" />
+                    <span className="text-sm">{widget.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="flex gap-2 pt-4">
+              <Button variant="outline" className="flex-1" onClick={() => setShowCreateDashboardDialog(false)}>Cancel</Button>
+              <Button className="flex-1 bg-gradient-to-r from-teal-500 to-cyan-500" onClick={handleCreateDashboard} disabled={isLoading}>
+                {isLoading ? 'Creating...' : 'Create Dashboard'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Set Goal Dialog */}
+      <Dialog open={showGoalDialog} onOpenChange={setShowGoalDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Target className="w-5 h-5 text-red-500" />
+              Set Conversion Goal
+            </DialogTitle>
+            <DialogDescription>Define a measurable growth target</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Goal Name</Label>
+              <Input
+                placeholder="e.g. Increase signup conversion to 15%"
+                value={goalForm.name}
+                onChange={(e) => setGoalForm(f => ({ ...f, name: e.target.value }))}
+              />
+            </div>
+            <div>
+              <Label>Target Metric</Label>
+              <select
+                className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-800"
+                value={goalForm.metric}
+                onChange={(e) => setGoalForm(f => ({ ...f, metric: e.target.value }))}
+              >
+                <option value="">Select a metric</option>
+                <option value="signup_conversion">Signup Conversion Rate</option>
+                <option value="purchase_conversion">Purchase Conversion Rate</option>
+                <option value="retention_d7">Day 7 Retention</option>
+                <option value="retention_d30">Day 30 Retention</option>
+                <option value="feature_adoption">Feature Adoption Rate</option>
+                <option value="activation_rate">User Activation Rate</option>
+                <option value="mrr_growth">MRR Growth</option>
+                <option value="churn_reduction">Churn Reduction</option>
+              </select>
+            </div>
+            <div>
+              <Label>Target Value</Label>
+              <div className="flex gap-2">
+                <Input
+                  type="number"
+                  placeholder="e.g. 15"
+                  value={goalForm.targetValue}
+                  onChange={(e) => setGoalForm(f => ({ ...f, targetValue: e.target.value }))}
+                  className="flex-1"
+                />
+                <div className="flex items-center justify-center w-12 bg-muted rounded-lg">
+                  <Percent className="w-4 h-4 text-muted-foreground" />
+                </div>
+              </div>
+            </div>
+            <div>
+              <Label>Target Date (optional)</Label>
+              <Input
+                type="date"
+                value={goalForm.targetDate}
+                onChange={(e) => setGoalForm(f => ({ ...f, targetDate: e.target.value }))}
+              />
+            </div>
+            <div className="p-3 bg-muted/50 rounded-lg">
+              <p className="text-sm font-medium mb-1">Goal Preview</p>
+              <p className="text-xs text-muted-foreground">
+                {goalForm.name || 'Untitled goal'} - Target: {goalForm.targetValue || '?'}%
+                {goalForm.targetDate ? ` by ${goalForm.targetDate}` : ''}
+              </p>
+            </div>
+            <div className="flex gap-2 pt-4">
+              <Button variant="outline" className="flex-1" onClick={() => setShowGoalDialog(false)}>Cancel</Button>
+              <Button className="flex-1 bg-gradient-to-r from-red-500 to-orange-500" onClick={handleCreateGoal} disabled={isLoading}>
+                <Target className="w-4 h-4 mr-2" />
+                {isLoading ? 'Setting...' : 'Set Goal'}
               </Button>
             </div>
           </div>

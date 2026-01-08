@@ -423,12 +423,8 @@ const mockOverviewActivities = [
   { id: '3', type: 'create' as const, title: 'Alert created', description: 'New monitor for Redis memory usage', user: { name: 'Lisa Park', avatar: '/avatars/lisa.jpg' }, timestamp: new Date(Date.now() - 3600000).toISOString(), metadata: {} },
 ]
 
-const mockOverviewQuickActions = [
-  { id: '1', label: 'Create Alert', icon: 'Bell', shortcut: '⌘A', action: () => toast.success('Configure your alert threshold and notification settings') },
-  { id: '2', label: 'View Logs', icon: 'FileText', shortcut: '⌘L', action: () => toast.success('Viewing last 24h of application logs') },
-  { id: '3', label: 'Run Health Check', icon: 'Activity', shortcut: '⌘H', action: () => toast.success('All 8 services healthy! Latency: 45ms avg') },
-  { id: '4', label: 'Deploy', icon: 'Rocket', shortcut: '⌘D', action: () => toast.success('Deployment pipeline started. View progress in CI/CD') },
-]
+// Note: Quick actions are defined inside the component using useState dialog handlers
+// See quickActions useMemo for the proper implementation with dialog-based workflows
 
 // ============================================================================
 // MAIN COMPONENT
@@ -515,6 +511,14 @@ export default function OverviewClient() {
       log.service.toLowerCase().includes(searchQuery.toLowerCase())
     )
   }, [searchQuery])
+
+  // Quick Actions with proper dialog handlers
+  const quickActions = useMemo(() => [
+    { id: '1', label: 'Create Alert', icon: 'Bell', shortcut: '⌘A', action: () => setShowCreateAlertDialog(true) },
+    { id: '2', label: 'View Logs', icon: 'FileText', shortcut: '⌘L', action: () => setShowViewLogsDialog(true) },
+    { id: '3', label: 'Run Health Check', icon: 'Activity', shortcut: '⌘H', action: () => setShowHealthCheckDialog(true) },
+    { id: '4', label: 'Deploy', icon: 'Rocket', shortcut: '⌘D', action: () => setShowDeployDialog(true) },
+  ], [])
 
   // Fetch dashboard metrics from Supabase
   const fetchMetrics = useCallback(async () => {
@@ -2337,7 +2341,231 @@ export default function OverviewClient() {
         </div>
 
         {/* Quick Actions Toolbar */}
-        <QuickActionsToolbar actions={mockOverviewQuickActions} />
+        <QuickActionsToolbar actions={quickActions} />
+
+        {/* Create Alert Dialog */}
+        <Dialog open={showCreateAlertDialog} onOpenChange={setShowCreateAlertDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Bell className="w-5 h-5 text-indigo-600" />
+                Create Alert
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Alert Name</Label>
+                <Input placeholder="e.g., High CPU Usage Alert" />
+              </div>
+              <div className="space-y-2">
+                <Label>Metric</Label>
+                <Select defaultValue="cpu">
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select metric" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="cpu">CPU Usage</SelectItem>
+                    <SelectItem value="memory">Memory Usage</SelectItem>
+                    <SelectItem value="disk">Disk Usage</SelectItem>
+                    <SelectItem value="latency">API Latency</SelectItem>
+                    <SelectItem value="error_rate">Error Rate</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Threshold (%)</Label>
+                <Input type="number" placeholder="80" defaultValue="80" />
+              </div>
+              <div className="space-y-2">
+                <Label>Severity</Label>
+                <Select defaultValue="warning">
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select severity" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="info">Info</SelectItem>
+                    <SelectItem value="warning">Warning</SelectItem>
+                    <SelectItem value="critical">Critical</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex gap-3 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowCreateAlertDialog(false)}>
+                  Cancel
+                </Button>
+                <Button className="flex-1 bg-indigo-600 hover:bg-indigo-700" onClick={() => {
+                  toast.success('Alert created successfully')
+                  setShowCreateAlertDialog(false)
+                }}>
+                  Create Alert
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* View Logs Dialog */}
+        <Dialog open={showViewLogsDialog} onOpenChange={setShowViewLogsDialog}>
+          <DialogContent className="max-w-3xl max-h-[80vh]">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Activity className="w-5 h-5 text-indigo-600" />
+                Application Logs
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="flex items-center gap-2">
+                <div className="relative flex-1">
+                  <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                  <Input placeholder="Search logs..." className="pl-10 font-mono" />
+                </div>
+                <Select defaultValue="24h">
+                  <SelectTrigger className="w-[120px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1h">Last 1h</SelectItem>
+                    <SelectItem value="6h">Last 6h</SelectItem>
+                    <SelectItem value="24h">Last 24h</SelectItem>
+                    <SelectItem value="7d">Last 7d</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <ScrollArea className="h-[400px] border rounded-lg">
+                <div className="font-mono text-sm">
+                  {mockLogs.map(log => (
+                    <div key={log.id} className="flex items-start gap-4 p-3 border-b hover:bg-gray-50 dark:hover:bg-gray-800">
+                      <span className="text-xs text-gray-500 whitespace-nowrap">{formatDate(log.timestamp)}</span>
+                      <Badge className={getLogLevelColor(log.level)}>{log.level.toUpperCase()}</Badge>
+                      <span className="text-blue-600 dark:text-blue-400 whitespace-nowrap">{log.service}</span>
+                      <span className="text-gray-600 dark:text-gray-400 flex-1 truncate">{log.message}</span>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+              <div className="flex justify-end">
+                <Button variant="outline" onClick={() => setShowViewLogsDialog(false)}>
+                  Close
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Health Check Dialog */}
+        <Dialog open={showHealthCheckDialog} onOpenChange={setShowHealthCheckDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Activity className="w-5 h-5 text-green-600" />
+                System Health Check
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="p-4 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
+                <div className="flex items-center gap-3">
+                  <CheckCircle className="w-6 h-6 text-green-600" />
+                  <div>
+                    <p className="font-semibold text-green-800 dark:text-green-200">All Systems Operational</p>
+                    <p className="text-sm text-green-600 dark:text-green-400">Last checked: Just now</p>
+                  </div>
+                </div>
+              </div>
+              <div className="space-y-3">
+                {mockServices.map(service => (
+                  <div key={service.id} className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-2 h-2 rounded-full ${
+                        service.status === 'operational' ? 'bg-green-500' :
+                        service.status === 'degraded' ? 'bg-yellow-500' : 'bg-red-500'
+                      }`} />
+                      <span className="font-medium">{service.display_name}</span>
+                    </div>
+                    <div className="flex items-center gap-4 text-sm text-gray-500">
+                      <span>Uptime: {service.uptime_percent}%</span>
+                      <span>Latency: {service.response_time_p95}ms</span>
+                      <Badge className={getStatusColor(service.status)}>{service.status}</Badge>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="flex justify-between pt-4">
+                <Button variant="outline" onClick={() => {
+                  toast.success('Running full health check...')
+                }}>
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                  Run Full Check
+                </Button>
+                <Button variant="outline" onClick={() => setShowHealthCheckDialog(false)}>
+                  Close
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Deploy Dialog */}
+        <Dialog open={showDeployDialog} onOpenChange={setShowDeployDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Zap className="w-5 h-5 text-orange-600" />
+                Deploy Application
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Service</Label>
+                <Select defaultValue="api-gateway">
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select service" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="api-gateway">API Gateway</SelectItem>
+                    <SelectItem value="auth-service">Auth Service</SelectItem>
+                    <SelectItem value="worker-nodes">Worker Nodes</SelectItem>
+                    <SelectItem value="frontend">Frontend</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Environment</Label>
+                <Select defaultValue="production">
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select environment" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="development">Development</SelectItem>
+                    <SelectItem value="staging">Staging</SelectItem>
+                    <SelectItem value="production">Production</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Version/Branch</Label>
+                <Input placeholder="main" defaultValue="main" />
+              </div>
+              <div className="p-3 rounded-lg bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800">
+                <p className="text-sm text-yellow-800 dark:text-yellow-200">
+                  <AlertTriangle className="w-4 h-4 inline mr-1" />
+                  Production deployments require approval from team lead.
+                </p>
+              </div>
+              <div className="flex gap-3 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowDeployDialog(false)}>
+                  Cancel
+                </Button>
+                <Button className="flex-1 bg-orange-600 hover:bg-orange-700" onClick={() => {
+                  toast.success('Deployment pipeline started. View progress in CI/CD')
+                  setShowDeployDialog(false)
+                }}>
+                  <Play className="w-4 h-4 mr-2" />
+                  Start Deploy
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   )

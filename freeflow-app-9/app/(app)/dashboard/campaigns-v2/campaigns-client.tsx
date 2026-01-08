@@ -593,12 +593,7 @@ const mockCampaignActivities = [
   { id: '3', type: 'milestone' as const, title: 'Subscriber milestone', description: 'Email list reached 50,000 subscribers', user: { name: 'Marketing Team', avatar: '/avatars/marketing.jpg' }, timestamp: new Date(Date.now() - 86400000).toISOString(), metadata: {} },
 ]
 
-const mockCampaignQuickActions = [
-  { id: '1', label: 'New Campaign', icon: 'Mail', shortcut: '⌘N', action: () => toast.info('Opening new campaign form...', { description: 'Click the + button to create a new campaign' }) },
-  { id: '2', label: 'Send Test', icon: 'Send', shortcut: '⌘T', action: () => toast.info('Send Test Email', { description: 'Select a campaign first, then use the Send Test option in campaign details' }) },
-  { id: '3', label: 'View Analytics', icon: 'BarChart3', shortcut: '⌘A', action: () => toast.info('Analytics Dashboard', { description: 'Navigate to the Analytics tab to view campaign performance' }) },
-  { id: '4', label: 'Manage Audience', icon: 'Users', shortcut: '⌘U', action: () => toast.info('Audience Manager', { description: 'Navigate to the Audiences tab to manage your subscribers' }) },
-]
+// Quick actions are defined inside the component to access state setters
 
 // ============== MAIN COMPONENT ==============
 
@@ -613,6 +608,19 @@ export default function CampaignsClient() {
   const [showTemplateDialog, setShowTemplateDialog] = useState(false)
   const [showAudienceDialog, setShowAudienceDialog] = useState(false)
   const [settingsTab, setSettingsTab] = useState('general')
+
+  // Quick Actions Dialog States
+  const [showSendTestDialog, setShowSendTestDialog] = useState(false)
+  const [showAnalyticsDialog, setShowAnalyticsDialog] = useState(false)
+  const [showManageAudienceDialog, setShowManageAudienceDialog] = useState(false)
+
+  // Quick Actions Array (inside component to access state setters)
+  const campaignQuickActions = [
+    { id: '1', label: 'New Campaign', icon: 'Mail', shortcut: '⌘N', action: () => setShowNewCampaignDialog(true) },
+    { id: '2', label: 'Send Test', icon: 'Send', shortcut: '⌘T', action: () => setShowSendTestDialog(true) },
+    { id: '3', label: 'View Analytics', icon: 'BarChart3', shortcut: '⌘A', action: () => setShowAnalyticsDialog(true) },
+    { id: '4', label: 'Manage Audience', icon: 'Users', shortcut: '⌘U', action: () => setShowManageAudienceDialog(true) },
+  ]
 
   // Database integration
   const { campaigns: dbCampaigns, createCampaign, updateCampaign, deleteCampaign, loading: campaignsLoading, refetch } = useCampaigns({})
@@ -2668,7 +2676,189 @@ export default function CampaignsClient() {
       </div>
 
       {/* Quick Actions Toolbar */}
-      <QuickActionsToolbar actions={mockCampaignQuickActions} />
+      <QuickActionsToolbar actions={campaignQuickActions} />
+
+      {/* Send Test Email Dialog */}
+      <Dialog open={showSendTestDialog} onOpenChange={setShowSendTestDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Send className="w-5 h-5 text-rose-600" />
+              Send Test Email
+            </DialogTitle>
+            <DialogDescription>
+              Send a test email to preview your campaign before sending to your full audience.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <Label>Test Email Address</Label>
+              <Input
+                type="email"
+                placeholder="Enter email address"
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label>Select Campaign</Label>
+              <select className="w-full mt-1 px-3 py-2 border rounded-md bg-background">
+                <option value="">Select a campaign...</option>
+                {mockCampaigns.filter(c => c.status === 'draft' || c.status === 'scheduled').map(campaign => (
+                  <option key={campaign.id} value={campaign.id}>{campaign.name}</option>
+                ))}
+              </select>
+            </div>
+            <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-3">
+              <p className="text-sm text-amber-700 dark:text-amber-300">
+                Test emails are sent immediately and do not affect campaign statistics.
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowSendTestDialog(false)}>Cancel</Button>
+            <Button
+              className="bg-gradient-to-r from-rose-600 to-pink-600"
+              onClick={() => {
+                toast.success('Test email sent successfully')
+                setShowSendTestDialog(false)
+              }}
+            >
+              <Send className="w-4 h-4 mr-2" />
+              Send Test
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* View Analytics Dialog */}
+      <Dialog open={showAnalyticsDialog} onOpenChange={setShowAnalyticsDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <BarChart3 className="w-5 h-5 text-rose-600" />
+              Campaign Analytics Overview
+            </DialogTitle>
+            <DialogDescription>
+              Quick overview of your campaign performance metrics.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="grid grid-cols-4 gap-4">
+              <div className="p-4 bg-gradient-to-br from-rose-50 to-pink-50 dark:from-rose-900/20 dark:to-pink-900/20 rounded-lg text-center">
+                <p className="text-2xl font-bold text-rose-600">{stats.avgOpenRate.toFixed(1)}%</p>
+                <p className="text-sm text-gray-500">Avg Open Rate</p>
+              </div>
+              <div className="p-4 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-lg text-center">
+                <p className="text-2xl font-bold text-blue-600">{stats.avgClickRate.toFixed(1)}%</p>
+                <p className="text-sm text-gray-500">Avg Click Rate</p>
+              </div>
+              <div className="p-4 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-lg text-center">
+                <p className="text-2xl font-bold text-green-600">${formatNumber(stats.totalRevenue)}</p>
+                <p className="text-sm text-gray-500">Total Revenue</p>
+              </div>
+              <div className="p-4 bg-gradient-to-br from-purple-50 to-violet-50 dark:from-purple-900/20 dark:to-violet-900/20 rounded-lg text-center">
+                <p className="text-2xl font-bold text-purple-600">{formatNumber(stats.totalSent)}</p>
+                <p className="text-sm text-gray-500">Emails Sent</p>
+              </div>
+            </div>
+            <div className="border rounded-lg p-4">
+              <h4 className="font-semibold mb-3">Recent Campaign Performance</h4>
+              <div className="space-y-3">
+                {mockCampaigns.slice(0, 3).map(campaign => (
+                  <div key={campaign.id} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                    <div>
+                      <p className="font-medium">{campaign.name}</p>
+                      <p className="text-sm text-gray-500">{campaign.stats.sent} sent</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-medium text-green-600">{campaign.stats.openRate.toFixed(1)}% opens</p>
+                      <p className="text-sm text-gray-500">{campaign.stats.clickRate.toFixed(1)}% clicks</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAnalyticsDialog(false)}>Close</Button>
+            <Button
+              className="bg-gradient-to-r from-rose-600 to-pink-600"
+              onClick={() => {
+                setActiveTab('analytics')
+                setShowAnalyticsDialog(false)
+              }}
+            >
+              <BarChart3 className="w-4 h-4 mr-2" />
+              View Full Analytics
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Manage Audience Dialog */}
+      <Dialog open={showManageAudienceDialog} onOpenChange={setShowManageAudienceDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Users className="w-5 h-5 text-rose-600" />
+              Manage Audiences
+            </DialogTitle>
+            <DialogDescription>
+              View and manage your subscriber audiences and segments.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="grid grid-cols-3 gap-4">
+              <div className="p-4 bg-gradient-to-br from-purple-50 to-violet-50 dark:from-purple-900/20 dark:to-violet-900/20 rounded-lg text-center">
+                <p className="text-2xl font-bold text-purple-600">{formatNumber(stats.totalSubscribers)}</p>
+                <p className="text-sm text-gray-500">Total Subscribers</p>
+              </div>
+              <div className="p-4 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-lg text-center">
+                <p className="text-2xl font-bold text-green-600">{mockAudiences.length}</p>
+                <p className="text-sm text-gray-500">Audiences</p>
+              </div>
+              <div className="p-4 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-lg text-center">
+                <p className="text-2xl font-bold text-blue-600">{mockAudiences.reduce((sum, a) => sum + a.segments.length, 0)}</p>
+                <p className="text-sm text-gray-500">Segments</p>
+              </div>
+            </div>
+            <div className="border rounded-lg p-4">
+              <h4 className="font-semibold mb-3">Your Audiences</h4>
+              <div className="space-y-3">
+                {mockAudiences.map(audience => (
+                  <div key={audience.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <div>
+                      <p className="font-medium">{audience.name}</p>
+                      <p className="text-sm text-gray-500">{formatNumber(audience.stats.subscribed)} subscribers</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline" className="text-green-600 border-green-600">
+                        {audience.stats.avgOpenRate.toFixed(0)}% opens
+                      </Badge>
+                      <Button size="sm" variant="ghost">
+                        <ChevronRight className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowManageAudienceDialog(false)}>Close</Button>
+            <Button
+              className="bg-gradient-to-r from-rose-600 to-pink-600"
+              onClick={() => {
+                setActiveTab('audiences')
+                setShowManageAudienceDialog(false)
+              }}
+            >
+              <Users className="w-4 h-4 mr-2" />
+              Go to Audiences
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

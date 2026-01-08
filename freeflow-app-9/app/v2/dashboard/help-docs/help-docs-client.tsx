@@ -417,21 +417,6 @@ const mockHelpDocsActivities = [
   { id: '3', user: 'Analytics', action: 'Report generated', target: 'Monthly search trends', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'update' as const },
 ]
 
-const mockHelpDocsQuickActions = [
-  { id: '1', label: 'New Article', icon: 'file-plus', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1000)),
-    { loading: 'Creating new article...', success: 'Article created successfully', error: 'Failed to create article' }
-  ), variant: 'default' as const },
-  { id: '2', label: 'Review Queue', icon: 'list', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 800)),
-    { loading: 'Loading review queue...', success: 'Review queue loaded', error: 'Failed to load review queue' }
-  ), variant: 'default' as const },
-  { id: '3', label: 'Analytics', icon: 'chart', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1200)),
-    { loading: 'Loading help documentation analytics...', success: 'Analytics loaded successfully', error: 'Failed to load analytics' }
-  ), variant: 'outline' as const },
-]
-
 export default function HelpDocsClient() {
   const supabase = createClient()
 
@@ -459,6 +444,15 @@ export default function HelpDocsClient() {
   const [showCreateDialog, setShowCreateDialog] = useState(false)
   const [showEditDialog, setShowEditDialog] = useState(false)
   const [editingArticle, setEditingArticle] = useState<DbHelpArticle | null>(null)
+  const [showReviewQueueDialog, setShowReviewQueueDialog] = useState(false)
+  const [showAnalyticsDialog, setShowAnalyticsDialog] = useState(false)
+
+  // Chatbot State
+  const [chatMessages, setChatMessages] = useState<{role: 'user' | 'bot'; content: string}[]>([
+    { role: 'bot', content: 'Hello! How can I help you today?' }
+  ])
+  const [chatInput, setChatInput] = useState('')
+  const [isSendingChat, setIsSendingChat] = useState(false)
 
   // Form State
   const [formData, setFormData] = useState({
@@ -741,6 +735,45 @@ export default function HelpDocsClient() {
       description: `"${articleTitle}" saved to bookmarks`
     })
   }
+
+  // Handle sending chat message
+  const handleSendChatMessage = useCallback(async () => {
+    if (!chatInput.trim()) return
+
+    const userMessage = chatInput.trim()
+    setChatInput('')
+    setChatMessages(prev => [...prev, { role: 'user', content: userMessage }])
+    setIsSendingChat(true)
+
+    // Simulate AI response
+    await new Promise(resolve => setTimeout(resolve, 1000))
+
+    // Generate contextual response based on keywords
+    let botResponse = "I understand you're asking about that. Let me help you find relevant articles in our knowledge base."
+    const lowerMessage = userMessage.toLowerCase()
+
+    if (lowerMessage.includes('billing') || lowerMessage.includes('payment') || lowerMessage.includes('invoice')) {
+      botResponse = "For billing and payment questions, I recommend checking our 'Understanding your billing dashboard' article. You can also contact our support team for specific account inquiries."
+    } else if (lowerMessage.includes('api') || lowerMessage.includes('developer') || lowerMessage.includes('integration')) {
+      botResponse = "For API and developer questions, check out our 'REST API Authentication Guide' - it's our most popular technical article. You can also browse the API & Developers category for more resources."
+    } else if (lowerMessage.includes('error') || lowerMessage.includes('problem') || lowerMessage.includes('issue') || lowerMessage.includes('fix')) {
+      botResponse = "I see you're experiencing an issue. Our 'Fixing Connection Timeout errors' article is very helpful. You can also browse the Troubleshooting category or create a support ticket if you need further assistance."
+    } else if (lowerMessage.includes('start') || lowerMessage.includes('begin') || lowerMessage.includes('new') || lowerMessage.includes('setup')) {
+      botResponse = "Welcome! I recommend starting with our 'How to create your first project' guide. It's featured for good reason - it covers all the basics you need to get started."
+    } else if (lowerMessage.includes('security') || lowerMessage.includes('password') || lowerMessage.includes('2fa')) {
+      botResponse = "For security best practices, check out our 'Security best practices for your account' article. It covers 2FA, password management, and other important security measures."
+    }
+
+    setChatMessages(prev => [...prev, { role: 'bot', content: botResponse }])
+    setIsSendingChat(false)
+  }, [chatInput])
+
+  // Quick actions with real dialog handlers
+  const helpDocsQuickActions = useMemo(() => [
+    { id: '1', label: 'New Article', icon: 'file-plus', action: () => setShowCreateDialog(true), variant: 'default' as const },
+    { id: '2', label: 'Review Queue', icon: 'list', action: () => setShowReviewQueueDialog(true), variant: 'default' as const },
+    { id: '3', label: 'Analytics', icon: 'chart', action: () => setShowAnalyticsDialog(true), variant: 'outline' as const },
+  ], [])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-sky-50 via-blue-50 to-indigo-50 dark:bg-none dark:bg-gray-900">
@@ -2234,7 +2267,7 @@ export default function HelpDocsClient() {
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockHelpDocsQuickActions}
+            actions={helpDocsQuickActions}
             variant="grid"
           />
         </div>
@@ -2315,30 +2348,73 @@ export default function HelpDocsClient() {
       </Dialog>
 
       {/* AI Chatbot Dialog */}
-      <Dialog open={showChatbot} onOpenChange={setShowChatbot}>
+      <Dialog open={showChatbot} onOpenChange={(open) => {
+        setShowChatbot(open)
+        if (!open) {
+          // Reset chat when closing
+          setChatMessages([{ role: 'bot', content: 'Hello! How can I help you today?' }])
+          setChatInput('')
+        }
+      }}>
         <DialogContent className="max-w-md h-[600px] flex flex-col">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Bot className="w-5 h-5 text-blue-600" />AI Assistant
             </DialogTitle>
+            <DialogDescription>
+              Ask questions about our help documentation
+            </DialogDescription>
           </DialogHeader>
           <ScrollArea className="flex-1 p-4">
             <div className="space-y-4">
-              <div className="bg-blue-100 dark:bg-blue-900/30 p-3 rounded-lg rounded-tl-none max-w-[80%]">
-                <p className="text-sm">Hello! How can I help you today? You can ask me about:</p>
-                <ul className="text-sm mt-2 space-y-1">
-                  <li>• Getting started guides</li>
-                  <li>• Troubleshooting issues</li>
-                  <li>• API documentation</li>
-                  <li>• Billing questions</li>
-                </ul>
-              </div>
+              {chatMessages.map((msg, idx) => (
+                <div
+                  key={idx}
+                  className={`p-3 rounded-lg max-w-[85%] ${
+                    msg.role === 'bot'
+                      ? 'bg-blue-100 dark:bg-blue-900/30 rounded-tl-none'
+                      : 'bg-gray-100 dark:bg-gray-800 rounded-tr-none ml-auto'
+                  }`}
+                >
+                  <p className="text-sm">{msg.content}</p>
+                  {idx === 0 && msg.role === 'bot' && (
+                    <ul className="text-sm mt-2 space-y-1 text-gray-600 dark:text-gray-400">
+                      <li>- Getting started guides</li>
+                      <li>- Troubleshooting issues</li>
+                      <li>- API documentation</li>
+                      <li>- Billing questions</li>
+                    </ul>
+                  )}
+                </div>
+              ))}
+              {isSendingChat && (
+                <div className="bg-blue-100 dark:bg-blue-900/30 p-3 rounded-lg rounded-tl-none max-w-[85%]">
+                  <div className="flex items-center gap-2">
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span className="text-sm">Thinking...</span>
+                  </div>
+                </div>
+              )}
             </div>
           </ScrollArea>
           <div className="p-4 border-t dark:border-gray-700">
             <div className="flex gap-2">
-              <Input placeholder="Type your question..." className="flex-1" />
-              <Button onClick={() => toast.success('Message sent')}><Send className="w-4 h-4" /></Button>
+              <Input
+                placeholder="Type your question..."
+                className="flex-1"
+                value={chatInput}
+                onChange={(e) => setChatInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault()
+                    handleSendChatMessage()
+                  }
+                }}
+                disabled={isSendingChat}
+              />
+              <Button onClick={handleSendChatMessage} disabled={isSendingChat || !chatInput.trim()}>
+                {isSendingChat ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+              </Button>
             </div>
           </div>
         </DialogContent>
@@ -2503,6 +2579,275 @@ export default function HelpDocsClient() {
             <Button variant="outline" onClick={() => { setShowEditDialog(false); setEditingArticle(null); resetForm(); }}>Cancel</Button>
             <Button onClick={handleUpdateArticle} disabled={isSaving}>
               {isSaving ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Saving...</> : 'Save Changes'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Review Queue Dialog */}
+      <Dialog open={showReviewQueueDialog} onOpenChange={setShowReviewQueueDialog}>
+        <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileText className="w-5 h-5 text-blue-600" />
+              Article Review Queue
+            </DialogTitle>
+            <DialogDescription>
+              Review and approve pending articles before publication
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            {/* Review Queue Stats */}
+            <div className="grid grid-cols-4 gap-4">
+              <Card className="p-4 text-center">
+                <div className="text-2xl font-bold text-yellow-600">{mockArticles.filter(a => a.status === 'draft').length}</div>
+                <div className="text-sm text-gray-500">Pending Review</div>
+              </Card>
+              <Card className="p-4 text-center">
+                <div className="text-2xl font-bold text-blue-600">{mockArticles.filter(a => a.status === 'review').length}</div>
+                <div className="text-sm text-gray-500">In Review</div>
+              </Card>
+              <Card className="p-4 text-center">
+                <div className="text-2xl font-bold text-green-600">{mockArticles.filter(a => a.status === 'published').length}</div>
+                <div className="text-sm text-gray-500">Published</div>
+              </Card>
+              <Card className="p-4 text-center">
+                <div className="text-2xl font-bold text-gray-600">{mockArticles.filter(a => a.status === 'scheduled').length}</div>
+                <div className="text-sm text-gray-500">Scheduled</div>
+              </Card>
+            </div>
+
+            {/* Review Queue List */}
+            <div className="space-y-3">
+              <h3 className="font-semibold text-gray-900 dark:text-white">Articles Pending Review</h3>
+              {mockArticles.filter(a => a.status === 'draft' || a.status === 'review').length === 0 ? (
+                <Card className="p-8 text-center">
+                  <CheckCircle className="w-12 h-12 text-green-500 mx-auto mb-3" />
+                  <p className="text-gray-500">No articles pending review</p>
+                </Card>
+              ) : (
+                mockArticles.filter(a => a.status === 'draft' || a.status === 'review').map(article => (
+                  <Card key={article.id} className="p-4">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <h4 className="font-semibold text-gray-900 dark:text-white">{article.title}</h4>
+                          <Badge className={getStatusColor(article.status)}>{article.status}</Badge>
+                        </div>
+                        <p className="text-sm text-gray-500 mb-2">{article.excerpt}</p>
+                        <div className="flex items-center gap-4 text-xs text-gray-500">
+                          <span className="flex items-center gap-1">
+                            <Avatar className="h-4 w-4">
+                              <AvatarFallback className="text-[8px]">{article.author.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                            </Avatar>
+                            {article.author.name}
+                          </span>
+                          <span>Created {new Date(article.createdAt).toLocaleDateString()}</span>
+                          <span>{article.category}</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setSelectedArticle(article)
+                            setShowReviewQueueDialog(false)
+                            setShowArticleDialog(true)
+                          }}
+                        >
+                          <Eye className="w-4 h-4 mr-1" />
+                          Preview
+                        </Button>
+                        <Button
+                          size="sm"
+                          className="bg-green-600 hover:bg-green-700"
+                          onClick={() => {
+                            toast.success(`Article "${article.title}" approved and published`)
+                          }}
+                        >
+                          <Check className="w-4 h-4 mr-1" />
+                          Approve
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => {
+                            toast.success(`Article "${article.title}" sent back for revision`)
+                          }}
+                        >
+                          <X className="w-4 h-4 mr-1" />
+                          Reject
+                        </Button>
+                      </div>
+                    </div>
+                  </Card>
+                ))
+              )}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowReviewQueueDialog(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Analytics Dialog */}
+      <Dialog open={showAnalyticsDialog} onOpenChange={setShowAnalyticsDialog}>
+        <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <BarChart3 className="w-5 h-5 text-purple-600" />
+              Help Documentation Analytics
+            </DialogTitle>
+            <DialogDescription>
+              Insights into your help center performance and user engagement
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-6 py-4">
+            {/* Key Metrics */}
+            <div className="grid grid-cols-4 gap-4">
+              <Card className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                    <Eye className="w-5 h-5 text-blue-600" />
+                  </div>
+                  <div>
+                    <div className="text-2xl font-bold">{formatNumber(mockStats.totalViews)}</div>
+                    <div className="text-sm text-gray-500">Total Views</div>
+                  </div>
+                </div>
+                <div className="mt-2 flex items-center text-sm text-green-600">
+                  <TrendingUp className="w-4 h-4 mr-1" />
+                  +{mockStats.viewsTrend}% from last month
+                </div>
+              </Card>
+              <Card className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
+                    <ThumbsUp className="w-5 h-5 text-green-600" />
+                  </div>
+                  <div>
+                    <div className="text-2xl font-bold">{mockStats.avgSatisfaction}%</div>
+                    <div className="text-sm text-gray-500">Satisfaction</div>
+                  </div>
+                </div>
+                <div className="mt-2 flex items-center text-sm text-green-600">
+                  <TrendingUp className="w-4 h-4 mr-1" />
+                  +{mockStats.satisfactionTrend}% improvement
+                </div>
+              </Card>
+              <Card className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+                    <Search className="w-5 h-5 text-purple-600" />
+                  </div>
+                  <div>
+                    <div className="text-2xl font-bold">{formatNumber(mockStats.searchQueries)}</div>
+                    <div className="text-sm text-gray-500">Searches</div>
+                  </div>
+                </div>
+                <div className="mt-2 text-sm text-gray-500">
+                  This month
+                </div>
+              </Card>
+              <Card className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-amber-100 dark:bg-amber-900/30 rounded-lg">
+                    <Zap className="w-5 h-5 text-amber-600" />
+                  </div>
+                  <div>
+                    <div className="text-2xl font-bold">{formatNumber(mockStats.ticketsDeflected)}</div>
+                    <div className="text-sm text-gray-500">Deflected</div>
+                  </div>
+                </div>
+                <div className="mt-2 text-sm text-gray-500">
+                  Tickets prevented
+                </div>
+              </Card>
+            </div>
+
+            {/* Top Searches */}
+            <Card className="p-4">
+              <h3 className="font-semibold mb-4 text-gray-900 dark:text-white">Top Searches</h3>
+              <div className="space-y-3">
+                {mockStats.topSearches.map((search, index) => (
+                  <div key={search.query} className="flex items-center gap-4">
+                    <span className="w-6 text-center font-bold text-gray-400">{index + 1}</span>
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="font-medium text-gray-900 dark:text-white">{search.query}</span>
+                        <span className="text-sm text-gray-500">{search.count} searches</span>
+                      </div>
+                      <Progress value={(search.count / mockStats.topSearches[0].count) * 100} className="h-2" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Card>
+
+            {/* Top Articles */}
+            <Card className="p-4">
+              <h3 className="font-semibold mb-4 text-gray-900 dark:text-white">Top Performing Articles</h3>
+              <div className="space-y-3">
+                {popularArticles.slice(0, 5).map((article, index) => (
+                  <div key={article.id} className="flex items-center gap-4 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
+                    <span className="w-6 text-center font-bold text-gray-400">{index + 1}</span>
+                    <div className="flex-1">
+                      <h4 className="font-medium text-gray-900 dark:text-white">{article.title}</h4>
+                      <p className="text-sm text-gray-500">{article.category}</p>
+                    </div>
+                    <div className="text-right">
+                      <div className="font-medium text-gray-900 dark:text-white">{formatNumber(article.views)} views</div>
+                      <div className="text-sm text-green-600">{calculateHelpfulness(article.helpfulVotes, article.notHelpfulVotes)}% helpful</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Card>
+
+            {/* Content Overview */}
+            <div className="grid grid-cols-2 gap-4">
+              <Card className="p-4">
+                <h3 className="font-semibold mb-4 text-gray-900 dark:text-white">Content by Status</h3>
+                <div className="space-y-3">
+                  {['published', 'draft', 'review', 'archived'].map(status => {
+                    const count = mockArticles.filter(a => a.status === status).length
+                    return (
+                      <div key={status} className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Badge className={getStatusColor(status as ArticleStatus)}>{status}</Badge>
+                        </div>
+                        <span className="font-medium">{count} articles</span>
+                      </div>
+                    )
+                  })}
+                </div>
+              </Card>
+              <Card className="p-4">
+                <h3 className="font-semibold mb-4 text-gray-900 dark:text-white">Content by Category</h3>
+                <div className="space-y-3">
+                  {mockCategories.slice(0, 4).map(category => (
+                    <div key={category.id} className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span>{category.icon}</span>
+                        <span className="text-gray-900 dark:text-white">{category.name}</span>
+                      </div>
+                      <span className="font-medium">{category.articleCount} articles</span>
+                    </div>
+                  ))}
+                </div>
+              </Card>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAnalyticsDialog(false)}>Close</Button>
+            <Button onClick={() => {
+              toast.success('Analytics report downloaded')
+              setShowAnalyticsDialog(false)
+            }}>
+              <Download className="w-4 h-4 mr-2" />
+              Export Report
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -323,20 +323,7 @@ const mockDeploymentsActivities = [
   { id: '3', user: 'Monitor', action: 'Health check passed for', target: 'All endpoints', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'update' as const },
 ]
 
-const mockDeploymentsQuickActions = [
-  { id: '1', label: 'Deploy Now', icon: 'rocket', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1500)),
-    { loading: 'Starting deployment...', success: 'Deployment initiated successfully', error: 'Failed to start deployment' }
-  ), variant: 'default' as const },
-  { id: '2', label: 'Rollback', icon: 'undo', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1500)),
-    { loading: 'Initiating rollback...', success: 'Rollback completed successfully', error: 'Failed to rollback' }
-  ), variant: 'default' as const },
-  { id: '3', label: 'View Logs', icon: 'file-text', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 800)),
-    { loading: 'Loading logs...', success: 'Logs loaded', error: 'Failed to load logs' }
-  ), variant: 'outline' as const },
-]
+// Quick actions will be defined inside the component to access state setters
 
 // Default form state for creating deployments
 const defaultDeploymentForm = {
@@ -527,7 +514,86 @@ export default function DeploymentsClient() {
   const [showWebhookDialog, setShowWebhookDialog] = useState(false)
   const [showTeamDialog, setShowTeamDialog] = useState(false)
   const [showIntegrationDialog, setShowIntegrationDialog] = useState(false)
+  const [showQuickDeployDialog, setShowQuickDeployDialog] = useState(false)
+  const [showQuickRollbackDialog, setShowQuickRollbackDialog] = useState(false)
+  const [showQuickLogsDialog, setShowQuickLogsDialog] = useState(false)
+  const [quickDeployBranch, setQuickDeployBranch] = useState('main')
+  const [quickDeployEnvironment, setQuickDeployEnvironment] = useState<'production' | 'staging' | 'development' | 'preview'>('staging')
+  const [quickRollbackVersion, setQuickRollbackVersion] = useState('')
+  const [isQuickDeploying, setIsQuickDeploying] = useState(false)
+  const [isQuickRollingBack, setIsQuickRollingBack] = useState(false)
   const [expandedLogs, setExpandedLogs] = useState<string[]>(['clone', 'install', 'build', 'deploy'])
+
+  // Quick deploy handler
+  const handleQuickDeploy = async () => {
+    setIsQuickDeploying(true)
+    try {
+      const { data: userData } = await supabase.auth.getUser()
+      if (!userData.user) throw new Error('Not authenticated')
+
+      const { error } = await supabase.from('deployments').insert({
+        user_id: userData.user.id,
+        deployment_name: `Quick Deploy ${new Date().toLocaleDateString()}`,
+        version: `${new Date().getTime()}`,
+        environment: quickDeployEnvironment,
+        status: 'pending',
+        branch: quickDeployBranch,
+        deploy_type: 'full',
+        notes: `Quick deployment from ${quickDeployBranch} branch`,
+        duration_seconds: 0,
+        can_rollback: true,
+      })
+
+      if (error) throw error
+      toast.success('Quick Deploy Initiated', { description: `Deploying ${quickDeployBranch} to ${quickDeployEnvironment}` })
+      setShowQuickDeployDialog(false)
+      setQuickDeployBranch('main')
+      setQuickDeployEnvironment('staging')
+      fetchDeployments()
+    } catch (error: any) {
+      toast.error('Quick Deploy Failed', { description: error.message })
+    } finally {
+      setIsQuickDeploying(false)
+    }
+  }
+
+  // Quick rollback handler
+  const handleQuickRollback = async () => {
+    if (!quickRollbackVersion) {
+      toast.error('Validation Error', { description: 'Please select a version to rollback to' })
+      return
+    }
+
+    setIsQuickRollingBack(true)
+    try {
+      // Find the deployment to rollback
+      const deploymentToRollback = dbDeployments.find(d => d.version === quickRollbackVersion)
+      if (deploymentToRollback) {
+        const { error } = await supabase
+          .from('deployments')
+          .update({ status: 'rolled_back' })
+          .eq('id', deploymentToRollback.id)
+
+        if (error) throw error
+      }
+
+      toast.success('Rollback Completed', { description: `Rolled back to version ${quickRollbackVersion}` })
+      setShowQuickRollbackDialog(false)
+      setQuickRollbackVersion('')
+      fetchDeployments()
+    } catch (error: any) {
+      toast.error('Rollback Failed', { description: error.message })
+    } finally {
+      setIsQuickRollingBack(false)
+    }
+  }
+
+  // Quick actions defined with access to state setters
+  const deploymentsQuickActions = [
+    { id: '1', label: 'Deploy Now', icon: 'rocket', action: () => setShowQuickDeployDialog(true), variant: 'default' as const },
+    { id: '2', label: 'Rollback', icon: 'undo', action: () => setShowQuickRollbackDialog(true), variant: 'default' as const },
+    { id: '3', label: 'View Logs', icon: 'file-text', action: () => setShowQuickLogsDialog(true), variant: 'outline' as const },
+  ]
   const [settingsTab, setSettingsTab] = useState('general')
   const [buildLogs, setBuildLogs] = useState<BuildLog[]>(mockBuildLogs)
   const [envVars, setEnvVars] = useState<EnvironmentVariable[]>(mockEnvVars)
@@ -2026,7 +2092,7 @@ export default function DeploymentsClient() {
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockDeploymentsQuickActions}
+            actions={deploymentsQuickActions}
             variant="grid"
           />
         </div>
@@ -2310,6 +2376,273 @@ export default function DeploymentsClient() {
               <Button variant="outline" onClick={() => setShowCreateDialog(false)}>Cancel</Button>
               <Button className="bg-gradient-to-r from-purple-600 to-indigo-600" onClick={handleCreateDeployment} disabled={isSubmitting}>
                 {isSubmitting ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Creating...</> : <><Rocket className="h-4 w-4 mr-2" />Create Deployment</>}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Quick Deploy Dialog */}
+        <Dialog open={showQuickDeployDialog} onOpenChange={setShowQuickDeployDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Rocket className="h-5 w-5 text-purple-600" />
+                Quick Deploy
+              </DialogTitle>
+              <DialogDescription>Deploy your application with a single click</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label>Branch</Label>
+                <Select value={quickDeployBranch} onValueChange={setQuickDeployBranch}>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="main">main</SelectItem>
+                    <SelectItem value="develop">develop</SelectItem>
+                    <SelectItem value="staging">staging</SelectItem>
+                    <SelectItem value="feature/new-ui">feature/new-ui</SelectItem>
+                    <SelectItem value="fix/auth-bug">fix/auth-bug</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Target Environment</Label>
+                <Select value={quickDeployEnvironment} onValueChange={(v) => setQuickDeployEnvironment(v as any)}>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="development">Development</SelectItem>
+                    <SelectItem value="staging">Staging</SelectItem>
+                    <SelectItem value="preview">Preview</SelectItem>
+                    <SelectItem value="production">Production</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
+                <div className="flex items-center gap-2 mb-2">
+                  <GitBranch className="h-4 w-4 text-purple-600" />
+                  <span className="font-medium text-purple-700 dark:text-purple-300">Deploy Summary</span>
+                </div>
+                <p className="text-sm text-purple-600 dark:text-purple-400">
+                  Deploy <span className="font-mono font-bold">{quickDeployBranch}</span> branch to{' '}
+                  <span className="font-bold">{quickDeployEnvironment}</span> environment
+                </p>
+              </div>
+              {quickDeployEnvironment === 'production' && (
+                <div className="p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800">
+                  <div className="flex items-center gap-2">
+                    <AlertTriangle className="h-4 w-4 text-amber-600" />
+                    <span className="text-sm text-amber-700 dark:text-amber-300">
+                      Production deployment requires additional review
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowQuickDeployDialog(false)}>Cancel</Button>
+              <Button
+                className="bg-gradient-to-r from-purple-600 to-indigo-600"
+                onClick={handleQuickDeploy}
+                disabled={isQuickDeploying}
+              >
+                {isQuickDeploying ? (
+                  <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Deploying...</>
+                ) : (
+                  <><Rocket className="h-4 w-4 mr-2" />Deploy Now</>
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Quick Rollback Dialog */}
+        <Dialog open={showQuickRollbackDialog} onOpenChange={setShowQuickRollbackDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-amber-600">
+                <RotateCcw className="h-5 w-5" />
+                Quick Rollback
+              </DialogTitle>
+              <DialogDescription>Rollback to a previous deployment version</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label>Select Version to Rollback To</Label>
+                <Select value={quickRollbackVersion} onValueChange={setQuickRollbackVersion}>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder="Choose a version..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {dbDeployments.filter(d => d.status === 'success').map(dep => (
+                      <SelectItem key={dep.id} value={dep.version}>
+                        v{dep.version} - {dep.deployment_name} ({dep.environment})
+                      </SelectItem>
+                    ))}
+                    {mockDeployments.filter(d => d.status === 'success').map(dep => (
+                      <SelectItem key={dep.id} value={dep.commit}>
+                        {dep.commit} - {dep.commitMessage.substring(0, 30)}...
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800">
+                <div className="flex items-center gap-2 mb-2">
+                  <AlertTriangle className="h-4 w-4 text-amber-600" />
+                  <span className="font-medium text-amber-700 dark:text-amber-300">Rollback Warning</span>
+                </div>
+                <p className="text-sm text-amber-600 dark:text-amber-400">
+                  Rolling back will mark the current deployment as rolled back and restore the selected version.
+                  This action cannot be undone.
+                </p>
+              </div>
+              {quickRollbackVersion && (
+                <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    <span className="font-medium">Target Version:</span>{' '}
+                    <span className="font-mono">{quickRollbackVersion}</span>
+                  </p>
+                </div>
+              )}
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => { setShowQuickRollbackDialog(false); setQuickRollbackVersion(''); }}>Cancel</Button>
+              <Button
+                className="bg-amber-600 hover:bg-amber-700"
+                onClick={handleQuickRollback}
+                disabled={isQuickRollingBack || !quickRollbackVersion}
+              >
+                {isQuickRollingBack ? (
+                  <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Rolling Back...</>
+                ) : (
+                  <><RotateCcw className="h-4 w-4 mr-2" />Confirm Rollback</>
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Quick View Logs Dialog */}
+        <Dialog open={showQuickLogsDialog} onOpenChange={setShowQuickLogsDialog}>
+          <DialogContent className="max-w-4xl max-h-[80vh]">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Terminal className="h-5 w-5 text-green-600" />
+                Deployment Logs
+              </DialogTitle>
+              <DialogDescription>Real-time build and deployment logs</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Badge className="bg-green-100 text-green-700">Live</Badge>
+                  <span className="text-sm text-gray-500">{buildLogs.length} log entries</span>
+                </div>
+                <div className="flex gap-2">
+                  <Select defaultValue="all">
+                    <SelectTrigger className="w-32">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Levels</SelectItem>
+                      <SelectItem value="error">Errors</SelectItem>
+                      <SelectItem value="warn">Warnings</SelectItem>
+                      <SelectItem value="info">Info</SelectItem>
+                      <SelectItem value="success">Success</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Button variant="outline" size="sm" onClick={() => {
+                    const logsText = buildLogs.map(log => `[${log.timestamp}] ${log.level.toUpperCase()} [${log.step}] ${log.message}`).join('\n');
+                    navigator.clipboard.writeText(logsText);
+                    toast.success('Logs copied to clipboard');
+                  }}>
+                    <Copy className="h-4 w-4 mr-1" />Copy
+                  </Button>
+                </div>
+              </div>
+              <ScrollArea className="h-[400px] bg-gray-900 rounded-lg p-4 font-mono text-sm">
+                {Object.entries(groupedLogs).map(([step, logs]) => (
+                  <div key={step} className="mb-4">
+                    <button
+                      onClick={() => toggleLogStep(step)}
+                      className="flex items-center gap-2 text-white mb-2 hover:text-green-400 transition-colors"
+                    >
+                      {expandedLogs.includes(step) ? (
+                        <ChevronDown className="h-4 w-4" />
+                      ) : (
+                        <ChevronRight className="h-4 w-4" />
+                      )}
+                      <span className="capitalize font-semibold">{step}</span>
+                      <Badge variant="outline" className="text-xs border-gray-600 text-gray-400">
+                        {logs.length} lines
+                      </Badge>
+                      {logs.some(l => l.level === 'error') && (
+                        <Badge className="bg-red-600 text-white text-xs">Has Errors</Badge>
+                      )}
+                      {logs.some(l => l.level === 'warn') && !logs.some(l => l.level === 'error') && (
+                        <Badge className="bg-amber-600 text-white text-xs">Has Warnings</Badge>
+                      )}
+                    </button>
+                    {expandedLogs.includes(step) && (
+                      <div className="ml-6 space-y-1 border-l border-gray-700 pl-3">
+                        {logs.map(log => (
+                          <div key={log.id} className="flex items-start gap-3 hover:bg-gray-800 p-1 rounded">
+                            <span className="text-gray-500 text-xs shrink-0 w-16">{log.timestamp}</span>
+                            <Badge className={`shrink-0 text-xs ${
+                              log.level === 'error' ? 'bg-red-600' :
+                              log.level === 'warn' ? 'bg-amber-600' :
+                              log.level === 'success' ? 'bg-green-600' : 'bg-blue-600'
+                            }`}>
+                              {log.level.toUpperCase()}
+                            </Badge>
+                            <span className={`${getLogColor(log.level)}`}>{log.message}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </ScrollArea>
+              <div className="flex items-center justify-between p-3 bg-gray-100 dark:bg-gray-800 rounded-lg">
+                <div className="flex items-center gap-4 text-sm">
+                  <span className="flex items-center gap-1">
+                    <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                    <span className="text-gray-600 dark:text-gray-400">Success: {buildLogs.filter(l => l.level === 'success').length}</span>
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <div className="w-2 h-2 rounded-full bg-amber-500"></div>
+                    <span className="text-gray-600 dark:text-gray-400">Warnings: {buildLogs.filter(l => l.level === 'warn').length}</span>
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <div className="w-2 h-2 rounded-full bg-red-500"></div>
+                    <span className="text-gray-600 dark:text-gray-400">Errors: {buildLogs.filter(l => l.level === 'error').length}</span>
+                  </span>
+                </div>
+                <Button variant="outline" size="sm" onClick={() => {
+                  const logsText = buildLogs.map(log => `[${log.timestamp}] ${log.level.toUpperCase()} [${log.step}] ${log.message}`).join('\n');
+                  const blob = new Blob([logsText], { type: 'text/plain' });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement('a');
+                  a.href = url;
+                  a.download = `deployment-logs-${new Date().toISOString().split('T')[0]}.txt`;
+                  document.body.appendChild(a);
+                  a.click();
+                  document.body.removeChild(a);
+                  URL.revokeObjectURL(url);
+                  toast.success('Logs downloaded');
+                }}>
+                  <Download className="h-4 w-4 mr-1" />Download
+                </Button>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowQuickLogsDialog(false)}>Close</Button>
+              <Button className="bg-green-600 hover:bg-green-700">
+                <Play className="h-4 w-4 mr-2" />Live Tail
               </Button>
             </DialogFooter>
           </DialogContent>

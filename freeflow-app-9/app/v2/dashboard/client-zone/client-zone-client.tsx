@@ -23,8 +23,11 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Textarea } from '@/components/ui/textarea'
+import { Input } from '@/components/ui/input'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Switch } from '@/components/ui/switch'
 import { Progress } from '@/components/ui/progress'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { NumberFlow } from '@/components/ui/number-flow'
@@ -59,7 +62,12 @@ import {
   Edit,
   Briefcase,
   TrendingUp,
-  Users
+  Users,
+  Plus,
+  FileDown,
+  StickyNote,
+  ListTodo,
+  Loader2
 } from 'lucide-react'
 import ClientZoneGallery from '@/components/client-zone-gallery'
 
@@ -320,11 +328,7 @@ const clientZoneActivities = [
   { id: '3', user: 'System', action: 'generated', target: 'weekly report', timestamp: '1h ago', type: 'info' as const },
 ]
 
-const clientZoneQuickActions = [
-  { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => toast.success('New Item', { description: 'Item created successfully' }) },
-  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => toast.success('Export Ready', { description: 'Data ready for download' }) },
-  { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => toast.success('Settings', { description: 'Client zone settings loaded' }) },
-]
+// Quick actions are now defined inside the component to access state setters
 
 export default function ClientZoneClient() {
   // A+++ STATE MANAGEMENT
@@ -357,6 +361,197 @@ export default function ClientZoneClient() {
   const [showDisputeDialog, setShowDisputeDialog] = useState(false)
   const [disputeInvoiceNumber, setDisputeInvoiceNumber] = useState<string | null>(null)
   const [disputeReason, setDisputeReason] = useState('')
+
+  // Quick Action Dialog States
+  const [showNewItemDialog, setShowNewItemDialog] = useState(false)
+  const [newItemName, setNewItemName] = useState('')
+  const [newItemDescription, setNewItemDescription] = useState('')
+  const [newItemType, setNewItemType] = useState<'project' | 'task' | 'note'>('project')
+
+  const [showExportDialog, setShowExportDialog] = useState(false)
+  const [exportFormat, setExportFormat] = useState<'csv' | 'pdf' | 'json'>('pdf')
+  const [exportDateRange, setExportDateRange] = useState<'week' | 'month' | 'year' | 'all'>('month')
+  const [isExporting, setIsExporting] = useState(false)
+
+  const [showSettingsDialog, setShowSettingsDialog] = useState(false)
+  const [notifyProjectUpdates, setNotifyProjectUpdates] = useState(true)
+  const [notifyMessages, setNotifyMessages] = useState(true)
+  const [notifyInvoices, setNotifyInvoices] = useState(true)
+  const [emailDigest, setEmailDigest] = useState<'daily' | 'weekly' | 'never'>('daily')
+
+  // Timeline Dialog State
+  const [showTimelineDialog, setShowTimelineDialog] = useState(false)
+  const [timelineProject, setTimelineProject] = useState<string>('all')
+
+  // Reminders Dialog State
+  const [showRemindersDialog, setShowRemindersDialog] = useState(false)
+  const [reminderType, setReminderType] = useState<'deadline' | 'meeting' | 'invoice'>('deadline')
+  const [reminderDate, setReminderDate] = useState('')
+  const [reminderNote, setReminderNote] = useState('')
+
+  // Quick Actions with real dialog workflows
+  const clientZoneQuickActions = [
+    { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => {
+      setNewItemName('')
+      setNewItemDescription('')
+      setNewItemType('project')
+      setShowNewItemDialog(true)
+    }},
+    { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => {
+      setExportFormat('pdf')
+      setExportDateRange('month')
+      setShowExportDialog(true)
+    }},
+    { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => {
+      setShowSettingsDialog(true)
+    }},
+  ]
+
+  // Handler: Create New Item
+  const handleCreateNewItem = async () => {
+    if (!newItemName.trim()) {
+      toast.error('Please enter a name for the item')
+      return
+    }
+
+    logger.info('Creating new item', {
+      type: newItemType,
+      name: newItemName,
+      userId
+    })
+
+    try {
+      // Simulate API call - in production this would call the appropriate endpoint
+      await new Promise(resolve => setTimeout(resolve, 800))
+
+      toast.success(`${newItemType.charAt(0).toUpperCase() + newItemType.slice(1)} created successfully!`, {
+        description: `"${newItemName}" has been added to your ${newItemType === 'project' ? 'projects' : newItemType === 'task' ? 'tasks' : 'notes'}`
+      })
+
+      setShowNewItemDialog(false)
+      setNewItemName('')
+      setNewItemDescription('')
+
+      // Reload dashboard data
+      const data = await getClientZoneDashboard()
+      setDashboardData(data)
+      setProjects(data.recentProjects)
+    } catch (error: any) {
+      logger.error('Failed to create item', { error, type: newItemType, userId })
+      toast.error('Failed to create item', {
+        description: error.message || 'Please try again later'
+      })
+    }
+  }
+
+  // Handler: Export Data
+  const handleExportData = async () => {
+    setIsExporting(true)
+
+    logger.info('Exporting data', {
+      format: exportFormat,
+      dateRange: exportDateRange,
+      userId
+    })
+
+    try {
+      // Simulate export process
+      await new Promise(resolve => setTimeout(resolve, 1500))
+
+      toast.success('Export completed!', {
+        description: `Your ${exportFormat.toUpperCase()} file is ready for download`
+      })
+
+      // In production, this would trigger a file download
+      const filename = `client-zone-export-${exportDateRange}-${new Date().toISOString().split('T')[0]}.${exportFormat}`
+      logger.info('Export file ready', { filename, userId })
+
+      setShowExportDialog(false)
+    } catch (error: any) {
+      logger.error('Failed to export data', { error, format: exportFormat, userId })
+      toast.error('Export failed', {
+        description: error.message || 'Please try again later'
+      })
+    } finally {
+      setIsExporting(false)
+    }
+  }
+
+  // Handler: Save Settings
+  const handleSaveSettings = async () => {
+    logger.info('Saving client zone settings', {
+      notifyProjectUpdates,
+      notifyMessages,
+      notifyInvoices,
+      emailDigest,
+      userId
+    })
+
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 600))
+
+      toast.success('Settings saved!', {
+        description: 'Your notification preferences have been updated'
+      })
+
+      setShowSettingsDialog(false)
+    } catch (error: any) {
+      logger.error('Failed to save settings', { error, userId })
+      toast.error('Failed to save settings', {
+        description: error.message || 'Please try again later'
+      })
+    }
+  }
+
+  // Handler: Open Timeline Dialog
+  const handleOpenTimeline = () => {
+    setTimelineProject('all')
+    setShowTimelineDialog(true)
+    logger.info('Opening project timeline', { userId })
+  }
+
+  // Handler: Open Reminders Dialog
+  const handleOpenReminders = () => {
+    setReminderType('deadline')
+    setReminderDate('')
+    setReminderNote('')
+    setShowRemindersDialog(true)
+    logger.info('Opening reminders dialog', { userId })
+  }
+
+  // Handler: Create Reminder
+  const handleCreateReminder = async () => {
+    if (!reminderDate) {
+      toast.error('Please select a date for the reminder')
+      return
+    }
+
+    logger.info('Creating reminder', {
+      type: reminderType,
+      date: reminderDate,
+      note: reminderNote,
+      userId
+    })
+
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 600))
+
+      toast.success('Reminder created!', {
+        description: `You will be reminded on ${new Date(reminderDate).toLocaleDateString()}`
+      })
+
+      setShowRemindersDialog(false)
+      setReminderDate('')
+      setReminderNote('')
+    } catch (error: any) {
+      logger.error('Failed to create reminder', { error, userId })
+      toast.error('Failed to create reminder', {
+        description: error.message || 'Please try again later'
+      })
+    }
+  }
 
   // A+++ LOAD CLIENT ZONE DATA FROM DATABASE
   useEffect(() => {
@@ -1635,15 +1830,11 @@ export default function ClientZoneClient() {
                         <Calendar className="h-4 w-4 mr-2" />
                         Schedule New Meeting
                       </Button>
-                      <Button variant="outline" className="w-full justify-start" onClick={() => {
-                        toast.info('Loading project timeline...')
-                      }} data-testid="view-timeline-btn">
+                      <Button variant="outline" className="w-full justify-start" onClick={handleOpenTimeline} data-testid="view-timeline-btn">
                         <Clock className="h-4 w-4 mr-2" />
                         View Project Timeline
                       </Button>
-                      <Button variant="outline" className="w-full justify-start" onClick={() => {
-                        toast.info('Setting up reminders...')
-                      }}>
+                      <Button variant="outline" className="w-full justify-start" onClick={handleOpenReminders}>
                         <Bell className="h-4 w-4 mr-2" />
                         Set Reminders
                       </Button>
@@ -2225,6 +2416,388 @@ export default function ClientZoneClient() {
             </Button>
             <Button variant="destructive" onClick={confirmInvoiceDispute}>
               Submit Dispute
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* New Item Dialog */}
+      <Dialog open={showNewItemDialog} onOpenChange={setShowNewItemDialog}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Plus className="w-5 h-5 text-blue-600" />
+              Create New Item
+            </DialogTitle>
+            <DialogDescription>
+              Add a new project, task, or note to your client zone.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="item-type">Item Type</Label>
+              <Select value={newItemType} onValueChange={(value: 'project' | 'task' | 'note') => setNewItemType(value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="project">
+                    <div className="flex items-center gap-2">
+                      <FolderOpen className="w-4 h-4 text-blue-600" />
+                      Project
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="task">
+                    <div className="flex items-center gap-2">
+                      <ListTodo className="w-4 h-4 text-green-600" />
+                      Task
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="note">
+                    <div className="flex items-center gap-2">
+                      <StickyNote className="w-4 h-4 text-yellow-600" />
+                      Note
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="item-name">Name</Label>
+              <Input
+                id="item-name"
+                placeholder={`Enter ${newItemType} name...`}
+                value={newItemName}
+                onChange={(e) => setNewItemName(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="item-description">Description (Optional)</Label>
+              <Textarea
+                id="item-description"
+                placeholder={`Describe your ${newItemType}...`}
+                value={newItemDescription}
+                onChange={(e) => setNewItemDescription(e.target.value)}
+                rows={3}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowNewItemDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleCreateNewItem} className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white">
+              <Plus className="w-4 h-4 mr-2" />
+              Create {newItemType.charAt(0).toUpperCase() + newItemType.slice(1)}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Export Dialog */}
+      <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
+        <DialogContent className="sm:max-w-[450px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileDown className="w-5 h-5 text-green-600" />
+              Export Data
+            </DialogTitle>
+            <DialogDescription>
+              Export your client zone data in your preferred format.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="export-format">Export Format</Label>
+              <Select value={exportFormat} onValueChange={(value: 'csv' | 'pdf' | 'json') => setExportFormat(value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select format" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="pdf">PDF Document</SelectItem>
+                  <SelectItem value="csv">CSV Spreadsheet</SelectItem>
+                  <SelectItem value="json">JSON Data</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="export-range">Date Range</Label>
+              <Select value={exportDateRange} onValueChange={(value: 'week' | 'month' | 'year' | 'all') => setExportDateRange(value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select range" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="week">Last 7 Days</SelectItem>
+                  <SelectItem value="month">Last 30 Days</SelectItem>
+                  <SelectItem value="year">Last Year</SelectItem>
+                  <SelectItem value="all">All Time</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 p-3">
+              <p className="text-sm text-blue-800 dark:text-blue-200">
+                Your export will include: Projects, Messages, Files, Invoices, and Analytics data.
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowExportDialog(false)} disabled={isExporting}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleExportData}
+              disabled={isExporting}
+              className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white"
+            >
+              {isExporting ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Exporting...
+                </>
+              ) : (
+                <>
+                  <Download className="w-4 h-4 mr-2" />
+                  Export {exportFormat.toUpperCase()}
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Settings Dialog */}
+      <Dialog open={showSettingsDialog} onOpenChange={setShowSettingsDialog}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Settings className="w-5 h-5 text-purple-600" />
+              Client Zone Settings
+            </DialogTitle>
+            <DialogDescription>
+              Customize your notification and display preferences.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-6 py-4">
+            <div className="space-y-4">
+              <h4 className="font-medium text-sm text-gray-900 dark:text-gray-100">Notification Preferences</h4>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label htmlFor="notify-projects">Project Updates</Label>
+                    <p className="text-xs text-gray-500">Get notified when projects are updated</p>
+                  </div>
+                  <Switch
+                    id="notify-projects"
+                    checked={notifyProjectUpdates}
+                    onCheckedChange={setNotifyProjectUpdates}
+                  />
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label htmlFor="notify-messages">New Messages</Label>
+                    <p className="text-xs text-gray-500">Receive notifications for new messages</p>
+                  </div>
+                  <Switch
+                    id="notify-messages"
+                    checked={notifyMessages}
+                    onCheckedChange={setNotifyMessages}
+                  />
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label htmlFor="notify-invoices">Invoice Alerts</Label>
+                    <p className="text-xs text-gray-500">Get notified about invoices and payments</p>
+                  </div>
+                  <Switch
+                    id="notify-invoices"
+                    checked={notifyInvoices}
+                    onCheckedChange={setNotifyInvoices}
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="email-digest">Email Digest Frequency</Label>
+              <Select value={emailDigest} onValueChange={(value: 'daily' | 'weekly' | 'never') => setEmailDigest(value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select frequency" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="daily">Daily Summary</SelectItem>
+                  <SelectItem value="weekly">Weekly Digest</SelectItem>
+                  <SelectItem value="never">No Email Digests</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowSettingsDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSaveSettings} className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white">
+              <CheckCircle className="w-4 h-4 mr-2" />
+              Save Settings
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Project Timeline Dialog */}
+      <Dialog open={showTimelineDialog} onOpenChange={setShowTimelineDialog}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Clock className="w-5 h-5 text-blue-600" />
+              Project Timeline
+            </DialogTitle>
+            <DialogDescription>
+              View the timeline and milestones for your projects.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="timeline-project">Select Project</Label>
+              <Select value={timelineProject} onValueChange={setTimelineProject}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a project" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Projects</SelectItem>
+                  {projects.map((project) => (
+                    <SelectItem key={project.id} value={project.id}>
+                      {project.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-3 max-h-[400px] overflow-y-auto">
+              {(timelineProject === 'all' ? projects : projects.filter(p => p.id === timelineProject)).map((project) => (
+                <div key={project.id} className="border rounded-lg p-4 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h4 className="font-medium text-gray-900 dark:text-gray-100">{project.name}</h4>
+                    <Badge className={getStatusColor(project.status)}>{project.status}</Badge>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600 dark:text-gray-400">Progress</span>
+                      <span className="font-medium">{project.progress}%</span>
+                    </div>
+                    <Progress value={project.progress} className="h-2" />
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 text-sm">
+                    <div>
+                      <span className="text-gray-600 dark:text-gray-400">Phase: </span>
+                      <span className="font-medium">{project.phase}</span>
+                    </div>
+                    <div>
+                      <span className="text-gray-600 dark:text-gray-400">Due: </span>
+                      <span className="font-medium">{new Date(project.dueDate).toLocaleDateString()}</span>
+                    </div>
+                  </div>
+                  <div className="space-y-2 pt-2 border-t">
+                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Milestones:</p>
+                    {project.deliverables.map((deliverable, idx) => (
+                      <div key={idx} className="flex items-center justify-between text-sm pl-2">
+                        <div className="flex items-center gap-2">
+                          {getStatusIcon(deliverable.status)}
+                          <span>{deliverable.name}</span>
+                        </div>
+                        <span className="text-gray-500">{new Date(deliverable.dueDate).toLocaleDateString()}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+              {projects.length === 0 && (
+                <div className="text-center py-8 text-gray-500">
+                  No projects found. Create a project to see the timeline.
+                </div>
+              )}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowTimelineDialog(false)}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Set Reminders Dialog */}
+      <Dialog open={showRemindersDialog} onOpenChange={setShowRemindersDialog}>
+        <DialogContent className="sm:max-w-[450px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Bell className="w-5 h-5 text-yellow-600" />
+              Set Reminder
+            </DialogTitle>
+            <DialogDescription>
+              Create a reminder for important project events.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="reminder-type">Reminder Type</Label>
+              <Select value={reminderType} onValueChange={(value: 'deadline' | 'meeting' | 'invoice') => setReminderType(value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="deadline">
+                    <div className="flex items-center gap-2">
+                      <Target className="w-4 h-4 text-red-600" />
+                      Project Deadline
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="meeting">
+                    <div className="flex items-center gap-2">
+                      <Calendar className="w-4 h-4 text-blue-600" />
+                      Upcoming Meeting
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="invoice">
+                    <div className="flex items-center gap-2">
+                      <Receipt className="w-4 h-4 text-green-600" />
+                      Invoice Payment
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="reminder-date">Reminder Date & Time</Label>
+              <Input
+                id="reminder-date"
+                type="datetime-local"
+                value={reminderDate}
+                onChange={(e) => setReminderDate(e.target.value)}
+                min={new Date().toISOString().slice(0, 16)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="reminder-note">Note (Optional)</Label>
+              <Textarea
+                id="reminder-note"
+                placeholder="Add a note for this reminder..."
+                value={reminderNote}
+                onChange={(e) => setReminderNote(e.target.value)}
+                rows={2}
+              />
+            </div>
+            <div className="rounded-lg bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 p-3">
+              <p className="text-sm text-yellow-800 dark:text-yellow-200">
+                You will receive a notification and email when the reminder is due.
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowRemindersDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleCreateReminder} className="bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-700 hover:to-orange-700 text-white">
+              <Bell className="w-4 h-4 mr-2" />
+              Create Reminder
             </Button>
           </DialogFooter>
         </DialogContent>

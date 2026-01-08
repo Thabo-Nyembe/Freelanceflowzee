@@ -203,11 +203,7 @@ const mockSupportTicketsActivities = [
   { id: '3', user: 'Agent Mike', action: 'Updated', target: 'knowledge base article', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'info' as const },
 ]
 
-const mockSupportTicketsQuickActions = [
-  { id: '1', label: 'New Ticket', icon: 'plus', action: () => toast.success('New Ticket', { description: 'Create a new support ticket' }), variant: 'default' as const },
-  { id: '2', label: 'My Queue', icon: 'inbox', action: () => toast.success('Your Queue', { description: '12 assigned tickets • 3 high priority • 2 overdue' }), variant: 'default' as const },
-  { id: '3', label: 'Macros', icon: 'zap', action: () => toast.success('Quick Macros', { description: '24 macros available • Click to apply common responses' }), variant: 'outline' as const },
-]
+// Quick actions will be defined inside the component to access state setters
 
 export default function SupportTicketsClient({ initialTickets, initialStats }: SupportTicketsClientProps) {
   const { tickets, loading, getStats } = useSupportTickets()
@@ -230,6 +226,26 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
     subject: '', description: '', category: 'general' as TicketCategory,
     priority: 'medium' as TicketPriority, customer_name: '', customer_email: ''
   })
+
+  // Dialog states for QuickActions
+  const [showMyQueueDialog, setShowMyQueueDialog] = useState(false)
+  const [showMacrosQuickDialog, setShowMacrosQuickDialog] = useState(false)
+
+  // My Queue data
+  const [myQueueTickets] = useState([
+    { id: '1', subject: 'Login issues', priority: 'high' as TicketPriority, status: 'open', customer: 'John Doe', createdAt: '2024-03-15T10:00:00Z', overdue: false },
+    { id: '2', subject: 'Billing inquiry', priority: 'medium' as TicketPriority, status: 'in-progress', customer: 'Jane Smith', createdAt: '2024-03-14T09:00:00Z', overdue: true },
+    { id: '3', subject: 'Feature request: Dark mode', priority: 'low' as TicketPriority, status: 'open', customer: 'Mike Chen', createdAt: '2024-03-13T14:00:00Z', overdue: false },
+    { id: '4', subject: 'API integration help', priority: 'high' as TicketPriority, status: 'pending', customer: 'Sarah Wilson', createdAt: '2024-03-12T11:00:00Z', overdue: true },
+    { id: '5', subject: 'Performance issue', priority: 'urgent' as TicketPriority, status: 'open', customer: 'Tom Brown', createdAt: '2024-03-15T08:00:00Z', overdue: false },
+  ])
+
+  // Quick actions with dialog-based workflows
+  const supportTicketsQuickActions = [
+    { id: '1', label: 'New Ticket', icon: 'plus', action: () => setShowCreateModal(true), variant: 'default' as const },
+    { id: '2', label: 'My Queue', icon: 'inbox', action: () => setShowMyQueueDialog(true), variant: 'default' as const },
+    { id: '3', label: 'Macros', icon: 'zap', action: () => setShowMacrosQuickDialog(true), variant: 'outline' as const },
+  ]
 
   const filteredTickets = useMemo(() => {
     return displayTickets.filter(t => {
@@ -1809,7 +1825,7 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockSupportTicketsQuickActions}
+            actions={supportTicketsQuickActions}
             variant="grid"
           />
         </div>
@@ -1976,6 +1992,210 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
                 </div>
               </div>
             </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* My Queue Dialog */}
+        <Dialog open={showMyQueueDialog} onOpenChange={setShowMyQueueDialog}>
+          <DialogContent className="max-w-3xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Inbox className="w-5 h-5 text-teal-600" />
+                My Ticket Queue
+              </DialogTitle>
+              <DialogDescription>
+                {myQueueTickets.length} tickets assigned to you
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              {/* Queue Stats */}
+              <div className="grid grid-cols-4 gap-4">
+                <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-center">
+                  <p className="text-2xl font-bold text-blue-600">{myQueueTickets.length}</p>
+                  <p className="text-xs text-muted-foreground">Total</p>
+                </div>
+                <div className="p-3 bg-red-50 dark:bg-red-900/20 rounded-lg text-center">
+                  <p className="text-2xl font-bold text-red-600">{myQueueTickets.filter(t => t.priority === 'high' || t.priority === 'urgent').length}</p>
+                  <p className="text-xs text-muted-foreground">High Priority</p>
+                </div>
+                <div className="p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg text-center">
+                  <p className="text-2xl font-bold text-orange-600">{myQueueTickets.filter(t => t.overdue).length}</p>
+                  <p className="text-xs text-muted-foreground">Overdue</p>
+                </div>
+                <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg text-center">
+                  <p className="text-2xl font-bold text-green-600">{myQueueTickets.filter(t => t.status === 'open').length}</p>
+                  <p className="text-xs text-muted-foreground">Open</p>
+                </div>
+              </div>
+
+              {/* Ticket List */}
+              <ScrollArea className="h-[400px]">
+                <div className="space-y-2">
+                  {myQueueTickets.map(ticket => (
+                    <div
+                      key={ticket.id}
+                      className="p-4 border rounded-lg hover:border-teal-500 hover:bg-teal-50/50 dark:hover:bg-teal-900/20 cursor-pointer transition-all"
+                      onClick={() => {
+                        setShowMyQueueDialog(false)
+                        const foundTicket = displayTickets.find(t => t.id === ticket.id)
+                        if (foundTicket) setSelectedTicket(foundTicket)
+                        toast.success('Ticket Selected', { description: `Now viewing: ${ticket.subject}` })
+                      }}
+                    >
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <h4 className="font-medium">{ticket.subject}</h4>
+                            {ticket.overdue && (
+                              <Badge className="bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 text-xs">
+                                <AlertTriangle className="w-3 h-3 mr-1" />
+                                Overdue
+                              </Badge>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                            <span className="flex items-center gap-1">
+                              <User className="w-3 h-3" />
+                              {ticket.customer}
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <Clock className="w-3 h-3" />
+                              {new Date(ticket.createdAt).toLocaleDateString()}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Badge className={getPriorityColor(ticket.priority)}>{ticket.priority}</Badge>
+                          <Badge className={getStatusColor(ticket.status)}>{ticket.status}</Badge>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+            </div>
+            <DialogFooter>
+              <button
+                onClick={() => setShowMyQueueDialog(false)}
+                className="px-4 py-2 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800"
+              >
+                Close
+              </button>
+              <button
+                onClick={() => {
+                  setShowMyQueueDialog(false)
+                  setActiveView('mine')
+                  setActiveTab('inbox')
+                  toast.success('View Changed', { description: 'Switched to My Tickets view' })
+                }}
+                className="px-4 py-2 bg-teal-600 text-white rounded-lg flex items-center gap-2"
+              >
+                <User className="w-4 h-4" />
+                View All My Tickets
+              </button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Quick Macros Dialog */}
+        <Dialog open={showMacrosQuickDialog} onOpenChange={setShowMacrosQuickDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Zap className="w-5 h-5 text-yellow-600" />
+                Quick Macros
+              </DialogTitle>
+              <DialogDescription>
+                {mockMacros.length} macros available - Select one to copy or apply
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              {/* Macro Stats */}
+              <div className="grid grid-cols-3 gap-4">
+                <div className="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg text-center">
+                  <p className="text-2xl font-bold text-purple-600">{mockMacros.length}</p>
+                  <p className="text-xs text-muted-foreground">Total Macros</p>
+                </div>
+                <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-center">
+                  <p className="text-2xl font-bold text-blue-600">{mockMacros.reduce((acc, m) => acc + m.usageCount, 0)}</p>
+                  <p className="text-xs text-muted-foreground">Total Uses</p>
+                </div>
+                <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg text-center">
+                  <p className="text-2xl font-bold text-green-600">{new Set(mockMacros.map(m => m.category)).size}</p>
+                  <p className="text-xs text-muted-foreground">Categories</p>
+                </div>
+              </div>
+
+              {/* Macro List */}
+              <ScrollArea className="h-[350px]">
+                <div className="space-y-2">
+                  {mockMacros.map(macro => (
+                    <div
+                      key={macro.id}
+                      className="p-4 border rounded-lg hover:border-yellow-500 hover:bg-yellow-50/50 dark:hover:bg-yellow-900/20 transition-all"
+                    >
+                      <div className="flex items-start justify-between mb-2">
+                        <div>
+                          <h4 className="font-medium">{macro.name}</h4>
+                          <p className="text-sm text-muted-foreground">{macro.description}</p>
+                        </div>
+                        <Badge variant="secondary">{macro.category}</Badge>
+                      </div>
+                      <p className="text-sm bg-gray-50 dark:bg-gray-800/50 p-3 rounded-lg mb-3 line-clamp-2">
+                        {macro.content}
+                      </p>
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-muted-foreground">Used {macro.usageCount} times</span>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => {
+                              navigator.clipboard.writeText(macro.content)
+                              toast.success('Copied to Clipboard', { description: `"${macro.name}" macro copied` })
+                            }}
+                            className="px-3 py-1.5 text-sm border rounded hover:bg-gray-50 dark:hover:bg-gray-800 flex items-center gap-1"
+                          >
+                            <Copy className="w-3 h-3" />
+                            Copy
+                          </button>
+                          {selectedTicket && (
+                            <button
+                              onClick={() => {
+                                setReplyContent(macro.content)
+                                setShowMacrosQuickDialog(false)
+                                toast.success('Macro Applied', { description: `"${macro.name}" inserted into reply` })
+                              }}
+                              className="px-3 py-1.5 text-sm bg-teal-600 text-white rounded flex items-center gap-1"
+                            >
+                              <Send className="w-3 h-3" />
+                              Apply
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+            </div>
+            <DialogFooter>
+              <button
+                onClick={() => setShowMacrosQuickDialog(false)}
+                className="px-4 py-2 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800"
+              >
+                Close
+              </button>
+              <button
+                onClick={() => {
+                  setShowMacrosQuickDialog(false)
+                  setActiveTab('macros')
+                  toast.success('Navigation', { description: 'Opened Macros Management tab' })
+                }}
+                className="px-4 py-2 bg-teal-600 text-white rounded-lg flex items-center gap-2"
+              >
+                <Settings className="w-4 h-4" />
+                Manage All Macros
+              </button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
       </div>

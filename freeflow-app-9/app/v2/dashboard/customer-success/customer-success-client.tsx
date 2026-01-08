@@ -15,7 +15,18 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
+  DialogDescription,
 } from '@/components/ui/dialog'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import {
   Heart,
   AlertTriangle,
@@ -436,20 +447,7 @@ const mockCSActivities = [
   { id: '3', user: 'System', action: 'Detected', target: 'usage spike at GlobalTech', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'update' as const },
 ]
 
-const mockCSQuickActions = [
-  { id: '1', label: 'New Playbook', icon: 'plus', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1500)),
-    { loading: 'Creating new playbook...', success: 'Playbook created successfully', error: 'Failed to create playbook' }
-  ), variant: 'default' as const },
-  { id: '2', label: 'Health Report', icon: 'activity', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1500)),
-    { loading: 'Generating health report...', success: 'Health report generated', error: 'Failed to generate report' }
-  ), variant: 'default' as const },
-  { id: '3', label: 'Export Data', icon: 'download', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1500)),
-    { loading: 'Exporting customer success data...', success: 'Data exported successfully', error: 'Failed to export data' }
-  ), variant: 'outline' as const },
-]
+// Quick actions will be defined inside component to access state setters
 
 export default function CustomerSuccessClient() {
   const [customers] = useState<Customer[]>(mockCustomers)
@@ -461,6 +459,268 @@ export default function CustomerSuccessClient() {
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null)
   const [activeTab, setActiveTab] = useState('portfolio')
   const [settingsTab, setSettingsTab] = useState('general')
+
+  // Dialog states for Quick Actions
+  const [showNewPlaybookDialog, setShowNewPlaybookDialog] = useState(false)
+  const [showHealthReportDialog, setShowHealthReportDialog] = useState(false)
+  const [showExportDataDialog, setShowExportDataDialog] = useState(false)
+  const [showAddCustomerDialog, setShowAddCustomerDialog] = useState(false)
+  const [showScheduleCallDialog, setShowScheduleCallDialog] = useState(false)
+  const [showSendCampaignDialog, setShowSendCampaignDialog] = useState(false)
+  const [showSetGoalsDialog, setShowSetGoalsDialog] = useState(false)
+  const [showRecognizeDialog, setShowRecognizeDialog] = useState(false)
+  const [showSendGiftDialog, setShowSendGiftDialog] = useState(false)
+  const [showGenerateReportDialog, setShowGenerateReportDialog] = useState(false)
+  const [showIntroduceDialog, setShowIntroduceDialog] = useState(false)
+  const [showAddCSMDialog, setShowAddCSMDialog] = useState(false)
+
+  // Form states
+  const [newPlaybookData, setNewPlaybookData] = useState({ name: '', trigger: '', description: '' })
+  const [healthReportData, setHealthReportData] = useState({ period: 'last_30_days', format: 'pdf', includeDetails: true })
+  const [exportDataData, setExportDataData] = useState({ format: 'csv', scope: 'all', dateRange: 'all_time' })
+  const [newCustomerData, setNewCustomerData] = useState({ name: '', industry: '', tier: 'starter', csm: '' })
+  const [scheduleCallData, setScheduleCallData] = useState({ customer: '', date: '', time: '', purpose: '' })
+  const [campaignData, setCampaignData] = useState({ subject: '', template: '', recipients: 'all' })
+  const [goalsData, setGoalsData] = useState({ metric: '', target: '', deadline: '' })
+  const [recognizeData, setRecognizeData] = useState({ customer: '', achievement: '', message: '' })
+  const [giftData, setGiftData] = useState({ customer: '', giftType: '', message: '' })
+  const [reportData, setReportData] = useState({ type: 'summary', period: 'monthly', format: 'pdf' })
+  const [introduceData, setIntroduceData] = useState({ from: '', to: '', context: '' })
+  const [newCSMData, setNewCSMData] = useState({ name: '', email: '', capacity: '' })
+  const [isProcessing, setIsProcessing] = useState(false)
+
+  // Quick actions with dialog handlers
+  const csQuickActions = [
+    { id: '1', label: 'New Playbook', icon: 'plus', action: () => setShowNewPlaybookDialog(true), variant: 'default' as const },
+    { id: '2', label: 'Health Report', icon: 'activity', action: () => setShowHealthReportDialog(true), variant: 'default' as const },
+    { id: '3', label: 'Export Data', icon: 'download', action: () => setShowExportDataDialog(true), variant: 'outline' as const },
+  ]
+
+  // Handler functions
+  const handleCreatePlaybook = async () => {
+    if (!newPlaybookData.name || !newPlaybookData.trigger) {
+      toast.error('Please fill in all required fields')
+      return
+    }
+    setIsProcessing(true)
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1500))
+      toast.success('Playbook created successfully', {
+        description: `"${newPlaybookData.name}" is now active and ready to use.`
+      })
+      setShowNewPlaybookDialog(false)
+      setNewPlaybookData({ name: '', trigger: '', description: '' })
+    } catch {
+      toast.error('Failed to create playbook')
+    } finally {
+      setIsProcessing(false)
+    }
+  }
+
+  const handleGenerateHealthReport = async () => {
+    setIsProcessing(true)
+    try {
+      await new Promise(resolve => setTimeout(resolve, 2000))
+      toast.success('Health report generated', {
+        description: `Report for ${healthReportData.period.replace('_', ' ')} has been created in ${healthReportData.format.toUpperCase()} format.`
+      })
+      setShowHealthReportDialog(false)
+    } catch {
+      toast.error('Failed to generate health report')
+    } finally {
+      setIsProcessing(false)
+    }
+  }
+
+  const handleExportData = async () => {
+    setIsProcessing(true)
+    try {
+      await new Promise(resolve => setTimeout(resolve, 2000))
+      toast.success('Data exported successfully', {
+        description: `Customer success data exported as ${exportDataData.format.toUpperCase()} file.`
+      })
+      setShowExportDataDialog(false)
+    } catch {
+      toast.error('Failed to export data')
+    } finally {
+      setIsProcessing(false)
+    }
+  }
+
+  const handleAddCustomer = async () => {
+    if (!newCustomerData.name || !newCustomerData.industry) {
+      toast.error('Please fill in all required fields')
+      return
+    }
+    setIsProcessing(true)
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1500))
+      toast.success('Customer added successfully', {
+        description: `${newCustomerData.name} has been added to your portfolio.`
+      })
+      setShowAddCustomerDialog(false)
+      setNewCustomerData({ name: '', industry: '', tier: 'starter', csm: '' })
+    } catch {
+      toast.error('Failed to add customer')
+    } finally {
+      setIsProcessing(false)
+    }
+  }
+
+  const handleScheduleCall = async () => {
+    if (!scheduleCallData.customer || !scheduleCallData.date || !scheduleCallData.time) {
+      toast.error('Please fill in all required fields')
+      return
+    }
+    setIsProcessing(true)
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1500))
+      toast.success('Call scheduled', {
+        description: `Call with ${scheduleCallData.customer} scheduled for ${scheduleCallData.date} at ${scheduleCallData.time}.`
+      })
+      setShowScheduleCallDialog(false)
+      setScheduleCallData({ customer: '', date: '', time: '', purpose: '' })
+    } catch {
+      toast.error('Failed to schedule call')
+    } finally {
+      setIsProcessing(false)
+    }
+  }
+
+  const handleSendCampaign = async () => {
+    if (!campaignData.subject || !campaignData.template) {
+      toast.error('Please fill in all required fields')
+      return
+    }
+    setIsProcessing(true)
+    try {
+      await new Promise(resolve => setTimeout(resolve, 2000))
+      toast.success('Campaign sent', {
+        description: `Email campaign "${campaignData.subject}" has been sent to ${campaignData.recipients} customers.`
+      })
+      setShowSendCampaignDialog(false)
+      setCampaignData({ subject: '', template: '', recipients: 'all' })
+    } catch {
+      toast.error('Failed to send campaign')
+    } finally {
+      setIsProcessing(false)
+    }
+  }
+
+  const handleSetGoals = async () => {
+    if (!goalsData.metric || !goalsData.target) {
+      toast.error('Please fill in all required fields')
+      return
+    }
+    setIsProcessing(true)
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1500))
+      toast.success('Goals set successfully', {
+        description: `Target for ${goalsData.metric}: ${goalsData.target}`
+      })
+      setShowSetGoalsDialog(false)
+      setGoalsData({ metric: '', target: '', deadline: '' })
+    } catch {
+      toast.error('Failed to set goals')
+    } finally {
+      setIsProcessing(false)
+    }
+  }
+
+  const handleRecognize = async () => {
+    if (!recognizeData.customer || !recognizeData.achievement) {
+      toast.error('Please fill in all required fields')
+      return
+    }
+    setIsProcessing(true)
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1500))
+      toast.success('Recognition sent', {
+        description: `Customer win for ${recognizeData.customer} has been recorded and shared.`
+      })
+      setShowRecognizeDialog(false)
+      setRecognizeData({ customer: '', achievement: '', message: '' })
+    } catch {
+      toast.error('Failed to send recognition')
+    } finally {
+      setIsProcessing(false)
+    }
+  }
+
+  const handleSendGift = async () => {
+    if (!giftData.customer || !giftData.giftType) {
+      toast.error('Please fill in all required fields')
+      return
+    }
+    setIsProcessing(true)
+    try {
+      await new Promise(resolve => setTimeout(resolve, 2000))
+      toast.success('Gift sent', {
+        description: `${giftData.giftType} gift has been sent to ${giftData.customer}.`
+      })
+      setShowSendGiftDialog(false)
+      setGiftData({ customer: '', giftType: '', message: '' })
+    } catch {
+      toast.error('Failed to send gift')
+    } finally {
+      setIsProcessing(false)
+    }
+  }
+
+  const handleGenerateReport = async () => {
+    setIsProcessing(true)
+    try {
+      await new Promise(resolve => setTimeout(resolve, 2000))
+      toast.success('Report generated', {
+        description: `${reportData.type} report for ${reportData.period} period has been created.`
+      })
+      setShowGenerateReportDialog(false)
+    } catch {
+      toast.error('Failed to generate report')
+    } finally {
+      setIsProcessing(false)
+    }
+  }
+
+  const handleIntroduce = async () => {
+    if (!introduceData.from || !introduceData.to) {
+      toast.error('Please fill in all required fields')
+      return
+    }
+    setIsProcessing(true)
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1500))
+      toast.success('Introduction sent', {
+        description: `Introduction email sent between ${introduceData.from} and ${introduceData.to}.`
+      })
+      setShowIntroduceDialog(false)
+      setIntroduceData({ from: '', to: '', context: '' })
+    } catch {
+      toast.error('Failed to send introduction')
+    } finally {
+      setIsProcessing(false)
+    }
+  }
+
+  const handleAddCSM = async () => {
+    if (!newCSMData.name || !newCSMData.email) {
+      toast.error('Please fill in all required fields')
+      return
+    }
+    setIsProcessing(true)
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1500))
+      toast.success('CSM added', {
+        description: `${newCSMData.name} has been added to the team.`
+      })
+      setShowAddCSMDialog(false)
+      setNewCSMData({ name: '', email: '', capacity: '' })
+    } catch {
+      toast.error('Failed to add CSM')
+    } finally {
+      setIsProcessing(false)
+    }
+  }
 
   // Filtered customers
   const filteredCustomers = useMemo(() => {
@@ -598,11 +858,11 @@ export default function CustomerSuccessClient() {
               </p>
             </div>
             <div className="flex items-center gap-3">
-              <Button variant="secondary" className="bg-white/10 hover:bg-white/20 text-white border-0">
+              <Button variant="secondary" className="bg-white/10 hover:bg-white/20 text-white border-0" onClick={() => setActiveTab('settings')}>
                 <Bell className="h-4 w-4 mr-2" />
                 Alerts
               </Button>
-              <Button className="bg-white text-emerald-600 hover:bg-white/90">
+              <Button className="bg-white text-emerald-600 hover:bg-white/90" onClick={() => setShowAddCustomerDialog(true)}>
                 <Plus className="h-4 w-4 mr-2" />
                 Add Customer
               </Button>
@@ -685,7 +945,7 @@ export default function CustomerSuccessClient() {
                     <p className="text-2xl font-bold">{stats.avgHealth.toFixed(0)}</p>
                     <p className="text-emerald-100 text-sm">Avg Health</p>
                   </div>
-                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10" onClick={() => setShowAddCustomerDialog(true)}>
                     <Plus className="h-4 w-4 mr-2" />
                     Add Customer
                   </Button>
@@ -696,16 +956,16 @@ export default function CustomerSuccessClient() {
             {/* Quick Actions */}
             <div className="grid grid-cols-4 gap-4">
               {[
-                { icon: Plus, label: 'Add Customer', desc: 'New account', color: 'text-emerald-500' },
-                { icon: Phone, label: 'Schedule Call', desc: 'Book meeting', color: 'text-blue-500' },
-                { icon: Mail, label: 'Send Campaign', desc: 'Email blast', color: 'text-purple-500' },
-                { icon: Target, label: 'Set Goals', desc: 'Define targets', color: 'text-amber-500' },
-                { icon: Trophy, label: 'Recognize', desc: 'Customer wins', color: 'text-pink-500' },
-                { icon: Gift, label: 'Send Gift', desc: 'Appreciation', color: 'text-red-500' },
-                { icon: FileText, label: 'Report', desc: 'Generate report', color: 'text-cyan-500' },
-                { icon: Handshake, label: 'Introduce', desc: 'Make intro', color: 'text-green-500' },
+                { icon: Plus, label: 'Add Customer', desc: 'New account', color: 'text-emerald-500', onClick: () => setShowAddCustomerDialog(true) },
+                { icon: Phone, label: 'Schedule Call', desc: 'Book meeting', color: 'text-blue-500', onClick: () => setShowScheduleCallDialog(true) },
+                { icon: Mail, label: 'Send Campaign', desc: 'Email blast', color: 'text-purple-500', onClick: () => setShowSendCampaignDialog(true) },
+                { icon: Target, label: 'Set Goals', desc: 'Define targets', color: 'text-amber-500', onClick: () => setShowSetGoalsDialog(true) },
+                { icon: Trophy, label: 'Recognize', desc: 'Customer wins', color: 'text-pink-500', onClick: () => setShowRecognizeDialog(true) },
+                { icon: Gift, label: 'Send Gift', desc: 'Appreciation', color: 'text-red-500', onClick: () => setShowSendGiftDialog(true) },
+                { icon: FileText, label: 'Report', desc: 'Generate report', color: 'text-cyan-500', onClick: () => setShowGenerateReportDialog(true) },
+                { icon: Handshake, label: 'Introduce', desc: 'Make intro', color: 'text-green-500', onClick: () => setShowIntroduceDialog(true) },
               ].map((action, i) => (
-                <Card key={i} className="p-4 cursor-pointer hover:shadow-lg transition-all hover:scale-105">
+                <Card key={i} className="p-4 cursor-pointer hover:shadow-lg transition-all hover:scale-105" onClick={action.onClick}>
                   <action.icon className={`h-8 w-8 ${action.color} mb-3`} />
                   <h4 className="font-semibold text-gray-900 dark:text-white">{action.label}</h4>
                   <p className="text-sm text-gray-500 dark:text-gray-400">{action.desc}</p>
@@ -863,7 +1123,7 @@ export default function CustomerSuccessClient() {
                     <p className="text-2xl font-bold">{customers.filter(c => c.healthStatus === 'healthy').length}</p>
                     <p className="text-green-100 text-sm">Healthy</p>
                   </div>
-                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10" onClick={() => setShowHealthReportDialog(true)}>
                     <Download className="h-4 w-4 mr-2" />
                     Export
                   </Button>
@@ -1006,7 +1266,7 @@ export default function CustomerSuccessClient() {
                     <p className="text-2xl font-bold">{customers.filter(c => c.renewalRisk === 'low').length}</p>
                     <p className="text-blue-100 text-sm">On Track</p>
                   </div>
-                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10" onClick={() => setShowScheduleCallDialog(true)}>
                     <Calendar className="h-4 w-4 mr-2" />
                     Schedule
                   </Button>
@@ -1090,7 +1350,7 @@ export default function CustomerSuccessClient() {
                     <p className="text-2xl font-bold">{(playbooks.reduce((sum, p) => sum + p.successRate, 0) / playbooks.length).toFixed(0)}%</p>
                     <p className="text-orange-100 text-sm">Avg Success Rate</p>
                   </div>
-                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10" onClick={() => setShowNewPlaybookDialog(true)}>
                     <Plus className="h-4 w-4 mr-2" />
                     Create
                   </Button>
@@ -1101,16 +1361,16 @@ export default function CustomerSuccessClient() {
             {/* Quick Actions */}
             <div className="grid grid-cols-4 gap-4">
               {[
-                { icon: Plus, label: 'New Playbook', desc: 'Create new', color: 'text-orange-500' },
-                { icon: BookOpen, label: 'Templates', desc: 'Start fast', color: 'text-blue-500' },
-                { icon: Target, label: 'Set Triggers', desc: 'Automation', color: 'text-purple-500' },
-                { icon: BarChart3, label: 'Analytics', desc: 'Performance', color: 'text-green-500' },
-                { icon: Users, label: 'Enrollments', desc: 'Active runs', color: 'text-pink-500' },
-                { icon: Clock, label: 'Schedule', desc: 'Timing', color: 'text-amber-500' },
-                { icon: GraduationCap, label: 'Training', desc: 'Best practices', color: 'text-cyan-500' },
-                { icon: Download, label: 'Export', desc: 'Share playbook', color: 'text-gray-500' },
+                { icon: Plus, label: 'New Playbook', desc: 'Create new', color: 'text-orange-500', onClick: () => setShowNewPlaybookDialog(true) },
+                { icon: BookOpen, label: 'Templates', desc: 'Start fast', color: 'text-blue-500', onClick: () => toast.info('Templates library', { description: 'Browse pre-built playbook templates' }) },
+                { icon: Target, label: 'Set Triggers', desc: 'Automation', color: 'text-purple-500', onClick: () => setShowNewPlaybookDialog(true) },
+                { icon: BarChart3, label: 'Analytics', desc: 'Performance', color: 'text-green-500', onClick: () => setShowHealthReportDialog(true) },
+                { icon: Users, label: 'Enrollments', desc: 'Active runs', color: 'text-pink-500', onClick: () => toast.info('Active Enrollments', { description: `${playbooks.reduce((sum, p) => sum + p.activeAccounts, 0)} accounts currently enrolled in playbooks` }) },
+                { icon: Clock, label: 'Schedule', desc: 'Timing', color: 'text-amber-500', onClick: () => setShowScheduleCallDialog(true) },
+                { icon: GraduationCap, label: 'Training', desc: 'Best practices', color: 'text-cyan-500', onClick: () => toast.info('Training Resources', { description: 'Opening CS training materials...' }) },
+                { icon: Download, label: 'Export', desc: 'Share playbook', color: 'text-gray-500', onClick: () => setShowExportDataDialog(true) },
               ].map((action, i) => (
-                <Card key={i} className="p-4 cursor-pointer hover:shadow-lg transition-all hover:scale-105">
+                <Card key={i} className="p-4 cursor-pointer hover:shadow-lg transition-all hover:scale-105" onClick={action.onClick}>
                   <action.icon className={`h-8 w-8 ${action.color} mb-3`} />
                   <h4 className="font-semibold text-gray-900 dark:text-white">{action.label}</h4>
                   <p className="text-sm text-gray-500 dark:text-gray-400">{action.desc}</p>
@@ -1120,7 +1380,7 @@ export default function CustomerSuccessClient() {
 
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold">All Playbooks</h2>
-              <Button>
+              <Button onClick={() => setShowNewPlaybookDialog(true)}>
                 <Plus className="h-4 w-4 mr-2" />
                 Create Playbook
               </Button>
@@ -1185,7 +1445,7 @@ export default function CustomerSuccessClient() {
                     <p className="text-2xl font-bold">{csms.reduce((sum, c) => sum + c.accounts, 0)}</p>
                     <p className="text-pink-100 text-sm">Total Accounts</p>
                   </div>
-                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10" onClick={() => setShowAddCSMDialog(true)}>
                     <Plus className="h-4 w-4 mr-2" />
                     Add CSM
                   </Button>
@@ -1262,7 +1522,7 @@ export default function CustomerSuccessClient() {
                 </div>
                 <div className="flex items-center gap-4">
                   <Badge className="bg-green-500/20 text-green-300 border-green-500/30">Active</Badge>
-                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10" onClick={() => setShowExportDataDialog(true)}>
                     <Download className="h-4 w-4 mr-2" />
                     Export Config
                   </Button>
@@ -1615,7 +1875,7 @@ export default function CustomerSuccessClient() {
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockCSQuickActions}
+            actions={csQuickActions}
             variant="grid"
           />
         </div>
@@ -1886,6 +2146,794 @@ export default function CustomerSuccessClient() {
               </Tabs>
             </>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* New Playbook Dialog */}
+      <Dialog open={showNewPlaybookDialog} onOpenChange={setShowNewPlaybookDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Create New Playbook</DialogTitle>
+            <DialogDescription>
+              Define a customer success playbook with automated triggers and actions.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="playbook-name">Playbook Name *</Label>
+              <Input
+                id="playbook-name"
+                placeholder="e.g., At-Risk Recovery"
+                value={newPlaybookData.name}
+                onChange={(e) => setNewPlaybookData({ ...newPlaybookData, name: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="playbook-trigger">Trigger Condition *</Label>
+              <Select
+                value={newPlaybookData.trigger}
+                onValueChange={(value) => setNewPlaybookData({ ...newPlaybookData, trigger: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select trigger condition" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="health_drop">Health Score Drops Below 70</SelectItem>
+                  <SelectItem value="renewal_90">90 Days Before Renewal</SelectItem>
+                  <SelectItem value="renewal_60">60 Days Before Renewal</SelectItem>
+                  <SelectItem value="usage_decline">Usage Declines 20%+</SelectItem>
+                  <SelectItem value="champion_left">Champion Leaves</SelectItem>
+                  <SelectItem value="high_health">Health Score Above 85</SelectItem>
+                  <SelectItem value="new_customer">New Customer Onboarding</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="playbook-desc">Description</Label>
+              <Textarea
+                id="playbook-desc"
+                placeholder="Describe the playbook goals and steps..."
+                value={newPlaybookData.description}
+                onChange={(e) => setNewPlaybookData({ ...newPlaybookData, description: e.target.value })}
+                rows={3}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowNewPlaybookDialog(false)}>Cancel</Button>
+            <Button onClick={handleCreatePlaybook} disabled={isProcessing}>
+              {isProcessing ? 'Creating...' : 'Create Playbook'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Health Report Dialog */}
+      <Dialog open={showHealthReportDialog} onOpenChange={setShowHealthReportDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Generate Health Report</DialogTitle>
+            <DialogDescription>
+              Create a comprehensive customer health analysis report.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Time Period</Label>
+              <Select
+                value={healthReportData.period}
+                onValueChange={(value) => setHealthReportData({ ...healthReportData, period: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="last_7_days">Last 7 Days</SelectItem>
+                  <SelectItem value="last_30_days">Last 30 Days</SelectItem>
+                  <SelectItem value="last_90_days">Last 90 Days</SelectItem>
+                  <SelectItem value="last_year">Last Year</SelectItem>
+                  <SelectItem value="all_time">All Time</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Export Format</Label>
+              <Select
+                value={healthReportData.format}
+                onValueChange={(value) => setHealthReportData({ ...healthReportData, format: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="pdf">PDF Document</SelectItem>
+                  <SelectItem value="excel">Excel Spreadsheet</SelectItem>
+                  <SelectItem value="csv">CSV File</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+              <div>
+                <p className="font-medium text-sm">Include Detailed Metrics</p>
+                <p className="text-xs text-gray-500">Add per-customer breakdowns</p>
+              </div>
+              <Switch
+                checked={healthReportData.includeDetails}
+                onCheckedChange={(checked) => setHealthReportData({ ...healthReportData, includeDetails: checked })}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowHealthReportDialog(false)}>Cancel</Button>
+            <Button onClick={handleGenerateHealthReport} disabled={isProcessing}>
+              {isProcessing ? 'Generating...' : 'Generate Report'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Export Data Dialog */}
+      <Dialog open={showExportDataDialog} onOpenChange={setShowExportDataDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Export Customer Success Data</DialogTitle>
+            <DialogDescription>
+              Download your customer success data for analysis or backup.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Export Format</Label>
+              <Select
+                value={exportDataData.format}
+                onValueChange={(value) => setExportDataData({ ...exportDataData, format: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="csv">CSV File</SelectItem>
+                  <SelectItem value="json">JSON File</SelectItem>
+                  <SelectItem value="excel">Excel Spreadsheet</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Data Scope</Label>
+              <Select
+                value={exportDataData.scope}
+                onValueChange={(value) => setExportDataData({ ...exportDataData, scope: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Customers</SelectItem>
+                  <SelectItem value="healthy">Healthy Customers Only</SelectItem>
+                  <SelectItem value="at_risk">At-Risk Customers Only</SelectItem>
+                  <SelectItem value="enterprise">Enterprise Tier Only</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Date Range</Label>
+              <Select
+                value={exportDataData.dateRange}
+                onValueChange={(value) => setExportDataData({ ...exportDataData, dateRange: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all_time">All Time</SelectItem>
+                  <SelectItem value="this_year">This Year</SelectItem>
+                  <SelectItem value="this_quarter">This Quarter</SelectItem>
+                  <SelectItem value="this_month">This Month</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowExportDataDialog(false)}>Cancel</Button>
+            <Button onClick={handleExportData} disabled={isProcessing}>
+              {isProcessing ? 'Exporting...' : 'Export Data'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Customer Dialog */}
+      <Dialog open={showAddCustomerDialog} onOpenChange={setShowAddCustomerDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Add New Customer</DialogTitle>
+            <DialogDescription>
+              Add a new customer to your success portfolio.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="customer-name">Company Name *</Label>
+              <Input
+                id="customer-name"
+                placeholder="e.g., Acme Corporation"
+                value={newCustomerData.name}
+                onChange={(e) => setNewCustomerData({ ...newCustomerData, name: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="customer-industry">Industry *</Label>
+              <Select
+                value={newCustomerData.industry}
+                onValueChange={(value) => setNewCustomerData({ ...newCustomerData, industry: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select industry" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="technology">Technology</SelectItem>
+                  <SelectItem value="financial">Financial Services</SelectItem>
+                  <SelectItem value="healthcare">Healthcare</SelectItem>
+                  <SelectItem value="retail">Retail</SelectItem>
+                  <SelectItem value="manufacturing">Manufacturing</SelectItem>
+                  <SelectItem value="education">Education</SelectItem>
+                  <SelectItem value="other">Other</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Account Tier</Label>
+              <Select
+                value={newCustomerData.tier}
+                onValueChange={(value) => setNewCustomerData({ ...newCustomerData, tier: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="enterprise">Enterprise</SelectItem>
+                  <SelectItem value="business">Business</SelectItem>
+                  <SelectItem value="professional">Professional</SelectItem>
+                  <SelectItem value="starter">Starter</SelectItem>
+                  <SelectItem value="trial">Trial</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Assigned CSM</Label>
+              <Select
+                value={newCustomerData.csm}
+                onValueChange={(value) => setNewCustomerData({ ...newCustomerData, csm: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select CSM" />
+                </SelectTrigger>
+                <SelectContent>
+                  {csms.map(csm => (
+                    <SelectItem key={csm.id} value={csm.id}>{csm.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAddCustomerDialog(false)}>Cancel</Button>
+            <Button onClick={handleAddCustomer} disabled={isProcessing}>
+              {isProcessing ? 'Adding...' : 'Add Customer'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Schedule Call Dialog */}
+      <Dialog open={showScheduleCallDialog} onOpenChange={setShowScheduleCallDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Schedule Customer Call</DialogTitle>
+            <DialogDescription>
+              Book a meeting with a customer.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Customer *</Label>
+              <Select
+                value={scheduleCallData.customer}
+                onValueChange={(value) => setScheduleCallData({ ...scheduleCallData, customer: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select customer" />
+                </SelectTrigger>
+                <SelectContent>
+                  {customers.map(c => (
+                    <SelectItem key={c.id} value={c.name}>{c.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="call-date">Date *</Label>
+                <Input
+                  id="call-date"
+                  type="date"
+                  value={scheduleCallData.date}
+                  onChange={(e) => setScheduleCallData({ ...scheduleCallData, date: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="call-time">Time *</Label>
+                <Input
+                  id="call-time"
+                  type="time"
+                  value={scheduleCallData.time}
+                  onChange={(e) => setScheduleCallData({ ...scheduleCallData, time: e.target.value })}
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="call-purpose">Purpose</Label>
+              <Select
+                value={scheduleCallData.purpose}
+                onValueChange={(value) => setScheduleCallData({ ...scheduleCallData, purpose: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select purpose" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="qbr">Quarterly Business Review</SelectItem>
+                  <SelectItem value="checkin">Regular Check-in</SelectItem>
+                  <SelectItem value="onboarding">Onboarding</SelectItem>
+                  <SelectItem value="renewal">Renewal Discussion</SelectItem>
+                  <SelectItem value="escalation">Escalation</SelectItem>
+                  <SelectItem value="expansion">Expansion Discussion</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowScheduleCallDialog(false)}>Cancel</Button>
+            <Button onClick={handleScheduleCall} disabled={isProcessing}>
+              {isProcessing ? 'Scheduling...' : 'Schedule Call'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Send Campaign Dialog */}
+      <Dialog open={showSendCampaignDialog} onOpenChange={setShowSendCampaignDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Send Email Campaign</DialogTitle>
+            <DialogDescription>
+              Send a targeted email campaign to your customers.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="campaign-subject">Email Subject *</Label>
+              <Input
+                id="campaign-subject"
+                placeholder="e.g., Important Product Update"
+                value={campaignData.subject}
+                onChange={(e) => setCampaignData({ ...campaignData, subject: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Email Template *</Label>
+              <Select
+                value={campaignData.template}
+                onValueChange={(value) => setCampaignData({ ...campaignData, template: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select template" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="product_update">Product Update</SelectItem>
+                  <SelectItem value="feature_announcement">Feature Announcement</SelectItem>
+                  <SelectItem value="best_practices">Best Practices</SelectItem>
+                  <SelectItem value="renewal_reminder">Renewal Reminder</SelectItem>
+                  <SelectItem value="survey">Customer Survey</SelectItem>
+                  <SelectItem value="event_invite">Event Invitation</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Recipients</Label>
+              <Select
+                value={campaignData.recipients}
+                onValueChange={(value) => setCampaignData({ ...campaignData, recipients: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Customers</SelectItem>
+                  <SelectItem value="enterprise">Enterprise Only</SelectItem>
+                  <SelectItem value="healthy">Healthy Accounts</SelectItem>
+                  <SelectItem value="at_risk">At-Risk Accounts</SelectItem>
+                  <SelectItem value="champions">Champions Only</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowSendCampaignDialog(false)}>Cancel</Button>
+            <Button onClick={handleSendCampaign} disabled={isProcessing}>
+              {isProcessing ? 'Sending...' : 'Send Campaign'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Set Goals Dialog */}
+      <Dialog open={showSetGoalsDialog} onOpenChange={setShowSetGoalsDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Set Success Goals</DialogTitle>
+            <DialogDescription>
+              Define targets for your customer success metrics.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Metric *</Label>
+              <Select
+                value={goalsData.metric}
+                onValueChange={(value) => setGoalsData({ ...goalsData, metric: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select metric" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="nrr">Net Revenue Retention</SelectItem>
+                  <SelectItem value="churn">Churn Rate</SelectItem>
+                  <SelectItem value="nps">NPS Score</SelectItem>
+                  <SelectItem value="health">Average Health Score</SelectItem>
+                  <SelectItem value="expansion">Expansion Revenue</SelectItem>
+                  <SelectItem value="renewals">Renewal Rate</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="goal-target">Target Value *</Label>
+              <Input
+                id="goal-target"
+                placeholder="e.g., 95% or $500K"
+                value={goalsData.target}
+                onChange={(e) => setGoalsData({ ...goalsData, target: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="goal-deadline">Deadline</Label>
+              <Input
+                id="goal-deadline"
+                type="date"
+                value={goalsData.deadline}
+                onChange={(e) => setGoalsData({ ...goalsData, deadline: e.target.value })}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowSetGoalsDialog(false)}>Cancel</Button>
+            <Button onClick={handleSetGoals} disabled={isProcessing}>
+              {isProcessing ? 'Setting...' : 'Set Goal'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Recognize Dialog */}
+      <Dialog open={showRecognizeDialog} onOpenChange={setShowRecognizeDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Recognize Customer Win</DialogTitle>
+            <DialogDescription>
+              Celebrate and share customer success achievements.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Customer *</Label>
+              <Select
+                value={recognizeData.customer}
+                onValueChange={(value) => setRecognizeData({ ...recognizeData, customer: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select customer" />
+                </SelectTrigger>
+                <SelectContent>
+                  {customers.map(c => (
+                    <SelectItem key={c.id} value={c.name}>{c.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Achievement Type *</Label>
+              <Select
+                value={recognizeData.achievement}
+                onValueChange={(value) => setRecognizeData({ ...recognizeData, achievement: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select achievement" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="expansion">Account Expansion</SelectItem>
+                  <SelectItem value="renewal">Early Renewal</SelectItem>
+                  <SelectItem value="adoption">High Adoption</SelectItem>
+                  <SelectItem value="referral">Customer Referral</SelectItem>
+                  <SelectItem value="case_study">Case Study Participation</SelectItem>
+                  <SelectItem value="milestone">Milestone Achievement</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="recognize-message">Recognition Message</Label>
+              <Textarea
+                id="recognize-message"
+                placeholder="Add details about this achievement..."
+                value={recognizeData.message}
+                onChange={(e) => setRecognizeData({ ...recognizeData, message: e.target.value })}
+                rows={3}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowRecognizeDialog(false)}>Cancel</Button>
+            <Button onClick={handleRecognize} disabled={isProcessing}>
+              {isProcessing ? 'Sharing...' : 'Share Recognition'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Send Gift Dialog */}
+      <Dialog open={showSendGiftDialog} onOpenChange={setShowSendGiftDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Send Customer Gift</DialogTitle>
+            <DialogDescription>
+              Show appreciation by sending a gift to your customer.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Customer *</Label>
+              <Select
+                value={giftData.customer}
+                onValueChange={(value) => setGiftData({ ...giftData, customer: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select customer" />
+                </SelectTrigger>
+                <SelectContent>
+                  {customers.map(c => (
+                    <SelectItem key={c.id} value={c.name}>{c.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Gift Type *</Label>
+              <Select
+                value={giftData.giftType}
+                onValueChange={(value) => setGiftData({ ...giftData, giftType: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select gift type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="swag">Company Swag Box</SelectItem>
+                  <SelectItem value="gift_card">Gift Card ($50)</SelectItem>
+                  <SelectItem value="gift_card_100">Gift Card ($100)</SelectItem>
+                  <SelectItem value="donation">Charity Donation</SelectItem>
+                  <SelectItem value="experience">Experience Gift</SelectItem>
+                  <SelectItem value="custom">Custom Gift</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="gift-message">Personal Message</Label>
+              <Textarea
+                id="gift-message"
+                placeholder="Add a personal message..."
+                value={giftData.message}
+                onChange={(e) => setGiftData({ ...giftData, message: e.target.value })}
+                rows={3}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowSendGiftDialog(false)}>Cancel</Button>
+            <Button onClick={handleSendGift} disabled={isProcessing}>
+              {isProcessing ? 'Sending...' : 'Send Gift'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Generate Report Dialog */}
+      <Dialog open={showGenerateReportDialog} onOpenChange={setShowGenerateReportDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Generate Report</DialogTitle>
+            <DialogDescription>
+              Create a customer success performance report.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Report Type</Label>
+              <Select
+                value={reportData.type}
+                onValueChange={(value) => setReportData({ ...reportData, type: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="summary">Executive Summary</SelectItem>
+                  <SelectItem value="detailed">Detailed Analysis</SelectItem>
+                  <SelectItem value="portfolio">Portfolio Overview</SelectItem>
+                  <SelectItem value="risk">Risk Assessment</SelectItem>
+                  <SelectItem value="expansion">Expansion Pipeline</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Time Period</Label>
+              <Select
+                value={reportData.period}
+                onValueChange={(value) => setReportData({ ...reportData, period: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="weekly">Weekly</SelectItem>
+                  <SelectItem value="monthly">Monthly</SelectItem>
+                  <SelectItem value="quarterly">Quarterly</SelectItem>
+                  <SelectItem value="yearly">Yearly</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Format</Label>
+              <Select
+                value={reportData.format}
+                onValueChange={(value) => setReportData({ ...reportData, format: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="pdf">PDF Document</SelectItem>
+                  <SelectItem value="pptx">PowerPoint</SelectItem>
+                  <SelectItem value="excel">Excel</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowGenerateReportDialog(false)}>Cancel</Button>
+            <Button onClick={handleGenerateReport} disabled={isProcessing}>
+              {isProcessing ? 'Generating...' : 'Generate Report'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Introduce Dialog */}
+      <Dialog open={showIntroduceDialog} onOpenChange={setShowIntroduceDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Make Introduction</DialogTitle>
+            <DialogDescription>
+              Connect customers with team members or other contacts.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>From (Customer) *</Label>
+              <Select
+                value={introduceData.from}
+                onValueChange={(value) => setIntroduceData({ ...introduceData, from: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select customer" />
+                </SelectTrigger>
+                <SelectContent>
+                  {customers.map(c => (
+                    <SelectItem key={c.id} value={c.name}>{c.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>To (Contact) *</Label>
+              <Select
+                value={introduceData.to}
+                onValueChange={(value) => setIntroduceData({ ...introduceData, to: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select contact" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="product_manager">Product Manager</SelectItem>
+                  <SelectItem value="sales_rep">Sales Representative</SelectItem>
+                  <SelectItem value="support_lead">Support Lead</SelectItem>
+                  <SelectItem value="executive">Executive Sponsor</SelectItem>
+                  <SelectItem value="other_customer">Another Customer</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="intro-context">Context</Label>
+              <Textarea
+                id="intro-context"
+                placeholder="Provide context for the introduction..."
+                value={introduceData.context}
+                onChange={(e) => setIntroduceData({ ...introduceData, context: e.target.value })}
+                rows={3}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowIntroduceDialog(false)}>Cancel</Button>
+            <Button onClick={handleIntroduce} disabled={isProcessing}>
+              {isProcessing ? 'Sending...' : 'Send Introduction'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add CSM Dialog */}
+      <Dialog open={showAddCSMDialog} onOpenChange={setShowAddCSMDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Add New CSM</DialogTitle>
+            <DialogDescription>
+              Add a new Customer Success Manager to the team.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="csm-name">Full Name *</Label>
+              <Input
+                id="csm-name"
+                placeholder="e.g., John Doe"
+                value={newCSMData.name}
+                onChange={(e) => setNewCSMData({ ...newCSMData, name: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="csm-email">Email Address *</Label>
+              <Input
+                id="csm-email"
+                type="email"
+                placeholder="e.g., john@company.com"
+                value={newCSMData.email}
+                onChange={(e) => setNewCSMData({ ...newCSMData, email: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="csm-capacity">Account Capacity</Label>
+              <Input
+                id="csm-capacity"
+                type="number"
+                placeholder="e.g., 50"
+                value={newCSMData.capacity}
+                onChange={(e) => setNewCSMData({ ...newCSMData, capacity: e.target.value })}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAddCSMDialog(false)}>Cancel</Button>
+            <Button onClick={handleAddCSM} disabled={isProcessing}>
+              {isProcessing ? 'Adding...' : 'Add CSM'}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

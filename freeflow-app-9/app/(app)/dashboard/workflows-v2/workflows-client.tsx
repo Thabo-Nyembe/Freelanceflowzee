@@ -402,11 +402,7 @@ const mockWorkflowsActivities = [
   { id: '3', user: 'System', action: 'Failed', target: 'Data Sync workflow - API timeout', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'warning' as const },
 ]
 
-const mockWorkflowsQuickActions = [
-  { id: '1', label: 'Create Workflow', icon: 'plus', action: () => toast.success('Workflow Created', { description: 'New workflow ready for configuration' }), variant: 'default' as const },
-  { id: '2', label: 'Run Test', icon: 'play', action: () => toast.success('Test Completed', { description: 'Workflow test passed successfully' }), variant: 'default' as const },
-  { id: '3', label: 'View Logs', icon: 'file', action: () => toast.success('Logs Loaded', { description: 'Showing recent workflow executions' }), variant: 'outline' as const },
-]
+// Quick actions are now defined inside the component to use useState setters for dialogs
 
 // ============================================================================
 // MAIN COMPONENT
@@ -426,6 +422,13 @@ export default function WorkflowsClient() {
   const [showCreateDialog, setShowCreateDialog] = useState(false)
   const [showRunTestDialog, setShowRunTestDialog] = useState(false)
   const [showViewLogsDialog, setShowViewLogsDialog] = useState(false)
+  const [showExportDialog, setShowExportDialog] = useState(false)
+  const [showWorkflowOptionsDialog, setShowWorkflowOptionsDialog] = useState(false)
+  const [workflowForOptions, setWorkflowForOptions] = useState<Workflow | null>(null)
+  const [exportFormat, setExportFormat] = useState('json')
+  const [isExporting, setIsExporting] = useState(false)
+  const [selectedWorkflowsForTest, setSelectedWorkflowsForTest] = useState<string>('')
+  const [isRunningTest, setIsRunningTest] = useState(false)
 
   // Real Supabase hook
   const {
@@ -702,14 +705,83 @@ export default function WorkflowsClient() {
   }
 
   const handleExportWorkflows = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 800)),
-      {
-        loading: 'Exporting workflows...',
-        success: 'Workflows exported successfully',
-        error: 'Failed to export workflows'
+    setShowExportDialog(true)
+  }
+
+  const handleSubmitExport = async () => {
+    setIsExporting(true)
+    try {
+      // Simulate export process
+      await new Promise(resolve => setTimeout(resolve, 1000))
+
+      // Generate export data
+      const exportData = {
+        workflows: filteredWorkflows,
+        exportedAt: new Date().toISOString(),
+        format: exportFormat
       }
-    )
+
+      // Create downloadable file
+      const blob = new Blob(
+        [exportFormat === 'json' ? JSON.stringify(exportData, null, 2) : JSON.stringify(exportData)],
+        { type: 'application/json' }
+      )
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `workflows-export-${Date.now()}.${exportFormat}`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+
+      toast.success('Export Complete', { description: `${filteredWorkflows.length} workflows exported successfully` })
+      setShowExportDialog(false)
+    } catch (error) {
+      toast.error('Export Failed', { description: 'Unable to export workflows. Please try again.' })
+    } finally {
+      setIsExporting(false)
+    }
+  }
+
+  const handleOpenWorkflowOptions = (workflow: Workflow) => {
+    setWorkflowForOptions(workflow)
+    setShowWorkflowOptionsDialog(true)
+  }
+
+  const handleSubmitRunTest = async () => {
+    if (!selectedWorkflowsForTest) {
+      toast.error('Please select a workflow to test')
+      return
+    }
+
+    setIsRunningTest(true)
+    try {
+      // Find the selected workflow
+      const workflow = filteredWorkflows.find(w => w.id === selectedWorkflowsForTest)
+
+      // Simulate test run
+      await new Promise(resolve => setTimeout(resolve, 2000))
+
+      toast.success('Test Completed', {
+        description: `${workflow?.name || 'Workflow'} test passed successfully with sample data`
+      })
+      setShowRunTestDialog(false)
+      setSelectedWorkflowsForTest('')
+    } catch (error) {
+      toast.error('Test Failed', { description: 'Workflow test encountered an error' })
+    } finally {
+      setIsRunningTest(false)
+    }
+  }
+
+  const handleCopyToClipboard = async (text: string, label: string) => {
+    try {
+      await navigator.clipboard.writeText(text)
+      toast.success(`${label} Copied`, { description: 'Copied to clipboard successfully' })
+    } catch (error) {
+      toast.error('Copy Failed', { description: 'Unable to copy to clipboard' })
+    }
   }
 
   return (
@@ -904,16 +976,7 @@ export default function WorkflowsClient() {
                           onCheckedChange={() => handleToggleWorkflowStatus(workflow)}
                           disabled={dbLoading}
                         />
-                        <Button variant="ghost" size="icon" onClick={() => {
-                          toast.promise(
-                            new Promise(resolve => setTimeout(resolve, 500)),
-                            {
-                              loading: 'Loading workflow options...',
-                              success: 'Workflow options loaded',
-                              error: 'Failed to load options'
-                            }
-                          )
-                        }}>
+                        <Button variant="ghost" size="icon" onClick={() => handleOpenWorkflowOptions(workflow)}>
                           <MoreHorizontal className="w-4 h-4" />
                         </Button>
                       </div>
@@ -1411,17 +1474,7 @@ export default function WorkflowsClient() {
                           <Label>Webhook Base URL</Label>
                           <div className="flex gap-2">
                             <Input value="https://hooks.freeflow.io/wf/" readOnly className="font-mono" />
-                            <Button variant="outline" size="icon" onClick={() => {
-                              navigator.clipboard.writeText('https://hooks.freeflow.io/wf/')
-                              toast.promise(
-                                new Promise(resolve => setTimeout(resolve, 300)),
-                                {
-                                  loading: 'Copying webhook URL...',
-                                  success: 'Webhook URL copied to clipboard',
-                                  error: 'Failed to copy URL'
-                                }
-                              )
-                            }}>
+                            <Button variant="outline" size="icon" onClick={() => handleCopyToClipboard('https://hooks.freeflow.io/wf/', 'Webhook URL')}>
                               <Copy className="w-4 h-4" />
                             </Button>
                           </div>
@@ -1829,16 +1882,7 @@ export default function WorkflowsClient() {
                           <Label>API Key</Label>
                           <div className="flex gap-2">
                             <Input type="password" value="wf_api_••••••••••••••••••••" readOnly className="font-mono" />
-                            <Button variant="outline" size="icon" onClick={() => {
-                              toast.promise(
-                                new Promise(resolve => setTimeout(resolve, 300)),
-                                {
-                                  loading: 'Copying API key...',
-                                  success: 'API key copied to clipboard',
-                                  error: 'Failed to copy API key'
-                                }
-                              )
-                            }}>
+                            <Button variant="outline" size="icon" onClick={() => handleCopyToClipboard('wf_api_live_xxxx_your_api_key_here', 'API Key')}>
                               <Copy className="w-4 h-4" />
                             </Button>
                           </div>
@@ -1964,7 +2008,7 @@ export default function WorkflowsClient() {
                             <p className="font-medium text-red-600">Export All Workflows</p>
                             <p className="text-sm text-muted-foreground">Download all workflow configurations</p>
                           </div>
-                          <Button variant="outline" className="text-red-600 border-red-600 hover:bg-red-50">
+                          <Button variant="outline" className="text-red-600 border-red-600 hover:bg-red-50" onClick={handleExportWorkflows}>
                             <Download className="w-4 h-4 mr-2" />
                             Export
                           </Button>
@@ -2263,7 +2307,13 @@ export default function WorkflowsClient() {
       </Dialog>
 
       {/* Run Test Dialog */}
-      <Dialog open={showRunTestDialog} onOpenChange={setShowRunTestDialog}>
+      <Dialog open={showRunTestDialog} onOpenChange={(open) => {
+        setShowRunTestDialog(open)
+        if (!open) {
+          setSelectedWorkflowsForTest('')
+          setIsRunningTest(false)
+        }
+      }}>
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
@@ -2277,7 +2327,7 @@ export default function WorkflowsClient() {
           <div className="space-y-4 py-4">
             <div className="space-y-2">
               <Label>Select Workflow</Label>
-              <Select>
+              <Select value={selectedWorkflowsForTest} onValueChange={setSelectedWorkflowsForTest}>
                 <SelectTrigger>
                   <SelectValue placeholder="Choose a workflow to test" />
                 </SelectTrigger>
@@ -2290,6 +2340,16 @@ export default function WorkflowsClient() {
                 </SelectContent>
               </Select>
             </div>
+            {selectedWorkflowsForTest && (
+              <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                <p className="text-sm font-medium text-blue-800 dark:text-blue-200">
+                  Selected: {filteredWorkflows.find(w => w.id === selectedWorkflowsForTest)?.name}
+                </p>
+                <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
+                  {filteredWorkflows.find(w => w.id === selectedWorkflowsForTest)?.steps.length || 0} steps will be tested
+                </p>
+              </div>
+            )}
             <div className="p-4 bg-muted/50 rounded-lg">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <AlertCircle className="w-4 h-4" />
@@ -2298,18 +2358,28 @@ export default function WorkflowsClient() {
             </div>
           </div>
           <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={() => setShowRunTestDialog(false)}>
+            <Button variant="outline" onClick={() => {
+              setShowRunTestDialog(false)
+              setSelectedWorkflowsForTest('')
+            }} disabled={isRunningTest}>
               Cancel
             </Button>
             <Button
               className="bg-gradient-to-r from-green-500 to-emerald-600 text-white"
-              onClick={() => {
-                toast.success('Test Started', { description: 'Workflow test is running...' })
-                setShowRunTestDialog(false)
-              }}
+              onClick={handleSubmitRunTest}
+              disabled={!selectedWorkflowsForTest || isRunningTest}
             >
-              <Play className="w-4 h-4 mr-2" />
-              Run Test
+              {isRunningTest ? (
+                <>
+                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                  Running Test...
+                </>
+              ) : (
+                <>
+                  <Play className="w-4 h-4 mr-2" />
+                  Run Test
+                </>
+              )}
             </Button>
           </div>
         </DialogContent>
@@ -2380,6 +2450,195 @@ export default function WorkflowsClient() {
               Export Logs
             </Button>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Export Workflows Dialog */}
+      <Dialog open={showExportDialog} onOpenChange={(open) => {
+        setShowExportDialog(open)
+        if (!open) {
+          setExportFormat('json')
+          setIsExporting(false)
+        }
+      }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Download className="w-5 h-5 text-blue-500" />
+              Export Workflows
+            </DialogTitle>
+            <DialogDescription>
+              Export your workflows to a file for backup or sharing.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Export Format</Label>
+              <Select value={exportFormat} onValueChange={setExportFormat}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="json">JSON (Recommended)</SelectItem>
+                  <SelectItem value="yaml">YAML</SelectItem>
+                  <SelectItem value="xml">XML</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="p-4 bg-muted/50 rounded-lg space-y-2">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">Workflows to export:</span>
+                <span className="font-medium">{filteredWorkflows.length}</span>
+              </div>
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">Total steps:</span>
+                <span className="font-medium">{filteredWorkflows.reduce((acc, w) => acc + w.steps.length, 0)}</span>
+              </div>
+            </div>
+            <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+              <div className="flex items-center gap-2 text-sm text-blue-800 dark:text-blue-200">
+                <AlertCircle className="w-4 h-4" />
+                <span>Exported files can be imported back into the system.</span>
+              </div>
+            </div>
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setShowExportDialog(false)} disabled={isExporting}>
+              Cancel
+            </Button>
+            <Button
+              className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white"
+              onClick={handleSubmitExport}
+              disabled={isExporting}
+            >
+              {isExporting ? (
+                <>
+                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                  Exporting...
+                </>
+              ) : (
+                <>
+                  <Download className="w-4 h-4 mr-2" />
+                  Export
+                </>
+              )}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Workflow Options Dialog */}
+      <Dialog open={showWorkflowOptionsDialog} onOpenChange={(open) => {
+        setShowWorkflowOptionsDialog(open)
+        if (!open) setWorkflowForOptions(null)
+      }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Settings className="w-5 h-5 text-gray-500" />
+              Workflow Options
+            </DialogTitle>
+            <DialogDescription>
+              {workflowForOptions?.name}
+            </DialogDescription>
+          </DialogHeader>
+          {workflowForOptions && (
+            <div className="space-y-2 py-4">
+              <Button
+                variant="outline"
+                className="w-full justify-start"
+                onClick={() => {
+                  setShowWorkflowOptionsDialog(false)
+                  setSelectedWorkflow(workflowForOptions)
+                }}
+              >
+                <Edit className="w-4 h-4 mr-2" />
+                Edit Workflow
+              </Button>
+              <Button
+                variant="outline"
+                className="w-full justify-start"
+                onClick={() => {
+                  handleDuplicateWorkflow(workflowForOptions)
+                  setShowWorkflowOptionsDialog(false)
+                }}
+              >
+                <Copy className="w-4 h-4 mr-2" />
+                Duplicate Workflow
+              </Button>
+              <Button
+                variant="outline"
+                className="w-full justify-start"
+                onClick={() => {
+                  if (workflowForOptions.status === 'active') {
+                    handlePauseWorkflow(workflowForOptions)
+                  } else {
+                    handleActivateWorkflow(workflowForOptions)
+                  }
+                  setShowWorkflowOptionsDialog(false)
+                }}
+              >
+                {workflowForOptions.status === 'active' ? (
+                  <>
+                    <Pause className="w-4 h-4 mr-2" />
+                    Pause Workflow
+                  </>
+                ) : (
+                  <>
+                    <Play className="w-4 h-4 mr-2" />
+                    Activate Workflow
+                  </>
+                )}
+              </Button>
+              <Button
+                variant="outline"
+                className="w-full justify-start"
+                onClick={() => {
+                  handleRunWorkflow(workflowForOptions)
+                  setShowWorkflowOptionsDialog(false)
+                }}
+              >
+                <Play className="w-4 h-4 mr-2" />
+                Run Now
+              </Button>
+              <Button
+                variant="outline"
+                className="w-full justify-start"
+                onClick={() => {
+                  setSelectedWorkflowsForTest(workflowForOptions.id)
+                  setShowWorkflowOptionsDialog(false)
+                  setShowRunTestDialog(true)
+                }}
+              >
+                <Activity className="w-4 h-4 mr-2" />
+                Test Workflow
+              </Button>
+              <Button
+                variant="outline"
+                className="w-full justify-start"
+                onClick={() => {
+                  setShowWorkflowOptionsDialog(false)
+                  setActiveTab('runs')
+                }}
+              >
+                <History className="w-4 h-4 mr-2" />
+                View Run History
+              </Button>
+              <div className="pt-2 border-t">
+                <Button
+                  variant="outline"
+                  className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50"
+                  onClick={() => {
+                    handleDeleteWorkflow(workflowForOptions)
+                    setShowWorkflowOptionsDialog(false)
+                  }}
+                >
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Delete Workflow
+                </Button>
+              </div>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
 

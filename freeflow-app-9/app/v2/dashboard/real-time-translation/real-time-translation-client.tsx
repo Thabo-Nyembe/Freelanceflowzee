@@ -27,10 +27,28 @@ import {
   Upload, Pause, Volume2, RefreshCw,
   CheckCircle, ArrowRight,
   Filter, Star, Plus, Eye, Save,
-  ChevronDown, Copy
+  ChevronDown, Copy, X
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
 import { TextShimmer } from '@/components/ui/text-shimmer'
 import { ScrollReveal } from '@/components/ui/scroll-reveal'
@@ -87,13 +105,119 @@ const realTimeTranslationActivities = [
   { id: '3', user: 'System', action: 'generated', target: 'weekly report', timestamp: '1h ago', type: 'info' as const },
 ]
 
-const realTimeTranslationQuickActions = [
-  { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => toast.success('Translation Created', { description: 'New translation job ready' }) },
-  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => toast.success('Translations Exported', { description: 'Translation data exported' }) },
-  { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => toast.success('Settings', { description: 'Translation settings opened' }) },
-]
-
 export default function RealTimeTranslationClient() {
+  // Dialog states for quick actions
+  const [showNewTranslationDialog, setShowNewTranslationDialog] = useState(false)
+  const [showExportDialog, setShowExportDialog] = useState(false)
+  const [showSettingsDialog, setShowSettingsDialog] = useState(false)
+
+  // New translation form state
+  const [newTranslationName, setNewTranslationName] = useState('')
+  const [newTranslationSource, setNewTranslationSource] = useState('')
+  const [newTranslationSourceLang, setNewTranslationSourceLang] = useState('en')
+  const [newTranslationTargetLang, setNewTranslationTargetLang] = useState('es')
+  const [newTranslationType, setNewTranslationType] = useState<'text' | 'document' | 'batch'>('text')
+  const [isCreatingTranslation, setIsCreatingTranslation] = useState(false)
+
+  // Export form state
+  const [exportFormat, setExportFormat] = useState<'json' | 'csv' | 'xlsx' | 'pdf'>('json')
+  const [exportDateRange, setExportDateRange] = useState<'all' | 'week' | 'month' | 'custom'>('all')
+  const [exportIncludeSource, setExportIncludeSource] = useState(true)
+  const [exportIncludeMetadata, setExportIncludeMetadata] = useState(true)
+  const [isExporting, setIsExporting] = useState(false)
+
+  // Settings form state
+  const [settingsDefaultEngine, setSettingsDefaultEngine] = useState('kazi-ai')
+  const [settingsDefaultQuality, setSettingsDefaultQuality] = useState('accurate')
+  const [settingsAutoDetect, setSettingsAutoDetect] = useState(true)
+  const [settingsSaveHistory, setSettingsSaveHistory] = useState(true)
+  const [settingsNotifications, setSettingsNotifications] = useState(true)
+  const [isSavingSettings, setIsSavingSettings] = useState(false)
+
+  // Handle new translation creation
+  const handleCreateTranslation = async () => {
+    if (!newTranslationName.trim()) {
+      toast.error('Name required', { description: 'Please enter a name for this translation job' })
+      return
+    }
+    if (!newTranslationSource.trim() && newTranslationType === 'text') {
+      toast.error('Source text required', { description: 'Please enter text to translate' })
+      return
+    }
+
+    setIsCreatingTranslation(true)
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1500))
+
+      toast.success('Translation Created', {
+        description: `"${newTranslationName}" has been created and queued for translation`
+      })
+
+      // Reset form
+      setNewTranslationName('')
+      setNewTranslationSource('')
+      setNewTranslationSourceLang('en')
+      setNewTranslationTargetLang('es')
+      setNewTranslationType('text')
+      setShowNewTranslationDialog(false)
+    } catch (error) {
+      toast.error('Failed to create translation', {
+        description: 'Please try again later'
+      })
+    } finally {
+      setIsCreatingTranslation(false)
+    }
+  }
+
+  // Handle export
+  const handleExport = async () => {
+    setIsExporting(true)
+    try {
+      // Simulate export process
+      await new Promise(resolve => setTimeout(resolve, 2000))
+
+      toast.success('Export Complete', {
+        description: `Translation history exported as ${exportFormat.toUpperCase()}`
+      })
+
+      setShowExportDialog(false)
+    } catch (error) {
+      toast.error('Export Failed', {
+        description: 'Unable to export translations. Please try again.'
+      })
+    } finally {
+      setIsExporting(false)
+    }
+  }
+
+  // Handle save settings
+  const handleSaveSettings = async () => {
+    setIsSavingSettings(true)
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000))
+
+      toast.success('Settings Saved', {
+        description: 'Your translation preferences have been updated'
+      })
+
+      setShowSettingsDialog(false)
+    } catch (error) {
+      toast.error('Failed to save settings', {
+        description: 'Please try again later'
+      })
+    } finally {
+      setIsSavingSettings(false)
+    }
+  }
+
+  // Quick actions with dialog triggers
+  const realTimeTranslationQuickActions = [
+    { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => setShowNewTranslationDialog(true) },
+    { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => setShowExportDialog(true) },
+    { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => setShowSettingsDialog(true) },
+  ]
   // A+++ STATE MANAGEMENT
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -747,6 +871,373 @@ export default function RealTimeTranslationClient() {
           )}
         </div>
       </div>
+
+      {/* New Translation Dialog */}
+      <Dialog open={showNewTranslationDialog} onOpenChange={setShowNewTranslationDialog}>
+        <DialogContent className="sm:max-w-[600px] bg-slate-900 border-gray-700">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <Plus className="w-5 h-5 text-indigo-400" />
+              New Translation Job
+            </DialogTitle>
+            <DialogDescription className="text-gray-400">
+              Create a new translation job. Configure the source, target language, and translation type.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="translation-name" className="text-gray-300">Job Name</Label>
+              <Input
+                id="translation-name"
+                placeholder="Enter a name for this translation job"
+                value={newTranslationName}
+                onChange={(e) => setNewTranslationName(e.target.value)}
+                className="bg-slate-800 border-gray-700 text-white"
+              />
+            </div>
+
+            <div className="grid gap-2">
+              <Label className="text-gray-300">Translation Type</Label>
+              <Select value={newTranslationType} onValueChange={(v: 'text' | 'document' | 'batch') => setNewTranslationType(v)}>
+                <SelectTrigger className="bg-slate-800 border-gray-700 text-white">
+                  <SelectValue placeholder="Select type" />
+                </SelectTrigger>
+                <SelectContent className="bg-slate-800 border-gray-700">
+                  <SelectItem value="text" className="text-white hover:bg-slate-700">Text Translation</SelectItem>
+                  <SelectItem value="document" className="text-white hover:bg-slate-700">Document Translation</SelectItem>
+                  <SelectItem value="batch" className="text-white hover:bg-slate-700">Batch Translation</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label className="text-gray-300">Source Language</Label>
+                <Select value={newTranslationSourceLang} onValueChange={setNewTranslationSourceLang}>
+                  <SelectTrigger className="bg-slate-800 border-gray-700 text-white">
+                    <SelectValue placeholder="Select language" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-800 border-gray-700 max-h-[200px]">
+                    {SUPPORTED_LANGUAGES.slice(0, 20).map((lang) => (
+                      <SelectItem key={lang.code} value={lang.code} className="text-white hover:bg-slate-700">
+                        <span className="flex items-center gap-2">
+                          <span>{lang.flag}</span>
+                          <span>{lang.name}</span>
+                        </span>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="grid gap-2">
+                <Label className="text-gray-300">Target Language</Label>
+                <Select value={newTranslationTargetLang} onValueChange={setNewTranslationTargetLang}>
+                  <SelectTrigger className="bg-slate-800 border-gray-700 text-white">
+                    <SelectValue placeholder="Select language" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-800 border-gray-700 max-h-[200px]">
+                    {SUPPORTED_LANGUAGES.slice(0, 20).map((lang) => (
+                      <SelectItem key={lang.code} value={lang.code} className="text-white hover:bg-slate-700">
+                        <span className="flex items-center gap-2">
+                          <span>{lang.flag}</span>
+                          <span>{lang.name}</span>
+                        </span>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {newTranslationType === 'text' && (
+              <div className="grid gap-2">
+                <Label htmlFor="source-text" className="text-gray-300">Source Text</Label>
+                <Textarea
+                  id="source-text"
+                  placeholder="Enter text to translate..."
+                  value={newTranslationSource}
+                  onChange={(e) => setNewTranslationSource(e.target.value)}
+                  className="bg-slate-800 border-gray-700 text-white min-h-[120px]"
+                />
+                <p className="text-xs text-gray-500">{newTranslationSource.length} characters</p>
+              </div>
+            )}
+
+            {newTranslationType === 'document' && (
+              <div className="grid gap-2">
+                <Label className="text-gray-300">Upload Document</Label>
+                <div className="border-2 border-dashed border-gray-700 rounded-lg p-8 text-center hover:border-indigo-500/50 transition-colors cursor-pointer">
+                  <Upload className="w-8 h-8 text-gray-500 mx-auto mb-2" />
+                  <p className="text-sm text-gray-400">Click to upload or drag and drop</p>
+                  <p className="text-xs text-gray-500 mt-1">PDF, DOCX, TXT (max 10MB)</p>
+                </div>
+              </div>
+            )}
+
+            {newTranslationType === 'batch' && (
+              <div className="grid gap-2">
+                <Label className="text-gray-300">Upload Batch File</Label>
+                <div className="border-2 border-dashed border-gray-700 rounded-lg p-8 text-center hover:border-indigo-500/50 transition-colors cursor-pointer">
+                  <Upload className="w-8 h-8 text-gray-500 mx-auto mb-2" />
+                  <p className="text-sm text-gray-400">Upload CSV or JSON file with text entries</p>
+                  <p className="text-xs text-gray-500 mt-1">CSV, JSON (max 50MB)</p>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setShowNewTranslationDialog(false)}
+              className="border-gray-700 hover:bg-slate-800"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleCreateTranslation}
+              disabled={isCreatingTranslation}
+              className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700"
+            >
+              {isCreatingTranslation ? (
+                <>
+                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                  Creating...
+                </>
+              ) : (
+                <>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Create Translation
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Export Dialog */}
+      <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
+        <DialogContent className="sm:max-w-[500px] bg-slate-900 border-gray-700">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <Download className="w-5 h-5 text-indigo-400" />
+              Export Translations
+            </DialogTitle>
+            <DialogDescription className="text-gray-400">
+              Export your translation history in your preferred format.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label className="text-gray-300">Export Format</Label>
+              <Select value={exportFormat} onValueChange={(v: 'json' | 'csv' | 'xlsx' | 'pdf') => setExportFormat(v)}>
+                <SelectTrigger className="bg-slate-800 border-gray-700 text-white">
+                  <SelectValue placeholder="Select format" />
+                </SelectTrigger>
+                <SelectContent className="bg-slate-800 border-gray-700">
+                  <SelectItem value="json" className="text-white hover:bg-slate-700">JSON - Machine readable</SelectItem>
+                  <SelectItem value="csv" className="text-white hover:bg-slate-700">CSV - Spreadsheet compatible</SelectItem>
+                  <SelectItem value="xlsx" className="text-white hover:bg-slate-700">Excel - Full formatting</SelectItem>
+                  <SelectItem value="pdf" className="text-white hover:bg-slate-700">PDF - Print ready</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="grid gap-2">
+              <Label className="text-gray-300">Date Range</Label>
+              <Select value={exportDateRange} onValueChange={(v: 'all' | 'week' | 'month' | 'custom') => setExportDateRange(v)}>
+                <SelectTrigger className="bg-slate-800 border-gray-700 text-white">
+                  <SelectValue placeholder="Select range" />
+                </SelectTrigger>
+                <SelectContent className="bg-slate-800 border-gray-700">
+                  <SelectItem value="all" className="text-white hover:bg-slate-700">All time</SelectItem>
+                  <SelectItem value="week" className="text-white hover:bg-slate-700">Last 7 days</SelectItem>
+                  <SelectItem value="month" className="text-white hover:bg-slate-700">Last 30 days</SelectItem>
+                  <SelectItem value="custom" className="text-white hover:bg-slate-700">Custom range</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-3">
+              <Label className="text-gray-300">Include in Export</Label>
+              <div className="space-y-2">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={exportIncludeSource}
+                    onChange={(e) => setExportIncludeSource(e.target.checked)}
+                    className="rounded border-gray-700 bg-slate-800 text-indigo-600"
+                  />
+                  <span className="text-sm text-gray-300">Source text</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={exportIncludeMetadata}
+                    onChange={(e) => setExportIncludeMetadata(e.target.checked)}
+                    className="rounded border-gray-700 bg-slate-800 text-indigo-600"
+                  />
+                  <span className="text-sm text-gray-300">Metadata (timestamps, confidence scores)</span>
+                </label>
+              </div>
+            </div>
+
+            <div className="p-3 bg-slate-800/50 rounded-lg border border-gray-700">
+              <p className="text-sm text-gray-400">
+                <strong className="text-gray-300">{translationResults.length}</strong> translations will be exported
+              </p>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setShowExportDialog(false)}
+              className="border-gray-700 hover:bg-slate-800"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleExport}
+              disabled={isExporting}
+              className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700"
+            >
+              {isExporting ? (
+                <>
+                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                  Exporting...
+                </>
+              ) : (
+                <>
+                  <Download className="w-4 h-4 mr-2" />
+                  Export
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Settings Dialog */}
+      <Dialog open={showSettingsDialog} onOpenChange={setShowSettingsDialog}>
+        <DialogContent className="sm:max-w-[500px] bg-slate-900 border-gray-700">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <Settings className="w-5 h-5 text-indigo-400" />
+              Translation Settings
+            </DialogTitle>
+            <DialogDescription className="text-gray-400">
+              Configure your translation preferences and default settings.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label className="text-gray-300">Default Translation Engine</Label>
+              <Select value={settingsDefaultEngine} onValueChange={setSettingsDefaultEngine}>
+                <SelectTrigger className="bg-slate-800 border-gray-700 text-white">
+                  <SelectValue placeholder="Select engine" />
+                </SelectTrigger>
+                <SelectContent className="bg-slate-800 border-gray-700">
+                  {TRANSLATION_ENGINES.map((engine) => (
+                    <SelectItem key={engine.id} value={engine.id} className="text-white hover:bg-slate-700">
+                      {engine.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="grid gap-2">
+              <Label className="text-gray-300">Default Quality Preset</Label>
+              <Select value={settingsDefaultQuality} onValueChange={setSettingsDefaultQuality}>
+                <SelectTrigger className="bg-slate-800 border-gray-700 text-white">
+                  <SelectValue placeholder="Select quality" />
+                </SelectTrigger>
+                <SelectContent className="bg-slate-800 border-gray-700">
+                  {QUALITY_PRESETS.map((preset) => (
+                    <SelectItem key={preset.id} value={preset.id} className="text-white hover:bg-slate-700">
+                      {preset.name} - {preset.description}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-3">
+              <Label className="text-gray-300">Features</Label>
+              <div className="space-y-2">
+                <label className="flex items-center justify-between cursor-pointer p-3 bg-slate-800/50 rounded-lg border border-gray-700">
+                  <div>
+                    <span className="text-sm text-gray-300">Auto-detect language</span>
+                    <p className="text-xs text-gray-500">Automatically detect the source language</p>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={settingsAutoDetect}
+                    onChange={(e) => setSettingsAutoDetect(e.target.checked)}
+                    className="rounded border-gray-700 bg-slate-800 text-indigo-600"
+                  />
+                </label>
+                <label className="flex items-center justify-between cursor-pointer p-3 bg-slate-800/50 rounded-lg border border-gray-700">
+                  <div>
+                    <span className="text-sm text-gray-300">Save translation history</span>
+                    <p className="text-xs text-gray-500">Keep a record of all translations</p>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={settingsSaveHistory}
+                    onChange={(e) => setSettingsSaveHistory(e.target.checked)}
+                    className="rounded border-gray-700 bg-slate-800 text-indigo-600"
+                  />
+                </label>
+                <label className="flex items-center justify-between cursor-pointer p-3 bg-slate-800/50 rounded-lg border border-gray-700">
+                  <div>
+                    <span className="text-sm text-gray-300">Translation notifications</span>
+                    <p className="text-xs text-gray-500">Get notified when translations complete</p>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={settingsNotifications}
+                    onChange={(e) => setSettingsNotifications(e.target.checked)}
+                    className="rounded border-gray-700 bg-slate-800 text-indigo-600"
+                  />
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setShowSettingsDialog(false)}
+              className="border-gray-700 hover:bg-slate-800"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSaveSettings}
+              disabled={isSavingSettings}
+              className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700"
+            >
+              {isSavingSettings ? (
+                <>
+                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <Save className="w-4 h-4 mr-2" />
+                  Save Settings
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

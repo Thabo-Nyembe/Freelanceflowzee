@@ -16,12 +16,16 @@ export const dynamic = 'force-dynamic';
 
 import React, { useEffect } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Mail, FileText, Sparkles, Brain, Instagram, Twitter, Linkedin, Facebook, Copy, RefreshCw, Check, Wand2 } from 'lucide-react'
+import { Mail, FileText, Sparkles, Brain, Instagram, Twitter, Linkedin, Facebook, Copy, RefreshCw, Check, Wand2, Plus, Download, Settings } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Textarea } from '@/components/ui/textarea'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Switch } from '@/components/ui/switch'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { SmartEmailTemplates } from '@/components/ai/smart-email-templates'
@@ -60,24 +64,117 @@ const aiContentStudioActivities = [
   { id: '3', user: 'System', action: 'generated', target: 'weekly report', timestamp: '1h ago', type: 'info' as const },
 ]
 
-const aiContentStudioQuickActions = [
-  { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 800)),
-    { loading: 'Creating new content...', success: 'New content created successfully', error: 'Failed to create content' }
-  ) },
-  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1000)),
-    { loading: 'Exporting content...', success: 'Content exported successfully', error: 'Failed to export content' }
-  ) },
-  { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 500)),
-    { loading: 'Loading settings...', success: 'Settings loaded', error: 'Failed to load settings' }
-  ) },
-]
-
 export default function AiContentStudioClient() {
   const { userId, loading: userLoading } = useCurrentUser()
   const { announce } = useAnnouncer()
+
+  // Dialog states for quick actions
+  const [showNewContentDialog, setShowNewContentDialog] = useState(false)
+  const [showExportDialog, setShowExportDialog] = useState(false)
+  const [showSettingsDialog, setShowSettingsDialog] = useState(false)
+
+  // New content form state
+  const [newContentTitle, setNewContentTitle] = useState('')
+  const [newContentType, setNewContentType] = useState('social-post')
+  const [newContentDescription, setNewContentDescription] = useState('')
+  const [isCreatingContent, setIsCreatingContent] = useState(false)
+
+  // Export form state
+  const [exportFormat, setExportFormat] = useState('json')
+  const [exportIncludeMetadata, setExportIncludeMetadata] = useState(true)
+  const [exportDateRange, setExportDateRange] = useState('all')
+  const [isExporting, setIsExporting] = useState(false)
+
+  // Settings form state
+  const [aiModel, setAiModel] = useState('gpt-4')
+  const [autoSaveEnabled, setAutoSaveEnabled] = useState(true)
+  const [defaultTone, setDefaultTone] = useState('professional')
+  const [maxTokens, setMaxTokens] = useState('2000')
+  const [isSavingSettings, setIsSavingSettings] = useState(false)
+
+  // Quick actions with dialog triggers
+  const aiContentStudioQuickActions = [
+    { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => setShowNewContentDialog(true) },
+    { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => setShowExportDialog(true) },
+    { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => setShowSettingsDialog(true) },
+  ]
+
+  // Handler for creating new content
+  const handleCreateContent = async () => {
+    if (!newContentTitle.trim()) {
+      toast.error('Please enter a content title')
+      return
+    }
+    setIsCreatingContent(true)
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      toast.success(`New ${newContentType.replace('-', ' ')} "${newContentTitle}" created successfully`)
+      logger.info('Content created', { title: newContentTitle, type: newContentType })
+      setShowNewContentDialog(false)
+      setNewContentTitle('')
+      setNewContentDescription('')
+    } catch {
+      toast.error('Failed to create content')
+    } finally {
+      setIsCreatingContent(false)
+    }
+  }
+
+  // Handler for exporting content
+  const handleExport = async () => {
+    setIsExporting(true)
+    try {
+      // Simulate export process
+      await new Promise(resolve => setTimeout(resolve, 1500))
+      const exportData = {
+        format: exportFormat,
+        includeMetadata: exportIncludeMetadata,
+        dateRange: exportDateRange,
+        exportedAt: new Date().toISOString()
+      }
+      // Create and download file
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `ai-content-export-${Date.now()}.${exportFormat}`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+      toast.success(`Content exported as ${exportFormat.toUpperCase()} successfully`)
+      logger.info('Content exported', { format: exportFormat, dateRange: exportDateRange })
+      setShowExportDialog(false)
+    } catch {
+      toast.error('Failed to export content')
+    } finally {
+      setIsExporting(false)
+    }
+  }
+
+  // Handler for saving settings
+  const handleSaveSettings = async () => {
+    setIsSavingSettings(true)
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 800))
+      const settings = {
+        aiModel,
+        autoSaveEnabled,
+        defaultTone,
+        maxTokens: parseInt(maxTokens)
+      }
+      localStorage.setItem('aiContentStudioSettings', JSON.stringify(settings))
+      toast.success('AI Content Studio settings saved successfully')
+      logger.info('Settings saved', settings)
+      setShowSettingsDialog(false)
+    } catch {
+      toast.error('Failed to save settings')
+    } finally {
+      setIsSavingSettings(false)
+    }
+  }
 
   useEffect(() => {
     if (userId) {
@@ -85,6 +182,22 @@ export default function AiContentStudioClient() {
       announce('AI Content Studio loaded', 'polite')
     }
   }, [userId, announce])
+
+  // Load saved settings on mount
+  useEffect(() => {
+    const savedSettings = localStorage.getItem('aiContentStudioSettings')
+    if (savedSettings) {
+      try {
+        const settings = JSON.parse(savedSettings)
+        if (settings.aiModel) setAiModel(settings.aiModel)
+        if (typeof settings.autoSaveEnabled === 'boolean') setAutoSaveEnabled(settings.autoSaveEnabled)
+        if (settings.defaultTone) setDefaultTone(settings.defaultTone)
+        if (settings.maxTokens) setMaxTokens(String(settings.maxTokens))
+      } catch {
+        // Ignore parse errors
+      }
+    }
+  }, [])
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
@@ -127,15 +240,277 @@ export default function AiContentStudioClient() {
         </TabsContent>
 
         <TabsContent value="content" className="mt-6">
-          <MarketingContentGenerator />
+          <MarketingContentGenerator aiContentStudioQuickActions={aiContentStudioQuickActions} />
         </TabsContent>
       </Tabs>
+
+      {/* New Content Dialog */}
+      <Dialog open={showNewContentDialog} onOpenChange={setShowNewContentDialog}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Plus className="h-5 w-5 text-purple-600" />
+              Create New Content
+            </DialogTitle>
+            <DialogDescription>
+              Create a new AI-powered content piece. Fill in the details below to get started.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="content-title">Content Title</Label>
+              <Input
+                id="content-title"
+                placeholder="Enter a title for your content..."
+                value={newContentTitle}
+                onChange={(e) => setNewContentTitle(e.target.value)}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="content-type">Content Type</Label>
+              <Select value={newContentType} onValueChange={setNewContentType}>
+                <SelectTrigger id="content-type">
+                  <SelectValue placeholder="Select content type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="social-post">Social Media Post</SelectItem>
+                  <SelectItem value="email-template">Email Template</SelectItem>
+                  <SelectItem value="blog-article">Blog Article</SelectItem>
+                  <SelectItem value="ad-copy">Advertisement Copy</SelectItem>
+                  <SelectItem value="proposal">Proposal</SelectItem>
+                  <SelectItem value="newsletter">Newsletter</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="content-description">Description (Optional)</Label>
+              <Textarea
+                id="content-description"
+                placeholder="Describe what you want to create..."
+                value={newContentDescription}
+                onChange={(e) => setNewContentDescription(e.target.value)}
+                rows={3}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowNewContentDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleCreateContent}
+              disabled={isCreatingContent}
+              className="bg-gradient-to-r from-purple-500 to-pink-600"
+            >
+              {isCreatingContent ? (
+                <>
+                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                  Creating...
+                </>
+              ) : (
+                <>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Create Content
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Export Dialog */}
+      <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Download className="h-5 w-5 text-purple-600" />
+              Export Content
+            </DialogTitle>
+            <DialogDescription>
+              Export your AI-generated content in your preferred format.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="export-format">Export Format</Label>
+              <Select value={exportFormat} onValueChange={setExportFormat}>
+                <SelectTrigger id="export-format">
+                  <SelectValue placeholder="Select format" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="json">JSON</SelectItem>
+                  <SelectItem value="csv">CSV</SelectItem>
+                  <SelectItem value="txt">Plain Text</SelectItem>
+                  <SelectItem value="md">Markdown</SelectItem>
+                  <SelectItem value="html">HTML</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="export-date-range">Date Range</Label>
+              <Select value={exportDateRange} onValueChange={setExportDateRange}>
+                <SelectTrigger id="export-date-range">
+                  <SelectValue placeholder="Select date range" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Content</SelectItem>
+                  <SelectItem value="today">Today</SelectItem>
+                  <SelectItem value="week">This Week</SelectItem>
+                  <SelectItem value="month">This Month</SelectItem>
+                  <SelectItem value="year">This Year</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label htmlFor="include-metadata">Include Metadata</Label>
+                <p className="text-sm text-muted-foreground">
+                  Include creation dates, AI models used, etc.
+                </p>
+              </div>
+              <Switch
+                id="include-metadata"
+                checked={exportIncludeMetadata}
+                onCheckedChange={setExportIncludeMetadata}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowExportDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleExport}
+              disabled={isExporting}
+              className="bg-gradient-to-r from-purple-500 to-pink-600"
+            >
+              {isExporting ? (
+                <>
+                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                  Exporting...
+                </>
+              ) : (
+                <>
+                  <Download className="w-4 h-4 mr-2" />
+                  Export
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Settings Dialog */}
+      <Dialog open={showSettingsDialog} onOpenChange={setShowSettingsDialog}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Settings className="h-5 w-5 text-purple-600" />
+              AI Content Studio Settings
+            </DialogTitle>
+            <DialogDescription>
+              Configure your AI content generation preferences.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="ai-model">AI Model</Label>
+              <Select value={aiModel} onValueChange={setAiModel}>
+                <SelectTrigger id="ai-model">
+                  <SelectValue placeholder="Select AI model" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="gpt-4">GPT-4 (Most Capable)</SelectItem>
+                  <SelectItem value="gpt-4-turbo">GPT-4 Turbo (Faster)</SelectItem>
+                  <SelectItem value="gpt-3.5-turbo">GPT-3.5 Turbo (Economical)</SelectItem>
+                  <SelectItem value="claude-3">Claude 3 (Alternative)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="default-tone">Default Writing Tone</Label>
+              <Select value={defaultTone} onValueChange={setDefaultTone}>
+                <SelectTrigger id="default-tone">
+                  <SelectValue placeholder="Select tone" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="professional">Professional</SelectItem>
+                  <SelectItem value="casual">Casual</SelectItem>
+                  <SelectItem value="friendly">Friendly</SelectItem>
+                  <SelectItem value="formal">Formal</SelectItem>
+                  <SelectItem value="persuasive">Persuasive</SelectItem>
+                  <SelectItem value="informative">Informative</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="max-tokens">Max Output Length (Tokens)</Label>
+              <Input
+                id="max-tokens"
+                type="number"
+                min="100"
+                max="4000"
+                value={maxTokens}
+                onChange={(e) => setMaxTokens(e.target.value)}
+              />
+              <p className="text-xs text-muted-foreground">
+                Recommended: 1000-2000 for most content
+              </p>
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label htmlFor="auto-save">Auto-Save Drafts</Label>
+                <p className="text-sm text-muted-foreground">
+                  Automatically save content as you work
+                </p>
+              </div>
+              <Switch
+                id="auto-save"
+                checked={autoSaveEnabled}
+                onCheckedChange={setAutoSaveEnabled}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowSettingsDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSaveSettings}
+              disabled={isSavingSettings}
+              className="bg-gradient-to-r from-purple-500 to-pink-600"
+            >
+              {isSavingSettings ? (
+                <>
+                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <Check className="w-4 h-4 mr-2" />
+                  Save Settings
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
 
 // Marketing Content Generator Component
-function MarketingContentGenerator() {
+interface MarketingContentGeneratorProps {
+  aiContentStudioQuickActions: Array<{
+    id: string
+    label: string
+    icon: string
+    shortcut: string
+    action: () => void
+  }>
+}
+
+function MarketingContentGenerator({ aiContentStudioQuickActions }: MarketingContentGeneratorProps) {
   const [contentType, setContentType] = useState('social')
   const [platform, setPlatform] = useState('instagram')
   const [topic, setTopic] = useState('')

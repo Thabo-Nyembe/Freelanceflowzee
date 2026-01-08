@@ -334,20 +334,7 @@ const mockReportsActivities = [
   { id: '3', user: 'System', action: 'Completed', target: 'Monthly data refresh for all sources', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
 ]
 
-const mockReportsQuickActions = [
-  { id: '1', label: 'New Report', icon: 'plus', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1000)),
-    { loading: 'Creating new report...', success: 'Report created successfully', error: 'Failed to create report' }
-  ), variant: 'default' as const },
-  { id: '2', label: 'Schedule Export', icon: 'calendar', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1200)),
-    { loading: 'Scheduling export...', success: 'Export scheduled successfully', error: 'Failed to schedule export' }
-  ), variant: 'default' as const },
-  { id: '3', label: 'Data Sources', icon: 'database', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 800)),
-    { loading: 'Loading data sources...', success: 'Data sources loaded', error: 'Failed to load data sources' }
-  ), variant: 'outline' as const },
-]
+// Quick actions will be defined inside the component to use state setters
 
 export default function ReportsClient() {
   const [activeTab, setActiveTab] = useState('dashboard')
@@ -358,6 +345,138 @@ export default function ReportsClient() {
   const [showCreateDialog, setShowCreateDialog] = useState(false)
   const [showScheduleDialog, setShowScheduleDialog] = useState(false)
   const [settingsTab, setSettingsTab] = useState('general')
+
+  // New Report Dialog State
+  const [showNewReportDialog, setShowNewReportDialog] = useState(false)
+  const [newReportName, setNewReportName] = useState('')
+  const [newReportDescription, setNewReportDescription] = useState('')
+  const [newReportType, setNewReportType] = useState<ReportType>('dashboard')
+  const [newReportDataSource, setNewReportDataSource] = useState('')
+  const [newReportFolder, setNewReportFolder] = useState('Sales')
+  const [isCreatingReport, setIsCreatingReport] = useState(false)
+
+  // Schedule Export Dialog State
+  const [showScheduleExportDialog, setShowScheduleExportDialog] = useState(false)
+  const [scheduleExportReport, setScheduleExportReport] = useState('')
+  const [scheduleExportFrequency, setScheduleExportFrequency] = useState('daily')
+  const [scheduleExportFormat, setScheduleExportFormat] = useState<'pdf' | 'excel' | 'csv' | 'image'>('pdf')
+  const [scheduleExportRecipients, setScheduleExportRecipients] = useState('')
+  const [scheduleExportTime, setScheduleExportTime] = useState('08:00')
+  const [isSchedulingExport, setIsSchedulingExport] = useState(false)
+
+  // Data Sources Dialog State
+  const [showDataSourcesDialog, setShowDataSourcesDialog] = useState(false)
+  const [newDataSourceName, setNewDataSourceName] = useState('')
+  const [newDataSourceType, setNewDataSourceType] = useState<DataSourceType>('database')
+  const [newDataSourceConnection, setNewDataSourceConnection] = useState('')
+  const [isAddingDataSource, setIsAddingDataSource] = useState(false)
+
+  // Quick Actions with real dialogs
+  const mockReportsQuickActions = [
+    { id: '1', label: 'New Report', icon: 'plus', action: () => setShowNewReportDialog(true), variant: 'default' as const },
+    { id: '2', label: 'Schedule Export', icon: 'calendar', action: () => setShowScheduleExportDialog(true), variant: 'default' as const },
+    { id: '3', label: 'Data Sources', icon: 'database', action: () => setShowDataSourcesDialog(true), variant: 'outline' as const },
+  ]
+
+  // Handler functions
+  const handleCreateNewReport = async () => {
+    if (!newReportName.trim()) {
+      toast.error('Report name is required')
+      return
+    }
+
+    setIsCreatingReport(true)
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1500))
+
+      toast.success('Report created successfully', {
+        description: `"${newReportName}" has been created in the ${newReportFolder} folder`
+      })
+
+      // Reset form
+      setNewReportName('')
+      setNewReportDescription('')
+      setNewReportType('dashboard')
+      setNewReportDataSource('')
+      setNewReportFolder('Sales')
+      setShowNewReportDialog(false)
+    } catch (error) {
+      toast.error('Failed to create report', {
+        description: 'Please try again later'
+      })
+    } finally {
+      setIsCreatingReport(false)
+    }
+  }
+
+  const handleScheduleExport = async () => {
+    if (!scheduleExportReport) {
+      toast.error('Please select a report to schedule')
+      return
+    }
+    if (!scheduleExportRecipients.trim()) {
+      toast.error('Please add at least one recipient')
+      return
+    }
+
+    setIsSchedulingExport(true)
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1500))
+
+      toast.success('Export scheduled successfully', {
+        description: `Report will be sent ${scheduleExportFrequency} at ${scheduleExportTime}`
+      })
+
+      // Reset form
+      setScheduleExportReport('')
+      setScheduleExportFrequency('daily')
+      setScheduleExportFormat('pdf')
+      setScheduleExportRecipients('')
+      setScheduleExportTime('08:00')
+      setShowScheduleExportDialog(false)
+    } catch (error) {
+      toast.error('Failed to schedule export', {
+        description: 'Please try again later'
+      })
+    } finally {
+      setIsSchedulingExport(false)
+    }
+  }
+
+  const handleAddDataSource = async () => {
+    if (!newDataSourceName.trim()) {
+      toast.error('Data source name is required')
+      return
+    }
+    if (!newDataSourceConnection.trim()) {
+      toast.error('Connection string is required')
+      return
+    }
+
+    setIsAddingDataSource(true)
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1500))
+
+      toast.success('Data source connected', {
+        description: `"${newDataSourceName}" has been added and is now syncing`
+      })
+
+      // Reset form
+      setNewDataSourceName('')
+      setNewDataSourceType('database')
+      setNewDataSourceConnection('')
+      setShowDataSourcesDialog(false)
+    } catch (error) {
+      toast.error('Failed to connect data source', {
+        description: 'Please check connection details and try again'
+      })
+    } finally {
+      setIsAddingDataSource(false)
+    }
+  }
 
   // Filter reports
   const filteredReports = useMemo(() => {
@@ -1899,6 +2018,396 @@ export default function ReportsClient() {
                 </Button>
               </div>
             </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* New Report Dialog - Full Workflow */}
+        <Dialog open={showNewReportDialog} onOpenChange={setShowNewReportDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Plus className="h-5 w-5 text-purple-600" />
+                Create New Report
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-6 py-4">
+              {/* Report Name */}
+              <div className="space-y-2">
+                <Label htmlFor="report-name">Report Name *</Label>
+                <Input
+                  id="report-name"
+                  placeholder="Enter report name..."
+                  value={newReportName}
+                  onChange={(e) => setNewReportName(e.target.value)}
+                />
+              </div>
+
+              {/* Report Description */}
+              <div className="space-y-2">
+                <Label htmlFor="report-description">Description</Label>
+                <Input
+                  id="report-description"
+                  placeholder="Brief description of this report..."
+                  value={newReportDescription}
+                  onChange={(e) => setNewReportDescription(e.target.value)}
+                />
+              </div>
+
+              {/* Report Type Selection */}
+              <div className="space-y-2">
+                <Label>Report Type</Label>
+                <div className="grid grid-cols-4 gap-3">
+                  {[
+                    { type: 'dashboard' as ReportType, icon: LayoutDashboard, label: 'Dashboard', color: 'purple' },
+                    { type: 'chart' as ReportType, icon: BarChart3, label: 'Chart', color: 'blue' },
+                    { type: 'table' as ReportType, icon: Table2, label: 'Table', color: 'green' },
+                    { type: 'story' as ReportType, icon: FileText, label: 'Story', color: 'amber' },
+                  ].map((item) => (
+                    <button
+                      key={item.type}
+                      onClick={() => setNewReportType(item.type)}
+                      className={`p-3 border rounded-lg transition-all ${
+                        newReportType === item.type
+                          ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/30'
+                          : 'hover:bg-gray-50 dark:hover:bg-gray-800'
+                      }`}
+                    >
+                      <item.icon className={`h-6 w-6 mx-auto mb-1 ${
+                        item.color === 'purple' ? 'text-purple-600' :
+                        item.color === 'blue' ? 'text-blue-600' :
+                        item.color === 'green' ? 'text-green-600' :
+                        'text-amber-600'
+                      }`} />
+                      <p className="text-xs font-medium">{item.label}</p>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Data Source Selection */}
+              <div className="space-y-2">
+                <Label>Data Source</Label>
+                <Select value={newReportDataSource} onValueChange={setNewReportDataSource}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a data source" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {mockDataSources.filter(ds => ds.status === 'connected').map((source) => (
+                      <SelectItem key={source.id} value={source.id}>
+                        <div className="flex items-center gap-2">
+                          <Database className="h-4 w-4 text-gray-500" />
+                          {source.name}
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Folder Selection */}
+              <div className="space-y-2">
+                <Label>Save to Folder</Label>
+                <Select value={newReportFolder} onValueChange={setNewReportFolder}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {folders.filter(f => f.name !== 'All Reports').map((folder) => (
+                      <SelectItem key={folder.name} value={folder.name}>
+                        <div className="flex items-center gap-2">
+                          <FolderOpen className="h-4 w-4 text-gray-500" />
+                          {folder.name}
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Actions */}
+              <div className="flex gap-3 pt-4 border-t">
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => setShowNewReportDialog(false)}
+                  disabled={isCreatingReport}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  className="flex-1 bg-purple-600 hover:bg-purple-700"
+                  onClick={handleCreateNewReport}
+                  disabled={isCreatingReport}
+                >
+                  {isCreatingReport ? (
+                    <>
+                      <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                      Creating...
+                    </>
+                  ) : (
+                    <>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Create Report
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Schedule Export Dialog */}
+        <Dialog open={showScheduleExportDialog} onOpenChange={setShowScheduleExportDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Calendar className="h-5 w-5 text-blue-600" />
+                Schedule Report Export
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-6 py-4">
+              {/* Report Selection */}
+              <div className="space-y-2">
+                <Label>Select Report *</Label>
+                <Select value={scheduleExportReport} onValueChange={setScheduleExportReport}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Choose a report to schedule" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {mockReports.map((report) => (
+                      <SelectItem key={report.id} value={report.id}>
+                        <div className="flex items-center gap-2">
+                          <FileText className="h-4 w-4 text-gray-500" />
+                          {report.name}
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Frequency Selection */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Frequency</Label>
+                  <Select value={scheduleExportFrequency} onValueChange={setScheduleExportFrequency}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="daily">Daily</SelectItem>
+                      <SelectItem value="weekly">Weekly</SelectItem>
+                      <SelectItem value="monthly">Monthly</SelectItem>
+                      <SelectItem value="quarterly">Quarterly</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Time</Label>
+                  <Input
+                    type="time"
+                    value={scheduleExportTime}
+                    onChange={(e) => setScheduleExportTime(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              {/* Format Selection */}
+              <div className="space-y-2">
+                <Label>Export Format</Label>
+                <div className="grid grid-cols-4 gap-3">
+                  {[
+                    { format: 'pdf' as const, label: 'PDF', icon: FileText },
+                    { format: 'excel' as const, label: 'Excel', icon: Table2 },
+                    { format: 'csv' as const, label: 'CSV', icon: Database },
+                    { format: 'image' as const, label: 'Image', icon: Layers },
+                  ].map((item) => (
+                    <button
+                      key={item.format}
+                      onClick={() => setScheduleExportFormat(item.format)}
+                      className={`p-3 border rounded-lg transition-all ${
+                        scheduleExportFormat === item.format
+                          ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30'
+                          : 'hover:bg-gray-50 dark:hover:bg-gray-800'
+                      }`}
+                    >
+                      <item.icon className="h-5 w-5 mx-auto mb-1 text-gray-600" />
+                      <p className="text-xs font-medium">{item.label}</p>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Recipients */}
+              <div className="space-y-2">
+                <Label htmlFor="recipients">Recipients *</Label>
+                <Input
+                  id="recipients"
+                  placeholder="Enter email addresses separated by commas..."
+                  value={scheduleExportRecipients}
+                  onChange={(e) => setScheduleExportRecipients(e.target.value)}
+                />
+                <p className="text-xs text-gray-500">Example: team@company.com, manager@company.com</p>
+              </div>
+
+              {/* Actions */}
+              <div className="flex gap-3 pt-4 border-t">
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => setShowScheduleExportDialog(false)}
+                  disabled={isSchedulingExport}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  className="flex-1 bg-blue-600 hover:bg-blue-700"
+                  onClick={handleScheduleExport}
+                  disabled={isSchedulingExport}
+                >
+                  {isSchedulingExport ? (
+                    <>
+                      <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                      Scheduling...
+                    </>
+                  ) : (
+                    <>
+                      <Calendar className="h-4 w-4 mr-2" />
+                      Schedule Export
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Data Sources Dialog */}
+        <Dialog open={showDataSourcesDialog} onOpenChange={setShowDataSourcesDialog}>
+          <DialogContent className="max-w-3xl max-h-[85vh]">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Database className="h-5 w-5 text-cyan-600" />
+                Manage Data Sources
+              </DialogTitle>
+            </DialogHeader>
+            <ScrollArea className="max-h-[65vh]">
+              <div className="space-y-6 py-4">
+                {/* Existing Data Sources */}
+                <div className="space-y-3">
+                  <h4 className="font-medium text-gray-900 dark:text-white">Connected Sources</h4>
+                  <div className="space-y-2">
+                    {mockDataSources.map((source) => {
+                      const SourceIcon = getDataSourceIcon(source.type)
+                      return (
+                        <div
+                          key={source.id}
+                          className="flex items-center gap-4 p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800"
+                        >
+                          <div className="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+                            <SourceIcon className="h-5 w-5 text-gray-600" />
+                          </div>
+                          <div className="flex-1">
+                            <p className="font-medium">{source.name}</p>
+                            <p className="text-sm text-gray-500">{source.connection}</p>
+                          </div>
+                          <Badge className={
+                            source.status === 'connected' ? 'bg-green-100 text-green-700' :
+                            source.status === 'syncing' ? 'bg-blue-100 text-blue-700' :
+                            source.status === 'error' ? 'bg-red-100 text-red-700' :
+                            'bg-gray-100 text-gray-700'
+                          }>
+                            {source.status}
+                          </Badge>
+                          <div className="text-right text-sm text-gray-500">
+                            <p>{source.tables} tables</p>
+                            <p>{formatNumber(source.rows)} rows</p>
+                          </div>
+                          <Button variant="outline" size="sm">
+                            <RefreshCw className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+
+                {/* Add New Data Source */}
+                <div className="space-y-4 pt-4 border-t">
+                  <h4 className="font-medium text-gray-900 dark:text-white">Add New Data Source</h4>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="ds-name">Name *</Label>
+                      <Input
+                        id="ds-name"
+                        placeholder="Data source name..."
+                        value={newDataSourceName}
+                        onChange={(e) => setNewDataSourceName(e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Type</Label>
+                      <Select value={newDataSourceType} onValueChange={(val: DataSourceType) => setNewDataSourceType(val)}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="database">Database</SelectItem>
+                          <SelectItem value="api">API</SelectItem>
+                          <SelectItem value="cloud">Cloud Service</SelectItem>
+                          <SelectItem value="file">File Upload</SelectItem>
+                          <SelectItem value="spreadsheet">Spreadsheet</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="ds-connection">Connection String *</Label>
+                    <Input
+                      id="ds-connection"
+                      placeholder={
+                        newDataSourceType === 'database' ? 'postgresql://user:pass@host:5432/dbname' :
+                        newDataSourceType === 'api' ? 'https://api.example.com/v1' :
+                        'Enter connection details...'
+                      }
+                      value={newDataSourceConnection}
+                      onChange={(e) => setNewDataSourceConnection(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                {/* Actions */}
+                <div className="flex gap-3 pt-4 border-t">
+                  <Button
+                    variant="outline"
+                    className="flex-1"
+                    onClick={() => setShowDataSourcesDialog(false)}
+                    disabled={isAddingDataSource}
+                  >
+                    Close
+                  </Button>
+                  <Button
+                    className="flex-1 bg-cyan-600 hover:bg-cyan-700"
+                    onClick={handleAddDataSource}
+                    disabled={isAddingDataSource || !newDataSourceName.trim() || !newDataSourceConnection.trim()}
+                  >
+                    {isAddingDataSource ? (
+                      <>
+                        <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                        Connecting...
+                      </>
+                    ) : (
+                      <>
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add Data Source
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </div>
+            </ScrollArea>
           </DialogContent>
         </Dialog>
       </div>

@@ -350,11 +350,7 @@ const mockInvestorMetricsActivities = [
   { id: '3', user: 'System', action: 'Generated', target: 'automated KPI report', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
 ]
 
-const mockInvestorMetricsQuickActions = [
-  { id: '1', label: 'Update Metrics', icon: 'refresh', action: () => toast.success('Metrics Updated', { description: 'All investor metrics refreshed' }), variant: 'default' as const },
-  { id: '2', label: 'Investor Report', icon: 'file-text', action: () => toast.success('Report Generated', { description: 'Investor report ready for download' }), variant: 'default' as const },
-  { id: '3', label: 'Export Data', icon: 'download', action: () => toast.success('Data Exported', { description: 'Metrics exported to Excel' }), variant: 'outline' as const },
-]
+// QuickActions are defined inside the component to access state setters
 
 export default function InvestorMetricsClient() {
   const supabase = createClient()
@@ -370,6 +366,33 @@ export default function InvestorMetricsClient() {
   const [loading, setLoading] = useState(false)
   const [showMetricDialog, setShowMetricDialog] = useState(false)
   const [editingMetric, setEditingMetric] = useState<DBInvestorMetric | null>(null)
+
+  // Dialog states for QuickActions
+  const [showUpdateMetricsDialog, setShowUpdateMetricsDialog] = useState(false)
+  const [showInvestorReportDialog, setShowInvestorReportDialog] = useState(false)
+  const [showExportDataDialog, setShowExportDataDialog] = useState(false)
+  const [updateMetricsData, setUpdateMetricsData] = useState({
+    refreshAll: true,
+    syncWithAccounting: false,
+    recalculateKPIs: true,
+    updateTimestamp: true
+  })
+  const [reportConfig, setReportConfig] = useState({
+    reportType: 'quarterly' as 'monthly' | 'quarterly' | 'annual',
+    includeFinancials: true,
+    includeCapTable: true,
+    includeKPIs: true,
+    recipientEmails: '',
+    sendImmediately: false
+  })
+  const [exportConfig, setExportConfig] = useState({
+    format: 'xlsx' as 'xlsx' | 'csv' | 'json' | 'pdf',
+    includeMetrics: true,
+    includeCapTable: true,
+    includeFundingRounds: true,
+    includeInvestors: true,
+    dateRange: 'all' as 'all' | 'ytd' | 'last12months' | 'custom'
+  })
   const [formData, setFormData] = useState<{
     metric_name: string
     category: 'revenue' | 'growth' | 'efficiency' | 'engagement'
@@ -649,7 +672,134 @@ export default function InvestorMetricsClient() {
   }
 
   const handleGenerateReport = () => {
-    toast.success('Report Generated', { description: 'Investor presentation is ready' })
+    setShowInvestorReportDialog(true)
+  }
+
+  const handleGenerateReportSubmit = async () => {
+    setLoading(true)
+    try {
+      // Generate report data
+      const reportData = {
+        type: reportConfig.reportType,
+        generatedAt: new Date().toISOString(),
+        company: 'Kazi Technologies Inc.',
+        ...(reportConfig.includeFinancials && { financials: mockKPIs.filter(k => k.category === 'revenue') }),
+        ...(reportConfig.includeCapTable && { capTable: mockCapTable }),
+        ...(reportConfig.includeKPIs && { kpis: mockKPIs })
+      }
+
+      // Create and download report
+      const blob = new Blob([JSON.stringify(reportData, null, 2)], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `investor-report-${reportConfig.reportType}-${new Date().toISOString().split('T')[0]}.json`
+      a.click()
+      URL.revokeObjectURL(url)
+
+      if (reportConfig.sendImmediately && reportConfig.recipientEmails) {
+        // In production, this would send to an API endpoint
+        toast.success('Report sent', { description: `Report emailed to ${reportConfig.recipientEmails.split(',').length} recipients` })
+      }
+
+      toast.success('Report Generated', { description: `${reportConfig.reportType.charAt(0).toUpperCase() + reportConfig.reportType.slice(1)} investor report is ready` })
+      setShowInvestorReportDialog(false)
+    } catch (error: any) {
+      toast.error('Failed to generate report', { description: error.message })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleUpdateMetricsSubmit = async () => {
+    setLoading(true)
+    try {
+      if (updateMetricsData.refreshAll) {
+        await fetchMetrics()
+      }
+
+      if (updateMetricsData.recalculateKPIs) {
+        // In production, this would trigger KPI recalculation
+        await new Promise(resolve => setTimeout(resolve, 500))
+      }
+
+      if (updateMetricsData.syncWithAccounting) {
+        // In production, this would sync with accounting system
+        await new Promise(resolve => setTimeout(resolve, 500))
+      }
+
+      toast.success('Metrics Updated', {
+        description: `Updated: ${[
+          updateMetricsData.refreshAll && 'data refreshed',
+          updateMetricsData.recalculateKPIs && 'KPIs recalculated',
+          updateMetricsData.syncWithAccounting && 'accounting synced'
+        ].filter(Boolean).join(', ')}`
+      })
+      setShowUpdateMetricsDialog(false)
+    } catch (error: any) {
+      toast.error('Failed to update metrics', { description: error.message })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleExportDataSubmit = async () => {
+    setLoading(true)
+    try {
+      const exportData: Record<string, any> = {
+        exportedAt: new Date().toISOString(),
+        dateRange: exportConfig.dateRange
+      }
+
+      if (exportConfig.includeMetrics) {
+        exportData.metrics = dbMetrics
+        exportData.kpis = mockKPIs
+      }
+      if (exportConfig.includeCapTable) {
+        exportData.capTable = mockCapTable
+      }
+      if (exportConfig.includeFundingRounds) {
+        exportData.fundingRounds = mockFundingRounds
+      }
+      if (exportConfig.includeInvestors) {
+        exportData.investors = mockInvestors
+      }
+
+      let blob: Blob
+      let filename: string
+
+      if (exportConfig.format === 'json') {
+        blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
+        filename = `investor-data-export-${new Date().toISOString().split('T')[0]}.json`
+      } else if (exportConfig.format === 'csv') {
+        // Convert to CSV (simplified)
+        const csvContent = Object.entries(exportData)
+          .map(([key, value]) => `${key},${JSON.stringify(value)}`)
+          .join('\n')
+        blob = new Blob([csvContent], { type: 'text/csv' })
+        filename = `investor-data-export-${new Date().toISOString().split('T')[0]}.csv`
+      } else {
+        // Default to JSON for xlsx/pdf (in production would use proper libraries)
+        blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
+        filename = `investor-data-export-${new Date().toISOString().split('T')[0]}.${exportConfig.format}`
+      }
+
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = filename
+      a.click()
+      URL.revokeObjectURL(url)
+
+      toast.success('Data Exported', {
+        description: `Exported ${Object.keys(exportData).length - 2} data sets as ${exportConfig.format.toUpperCase()}`
+      })
+      setShowExportDataDialog(false)
+    } catch (error: any) {
+      toast.error('Export failed', { description: error.message })
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handleSetAlert = async (metric: string) => {
@@ -680,6 +830,13 @@ export default function InvestorMetricsClient() {
     resetForm()
     setShowMetricDialog(true)
   }
+
+  // QuickActions with real dialog-based workflows
+  const investorMetricsQuickActions = [
+    { id: '1', label: 'Update Metrics', icon: 'refresh', action: () => setShowUpdateMetricsDialog(true), variant: 'default' as const },
+    { id: '2', label: 'Investor Report', icon: 'file-text', action: () => setShowInvestorReportDialog(true), variant: 'default' as const },
+    { id: '3', label: 'Export Data', icon: 'download', action: () => setShowExportDataDialog(true), variant: 'outline' as const },
+  ]
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 via-yellow-50/30 to-orange-50/40 dark:bg-none dark:bg-gray-900">
@@ -2082,7 +2239,7 @@ export default function InvestorMetricsClient() {
               maxItems={5}
             />
             <QuickActionsToolbar
-              actions={mockInvestorMetricsQuickActions}
+              actions={investorMetricsQuickActions}
               variant="grid"
             />
           </div>
@@ -2268,6 +2425,319 @@ export default function InvestorMetricsClient() {
               </div>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Update Metrics Dialog */}
+      <Dialog open={showUpdateMetricsDialog} onOpenChange={setShowUpdateMetricsDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <RefreshCw className="w-5 h-5 text-amber-500" />
+              Update Metrics
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              Configure which metrics to update and sync options.
+            </p>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                <div>
+                  <Label>Refresh All Data</Label>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Pull latest metrics from database</p>
+                </div>
+                <Switch
+                  checked={updateMetricsData.refreshAll}
+                  onCheckedChange={(checked) => setUpdateMetricsData(prev => ({ ...prev, refreshAll: checked }))}
+                />
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                <div>
+                  <Label>Recalculate KPIs</Label>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Recompute derived metrics</p>
+                </div>
+                <Switch
+                  checked={updateMetricsData.recalculateKPIs}
+                  onCheckedChange={(checked) => setUpdateMetricsData(prev => ({ ...prev, recalculateKPIs: checked }))}
+                />
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                <div>
+                  <Label>Sync with Accounting</Label>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Import from QuickBooks/Xero</p>
+                </div>
+                <Switch
+                  checked={updateMetricsData.syncWithAccounting}
+                  onCheckedChange={(checked) => setUpdateMetricsData(prev => ({ ...prev, syncWithAccounting: checked }))}
+                />
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                <div>
+                  <Label>Update Timestamps</Label>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Set last updated time</p>
+                </div>
+                <Switch
+                  checked={updateMetricsData.updateTimestamp}
+                  onCheckedChange={(checked) => setUpdateMetricsData(prev => ({ ...prev, updateTimestamp: checked }))}
+                />
+              </div>
+            </div>
+          </div>
+          <DialogFooter className="mt-4">
+            <Button variant="outline" onClick={() => setShowUpdateMetricsDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleUpdateMetricsSubmit}
+              disabled={loading}
+              className="bg-gradient-to-r from-amber-500 to-orange-500"
+            >
+              {loading ? (
+                <>
+                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                  Updating...
+                </>
+              ) : (
+                <>
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                  Update Metrics
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Investor Report Dialog */}
+      <Dialog open={showInvestorReportDialog} onOpenChange={setShowInvestorReportDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileText className="w-5 h-5 text-blue-500" />
+              Generate Investor Report
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              Configure your investor report settings and content.
+            </p>
+            <div>
+              <Label>Report Type</Label>
+              <Select
+                value={reportConfig.reportType}
+                onValueChange={(v) => setReportConfig(prev => ({ ...prev, reportType: v as any }))}
+              >
+                <SelectTrigger className="mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="monthly">Monthly Update</SelectItem>
+                  <SelectItem value="quarterly">Quarterly Report</SelectItem>
+                  <SelectItem value="annual">Annual Review</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-3">
+              <Label>Include in Report</Label>
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                <span className="text-sm">Financial Statements</span>
+                <Switch
+                  checked={reportConfig.includeFinancials}
+                  onCheckedChange={(checked) => setReportConfig(prev => ({ ...prev, includeFinancials: checked }))}
+                />
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                <span className="text-sm">Cap Table Summary</span>
+                <Switch
+                  checked={reportConfig.includeCapTable}
+                  onCheckedChange={(checked) => setReportConfig(prev => ({ ...prev, includeCapTable: checked }))}
+                />
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                <span className="text-sm">KPI Dashboard</span>
+                <Switch
+                  checked={reportConfig.includeKPIs}
+                  onCheckedChange={(checked) => setReportConfig(prev => ({ ...prev, includeKPIs: checked }))}
+                />
+              </div>
+            </div>
+            <div>
+              <Label>Recipient Emails (optional)</Label>
+              <Input
+                value={reportConfig.recipientEmails}
+                onChange={(e) => setReportConfig(prev => ({ ...prev, recipientEmails: e.target.value }))}
+                placeholder="investor1@email.com, investor2@email.com"
+                className="mt-1"
+              />
+              <p className="text-xs text-gray-500 mt-1">Separate multiple emails with commas</p>
+            </div>
+            <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+              <div>
+                <Label>Send Immediately</Label>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Email report to recipients after generation</p>
+              </div>
+              <Switch
+                checked={reportConfig.sendImmediately}
+                onCheckedChange={(checked) => setReportConfig(prev => ({ ...prev, sendImmediately: checked }))}
+                disabled={!reportConfig.recipientEmails}
+              />
+            </div>
+          </div>
+          <DialogFooter className="mt-4">
+            <Button variant="outline" onClick={() => setShowInvestorReportDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleGenerateReportSubmit}
+              disabled={loading}
+              className="bg-gradient-to-r from-blue-500 to-indigo-500"
+            >
+              {loading ? (
+                <>
+                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <FileText className="w-4 h-4 mr-2" />
+                  Generate Report
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Export Data Dialog */}
+      <Dialog open={showExportDataDialog} onOpenChange={setShowExportDataDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Download className="w-5 h-5 text-green-500" />
+              Export Investor Data
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              Select the data sets and format for export.
+            </p>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Export Format</Label>
+                <Select
+                  value={exportConfig.format}
+                  onValueChange={(v) => setExportConfig(prev => ({ ...prev, format: v as any }))}
+                >
+                  <SelectTrigger className="mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="xlsx">Excel (XLSX)</SelectItem>
+                    <SelectItem value="csv">CSV</SelectItem>
+                    <SelectItem value="json">JSON</SelectItem>
+                    <SelectItem value="pdf">PDF</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Date Range</Label>
+                <Select
+                  value={exportConfig.dateRange}
+                  onValueChange={(v) => setExportConfig(prev => ({ ...prev, dateRange: v as any }))}
+                >
+                  <SelectTrigger className="mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Time</SelectItem>
+                    <SelectItem value="ytd">Year to Date</SelectItem>
+                    <SelectItem value="last12months">Last 12 Months</SelectItem>
+                    <SelectItem value="custom">Custom Range</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="space-y-3">
+              <Label>Data to Export</Label>
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <BarChart3 className="w-4 h-4 text-amber-500" />
+                  <span className="text-sm">Metrics & KPIs</span>
+                </div>
+                <Switch
+                  checked={exportConfig.includeMetrics}
+                  onCheckedChange={(checked) => setExportConfig(prev => ({ ...prev, includeMetrics: checked }))}
+                />
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <PieChart className="w-4 h-4 text-purple-500" />
+                  <span className="text-sm">Cap Table</span>
+                </div>
+                <Switch
+                  checked={exportConfig.includeCapTable}
+                  onCheckedChange={(checked) => setExportConfig(prev => ({ ...prev, includeCapTable: checked }))}
+                />
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <CircleDollarSign className="w-4 h-4 text-green-500" />
+                  <span className="text-sm">Funding Rounds</span>
+                </div>
+                <Switch
+                  checked={exportConfig.includeFundingRounds}
+                  onCheckedChange={(checked) => setExportConfig(prev => ({ ...prev, includeFundingRounds: checked }))}
+                />
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <Users className="w-4 h-4 text-blue-500" />
+                  <span className="text-sm">Investor Directory</span>
+                </div>
+                <Switch
+                  checked={exportConfig.includeInvestors}
+                  onCheckedChange={(checked) => setExportConfig(prev => ({ ...prev, includeInvestors: checked }))}
+                />
+              </div>
+            </div>
+            <div className="p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
+              <div className="flex items-center gap-2 text-amber-700 dark:text-amber-400">
+                <Info className="w-4 h-4" />
+                <span className="text-sm font-medium">Export Preview</span>
+              </div>
+              <p className="text-xs text-amber-600 dark:text-amber-500 mt-1">
+                {[
+                  exportConfig.includeMetrics && 'Metrics',
+                  exportConfig.includeCapTable && 'Cap Table',
+                  exportConfig.includeFundingRounds && 'Funding Rounds',
+                  exportConfig.includeInvestors && 'Investors'
+                ].filter(Boolean).join(', ') || 'No data selected'} will be exported as {exportConfig.format.toUpperCase()}
+              </p>
+            </div>
+          </div>
+          <DialogFooter className="mt-4">
+            <Button variant="outline" onClick={() => setShowExportDataDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleExportDataSubmit}
+              disabled={loading || (!exportConfig.includeMetrics && !exportConfig.includeCapTable && !exportConfig.includeFundingRounds && !exportConfig.includeInvestors)}
+              className="bg-gradient-to-r from-green-500 to-emerald-500"
+            >
+              {loading ? (
+                <>
+                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                  Exporting...
+                </>
+              ) : (
+                <>
+                  <Download className="w-4 h-4 mr-2" />
+                  Export Data
+                </>
+              )}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

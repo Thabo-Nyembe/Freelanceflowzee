@@ -456,11 +456,7 @@ const pluginMarketplaceActivities = [
   { id: '3', user: 'System', action: 'generated', target: 'weekly report', timestamp: '1h ago', type: 'info' as const },
 ]
 
-const pluginMarketplaceQuickActions = [
-  { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => toast.success('Plugin Created', { description: 'New plugin ready' }) },
-  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => toast.success('Data Exported', { description: 'Plugin data exported' }) },
-  { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => toast.success('Settings', { description: 'Plugin settings opened' }) },
-]
+// Quick actions will be defined inside the component to access state setters
 
 export default function PluginMarketplaceClient() {
   logger.debug('Plugin marketplace component mounting')
@@ -491,8 +487,47 @@ export default function PluginMarketplaceClient() {
   const [showViewModal, setShowViewModal] = useState(false)
   const [showInstallModal, setShowInstallModal] = useState(false)
 
+  // Quick Action Dialog States
+  const [showCreatePluginDialog, setShowCreatePluginDialog] = useState(false)
+  const [showExportDialog, setShowExportDialog] = useState(false)
+  const [showSettingsDialog, setShowSettingsDialog] = useState(false)
+
+  // Create Plugin Form State
+  const [newPluginData, setNewPluginData] = useState({
+    name: '',
+    description: '',
+    category: 'productivity' as PluginCategory,
+    pricingType: 'free' as PricingType,
+    price: 0,
+    version: '1.0.0'
+  })
+
+  // Export Options State
+  const [exportOptions, setExportOptions] = useState({
+    format: 'json' as 'json' | 'csv' | 'xml',
+    includeInstalled: true,
+    includeSettings: true,
+    includeStats: true
+  })
+
+  // Settings State
+  const [marketplaceSettings, setMarketplaceSettings] = useState({
+    autoUpdate: true,
+    notifyNewPlugins: true,
+    showBetaPlugins: false,
+    defaultView: 'grid' as ViewMode,
+    defaultSort: 'popular' as PluginState['sortBy']
+  })
+
   // Confirmation Dialog State
   const [uninstallPlugin, setUninstallPlugin] = useState<{ id: string; name: string; category: string; version: string; fileSize: number; installedAt?: string } | null>(null)
+
+  // Quick Actions with dialog triggers
+  const pluginMarketplaceQuickActions = useMemo(() => [
+    { id: '1', label: 'New Plugin', icon: 'Plus', shortcut: 'N', action: () => setShowCreatePluginDialog(true) },
+    { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => setShowExportDialog(true) },
+    { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => setShowSettingsDialog(true) },
+  ], [])
 
   // ============================================================================
   // A++++ LOAD DATA
@@ -829,6 +864,180 @@ export default function PluginMarketplaceClient() {
   function getCategoryIcon(category: PluginCategory) {
     const option = categoryOptions.find(c => c.id === category)
     return option?.icon || Package
+  }
+
+  // ============================================================================
+  // A++++ QUICK ACTION HANDLERS
+  // ============================================================================
+
+  const handleCreatePlugin = async () => {
+    if (!newPluginData.name.trim()) {
+      toast.error('Plugin name is required')
+      return
+    }
+
+    logger.info('Creating new plugin', { name: newPluginData.name, category: newPluginData.category })
+
+    const newPlugin: Plugin = {
+      id: `PLG-${Date.now()}`,
+      name: newPluginData.name,
+      description: newPluginData.description || `A new ${newPluginData.category} plugin`,
+      longDescription: `${newPluginData.name} is a custom plugin created to enhance your workflow with specialized features.`,
+      category: newPluginData.category,
+      icon: ['🔌', '⚡', '🚀', '🎯', '💡', '🔥'][Math.floor(Math.random() * 6)],
+      author: {
+        id: userId || 'user-001',
+        name: 'You',
+        avatar: '👤',
+        verified: false
+      },
+      version: newPluginData.version,
+      rating: 0,
+      reviewCount: 0,
+      installCount: 0,
+      price: newPluginData.price,
+      pricingType: newPluginData.pricingType,
+      status: 'published',
+      fileSize: Math.floor(Math.random() * 5000000) + 100000,
+      lastUpdated: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
+      isVerified: false,
+      isFeatured: false,
+      isTrending: false,
+      isPopular: false,
+      tags: [newPluginData.category],
+      screenshots: [],
+      compatibility: ['v1.0+'],
+      requirements: ['Min 1GB RAM'],
+      changelog: [`v${newPluginData.version}: Initial release`]
+    }
+
+    try {
+      if (userId) {
+        const { createPlugin } = await import('@/lib/plugin-marketplace-queries')
+        const { error: createError } = await createPlugin({
+          name: newPlugin.name,
+          description: newPlugin.description,
+          category: newPlugin.category,
+          pricing_type: newPlugin.pricingType,
+          price: newPlugin.price,
+          version: newPlugin.version,
+          author_id: userId
+        })
+        if (createError) throw new Error(createError.message || 'Failed to create plugin')
+      }
+
+      dispatch({ type: 'ADD_PLUGIN', plugin: newPlugin })
+
+      toast.success('Plugin Created Successfully', {
+        description: `${newPlugin.name} (${newPlugin.category}) - v${newPlugin.version} - Ready for installation`
+      })
+
+      setShowCreatePluginDialog(false)
+      setNewPluginData({
+        name: '',
+        description: '',
+        category: 'productivity',
+        pricingType: 'free',
+        price: 0,
+        version: '1.0.0'
+      })
+      announce('New plugin created', 'polite')
+    } catch (error: any) {
+      logger.error('Failed to create plugin', { error: error.message })
+      toast.error('Failed to create plugin', { description: error.message })
+    }
+  }
+
+  const handleExportPluginData = () => {
+    logger.info('Exporting plugin data', { format: exportOptions.format, options: exportOptions })
+
+    const dataToExport: any = {
+      exportDate: new Date().toISOString(),
+      totalPlugins: state.plugins.length
+    }
+
+    if (exportOptions.includeInstalled) {
+      dataToExport.installedPlugins = state.installedPlugins.map(ip => {
+        const plugin = state.plugins.find(p => p.id === ip.pluginId)
+        return {
+          ...ip,
+          pluginName: plugin?.name,
+          pluginCategory: plugin?.category
+        }
+      })
+    }
+
+    if (exportOptions.includeStats) {
+      dataToExport.stats = stats
+    }
+
+    if (exportOptions.includeSettings) {
+      dataToExport.settings = marketplaceSettings
+    }
+
+    let content: string
+    let filename: string
+    let mimeType: string
+
+    switch (exportOptions.format) {
+      case 'csv':
+        const headers = ['Plugin ID', 'Name', 'Category', 'Status', 'Installed At']
+        const rows = state.installedPlugins.map(ip => {
+          const plugin = state.plugins.find(p => p.id === ip.pluginId)
+          return [ip.pluginId, plugin?.name || '', plugin?.category || '', ip.isActive ? 'Active' : 'Inactive', ip.installedAt]
+        })
+        content = [headers.join(','), ...rows.map(r => r.join(','))].join('\n')
+        filename = `plugin-marketplace-export-${Date.now()}.csv`
+        mimeType = 'text/csv'
+        break
+      case 'xml':
+        content = `<?xml version="1.0" encoding="UTF-8"?>\n<pluginExport>\n  <exportDate>${dataToExport.exportDate}</exportDate>\n  <totalPlugins>${dataToExport.totalPlugins}</totalPlugins>\n</pluginExport>`
+        filename = `plugin-marketplace-export-${Date.now()}.xml`
+        mimeType = 'application/xml'
+        break
+      default:
+        content = JSON.stringify(dataToExport, null, 2)
+        filename = `plugin-marketplace-export-${Date.now()}.json`
+        mimeType = 'application/json'
+    }
+
+    const blob = new Blob([content], { type: mimeType })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = filename
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
+
+    toast.success('Data Exported Successfully', {
+      description: `Exported ${state.installedPlugins.length} plugins to ${exportOptions.format.toUpperCase()} format`
+    })
+    setShowExportDialog(false)
+    announce('Plugin data exported', 'polite')
+  }
+
+  const handleSaveSettings = () => {
+    logger.info('Saving marketplace settings', { settings: marketplaceSettings })
+
+    // Apply default view and sort settings
+    dispatch({ type: 'SET_VIEW_MODE', viewMode: marketplaceSettings.defaultView })
+    dispatch({ type: 'SET_SORT', sortBy: marketplaceSettings.defaultSort })
+
+    // Store settings in localStorage for persistence
+    try {
+      localStorage.setItem('pluginMarketplaceSettings', JSON.stringify(marketplaceSettings))
+    } catch (e) {
+      logger.warn('Failed to save settings to localStorage')
+    }
+
+    toast.success('Settings Saved', {
+      description: `Auto-update: ${marketplaceSettings.autoUpdate ? 'On' : 'Off'} | Notifications: ${marketplaceSettings.notifyNewPlugins ? 'On' : 'Off'} | Beta plugins: ${marketplaceSettings.showBetaPlugins ? 'Visible' : 'Hidden'}`
+    })
+    setShowSettingsDialog(false)
+    announce('Settings saved successfully', 'polite')
   }
 
   // ============================================================================
@@ -1532,6 +1741,319 @@ export default function PluginMarketplaceClient() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Create Plugin Dialog */}
+      <Dialog open={showCreatePluginDialog} onOpenChange={setShowCreatePluginDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Package className="h-5 w-5 text-emerald-400" />
+              Create New Plugin
+            </DialogTitle>
+            <DialogDescription>
+              Create a custom plugin to extend your marketplace
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="plugin-name">Plugin Name *</Label>
+              <Input
+                id="plugin-name"
+                placeholder="My Awesome Plugin"
+                value={newPluginData.name}
+                onChange={(e) => setNewPluginData(prev => ({ ...prev, name: e.target.value }))}
+                className="bg-slate-900/50 border-slate-700"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="plugin-description">Description</Label>
+              <Input
+                id="plugin-description"
+                placeholder="A brief description of what your plugin does"
+                value={newPluginData.description}
+                onChange={(e) => setNewPluginData(prev => ({ ...prev, description: e.target.value }))}
+                className="bg-slate-900/50 border-slate-700"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="plugin-category">Category</Label>
+                <Select
+                  value={newPluginData.category}
+                  onValueChange={(value) => setNewPluginData(prev => ({ ...prev, category: value as PluginCategory }))}
+                >
+                  <SelectTrigger className="bg-slate-900/50 border-slate-700">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categoryOptions.map(cat => (
+                      <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="plugin-pricing">Pricing Type</Label>
+                <Select
+                  value={newPluginData.pricingType}
+                  onValueChange={(value) => setNewPluginData(prev => ({ ...prev, pricingType: value as PricingType }))}
+                >
+                  <SelectTrigger className="bg-slate-900/50 border-slate-700">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="free">Free</SelectItem>
+                    <SelectItem value="freemium">Freemium</SelectItem>
+                    <SelectItem value="one-time">One-time Purchase</SelectItem>
+                    <SelectItem value="subscription">Subscription</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {newPluginData.pricingType !== 'free' && (
+              <div className="space-y-2">
+                <Label htmlFor="plugin-price">Price ($)</Label>
+                <Input
+                  id="plugin-price"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  placeholder="9.99"
+                  value={newPluginData.price || ''}
+                  onChange={(e) => setNewPluginData(prev => ({ ...prev, price: parseFloat(e.target.value) || 0 }))}
+                  className="bg-slate-900/50 border-slate-700"
+                />
+              </div>
+            )}
+
+            <div className="space-y-2">
+              <Label htmlFor="plugin-version">Version</Label>
+              <Input
+                id="plugin-version"
+                placeholder="1.0.0"
+                value={newPluginData.version}
+                onChange={(e) => setNewPluginData(prev => ({ ...prev, version: e.target.value }))}
+                className="bg-slate-900/50 border-slate-700"
+              />
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCreatePluginDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleCreatePlugin}
+              className="bg-gradient-to-r from-emerald-500 to-teal-600"
+              disabled={!newPluginData.name.trim()}
+            >
+              <Package className="h-4 w-4 mr-2" />
+              Create Plugin
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Export Data Dialog */}
+      <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Download className="h-5 w-5 text-cyan-400" />
+              Export Plugin Data
+            </DialogTitle>
+            <DialogDescription>
+              Export your plugin marketplace data in your preferred format
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Export Format</Label>
+              <Select
+                value={exportOptions.format}
+                onValueChange={(value) => setExportOptions(prev => ({ ...prev, format: value as 'json' | 'csv' | 'xml' }))}
+              >
+                <SelectTrigger className="bg-slate-900/50 border-slate-700">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="json">JSON (Full Data)</SelectItem>
+                  <SelectItem value="csv">CSV (Spreadsheet)</SelectItem>
+                  <SelectItem value="xml">XML (Structured)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-3">
+              <Label>Include in Export</Label>
+              <div className="space-y-2">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={exportOptions.includeInstalled}
+                    onChange={(e) => setExportOptions(prev => ({ ...prev, includeInstalled: e.target.checked }))}
+                    className="rounded border-slate-600 bg-slate-800 text-emerald-500 focus:ring-emerald-500"
+                  />
+                  <span className="text-sm text-gray-300">Installed Plugins ({state.installedPlugins.length})</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={exportOptions.includeStats}
+                    onChange={(e) => setExportOptions(prev => ({ ...prev, includeStats: e.target.checked }))}
+                    className="rounded border-slate-600 bg-slate-800 text-emerald-500 focus:ring-emerald-500"
+                  />
+                  <span className="text-sm text-gray-300">Marketplace Statistics</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={exportOptions.includeSettings}
+                    onChange={(e) => setExportOptions(prev => ({ ...prev, includeSettings: e.target.checked }))}
+                    className="rounded border-slate-600 bg-slate-800 text-emerald-500 focus:ring-emerald-500"
+                  />
+                  <span className="text-sm text-gray-300">Current Settings</span>
+                </label>
+              </div>
+            </div>
+
+            <div className="p-3 bg-slate-800/50 rounded-lg">
+              <p className="text-xs text-gray-400">
+                Total plugins in marketplace: <span className="text-white font-medium">{state.plugins.length}</span>
+              </p>
+              <p className="text-xs text-gray-400">
+                Installed plugins: <span className="text-white font-medium">{state.installedPlugins.length}</span>
+              </p>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowExportDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleExportPluginData}
+              className="bg-gradient-to-r from-cyan-500 to-blue-600"
+            >
+              <Download className="h-4 w-4 mr-2" />
+              Export Data
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Settings Dialog */}
+      <Dialog open={showSettingsDialog} onOpenChange={setShowSettingsDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Settings className="h-5 w-5 text-purple-400" />
+              Marketplace Settings
+            </DialogTitle>
+            <DialogDescription>
+              Customize your plugin marketplace experience
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div className="space-y-3">
+              <Label>Plugin Updates</Label>
+              <div className="space-y-2">
+                <label className="flex items-center justify-between cursor-pointer">
+                  <span className="text-sm text-gray-300">Auto-update installed plugins</span>
+                  <input
+                    type="checkbox"
+                    checked={marketplaceSettings.autoUpdate}
+                    onChange={(e) => setMarketplaceSettings(prev => ({ ...prev, autoUpdate: e.target.checked }))}
+                    className="rounded border-slate-600 bg-slate-800 text-emerald-500 focus:ring-emerald-500"
+                  />
+                </label>
+                <label className="flex items-center justify-between cursor-pointer">
+                  <span className="text-sm text-gray-300">Notify about new plugins</span>
+                  <input
+                    type="checkbox"
+                    checked={marketplaceSettings.notifyNewPlugins}
+                    onChange={(e) => setMarketplaceSettings(prev => ({ ...prev, notifyNewPlugins: e.target.checked }))}
+                    className="rounded border-slate-600 bg-slate-800 text-emerald-500 focus:ring-emerald-500"
+                  />
+                </label>
+                <label className="flex items-center justify-between cursor-pointer">
+                  <span className="text-sm text-gray-300">Show beta plugins</span>
+                  <input
+                    type="checkbox"
+                    checked={marketplaceSettings.showBetaPlugins}
+                    onChange={(e) => setMarketplaceSettings(prev => ({ ...prev, showBetaPlugins: e.target.checked }))}
+                    className="rounded border-slate-600 bg-slate-800 text-emerald-500 focus:ring-emerald-500"
+                  />
+                </label>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Default View</Label>
+              <Select
+                value={marketplaceSettings.defaultView}
+                onValueChange={(value) => setMarketplaceSettings(prev => ({ ...prev, defaultView: value as ViewMode }))}
+              >
+                <SelectTrigger className="bg-slate-900/50 border-slate-700">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="grid">Grid View</SelectItem>
+                  <SelectItem value="list">List View</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Default Sort</Label>
+              <Select
+                value={marketplaceSettings.defaultSort}
+                onValueChange={(value) => setMarketplaceSettings(prev => ({ ...prev, defaultSort: value as PluginState['sortBy'] }))}
+              >
+                <SelectTrigger className="bg-slate-900/50 border-slate-700">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="popular">Most Popular</SelectItem>
+                  <SelectItem value="recent">Most Recent</SelectItem>
+                  <SelectItem value="rating">Highest Rated</SelectItem>
+                  <SelectItem value="name">Alphabetical</SelectItem>
+                  <SelectItem value="price">Price (Low to High)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="p-3 bg-slate-800/50 rounded-lg space-y-1">
+              <p className="text-xs text-gray-400">
+                Active plugins: <span className="text-emerald-400 font-medium">{state.installedPlugins.filter(p => p.isActive).length}</span>
+              </p>
+              <p className="text-xs text-gray-400">
+                Inactive plugins: <span className="text-amber-400 font-medium">{state.installedPlugins.filter(p => !p.isActive).length}</span>
+              </p>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowSettingsDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSaveSettings}
+              className="bg-gradient-to-r from-purple-500 to-pink-600"
+            >
+              <Settings className="h-4 w-4 mr-2" />
+              Save Settings
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

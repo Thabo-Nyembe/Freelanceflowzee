@@ -448,6 +448,16 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
   const [settingsTab, setSettingsTab] = useState('general')
   const [showGoalDialog, setShowGoalDialog] = useState(false)
   const [showAchievementDialog, setShowAchievementDialog] = useState(false)
+  const [showNewCourseDialog, setShowNewCourseDialog] = useState(false)
+  const [showUploadDialog, setShowUploadDialog] = useState(false)
+  const [showAnalyticsDialog, setShowAnalyticsDialog] = useState(false)
+
+  // Quick actions defined inside component to access state setters
+  const tutorialsQuickActions = [
+    { id: '1', label: 'New Course', icon: 'plus', action: () => setShowNewCourseDialog(true), variant: 'default' as const },
+    { id: '2', label: 'Upload', icon: 'upload', action: () => setShowUploadDialog(true), variant: 'default' as const },
+    { id: '3', label: 'Analytics', icon: 'barChart', action: () => setShowAnalyticsDialog(true), variant: 'outline' as const },
+  ]
 
   const filteredCourses = useMemo(() => {
     let filtered = [...mockCourses]
@@ -1758,7 +1768,7 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockTutorialsQuickActions}
+            actions={tutorialsQuickActions}
             variant="grid"
           />
         </div>
@@ -1915,6 +1925,183 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowGoalDialog(false)}>Cancel</Button>
             <Button className="bg-rose-600 hover:bg-rose-700" onClick={handleCreateGoal}>Create Goal</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* New Course Dialog */}
+      <Dialog open={showNewCourseDialog} onOpenChange={setShowNewCourseDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Plus className="w-5 h-5 text-rose-600" />
+              Create New Course
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Course Title</Label>
+              <Input placeholder="e.g., Complete React Developer Course" />
+            </div>
+            <div className="space-y-2">
+              <Label>Description</Label>
+              <Input placeholder="Brief description of your course" />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Category</Label>
+                <Select>
+                  <SelectTrigger><SelectValue placeholder="Select category" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="development">Development</SelectItem>
+                    <SelectItem value="design">Design</SelectItem>
+                    <SelectItem value="business">Business</SelectItem>
+                    <SelectItem value="data-science">Data Science</SelectItem>
+                    <SelectItem value="marketing">Marketing</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Level</Label>
+                <Select>
+                  <SelectTrigger><SelectValue placeholder="Select level" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="beginner">Beginner</SelectItem>
+                    <SelectItem value="intermediate">Intermediate</SelectItem>
+                    <SelectItem value="advanced">Advanced</SelectItem>
+                    <SelectItem value="all-levels">All Levels</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Price ($)</Label>
+              <Input type="number" placeholder="99.99" />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowNewCourseDialog(false)}>Cancel</Button>
+            <Button className="bg-rose-600 hover:bg-rose-700" onClick={() => {
+              toast.success('Course Created', { description: 'Your new course has been created. Start adding content!' })
+              setShowNewCourseDialog(false)
+            }}>Create Course</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Upload Dialog */}
+      <Dialog open={showUploadDialog} onOpenChange={setShowUploadDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Download className="w-5 h-5 text-blue-600" />
+              Upload Content
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+              <Download className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+              <p className="text-gray-600 mb-2">Drag and drop files here, or click to browse</p>
+              <p className="text-sm text-gray-500">Supports: MP4, MOV, PDF, ZIP (Max 2GB)</p>
+              <Button variant="outline" className="mt-4">Browse Files</Button>
+            </div>
+            <div className="space-y-2">
+              <Label>Upload to Course</Label>
+              <Select>
+                <SelectTrigger><SelectValue placeholder="Select a course" /></SelectTrigger>
+                <SelectContent>
+                  {mockCourses.map(c => (<SelectItem key={c.id} value={c.id}>{c.title}</SelectItem>))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Content Type</Label>
+              <Select>
+                <SelectTrigger><SelectValue placeholder="Select type" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="video">Video Lesson</SelectItem>
+                  <SelectItem value="resource">Downloadable Resource</SelectItem>
+                  <SelectItem value="exercise">Exercise Files</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowUploadDialog(false)}>Cancel</Button>
+            <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => {
+              toast.success('Upload Started', { description: 'Your files are being uploaded in the background.' })
+              setShowUploadDialog(false)
+            }}>Upload</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Analytics Dialog */}
+      <Dialog open={showAnalyticsDialog} onOpenChange={setShowAnalyticsDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <BarChart3 className="w-5 h-5 text-purple-600" />
+              Course Analytics
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-6 py-4">
+            <div className="grid grid-cols-4 gap-4">
+              <Card>
+                <CardContent className="p-4 text-center">
+                  <div className="text-2xl font-bold text-rose-600">156K</div>
+                  <div className="text-sm text-gray-500">Total Enrollments</div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-4 text-center">
+                  <div className="text-2xl font-bold text-green-600">89K</div>
+                  <div className="text-sm text-gray-500">Completions</div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-4 text-center">
+                  <div className="text-2xl font-bold text-blue-600">4.8</div>
+                  <div className="text-sm text-gray-500">Avg Rating</div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-4 text-center">
+                  <div className="text-2xl font-bold text-amber-600">$45K</div>
+                  <div className="text-sm text-gray-500">Revenue</div>
+                </CardContent>
+              </Card>
+            </div>
+            <div className="space-y-2">
+              <h4 className="font-semibold">Course Performance</h4>
+              <div className="space-y-3">
+                {mockCourses.map(course => (
+                  <div key={course.id} className="flex items-center gap-4">
+                    <div className="flex-1">
+                      <div className="flex justify-between text-sm mb-1">
+                        <span>{course.title}</span>
+                        <span className="text-gray-500">{course.metrics.completionRate}%</span>
+                      </div>
+                      <Progress value={course.metrics.completionRate} className="h-2" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="space-y-2">
+              <h4 className="font-semibold">Recent Activity</h4>
+              <div className="text-sm text-gray-500 space-y-2">
+                <p>+234 new enrollments this week</p>
+                <p>+45 course completions today</p>
+                <p>12 new reviews (4.9 avg rating)</p>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAnalyticsDialog(false)}>Close</Button>
+            <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => {
+              toast.info('Full Report', { description: 'Opening detailed analytics dashboard...' })
+            }}>View Full Report</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

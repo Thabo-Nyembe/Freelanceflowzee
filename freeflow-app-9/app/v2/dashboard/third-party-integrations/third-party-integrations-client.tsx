@@ -340,24 +340,11 @@ const mockIntegrationsActivities = [
   { id: '3', user: 'System', action: 'Synced', target: '2,450 records from HubSpot', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
 ]
 
-const mockIntegrationsQuickActions = [
-  { id: '1', label: 'Add Integration', icon: 'plus', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1500)),
-    { loading: 'Preparing integration wizard...', success: 'Integration wizard ready', error: 'Failed to open wizard' }
-  ), variant: 'default' as const },
-  { id: '2', label: 'Test Connection', icon: 'refresh', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 2000)),
-    { loading: 'Testing connection...', success: 'Connection test successful', error: 'Connection test failed' }
-  ), variant: 'default' as const },
-  { id: '3', label: 'View Logs', icon: 'file', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1000)),
-    { loading: 'Loading integration logs...', success: 'Integration logs loaded', error: 'Failed to load logs' }
-  ), variant: 'outline' as const },
-]
+// Quick actions will be defined inside the component to access state setters
 
 export default function ThirdPartyIntegrationsClient() {
   const [apps] = useState<IntegrationApp[]>(mockApps)
-  const [connections] = useState<Connection[]>(mockConnections)
+  const [connections, setConnections] = useState<Connection[]>(mockConnections)
   const [zaps] = useState<Zap[]>(mockZaps)
   const [logs] = useState<ExecutionLog[]>(mockLogs)
   const [searchQuery, setSearchQuery] = useState('')
@@ -366,6 +353,26 @@ export default function ThirdPartyIntegrationsClient() {
   const [selectedZap, setSelectedZap] = useState<Zap | null>(null)
   const [activeTab, setActiveTab] = useState('zaps')
   const [settingsTab, setSettingsTab] = useState('general')
+
+  // Dialog states for quick actions
+  const [showAddIntegrationDialog, setShowAddIntegrationDialog] = useState(false)
+  const [showTestConnectionDialog, setShowTestConnectionDialog] = useState(false)
+  const [showViewLogsDialog, setShowViewLogsDialog] = useState(false)
+  const [showConnectIntegrationDialog, setShowConnectIntegrationDialog] = useState(false)
+  const [showDisconnectConfirmDialog, setShowDisconnectConfirmDialog] = useState(false)
+  const [showRefreshSyncDialog, setShowRefreshSyncDialog] = useState(false)
+  const [showConfigureDialog, setShowConfigureDialog] = useState(false)
+
+  // Form states for dialogs
+  const [newIntegration, setNewIntegration] = useState({ name: '', apiKey: '', webhookUrl: '', category: 'crm' as IntegrationCategory })
+  const [selectedIntegrationForAction, setSelectedIntegrationForAction] = useState<string>('')
+  const [testConnectionResult, setTestConnectionResult] = useState<{ status: 'idle' | 'testing' | 'success' | 'error', message: string }>({ status: 'idle', message: '' })
+  const [configSettings, setConfigSettings] = useState({ syncInterval: '15', retryOnError: true, logLevel: 'info' })
+
+  // Danger zone dialog states
+  const [showPauseAllDialog, setShowPauseAllDialog] = useState(false)
+  const [showDeleteAllConnectionsDialog, setShowDeleteAllConnectionsDialog] = useState(false)
+  const [showResetSettingsDialog, setShowResetSettingsDialog] = useState(false)
 
   // Stats
   const stats = useMemo(() => ({
@@ -436,36 +443,136 @@ export default function ThirdPartyIntegrationsClient() {
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
   }
 
-  // Handlers
+  // Handlers with real dialog functionality
   const handleConnectIntegration = (integrationName: string) => {
-    toast.info('Connecting integration', {
-      description: `Setting up ${integrationName}...`
-    })
+    setSelectedIntegrationForAction(integrationName)
+    setShowConnectIntegrationDialog(true)
   }
 
   const handleDisconnectIntegration = (integrationName: string) => {
-    toast.success('Integration disconnected', {
-      description: `${integrationName} has been removed`
-    })
+    setSelectedIntegrationForAction(integrationName)
+    setShowDisconnectConfirmDialog(true)
   }
 
   const handleRefreshIntegration = (integrationName: string) => {
-    toast.info('Refreshing integration', {
-      description: `Syncing ${integrationName} data...`
-    })
+    setSelectedIntegrationForAction(integrationName)
+    setShowRefreshSyncDialog(true)
   }
 
-  const handleConfigureIntegration = (integrationName: string) => {
-    toast.info('Opening configuration', {
-      description: `Configuring ${integrationName} settings`
+  // Form submission handlers
+  const handleAddIntegrationSubmit = () => {
+    if (!newIntegration.name || !newIntegration.apiKey) {
+      toast.error('Please fill in all required fields')
+      return
+    }
+    toast.success('Integration added successfully', {
+      description: `${newIntegration.name} has been connected to your account`
     })
+    setShowAddIntegrationDialog(false)
+    setNewIntegration({ name: '', apiKey: '', webhookUrl: '', category: 'crm' })
   }
 
-  const handleViewLogs = (integrationName: string) => {
-    toast.info('Loading logs', {
-      description: `Fetching ${integrationName} activity logs`
-    })
+  const handleTestConnection = async () => {
+    if (!selectedIntegrationForAction) {
+      toast.error('Please select an integration to test')
+      return
+    }
+    setTestConnectionResult({ status: 'testing', message: 'Testing connection...' })
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 2000))
+    const isSuccess = Math.random() > 0.2 // 80% success rate for demo
+    if (isSuccess) {
+      setTestConnectionResult({ status: 'success', message: `Connection to ${selectedIntegrationForAction} is healthy. Response time: ${Math.floor(Math.random() * 200 + 50)}ms` })
+      toast.success('Connection test passed')
+    } else {
+      setTestConnectionResult({ status: 'error', message: `Failed to connect to ${selectedIntegrationForAction}. Please check your credentials.` })
+      toast.error('Connection test failed')
+    }
   }
+
+  const handleConfirmDisconnect = () => {
+    setConnections(prev => prev.filter(c => c.app.name !== selectedIntegrationForAction))
+    toast.success('Integration disconnected', {
+      description: `${selectedIntegrationForAction} has been removed from your account`
+    })
+    setShowDisconnectConfirmDialog(false)
+    setSelectedIntegrationForAction('')
+  }
+
+  const handleRefreshSync = async () => {
+    toast.info(`Syncing ${selectedIntegrationForAction}...`)
+    // Simulate sync
+    await new Promise(resolve => setTimeout(resolve, 2000))
+    toast.success('Sync completed', {
+      description: `${selectedIntegrationForAction} data has been refreshed`
+    })
+    setShowRefreshSyncDialog(false)
+    setSelectedIntegrationForAction('')
+  }
+
+  const handleSaveConfig = () => {
+    toast.success('Configuration saved', {
+      description: `Settings for ${selectedIntegrationForAction} have been updated`
+    })
+    setShowConfigureDialog(false)
+    setSelectedIntegrationForAction('')
+  }
+
+  // Danger zone handlers
+  const handlePauseAllZaps = () => {
+    toast.success('All zaps paused', {
+      description: 'All active zaps have been stopped'
+    })
+    setShowPauseAllDialog(false)
+  }
+
+  const handleDeleteAllConnections = () => {
+    setConnections([])
+    toast.success('All connections deleted', {
+      description: 'All app connections have been removed'
+    })
+    setShowDeleteAllConnectionsDialog(false)
+  }
+
+  const handleResetSettings = () => {
+    setConfigSettings({ syncInterval: '15', retryOnError: true, logLevel: 'info' })
+    toast.success('Settings reset', {
+      description: 'All settings have been restored to defaults'
+    })
+    setShowResetSettingsDialog(false)
+  }
+
+  // Quick actions with dialog-based workflows
+  const integrationsQuickActions = [
+    {
+      id: '1',
+      label: 'Add Integration',
+      icon: 'plus',
+      action: () => setShowAddIntegrationDialog(true),
+      variant: 'default' as const
+    },
+    {
+      id: '2',
+      label: 'Test Connection',
+      icon: 'refresh',
+      action: () => {
+        setSelectedIntegrationForAction(connections[0]?.app.name || 'Slack')
+        setTestConnectionResult({ status: 'idle', message: '' })
+        setShowTestConnectionDialog(true)
+      },
+      variant: 'default' as const
+    },
+    {
+      id: '3',
+      label: 'View Logs',
+      icon: 'file',
+      action: () => {
+        setSelectedIntegrationForAction('')
+        setShowViewLogsDialog(true)
+      },
+      variant: 'outline' as const
+    },
+  ]
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50/30 to-yellow-50/40 dark:bg-none dark:bg-gray-900 p-6">
@@ -855,15 +962,24 @@ export default function ThirdPartyIntegrationsClient() {
                     <CardTitle className="text-lg">Quick Actions</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-2">
-                    <Button variant="outline" className="w-full justify-start gap-2">
+                    <Button variant="outline" className="w-full justify-start gap-2" onClick={() => {
+                      setSelectedIntegrationForAction(connections[0]?.app.name || 'Slack')
+                      setShowAddIntegrationDialog(true)
+                    }}>
                       <Key className="h-4 w-4" />
                       Manage API Keys
                     </Button>
-                    <Button variant="outline" className="w-full justify-start gap-2">
+                    <Button variant="outline" className="w-full justify-start gap-2" onClick={() => {
+                      setSelectedIntegrationForAction(connections[0]?.app.name || 'Slack')
+                      setShowConfigureDialog(true)
+                    }}>
                       <Shield className="h-4 w-4" />
                       Security Settings
                     </Button>
-                    <Button variant="outline" className="w-full justify-start gap-2">
+                    <Button variant="outline" className="w-full justify-start gap-2" onClick={() => {
+                      setSelectedIntegrationForAction('')
+                      setShowViewLogsDialog(true)
+                    }}>
                       <Webhook className="h-4 w-4" />
                       Webhooks
                     </Button>
@@ -1067,7 +1183,7 @@ export default function ThirdPartyIntegrationsClient() {
                             <div className="mt-1 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                               <div className="flex items-center gap-2">
                                 <Badge className="bg-orange-100 text-orange-700">Professional</Badge>
-                                <Button variant="link" size="sm" className="text-orange-600">Upgrade</Button>
+                                <Button variant="link" size="sm" className="text-orange-600" onClick={() => window.open('/pricing', '_blank')}>Upgrade</Button>
                               </div>
                             </div>
                           </div>
@@ -1482,23 +1598,23 @@ export default function ThirdPartyIntegrationsClient() {
                         <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                           <div className="flex items-center justify-between mb-2">
                             <Label>Production API Key</Label>
-                            <Button variant="ghost" size="sm">Regenerate</Button>
+                            <Button variant="ghost" size="sm" onClick={() => toast.success('Production API key regenerated', { description: 'Your new key is now active' })}>Regenerate</Button>
                           </div>
                           <Input type="password" value="zap_live_••••••••••••••••" readOnly className="font-mono" />
                         </div>
                         <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                           <div className="flex items-center justify-between mb-2">
                             <Label>Test API Key</Label>
-                            <Button variant="ghost" size="sm">Regenerate</Button>
+                            <Button variant="ghost" size="sm" onClick={() => toast.success('Test API key regenerated', { description: 'Your new test key is now active' })}>Regenerate</Button>
                           </div>
                           <Input type="password" value="zap_test_••••••••••••••••" readOnly className="font-mono" />
                         </div>
                         <div className="flex items-center gap-4">
-                          <Button variant="outline" className="flex items-center gap-2">
+                          <Button variant="outline" className="flex items-center gap-2" onClick={() => window.open('/docs/api', '_blank')}>
                             <FileText className="w-4 h-4" />
                             API Docs
                           </Button>
-                          <Button variant="outline" className="flex items-center gap-2">
+                          <Button variant="outline" className="flex items-center gap-2" onClick={() => window.open('/docs/sdks', '_blank')}>
                             <Code className="w-4 h-4" />
                             SDKs
                           </Button>
@@ -1529,13 +1645,16 @@ export default function ThirdPartyIntegrationsClient() {
                                 <p className="text-xs text-gray-500 font-mono">{webhook.url}</p>
                               </div>
                               <div className="flex items-center gap-2">
-                                <Button variant="ghost" size="sm">Test</Button>
-                                <Button variant="ghost" size="sm">Edit</Button>
+                                <Button variant="ghost" size="sm" onClick={() => toast.success(`Webhook test sent`, { description: `Test event sent to ${webhook.name}` })}>Test</Button>
+                                <Button variant="ghost" size="sm" onClick={() => {
+                                  setSelectedIntegrationForAction(webhook.name)
+                                  setShowConfigureDialog(true)
+                                }}>Edit</Button>
                               </div>
                             </div>
                           ))}
                         </div>
-                        <Button variant="outline" className="mt-4 w-full">
+                        <Button variant="outline" className="mt-4 w-full" onClick={() => setShowAddIntegrationDialog(true)}>
                           <Webhook className="w-4 h-4 mr-2" />
                           Add Webhook
                         </Button>
@@ -1557,7 +1676,7 @@ export default function ThirdPartyIntegrationsClient() {
                           </div>
                           <Switch />
                         </div>
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => setShowAddIntegrationDialog(true)}>
                           <Plus className="w-4 h-4 mr-2" />
                           Create Custom Integration
                         </Button>
@@ -1601,11 +1720,11 @@ export default function ThirdPartyIntegrationsClient() {
                           <Switch defaultChecked />
                         </div>
                         <div className="flex items-center gap-4">
-                          <Button variant="outline" className="flex items-center gap-2">
+                          <Button variant="outline" className="flex items-center gap-2" onClick={() => toast.success('Export started', { description: 'Your data export will be ready for download shortly' })}>
                             <FileText className="w-4 h-4" />
                             Export All Data
                           </Button>
-                          <Button variant="outline" className="flex items-center gap-2">
+                          <Button variant="outline" className="flex items-center gap-2" onClick={() => toast.success('Configuration cloned', { description: 'Settings have been copied to clipboard' })}>
                             <Copy className="w-4 h-4" />
                             Clone Configuration
                           </Button>
@@ -1651,21 +1770,21 @@ export default function ThirdPartyIntegrationsClient() {
                             <Label className="text-red-700 dark:text-red-400">Pause All Zaps</Label>
                             <p className="text-sm text-red-600 dark:text-red-500">Immediately stop all active zaps</p>
                           </div>
-                          <Button variant="destructive" size="sm">Pause All</Button>
+                          <Button variant="destructive" size="sm" onClick={() => setShowPauseAllDialog(true)}>Pause All</Button>
                         </div>
                         <div className="flex items-center justify-between p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
                           <div>
                             <Label className="text-red-700 dark:text-red-400">Delete All Connections</Label>
                             <p className="text-sm text-red-600 dark:text-red-500">Remove all app connections</p>
                           </div>
-                          <Button variant="destructive" size="sm">Delete</Button>
+                          <Button variant="destructive" size="sm" onClick={() => setShowDeleteAllConnectionsDialog(true)}>Delete</Button>
                         </div>
                         <div className="flex items-center justify-between p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
                           <div>
                             <Label className="text-red-700 dark:text-red-400">Reset All Settings</Label>
                             <p className="text-sm text-red-600 dark:text-red-500">Restore factory defaults</p>
                           </div>
-                          <Button variant="destructive" size="sm">Reset</Button>
+                          <Button variant="destructive" size="sm" onClick={() => setShowResetSettingsDialog(true)}>Reset</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -1704,7 +1823,7 @@ export default function ThirdPartyIntegrationsClient() {
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockIntegrationsQuickActions}
+            actions={integrationsQuickActions}
             variant="grid"
           />
         </div>
@@ -1882,15 +2001,24 @@ export default function ThirdPartyIntegrationsClient() {
                 </div>
 
                 <div className="flex items-center gap-3">
-                  <Button variant="outline" className="flex-1">
+                  <Button variant="outline" className="flex-1" onClick={() => {
+                    handleRefreshIntegration(selectedConnection.app.name)
+                    setSelectedConnection(null)
+                  }}>
                     <RefreshCcw className="h-4 w-4 mr-2" />
                     Sync Now
                   </Button>
-                  <Button variant="outline" className="flex-1">
+                  <Button variant="outline" className="flex-1" onClick={() => {
+                    handleConnectIntegration(selectedConnection.app.name)
+                    setSelectedConnection(null)
+                  }}>
                     <Key className="h-4 w-4 mr-2" />
                     Reauthorize
                   </Button>
-                  <Button variant="outline" className="text-red-600 hover:text-red-700">
+                  <Button variant="outline" className="text-red-600 hover:text-red-700" onClick={() => {
+                    handleDisconnectIntegration(selectedConnection.app.name)
+                    setSelectedConnection(null)
+                  }}>
                     <Unlink className="h-4 w-4 mr-2" />
                     Disconnect
                   </Button>
@@ -1898,6 +2026,548 @@ export default function ThirdPartyIntegrationsClient() {
               </div>
             </>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Integration Dialog */}
+      <Dialog open={showAddIntegrationDialog} onOpenChange={setShowAddIntegrationDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Plus className="h-5 w-5 text-orange-500" />
+              Add New Integration
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="integration-name">Integration Name *</Label>
+              <Input
+                id="integration-name"
+                placeholder="e.g., My Slack Workspace"
+                value={newIntegration.name}
+                onChange={(e) => setNewIntegration(prev => ({ ...prev, name: e.target.value }))}
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label htmlFor="integration-category">Category</Label>
+              <Select
+                value={newIntegration.category}
+                onValueChange={(value: IntegrationCategory) => setNewIntegration(prev => ({ ...prev, category: value }))}
+              >
+                <SelectTrigger className="mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="crm">CRM</SelectItem>
+                  <SelectItem value="marketing">Marketing</SelectItem>
+                  <SelectItem value="payment">Payment</SelectItem>
+                  <SelectItem value="storage">Storage</SelectItem>
+                  <SelectItem value="communication">Communication</SelectItem>
+                  <SelectItem value="analytics">Analytics</SelectItem>
+                  <SelectItem value="ecommerce">E-commerce</SelectItem>
+                  <SelectItem value="productivity">Productivity</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="api-key">API Key *</Label>
+              <Input
+                id="api-key"
+                type="password"
+                placeholder="Enter your API key"
+                value={newIntegration.apiKey}
+                onChange={(e) => setNewIntegration(prev => ({ ...prev, apiKey: e.target.value }))}
+                className="mt-1"
+              />
+              <p className="text-xs text-gray-500 mt-1">Your API key will be encrypted and stored securely</p>
+            </div>
+            <div>
+              <Label htmlFor="webhook-url">Webhook URL (Optional)</Label>
+              <Input
+                id="webhook-url"
+                placeholder="https://your-app.com/webhooks"
+                value={newIntegration.webhookUrl}
+                onChange={(e) => setNewIntegration(prev => ({ ...prev, webhookUrl: e.target.value }))}
+                className="mt-1"
+              />
+            </div>
+            <div className="flex items-center gap-3 pt-4">
+              <Button variant="outline" className="flex-1" onClick={() => setShowAddIntegrationDialog(false)}>
+                Cancel
+              </Button>
+              <Button className="flex-1 bg-orange-500 hover:bg-orange-600" onClick={handleAddIntegrationSubmit}>
+                <Link2 className="h-4 w-4 mr-2" />
+                Connect Integration
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Test Connection Dialog */}
+      <Dialog open={showTestConnectionDialog} onOpenChange={setShowTestConnectionDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Activity className="h-5 w-5 text-blue-500" />
+              Test Connection
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Select Integration to Test</Label>
+              <Select
+                value={selectedIntegrationForAction}
+                onValueChange={setSelectedIntegrationForAction}
+              >
+                <SelectTrigger className="mt-1">
+                  <SelectValue placeholder="Select an integration" />
+                </SelectTrigger>
+                <SelectContent>
+                  {connections.map(conn => (
+                    <SelectItem key={conn.id} value={conn.app.name}>
+                      <div className="flex items-center gap-2">
+                        <div className="w-5 h-5 rounded bg-orange-500 flex items-center justify-center text-white text-xs font-bold">
+                          {conn.app.name[0]}
+                        </div>
+                        {conn.app.name}
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {testConnectionResult.status !== 'idle' && (
+              <div className={`p-4 rounded-lg ${
+                testConnectionResult.status === 'testing' ? 'bg-blue-50 dark:bg-blue-900/20' :
+                testConnectionResult.status === 'success' ? 'bg-green-50 dark:bg-green-900/20' :
+                'bg-red-50 dark:bg-red-900/20'
+              }`}>
+                <div className="flex items-center gap-2">
+                  {testConnectionResult.status === 'testing' && (
+                    <RefreshCcw className="h-4 w-4 text-blue-500 animate-spin" />
+                  )}
+                  {testConnectionResult.status === 'success' && (
+                    <CheckCircle className="h-4 w-4 text-green-500" />
+                  )}
+                  {testConnectionResult.status === 'error' && (
+                    <XCircle className="h-4 w-4 text-red-500" />
+                  )}
+                  <span className={`text-sm font-medium ${
+                    testConnectionResult.status === 'testing' ? 'text-blue-700 dark:text-blue-400' :
+                    testConnectionResult.status === 'success' ? 'text-green-700 dark:text-green-400' :
+                    'text-red-700 dark:text-red-400'
+                  }`}>
+                    {testConnectionResult.message}
+                  </span>
+                </div>
+              </div>
+            )}
+
+            <div className="flex items-center gap-3 pt-4">
+              <Button variant="outline" className="flex-1" onClick={() => {
+                setShowTestConnectionDialog(false)
+                setTestConnectionResult({ status: 'idle', message: '' })
+              }}>
+                Close
+              </Button>
+              <Button
+                className="flex-1 bg-blue-500 hover:bg-blue-600"
+                onClick={handleTestConnection}
+                disabled={!selectedIntegrationForAction || testConnectionResult.status === 'testing'}
+              >
+                {testConnectionResult.status === 'testing' ? (
+                  <>
+                    <RefreshCcw className="h-4 w-4 mr-2 animate-spin" />
+                    Testing...
+                  </>
+                ) : (
+                  <>
+                    <Zap className="h-4 w-4 mr-2" />
+                    Run Test
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* View Logs Dialog */}
+      <Dialog open={showViewLogsDialog} onOpenChange={setShowViewLogsDialog}>
+        <DialogContent className="max-w-3xl max-h-[80vh] overflow-hidden flex flex-col">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <History className="h-5 w-5 text-purple-500" />
+              Integration Logs
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 flex-1 overflow-auto">
+            <div className="flex items-center gap-2">
+              <Select
+                value={selectedIntegrationForAction || 'all'}
+                onValueChange={(value) => setSelectedIntegrationForAction(value === 'all' ? '' : value)}
+              >
+                <SelectTrigger className="w-48">
+                  <SelectValue placeholder="Filter by integration" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Integrations</SelectItem>
+                  {connections.map(conn => (
+                    <SelectItem key={conn.id} value={conn.app.name}>
+                      {conn.app.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Button variant="outline" size="sm">
+                <RefreshCcw className="h-4 w-4 mr-2" />
+                Refresh
+              </Button>
+            </div>
+
+            <div className="border rounded-lg divide-y max-h-96 overflow-auto">
+              {logs.map(log => (
+                <div key={log.id} className="p-3 hover:bg-gray-50 dark:hover:bg-gray-800">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      {getLogStatusIcon(log.status)}
+                      <div>
+                        <div className="font-medium text-sm">{log.zapName}</div>
+                        <div className="text-xs text-gray-500">
+                          {new Date(log.triggeredAt).toLocaleString()}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-4 text-sm">
+                      <span className="text-gray-500">{log.duration}s</span>
+                      <Badge className={getStatusColor(log.status === 'success' ? 'connected' : log.status === 'error' ? 'error' : 'pending')}>
+                        {log.status}
+                      </Badge>
+                    </div>
+                  </div>
+                  {log.error && (
+                    <div className="mt-2 p-2 bg-red-50 dark:bg-red-900/20 rounded text-xs text-red-600">
+                      {log.error}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="flex justify-end pt-4 border-t">
+            <Button variant="outline" onClick={() => setShowViewLogsDialog(false)}>
+              Close
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Connect Integration Dialog (for OAuth/Reauthorize) */}
+      <Dialog open={showConnectIntegrationDialog} onOpenChange={setShowConnectIntegrationDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Key className="h-5 w-5 text-amber-500" />
+              Connect {selectedIntegrationForAction}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-gray-500">
+              Choose how you want to authenticate with {selectedIntegrationForAction}.
+            </p>
+
+            <div className="space-y-3">
+              <Button
+                variant="outline"
+                className="w-full justify-start gap-3 h-auto py-3"
+                onClick={() => {
+                  toast.success('OAuth flow initiated', {
+                    description: `Redirecting to ${selectedIntegrationForAction} authorization page...`
+                  })
+                  setShowConnectIntegrationDialog(false)
+                }}
+              >
+                <div className="w-8 h-8 rounded bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center">
+                  <Shield className="h-4 w-4 text-blue-600" />
+                </div>
+                <div className="text-left">
+                  <div className="font-medium">OAuth 2.0</div>
+                  <div className="text-xs text-gray-500">Recommended - Secure authorization</div>
+                </div>
+              </Button>
+
+              <Button
+                variant="outline"
+                className="w-full justify-start gap-3 h-auto py-3"
+                onClick={() => {
+                  setShowConnectIntegrationDialog(false)
+                  setShowAddIntegrationDialog(true)
+                }}
+              >
+                <div className="w-8 h-8 rounded bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center">
+                  <Key className="h-4 w-4 text-amber-600" />
+                </div>
+                <div className="text-left">
+                  <div className="font-medium">API Key</div>
+                  <div className="text-xs text-gray-500">Manual authentication with API key</div>
+                </div>
+              </Button>
+            </div>
+
+            <div className="flex justify-end pt-4">
+              <Button variant="outline" onClick={() => setShowConnectIntegrationDialog(false)}>
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Disconnect Confirmation Dialog */}
+      <Dialog open={showDisconnectConfirmDialog} onOpenChange={setShowDisconnectConfirmDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-600">
+              <AlertTriangle className="h-5 w-5" />
+              Disconnect Integration
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Are you sure you want to disconnect <span className="font-semibold">{selectedIntegrationForAction}</span>?
+              This will:
+            </p>
+            <ul className="list-disc list-inside text-sm text-gray-500 space-y-1">
+              <li>Stop all active Zaps using this integration</li>
+              <li>Remove stored credentials</li>
+              <li>Delete sync history for this connection</li>
+            </ul>
+
+            <div className="flex items-center gap-3 pt-4">
+              <Button variant="outline" className="flex-1" onClick={() => setShowDisconnectConfirmDialog(false)}>
+                Cancel
+              </Button>
+              <Button variant="destructive" className="flex-1" onClick={handleConfirmDisconnect}>
+                <Unlink className="h-4 w-4 mr-2" />
+                Disconnect
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Refresh Sync Dialog */}
+      <Dialog open={showRefreshSyncDialog} onOpenChange={setShowRefreshSyncDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <RefreshCcw className="h-5 w-5 text-green-500" />
+              Sync {selectedIntegrationForAction}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-gray-500">
+              Choose what data to sync from {selectedIntegrationForAction}.
+            </p>
+
+            <div className="space-y-3">
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div>
+                  <Label>Full Sync</Label>
+                  <p className="text-xs text-gray-500">Sync all data since last connection</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div>
+                  <Label>Include Historical Data</Label>
+                  <p className="text-xs text-gray-500">Sync data older than 30 days</p>
+                </div>
+                <Switch />
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 pt-4">
+              <Button variant="outline" className="flex-1" onClick={() => setShowRefreshSyncDialog(false)}>
+                Cancel
+              </Button>
+              <Button className="flex-1 bg-green-500 hover:bg-green-600" onClick={handleRefreshSync}>
+                <RefreshCcw className="h-4 w-4 mr-2" />
+                Start Sync
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Configure Integration Dialog */}
+      <Dialog open={showConfigureDialog} onOpenChange={setShowConfigureDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Settings className="h-5 w-5 text-gray-500" />
+              Configure {selectedIntegrationForAction}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Sync Interval</Label>
+              <Select
+                value={configSettings.syncInterval}
+                onValueChange={(value) => setConfigSettings(prev => ({ ...prev, syncInterval: value }))}
+              >
+                <SelectTrigger className="mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="5">Every 5 minutes</SelectItem>
+                  <SelectItem value="15">Every 15 minutes</SelectItem>
+                  <SelectItem value="30">Every 30 minutes</SelectItem>
+                  <SelectItem value="60">Every hour</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label>Log Level</Label>
+              <Select
+                value={configSettings.logLevel}
+                onValueChange={(value) => setConfigSettings(prev => ({ ...prev, logLevel: value }))}
+              >
+                <SelectTrigger className="mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="error">Error Only</SelectItem>
+                  <SelectItem value="warning">Warning & Error</SelectItem>
+                  <SelectItem value="info">Info (Recommended)</SelectItem>
+                  <SelectItem value="debug">Debug (Verbose)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+              <div>
+                <Label>Retry on Error</Label>
+                <p className="text-xs text-gray-500">Automatically retry failed requests</p>
+              </div>
+              <Switch
+                checked={configSettings.retryOnError}
+                onCheckedChange={(checked) => setConfigSettings(prev => ({ ...prev, retryOnError: checked }))}
+              />
+            </div>
+
+            <div className="flex items-center gap-3 pt-4">
+              <Button variant="outline" className="flex-1" onClick={() => setShowConfigureDialog(false)}>
+                Cancel
+              </Button>
+              <Button className="flex-1 bg-orange-500 hover:bg-orange-600" onClick={handleSaveConfig}>
+                <Check className="h-4 w-4 mr-2" />
+                Save Configuration
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Pause All Zaps Confirmation Dialog */}
+      <Dialog open={showPauseAllDialog} onOpenChange={setShowPauseAllDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-600">
+              <Pause className="h-5 w-5" />
+              Pause All Zaps
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Are you sure you want to pause all active zaps? This will:
+            </p>
+            <ul className="list-disc list-inside text-sm text-gray-500 space-y-1">
+              <li>Stop all {stats.activeZaps} active zaps immediately</li>
+              <li>Queued tasks will not be processed</li>
+              <li>You can resume zaps individually later</li>
+            </ul>
+
+            <div className="flex items-center gap-3 pt-4">
+              <Button variant="outline" className="flex-1" onClick={() => setShowPauseAllDialog(false)}>
+                Cancel
+              </Button>
+              <Button variant="destructive" className="flex-1" onClick={handlePauseAllZaps}>
+                <Pause className="h-4 w-4 mr-2" />
+                Pause All
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete All Connections Confirmation Dialog */}
+      <Dialog open={showDeleteAllConnectionsDialog} onOpenChange={setShowDeleteAllConnectionsDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-600">
+              <Unlink className="h-5 w-5" />
+              Delete All Connections
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Are you sure you want to delete all connections? This action cannot be undone and will:
+            </p>
+            <ul className="list-disc list-inside text-sm text-gray-500 space-y-1">
+              <li>Remove all {connections.length} app connections</li>
+              <li>Stop all associated zaps</li>
+              <li>Delete all stored API keys and tokens</li>
+              <li>Remove sync history</li>
+            </ul>
+
+            <div className="flex items-center gap-3 pt-4">
+              <Button variant="outline" className="flex-1" onClick={() => setShowDeleteAllConnectionsDialog(false)}>
+                Cancel
+              </Button>
+              <Button variant="destructive" className="flex-1" onClick={handleDeleteAllConnections}>
+                <Unlink className="h-4 w-4 mr-2" />
+                Delete All
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Reset Settings Confirmation Dialog */}
+      <Dialog open={showResetSettingsDialog} onOpenChange={setShowResetSettingsDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-600">
+              <RefreshCcw className="h-5 w-5" />
+              Reset All Settings
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Are you sure you want to reset all settings to defaults? This will:
+            </p>
+            <ul className="list-disc list-inside text-sm text-gray-500 space-y-1">
+              <li>Reset execution settings</li>
+              <li>Reset notification preferences</li>
+              <li>Reset security configuration</li>
+              <li>Connections and zaps will not be affected</li>
+            </ul>
+
+            <div className="flex items-center gap-3 pt-4">
+              <Button variant="outline" className="flex-1" onClick={() => setShowResetSettingsDialog(false)}>
+                Cancel
+              </Button>
+              <Button variant="destructive" className="flex-1" onClick={handleResetSettings}>
+                <RefreshCcw className="h-4 w-4 mr-2" />
+                Reset Settings
+              </Button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

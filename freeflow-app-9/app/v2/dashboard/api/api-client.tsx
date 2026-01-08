@@ -324,20 +324,7 @@ const mockApiActivities = [
   { id: '3', user: 'System', action: 'Regenerated', target: 'API documentation', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
 ]
 
-const mockApiQuickActions = [
-  { id: '1', label: 'New Endpoint', icon: 'plus', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 800)),
-    { loading: 'Creating new endpoint...', success: 'Endpoint created successfully', error: 'Failed to create endpoint' }
-  ), variant: 'default' as const },
-  { id: '2', label: 'Test API', icon: 'play', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1200)),
-    { loading: 'Testing API endpoint...', success: 'API test passed - 200 OK', error: 'API test failed' }
-  ), variant: 'default' as const },
-  { id: '3', label: 'View Docs', icon: 'book', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 500)),
-    { loading: 'Loading API documentation...', success: 'Documentation opened', error: 'Failed to load docs' }
-  ), variant: 'outline' as const },
-]
+// Note: Quick actions are now defined inside the component to access dialog state setters
 
 // Form state types
 interface EndpointFormData {
@@ -411,6 +398,12 @@ export default function ApiClient() {
   const [showCopyAllKeysDialog, setShowCopyAllKeysDialog] = useState(false)
   const [showExportKeysDialog, setShowExportKeysDialog] = useState(false)
   const [showEditKeyDialog, setShowEditKeyDialog] = useState(false)
+  const [showCollectionsDialog, setShowCollectionsDialog] = useState(false)
+  const [showHistoryDialog, setShowHistoryDialog] = useState(false)
+  const [showEndpointSettingsDialog, setShowEndpointSettingsDialog] = useState(false)
+  const [showPermissionsDialog, setShowPermissionsDialog] = useState(false)
+  const [showUsageLogDialog, setShowUsageLogDialog] = useState(false)
+  const [showKeySettingsDialog, setShowKeySettingsDialog] = useState(false)
   const [selectedKeyForEdit, setSelectedKeyForEdit] = useState<ApiKey | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -453,6 +446,31 @@ export default function ApiClient() {
     proxyEnabled: false,
     proxyUrl: ''
   })
+
+  // Quick actions with proper dialog-based workflows
+  const apiQuickActions = useMemo(() => [
+    {
+      id: '1',
+      label: 'New Endpoint',
+      icon: 'plus',
+      action: () => setShowCreateEndpointDialog(true),
+      variant: 'default' as const
+    },
+    {
+      id: '2',
+      label: 'Test API',
+      icon: 'play',
+      action: () => setShowTestAllDialog(true),
+      variant: 'default' as const
+    },
+    {
+      id: '3',
+      label: 'View Docs',
+      icon: 'book',
+      action: () => setShowDocsDialog(true),
+      variant: 'outline' as const
+    },
+  ], [])
 
   // Combined endpoints: DB data + mock data fallback
   const endpoints = useMemo(() => {
@@ -867,12 +885,12 @@ export default function ApiClient() {
               {[
                 { icon: Plus, label: 'New Endpoint', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => setShowCreateEndpointDialog(true) },
                 { icon: Play, label: 'Test All', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', onClick: () => setShowTestAllDialog(true) },
-                { icon: Folder, label: 'Collections', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => {} },
+                { icon: Folder, label: 'Collections', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => setShowCollectionsDialog(true) },
                 { icon: FileJson, label: 'Import', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => setShowImportDialog(true) },
                 { icon: Download, label: 'Export', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', onClick: handleExportApiDocs },
                 { icon: BookOpen, label: 'Docs', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', onClick: () => setShowDocsDialog(true) },
-                { icon: History, label: 'History', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', onClick: () => {} },
-                { icon: Settings, label: 'Settings', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400', onClick: () => {} },
+                { icon: History, label: 'History', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', onClick: () => setShowHistoryDialog(true) },
+                { icon: Settings, label: 'Settings', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400', onClick: () => setShowEndpointSettingsDialog(true) },
               ].map((action, idx) => (
                 <Button
                   key={idx}
@@ -1047,12 +1065,12 @@ export default function ApiClient() {
               {[
                 { icon: Plus, label: 'New Key', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', onClick: () => setShowCreateKeyDialog(true) },
                 { icon: RotateCcw, label: 'Rotate All', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', onClick: () => setShowRotateAllKeysDialog(true) },
-                { icon: Shield, label: 'Permissions', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', onClick: () => {} },
-                { icon: History, label: 'Usage Log', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => {} },
+                { icon: Shield, label: 'Permissions', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', onClick: () => setShowPermissionsDialog(true) },
+                { icon: History, label: 'Usage Log', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => setShowUsageLogDialog(true) },
                 { icon: Lock, label: 'Revoke', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', onClick: () => setShowRevokeKeyDialog(true) },
                 { icon: Copy, label: 'Copy All', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => setShowCopyAllKeysDialog(true) },
                 { icon: Download, label: 'Export', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', onClick: () => setShowExportKeysDialog(true) },
-                { icon: Settings, label: 'Settings', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400', onClick: () => {} },
+                { icon: Settings, label: 'Settings', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400', onClick: () => setShowKeySettingsDialog(true) },
               ].map((action, idx) => (
                 <Button
                   key={idx}
@@ -1988,7 +2006,7 @@ export default function ApiClient() {
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockApiQuickActions}
+            actions={apiQuickActions}
             variant="grid"
           />
         </div>
@@ -2758,6 +2776,339 @@ export default function ApiClient() {
               <Button variant="outline" onClick={() => setShowEditKeyDialog(false)}>Cancel</Button>
               <Button onClick={() => { setShowEditKeyDialog(false); toast.success(`API key "${selectedKeyForEdit?.name}" updated`); }}>
                 Save Changes
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Collections Dialog */}
+        <Dialog open={showCollectionsDialog} onOpenChange={setShowCollectionsDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Folder className="w-5 h-5 text-indigo-600" />
+                API Collections
+              </DialogTitle>
+              <DialogDescription>
+                Manage your API request collections and organize endpoints
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <Input placeholder="Search collections..." className="max-w-xs" />
+                <Button size="sm">
+                  <FolderPlus className="w-4 h-4 mr-2" />
+                  New Collection
+                </Button>
+              </div>
+              <ScrollArea className="h-64">
+                <div className="space-y-3">
+                  {collections.map(collection => (
+                    <div key={collection.id} className="p-4 border rounded-lg hover:border-indigo-300 transition-colors cursor-pointer">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <FolderOpen className="w-4 h-4 text-indigo-500" />
+                          <span className="font-medium">{collection.name}</span>
+                        </div>
+                        <Badge className={getEnvironmentColor(collection.environment)}>{collection.environment}</Badge>
+                      </div>
+                      <p className="text-sm text-gray-500 mb-2">{collection.description}</p>
+                      <div className="flex items-center gap-4 text-xs text-gray-400">
+                        <span>{collection.requests} requests</span>
+                        <span>{collection.folders} folders</span>
+                        <span>{collection.passRate}% pass rate</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowCollectionsDialog(false)}>Close</Button>
+              <Button onClick={() => { setShowCollectionsDialog(false); toast.success('Collection selected'); }}>
+                Open Collection
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* History Dialog */}
+        <Dialog open={showHistoryDialog} onOpenChange={setShowHistoryDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <History className="w-5 h-5 text-pink-600" />
+                Request History
+              </DialogTitle>
+              <DialogDescription>
+                View and replay recent API requests
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <Input placeholder="Filter history..." className="flex-1" />
+                <Select defaultValue="all">
+                  <SelectTrigger className="w-32">
+                    <SelectValue placeholder="Method" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Methods</SelectItem>
+                    <SelectItem value="GET">GET</SelectItem>
+                    <SelectItem value="POST">POST</SelectItem>
+                    <SelectItem value="PUT">PUT</SelectItem>
+                    <SelectItem value="DELETE">DELETE</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <ScrollArea className="h-64">
+                <div className="space-y-2">
+                  {history.map(item => (
+                    <div key={item.id} className="p-3 border rounded-lg hover:border-pink-300 transition-colors cursor-pointer">
+                      <div className="flex items-center justify-between mb-1">
+                        <div className="flex items-center gap-2">
+                          <Badge className={getMethodColor(item.method)}>{item.method}</Badge>
+                          <code className="text-sm">{item.url}</code>
+                        </div>
+                        <span className={`text-sm font-mono ${getHttpStatusColor(item.status)}`}>{item.status}</span>
+                      </div>
+                      <div className="flex items-center gap-4 text-xs text-gray-400">
+                        <span>{item.duration}ms</span>
+                        <span>{formatSize(item.size)}</span>
+                        <span>{formatTimeAgo(item.timestamp)}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowHistoryDialog(false)}>Close</Button>
+              <Button variant="destructive" onClick={() => { toast.success('History cleared'); }}>
+                <Trash2 className="w-4 h-4 mr-2" />
+                Clear History
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Endpoint Settings Dialog */}
+        <Dialog open={showEndpointSettingsDialog} onOpenChange={setShowEndpointSettingsDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Settings className="w-5 h-5 text-slate-600" />
+                Endpoint Settings
+              </DialogTitle>
+              <DialogDescription>
+                Configure default settings for API endpoints
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label>Auto-generate Documentation</Label>
+                  <p className="text-xs text-gray-500">Automatically create OpenAPI docs</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label>Enable Versioning</Label>
+                  <p className="text-xs text-gray-500">Track endpoint version history</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label>Require Authentication</Label>
+                  <p className="text-xs text-gray-500">Default authentication requirement</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+              <div className="space-y-2">
+                <Label>Default Rate Limit (per hour)</Label>
+                <Input type="number" defaultValue="1000" />
+              </div>
+              <div className="space-y-2">
+                <Label>Default Timeout (seconds)</Label>
+                <Input type="number" defaultValue="30" />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowEndpointSettingsDialog(false)}>Cancel</Button>
+              <Button onClick={() => { setShowEndpointSettingsDialog(false); toast.success('Endpoint settings saved'); }}>
+                Save Settings
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Permissions Dialog */}
+        <Dialog open={showPermissionsDialog} onOpenChange={setShowPermissionsDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Shield className="w-5 h-5 text-red-600" />
+                API Key Permissions
+              </DialogTitle>
+              <DialogDescription>
+                Configure permission scopes for API keys
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-3">
+                  <Label className="text-sm font-semibold">Read Permissions</Label>
+                  <div className="space-y-2">
+                    {['users:read', 'products:read', 'orders:read', 'analytics:read'].map(perm => (
+                      <div key={perm} className="flex items-center gap-2">
+                        <Switch defaultChecked id={perm} />
+                        <Label htmlFor={perm} className="text-sm font-mono">{perm}</Label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div className="space-y-3">
+                  <Label className="text-sm font-semibold">Write Permissions</Label>
+                  <div className="space-y-2">
+                    {['users:write', 'products:write', 'orders:write', 'webhooks:write'].map(perm => (
+                      <div key={perm} className="flex items-center gap-2">
+                        <Switch id={perm} />
+                        <Label htmlFor={perm} className="text-sm font-mono">{perm}</Label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
+                <p className="text-sm text-yellow-700 dark:text-yellow-400 flex items-center gap-2">
+                  <AlertTriangle className="w-4 h-4" />
+                  Changes will affect all keys with these scopes
+                </p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowPermissionsDialog(false)}>Cancel</Button>
+              <Button onClick={() => { setShowPermissionsDialog(false); toast.success('Permissions updated'); }}>
+                Save Permissions
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Usage Log Dialog */}
+        <Dialog open={showUsageLogDialog} onOpenChange={setShowUsageLogDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Activity className="w-5 h-5 text-purple-600" />
+                API Usage Log
+              </DialogTitle>
+              <DialogDescription>
+                View detailed usage statistics and request logs
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="grid grid-cols-4 gap-4">
+                <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                  <p className="text-2xl font-bold text-gray-900 dark:text-white">{formatNumber(stats.totalRequests)}</p>
+                  <p className="text-xs text-gray-500">Total Requests</p>
+                </div>
+                <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                  <p className="text-2xl font-bold text-green-600">{formatLatency(stats.avgLatency)}</p>
+                  <p className="text-xs text-gray-500">Avg Latency</p>
+                </div>
+                <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                  <p className="text-2xl font-bold text-blue-600">{stats.activeKeys}</p>
+                  <p className="text-xs text-gray-500">Active Keys</p>
+                </div>
+                <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                  <p className="text-2xl font-bold text-red-600">{stats.avgErrorRate.toFixed(2)}%</p>
+                  <p className="text-xs text-gray-500">Error Rate</p>
+                </div>
+              </div>
+              <ScrollArea className="h-48">
+                <div className="space-y-2">
+                  {apiKeys.slice(0, 5).map(key => (
+                    <div key={key.id} className="p-3 border rounded-lg">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="font-medium">{key.name}</span>
+                        <Badge className={getKeyStatusColor(key.status)}>{key.status}</Badge>
+                      </div>
+                      <div className="flex items-center justify-between text-sm text-gray-500">
+                        <span>{formatNumber(key.totalRequests)} requests</span>
+                        <span>Last used: {formatTimeAgo(key.lastUsed)}</span>
+                      </div>
+                      <Progress value={(key.totalRequests / (stats.totalRequests || 1)) * 100} className="mt-2 h-1" />
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowUsageLogDialog(false)}>Close</Button>
+              <Button onClick={() => { toast.success('Usage report exported'); }}>
+                <Download className="w-4 h-4 mr-2" />
+                Export Report
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Key Settings Dialog */}
+        <Dialog open={showKeySettingsDialog} onOpenChange={setShowKeySettingsDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Cog className="w-5 h-5 text-slate-600" />
+                API Key Settings
+              </DialogTitle>
+              <DialogDescription>
+                Configure global settings for API key management
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label>Auto-expire Keys</Label>
+                  <p className="text-xs text-gray-500">Automatically expire keys after set period</p>
+                </div>
+                <Switch />
+              </div>
+              <div className="space-y-2">
+                <Label>Default Expiration (days)</Label>
+                <Input type="number" defaultValue="90" />
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label>IP Whitelist Required</Label>
+                  <p className="text-xs text-gray-500">Require IP whitelist for production keys</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label>Usage Alerts</Label>
+                  <p className="text-xs text-gray-500">Get notified at usage thresholds</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+              <div className="space-y-2">
+                <Label>Alert Threshold (%)</Label>
+                <Input type="number" defaultValue="80" />
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label>Audit Logging</Label>
+                  <p className="text-xs text-gray-500">Log all key operations</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowKeySettingsDialog(false)}>Cancel</Button>
+              <Button onClick={() => { setShowKeySettingsDialog(false); toast.success('Key settings saved'); }}>
+                Save Settings
               </Button>
             </DialogFooter>
           </DialogContent>

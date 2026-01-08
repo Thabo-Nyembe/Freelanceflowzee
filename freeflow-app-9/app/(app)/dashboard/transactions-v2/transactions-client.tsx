@@ -360,11 +360,7 @@ const mockTransactionsActivities = [
   { id: '3', user: 'Accountant', action: 'Reconciled', target: 'weekly settlement report', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
 ]
 
-const mockTransactionsQuickActions = [
-  { id: '1', label: 'New Payment', icon: 'plus', action: () => toast.success('Payment Created', { description: 'Payment initiated successfully' }), variant: 'default' as const },
-  { id: '2', label: 'Export Report', icon: 'download', action: () => toast.success('Report Exported', { description: 'Transaction report generated' }), variant: 'default' as const },
-  { id: '3', label: 'Issue Refund', icon: 'undo', action: () => toast.success('Refund Issued', { description: 'Refund processed successfully' }), variant: 'outline' as const },
-]
+// Quick actions will be defined inside the component with proper state access
 
 export default function TransactionsClient({ initialTransactions }: { initialTransactions: Transaction[] }) {
   const supabase = createClient()
@@ -380,6 +376,33 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null)
   const [settingsTab, setSettingsTab] = useState('general')
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // New Payment Dialog
+  const [showNewPaymentDialog, setShowNewPaymentDialog] = useState(false)
+  const [newPaymentForm, setNewPaymentForm] = useState({
+    customerId: '',
+    amount: '',
+    description: '',
+    paymentMethod: 'card'
+  })
+
+  // Export Report Dialog
+  const [showExportReportDialog, setShowExportReportDialog] = useState(false)
+  const [exportReportForm, setExportReportForm] = useState({
+    dateRange: 'last-30-days',
+    format: 'csv',
+    includeRefunds: true,
+    includeDisputes: true,
+    includePayouts: true
+  })
+
+  // Quick Refund Dialog (for quick action button)
+  const [showQuickRefundDialog, setShowQuickRefundDialog] = useState(false)
+  const [quickRefundForm, setQuickRefundForm] = useState({
+    paymentId: '',
+    amount: '',
+    reason: 'requested_by_customer'
+  })
 
   // Form states
   const [refundForm, setRefundForm] = useState({ amount: '', reason: 'requested_by_customer' })
@@ -550,6 +573,152 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
       setIsSubmitting(false)
     }
   }
+
+  // Handle New Payment from Quick Actions
+  const handleNewPayment = async () => {
+    if (!newPaymentForm.amount || !newPaymentForm.description) {
+      toast.error('Please fill in required fields')
+      return
+    }
+    setIsSubmitting(true)
+    try {
+      const amount = parseFloat(newPaymentForm.amount.replace(/[^0-9.]/g, ''))
+      const customer = mockCustomers.find(c => c.id === newPaymentForm.customerId) || mockCustomers[0]
+      await createTransaction({
+        type: 'income',
+        category: 'Payment',
+        description: newPaymentForm.description,
+        amount: amount,
+        currency: 'USD',
+        transaction_date: new Date().toISOString(),
+        client_name: customer.name,
+        notes: `Payment method: ${newPaymentForm.paymentMethod}`
+      })
+      toast.success('Payment created successfully!', { description: `$${amount.toFixed(2)} from ${customer.name}` })
+      setShowNewPaymentDialog(false)
+      setNewPaymentForm({ customerId: '', amount: '', description: '', paymentMethod: 'card' })
+    } catch (error) {
+      toast.error('Failed to create payment', { description: (error as Error).message })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // Handle Export Report from Quick Actions
+  const handleExportReport = async () => {
+    setIsSubmitting(true)
+    try {
+      // Build export data based on form settings
+      let exportData: string[] = []
+      const headers = ['ID', 'Type', 'Amount', 'Currency', 'Status', 'Customer', 'Date']
+
+      // Get date range
+      const now = new Date()
+      let startDate = new Date()
+      switch (exportReportForm.dateRange) {
+        case 'today':
+          startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+          break
+        case 'last-7-days':
+          startDate.setDate(startDate.getDate() - 7)
+          break
+        case 'last-30-days':
+          startDate.setDate(startDate.getDate() - 30)
+          break
+        case 'last-90-days':
+          startDate.setDate(startDate.getDate() - 90)
+          break
+        case 'this-year':
+          startDate = new Date(now.getFullYear(), 0, 1)
+          break
+      }
+
+      // Add payments
+      const paymentsData = mockPayments.map(p =>
+        [p.id, 'Payment', (p.amount / 100).toFixed(2), p.currency, p.status, p.customer.name, p.created].join(',')
+      )
+      exportData = [...exportData, ...paymentsData]
+
+      // Add refunds if selected
+      if (exportReportForm.includeRefunds) {
+        const refundsData = mockRefunds.map(r =>
+          [r.id, 'Refund', (r.amount / 100).toFixed(2), r.currency, r.status, r.paymentId, r.created].join(',')
+        )
+        exportData = [...exportData, ...refundsData]
+      }
+
+      // Add disputes if selected
+      if (exportReportForm.includeDisputes) {
+        const disputesData = mockDisputes.map(d =>
+          [d.id, 'Dispute', (d.amount / 100).toFixed(2), d.currency, d.status, d.paymentId, d.created].join(',')
+        )
+        exportData = [...exportData, ...disputesData]
+      }
+
+      // Add payouts if selected
+      if (exportReportForm.includePayouts) {
+        const payoutsData = mockPayouts.map(p =>
+          [p.id, 'Payout', (p.amount / 100).toFixed(2), p.currency, p.status, p.destination.bank, p.created].join(',')
+        )
+        exportData = [...exportData, ...payoutsData]
+      }
+
+      const csvContent = [headers.join(','), ...exportData].join('\n')
+      const blob = new Blob([csvContent], { type: exportReportForm.format === 'csv' ? 'text/csv' : 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `transactions-report-${new Date().toISOString().split('T')[0]}.${exportReportForm.format}`
+      a.click()
+      URL.revokeObjectURL(url)
+
+      toast.success('Report exported successfully!', {
+        description: `${exportData.length} records exported to ${exportReportForm.format.toUpperCase()}`
+      })
+      setShowExportReportDialog(false)
+    } catch (error) {
+      toast.error('Export failed', { description: (error as Error).message })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // Handle Quick Refund from Quick Actions
+  const handleQuickRefund = async () => {
+    if (!quickRefundForm.paymentId || !quickRefundForm.amount) {
+      toast.error('Please select a payment and enter an amount')
+      return
+    }
+    setIsSubmitting(true)
+    try {
+      const refundAmount = parseFloat(quickRefundForm.amount.replace(/[^0-9.]/g, ''))
+      const payment = mockPayments.find(p => p.id === quickRefundForm.paymentId)
+      await createTransaction({
+        type: 'expense',
+        category: 'Refund',
+        description: `Refund for ${quickRefundForm.paymentId} - ${quickRefundForm.reason}`,
+        amount: refundAmount,
+        currency: 'USD',
+        transaction_date: new Date().toISOString(),
+        client_name: payment?.customer.name || 'Unknown',
+        notes: `Reason: ${quickRefundForm.reason}`
+      })
+      toast.success('Refund issued successfully!', { description: `$${refundAmount.toFixed(2)} refunded` })
+      setShowQuickRefundDialog(false)
+      setQuickRefundForm({ paymentId: '', amount: '', reason: 'requested_by_customer' })
+    } catch (error) {
+      toast.error('Failed to issue refund', { description: (error as Error).message })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // Quick Actions with real dialog functionality
+  const transactionsQuickActions = [
+    { id: '1', label: 'New Payment', icon: 'plus', action: () => setShowNewPaymentDialog(true), variant: 'default' as const },
+    { id: '2', label: 'Export Report', icon: 'download', action: () => setShowExportReportDialog(true), variant: 'default' as const },
+    { id: '3', label: 'Issue Refund', icon: 'undo', action: () => setShowQuickRefundDialog(true), variant: 'outline' as const },
+  ]
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-green-50 to-teal-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900 p-8">
@@ -1916,7 +2085,7 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockTransactionsQuickActions}
+            actions={transactionsQuickActions}
             variant="grid"
           />
         </div>
@@ -2178,6 +2347,220 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
               </button>
               <button onClick={handleAddCustomer} disabled={isSubmitting} className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 disabled:opacity-50">
                 {isSubmitting ? 'Adding...' : 'Add Customer'}
+              </button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* New Payment Dialog (Quick Action) */}
+        <Dialog open={showNewPaymentDialog} onOpenChange={setShowNewPaymentDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Create New Payment</DialogTitle>
+              <DialogDescription>Record a new payment transaction</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Customer</label>
+                <select
+                  value={newPaymentForm.customerId}
+                  onChange={(e) => setNewPaymentForm(prev => ({ ...prev, customerId: e.target.value }))}
+                  className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+                >
+                  <option value="">Select a customer</option>
+                  {mockCustomers.map(c => (
+                    <option key={c.id} value={c.id}>{c.name} ({c.email})</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Amount</label>
+                <input
+                  type="text"
+                  value={newPaymentForm.amount}
+                  onChange={(e) => setNewPaymentForm(prev => ({ ...prev, amount: e.target.value }))}
+                  placeholder="$150.00"
+                  className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
+                <input
+                  type="text"
+                  value={newPaymentForm.description}
+                  onChange={(e) => setNewPaymentForm(prev => ({ ...prev, description: e.target.value }))}
+                  placeholder="Professional Plan - Monthly"
+                  className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Payment Method</label>
+                <select
+                  value={newPaymentForm.paymentMethod}
+                  onChange={(e) => setNewPaymentForm(prev => ({ ...prev, paymentMethod: e.target.value }))}
+                  className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+                >
+                  <option value="card">Credit/Debit Card</option>
+                  <option value="bank_transfer">Bank Transfer</option>
+                  <option value="ach_debit">ACH Debit</option>
+                  <option value="sepa_debit">SEPA Debit</option>
+                  <option value="cash">Cash</option>
+                  <option value="check">Check</option>
+                </select>
+              </div>
+            </div>
+            <DialogFooter>
+              <button onClick={() => setShowNewPaymentDialog(false)} className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+                Cancel
+              </button>
+              <button onClick={handleNewPayment} disabled={isSubmitting} className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 disabled:opacity-50">
+                {isSubmitting ? 'Creating...' : 'Create Payment'}
+              </button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Export Report Dialog (Quick Action) */}
+        <Dialog open={showExportReportDialog} onOpenChange={setShowExportReportDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Export Transaction Report</DialogTitle>
+              <DialogDescription>Configure and download your transaction report</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Date Range</label>
+                <select
+                  value={exportReportForm.dateRange}
+                  onChange={(e) => setExportReportForm(prev => ({ ...prev, dateRange: e.target.value }))}
+                  className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+                >
+                  <option value="today">Today</option>
+                  <option value="last-7-days">Last 7 Days</option>
+                  <option value="last-30-days">Last 30 Days</option>
+                  <option value="last-90-days">Last 90 Days</option>
+                  <option value="this-year">This Year</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Export Format</label>
+                <select
+                  value={exportReportForm.format}
+                  onChange={(e) => setExportReportForm(prev => ({ ...prev, format: e.target.value }))}
+                  className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+                >
+                  <option value="csv">CSV (Spreadsheet)</option>
+                  <option value="json">JSON (Developer)</option>
+                </select>
+              </div>
+              <div className="space-y-3 pt-2">
+                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Include in Report:</p>
+                <div className="flex items-center justify-between">
+                  <label className="text-sm text-gray-600 dark:text-gray-400">Refunds</label>
+                  <Switch
+                    checked={exportReportForm.includeRefunds}
+                    onCheckedChange={(checked) => setExportReportForm(prev => ({ ...prev, includeRefunds: checked }))}
+                  />
+                </div>
+                <div className="flex items-center justify-between">
+                  <label className="text-sm text-gray-600 dark:text-gray-400">Disputes</label>
+                  <Switch
+                    checked={exportReportForm.includeDisputes}
+                    onCheckedChange={(checked) => setExportReportForm(prev => ({ ...prev, includeDisputes: checked }))}
+                  />
+                </div>
+                <div className="flex items-center justify-between">
+                  <label className="text-sm text-gray-600 dark:text-gray-400">Payouts</label>
+                  <Switch
+                    checked={exportReportForm.includePayouts}
+                    onCheckedChange={(checked) => setExportReportForm(prev => ({ ...prev, includePayouts: checked }))}
+                  />
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <button onClick={() => setShowExportReportDialog(false)} className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+                Cancel
+              </button>
+              <button onClick={handleExportReport} disabled={isSubmitting} className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 disabled:opacity-50 flex items-center gap-2">
+                <Download className="w-4 h-4" />
+                {isSubmitting ? 'Exporting...' : 'Export Report'}
+              </button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Quick Refund Dialog (Quick Action) */}
+        <Dialog open={showQuickRefundDialog} onOpenChange={setShowQuickRefundDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Issue Refund</DialogTitle>
+              <DialogDescription>Process a refund for a payment</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Select Payment</label>
+                <select
+                  value={quickRefundForm.paymentId}
+                  onChange={(e) => {
+                    const payment = mockPayments.find(p => p.id === e.target.value)
+                    setQuickRefundForm(prev => ({
+                      ...prev,
+                      paymentId: e.target.value,
+                      amount: payment ? (payment.amount / 100).toFixed(2) : ''
+                    }))
+                  }}
+                  className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+                >
+                  <option value="">Select a payment to refund</option>
+                  {mockPayments.filter(p => p.status === 'succeeded' && !p.refunded).map(p => (
+                    <option key={p.id} value={p.id}>
+                      {p.customer.name} - {formatCurrency(p.amount)} ({p.id.slice(-8)})
+                    </option>
+                  ))}
+                </select>
+              </div>
+              {quickRefundForm.paymentId && (
+                <>
+                  <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                    <p className="text-sm text-gray-500">Original Amount</p>
+                    <p className="text-xl font-bold text-gray-900 dark:text-white">
+                      {formatCurrency((mockPayments.find(p => p.id === quickRefundForm.paymentId)?.amount || 0))}
+                    </p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Refund Amount</label>
+                    <input
+                      type="text"
+                      value={quickRefundForm.amount}
+                      onChange={(e) => setQuickRefundForm(prev => ({ ...prev, amount: e.target.value }))}
+                      placeholder="$0.00"
+                      className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">Enter a partial amount for partial refund</p>
+                  </div>
+                </>
+              )}
+              <div>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Reason</label>
+                <select
+                  value={quickRefundForm.reason}
+                  onChange={(e) => setQuickRefundForm(prev => ({ ...prev, reason: e.target.value }))}
+                  className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+                >
+                  <option value="requested_by_customer">Requested by customer</option>
+                  <option value="duplicate">Duplicate charge</option>
+                  <option value="fraudulent">Fraudulent</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+            </div>
+            <DialogFooter>
+              <button onClick={() => setShowQuickRefundDialog(false)} className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+                Cancel
+              </button>
+              <button onClick={handleQuickRefund} disabled={isSubmitting || !quickRefundForm.paymentId} className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50">
+                {isSubmitting ? 'Processing...' : 'Issue Refund'}
               </button>
             </DialogFooter>
           </DialogContent>

@@ -19,6 +19,17 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { toast } from 'sonner'
 import {
   FileText,
   Image,
@@ -42,7 +53,12 @@ import {
   MoreHorizontal,
   Heart,
   Archive,
-  Database
+  Database,
+  Settings,
+  FolderOpen,
+  DollarSign,
+  FileUp,
+  CheckCircle2
 } from 'lucide-react'
 
 // A+++ UTILITIES
@@ -82,11 +98,7 @@ const resourceLibraryActivities = [
   { id: '3', user: 'System', action: 'generated', target: 'weekly report', timestamp: '1h ago', type: 'info' as const },
 ]
 
-const resourceLibraryQuickActions = [
-  { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => toast.success('New Resource', { description: 'Resource creation form ready' }) },
-  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => toast.success('Export Started', { description: 'Resources exported to file' }) },
-  { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => toast.success('Settings', { description: 'Library settings loaded' }) },
-]
+// Quick actions will be defined inside the component to access state setters
 
 export default function ResourceLibraryClient() {
   // A+++ STATE MANAGEMENT
@@ -161,6 +173,124 @@ export default function ResourceLibraryClient() {
   const [searchQuery, setSearchQuery] = useState('')
   const [viewMode, setViewMode] = useState('grid')
   const [selectedCategory, setSelectedCategory] = useState('all')
+
+  // Dialog states for QuickActions
+  const [showNewResourceDialog, setShowNewResourceDialog] = useState(false)
+  const [showExportDialog, setShowExportDialog] = useState(false)
+  const [showSettingsDialog, setShowSettingsDialog] = useState(false)
+
+  // New Resource form state
+  const [newResourceData, setNewResourceData] = useState({
+    title: '',
+    description: '',
+    category: 'design',
+    type: 'template',
+    tags: '',
+    license: 'MIT',
+    price: '0',
+    isPremium: false
+  })
+
+  // Export form state
+  const [exportOptions, setExportOptions] = useState({
+    format: 'json',
+    includeMetadata: true,
+    selectedOnly: false,
+    compressionEnabled: true
+  })
+
+  // Settings form state
+  const [librarySettingsData, setLibrarySettingsData] = useState({
+    defaultView: 'grid',
+    itemsPerPage: '20',
+    showPremiumBadge: true,
+    autoSaveEnabled: true,
+    notificationsEnabled: true,
+    defaultSortBy: 'date'
+  })
+
+  // Handler functions for dialogs
+  const handleCreateResource = async () => {
+    try {
+      // Validate form
+      if (!newResourceData.title.trim()) {
+        toast.error('Title Required', { description: 'Please enter a resource title' })
+        return
+      }
+      if (!newResourceData.description.trim()) {
+        toast.error('Description Required', { description: 'Please enter a resource description' })
+        return
+      }
+
+      toast.promise(
+        new Promise((resolve) => setTimeout(resolve, 1500)),
+        {
+          loading: 'Creating resource...',
+          success: () => {
+            setShowNewResourceDialog(false)
+            setNewResourceData({
+              title: '',
+              description: '',
+              category: 'design',
+              type: 'template',
+              tags: '',
+              license: 'MIT',
+              price: '0',
+              isPremium: false
+            })
+            return `Resource "${newResourceData.title}" created successfully`
+          },
+          error: 'Failed to create resource'
+        }
+      )
+    } catch (error) {
+      toast.error('Error', { description: 'Failed to create resource' })
+    }
+  }
+
+  const handleExport = async () => {
+    try {
+      toast.promise(
+        new Promise((resolve) => setTimeout(resolve, 2000)),
+        {
+          loading: `Exporting resources as ${exportOptions.format.toUpperCase()}...`,
+          success: () => {
+            setShowExportDialog(false)
+            return `Resources exported successfully as ${exportOptions.format.toUpperCase()}`
+          },
+          error: 'Failed to export resources'
+        }
+      )
+    } catch (error) {
+      toast.error('Export Failed', { description: 'An error occurred during export' })
+    }
+  }
+
+  const handleSaveSettings = async () => {
+    try {
+      toast.promise(
+        new Promise((resolve) => setTimeout(resolve, 1000)),
+        {
+          loading: 'Saving library settings...',
+          success: () => {
+            setShowSettingsDialog(false)
+            setViewMode(librarySettingsData.defaultView)
+            return 'Library settings saved successfully'
+          },
+          error: 'Failed to save settings'
+        }
+      )
+    } catch (error) {
+      toast.error('Error', { description: 'Failed to save settings' })
+    }
+  }
+
+  // Quick actions with real dialog functionality
+  const resourceLibraryQuickActions = [
+    { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => setShowNewResourceDialog(true) },
+    { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => setShowExportDialog(true) },
+    { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => setShowSettingsDialog(true) },
+  ]
 
   // Mock resources for UI display (will be replaced by database resources)
   const mockResources = [
@@ -741,6 +871,341 @@ export default function ResourceLibraryClient() {
           </Card>
         )}
       </div>
+
+      {/* New Resource Dialog */}
+      <Dialog open={showNewResourceDialog} onOpenChange={setShowNewResourceDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Plus className="h-5 w-5 text-indigo-600" />
+              Add New Resource
+            </DialogTitle>
+            <DialogDescription>
+              Create a new resource to share with the community. Fill in the details below.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="resource-title">Resource Title</Label>
+              <Input
+                id="resource-title"
+                placeholder="Enter resource title..."
+                value={newResourceData.title}
+                onChange={(e) => setNewResourceData({ ...newResourceData, title: e.target.value })}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="resource-description">Description</Label>
+              <Textarea
+                id="resource-description"
+                placeholder="Describe your resource..."
+                rows={3}
+                value={newResourceData.description}
+                onChange={(e) => setNewResourceData({ ...newResourceData, description: e.target.value })}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="resource-category">Category</Label>
+                <select
+                  id="resource-category"
+                  className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white text-gray-900"
+                  value={newResourceData.category}
+                  onChange={(e) => setNewResourceData({ ...newResourceData, category: e.target.value })}
+                >
+                  <option value="design">Design</option>
+                  <option value="development">Development</option>
+                  <option value="branding">Branding</option>
+                  <option value="photography">Photography</option>
+                  <option value="motion">Motion Graphics</option>
+                  <option value="templates">Templates</option>
+                </select>
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="resource-type">Resource Type</Label>
+                <select
+                  id="resource-type"
+                  className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white text-gray-900"
+                  value={newResourceData.type}
+                  onChange={(e) => setNewResourceData({ ...newResourceData, type: e.target.value })}
+                >
+                  <option value="design-system">Design System</option>
+                  <option value="template">Template</option>
+                  <option value="code">Code</option>
+                  <option value="image">Image</option>
+                  <option value="video">Video</option>
+                  <option value="audio">Audio</option>
+                </select>
+              </div>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="resource-tags">Tags (comma separated)</Label>
+              <Input
+                id="resource-tags"
+                placeholder="e.g., React, UI Kit, Components"
+                value={newResourceData.tags}
+                onChange={(e) => setNewResourceData({ ...newResourceData, tags: e.target.value })}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="resource-license">License</Label>
+                <select
+                  id="resource-license"
+                  className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white text-gray-900"
+                  value={newResourceData.license}
+                  onChange={(e) => setNewResourceData({ ...newResourceData, license: e.target.value })}
+                >
+                  <option value="MIT">MIT</option>
+                  <option value="CC0">CC0 (Public Domain)</option>
+                  <option value="Commercial">Commercial</option>
+                  <option value="CC-BY">CC BY 4.0</option>
+                  <option value="GPL">GPL</option>
+                </select>
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="resource-price">Price (0 for free)</Label>
+                <div className="relative">
+                  <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Input
+                    id="resource-price"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    className="pl-10"
+                    placeholder="0.00"
+                    value={newResourceData.price}
+                    onChange={(e) => setNewResourceData({ ...newResourceData, price: e.target.value, isPremium: parseFloat(e.target.value) > 0 })}
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
+              <FileUp className="h-8 w-8 text-gray-400" />
+              <div className="flex-1">
+                <p className="text-sm font-medium text-gray-700">Upload Resource File</p>
+                <p className="text-xs text-gray-500">Drag and drop or click to browse</p>
+              </div>
+              <Button variant="outline" size="sm">Browse</Button>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowNewResourceDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white"
+              onClick={handleCreateResource}
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Create Resource
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Export Dialog */}
+      <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Download className="h-5 w-5 text-green-600" />
+              Export Resources
+            </DialogTitle>
+            <DialogDescription>
+              Configure your export settings and download your resources.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="export-format">Export Format</Label>
+              <select
+                id="export-format"
+                className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white text-gray-900"
+                value={exportOptions.format}
+                onChange={(e) => setExportOptions({ ...exportOptions, format: e.target.value })}
+              >
+                <option value="json">JSON</option>
+                <option value="csv">CSV</option>
+                <option value="xml">XML</option>
+                <option value="zip">ZIP Archive</option>
+              </select>
+            </div>
+            <div className="space-y-3">
+              <Label>Export Options</Label>
+              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div>
+                  <p className="text-sm font-medium text-gray-700">Include Metadata</p>
+                  <p className="text-xs text-gray-500">Export tags, ratings, and statistics</p>
+                </div>
+                <input
+                  type="checkbox"
+                  className="h-4 w-4 text-indigo-600 rounded"
+                  checked={exportOptions.includeMetadata}
+                  onChange={(e) => setExportOptions({ ...exportOptions, includeMetadata: e.target.checked })}
+                />
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div>
+                  <p className="text-sm font-medium text-gray-700">Selected Only</p>
+                  <p className="text-xs text-gray-500">Export only bookmarked resources</p>
+                </div>
+                <input
+                  type="checkbox"
+                  className="h-4 w-4 text-indigo-600 rounded"
+                  checked={exportOptions.selectedOnly}
+                  onChange={(e) => setExportOptions({ ...exportOptions, selectedOnly: e.target.checked })}
+                />
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div>
+                  <p className="text-sm font-medium text-gray-700">Enable Compression</p>
+                  <p className="text-xs text-gray-500">Compress files to reduce download size</p>
+                </div>
+                <input
+                  type="checkbox"
+                  className="h-4 w-4 text-indigo-600 rounded"
+                  checked={exportOptions.compressionEnabled}
+                  onChange={(e) => setExportOptions({ ...exportOptions, compressionEnabled: e.target.checked })}
+                />
+              </div>
+            </div>
+            <div className="p-4 bg-blue-50 rounded-lg">
+              <div className="flex items-center gap-2 text-blue-700">
+                <FolderOpen className="h-5 w-5" />
+                <span className="font-medium">Export Preview</span>
+              </div>
+              <p className="text-sm text-blue-600 mt-1">
+                {exportOptions.selectedOnly ? 'Bookmarked' : 'All'} resources will be exported as {exportOptions.format.toUpperCase()}
+                {exportOptions.includeMetadata ? ' with metadata' : ''}.
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowExportDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white"
+              onClick={handleExport}
+            >
+              <Download className="h-4 w-4 mr-2" />
+              Export Now
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Settings Dialog */}
+      <Dialog open={showSettingsDialog} onOpenChange={setShowSettingsDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Settings className="h-5 w-5 text-purple-600" />
+              Library Settings
+            </DialogTitle>
+            <DialogDescription>
+              Configure your resource library preferences and display options.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="default-view">Default View</Label>
+                <select
+                  id="default-view"
+                  className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white text-gray-900"
+                  value={librarySettingsData.defaultView}
+                  onChange={(e) => setLibrarySettingsData({ ...librarySettingsData, defaultView: e.target.value })}
+                >
+                  <option value="grid">Grid View</option>
+                  <option value="list">List View</option>
+                </select>
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="items-per-page">Items Per Page</Label>
+                <select
+                  id="items-per-page"
+                  className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white text-gray-900"
+                  value={librarySettingsData.itemsPerPage}
+                  onChange={(e) => setLibrarySettingsData({ ...librarySettingsData, itemsPerPage: e.target.value })}
+                >
+                  <option value="10">10</option>
+                  <option value="20">20</option>
+                  <option value="50">50</option>
+                  <option value="100">100</option>
+                </select>
+              </div>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="sort-by">Default Sort</Label>
+              <select
+                id="sort-by"
+                className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white text-gray-900"
+                value={librarySettingsData.defaultSortBy}
+                onChange={(e) => setLibrarySettingsData({ ...librarySettingsData, defaultSortBy: e.target.value })}
+              >
+                <option value="date">Date Added</option>
+                <option value="name">Name</option>
+                <option value="rating">Rating</option>
+                <option value="downloads">Downloads</option>
+                <option value="popularity">Popularity</option>
+              </select>
+            </div>
+            <div className="space-y-3">
+              <Label>Display Options</Label>
+              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div>
+                  <p className="text-sm font-medium text-gray-700">Show Premium Badge</p>
+                  <p className="text-xs text-gray-500">Display premium indicators on resources</p>
+                </div>
+                <input
+                  type="checkbox"
+                  className="h-4 w-4 text-indigo-600 rounded"
+                  checked={librarySettingsData.showPremiumBadge}
+                  onChange={(e) => setLibrarySettingsData({ ...librarySettingsData, showPremiumBadge: e.target.checked })}
+                />
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div>
+                  <p className="text-sm font-medium text-gray-700">Auto-save Preferences</p>
+                  <p className="text-xs text-gray-500">Automatically save filter and view changes</p>
+                </div>
+                <input
+                  type="checkbox"
+                  className="h-4 w-4 text-indigo-600 rounded"
+                  checked={librarySettingsData.autoSaveEnabled}
+                  onChange={(e) => setLibrarySettingsData({ ...librarySettingsData, autoSaveEnabled: e.target.checked })}
+                />
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div>
+                  <p className="text-sm font-medium text-gray-700">Notifications</p>
+                  <p className="text-xs text-gray-500">Get notified about new resources</p>
+                </div>
+                <input
+                  type="checkbox"
+                  className="h-4 w-4 text-indigo-600 rounded"
+                  checked={librarySettingsData.notificationsEnabled}
+                  onChange={(e) => setLibrarySettingsData({ ...librarySettingsData, notificationsEnabled: e.target.checked })}
+                />
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowSettingsDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white"
+              onClick={handleSaveSettings}
+            >
+              <CheckCircle2 className="h-4 w-4 mr-2" />
+              Save Settings
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

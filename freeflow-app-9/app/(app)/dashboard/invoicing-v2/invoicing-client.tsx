@@ -625,12 +625,7 @@ const mockInvoicingActivities = [
   { id: '3', user: 'AR Manager', action: 'sent reminder', target: '5 overdue invoices', timestamp: '2h ago', type: 'info' as const },
 ]
 
-const mockInvoicingQuickActions = [
-  { id: '1', label: 'New Invoice', icon: 'FileText', shortcut: 'N', action: () => toast.success('Create professional invoices with custom branding') },
-  { id: '2', label: 'Record Payment', icon: 'DollarSign', shortcut: 'P', action: () => toast.success('Record payments against open invoices') },
-  { id: '3', label: 'Send Reminders', icon: 'Send', shortcut: 'R', action: () => toast.success('8 reminders sent for overdue invoices') },
-  { id: '4', label: 'Export Report', icon: 'Download', shortcut: 'E', action: () => toast.success('Accounts Receivable report downloaded') },
-]
+// Quick actions are defined inside the component to access state setters
 
 // ============================================================================
 // MAIN COMPONENT
@@ -657,6 +652,14 @@ export default function InvoicingClient() {
   const [showRecordPaymentDialog, setShowRecordPaymentDialog] = useState(false)
   const [showSendRemindersDialog, setShowSendRemindersDialog] = useState(false)
   const [showExportReportDialog, setShowExportReportDialog] = useState(false)
+
+  // Quick Actions with proper dialog handlers
+  const invoicingQuickActions = [
+    { id: '1', label: 'New Invoice', icon: 'FileText', shortcut: 'N', action: () => setShowNewInvoiceDialog(true) },
+    { id: '2', label: 'Record Payment', icon: 'DollarSign', shortcut: 'P', action: () => setShowRecordPaymentDialog(true) },
+    { id: '3', label: 'Send Reminders', icon: 'Send', shortcut: 'R', action: () => setShowSendRemindersDialog(true) },
+    { id: '4', label: 'Export Report', icon: 'Download', shortcut: 'E', action: () => setShowExportReportDialog(true) },
+  ]
 
   // Filtered invoices
   const filteredInvoices = useMemo(() => {
@@ -1909,7 +1912,7 @@ export default function InvoicingClient() {
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockInvoicingQuickActions}
+            actions={invoicingQuickActions}
             variant="grid"
           />
         </div>
@@ -2171,6 +2174,265 @@ export default function InvoicingClient() {
               </div>
             </>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* New Invoice Dialog */}
+      <Dialog open={showNewInvoiceDialog} onOpenChange={setShowNewInvoiceDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileText className="w-5 h-5 text-emerald-600" />
+              Create New Invoice
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-muted-foreground">
+              Create professional invoices with custom branding and send them directly to your clients.
+            </p>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Client</Label>
+                <select className="w-full mt-1 px-3 py-2 border rounded-lg">
+                  <option value="">Select a client</option>
+                  {clients.map(client => (
+                    <option key={client.id} value={client.id}>{client.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <Label>Invoice Type</Label>
+                <select className="w-full mt-1 px-3 py-2 border rounded-lg">
+                  <option value="standard">Standard Invoice</option>
+                  <option value="recurring">Recurring Invoice</option>
+                  <option value="estimate">Estimate/Quote</option>
+                  <option value="credit_memo">Credit Memo</option>
+                </select>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Issue Date</Label>
+                <Input type="date" defaultValue={new Date().toISOString().split('T')[0]} className="mt-1" />
+              </div>
+              <div>
+                <Label>Due Date</Label>
+                <Input type="date" className="mt-1" />
+              </div>
+            </div>
+            <div>
+              <Label>Notes</Label>
+              <Input placeholder="Add any notes for this invoice..." className="mt-1" />
+            </div>
+            <div className="flex justify-end gap-3 pt-4 border-t">
+              <Button variant="outline" onClick={() => setShowNewInvoiceDialog(false)}>Cancel</Button>
+              <Button className="bg-emerald-600 hover:bg-emerald-700" onClick={() => {
+                toast.success('Invoice created successfully!')
+                setShowNewInvoiceDialog(false)
+              }}>
+                <Plus className="w-4 h-4 mr-2" />
+                Create Invoice
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Record Payment Dialog */}
+      <Dialog open={showRecordPaymentDialog} onOpenChange={setShowRecordPaymentDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <DollarSign className="w-5 h-5 text-green-600" />
+              Record Payment
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-muted-foreground">
+              Record a payment against an open invoice.
+            </p>
+            <div>
+              <Label>Select Invoice</Label>
+              <select className="w-full mt-1 px-3 py-2 border rounded-lg">
+                <option value="">Select an invoice</option>
+                {invoices.filter(inv => inv.amountDue > 0).map(inv => (
+                  <option key={inv.id} value={inv.id}>
+                    {inv.invoiceNumber} - {inv.client.name} ({formatCurrency(inv.amountDue)} due)
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Amount</Label>
+                <Input type="number" placeholder="0.00" className="mt-1" />
+              </div>
+              <div>
+                <Label>Payment Method</Label>
+                <select className="w-full mt-1 px-3 py-2 border rounded-lg">
+                  <option value="credit_card">Credit Card</option>
+                  <option value="bank_transfer">Bank Transfer</option>
+                  <option value="check">Check</option>
+                  <option value="cash">Cash</option>
+                  <option value="paypal">PayPal</option>
+                </select>
+              </div>
+            </div>
+            <div>
+              <Label>Payment Date</Label>
+              <Input type="date" defaultValue={new Date().toISOString().split('T')[0]} className="mt-1" />
+            </div>
+            <div>
+              <Label>Reference Number</Label>
+              <Input placeholder="Transaction reference..." className="mt-1" />
+            </div>
+            <div className="flex justify-end gap-3 pt-4 border-t">
+              <Button variant="outline" onClick={() => setShowRecordPaymentDialog(false)}>Cancel</Button>
+              <Button className="bg-green-600 hover:bg-green-700" onClick={() => {
+                toast.success('Payment recorded successfully!')
+                setShowRecordPaymentDialog(false)
+              }}>
+                <CheckCircle2 className="w-4 h-4 mr-2" />
+                Record Payment
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Send Reminders Dialog */}
+      <Dialog open={showSendRemindersDialog} onOpenChange={setShowSendRemindersDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Send className="w-5 h-5 text-purple-600" />
+              Send Payment Reminders
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-muted-foreground">
+              Send automated payment reminders to clients with overdue invoices.
+            </p>
+            <div className="bg-amber-50 dark:bg-amber-900/20 rounded-lg p-4">
+              <div className="flex items-center gap-2 text-amber-700 dark:text-amber-400 mb-2">
+                <AlertCircle className="w-4 h-4" />
+                <span className="font-medium">Overdue Invoices</span>
+              </div>
+              <p className="text-sm text-amber-600 dark:text-amber-300">
+                {invoices.filter(inv => inv.status === 'overdue').length} invoices are currently overdue
+              </p>
+            </div>
+            <div>
+              <Label>Select Invoices to Remind</Label>
+              <div className="mt-2 max-h-48 overflow-y-auto space-y-2">
+                {invoices.filter(inv => inv.status === 'overdue' || inv.status === 'sent').map(inv => (
+                  <div key={inv.id} className="flex items-center gap-3 p-2 border rounded-lg">
+                    <input type="checkbox" defaultChecked={inv.status === 'overdue'} className="rounded" />
+                    <div className="flex-1">
+                      <p className="font-medium text-sm">{inv.invoiceNumber}</p>
+                      <p className="text-xs text-muted-foreground">{inv.client.name}</p>
+                    </div>
+                    <Badge variant={inv.status === 'overdue' ? 'destructive' : 'secondary'}>
+                      {formatCurrency(inv.amountDue)}
+                    </Badge>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div>
+              <Label>Reminder Message (Optional)</Label>
+              <Input placeholder="Add a custom message to include with reminders..." className="mt-1" />
+            </div>
+            <div className="flex justify-end gap-3 pt-4 border-t">
+              <Button variant="outline" onClick={() => setShowSendRemindersDialog(false)}>Cancel</Button>
+              <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => {
+                const overdueCount = invoices.filter(inv => inv.status === 'overdue').length
+                toast.success(`${overdueCount} payment reminders sent successfully!`)
+                setShowSendRemindersDialog(false)
+              }}>
+                <Send className="w-4 h-4 mr-2" />
+                Send Reminders
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Export Report Dialog */}
+      <Dialog open={showExportReportDialog} onOpenChange={setShowExportReportDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Download className="w-5 h-5 text-teal-600" />
+              Export Accounts Receivable Report
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-muted-foreground">
+              Generate and download comprehensive accounts receivable reports.
+            </p>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Report Type</Label>
+                <select className="w-full mt-1 px-3 py-2 border rounded-lg">
+                  <option value="ar_aging">A/R Aging Summary</option>
+                  <option value="ar_detail">A/R Aging Detail</option>
+                  <option value="invoice_list">Invoice List</option>
+                  <option value="payment_history">Payment History</option>
+                  <option value="client_balances">Client Balances</option>
+                </select>
+              </div>
+              <div>
+                <Label>Export Format</Label>
+                <select className="w-full mt-1 px-3 py-2 border rounded-lg">
+                  <option value="pdf">PDF</option>
+                  <option value="xlsx">Excel (XLSX)</option>
+                  <option value="csv">CSV</option>
+                </select>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Date From</Label>
+                <Input type="date" className="mt-1" />
+              </div>
+              <div>
+                <Label>Date To</Label>
+                <Input type="date" defaultValue={new Date().toISOString().split('T')[0]} className="mt-1" />
+              </div>
+            </div>
+            <div className="bg-muted/50 rounded-lg p-4">
+              <h4 className="font-medium mb-2">Report Summary</h4>
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <div>
+                  <span className="text-muted-foreground">Total Invoiced:</span>
+                  <span className="ml-2 font-medium">{formatCurrency(stats.totalInvoiced)}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Total Paid:</span>
+                  <span className="ml-2 font-medium text-green-600">{formatCurrency(stats.totalPaid)}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Outstanding:</span>
+                  <span className="ml-2 font-medium text-orange-600">{formatCurrency(stats.totalPending)}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Overdue:</span>
+                  <span className="ml-2 font-medium text-red-600">{formatCurrency(stats.totalOverdue)}</span>
+                </div>
+              </div>
+            </div>
+            <div className="flex justify-end gap-3 pt-4 border-t">
+              <Button variant="outline" onClick={() => setShowExportReportDialog(false)}>Cancel</Button>
+              <Button className="bg-teal-600 hover:bg-teal-700" onClick={() => {
+                toast.success('Report exported successfully!')
+                setShowExportReportDialog(false)
+              }}>
+                <Download className="w-4 h-4 mr-2" />
+                Export Report
+              </Button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

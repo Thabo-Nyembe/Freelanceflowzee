@@ -24,7 +24,8 @@ import { toast } from 'sonner'
 import { motion } from 'framer-motion'
 import {
   Palette, Type, Image, Globe, Code, Eye, Download,
-  Settings, Sparkles, CheckCircle, AlertCircle, Copy, Upload, RefreshCw, Save, Star, Crown, Shield, Zap, Info, Award
+  Settings, Sparkles, CheckCircle, AlertCircle, Copy, Upload, RefreshCw, Save, Star, Crown, Shield, Zap, Info, Award,
+  Plus, X, FileText
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -34,6 +35,22 @@ import { ScrollReveal } from '@/components/ui/scroll-reveal'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import {
   WhiteLabelConfig,
   BrandingPreset,
@@ -59,6 +76,15 @@ import { useAnnouncer } from '@/lib/accessibility'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 
 type ViewMode = 'overview' | 'branding' | 'domain' | 'templates' | 'export'
+
+// New item type for white label configurations
+interface WhiteLabelItem {
+  id: string
+  name: string
+  type: 'color-scheme' | 'font-set' | 'logo-pack' | 'template'
+  description: string
+  createdAt: string
+}
 
 
 // ============================================================================
@@ -88,12 +114,6 @@ const whiteLabelActivities = [
   { id: '3', user: 'System', action: 'generated', target: 'weekly report', timestamp: '1h ago', type: 'info' as const },
 ]
 
-const whiteLabelQuickActions = [
-  { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => toast.success('New Item', { description: 'Item created successfully' }) },
-  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => toast.success('Export Complete', { description: 'Branding exported' }) },
-  { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => toast.success('Settings', { description: 'White-label settings opened' }) },
-]
-
 export default function WhiteLabelClient() {
   // A+++ STATE MANAGEMENT
   const [isLoading, setIsLoading] = useState(true)
@@ -106,6 +126,107 @@ export default function WhiteLabelClient() {
   const [selectedPreset, setSelectedPreset] = useState<BrandingPreset | null>(null)
   const [customDomain, setCustomDomain] = useState(config.customDomain?.domain || '')
   const [isPreviewOpen, setIsPreviewOpen] = useState(false)
+
+  // Dialog states for quick actions
+  const [showNewItemDialog, setShowNewItemDialog] = useState(false)
+  const [showExportDialog, setShowExportDialog] = useState(false)
+  const [showSettingsDialog, setShowSettingsDialog] = useState(false)
+
+  // Form states for dialogs
+  const [newItemForm, setNewItemForm] = useState({
+    name: '',
+    type: 'color-scheme' as WhiteLabelItem['type'],
+    description: ''
+  })
+  const [exportFormat, setExportFormat] = useState<'css' | 'json' | 'scss' | 'all'>('css')
+  const [settingsForm, setSettingsForm] = useState({
+    autoSave: true,
+    showPreview: true,
+    enableAnimations: true,
+    defaultTheme: 'dark' as 'light' | 'dark'
+  })
+
+  // Items list
+  const [whiteLabelItems, setWhiteLabelItems] = useState<WhiteLabelItem[]>([
+    { id: '1', name: 'Corporate Blue', type: 'color-scheme', description: 'Professional blue color palette', createdAt: '2024-01-15' },
+    { id: '2', name: 'Modern Sans', type: 'font-set', description: 'Clean sans-serif font collection', createdAt: '2024-01-10' },
+    { id: '3', name: 'Brand Assets v2', type: 'logo-pack', description: 'Updated logo and icon set', createdAt: '2024-01-08' }
+  ])
+
+  // Handlers for dialogs
+  const handleCreateNewItem = () => {
+    if (!newItemForm.name.trim()) {
+      toast.error('Validation Error', { description: 'Please enter an item name' })
+      return
+    }
+
+    const newItem: WhiteLabelItem = {
+      id: Date.now().toString(),
+      name: newItemForm.name,
+      type: newItemForm.type,
+      description: newItemForm.description,
+      createdAt: new Date().toISOString().split('T')[0]
+    }
+
+    setWhiteLabelItems(prev => [newItem, ...prev])
+    setNewItemForm({ name: '', type: 'color-scheme', description: '' })
+    setShowNewItemDialog(false)
+    toast.success('Item Created', { description: `${newItem.name} has been created successfully` })
+    announce(`Created new ${newItem.type}: ${newItem.name}`, 'polite')
+  }
+
+  const handleExportBranding = async () => {
+    setShowExportDialog(false)
+
+    const exportPromise = new Promise((resolve) => {
+      setTimeout(() => {
+        const exportData = {
+          format: exportFormat,
+          config: config,
+          timestamp: new Date().toISOString()
+        }
+
+        // Simulate file download
+        const blob = new Blob([
+          exportFormat === 'json'
+            ? JSON.stringify(exportData, null, 2)
+            : generateBrandingExportCss(config)
+        ], { type: 'text/plain' })
+
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `branding-export.${exportFormat === 'all' ? 'zip' : exportFormat}`
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+        URL.revokeObjectURL(url)
+
+        resolve(exportData)
+      }, 1500)
+    })
+
+    toast.promise(exportPromise, {
+      loading: `Exporting branding as ${exportFormat.toUpperCase()}...`,
+      success: `Branding exported successfully as ${exportFormat.toUpperCase()}`,
+      error: 'Failed to export branding'
+    })
+
+    announce(`Branding exported as ${exportFormat}`, 'polite')
+  }
+
+  const handleSaveSettings = () => {
+    setShowSettingsDialog(false)
+    toast.success('Settings Saved', { description: 'White-label settings have been updated' })
+    announce('White-label settings saved', 'polite')
+  }
+
+  // Quick actions with real dialog functionality
+  const whiteLabelQuickActions = [
+    { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => setShowNewItemDialog(true) },
+    { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => setShowExportDialog(true) },
+    { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => setShowSettingsDialog(true) },
+  ]
 
   // A+++ LOAD WHITE LABEL DATA
   useEffect(() => {
@@ -834,6 +955,252 @@ export default function WhiteLabelClient() {
           </div>
         </div>
       </div>
+
+      {/* New Item Dialog */}
+      <Dialog open={showNewItemDialog} onOpenChange={setShowNewItemDialog}>
+        <DialogContent className="sm:max-w-[500px] bg-slate-900 border-gray-700">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-white">
+              <Plus className="w-5 h-5 text-purple-400" />
+              Create New White Label Item
+            </DialogTitle>
+            <DialogDescription className="text-gray-400">
+              Add a new color scheme, font set, logo pack, or template to your white label configuration.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="item-name" className="text-gray-300">Item Name</Label>
+              <Input
+                id="item-name"
+                value={newItemForm.name}
+                onChange={(e) => setNewItemForm({ ...newItemForm, name: e.target.value })}
+                placeholder="Enter item name..."
+                className="bg-slate-800 border-gray-700 text-white"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="item-type" className="text-gray-300">Item Type</Label>
+              <Select
+                value={newItemForm.type}
+                onValueChange={(value: WhiteLabelItem['type']) =>
+                  setNewItemForm({ ...newItemForm, type: value })
+                }
+              >
+                <SelectTrigger className="bg-slate-800 border-gray-700 text-white">
+                  <SelectValue placeholder="Select item type" />
+                </SelectTrigger>
+                <SelectContent className="bg-slate-800 border-gray-700">
+                  <SelectItem value="color-scheme">Color Scheme</SelectItem>
+                  <SelectItem value="font-set">Font Set</SelectItem>
+                  <SelectItem value="logo-pack">Logo Pack</SelectItem>
+                  <SelectItem value="template">Template</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="item-description" className="text-gray-300">Description</Label>
+              <Textarea
+                id="item-description"
+                value={newItemForm.description}
+                onChange={(e) => setNewItemForm({ ...newItemForm, description: e.target.value })}
+                placeholder="Describe this item..."
+                className="bg-slate-800 border-gray-700 text-white"
+                rows={3}
+              />
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setShowNewItemDialog(false)}
+              className="border-gray-700 hover:bg-slate-800"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleCreateNewItem}
+              className="bg-gradient-to-r from-purple-600 to-pink-600"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Create Item
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Export Dialog */}
+      <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
+        <DialogContent className="sm:max-w-[500px] bg-slate-900 border-gray-700">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-white">
+              <Download className="w-5 h-5 text-purple-400" />
+              Export Branding Configuration
+            </DialogTitle>
+            <DialogDescription className="text-gray-400">
+              Choose an export format for your white label branding settings.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label className="text-gray-300">Export Format</Label>
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { value: 'css', label: 'CSS Variables', icon: Code, desc: 'CSS custom properties' },
+                  { value: 'json', label: 'JSON', icon: FileText, desc: 'Theme configuration' },
+                  { value: 'scss', label: 'SCSS', icon: Code, desc: 'Sass variables' },
+                  { value: 'all', label: 'All Formats', icon: Download, desc: 'Complete package' }
+                ].map((format) => (
+                  <button
+                    key={format.value}
+                    onClick={() => setExportFormat(format.value as typeof exportFormat)}
+                    className={`p-3 rounded-lg border-2 transition-all text-left ${
+                      exportFormat === format.value
+                        ? 'border-purple-500 bg-purple-500/10'
+                        : 'border-gray-700 hover:border-gray-600 bg-slate-800'
+                    }`}
+                  >
+                    <format.icon className="w-5 h-5 text-purple-400 mb-1" />
+                    <p className="text-sm font-medium text-white">{format.label}</p>
+                    <p className="text-xs text-gray-400">{format.desc}</p>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="p-3 bg-slate-800 rounded-lg border border-gray-700">
+              <p className="text-sm text-gray-300 mb-2">Export will include:</p>
+              <ul className="text-xs text-gray-400 space-y-1">
+                <li className="flex items-center gap-2">
+                  <CheckCircle className="w-3 h-3 text-green-400" />
+                  Color schemes (light & dark)
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle className="w-3 h-3 text-green-400" />
+                  Typography settings
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle className="w-3 h-3 text-green-400" />
+                  Brand configuration
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setShowExportDialog(false)}
+              className="border-gray-700 hover:bg-slate-800"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleExportBranding}
+              className="bg-gradient-to-r from-purple-600 to-pink-600"
+            >
+              <Download className="w-4 h-4 mr-2" />
+              Export Now
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Settings Dialog */}
+      <Dialog open={showSettingsDialog} onOpenChange={setShowSettingsDialog}>
+        <DialogContent className="sm:max-w-[500px] bg-slate-900 border-gray-700">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-white">
+              <Settings className="w-5 h-5 text-purple-400" />
+              White Label Settings
+            </DialogTitle>
+            <DialogDescription className="text-gray-400">
+              Configure your white label preferences and behavior settings.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div className="flex items-center justify-between p-3 bg-slate-800 rounded-lg">
+              <div>
+                <p className="text-sm font-medium text-white">Auto-save Changes</p>
+                <p className="text-xs text-gray-400">Automatically save branding changes</p>
+              </div>
+              <Switch
+                checked={settingsForm.autoSave}
+                onCheckedChange={(checked) =>
+                  setSettingsForm({ ...settingsForm, autoSave: checked })
+                }
+              />
+            </div>
+
+            <div className="flex items-center justify-between p-3 bg-slate-800 rounded-lg">
+              <div>
+                <p className="text-sm font-medium text-white">Live Preview</p>
+                <p className="text-xs text-gray-400">Show real-time preview of changes</p>
+              </div>
+              <Switch
+                checked={settingsForm.showPreview}
+                onCheckedChange={(checked) =>
+                  setSettingsForm({ ...settingsForm, showPreview: checked })
+                }
+              />
+            </div>
+
+            <div className="flex items-center justify-between p-3 bg-slate-800 rounded-lg">
+              <div>
+                <p className="text-sm font-medium text-white">Enable Animations</p>
+                <p className="text-xs text-gray-400">Use smooth transitions and effects</p>
+              </div>
+              <Switch
+                checked={settingsForm.enableAnimations}
+                onCheckedChange={(checked) =>
+                  setSettingsForm({ ...settingsForm, enableAnimations: checked })
+                }
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-gray-300">Default Theme</Label>
+              <Select
+                value={settingsForm.defaultTheme}
+                onValueChange={(value: 'light' | 'dark') =>
+                  setSettingsForm({ ...settingsForm, defaultTheme: value })
+                }
+              >
+                <SelectTrigger className="bg-slate-800 border-gray-700 text-white">
+                  <SelectValue placeholder="Select default theme" />
+                </SelectTrigger>
+                <SelectContent className="bg-slate-800 border-gray-700">
+                  <SelectItem value="light">Light Theme</SelectItem>
+                  <SelectItem value="dark">Dark Theme</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setShowSettingsDialog(false)}
+              className="border-gray-700 hover:bg-slate-800"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSaveSettings}
+              className="bg-gradient-to-r from-purple-600 to-pink-600"
+            >
+              <Save className="w-4 h-4 mr-2" />
+              Save Settings
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

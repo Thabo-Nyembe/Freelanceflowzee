@@ -516,6 +516,13 @@ export default function WorkflowBuilderClient() {
   const [showTestWorkflowDialog, setShowTestWorkflowDialog] = useState(false)
   const [showLogsDialog, setShowLogsDialog] = useState(false)
 
+  // Quick Actions with proper dialog handlers
+  const workflowQuickActions = [
+    { id: '1', label: 'New Flow', icon: 'plus', action: () => setShowNewFlowDialog(true), variant: 'default' as const },
+    { id: '2', label: 'Test', icon: 'play', action: () => setShowTestWorkflowDialog(true), variant: 'default' as const },
+    { id: '3', label: 'Logs', icon: 'list', action: () => setShowLogsDialog(true), variant: 'outline' as const },
+  ]
+
   const stats: WorkflowStats = useMemo(() => ({
     totalWorkflows: mockWorkflows.length,
     activeWorkflows: mockWorkflows.filter(w => w.status === 'active').length,
@@ -2311,7 +2318,7 @@ export default function WorkflowBuilderClient() {
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockWorkflowQuickActions}
+            actions={workflowQuickActions}
             variant="grid"
           />
         </div>
@@ -2407,6 +2414,178 @@ export default function WorkflowBuilderClient() {
               </div>
             )}
           </ScrollArea>
+        </DialogContent>
+      </Dialog>
+
+      {/* New Flow Quick Action Dialog */}
+      <Dialog open={showNewFlowDialog} onOpenChange={setShowNewFlowDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Plus className="w-5 h-5 text-violet-600" />
+              Create New Workflow
+            </DialogTitle>
+            <DialogDescription>Quickly create a new automation workflow</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Workflow Name</Label>
+              <Input placeholder="e.g., Customer Onboarding Flow" />
+            </div>
+            <div className="space-y-2">
+              <Label>Start from Template</Label>
+              <Select defaultValue="blank">
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="blank">Blank Workflow</SelectItem>
+                  <SelectItem value="webhook">Webhook Trigger</SelectItem>
+                  <SelectItem value="schedule">Scheduled Task</SelectItem>
+                  <SelectItem value="email">Email Automation</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Description (Optional)</Label>
+              <Textarea placeholder="Describe what this workflow does..." rows={2} />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowNewFlowDialog(false)}>Cancel</Button>
+            <Button
+              className="bg-violet-600 hover:bg-violet-700"
+              onClick={() => {
+                toast.success('Workflow created successfully')
+                setShowNewFlowDialog(false)
+              }}
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Create Workflow
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Test Workflow Dialog */}
+      <Dialog open={showTestWorkflowDialog} onOpenChange={setShowTestWorkflowDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Play className="w-5 h-5 text-green-600" />
+              Test Workflow
+            </DialogTitle>
+            <DialogDescription>Run a test execution of your workflow</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Select Workflow</Label>
+              <Select defaultValue="wf1">
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {mockWorkflows.map(wf => (
+                    <SelectItem key={wf.id} value={wf.id}>{wf.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Test Data (JSON)</Label>
+              <Textarea
+                placeholder='{"email": "test@example.com", "name": "Test User"}'
+                rows={4}
+                className="font-mono text-sm"
+              />
+            </div>
+            <div className="flex items-center gap-2 p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
+              <AlertTriangle className="w-4 h-4 text-amber-600" />
+              <span className="text-sm text-amber-700 dark:text-amber-400">Test executions won&apos;t trigger real external actions</span>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowTestWorkflowDialog(false)}>Cancel</Button>
+            <Button
+              className="bg-green-600 hover:bg-green-700"
+              onClick={() => {
+                toast.success('Test execution started')
+                setShowTestWorkflowDialog(false)
+              }}
+            >
+              <Play className="w-4 h-4 mr-2" />
+              Run Test
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Logs Dialog */}
+      <Dialog open={showLogsDialog} onOpenChange={setShowLogsDialog}>
+        <DialogContent className="max-w-3xl max-h-[80vh]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Terminal className="w-5 h-5 text-blue-600" />
+              Workflow Logs
+            </DialogTitle>
+            <DialogDescription>View recent execution logs across all workflows</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="flex items-center gap-4">
+              <div className="flex-1">
+                <Input placeholder="Search logs..." className="w-full" />
+              </div>
+              <Select defaultValue="all">
+                <SelectTrigger className="w-[150px]"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Levels</SelectItem>
+                  <SelectItem value="info">Info</SelectItem>
+                  <SelectItem value="warning">Warning</SelectItem>
+                  <SelectItem value="error">Error</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <ScrollArea className="h-[400px] border rounded-lg p-4 bg-gray-950 text-gray-100 font-mono text-sm">
+              <div className="space-y-2">
+                <div className="flex items-start gap-2">
+                  <span className="text-gray-500">[2024-01-15 10:30:02]</span>
+                  <Badge className="bg-green-600 text-xs">INFO</Badge>
+                  <span>Lead Processing Pipeline - Execution completed successfully (8/8 nodes)</span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-gray-500">[2024-01-15 10:25:00]</span>
+                  <Badge className="bg-green-600 text-xs">INFO</Badge>
+                  <span>Lead Processing Pipeline - Webhook triggered from api.example.com</span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-gray-500">[2024-01-15 09:00:05]</span>
+                  <Badge className="bg-red-600 text-xs">ERROR</Badge>
+                  <span>Daily Report Generator - Connection timeout at HTTP Request node</span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-gray-500">[2024-01-15 09:00:00]</span>
+                  <Badge className="bg-green-600 text-xs">INFO</Badge>
+                  <span>Daily Report Generator - Scheduled execution started</span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-gray-500">[2024-01-15 08:45:12]</span>
+                  <Badge className="bg-yellow-600 text-xs">WARN</Badge>
+                  <span>Slack Notification Bot - Rate limit approaching (80% used)</span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-gray-500">[2024-01-15 08:30:00]</span>
+                  <Badge className="bg-green-600 text-xs">INFO</Badge>
+                  <span>Customer Onboarding - Draft workflow saved</span>
+                </div>
+              </div>
+            </ScrollArea>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowLogsDialog(false)}>Close</Button>
+            <Button
+              variant="outline"
+              onClick={() => toast.success('Logs exported to file')}
+            >
+              <Download className="w-4 h-4 mr-2" />
+              Export Logs
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

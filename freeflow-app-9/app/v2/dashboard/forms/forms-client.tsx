@@ -268,20 +268,7 @@ const mockFormsActivities = [
   { id: '3', user: 'System', action: 'Received', target: '45 new responses', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
 ]
 
-const mockFormsQuickActions = [
-  { id: '1', label: 'Create Form', icon: 'plus', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1000)),
-    { loading: 'Creating new form...', success: 'Form created successfully', error: 'Failed to create form' }
-  ), variant: 'default' as const },
-  { id: '2', label: 'Use Template', icon: 'copy', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 800)),
-    { loading: 'Loading form templates...', success: 'Template applied successfully', error: 'Failed to load templates' }
-  ), variant: 'default' as const },
-  { id: '3', label: 'Export Data', icon: 'download', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1500)),
-    { loading: 'Exporting form data...', success: 'Form data exported successfully', error: 'Failed to export data' }
-  ), variant: 'outline' as const },
-]
+// Quick actions are defined inside the component to access state setters
 
 // ============================================================================
 // MAIN COMPONENT
@@ -302,6 +289,13 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
   const [showAnalyticsDialog, setShowAnalyticsDialog] = useState(false)
   const [showQuestionTypesDialog, setShowQuestionTypesDialog] = useState(false)
   const [showThemesDialog, setShowThemesDialog] = useState(false)
+  const [showExportDialog, setShowExportDialog] = useState(false)
+
+  // Export dialog state
+  const [exportFormat, setExportFormat] = useState<'csv' | 'xlsx' | 'json' | 'pdf'>('csv')
+  const [exportDateRange, setExportDateRange] = useState<'all' | '7d' | '30d' | '90d'>('all')
+  const [exportIncludeMetadata, setExportIncludeMetadata] = useState(true)
+  const [isExporting, setIsExporting] = useState(false)
 
   // Form state for create dialog
   const [newFormTitle, setNewFormTitle] = useState('')
@@ -435,6 +429,62 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
   const handleExportResponses = (formTitle: string) => {
     toast.success('Exporting Responses', { description: `Responses for "${formTitle}" will be downloaded` })
   }
+
+  const handleExportData = async () => {
+    setIsExporting(true)
+    try {
+      // Simulate export process
+      await new Promise(resolve => setTimeout(resolve, 1500))
+
+      // Generate mock export data
+      const exportData = {
+        forms: displayForms.map(form => ({
+          id: form.id,
+          title: form.title,
+          status: form.status,
+          submissions: form.total_submissions,
+          views: form.total_views,
+          completionRate: form.completion_rate
+        })),
+        responses: mockResponses.map(response => ({
+          id: response.id,
+          formTitle: response.formTitle,
+          respondentEmail: response.respondentEmail,
+          submittedAt: response.submittedAt,
+          completionTime: response.completionTime,
+          ...(exportIncludeMetadata ? { metadata: response.metadata } : {})
+        })),
+        exportedAt: new Date().toISOString(),
+        format: exportFormat,
+        dateRange: exportDateRange
+      }
+
+      // Create and download file
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `forms-export-${new Date().toISOString().split('T')[0]}.${exportFormat === 'xlsx' ? 'json' : exportFormat}`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+
+      toast.success('Export Complete', { description: `Data exported as ${exportFormat.toUpperCase()}` })
+      setShowExportDialog(false)
+    } catch (err: any) {
+      toast.error('Export Failed', { description: err.message || 'Failed to export data' })
+    } finally {
+      setIsExporting(false)
+    }
+  }
+
+  // Quick Actions for toolbar
+  const formsQuickActions = [
+    { id: '1', label: 'Create Form', icon: 'plus', action: () => setShowCreateDialog(true), variant: 'default' as const },
+    { id: '2', label: 'Use Template', icon: 'copy', action: () => setShowTemplatesDialog(true), variant: 'default' as const },
+    { id: '3', label: 'Export Data', icon: 'download', action: () => setShowExportDialog(true), variant: 'outline' as const },
+  ]
 
   const handleShareForm = async (form: Form) => {
     const shareUrl = `${window.location.origin}/forms/${form.id}`
@@ -1921,7 +1971,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockFormsQuickActions}
+            actions={formsQuickActions}
             variant="grid"
           />
         </div>
@@ -2045,6 +2095,129 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
             <div className="h-64 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-lg flex items-center justify-center">
               <Activity className="h-12 w-12 text-indigo-300" />
             </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Export Data Dialog */}
+        <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Export Form Data</DialogTitle>
+              <DialogDescription>Download your form responses and analytics</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-6 py-4">
+              {/* Export Format */}
+              <div>
+                <Label className="text-sm font-medium">Export Format</Label>
+                <div className="grid grid-cols-4 gap-2 mt-2">
+                  {(['csv', 'xlsx', 'json', 'pdf'] as const).map(format => (
+                    <button
+                      key={format}
+                      onClick={() => setExportFormat(format)}
+                      className={`p-3 border rounded-lg text-center transition-colors ${
+                        exportFormat === format
+                          ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600'
+                          : 'hover:bg-gray-50 dark:hover:bg-gray-800'
+                      }`}
+                    >
+                      <Download className="h-5 w-5 mx-auto mb-1" />
+                      <span className="text-xs font-medium uppercase">{format}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Date Range */}
+              <div>
+                <Label className="text-sm font-medium">Date Range</Label>
+                <select
+                  value={exportDateRange}
+                  onChange={(e) => setExportDateRange(e.target.value as typeof exportDateRange)}
+                  className="mt-2 w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700"
+                >
+                  <option value="all">All Time</option>
+                  <option value="7d">Last 7 Days</option>
+                  <option value="30d">Last 30 Days</option>
+                  <option value="90d">Last 90 Days</option>
+                </select>
+              </div>
+
+              {/* Forms to Export */}
+              <div>
+                <Label className="text-sm font-medium">Forms to Export</Label>
+                <div className="mt-2 max-h-40 overflow-y-auto space-y-2 border rounded-lg p-3">
+                  {displayForms.slice(0, 5).map(form => (
+                    <div key={form.id} className="flex items-center gap-3 p-2 hover:bg-gray-50 dark:hover:bg-gray-800 rounded">
+                      <input type="checkbox" defaultChecked className="rounded text-indigo-600" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium truncate">{form.title}</p>
+                        <p className="text-xs text-gray-500">{form.total_submissions} responses</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Options */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div>
+                    <p className="text-sm font-medium">Include Metadata</p>
+                    <p className="text-xs text-gray-500">Device, browser, and location data</p>
+                  </div>
+                  <Switch
+                    checked={exportIncludeMetadata}
+                    onCheckedChange={setExportIncludeMetadata}
+                  />
+                </div>
+                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div>
+                    <p className="text-sm font-medium">Include Analytics</p>
+                    <p className="text-xs text-gray-500">Views, completion rates, and trends</p>
+                  </div>
+                  <Switch defaultChecked />
+                </div>
+              </div>
+
+              {/* Export Summary */}
+              <div className="p-4 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-indigo-100 dark:bg-indigo-900/40 rounded-lg">
+                    <Database className="h-5 w-5 text-indigo-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-indigo-900 dark:text-indigo-100">
+                      Ready to Export
+                    </p>
+                    <p className="text-xs text-indigo-600 dark:text-indigo-300">
+                      {displayForms.length} forms, {stats.totalSubmissions} responses
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowExportDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                className="bg-indigo-600 hover:bg-indigo-700"
+                onClick={handleExportData}
+                disabled={isExporting}
+              >
+                {isExporting ? (
+                  <>
+                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                    Exporting...
+                  </>
+                ) : (
+                  <>
+                    <Download className="h-4 w-4 mr-2" />
+                    Export Data
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
       </div>

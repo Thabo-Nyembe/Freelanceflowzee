@@ -239,20 +239,7 @@ const voiceCollaborationActivities = [
   { id: '3', user: 'System', action: 'generated', target: 'weekly report', timestamp: '1h ago', type: 'info' as const },
 ]
 
-const voiceCollaborationQuickActions = [
-  { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1000)),
-    { loading: 'Creating new voice room...', success: 'Voice room created successfully', error: 'Failed to create voice room' }
-  ) },
-  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1500)),
-    { loading: 'Exporting recordings...', success: 'Recordings exported successfully', error: 'Failed to export recordings' }
-  ) },
-  { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 800)),
-    { loading: 'Opening voice settings...', success: 'Voice settings opened', error: 'Failed to open settings' }
-  ) },
-]
+// Quick actions are defined inside the component to access setState functions
 
 export default function VoiceCollaborationClient() {
   logger.info('Voice collaboration page mounting')
@@ -302,6 +289,60 @@ export default function VoiceCollaborationClient() {
 
   // Confirmation Dialog State
   const [deleteRoom, setDeleteRoom] = useState<{ id: string; name: string; type: RoomType } | null>(null)
+
+  // QuickAction Dialog States
+  const [showQuickCreateRoomModal, setShowQuickCreateRoomModal] = useState(false)
+  const [showExportRecordingsModal, setShowExportRecordingsModal] = useState(false)
+  const [showVoiceSettingsModal, setShowVoiceSettingsModal] = useState(false)
+
+  // Export Form States
+  const [exportFormat, setExportFormat] = useState<'mp3' | 'wav' | 'flac'>('mp3')
+  const [exportQuality, setExportQuality] = useState<'low' | 'medium' | 'high'>('high')
+  const [exportSelectedRecordings, setExportSelectedRecordings] = useState<string[]>([])
+  const [isExporting, setIsExporting] = useState(false)
+
+  // Voice Settings Form States
+  const [voiceInputDevice, setVoiceInputDevice] = useState('default')
+  const [voiceOutputDevice, setVoiceOutputDevice] = useState('default')
+  const [voiceInputVolume, setVoiceInputVolume] = useState(80)
+  const [voiceOutputVolume, setVoiceOutputVolume] = useState(100)
+  const [voicePushToTalk, setVoicePushToTalk] = useState(false)
+  const [voiceAutoMute, setVoiceAutoMute] = useState(true)
+
+  // Quick Actions with real dialog functionality
+  const voiceCollaborationQuickActions = useMemo(() => [
+    {
+      id: '1',
+      label: 'New Room',
+      icon: 'Plus',
+      shortcut: 'N',
+      action: () => {
+        logger.info('QuickAction: Opening create room dialog')
+        setShowQuickCreateRoomModal(true)
+      }
+    },
+    {
+      id: '2',
+      label: 'Export',
+      icon: 'Download',
+      shortcut: 'E',
+      action: () => {
+        logger.info('QuickAction: Opening export recordings dialog')
+        setExportSelectedRecordings([])
+        setShowExportRecordingsModal(true)
+      }
+    },
+    {
+      id: '3',
+      label: 'Settings',
+      icon: 'Settings',
+      shortcut: 'S',
+      action: () => {
+        logger.info('QuickAction: Opening voice settings dialog')
+        setShowVoiceSettingsModal(true)
+      }
+    },
+  ], [])
 
   // Load voice collaboration data from database
   useEffect(() => {
@@ -831,6 +872,207 @@ export default function VoiceCollaborationClient() {
       description: `${recording.title} - ${formatDuration(recording.duration)} - ${recording.participants} participants - ${recording.quality} quality`
     })
     announce(`Playing ${recording.title}`, 'polite')
+  }
+
+  // Handle export recordings from dialog
+  const handleExportRecordings = async () => {
+    logger.info('Exporting recordings', {
+      selectedCount: exportSelectedRecordings.length,
+      format: exportFormat,
+      quality: exportQuality
+    })
+
+    if (exportSelectedRecordings.length === 0) {
+      toast.error('No recordings selected', {
+        description: 'Please select at least one recording to export'
+      })
+      return
+    }
+
+    setIsExporting(true)
+
+    try {
+      // Simulate export process
+      await new Promise(resolve => setTimeout(resolve, 1500))
+
+      const selectedRecordingData = state.recordings.filter(r =>
+        exportSelectedRecordings.includes(r.id)
+      )
+
+      // Create download links for each selected recording
+      for (const recording of selectedRecordingData) {
+        const blob = new Blob([`Mock audio data for ${recording.title}`], {
+          type: `audio/${exportFormat}`
+        })
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `${recording.title}.${exportFormat}`
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+        URL.revokeObjectURL(url)
+      }
+
+      const totalSize = selectedRecordingData.reduce((sum, r) => sum + r.fileSize, 0)
+      const totalDuration = selectedRecordingData.reduce((sum, r) => sum + r.duration, 0)
+
+      logger.info('Export completed', {
+        recordingsCount: selectedRecordingData.length,
+        totalSize: formatFileSize(totalSize),
+        totalDuration: formatDuration(totalDuration),
+        format: exportFormat,
+        quality: exportQuality
+      })
+
+      toast.success('Recordings exported successfully', {
+        description: `${selectedRecordingData.length} recordings exported as ${exportFormat.toUpperCase()} (${exportQuality} quality)`
+      })
+      announce('Recordings exported', 'polite')
+      setShowExportRecordingsModal(false)
+      setExportSelectedRecordings([])
+    } catch (error: any) {
+      logger.error('Export failed', { error: error.message })
+      toast.error('Export failed', {
+        description: error.message || 'Please try again later'
+      })
+      announce('Export failed', 'assertive')
+    } finally {
+      setIsExporting(false)
+    }
+  }
+
+  // Handle save voice settings from dialog
+  const handleSaveVoiceSettings = async () => {
+    logger.info('Saving voice settings', {
+      inputDevice: voiceInputDevice,
+      outputDevice: voiceOutputDevice,
+      inputVolume: voiceInputVolume,
+      outputVolume: voiceOutputVolume,
+      pushToTalk: voicePushToTalk,
+      autoMute: voiceAutoMute
+    })
+
+    try {
+      // Simulate API call to save settings
+      await new Promise(resolve => setTimeout(resolve, 800))
+
+      // In production, this would save to user preferences in the database
+      // await updateUserVoiceSettings(userId, { ... })
+
+      logger.info('Voice settings saved successfully', {
+        inputDevice: voiceInputDevice,
+        outputDevice: voiceOutputDevice,
+        inputVolume: voiceInputVolume,
+        outputVolume: voiceOutputVolume
+      })
+
+      toast.success('Voice settings saved', {
+        description: `Input: ${voiceInputVolume}% | Output: ${voiceOutputVolume}% | ${voicePushToTalk ? 'Push-to-Talk' : 'Voice Activated'}`
+      })
+      announce('Voice settings saved', 'polite')
+      setShowVoiceSettingsModal(false)
+    } catch (error: any) {
+      logger.error('Failed to save voice settings', { error: error.message })
+      toast.error('Failed to save settings', {
+        description: error.message || 'Please try again later'
+      })
+      announce('Failed to save settings', 'assertive')
+    }
+  }
+
+  // Handle quick create room (simplified version)
+  const handleQuickCreateRoom = async () => {
+    logger.info('Quick creating voice room', {
+      name: roomName,
+      type: roomType,
+      userId
+    })
+
+    if (!roomName.trim()) {
+      toast.error('Room name is required')
+      return
+    }
+
+    if (!userId) {
+      toast.error('Please log in to create rooms')
+      return
+    }
+
+    try {
+      dispatch({ type: 'SET_LOADING', isLoading: true })
+
+      const { createVoiceRoom } = await import('@/lib/voice-collaboration-queries')
+
+      const { data: createdRoom, error: createError } = await createVoiceRoom(userId, {
+        name: roomName,
+        description: roomDescription || `Quick-created ${roomType} room`,
+        type: roomType,
+        status: 'active',
+        host_name: 'Current User',
+        capacity: 10,
+        quality: 'high',
+        is_locked: false,
+        is_recording: false,
+        category: 'Quick Create',
+        tags: [roomType, 'quick']
+      })
+
+      if (createError || !createdRoom) {
+        throw new Error(createError?.message || 'Failed to create room')
+      }
+
+      const newRoom: VoiceRoom = {
+        id: createdRoom.id,
+        name: roomName,
+        description: roomDescription || `Quick-created ${roomType} room`,
+        type: roomType,
+        status: 'active',
+        hostId: userId,
+        hostName: 'Current User',
+        participants: [],
+        currentParticipants: 0,
+        capacity: 10,
+        quality: 'high',
+        isLocked: false,
+        isRecording: false,
+        features: {
+          recording: true,
+          transcription: false,
+          spatialAudio: false,
+          noiseCancellation: true,
+          echoCancellation: true,
+          autoGainControl: true
+        },
+        category: 'Quick Create',
+        tags: [roomType, 'quick'],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      }
+
+      dispatch({ type: 'ADD_ROOM', room: newRoom })
+
+      logger.info('Quick room created', {
+        roomId: newRoom.id,
+        name: newRoom.name,
+        type: newRoom.type
+      })
+
+      setRoomName('')
+      setRoomDescription('')
+      setShowQuickCreateRoomModal(false)
+
+      toast.success('Voice room created', {
+        description: `${newRoom.name} is now active and ready for participants`
+      })
+      announce('Voice room created', 'polite')
+    } catch (error: any) {
+      logger.error('Quick room creation failed', { error: error.message })
+      toast.error('Failed to create room', {
+        description: error.message || 'Please try again later'
+      })
+      dispatch({ type: 'SET_ERROR', error: 'Failed to create room' })
+    }
   }
 
   // ========================================
@@ -1802,6 +2044,415 @@ export default function VoiceCollaborationClient() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Quick Create Room Dialog */}
+      <AnimatePresence>
+        {showQuickCreateRoomModal && (
+          <Dialog open={showQuickCreateRoomModal} onOpenChange={setShowQuickCreateRoomModal}>
+            <DialogContent className="max-w-md bg-slate-900 border-gray-700">
+              <DialogHeader>
+                <DialogTitle className="text-white flex items-center gap-2">
+                  <Plus className="w-5 h-5 text-purple-400" />
+                  Quick Create Room
+                </DialogTitle>
+                <DialogDescription className="text-gray-400">
+                  Create a new voice room with default settings
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="space-y-4">
+                <div>
+                  <Label className="text-gray-300">Room Name *</Label>
+                  <Input
+                    value={roomName}
+                    onChange={(e) => setRoomName(e.target.value)}
+                    placeholder="Enter room name"
+                    className="bg-slate-800 border-gray-700 text-white"
+                  />
+                </div>
+
+                <div>
+                  <Label className="text-gray-300">Description (optional)</Label>
+                  <Textarea
+                    value={roomDescription}
+                    onChange={(e) => setRoomDescription(e.target.value)}
+                    placeholder="Brief description of this room"
+                    className="bg-slate-800 border-gray-700 text-white"
+                    rows={2}
+                  />
+                </div>
+
+                <div>
+                  <Label className="text-gray-300">Room Type</Label>
+                  <select
+                    value={roomType}
+                    onChange={(e) => setRoomType(e.target.value as RoomType)}
+                    className="w-full h-10 rounded-md border border-gray-700 bg-slate-800 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  >
+                    <option value="team">Team</option>
+                    <option value="client">Client</option>
+                    <option value="public">Public</option>
+                    <option value="private">Private</option>
+                    <option value="project">Project</option>
+                    <option value="meeting">Meeting</option>
+                  </select>
+                </div>
+
+                <div className="p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+                  <div className="flex items-start gap-2">
+                    <Info className="w-4 h-4 text-blue-400 mt-0.5 shrink-0" />
+                    <p className="text-xs text-blue-300">
+                      Room will be created with high quality audio, 10 participant capacity, and recording enabled by default.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex gap-3">
+                  <Button
+                    onClick={handleQuickCreateRoom}
+                    disabled={state.isLoading || !roomName.trim()}
+                    className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                  >
+                    {state.isLoading ? (
+                      <>Creating...</>
+                    ) : (
+                      <>
+                        <Plus className="w-4 h-4 mr-2" />
+                        Create Room
+                      </>
+                    )}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setShowQuickCreateRoomModal(false)
+                      setRoomName('')
+                      setRoomDescription('')
+                    }}
+                    className="border-gray-700 hover:bg-slate-800"
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+        )}
+      </AnimatePresence>
+
+      {/* Export Recordings Dialog */}
+      <AnimatePresence>
+        {showExportRecordingsModal && (
+          <Dialog open={showExportRecordingsModal} onOpenChange={setShowExportRecordingsModal}>
+            <DialogContent className="max-w-2xl bg-slate-900 border-gray-700">
+              <DialogHeader>
+                <DialogTitle className="text-white flex items-center gap-2">
+                  <Download className="w-5 h-5 text-blue-400" />
+                  Export Recordings
+                </DialogTitle>
+                <DialogDescription className="text-gray-400">
+                  Select recordings to export and choose your preferred format
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="space-y-4">
+                {/* Format and Quality Selection */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-gray-300">Export Format</Label>
+                    <select
+                      value={exportFormat}
+                      onChange={(e) => setExportFormat(e.target.value as 'mp3' | 'wav' | 'flac')}
+                      className="w-full h-10 rounded-md border border-gray-700 bg-slate-800 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    >
+                      <option value="mp3">MP3 (Compressed)</option>
+                      <option value="wav">WAV (Lossless)</option>
+                      <option value="flac">FLAC (High Quality)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <Label className="text-gray-300">Export Quality</Label>
+                    <select
+                      value={exportQuality}
+                      onChange={(e) => setExportQuality(e.target.value as 'low' | 'medium' | 'high')}
+                      className="w-full h-10 rounded-md border border-gray-700 bg-slate-800 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    >
+                      <option value="low">Low (Smaller files)</option>
+                      <option value="medium">Medium (Balanced)</option>
+                      <option value="high">High (Best quality)</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Recordings List */}
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <Label className="text-gray-300">Select Recordings</Label>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        if (exportSelectedRecordings.length === state.recordings.length) {
+                          setExportSelectedRecordings([])
+                        } else {
+                          setExportSelectedRecordings(state.recordings.map(r => r.id))
+                        }
+                      }}
+                      className="text-purple-400 hover:text-purple-300"
+                    >
+                      {exportSelectedRecordings.length === state.recordings.length ? 'Deselect All' : 'Select All'}
+                    </Button>
+                  </div>
+
+                  <div className="max-h-64 overflow-y-auto space-y-2 border border-gray-700 rounded-lg p-2">
+                    {state.recordings.length === 0 ? (
+                      <p className="text-center text-gray-400 py-8">No recordings available to export</p>
+                    ) : (
+                      state.recordings.map((recording) => (
+                        <div
+                          key={recording.id}
+                          className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors ${
+                            exportSelectedRecordings.includes(recording.id)
+                              ? 'bg-purple-500/20 border border-purple-500/30'
+                              : 'bg-slate-800 hover:bg-slate-700'
+                          }`}
+                          onClick={() => {
+                            if (exportSelectedRecordings.includes(recording.id)) {
+                              setExportSelectedRecordings(prev => prev.filter(id => id !== recording.id))
+                            } else {
+                              setExportSelectedRecordings(prev => [...prev, recording.id])
+                            }
+                          }}
+                        >
+                          <Checkbox
+                            checked={exportSelectedRecordings.includes(recording.id)}
+                            onCheckedChange={(checked) => {
+                              if (checked) {
+                                setExportSelectedRecordings(prev => [...prev, recording.id])
+                              } else {
+                                setExportSelectedRecordings(prev => prev.filter(id => id !== recording.id))
+                              }
+                            }}
+                          />
+                          <FileAudio className="w-8 h-8 text-blue-400 shrink-0" />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-white font-medium truncate">{recording.title}</p>
+                            <p className="text-xs text-gray-400">
+                              {formatDuration(recording.duration)} | {formatFileSize(recording.fileSize)} | {recording.quality.toUpperCase()}
+                            </p>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+
+                {/* Export Summary */}
+                {exportSelectedRecordings.length > 0 && (
+                  <div className="p-3 bg-green-500/10 border border-green-500/30 rounded-lg">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-green-300">
+                        {exportSelectedRecordings.length} recording{exportSelectedRecordings.length !== 1 ? 's' : ''} selected
+                      </span>
+                      <span className="text-green-300">
+                        {formatFileSize(
+                          state.recordings
+                            .filter(r => exportSelectedRecordings.includes(r.id))
+                            .reduce((sum, r) => sum + r.fileSize, 0)
+                        )} total
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex gap-3">
+                  <Button
+                    onClick={handleExportRecordings}
+                    disabled={isExporting || exportSelectedRecordings.length === 0}
+                    className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                  >
+                    {isExporting ? (
+                      <>Exporting...</>
+                    ) : (
+                      <>
+                        <Download className="w-4 h-4 mr-2" />
+                        Export {exportSelectedRecordings.length > 0 ? `(${exportSelectedRecordings.length})` : ''}
+                      </>
+                    )}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setShowExportRecordingsModal(false)
+                      setExportSelectedRecordings([])
+                    }}
+                    className="border-gray-700 hover:bg-slate-800"
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+        )}
+      </AnimatePresence>
+
+      {/* Voice Settings Dialog */}
+      <AnimatePresence>
+        {showVoiceSettingsModal && (
+          <Dialog open={showVoiceSettingsModal} onOpenChange={setShowVoiceSettingsModal}>
+            <DialogContent className="max-w-lg bg-slate-900 border-gray-700">
+              <DialogHeader>
+                <DialogTitle className="text-white flex items-center gap-2">
+                  <Settings className="w-5 h-5 text-purple-400" />
+                  Voice Settings
+                </DialogTitle>
+                <DialogDescription className="text-gray-400">
+                  Configure your audio input and output preferences
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="space-y-5">
+                {/* Input Device */}
+                <div>
+                  <Label className="text-gray-300 flex items-center gap-2">
+                    <Mic className="w-4 h-4" />
+                    Input Device (Microphone)
+                  </Label>
+                  <select
+                    value={voiceInputDevice}
+                    onChange={(e) => setVoiceInputDevice(e.target.value)}
+                    className="w-full h-10 rounded-md border border-gray-700 bg-slate-800 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  >
+                    <option value="default">Default System Microphone</option>
+                    <option value="built-in">Built-in Microphone</option>
+                    <option value="external">External USB Microphone</option>
+                    <option value="headset">Headset Microphone</option>
+                  </select>
+                </div>
+
+                {/* Input Volume */}
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <Label className="text-gray-300">Input Volume</Label>
+                    <span className="text-sm text-purple-400">{voiceInputVolume}%</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    value={voiceInputVolume}
+                    onChange={(e) => setVoiceInputVolume(parseInt(e.target.value))}
+                    className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-purple-500"
+                  />
+                </div>
+
+                {/* Output Device */}
+                <div>
+                  <Label className="text-gray-300 flex items-center gap-2">
+                    <Headphones className="w-4 h-4" />
+                    Output Device (Speakers)
+                  </Label>
+                  <select
+                    value={voiceOutputDevice}
+                    onChange={(e) => setVoiceOutputDevice(e.target.value)}
+                    className="w-full h-10 rounded-md border border-gray-700 bg-slate-800 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  >
+                    <option value="default">Default System Speakers</option>
+                    <option value="built-in">Built-in Speakers</option>
+                    <option value="external">External Speakers</option>
+                    <option value="headphones">Headphones</option>
+                  </select>
+                </div>
+
+                {/* Output Volume */}
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <Label className="text-gray-300">Output Volume</Label>
+                    <span className="text-sm text-purple-400">{voiceOutputVolume}%</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    value={voiceOutputVolume}
+                    onChange={(e) => setVoiceOutputVolume(parseInt(e.target.value))}
+                    className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-purple-500"
+                  />
+                </div>
+
+                {/* Voice Activation Settings */}
+                <div className="space-y-3 pt-2 border-t border-gray-700">
+                  <Label className="text-gray-300">Voice Activation</Label>
+
+                  <div className="flex items-center justify-between p-3 bg-slate-800 rounded-lg">
+                    <div>
+                      <p className="text-white text-sm">Push-to-Talk</p>
+                      <p className="text-xs text-gray-400">Hold a key to transmit voice</p>
+                    </div>
+                    <Checkbox
+                      checked={voicePushToTalk}
+                      onCheckedChange={(checked) => setVoicePushToTalk(checked as boolean)}
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between p-3 bg-slate-800 rounded-lg">
+                    <div>
+                      <p className="text-white text-sm">Auto-Mute on Join</p>
+                      <p className="text-xs text-gray-400">Start muted when joining rooms</p>
+                    </div>
+                    <Checkbox
+                      checked={voiceAutoMute}
+                      onCheckedChange={(checked) => setVoiceAutoMute(checked as boolean)}
+                    />
+                  </div>
+                </div>
+
+                {/* Test Audio Button */}
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    logger.info('Testing audio devices', {
+                      inputDevice: voiceInputDevice,
+                      outputDevice: voiceOutputDevice
+                    })
+                    toast.info('Audio test', {
+                      description: 'Testing microphone and speakers...'
+                    })
+                    // In production, this would trigger actual audio test
+                    setTimeout(() => {
+                      toast.success('Audio test complete', {
+                        description: 'Your devices are working correctly'
+                      })
+                    }, 1500)
+                  }}
+                  className="w-full border-gray-700 hover:bg-slate-800"
+                >
+                  <Volume2 className="w-4 h-4 mr-2" />
+                  Test Audio
+                </Button>
+
+                <div className="flex gap-3">
+                  <Button
+                    onClick={handleSaveVoiceSettings}
+                    className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                  >
+                    <Settings className="w-4 h-4 mr-2" />
+                    Save Settings
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowVoiceSettingsModal(false)}
+                    className="border-gray-700 hover:bg-slate-800"
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

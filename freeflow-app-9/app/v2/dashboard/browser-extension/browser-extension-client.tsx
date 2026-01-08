@@ -544,20 +544,7 @@ const browserExtensionActivities = [
   { id: '3', user: 'System', action: 'generated', target: 'weekly report', timestamp: '1h ago', type: 'info' as const },
 ]
 
-const browserExtensionQuickActions = [
-  { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 800)),
-    { loading: 'Creating new item...', success: 'Item created successfully', error: 'Failed to create item' }
-  ) },
-  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1500)),
-    { loading: 'Exporting data...', success: 'Export completed', error: 'Export failed' }
-  ) },
-  { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 500)),
-    { loading: 'Opening settings...', success: 'Settings loaded', error: 'Failed to load settings' }
-  ) },
-]
+// Quick actions will be defined inside the component to access state setters
 
 export default function BrowserExtensionClient() {
   logger.debug('Component mounting')
@@ -587,6 +574,69 @@ export default function BrowserExtensionClient() {
   const [showSettingsModal, setShowSettingsModal] = useState(false)
   const [showAnalyticsModal, setShowAnalyticsModal] = useState(false)
   const [viewCaptureTab, setViewCaptureTab] = useState<'details' | 'metadata' | 'actions'>('details')
+
+  // Quick Action Dialog States
+  const [showNewItemDialog, setShowNewItemDialog] = useState(false)
+  const [showExportDialog, setShowExportDialog] = useState(false)
+  const [showQuickSettingsDialog, setShowQuickSettingsDialog] = useState(false)
+
+  // New Item Dialog Form State
+  const [newItemForm, setNewItemForm] = useState({
+    title: '',
+    url: '',
+    type: 'screenshot' as CaptureType,
+    tags: ''
+  })
+
+  // Export Dialog Form State
+  const [exportForm, setExportForm] = useState({
+    format: 'json' as 'json' | 'csv' | 'zip',
+    dateRange: 'all' as 'all' | 'week' | 'month' | 'year',
+    includeMetadata: true,
+    includeImages: true
+  })
+
+  // Quick Settings State
+  const [quickSettings, setQuickSettings] = useState({
+    autoCapture: false,
+    compressImages: true,
+    syncOnSave: true,
+    showNotifications: true
+  })
+
+  // Quick Actions with Dialog Handlers
+  const browserExtensionQuickActions = useMemo(() => [
+    {
+      id: '1',
+      label: 'New Item',
+      icon: 'Plus',
+      shortcut: 'N',
+      action: () => {
+        logger.info('Opening new item dialog')
+        setShowNewItemDialog(true)
+      }
+    },
+    {
+      id: '2',
+      label: 'Export',
+      icon: 'Download',
+      shortcut: 'E',
+      action: () => {
+        logger.info('Opening export dialog')
+        setShowExportDialog(true)
+      }
+    },
+    {
+      id: '3',
+      label: 'Settings',
+      icon: 'Settings',
+      shortcut: 'S',
+      action: () => {
+        logger.info('Opening quick settings dialog')
+        setShowQuickSettingsDialog(true)
+      }
+    },
+  ], [])
 
   // Confirmation Dialog State
   const [deleteCapture, setDeleteCapture] = useState<{ id: string; title: string; fileSize: number; type: CaptureType } | null>(null)
@@ -835,6 +885,141 @@ export default function BrowserExtensionClient() {
       description: url.length > 50 ? url.substring(0, 50) + '...' : url
     })
     announce('URL copied', 'polite')
+  }
+
+  // Handler for creating new capture item
+  const handleCreateNewItem = async () => {
+    logger.info('Creating new capture item', { form: newItemForm })
+
+    if (!newItemForm.title.trim()) {
+      toast.error('Title is required')
+      return
+    }
+
+    if (!newItemForm.url.trim()) {
+      toast.error('URL is required')
+      return
+    }
+
+    const newCapture: PageCapture = {
+      id: `CAP-${String(state.captures.length + 1).padStart(3, '0')}`,
+      title: newItemForm.title,
+      url: newItemForm.url,
+      type: newItemForm.type,
+      fileSize: Math.floor(Math.random() * 2000000) + 100000,
+      timestamp: new Date().toISOString(),
+      tags: newItemForm.tags.split(',').map(t => t.trim()).filter(Boolean),
+      metadata: {
+        browser: state.currentBrowser,
+        viewport: { width: 1920, height: 1080 }
+      }
+    }
+
+    dispatch({ type: 'ADD_CAPTURE', capture: newCapture })
+
+    toast.success('Capture created successfully', {
+      description: `${newCapture.title} - ${newCapture.type}`
+    })
+
+    // Reset form and close dialog
+    setNewItemForm({ title: '', url: '', type: 'screenshot', tags: '' })
+    setShowNewItemDialog(false)
+    announce('New capture created', 'polite')
+  }
+
+  // Handler for exporting data
+  const handleExportData = async () => {
+    logger.info('Exporting data', { form: exportForm })
+
+    // Filter captures based on date range
+    let capturesForExport = [...state.captures]
+    const now = new Date()
+
+    if (exportForm.dateRange === 'week') {
+      const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
+      capturesForExport = capturesForExport.filter(c => new Date(c.timestamp) >= weekAgo)
+    } else if (exportForm.dateRange === 'month') {
+      const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
+      capturesForExport = capturesForExport.filter(c => new Date(c.timestamp) >= monthAgo)
+    } else if (exportForm.dateRange === 'year') {
+      const yearAgo = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000)
+      capturesForExport = capturesForExport.filter(c => new Date(c.timestamp) >= yearAgo)
+    }
+
+    // Prepare export data
+    const exportData = capturesForExport.map(capture => {
+      const base: Record<string, any> = {
+        id: capture.id,
+        title: capture.title,
+        url: capture.url,
+        type: capture.type,
+        timestamp: capture.timestamp,
+        tags: capture.tags
+      }
+
+      if (exportForm.includeMetadata) {
+        base.metadata = capture.metadata
+        base.fileSize = capture.fileSize
+      }
+
+      return base
+    })
+
+    // Simulate export based on format
+    if (exportForm.format === 'json') {
+      const jsonString = JSON.stringify(exportData, null, 2)
+      const blob = new Blob([jsonString], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `browser-extension-captures-${new Date().toISOString().split('T')[0]}.json`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+    } else if (exportForm.format === 'csv') {
+      const headers = ['ID', 'Title', 'URL', 'Type', 'Timestamp', 'Tags']
+      const rows = exportData.map(item => [
+        item.id,
+        `"${item.title}"`,
+        `"${item.url}"`,
+        item.type,
+        item.timestamp,
+        `"${item.tags.join(', ')}"`
+      ])
+      const csvContent = [headers.join(','), ...rows.map(row => row.join(','))].join('\n')
+      const blob = new Blob([csvContent], { type: 'text/csv' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `browser-extension-captures-${new Date().toISOString().split('T')[0]}.csv`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+    }
+
+    toast.success('Export completed', {
+      description: `${capturesForExport.length} captures exported as ${exportForm.format.toUpperCase()}`
+    })
+
+    setShowExportDialog(false)
+    announce('Data exported successfully', 'polite')
+  }
+
+  // Handler for saving quick settings
+  const handleSaveQuickSettings = () => {
+    logger.info('Saving quick settings', { settings: quickSettings })
+
+    // Here you would typically save to localStorage or backend
+    localStorage.setItem('browserExtensionQuickSettings', JSON.stringify(quickSettings))
+
+    toast.success('Settings saved', {
+      description: 'Your preferences have been updated'
+    })
+
+    setShowQuickSettingsDialog(false)
+    announce('Settings saved', 'polite')
   }
 
   // ========================================
@@ -1611,6 +1796,260 @@ export default function BrowserExtensionClient() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* New Item Dialog */}
+      <Dialog open={showNewItemDialog} onOpenChange={setShowNewItemDialog}>
+        <DialogContent className="max-w-lg bg-slate-900 border-gray-700">
+          <DialogHeader>
+            <DialogTitle className="text-white">Create New Capture</DialogTitle>
+            <DialogDescription className="text-gray-400">
+              Add a new page capture to your library
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-300">Title</label>
+              <Input
+                placeholder="Enter capture title..."
+                value={newItemForm.title}
+                onChange={(e) => setNewItemForm(prev => ({ ...prev, title: e.target.value }))}
+                className="bg-slate-800 border-gray-700 text-white"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-300">URL</label>
+              <Input
+                placeholder="https://example.com/page"
+                value={newItemForm.url}
+                onChange={(e) => setNewItemForm(prev => ({ ...prev, url: e.target.value }))}
+                className="bg-slate-800 border-gray-700 text-white"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-300">Capture Type</label>
+              <Select
+                value={newItemForm.type}
+                onValueChange={(value) => setNewItemForm(prev => ({ ...prev, type: value as CaptureType }))}
+              >
+                <SelectTrigger className="bg-slate-800 border-gray-700 text-white">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="screenshot">Screenshot</SelectItem>
+                  <SelectItem value="full-page">Full Page</SelectItem>
+                  <SelectItem value="selection">Selection</SelectItem>
+                  <SelectItem value="video">Video</SelectItem>
+                  <SelectItem value="text">Text</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-300">Tags (comma-separated)</label>
+              <Input
+                placeholder="work, reference, design"
+                value={newItemForm.tags}
+                onChange={(e) => setNewItemForm(prev => ({ ...prev, tags: e.target.value }))}
+                className="bg-slate-800 border-gray-700 text-white"
+              />
+            </div>
+
+            <div className="flex gap-3 pt-4">
+              <Button
+                onClick={handleCreateNewItem}
+                className="flex-1 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700"
+              >
+                <Camera className="w-4 h-4 mr-2" />
+                Create Capture
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => setShowNewItemDialog(false)}
+                className="border-gray-700 hover:bg-slate-800"
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Export Dialog */}
+      <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
+        <DialogContent className="max-w-lg bg-slate-900 border-gray-700">
+          <DialogHeader>
+            <DialogTitle className="text-white">Export Captures</DialogTitle>
+            <DialogDescription className="text-gray-400">
+              Export your captures in various formats
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-300">Export Format</label>
+              <Select
+                value={exportForm.format}
+                onValueChange={(value) => setExportForm(prev => ({ ...prev, format: value as 'json' | 'csv' | 'zip' }))}
+              >
+                <SelectTrigger className="bg-slate-800 border-gray-700 text-white">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="json">JSON</SelectItem>
+                  <SelectItem value="csv">CSV</SelectItem>
+                  <SelectItem value="zip">ZIP Archive</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-300">Date Range</label>
+              <Select
+                value={exportForm.dateRange}
+                onValueChange={(value) => setExportForm(prev => ({ ...prev, dateRange: value as 'all' | 'week' | 'month' | 'year' }))}
+              >
+                <SelectTrigger className="bg-slate-800 border-gray-700 text-white">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Time</SelectItem>
+                  <SelectItem value="week">Last 7 Days</SelectItem>
+                  <SelectItem value="month">Last 30 Days</SelectItem>
+                  <SelectItem value="year">Last Year</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-3">
+              <label className="text-sm font-medium text-gray-300">Options</label>
+              <div className="flex items-center justify-between p-3 bg-slate-800 rounded-lg">
+                <div>
+                  <div className="text-sm font-medium text-white">Include Metadata</div>
+                  <div className="text-xs text-gray-400">Browser info, viewport, file size</div>
+                </div>
+                <Switch
+                  checked={exportForm.includeMetadata}
+                  onCheckedChange={(checked) => setExportForm(prev => ({ ...prev, includeMetadata: checked }))}
+                />
+              </div>
+              <div className="flex items-center justify-between p-3 bg-slate-800 rounded-lg">
+                <div>
+                  <div className="text-sm font-medium text-white">Include Images</div>
+                  <div className="text-xs text-gray-400">Export thumbnail images (ZIP only)</div>
+                </div>
+                <Switch
+                  checked={exportForm.includeImages}
+                  onCheckedChange={(checked) => setExportForm(prev => ({ ...prev, includeImages: checked }))}
+                  disabled={exportForm.format !== 'zip'}
+                />
+              </div>
+            </div>
+
+            <div className="p-3 bg-slate-800/50 rounded-lg border border-gray-700">
+              <div className="text-sm text-gray-400">
+                <span className="text-white font-medium">{state.captures.length}</span> captures will be exported
+              </div>
+            </div>
+
+            <div className="flex gap-3 pt-4">
+              <Button
+                onClick={handleExportData}
+                className="flex-1 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700"
+              >
+                <Download className="w-4 h-4 mr-2" />
+                Export Data
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => setShowExportDialog(false)}
+                className="border-gray-700 hover:bg-slate-800"
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Quick Settings Dialog */}
+      <Dialog open={showQuickSettingsDialog} onOpenChange={setShowQuickSettingsDialog}>
+        <DialogContent className="max-w-lg bg-slate-900 border-gray-700">
+          <DialogHeader>
+            <DialogTitle className="text-white">Quick Settings</DialogTitle>
+            <DialogDescription className="text-gray-400">
+              Configure extension behavior and preferences
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div className="space-y-3">
+              <div className="flex items-center justify-between p-3 bg-slate-800 rounded-lg">
+                <div>
+                  <div className="text-sm font-medium text-white">Auto Capture</div>
+                  <div className="text-xs text-gray-400">Automatically capture pages on visit</div>
+                </div>
+                <Switch
+                  checked={quickSettings.autoCapture}
+                  onCheckedChange={(checked) => setQuickSettings(prev => ({ ...prev, autoCapture: checked }))}
+                />
+              </div>
+
+              <div className="flex items-center justify-between p-3 bg-slate-800 rounded-lg">
+                <div>
+                  <div className="text-sm font-medium text-white">Compress Images</div>
+                  <div className="text-xs text-gray-400">Reduce file size for screenshots</div>
+                </div>
+                <Switch
+                  checked={quickSettings.compressImages}
+                  onCheckedChange={(checked) => setQuickSettings(prev => ({ ...prev, compressImages: checked }))}
+                />
+              </div>
+
+              <div className="flex items-center justify-between p-3 bg-slate-800 rounded-lg">
+                <div>
+                  <div className="text-sm font-medium text-white">Sync on Save</div>
+                  <div className="text-xs text-gray-400">Automatically sync captures to cloud</div>
+                </div>
+                <Switch
+                  checked={quickSettings.syncOnSave}
+                  onCheckedChange={(checked) => setQuickSettings(prev => ({ ...prev, syncOnSave: checked }))}
+                />
+              </div>
+
+              <div className="flex items-center justify-between p-3 bg-slate-800 rounded-lg">
+                <div>
+                  <div className="text-sm font-medium text-white">Show Notifications</div>
+                  <div className="text-xs text-gray-400">Display desktop notifications</div>
+                </div>
+                <Switch
+                  checked={quickSettings.showNotifications}
+                  onCheckedChange={(checked) => setQuickSettings(prev => ({ ...prev, showNotifications: checked }))}
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-3 pt-4">
+              <Button
+                onClick={handleSaveQuickSettings}
+                className="flex-1 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700"
+              >
+                <Settings className="w-4 h-4 mr-2" />
+                Save Settings
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => setShowQuickSettingsDialog(false)}
+                className="border-gray-700 hover:bg-slate-800"
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

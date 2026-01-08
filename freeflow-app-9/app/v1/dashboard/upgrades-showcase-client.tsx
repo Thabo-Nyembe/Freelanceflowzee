@@ -36,7 +36,6 @@ import {
   Star,
   Rocket,
   Crown,
-  X,
 } from 'lucide-react'
 
 // Import all competitive upgrade components
@@ -312,6 +311,83 @@ const mockAchievements = [
 export function UpgradesShowcaseClient() {
   const [activeTab, setActiveTab] = useState('ai-insights')
 
+  // Dialog state variables
+  const [showViewDocumentDialog, setShowViewDocumentDialog] = useState(false)
+  const [showReplyDialog, setShowReplyDialog] = useState(false)
+  const [showNewTaskDialog, setShowNewTaskDialog] = useState(false)
+  const [showSearchDialog, setShowSearchDialog] = useState(false)
+  const [showAIAssistantDialog, setShowAIAssistantDialog] = useState(false)
+  const [showNewProjectDialog, setShowNewProjectDialog] = useState(false)
+  const [showEditDialog, setShowEditDialog] = useState(false)
+  const [showStarDialog, setShowStarDialog] = useState(false)
+
+  // Mock activities with dialog actions
+  const mockActivities = [
+    {
+      id: '1',
+      type: 'mention' as const,
+      title: 'mentioned you in Q4 Planning',
+      user: { id: '1', name: 'Sarah Chen' },
+      target: { type: 'Document', name: 'Q4 Marketing Strategy' },
+      timestamp: new Date(Date.now() - 300000),
+      isRead: false,
+      actions: [
+        { label: 'View', action: () => setShowViewDocumentDialog(true) },
+        { label: 'Reply', action: () => setShowReplyDialog(true) },
+      ],
+    },
+    {
+      id: '2',
+      type: 'assignment' as const,
+      title: 'assigned you a task',
+      description: 'Review and approve the new landing page design',
+      user: { id: '2', name: 'Mike Johnson' },
+      target: { type: 'Task', name: 'Landing Page Review' },
+      timestamp: new Date(Date.now() - 1800000),
+      isRead: false,
+    },
+    {
+      id: '3',
+      type: 'status_change' as const,
+      title: 'moved to "In Review"',
+      user: { id: '3', name: 'Emily Davis' },
+      target: { type: 'Project', name: 'Website Redesign' },
+      timestamp: new Date(Date.now() - 3600000),
+      isRead: true,
+    },
+    {
+      id: '4',
+      type: 'milestone' as const,
+      title: 'completed a milestone',
+      description: 'Phase 1 of the product launch is complete',
+      user: { id: '1', name: 'Sarah Chen' },
+      target: { type: 'Project', name: 'Product Launch 2025' },
+      timestamp: new Date(Date.now() - 7200000),
+      isRead: true,
+      isPinned: true,
+    },
+    {
+      id: '5',
+      type: 'comment' as const,
+      title: 'commented on your task',
+      description: 'Great progress on the analytics dashboard! Just a few suggestions...',
+      user: { id: '4', name: 'Alex Kim' },
+      target: { type: 'Task', name: 'Analytics Dashboard' },
+      timestamp: new Date(Date.now() - 86400000),
+      isRead: true,
+    },
+  ]
+
+  // Mock quick actions with dialog actions
+  const mockQuickActions = [
+    { id: '1', label: 'New Task', icon: <Plus className="h-5 w-5" />, shortcut: '⌘N', action: () => setShowNewTaskDialog(true), category: 'Create' },
+    { id: '2', label: 'Search', icon: <Search className="h-5 w-5" />, shortcut: '⌘K', action: () => setShowSearchDialog(true), category: 'Navigate' },
+    { id: '3', label: 'AI Assistant', icon: <Brain className="h-5 w-5" />, shortcut: '⌘J', action: () => setShowAIAssistantDialog(true), category: 'AI' },
+    { id: '4', label: 'New Project', icon: <FileText className="h-5 w-5" />, shortcut: '⌘P', action: () => setShowNewProjectDialog(true), category: 'Create' },
+    { id: '5', label: 'Edit', icon: <Edit className="h-5 w-5" />, shortcut: '⌘E', action: () => setShowEditDialog(true), category: 'Actions' },
+    { id: '6', label: 'Star', icon: <Star className="h-5 w-5" />, shortcut: '⌘S', action: () => setShowStarDialog(true), category: 'Actions' },
+  ]
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-950 dark:bg-none dark:bg-gray-900 p-6">
       <div className="max-w-7xl mx-auto space-y-6">
@@ -550,6 +626,360 @@ export function UpgradesShowcaseClient() {
         {/* Quick Actions Toolbar (always visible) */}
         <QuickActionsToolbar actions={mockQuickActions} position="bottom" />
       </div>
+
+      {/* View Document Dialog */}
+      <Dialog open={showViewDocumentDialog} onOpenChange={setShowViewDocumentDialog}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5 text-violet-600" />
+              Q4 Marketing Strategy
+            </DialogTitle>
+            <DialogDescription>
+              Document shared by Sarah Chen
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="rounded-lg border bg-muted/50 p-4">
+              <h4 className="font-medium mb-2">Document Preview</h4>
+              <p className="text-sm text-muted-foreground">
+                This document outlines our Q4 marketing strategy including budget allocation,
+                campaign timeline, and key performance indicators. The focus areas include
+                digital advertising, content marketing, and influencer partnerships.
+              </p>
+            </div>
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Calendar className="h-4 w-4" />
+              Last modified: 2 hours ago
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowViewDocumentDialog(false)}>
+              Close
+            </Button>
+            <Button onClick={() => setShowViewDocumentDialog(false)}>
+              Open Full Document
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Reply Dialog */}
+      <Dialog open={showReplyDialog} onOpenChange={setShowReplyDialog}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Edit className="h-5 w-5 text-violet-600" />
+              Reply to Sarah Chen
+            </DialogTitle>
+            <DialogDescription>
+              Respond to the mention in Q4 Marketing Strategy
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="reply">Your Reply</Label>
+              <Textarea
+                id="reply"
+                placeholder="Type your reply here..."
+                className="min-h-[100px]"
+              />
+            </div>
+            <div className="text-sm text-muted-foreground">
+              Tip: Use @mention to notify specific team members
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowReplyDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={() => setShowReplyDialog(false)}>
+              Send Reply
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* New Task Dialog */}
+      <Dialog open={showNewTaskDialog} onOpenChange={setShowNewTaskDialog}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Plus className="h-5 w-5 text-green-600" />
+              Create New Task
+            </DialogTitle>
+            <DialogDescription>
+              Add a new task to your workflow
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="taskTitle">Task Title</Label>
+              <Input id="taskTitle" placeholder="Enter task title..." />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="taskDescription">Description</Label>
+              <Textarea
+                id="taskDescription"
+                placeholder="Describe the task..."
+                className="min-h-[80px]"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="taskPriority">Priority</Label>
+                <Input id="taskPriority" placeholder="High, Medium, Low" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="taskDue">Due Date</Label>
+                <Input id="taskDue" type="date" />
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowNewTaskDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={() => setShowNewTaskDialog(false)}>
+              Create Task
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Search Dialog */}
+      <Dialog open={showSearchDialog} onOpenChange={setShowSearchDialog}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Search className="h-5 w-5 text-blue-600" />
+              Search Everything
+            </DialogTitle>
+            <DialogDescription>
+              Find projects, tasks, documents, and people
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Input
+                placeholder="Type to search..."
+                className="text-lg"
+                autoFocus
+              />
+            </div>
+            <div className="space-y-2">
+              <h4 className="text-sm font-medium text-muted-foreground">Recent Searches</h4>
+              <div className="flex flex-wrap gap-2">
+                {['marketing campaign', 'Q4 report', 'team meeting', 'budget review'].map((term) => (
+                  <Badge key={term} variant="secondary" className="cursor-pointer">
+                    {term}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+            <div className="space-y-2">
+              <h4 className="text-sm font-medium text-muted-foreground">Quick Filters</h4>
+              <div className="flex flex-wrap gap-2">
+                <Badge variant="outline">Projects</Badge>
+                <Badge variant="outline">Tasks</Badge>
+                <Badge variant="outline">Documents</Badge>
+                <Badge variant="outline">People</Badge>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowSearchDialog(false)}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* AI Assistant Dialog */}
+      <Dialog open={showAIAssistantDialog} onOpenChange={setShowAIAssistantDialog}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Brain className="h-5 w-5 text-violet-600" />
+              AI Assistant
+            </DialogTitle>
+            <DialogDescription>
+              Get intelligent help with your tasks
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="rounded-lg border bg-gradient-to-br from-violet-50 to-purple-50 dark:from-violet-950/30 dark:to-purple-950/30 p-4">
+              <div className="flex items-start gap-3">
+                <div className="rounded-full bg-violet-100 dark:bg-violet-900 p-2">
+                  <Brain className="h-4 w-4 text-violet-600" />
+                </div>
+                <div>
+                  <p className="text-sm">
+                    Hello! I can help you with tasks, answer questions, analyze data,
+                    and provide recommendations. How can I assist you today?
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="aiQuery">Ask AI</Label>
+              <Textarea
+                id="aiQuery"
+                placeholder="Ask me anything..."
+                className="min-h-[80px]"
+              />
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Badge variant="secondary" className="cursor-pointer">Summarize my tasks</Badge>
+              <Badge variant="secondary" className="cursor-pointer">Suggest priorities</Badge>
+              <Badge variant="secondary" className="cursor-pointer">Draft an email</Badge>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAIAssistantDialog(false)}>
+              Close
+            </Button>
+            <Button onClick={() => setShowAIAssistantDialog(false)}>
+              <Sparkles className="h-4 w-4 mr-2" />
+              Ask AI
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* New Project Dialog */}
+      <Dialog open={showNewProjectDialog} onOpenChange={setShowNewProjectDialog}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5 text-blue-600" />
+              Create New Project
+            </DialogTitle>
+            <DialogDescription>
+              Start a new project to organize your work
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="projectName">Project Name</Label>
+              <Input id="projectName" placeholder="Enter project name..." />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="projectDescription">Description</Label>
+              <Textarea
+                id="projectDescription"
+                placeholder="Describe the project..."
+                className="min-h-[80px]"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="projectTeam">Team</Label>
+              <Input id="projectTeam" placeholder="Select team members..." />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="projectStart">Start Date</Label>
+                <Input id="projectStart" type="date" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="projectEnd">End Date</Label>
+                <Input id="projectEnd" type="date" />
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowNewProjectDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={() => setShowNewProjectDialog(false)}>
+              Create Project
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Dialog */}
+      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Edit className="h-5 w-5 text-amber-600" />
+              Quick Edit
+            </DialogTitle>
+            <DialogDescription>
+              Make quick edits to your content
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="editContent">Content</Label>
+              <Textarea
+                id="editContent"
+                placeholder="Edit your content here..."
+                className="min-h-[150px]"
+              />
+            </div>
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Edit className="h-4 w-4" />
+              Use keyboard shortcuts for faster editing
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowEditDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={() => setShowEditDialog(false)}>
+              Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Star/Favorite Dialog */}
+      <Dialog open={showStarDialog} onOpenChange={setShowStarDialog}>
+        <DialogContent className="sm:max-w-[400px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Star className="h-5 w-5 text-yellow-500" />
+              Add to Favorites
+            </DialogTitle>
+            <DialogDescription>
+              Star items for quick access
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="rounded-lg border p-4 space-y-3">
+              <h4 className="font-medium">Select items to favorite:</h4>
+              <div className="space-y-2">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" className="rounded" />
+                  <span className="text-sm">Current Project</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" className="rounded" />
+                  <span className="text-sm">Current Task</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" className="rounded" />
+                  <span className="text-sm">Current Document</span>
+                </label>
+              </div>
+            </div>
+            <div className="text-sm text-muted-foreground">
+              Starred items appear in your quick access panel
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowStarDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={() => setShowStarDialog(false)}>
+              <Star className="h-4 w-4 mr-2" />
+              Add to Favorites
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

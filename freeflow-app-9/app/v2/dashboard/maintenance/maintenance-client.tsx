@@ -530,11 +530,7 @@ const mockMaintenanceActivities = [
   { id: '3', user: 'Safety Officer', action: 'Inspected', target: 'fire suppression system', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
 ]
 
-const mockMaintenanceQuickActions = [
-  { id: '1', label: 'New Work Order', icon: 'plus', action: () => toast.success('Work order created successfully'), variant: 'default' as const },
-  { id: '2', label: 'Schedule PM', icon: 'calendar', action: () => toast.success('Preventive maintenance scheduled'), variant: 'default' as const },
-  { id: '3', label: 'Asset List', icon: 'list', action: () => toast.success('Asset list loaded'), variant: 'outline' as const },
-]
+// Quick actions will be defined inside the component to use state setters
 
 // Database types
 interface DbMaintenanceWindow {
@@ -606,6 +602,20 @@ export default function MaintenanceClient() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showCreateDialog, setShowCreateDialog] = useState(false)
   const [formState, setFormState] = useState<MaintenanceFormState>(initialFormState)
+
+  // Dialog states for quick actions
+  const [showSchedulePMDialog, setShowSchedulePMDialog] = useState(false)
+  const [showAssetListDialog, setShowAssetListDialog] = useState(false)
+  const [showInsightActionDialog, setShowInsightActionDialog] = useState(false)
+  const [selectedInsight, setSelectedInsight] = useState<{ title: string; description: string } | null>(null)
+
+  // Schedule PM form state
+  const [schedulePMForm, setSchedulePMForm] = useState({
+    assetId: '',
+    scheduleType: 'weekly' as 'daily' | 'weekly' | 'monthly' | 'quarterly',
+    startDate: '',
+    notes: ''
+  })
 
   // Fetch maintenance windows from Supabase
   const fetchMaintenanceWindows = useCallback(async () => {
@@ -794,6 +804,113 @@ export default function MaintenanceClient() {
   const handleScheduleMaintenance = () => {
     setShowCreateDialog(true)
   }
+
+  // Handle Schedule PM submission
+  const handleSchedulePM = async () => {
+    if (!schedulePMForm.assetId || !schedulePMForm.startDate) {
+      toast.error('Please select an asset and start date')
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Please sign in to schedule preventive maintenance')
+        return
+      }
+
+      const selectedAsset = mockAssets.find(a => a.id === schedulePMForm.assetId)
+
+      const { error } = await supabase.from('maintenance_windows').insert({
+        user_id: user.id,
+        title: `Preventive Maintenance - ${selectedAsset?.name || 'Asset'}`,
+        description: schedulePMForm.notes || `Scheduled ${schedulePMForm.scheduleType} preventive maintenance`,
+        type: 'preventive',
+        status: 'scheduled',
+        priority: 'medium',
+        impact: 'low',
+        start_time: schedulePMForm.startDate,
+        end_time: new Date(new Date(schedulePMForm.startDate).getTime() + 2 * 60 * 60 * 1000).toISOString(),
+        duration_minutes: 120,
+        affected_systems: selectedAsset ? [selectedAsset.name] : [],
+        downtime_expected: false,
+        assigned_to: [],
+        notes: `Schedule type: ${schedulePMForm.scheduleType}`,
+        completion_rate: 0,
+      })
+
+      if (error) throw error
+
+      toast.success('Preventive maintenance scheduled successfully')
+      setShowSchedulePMDialog(false)
+      setSchedulePMForm({ assetId: '', scheduleType: 'weekly', startDate: '', notes: '' })
+      fetchMaintenanceWindows()
+    } catch (error) {
+      console.error('Error scheduling PM:', error)
+      toast.error('Failed to schedule preventive maintenance')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // Handle insight action
+  const handleInsightAction = (insight: { title: string; description: string }) => {
+    setSelectedInsight(insight)
+    setShowInsightActionDialog(true)
+  }
+
+  // Process insight action
+  const processInsightAction = async () => {
+    if (!selectedInsight) return
+
+    setIsSubmitting(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Please sign in to take action')
+        return
+      }
+
+      // Create a work order based on the insight
+      const { error } = await supabase.from('maintenance_windows').insert({
+        user_id: user.id,
+        title: `Action: ${selectedInsight.title}`,
+        description: selectedInsight.description,
+        type: 'corrective',
+        status: 'scheduled',
+        priority: 'high',
+        impact: 'medium',
+        start_time: new Date().toISOString(),
+        end_time: new Date(Date.now() + 4 * 60 * 60 * 1000).toISOString(),
+        duration_minutes: 240,
+        affected_systems: [],
+        downtime_expected: false,
+        assigned_to: [],
+        notes: `Generated from AI insight: ${selectedInsight.title}`,
+        completion_rate: 0,
+      })
+
+      if (error) throw error
+
+      toast.success('Work order created from insight')
+      setShowInsightActionDialog(false)
+      setSelectedInsight(null)
+      fetchMaintenanceWindows()
+    } catch (error) {
+      console.error('Error processing insight:', error)
+      toast.error('Failed to process insight action')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // Quick actions with proper dialog handlers
+  const maintenanceQuickActions = [
+    { id: '1', label: 'New Work Order', icon: 'plus', action: () => setShowCreateDialog(true), variant: 'default' as const },
+    { id: '2', label: 'Schedule PM', icon: 'calendar', action: () => setShowSchedulePMDialog(true), variant: 'default' as const },
+    { id: '3', label: 'Asset List', icon: 'list', action: () => setShowAssetListDialog(true), variant: 'outline' as const },
+  ]
 
   // Export report
   const handleExportReport = () => {
@@ -2084,7 +2201,7 @@ export default function MaintenanceClient() {
               <AIInsightsPanel
                 insights={mockMaintenanceAIInsights}
                 title="Maintenance Intelligence"
-                onInsightAction={() => toast.success('Insight action completed')}
+                onInsightAction={(insight) => handleInsightAction({ title: insight?.title || 'Insight Action', description: insight?.description || '' })}
               />
             </div>
             <div className="space-y-6">
@@ -2106,7 +2223,7 @@ export default function MaintenanceClient() {
               maxItems={5}
             />
             <QuickActionsToolbar
-              actions={mockMaintenanceQuickActions}
+              actions={maintenanceQuickActions}
               variant="grid"
             />
           </div>
@@ -2251,6 +2368,208 @@ export default function MaintenanceClient() {
               className="bg-gradient-to-r from-orange-600 to-amber-600 text-white"
             >
               {isSubmitting ? 'Creating...' : 'Create Maintenance Window'}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Schedule Preventive Maintenance Dialog */}
+      <Dialog open={showSchedulePMDialog} onOpenChange={setShowSchedulePMDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Schedule Preventive Maintenance</DialogTitle>
+            <DialogDescription>Set up recurring preventive maintenance for an asset</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <Label>Select Asset *</Label>
+              <select
+                value={schedulePMForm.assetId}
+                onChange={(e) => setSchedulePMForm(prev => ({ ...prev, assetId: e.target.value }))}
+                className="w-full mt-1.5 px-3 py-2 border rounded-lg dark:bg-gray-900 dark:border-gray-700"
+              >
+                <option value="">Select an asset...</option>
+                {mockAssets.map(asset => (
+                  <option key={asset.id} value={asset.id}>
+                    {asset.name} - {asset.location}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <Label>Schedule Frequency</Label>
+              <select
+                value={schedulePMForm.scheduleType}
+                onChange={(e) => setSchedulePMForm(prev => ({ ...prev, scheduleType: e.target.value as 'daily' | 'weekly' | 'monthly' | 'quarterly' }))}
+                className="w-full mt-1.5 px-3 py-2 border rounded-lg dark:bg-gray-900 dark:border-gray-700"
+              >
+                <option value="daily">Daily</option>
+                <option value="weekly">Weekly</option>
+                <option value="monthly">Monthly</option>
+                <option value="quarterly">Quarterly</option>
+              </select>
+            </div>
+            <div>
+              <Label>Start Date *</Label>
+              <Input
+                type="datetime-local"
+                value={schedulePMForm.startDate}
+                onChange={(e) => setSchedulePMForm(prev => ({ ...prev, startDate: e.target.value }))}
+                className="mt-1.5"
+              />
+            </div>
+            <div>
+              <Label>Notes</Label>
+              <Input
+                value={schedulePMForm.notes}
+                onChange={(e) => setSchedulePMForm(prev => ({ ...prev, notes: e.target.value }))}
+                placeholder="Additional notes for this schedule..."
+                className="mt-1.5"
+              />
+            </div>
+          </div>
+          <div className="flex justify-end gap-3">
+            <Button variant="outline" onClick={() => setShowSchedulePMDialog(false)}>Cancel</Button>
+            <Button
+              onClick={handleSchedulePM}
+              disabled={isSubmitting}
+              className="bg-gradient-to-r from-orange-600 to-amber-600 text-white"
+            >
+              {isSubmitting ? 'Scheduling...' : 'Schedule Maintenance'}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Asset List Dialog */}
+      <Dialog open={showAssetListDialog} onOpenChange={setShowAssetListDialog}>
+        <DialogContent className="max-w-4xl max-h-[80vh]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Server className="w-5 h-5 text-blue-600" />
+              Asset Inventory
+            </DialogTitle>
+            <DialogDescription>Complete list of all registered assets</DialogDescription>
+          </DialogHeader>
+          <ScrollArea className="h-[500px] mt-4">
+            <div className="space-y-3">
+              {mockAssets.map((asset) => (
+                <div key={asset.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
+                  <div className="flex items-center gap-4">
+                    <div className="p-2 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-lg">
+                      <HardDrive className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <p className="font-semibold text-gray-900 dark:text-white">{asset.name}</p>
+                        <Badge className={getPriorityColor(asset.criticality)}>{asset.criticality}</Badge>
+                        <Badge className={getAssetStatusColor(asset.status)}>{asset.status}</Badge>
+                      </div>
+                      <p className="text-sm text-gray-500">{asset.assetTag} | {asset.manufacturer} {asset.model}</p>
+                      <p className="text-xs text-gray-400">{asset.location} | Owner: {asset.owner}</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="grid grid-cols-3 gap-4 text-xs mb-2">
+                      <div>
+                        <p className="text-gray-500">Uptime</p>
+                        <p className="font-semibold">{asset.uptime}%</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-500">MTBF</p>
+                        <p className="font-semibold">{asset.mtbf}h</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-500">MTTR</p>
+                        <p className="font-semibold">{asset.mttr}h</p>
+                      </div>
+                    </div>
+                    <p className="text-xs text-gray-500">Next maintenance: {formatDate(asset.nextMaintenance)}</p>
+                    <div className="flex gap-2 mt-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          setShowAssetListDialog(false)
+                          setSchedulePMForm(prev => ({ ...prev, assetId: asset.id }))
+                          setShowSchedulePMDialog(true)
+                        }}
+                      >
+                        Schedule PM
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={() => {
+                          setShowAssetListDialog(false)
+                          setFormState(prev => ({
+                            ...prev,
+                            title: `Work Order - ${asset.name}`,
+                            affected_systems: asset.name
+                          }))
+                          setShowCreateDialog(true)
+                        }}
+                      >
+                        Create Work Order
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </ScrollArea>
+          <div className="flex justify-between items-center pt-4 border-t">
+            <p className="text-sm text-gray-500">{mockAssets.length} assets total</p>
+            <Button variant="outline" onClick={() => setShowAssetListDialog(false)}>Close</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Insight Action Dialog */}
+      <Dialog open={showInsightActionDialog} onOpenChange={setShowInsightActionDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="w-5 h-5 text-orange-600" />
+              Take Action on Insight
+            </DialogTitle>
+            <DialogDescription>Create a work order based on this AI insight</DialogDescription>
+          </DialogHeader>
+          {selectedInsight && (
+            <div className="space-y-4 py-4">
+              <div className="p-4 bg-orange-50 dark:bg-orange-900/20 rounded-xl">
+                <h4 className="font-semibold text-gray-900 dark:text-white mb-1">{selectedInsight.title}</h4>
+                <p className="text-sm text-gray-600 dark:text-gray-300">{selectedInsight.description}</p>
+              </div>
+              <div className="space-y-2">
+                <h4 className="font-medium text-gray-900 dark:text-white">This will:</h4>
+                <ul className="text-sm text-gray-600 dark:text-gray-300 space-y-1">
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-green-600" />
+                    Create a new work order based on this insight
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-green-600" />
+                    Set priority to High for immediate attention
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-green-600" />
+                    Add insight details to work order notes
+                  </li>
+                </ul>
+              </div>
+            </div>
+          )}
+          <div className="flex justify-end gap-3">
+            <Button variant="outline" onClick={() => {
+              setShowInsightActionDialog(false)
+              setSelectedInsight(null)
+            }}>Cancel</Button>
+            <Button
+              onClick={processInsightAction}
+              disabled={isSubmitting}
+              className="bg-gradient-to-r from-orange-600 to-amber-600 text-white"
+            >
+              {isSubmitting ? 'Creating...' : 'Create Work Order'}
             </Button>
           </div>
         </DialogContent>

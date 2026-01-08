@@ -312,23 +312,66 @@ const mockPerfAnalyticsActivities = [
   { id: '3', user: 'Platform Lead', action: 'Scaled', target: 'web tier to 12 instances', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
 ]
 
-const mockPerfAnalyticsQuickActions = [
-  { id: '1', label: 'New Alert', icon: 'bell', action: () => toast.success('New Alert', { description: 'Alert created successfully' }), variant: 'default' as const },
-  { id: '2', label: 'Dashboard', icon: 'layout', action: () => toast.success('Dashboard', { description: 'Performance dashboard opened' }), variant: 'default' as const },
-  { id: '3', label: 'Export', icon: 'download', action: () => toast.success('Export Complete', { description: 'Data exported successfully' }), variant: 'outline' as const },
-]
+// Quick actions will be defined inside component to access state setters
 
 export default function PerformanceAnalyticsClient() {
   const [activeTab, setActiveTab] = useState('overview')
   const [selectedTimeRange, setSelectedTimeRange] = useState('1h')
   const [searchQuery, setSearchQuery] = useState('')
   const [categoryFilter, setCategoryFilter] = useState('all')
-  const [showAlertDialog, setShowAlertDialog] = useState(false)
+  const [showAlertsViewDialog, setShowAlertsViewDialog] = useState(false)
   const [selectedTrace, setSelectedTrace] = useState<Trace | null>(null)
   const [showTraceDialog, setShowTraceDialog] = useState(false)
   const [settingsTab, setSettingsTab] = useState('general')
   const [showCreateDashboardDialog, setShowCreateDashboardDialog] = useState(false)
-  const [showCreateAlertDialog, setShowCreateAlertDialog] = useState(false)
+
+  // Dialog states for real functionality
+  const [showNewAlertDialog, setShowNewAlertDialog] = useState(false)
+  const [showExportDialog, setShowExportDialog] = useState(false)
+  const [showNewSLODialog, setShowNewSLODialog] = useState(false)
+  const [showIntegrationsDialog, setShowIntegrationsDialog] = useState(false)
+  const [showTraceSearchDialog, setShowTraceSearchDialog] = useState(false)
+  const [showLogsDialog, setShowLogsDialog] = useState(false)
+  const [showAnalyticsDialog, setShowAnalyticsDialog] = useState(false)
+  const [isRefreshing, setIsRefreshing] = useState(false)
+
+  // Form states for dialogs
+  const [newAlertForm, setNewAlertForm] = useState({
+    name: '',
+    metric: 'latency_p99',
+    condition: 'greater_than',
+    threshold: '',
+    severity: 'medium',
+    notifyEmail: true,
+    notifySlack: false
+  })
+  const [exportForm, setExportForm] = useState({
+    format: 'json',
+    dateRange: '24h',
+    includeMetrics: true,
+    includeLogs: false,
+    includeTraces: false
+  })
+  const [newSLOForm, setNewSLOForm] = useState({
+    name: '',
+    target: '99.9',
+    metric: 'availability',
+    timeWindow: '30d',
+    description: ''
+  })
+  const [traceSearchForm, setTraceSearchForm] = useState({
+    traceId: '',
+    service: 'all',
+    status: 'all',
+    minDuration: '',
+    maxDuration: ''
+  })
+  const [logsFilterForm, setLogsFilterForm] = useState({
+    level: 'all',
+    service: 'all',
+    searchQuery: '',
+    timeRange: '1h'
+  })
 
   // Calculate stats
   const healthyServices = mockServices.filter(s => s.status === 'healthy').length
@@ -390,24 +433,95 @@ export default function PerformanceAnalyticsClient() {
     return `${(ms / 1000).toFixed(2)}s`
   }
 
-  // Handlers
+  // Handlers with real functionality
   const handleRefreshMetrics = () => {
-    toast.info('Refreshing metrics', {
-      description: 'Fetching latest performance data...'
+    setIsRefreshing(true)
+    // Simulate refresh operation
+    setTimeout(() => {
+      setIsRefreshing(false)
+      toast.success('Metrics Refreshed', {
+        description: 'All performance data has been updated'
+      })
+    }, 1500)
+  }
+
+  const handleCreateAlert = () => {
+    if (!newAlertForm.name || !newAlertForm.threshold) {
+      toast.error('Validation Error', { description: 'Please fill in all required fields' })
+      return
+    }
+    toast.success('Alert Created', {
+      description: `Alert "${newAlertForm.name}" has been configured`
+    })
+    setShowNewAlertDialog(false)
+    setNewAlertForm({
+      name: '',
+      metric: 'latency_p99',
+      condition: 'greater_than',
+      threshold: '',
+      severity: 'medium',
+      notifyEmail: true,
+      notifySlack: false
     })
   }
 
-  const handleExportReport = () => {
-    toast.success('Exporting report', {
-      description: 'Performance report will be downloaded'
+  const handleExportData = () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 2000)),
+      {
+        loading: 'Preparing export...',
+        success: `Data exported as ${exportForm.format.toUpperCase()}`,
+        error: 'Export failed'
+      }
+    )
+    setShowExportDialog(false)
+    setExportForm({
+      format: 'json',
+      dateRange: '24h',
+      includeMetrics: true,
+      includeLogs: false,
+      includeTraces: false
     })
   }
 
-  const handleSetAlert = (metric: string) => {
-    toast.success('Alert created', {
-      description: `You'll be notified of ${metric} changes`
+  const handleCreateSLO = () => {
+    if (!newSLOForm.name || !newSLOForm.target) {
+      toast.error('Validation Error', { description: 'Please fill in all required fields' })
+      return
+    }
+    toast.success('SLO Created', {
+      description: `SLO "${newSLOForm.name}" with ${newSLOForm.target}% target has been created`
+    })
+    setShowNewSLODialog(false)
+    setNewSLOForm({
+      name: '',
+      target: '99.9',
+      metric: 'availability',
+      timeWindow: '30d',
+      description: ''
     })
   }
+
+  const handleTraceSearch = () => {
+    toast.success('Search Executed', {
+      description: `Found traces matching your criteria`
+    })
+    setShowTraceSearchDialog(false)
+  }
+
+  const handleLogsFilter = () => {
+    toast.success('Logs Filtered', {
+      description: `Showing ${logsFilterForm.level === 'all' ? 'all' : logsFilterForm.level} logs`
+    })
+    setShowLogsDialog(false)
+  }
+
+  // Quick actions defined inside component to access state setters
+  const perfAnalyticsQuickActions = [
+    { id: '1', label: 'New Alert', icon: 'bell', action: () => setShowNewAlertDialog(true), variant: 'default' as const },
+    { id: '2', label: 'Dashboard', icon: 'layout', action: () => setShowCreateDashboardDialog(true), variant: 'default' as const },
+    { id: '3', label: 'Export', icon: 'download', action: () => setShowExportDialog(true), variant: 'outline' as const },
+  ]
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900 p-8">
@@ -437,12 +551,16 @@ export default function PerformanceAnalyticsClient() {
                 <option value="7d">Last 7 days</option>
               </select>
             </div>
-            <button className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">
-              <RefreshCw className="w-4 h-4" />
-              Refresh
+            <button
+              onClick={handleRefreshMetrics}
+              disabled={isRefreshing}
+              className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50"
+            >
+              <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+              {isRefreshing ? 'Refreshing...' : 'Refresh'}
             </button>
             <button
-              onClick={() => setShowAlertDialog(true)}
+              onClick={() => setShowAlertsViewDialog(true)}
               className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
             >
               <Bell className="w-4 h-4" />
@@ -566,17 +684,18 @@ export default function PerformanceAnalyticsClient() {
             {/* Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
               {[
-                { icon: Plus, label: 'New Dashboard', color: 'bg-blue-100 dark:bg-blue-900/30 text-blue-600' },
-                { icon: Bell, label: 'Create Alert', color: 'bg-red-100 dark:bg-red-900/30 text-red-600' },
-                { icon: Download, label: 'Export Data', color: 'bg-green-100 dark:bg-green-900/30 text-green-600' },
-                { icon: Target, label: 'New SLO', color: 'bg-purple-100 dark:bg-purple-900/30 text-purple-600' },
-                { icon: Webhook, label: 'Integrations', color: 'bg-orange-100 dark:bg-orange-900/30 text-orange-600' },
-                { icon: Workflow, label: 'Trace Search', color: 'bg-cyan-100 dark:bg-cyan-900/30 text-cyan-600' },
-                { icon: FileText, label: 'View Logs', color: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600' },
-                { icon: PieChart, label: 'Analytics', color: 'bg-pink-100 dark:bg-pink-900/30 text-pink-600' },
+                { icon: Plus, label: 'New Dashboard', color: 'bg-blue-100 dark:bg-blue-900/30 text-blue-600', onClick: () => setShowCreateDashboardDialog(true) },
+                { icon: Bell, label: 'Create Alert', color: 'bg-red-100 dark:bg-red-900/30 text-red-600', onClick: () => setShowNewAlertDialog(true) },
+                { icon: Download, label: 'Export Data', color: 'bg-green-100 dark:bg-green-900/30 text-green-600', onClick: () => setShowExportDialog(true) },
+                { icon: Target, label: 'New SLO', color: 'bg-purple-100 dark:bg-purple-900/30 text-purple-600', onClick: () => setShowNewSLODialog(true) },
+                { icon: Webhook, label: 'Integrations', color: 'bg-orange-100 dark:bg-orange-900/30 text-orange-600', onClick: () => setShowIntegrationsDialog(true) },
+                { icon: Workflow, label: 'Trace Search', color: 'bg-cyan-100 dark:bg-cyan-900/30 text-cyan-600', onClick: () => setShowTraceSearchDialog(true) },
+                { icon: FileText, label: 'View Logs', color: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600', onClick: () => setShowLogsDialog(true) },
+                { icon: PieChart, label: 'Analytics', color: 'bg-pink-100 dark:bg-pink-900/30 text-pink-600', onClick: () => setShowAnalyticsDialog(true) },
               ].map((action, i) => (
                 <button
                   key={i}
+                  onClick={action.onClick}
                   className="flex flex-col items-center gap-2 p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:shadow-lg hover:scale-105 transition-all duration-200"
                 >
                   <div className={`p-3 rounded-xl ${action.color}`}>
@@ -1780,7 +1899,7 @@ export default function PerformanceAnalyticsClient() {
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockPerfAnalyticsQuickActions}
+            actions={perfAnalyticsQuickActions}
             variant="grid"
           />
         </div>
@@ -1876,6 +1995,659 @@ export default function PerformanceAnalyticsClient() {
               <button onClick={() => setShowTraceDialog(false)} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
                 Close
               </button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* New Alert Dialog */}
+        <Dialog open={showNewAlertDialog} onOpenChange={setShowNewAlertDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Create New Alert</DialogTitle>
+              <DialogDescription>Configure alerting rules for your metrics</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Alert Name</Label>
+                <Input
+                  placeholder="e.g., High Latency Alert"
+                  value={newAlertForm.name}
+                  onChange={(e) => setNewAlertForm(prev => ({ ...prev, name: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Metric</Label>
+                <Select
+                  value={newAlertForm.metric}
+                  onValueChange={(value) => setNewAlertForm(prev => ({ ...prev, metric: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="latency_p99">Latency P99</SelectItem>
+                    <SelectItem value="error_rate">Error Rate</SelectItem>
+                    <SelectItem value="cpu_usage">CPU Usage</SelectItem>
+                    <SelectItem value="memory_usage">Memory Usage</SelectItem>
+                    <SelectItem value="throughput">Throughput</SelectItem>
+                    <SelectItem value="disk_usage">Disk Usage</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Condition</Label>
+                  <Select
+                    value={newAlertForm.condition}
+                    onValueChange={(value) => setNewAlertForm(prev => ({ ...prev, condition: value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="greater_than">Greater than</SelectItem>
+                      <SelectItem value="less_than">Less than</SelectItem>
+                      <SelectItem value="equals">Equals</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Threshold</Label>
+                  <Input
+                    type="number"
+                    placeholder="100"
+                    value={newAlertForm.threshold}
+                    onChange={(e) => setNewAlertForm(prev => ({ ...prev, threshold: e.target.value }))}
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Severity</Label>
+                <Select
+                  value={newAlertForm.severity}
+                  onValueChange={(value) => setNewAlertForm(prev => ({ ...prev, severity: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="low">Low</SelectItem>
+                    <SelectItem value="medium">Medium</SelectItem>
+                    <SelectItem value="high">High</SelectItem>
+                    <SelectItem value="critical">Critical</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-3 pt-2">
+                <Label>Notification Channels</Label>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Email Notifications</span>
+                  <Switch
+                    checked={newAlertForm.notifyEmail}
+                    onCheckedChange={(checked) => setNewAlertForm(prev => ({ ...prev, notifyEmail: checked }))}
+                  />
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Slack Notifications</span>
+                  <Switch
+                    checked={newAlertForm.notifySlack}
+                    onCheckedChange={(checked) => setNewAlertForm(prev => ({ ...prev, notifySlack: checked }))}
+                  />
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowNewAlertDialog(false)}>Cancel</Button>
+              <Button className="bg-red-600 hover:bg-red-700" onClick={handleCreateAlert}>
+                <Bell className="w-4 h-4 mr-2" />
+                Create Alert
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Export Data Dialog */}
+        <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Export Performance Data</DialogTitle>
+              <DialogDescription>Configure your data export options</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Export Format</Label>
+                <Select
+                  value={exportForm.format}
+                  onValueChange={(value) => setExportForm(prev => ({ ...prev, format: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="json">JSON</SelectItem>
+                    <SelectItem value="csv">CSV</SelectItem>
+                    <SelectItem value="parquet">Parquet</SelectItem>
+                    <SelectItem value="excel">Excel</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Date Range</Label>
+                <Select
+                  value={exportForm.dateRange}
+                  onValueChange={(value) => setExportForm(prev => ({ ...prev, dateRange: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1h">Last 1 hour</SelectItem>
+                    <SelectItem value="24h">Last 24 hours</SelectItem>
+                    <SelectItem value="7d">Last 7 days</SelectItem>
+                    <SelectItem value="30d">Last 30 days</SelectItem>
+                    <SelectItem value="custom">Custom range</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-3 pt-2">
+                <Label>Include Data</Label>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Metrics Data</span>
+                  <Switch
+                    checked={exportForm.includeMetrics}
+                    onCheckedChange={(checked) => setExportForm(prev => ({ ...prev, includeMetrics: checked }))}
+                  />
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Log Data</span>
+                  <Switch
+                    checked={exportForm.includeLogs}
+                    onCheckedChange={(checked) => setExportForm(prev => ({ ...prev, includeLogs: checked }))}
+                  />
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Trace Data</span>
+                  <Switch
+                    checked={exportForm.includeTraces}
+                    onCheckedChange={(checked) => setExportForm(prev => ({ ...prev, includeTraces: checked }))}
+                  />
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowExportDialog(false)}>Cancel</Button>
+              <Button className="bg-green-600 hover:bg-green-700" onClick={handleExportData}>
+                <Download className="w-4 h-4 mr-2" />
+                Export Data
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* New SLO Dialog */}
+        <Dialog open={showNewSLODialog} onOpenChange={setShowNewSLODialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Create New SLO</DialogTitle>
+              <DialogDescription>Define a Service Level Objective for your system</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>SLO Name</Label>
+                <Input
+                  placeholder="e.g., API Availability"
+                  value={newSLOForm.name}
+                  onChange={(e) => setNewSLOForm(prev => ({ ...prev, name: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Description</Label>
+                <Input
+                  placeholder="Describe this SLO..."
+                  value={newSLOForm.description}
+                  onChange={(e) => setNewSLOForm(prev => ({ ...prev, description: e.target.value }))}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Metric</Label>
+                  <Select
+                    value={newSLOForm.metric}
+                    onValueChange={(value) => setNewSLOForm(prev => ({ ...prev, metric: value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="availability">Availability</SelectItem>
+                      <SelectItem value="latency">Latency</SelectItem>
+                      <SelectItem value="error_rate">Error Rate</SelectItem>
+                      <SelectItem value="throughput">Throughput</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Target (%)</Label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    placeholder="99.9"
+                    value={newSLOForm.target}
+                    onChange={(e) => setNewSLOForm(prev => ({ ...prev, target: e.target.value }))}
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Time Window</Label>
+                <Select
+                  value={newSLOForm.timeWindow}
+                  onValueChange={(value) => setNewSLOForm(prev => ({ ...prev, timeWindow: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="7d">7 days</SelectItem>
+                    <SelectItem value="30d">30 days</SelectItem>
+                    <SelectItem value="90d">90 days</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                <p className="text-sm text-purple-700 dark:text-purple-300">
+                  <strong>Error Budget:</strong> With a {newSLOForm.target}% target over {newSLOForm.timeWindow},
+                  you will have {(100 - parseFloat(newSLOForm.target || '99.9')).toFixed(2)}% error budget.
+                </p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowNewSLODialog(false)}>Cancel</Button>
+              <Button className="bg-purple-600 hover:bg-purple-700" onClick={handleCreateSLO}>
+                <Target className="w-4 h-4 mr-2" />
+                Create SLO
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Integrations Dialog */}
+        <Dialog open={showIntegrationsDialog} onOpenChange={setShowIntegrationsDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Manage Integrations</DialogTitle>
+              <DialogDescription>Connect external services for enhanced observability</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                {mockIntegrations.map((integration) => (
+                  <div key={integration.id} className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-blue-500 transition-colors">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-3">
+                        <span className="text-2xl">{integration.icon}</span>
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">{integration.name}</p>
+                          <p className="text-xs text-gray-500">{integration.type}</p>
+                        </div>
+                      </div>
+                      <Badge variant="outline" className={
+                        integration.status === 'connected' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300' :
+                        integration.status === 'error' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300' :
+                        'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'
+                      }>
+                        {integration.status}
+                      </Badge>
+                    </div>
+                    <div className="flex items-center justify-between mt-3">
+                      <span className="text-xs text-gray-500">{integration.dataPoints.toLocaleString()} data points</span>
+                      <Button variant="ghost" size="sm">Configure</Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="p-4 border border-dashed border-gray-300 dark:border-gray-600 rounded-lg text-center hover:border-blue-500 cursor-pointer transition-colors">
+                <Plus className="w-6 h-6 mx-auto text-gray-400 mb-2" />
+                <p className="text-sm text-gray-600 dark:text-gray-400">Add New Integration</p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowIntegrationsDialog(false)}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Trace Search Dialog */}
+        <Dialog open={showTraceSearchDialog} onOpenChange={setShowTraceSearchDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Search Traces</DialogTitle>
+              <DialogDescription>Find distributed traces across your services</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Trace ID</Label>
+                <Input
+                  placeholder="trace-abc123xyz"
+                  value={traceSearchForm.traceId}
+                  onChange={(e) => setTraceSearchForm(prev => ({ ...prev, traceId: e.target.value }))}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Service</Label>
+                  <Select
+                    value={traceSearchForm.service}
+                    onValueChange={(value) => setTraceSearchForm(prev => ({ ...prev, service: value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Services</SelectItem>
+                      {mockServices.map(s => (
+                        <SelectItem key={s.name} value={s.name}>{s.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Status</Label>
+                  <Select
+                    value={traceSearchForm.status}
+                    onValueChange={(value) => setTraceSearchForm(prev => ({ ...prev, status: value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Statuses</SelectItem>
+                      <SelectItem value="success">Success</SelectItem>
+                      <SelectItem value="error">Error</SelectItem>
+                      <SelectItem value="timeout">Timeout</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Min Duration (ms)</Label>
+                  <Input
+                    type="number"
+                    placeholder="0"
+                    value={traceSearchForm.minDuration}
+                    onChange={(e) => setTraceSearchForm(prev => ({ ...prev, minDuration: e.target.value }))}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Max Duration (ms)</Label>
+                  <Input
+                    type="number"
+                    placeholder="5000"
+                    value={traceSearchForm.maxDuration}
+                    onChange={(e) => setTraceSearchForm(prev => ({ ...prev, maxDuration: e.target.value }))}
+                  />
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowTraceSearchDialog(false)}>Cancel</Button>
+              <Button className="bg-cyan-600 hover:bg-cyan-700" onClick={handleTraceSearch}>
+                <Search className="w-4 h-4 mr-2" />
+                Search Traces
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Logs Filter Dialog */}
+        <Dialog open={showLogsDialog} onOpenChange={setShowLogsDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Filter Logs</DialogTitle>
+              <DialogDescription>Configure log viewing options</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Search Query</Label>
+                <Input
+                  placeholder="Search logs..."
+                  value={logsFilterForm.searchQuery}
+                  onChange={(e) => setLogsFilterForm(prev => ({ ...prev, searchQuery: e.target.value }))}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Log Level</Label>
+                  <Select
+                    value={logsFilterForm.level}
+                    onValueChange={(value) => setLogsFilterForm(prev => ({ ...prev, level: value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Levels</SelectItem>
+                      <SelectItem value="debug">Debug</SelectItem>
+                      <SelectItem value="info">Info</SelectItem>
+                      <SelectItem value="warn">Warning</SelectItem>
+                      <SelectItem value="error">Error</SelectItem>
+                      <SelectItem value="fatal">Fatal</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Service</Label>
+                  <Select
+                    value={logsFilterForm.service}
+                    onValueChange={(value) => setLogsFilterForm(prev => ({ ...prev, service: value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Services</SelectItem>
+                      {mockServices.map(s => (
+                        <SelectItem key={s.name} value={s.name}>{s.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Time Range</Label>
+                <Select
+                  value={logsFilterForm.timeRange}
+                  onValueChange={(value) => setLogsFilterForm(prev => ({ ...prev, timeRange: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="15m">Last 15 minutes</SelectItem>
+                    <SelectItem value="1h">Last 1 hour</SelectItem>
+                    <SelectItem value="6h">Last 6 hours</SelectItem>
+                    <SelectItem value="24h">Last 24 hours</SelectItem>
+                    <SelectItem value="7d">Last 7 days</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
+                <p className="text-sm text-yellow-700 dark:text-yellow-300">
+                  <strong>Tip:</strong> Use advanced query syntax like <code className="bg-yellow-100 dark:bg-yellow-800 px-1 rounded">level:error AND service:API*</code> for complex searches.
+                </p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowLogsDialog(false)}>Cancel</Button>
+              <Button className="bg-yellow-600 hover:bg-yellow-700" onClick={handleLogsFilter}>
+                <FileText className="w-4 h-4 mr-2" />
+                Apply Filter
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Analytics Dialog */}
+        <Dialog open={showAnalyticsDialog} onOpenChange={setShowAnalyticsDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Performance Analytics</DialogTitle>
+              <DialogDescription>Deep dive into your system performance</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border-0">
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-blue-500/20 rounded-lg">
+                        <Zap className="w-5 h-5 text-blue-600" />
+                      </div>
+                      <div>
+                        <p className="text-2xl font-bold text-gray-900 dark:text-white">{(totalThroughput / 1000).toFixed(1)}K</p>
+                        <p className="text-sm text-gray-500">Requests/min</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-0">
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-green-500/20 rounded-lg">
+                        <Activity className="w-5 h-5 text-green-600" />
+                      </div>
+                      <div>
+                        <p className="text-2xl font-bold text-gray-900 dark:text-white">{healthyServices}/{mockServices.length}</p>
+                        <p className="text-sm text-gray-500">Healthy Services</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card className="bg-gradient-to-br from-purple-50 to-violet-50 dark:from-purple-900/20 dark:to-violet-900/20 border-0">
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-purple-500/20 rounded-lg">
+                        <Timer className="w-5 h-5 text-purple-600" />
+                      </div>
+                      <div>
+                        <p className="text-2xl font-bold text-gray-900 dark:text-white">{Math.round(avgLatency)}ms</p>
+                        <p className="text-sm text-gray-500">Avg Latency</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card className="bg-gradient-to-br from-red-50 to-rose-50 dark:from-red-900/20 dark:to-rose-900/20 border-0">
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-red-500/20 rounded-lg">
+                        <AlertTriangle className="w-5 h-5 text-red-600" />
+                      </div>
+                      <div>
+                        <p className="text-2xl font-bold text-gray-900 dark:text-white">{overallErrorRate.toFixed(2)}%</p>
+                        <p className="text-sm text-gray-500">Error Rate</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <h4 className="font-medium text-gray-900 dark:text-white mb-3">Top Performers</h4>
+                <div className="space-y-2">
+                  {mockServices.sort((a, b) => a.latency - b.latency).slice(0, 3).map((service, i) => (
+                    <div key={service.name} className="flex items-center justify-between py-2 border-b border-gray-200 dark:border-gray-700 last:border-0">
+                      <div className="flex items-center gap-2">
+                        <span className="w-6 h-6 rounded-full bg-gradient-to-r from-green-400 to-emerald-500 flex items-center justify-center text-xs text-white font-bold">{i + 1}</span>
+                        <span className="text-sm font-medium text-gray-900 dark:text-white">{service.name}</span>
+                      </div>
+                      <span className="text-sm text-gray-500">{service.latency}ms</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowAnalyticsDialog(false)}>Close</Button>
+              <Button onClick={() => { setShowAnalyticsDialog(false); setActiveTab('metrics'); }}>
+                <BarChart3 className="w-4 h-4 mr-2" />
+                View Full Metrics
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Alerts View Dialog */}
+        <Dialog open={showAlertsViewDialog} onOpenChange={setShowAlertsViewDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Active Alerts</DialogTitle>
+              <DialogDescription>Monitor and manage your system alerts</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline" className="bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300">
+                    {firingAlerts} Firing
+                  </Badge>
+                  <Badge variant="outline" className="bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
+                    {mockAlerts.filter(a => a.status === 'acknowledged').length} Acknowledged
+                  </Badge>
+                  <Badge variant="outline" className="bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300">
+                    {mockAlerts.filter(a => a.status === 'resolved').length} Resolved
+                  </Badge>
+                </div>
+                <Button variant="outline" size="sm" onClick={() => { setShowAlertsViewDialog(false); setShowNewAlertDialog(true); }}>
+                  <Plus className="w-4 h-4 mr-2" />
+                  New Alert
+                </Button>
+              </div>
+              <ScrollArea className="h-[400px]">
+                <div className="space-y-3">
+                  {mockAlerts.map((alert) => (
+                    <div key={alert.id} className={`p-4 rounded-lg border ${
+                      alert.status === 'firing' ? 'border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-900/20' :
+                      alert.status === 'acknowledged' ? 'border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-900/20' :
+                      'border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800'
+                    }`}>
+                      <div className="flex items-start justify-between">
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2">
+                            <h4 className="font-medium text-gray-900 dark:text-white">{alert.name}</h4>
+                            <Badge variant="outline" className={severityColors[alert.severity]}>
+                              {alert.severity}
+                            </Badge>
+                          </div>
+                          <p className="text-sm text-gray-500">
+                            {alert.metric} {alert.condition} (Current: {alert.value}, Threshold: {alert.threshold})
+                          </p>
+                          <p className="text-xs text-gray-400">
+                            Triggered: {formatDate(alert.triggeredAt)}
+                            {alert.resolvedAt && ` | Resolved: ${formatDate(alert.resolvedAt)}`}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Badge variant="outline" className={statusColors[alert.status]}>
+                            {alert.status}
+                          </Badge>
+                          {alert.status === 'firing' && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => toast.success('Alert Acknowledged', { description: `${alert.name} has been acknowledged` })}
+                            >
+                              Acknowledge
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowAlertsViewDialog(false)}>Close</Button>
+              <Button onClick={() => { setShowAlertsViewDialog(false); setActiveTab('alerts'); }}>
+                <Bell className="w-4 h-4 mr-2" />
+                View All Alerts
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

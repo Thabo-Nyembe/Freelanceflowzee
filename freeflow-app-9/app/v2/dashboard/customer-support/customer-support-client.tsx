@@ -264,12 +264,7 @@ const mockSupportActivities = [
   { id: '3', type: 'milestone' as const, title: 'SLA achieved', description: 'First response SLA met for all morning tickets', user: { name: 'Support Team', avatar: '/avatars/support.jpg' }, timestamp: new Date(Date.now() - 7200000).toISOString(), metadata: {} },
 ]
 
-const mockSupportQuickActions = [
-  { id: '1', label: 'New Ticket', icon: 'Plus', shortcut: '⌘N', action: () => toast.success('Ticket created successfully') },
-  { id: '2', label: 'Quick Reply', icon: 'Send', shortcut: '⌘R', action: () => toast.success('Reply sent successfully') },
-  { id: '3', label: 'Escalate', icon: 'AlertTriangle', shortcut: '⌘E', action: () => toast.success('Ticket escalated to supervisor') },
-  { id: '4', label: 'View Queue', icon: 'Inbox', shortcut: '⌘Q', action: () => toast.success('Queue loaded') },
-]
+// Quick actions will be defined inside the component to access state setters
 
 export default function CustomerSupportClient({ initialAgents, initialConversations, initialStats }: CustomerSupportClientProps) {
   const supabase = createClient()
@@ -294,6 +289,14 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
   const [quickReplyMessage, setQuickReplyMessage] = useState('')
   const [escalateReason, setEscalateReason] = useState('')
   const [escalatePriority, setEscalatePriority] = useState('urgent')
+
+  // Quick Actions with proper dialog handlers
+  const supportQuickActions = [
+    { id: '1', label: 'New Ticket', icon: 'Plus', shortcut: '⌘N', action: () => setShowCreateDialog(true) },
+    { id: '2', label: 'Quick Reply', icon: 'Send', shortcut: '⌘R', action: () => setShowQuickReplyDialog(true) },
+    { id: '3', label: 'Escalate', icon: 'AlertTriangle', shortcut: '⌘E', action: () => setShowEscalateDialog(true) },
+    { id: '4', label: 'View Queue', icon: 'Inbox', shortcut: '⌘Q', action: () => setShowViewQueueDialog(true) },
+  ]
 
   // Supabase state
   const [dbTickets, setDbTickets] = useState<DbTicket[]>([])
@@ -2236,7 +2239,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
       </div>
 
       {/* Quick Actions Toolbar */}
-      <QuickActionsToolbar actions={mockSupportQuickActions} />
+      <QuickActionsToolbar actions={supportQuickActions} />
 
       {/* Create Ticket Dialog */}
       <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
@@ -2335,6 +2338,254 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
             <Button variant="outline" onClick={() => setShowCreateDialog(false)}>Cancel</Button>
             <Button onClick={handleCreateTicket} disabled={isSubmitting} className="bg-emerald-600 hover:bg-emerald-700">
               {isSubmitting ? 'Creating...' : 'Create Ticket'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Quick Reply Dialog */}
+      <Dialog open={showQuickReplyDialog} onOpenChange={setShowQuickReplyDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Send className="h-5 w-5 text-emerald-600" />
+              Quick Reply
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Select Ticket</Label>
+              <Select defaultValue="">
+                <SelectTrigger className="mt-1">
+                  <SelectValue placeholder="Choose a ticket to reply to" />
+                </SelectTrigger>
+                <SelectContent>
+                  {tickets.map(ticket => (
+                    <SelectItem key={ticket.id} value={ticket.id}>
+                      #{ticket.id} - {ticket.subject}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Use Canned Response</Label>
+              <Select defaultValue="">
+                <SelectTrigger className="mt-1">
+                  <SelectValue placeholder="Select a template (optional)" />
+                </SelectTrigger>
+                <SelectContent>
+                  {cannedResponses.map(response => (
+                    <SelectItem key={response.id} value={response.id}>
+                      {response.title}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Message</Label>
+              <textarea
+                value={quickReplyMessage}
+                onChange={(e) => setQuickReplyMessage(e.target.value)}
+                placeholder="Type your reply message..."
+                className="mt-1 w-full p-3 border rounded-lg text-sm resize-none h-32"
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <Switch id="internal-note" />
+              <Label htmlFor="internal-note">Send as internal note</Label>
+            </div>
+          </div>
+          <DialogFooter className="mt-4">
+            <Button variant="outline" onClick={() => setShowQuickReplyDialog(false)}>Cancel</Button>
+            <Button
+              onClick={() => {
+                toast.success('Reply sent successfully')
+                setQuickReplyMessage('')
+                setShowQuickReplyDialog(false)
+              }}
+              className="bg-emerald-600 hover:bg-emerald-700"
+            >
+              <Send className="h-4 w-4 mr-2" />
+              Send Reply
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Escalate Dialog */}
+      <Dialog open={showEscalateDialog} onOpenChange={setShowEscalateDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-amber-600" />
+              Escalate Ticket
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Select Ticket to Escalate</Label>
+              <Select defaultValue="">
+                <SelectTrigger className="mt-1">
+                  <SelectValue placeholder="Choose a ticket" />
+                </SelectTrigger>
+                <SelectContent>
+                  {tickets.filter(t => t.status !== 'solved' && t.status !== 'closed').map(ticket => (
+                    <SelectItem key={ticket.id} value={ticket.id}>
+                      #{ticket.id} - {ticket.subject} ({ticket.priority})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Escalate To</Label>
+              <Select defaultValue="">
+                <SelectTrigger className="mt-1">
+                  <SelectValue placeholder="Select supervisor or team" />
+                </SelectTrigger>
+                <SelectContent>
+                  {agents.filter(a => a.role === 'supervisor' || a.role === 'admin').map(agent => (
+                    <SelectItem key={agent.id} value={agent.id}>
+                      {agent.name} ({agent.role})
+                    </SelectItem>
+                  ))}
+                  <SelectItem value="senior-team">Senior Support Team</SelectItem>
+                  <SelectItem value="engineering">Engineering Team</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>New Priority</Label>
+              <Select value={escalatePriority} onValueChange={setEscalatePriority}>
+                <SelectTrigger className="mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="high">High</SelectItem>
+                  <SelectItem value="urgent">Urgent</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Escalation Reason</Label>
+              <textarea
+                value={escalateReason}
+                onChange={(e) => setEscalateReason(e.target.value)}
+                placeholder="Explain why this ticket needs escalation..."
+                className="mt-1 w-full p-3 border rounded-lg text-sm resize-none h-24"
+              />
+            </div>
+            <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
+              <p className="text-sm text-amber-800">
+                <AlertTriangle className="h-4 w-4 inline mr-1" />
+                Escalating will notify the assigned supervisor and increase ticket priority.
+              </p>
+            </div>
+          </div>
+          <DialogFooter className="mt-4">
+            <Button variant="outline" onClick={() => setShowEscalateDialog(false)}>Cancel</Button>
+            <Button
+              onClick={() => {
+                toast.success('Ticket escalated to supervisor')
+                setEscalateReason('')
+                setShowEscalateDialog(false)
+              }}
+              className="bg-amber-600 hover:bg-amber-700"
+            >
+              <AlertTriangle className="h-4 w-4 mr-2" />
+              Escalate Ticket
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* View Queue Dialog */}
+      <Dialog open={showViewQueueDialog} onOpenChange={setShowViewQueueDialog}>
+        <DialogContent className="max-w-3xl max-h-[80vh] overflow-hidden">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Inbox className="h-5 w-5 text-blue-600" />
+              Ticket Queue
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            {/* Queue Stats */}
+            <div className="grid grid-cols-4 gap-4">
+              <div className="p-3 bg-blue-50 rounded-lg text-center">
+                <p className="text-2xl font-bold text-blue-600">{tickets.filter(t => t.status === 'new').length}</p>
+                <p className="text-xs text-blue-600">New</p>
+              </div>
+              <div className="p-3 bg-green-50 rounded-lg text-center">
+                <p className="text-2xl font-bold text-green-600">{tickets.filter(t => t.status === 'open').length}</p>
+                <p className="text-xs text-green-600">Open</p>
+              </div>
+              <div className="p-3 bg-amber-50 rounded-lg text-center">
+                <p className="text-2xl font-bold text-amber-600">{tickets.filter(t => t.status === 'pending').length}</p>
+                <p className="text-xs text-amber-600">Pending</p>
+              </div>
+              <div className="p-3 bg-red-50 rounded-lg text-center">
+                <p className="text-2xl font-bold text-red-600">{tickets.filter(t => t.slaBreached).length}</p>
+                <p className="text-xs text-red-600">SLA Breached</p>
+              </div>
+            </div>
+
+            {/* Queue Filters */}
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" className="bg-blue-50 text-blue-600">All Tickets</Button>
+              <Button variant="outline" size="sm">My Tickets</Button>
+              <Button variant="outline" size="sm">Unassigned</Button>
+              <Button variant="outline" size="sm">Urgent</Button>
+            </div>
+
+            {/* Queue List */}
+            <ScrollArea className="h-[40vh] border rounded-lg">
+              <div className="divide-y">
+                {tickets.map(ticket => (
+                  <div
+                    key={ticket.id}
+                    className="p-4 hover:bg-gray-50 cursor-pointer transition-colors"
+                    onClick={() => {
+                      setShowViewQueueDialog(false)
+                      openTicketDetails(ticket)
+                    }}
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-sm text-gray-500">#{ticket.id}</span>
+                          <Badge className={getPriorityColor(ticket.priority)}>{ticket.priority}</Badge>
+                          {ticket.slaBreached && <Badge variant="destructive">SLA</Badge>}
+                        </div>
+                        <h4 className="font-medium">{ticket.subject}</h4>
+                        <p className="text-sm text-gray-500">{ticket.customer.name} - {ticket.channel}</p>
+                      </div>
+                      <div className="text-right">
+                        <Badge className={getStatusColor(ticket.status)}>{ticket.status}</Badge>
+                        {ticket.assignee ? (
+                          <p className="text-xs text-gray-500 mt-1">{ticket.assignee.name}</p>
+                        ) : (
+                          <p className="text-xs text-orange-500 mt-1">Unassigned</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+          </div>
+          <DialogFooter className="mt-4">
+            <Button variant="outline" onClick={() => setShowViewQueueDialog(false)}>Close</Button>
+            <Button
+              onClick={() => {
+                fetchTickets()
+                toast.success('Queue refreshed')
+              }}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Refresh Queue
             </Button>
           </DialogFooter>
         </DialogContent>

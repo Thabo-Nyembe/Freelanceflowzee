@@ -147,21 +147,6 @@ const shadcnShowcaseActivities = [
   { id: '3', user: 'System', action: 'generated', target: 'weekly report', timestamp: '1h ago', type: 'info' as const },
 ]
 
-const shadcnShowcaseQuickActions = [
-  { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 800)),
-    { loading: 'Creating new item...', success: 'New item created successfully', error: 'Failed to create item' }
-  ) },
-  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1000)),
-    { loading: 'Exporting data...', success: 'Data exported successfully', error: 'Failed to export data' }
-  ) },
-  { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 500)),
-    { loading: 'Opening settings...', success: 'Settings panel opened', error: 'Failed to open settings' }
-  ) },
-]
-
 export default function ShadcnShowcaseClient() {
   // A+++ STATE MANAGEMENT
   const { userId, loading: userLoading } = useCurrentUser()
@@ -173,6 +158,108 @@ export default function ShadcnShowcaseClient() {
   const [progress, setProgress] = React.useState(65)
   const [isLoading, setIsLoading] = React.useState(false)
   const [sliderValue, setSliderValue] = React.useState([50])
+
+  // Dialog states for Quick Actions
+  const [newItemDialogOpen, setNewItemDialogOpen] = React.useState(false)
+  const [exportDialogOpen, setExportDialogOpen] = React.useState(false)
+  const [settingsDialogOpen, setSettingsDialogOpen] = React.useState(false)
+
+  // New Item form state
+  const [newItemName, setNewItemName] = React.useState('')
+  const [newItemType, setNewItemType] = React.useState('')
+  const [newItemDescription, setNewItemDescription] = React.useState('')
+  const [isCreatingItem, setIsCreatingItem] = React.useState(false)
+
+  // Export form state
+  const [exportFormat, setExportFormat] = React.useState('json')
+  const [exportScope, setExportScope] = React.useState('all')
+  const [includeMetadata, setIncludeMetadata] = React.useState(true)
+  const [isExporting, setIsExporting] = React.useState(false)
+
+  // Settings form state
+  const [notificationsEnabled, setNotificationsEnabled] = React.useState(true)
+  const [darkModeEnabled, setDarkModeEnabled] = React.useState(false)
+  const [autoSaveEnabled, setAutoSaveEnabled] = React.useState(true)
+  const [refreshInterval, setRefreshInterval] = React.useState('30')
+  const [isSavingSettings, setIsSavingSettings] = React.useState(false)
+
+  // Quick Actions with dialog openers
+  const shadcnShowcaseQuickActions = [
+    { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => setNewItemDialogOpen(true) },
+    { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => setExportDialogOpen(true) },
+    { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => setSettingsDialogOpen(true) },
+  ]
+
+  // Handle New Item creation
+  const handleCreateItem = async () => {
+    if (!newItemName.trim()) {
+      toast.error('Item name is required')
+      return
+    }
+    setIsCreatingItem(true)
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      logger.info('New item created', { name: newItemName, type: newItemType, description: newItemDescription })
+      toast.success('Item created successfully', {
+        description: `"${newItemName}" has been added to your collection`
+      })
+      setNewItemDialogOpen(false)
+      setNewItemName('')
+      setNewItemType('')
+      setNewItemDescription('')
+    } catch (err) {
+      toast.error('Failed to create item')
+    } finally {
+      setIsCreatingItem(false)
+    }
+  }
+
+  // Handle Export
+  const handleExport = async () => {
+    setIsExporting(true)
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1500))
+      const exportData = {
+        format: exportFormat,
+        scope: exportScope,
+        includeMetadata,
+        timestamp: new Date().toISOString(),
+        records: exportScope === 'all' ? 150 : 50
+      }
+      logger.info('Data exported', exportData)
+      toast.success('Export completed', {
+        description: `Exported ${exportData.records} records as ${exportFormat.toUpperCase()}`
+      })
+      setExportDialogOpen(false)
+    } catch (err) {
+      toast.error('Export failed')
+    } finally {
+      setIsExporting(false)
+    }
+  }
+
+  // Handle Settings Save
+  const handleSaveSettings = async () => {
+    setIsSavingSettings(true)
+    try {
+      await new Promise(resolve => setTimeout(resolve, 800))
+      const settings = {
+        notificationsEnabled,
+        darkModeEnabled,
+        autoSaveEnabled,
+        refreshInterval
+      }
+      logger.info('Settings saved', settings)
+      toast.success('Settings saved', {
+        description: 'Your preferences have been updated successfully'
+      })
+      setSettingsDialogOpen(false)
+    } catch (err) {
+      toast.error('Failed to save settings')
+    } finally {
+      setIsSavingSettings(false)
+    }
+  }
 
   // A+++ LOAD SHADCN SHOWCASE DATA
   React.useEffect(() => {
@@ -740,6 +827,198 @@ export default function ShadcnShowcaseClient() {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* New Item Dialog */}
+      <Dialog open={newItemDialogOpen} onOpenChange={setNewItemDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Create New Item</DialogTitle>
+            <DialogDescription>
+              Add a new item to your component showcase collection.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="item-name">Item Name *</Label>
+              <Input
+                id="item-name"
+                placeholder="Enter item name..."
+                value={newItemName}
+                onChange={(e) => setNewItemName(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="item-type">Item Type</Label>
+              <Select value={newItemType} onValueChange={setNewItemType}>
+                <SelectTrigger id="item-type">
+                  <SelectValue placeholder="Select type..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="component">Component</SelectItem>
+                  <SelectItem value="template">Template</SelectItem>
+                  <SelectItem value="pattern">Pattern</SelectItem>
+                  <SelectItem value="utility">Utility</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="item-description">Description</Label>
+              <Textarea
+                id="item-description"
+                placeholder="Enter description..."
+                value={newItemDescription}
+                onChange={(e) => setNewItemDescription(e.target.value)}
+                rows={3}
+              />
+            </div>
+          </div>
+          <div className="flex justify-end gap-3">
+            <Button variant="outline" onClick={() => setNewItemDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleCreateItem} disabled={isCreatingItem}>
+              {isCreatingItem ? 'Creating...' : 'Create Item'}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Export Dialog */}
+      <Dialog open={exportDialogOpen} onOpenChange={setExportDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Export Data</DialogTitle>
+            <DialogDescription>
+              Configure your export settings and download your data.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Export Format</Label>
+              <RadioGroup value={exportFormat} onValueChange={setExportFormat}>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="json" id="format-json" />
+                  <Label htmlFor="format-json">JSON</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="csv" id="format-csv" />
+                  <Label htmlFor="format-csv">CSV</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="xlsx" id="format-xlsx" />
+                  <Label htmlFor="format-xlsx">Excel (XLSX)</Label>
+                </div>
+              </RadioGroup>
+            </div>
+            <div className="space-y-2">
+              <Label>Export Scope</Label>
+              <Select value={exportScope} onValueChange={setExportScope}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Records (150 items)</SelectItem>
+                  <SelectItem value="filtered">Filtered Records (50 items)</SelectItem>
+                  <SelectItem value="selected">Selected Records Only</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-center justify-between">
+              <div>
+                <Label htmlFor="include-metadata">Include Metadata</Label>
+                <p className="text-sm text-muted-foreground">Add timestamps and user info</p>
+              </div>
+              <Switch
+                id="include-metadata"
+                checked={includeMetadata}
+                onCheckedChange={setIncludeMetadata}
+              />
+            </div>
+          </div>
+          <div className="flex justify-end gap-3">
+            <Button variant="outline" onClick={() => setExportDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleExport} disabled={isExporting}>
+              <Download className="w-4 h-4 mr-2" />
+              {isExporting ? 'Exporting...' : 'Export'}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Settings Dialog */}
+      <Dialog open={settingsDialogOpen} onOpenChange={setSettingsDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Showcase Settings</DialogTitle>
+            <DialogDescription>
+              Customize your component showcase experience.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <Label htmlFor="notifications">Notifications</Label>
+                <p className="text-sm text-muted-foreground">Receive update alerts</p>
+              </div>
+              <Switch
+                id="notifications"
+                checked={notificationsEnabled}
+                onCheckedChange={setNotificationsEnabled}
+              />
+            </div>
+            <Separator />
+            <div className="flex items-center justify-between">
+              <div>
+                <Label htmlFor="dark-mode">Dark Mode</Label>
+                <p className="text-sm text-muted-foreground">Use dark theme</p>
+              </div>
+              <Switch
+                id="dark-mode"
+                checked={darkModeEnabled}
+                onCheckedChange={setDarkModeEnabled}
+              />
+            </div>
+            <Separator />
+            <div className="flex items-center justify-between">
+              <div>
+                <Label htmlFor="auto-save">Auto Save</Label>
+                <p className="text-sm text-muted-foreground">Save changes automatically</p>
+              </div>
+              <Switch
+                id="auto-save"
+                checked={autoSaveEnabled}
+                onCheckedChange={setAutoSaveEnabled}
+              />
+            </div>
+            <Separator />
+            <div className="space-y-2">
+              <Label>Refresh Interval</Label>
+              <Select value={refreshInterval} onValueChange={setRefreshInterval}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="15">Every 15 seconds</SelectItem>
+                  <SelectItem value="30">Every 30 seconds</SelectItem>
+                  <SelectItem value="60">Every minute</SelectItem>
+                  <SelectItem value="300">Every 5 minutes</SelectItem>
+                  <SelectItem value="0">Manual only</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <div className="flex justify-end gap-3">
+            <Button variant="outline" onClick={() => setSettingsDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSaveSettings} disabled={isSavingSettings}>
+              {isSavingSettings ? 'Saving...' : 'Save Settings'}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

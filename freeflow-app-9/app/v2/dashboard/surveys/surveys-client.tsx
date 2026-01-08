@@ -449,20 +449,7 @@ const mockSurveysActivities = [
   { id: '3', user: 'Product Manager', action: 'Analyzed', target: 'feature request survey results', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
 ]
 
-const mockSurveysQuickActions = [
-  { id: '1', label: 'Create Survey', icon: 'plus', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1500)),
-    { loading: 'Creating new survey...', success: 'Survey created successfully', error: 'Failed to create survey' }
-  ), variant: 'default' as const },
-  { id: '2', label: 'View Results', icon: 'bar-chart', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1500)),
-    { loading: 'Loading survey results...', success: 'Results loaded', error: 'Failed to load results' }
-  ), variant: 'default' as const },
-  { id: '3', label: 'Export Data', icon: 'download', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1500)),
-    { loading: 'Exporting survey data...', success: 'Data exported successfully', error: 'Failed to export data' }
-  ), variant: 'outline' as const },
-]
+// Quick actions will be defined inside component to have access to state setters
 
 export default function SurveysClient() {
   const [activeTab, setActiveTab] = useState('surveys')
@@ -483,6 +470,16 @@ export default function SurveysClient() {
   // Confirm Delete Dialog State
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [surveyToDelete, setSurveyToDelete] = useState<string | null>(null)
+
+  // View Results Dialog State
+  const [showResultsDialog, setShowResultsDialog] = useState(false)
+  const [selectedSurveyForResults, setSelectedSurveyForResults] = useState<Survey | null>(null)
+
+  // Export Data Dialog State
+  const [showExportDialog, setShowExportDialog] = useState(false)
+  const [exportFormat, setExportFormat] = useState<'csv' | 'json' | 'xlsx' | 'pdf'>('csv')
+  const [exportDateRange, setExportDateRange] = useState<'all' | 'week' | 'month' | 'year'>('all')
+  const [isExporting, setIsExporting] = useState(false)
 
   // Real Supabase data and mutations
   const { surveys: dbSurveys, stats: dbStats, isLoading, error: dbError, refetch } = useSurveys()
@@ -685,6 +682,106 @@ export default function SurveysClient() {
     setSharingSurvey(survey)
     setShowShareDialog(true)
   }
+
+  // Handler: View Results
+  const handleViewResults = () => {
+    // Select the first survey with responses, fallback to mock data
+    const surveysToCheck = filteredSurveys.length > 0 ? filteredSurveys : mockSurveys
+    const surveyWithResponses = surveysToCheck.find(s => s.responses > 0) || surveysToCheck[0]
+    if (surveyWithResponses) {
+      setSelectedSurveyForResults(surveyWithResponses)
+      setShowResultsDialog(true)
+    } else {
+      toast.error('No surveys available to view results')
+    }
+  }
+
+  // Handler: Export Data
+  const handleExportData = async () => {
+    setIsExporting(true)
+    try {
+      // Simulate export process
+      await new Promise(resolve => setTimeout(resolve, 1500))
+
+      // Generate mock export data
+      const exportData = {
+        surveys: combinedSurveys.map(s => ({
+          id: s.id,
+          title: s.title,
+          status: s.status,
+          responses: s.responses,
+          completionRate: s.completionRate
+        })),
+        responses: mockResponses,
+        exportedAt: new Date().toISOString(),
+        format: exportFormat,
+        dateRange: exportDateRange
+      }
+
+      // Create and download file based on format
+      let blob: Blob
+      let filename: string
+
+      if (exportFormat === 'json') {
+        blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
+        filename = `surveys-export-${Date.now()}.json`
+      } else if (exportFormat === 'csv') {
+        // Generate CSV for surveys
+        const csvHeader = 'ID,Title,Status,Responses,Completion Rate\n'
+        const csvData = combinedSurveys.map(s =>
+          `${s.id},${s.title.replace(/,/g, ';')},${s.status},${s.responses},${s.completionRate}%`
+        ).join('\n')
+        blob = new Blob([csvHeader + csvData], { type: 'text/csv' })
+        filename = `surveys-export-${Date.now()}.csv`
+      } else {
+        // For xlsx and pdf, create JSON as fallback
+        blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
+        filename = `surveys-export-${Date.now()}.${exportFormat === 'xlsx' ? 'json' : 'json'}`
+      }
+
+      // Download file
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = filename
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+
+      toast.success(`Survey data exported as ${exportFormat.toUpperCase()}`)
+      setShowExportDialog(false)
+    } catch (error) {
+      toast.error('Failed to export data')
+    } finally {
+      setIsExporting(false)
+    }
+  }
+
+  // Quick Actions for toolbar (defined here to have access to state setters)
+  const surveysQuickActions = [
+    {
+      id: '1',
+      label: 'Create Survey',
+      icon: 'plus',
+      action: () => setShowCreateDialog(true),
+      variant: 'default' as const
+    },
+    {
+      id: '2',
+      label: 'View Results',
+      icon: 'bar-chart',
+      action: handleViewResults,
+      variant: 'default' as const
+    },
+    {
+      id: '3',
+      label: 'Export Data',
+      icon: 'download',
+      action: () => setShowExportDialog(true),
+      variant: 'outline' as const
+    },
+  ]
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-green-50/30 to-teal-50/40 dark:bg-none dark:bg-gray-900 p-6">
@@ -1962,7 +2059,7 @@ export default function SurveysClient() {
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockSurveysQuickActions}
+            actions={surveysQuickActions}
             variant="grid"
           />
         </div>
@@ -2278,6 +2375,239 @@ export default function SurveysClient() {
                   <>
                     <Trash2 className="w-4 h-4 mr-2" />
                     Delete Survey
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* View Results Dialog */}
+        <Dialog open={showResultsDialog} onOpenChange={setShowResultsDialog}>
+          <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <BarChart3 className="w-5 h-5" />
+                Survey Results
+              </DialogTitle>
+              <DialogDescription>
+                {selectedSurveyForResults?.title || 'View survey results and analytics'}
+              </DialogDescription>
+            </DialogHeader>
+            {selectedSurveyForResults && (
+              <div className="space-y-6">
+                {/* Survey Selection */}
+                <div className="space-y-2">
+                  <Label>Select Survey</Label>
+                  <select
+                    className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+                    value={selectedSurveyForResults.id}
+                    onChange={(e) => {
+                      const survey = combinedSurveys.find(s => s.id === e.target.value) || mockSurveys.find(s => s.id === e.target.value)
+                      if (survey) setSelectedSurveyForResults(survey)
+                    }}
+                  >
+                    {(combinedSurveys.length > 0 ? combinedSurveys : mockSurveys).map(survey => (
+                      <option key={survey.id} value={survey.id}>
+                        {survey.title} ({survey.responses} responses)
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Key Metrics */}
+                <div className="grid grid-cols-4 gap-4">
+                  <div className="p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg text-center">
+                    <Users className="w-6 h-6 mx-auto mb-2 text-emerald-600" />
+                    <p className="text-2xl font-bold text-emerald-700">{selectedSurveyForResults.responses.toLocaleString()}</p>
+                    <p className="text-xs text-emerald-600">Total Responses</p>
+                  </div>
+                  <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-center">
+                    <CheckCircle className="w-6 h-6 mx-auto mb-2 text-blue-600" />
+                    <p className="text-2xl font-bold text-blue-700">{selectedSurveyForResults.completionRate}%</p>
+                    <p className="text-xs text-blue-600">Completion Rate</p>
+                  </div>
+                  <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg text-center">
+                    <Clock className="w-6 h-6 mx-auto mb-2 text-purple-600" />
+                    <p className="text-2xl font-bold text-purple-700">{selectedSurveyForResults.avgTime}</p>
+                    <p className="text-xs text-purple-600">Avg. Minutes</p>
+                  </div>
+                  <div className="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg text-center">
+                    <FileText className="w-6 h-6 mx-auto mb-2 text-amber-600" />
+                    <p className="text-2xl font-bold text-amber-700">{selectedSurveyForResults.questions.length}</p>
+                    <p className="text-xs text-amber-600">Questions</p>
+                  </div>
+                </div>
+
+                {/* Response Trend Chart */}
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <h4 className="font-medium mb-3">Response Trend (Last 14 Days)</h4>
+                  <div className="h-40 flex items-end justify-between gap-1">
+                    {Array.from({ length: 14 }).map((_, i) => {
+                      const height = 20 + Math.random() * 80
+                      const isToday = i === 13
+                      return (
+                        <div key={i} className="flex-1 flex flex-col items-center gap-1">
+                          <div
+                            className={`w-full rounded-t transition-all ${isToday ? 'bg-emerald-500' : 'bg-emerald-300 dark:bg-emerald-700'}`}
+                            style={{ height: `${height}%` }}
+                          />
+                          <span className="text-[9px] text-muted-foreground">{i + 1}</span>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+
+                {/* Recent Responses Preview */}
+                <div>
+                  <h4 className="font-medium mb-3">Recent Responses</h4>
+                  <div className="space-y-2 max-h-48 overflow-y-auto">
+                    {mockResponses.filter(r => r.surveyId === selectedSurveyForResults.id).slice(0, 5).map(response => (
+                      <div key={response.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <Avatar className="w-8 h-8">
+                            <AvatarFallback className="bg-emerald-100 text-emerald-700 text-xs">
+                              {response.respondentEmail ? response.respondentEmail[0].toUpperCase() : 'A'}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="text-sm font-medium">{response.respondentEmail || 'Anonymous'}</p>
+                            <p className="text-xs text-muted-foreground">{formatDateTime(response.startedAt)}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {response.isComplete ? (
+                            <Badge className="bg-green-100 text-green-700 text-xs">Complete</Badge>
+                          ) : (
+                            <Badge variant="secondary" className="text-xs">Partial</Badge>
+                          )}
+                          {response.npsScore !== undefined && (
+                            <Badge variant="outline" className="text-xs">NPS: {response.npsScore}</Badge>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                    {mockResponses.filter(r => r.surveyId === selectedSurveyForResults.id).length === 0 && (
+                      <p className="text-sm text-muted-foreground text-center py-4">No responses yet for this survey</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+            <DialogFooter className="mt-4">
+              <Button variant="outline" onClick={() => setShowResultsDialog(false)}>
+                Close
+              </Button>
+              <Button
+                onClick={() => {
+                  setShowResultsDialog(false)
+                  setShowExportDialog(true)
+                }}
+              >
+                <Download className="w-4 h-4 mr-2" />
+                Export Results
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Export Data Dialog */}
+        <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Download className="w-5 h-5" />
+                Export Survey Data
+              </DialogTitle>
+              <DialogDescription>
+                Choose format and date range for your export
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              {/* Export Format */}
+              <div className="space-y-2">
+                <Label>Export Format</Label>
+                <div className="grid grid-cols-4 gap-2">
+                  {(['csv', 'json', 'xlsx', 'pdf'] as const).map((format) => (
+                    <button
+                      key={format}
+                      onClick={() => setExportFormat(format)}
+                      className={`p-3 border rounded-lg text-center transition-all ${
+                        exportFormat === format
+                          ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700'
+                          : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
+                      }`}
+                    >
+                      <span className="text-sm font-medium uppercase">{format}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Date Range */}
+              <div className="space-y-2">
+                <Label>Date Range</Label>
+                <select
+                  className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+                  value={exportDateRange}
+                  onChange={(e) => setExportDateRange(e.target.value as typeof exportDateRange)}
+                >
+                  <option value="all">All Time</option>
+                  <option value="week">Last 7 Days</option>
+                  <option value="month">Last 30 Days</option>
+                  <option value="year">Last 12 Months</option>
+                </select>
+              </div>
+
+              {/* Data to Include */}
+              <div className="space-y-2">
+                <Label>Data to Include</Label>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <span className="text-sm">Survey Metadata</span>
+                    <Switch defaultChecked />
+                  </div>
+                  <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <span className="text-sm">Individual Responses</span>
+                    <Switch defaultChecked />
+                  </div>
+                  <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <span className="text-sm">Analytics Summary</span>
+                    <Switch defaultChecked />
+                  </div>
+                </div>
+              </div>
+
+              {/* Export Summary */}
+              <div className="p-3 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg">
+                <div className="flex items-center gap-2 text-emerald-700 dark:text-emerald-400 mb-1">
+                  <FileText className="w-4 h-4" />
+                  <span className="text-sm font-medium">Export Summary</span>
+                </div>
+                <p className="text-xs text-emerald-600 dark:text-emerald-500">
+                  {combinedSurveys.length} surveys, {mockResponses.length} responses will be exported as {exportFormat.toUpperCase()}
+                </p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowExportDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                onClick={handleExportData}
+                disabled={isExporting}
+                className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white"
+              >
+                {isExporting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Exporting...
+                  </>
+                ) : (
+                  <>
+                    <Download className="w-4 h-4 mr-2" />
+                    Export Data
                   </>
                 )}
               </Button>

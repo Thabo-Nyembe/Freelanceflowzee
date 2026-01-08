@@ -675,8 +675,17 @@ export default function MilestonesClient() {
   const [loading, setLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showCreateDialog, setShowCreateDialog] = useState(false)
+  const [showRiskAnalysisDialog, setShowRiskAnalysisDialog] = useState(false)
   const [_editingMilestone, _setEditingMilestone] = useState<DbMilestone | null>(null)
   const [formState, setFormState] = useState<MilestoneFormState>(initialFormState)
+  const [riskForm, setRiskForm] = useState({
+    title: '',
+    description: '',
+    probability: 'medium' as 'low' | 'medium' | 'high' | 'very_high',
+    impact: 'medium' as 'low' | 'medium' | 'high' | 'critical',
+    mitigation: '',
+    owner: ''
+  })
 
   // Fetch milestones from Supabase
   const fetchMilestones = useCallback(async () => {
@@ -1088,7 +1097,7 @@ export default function MilestonesClient() {
                 { icon: CalendarDays, label: 'Timeline', color: 'text-blue-500', action: () => setActiveTab('timeline') },
                 { icon: Package, label: 'Deliverables', color: 'text-green-500', action: () => setActiveTab('deliverables') },
                 { icon: Link2, label: 'Dependencies', color: 'text-purple-500', action: () => setActiveTab('dependencies') },
-                { icon: AlertTriangle, label: 'Risks', color: 'text-amber-500', action: () => toast.success('Risk analysis ready') },
+                { icon: AlertTriangle, label: 'Risks', color: 'text-amber-500', action: () => setShowRiskAnalysisDialog(true) },
                 { icon: BarChart3, label: 'Reports', color: 'text-indigo-500', action: () => setActiveTab('reports') },
                 { icon: Download, label: 'Export', color: 'text-cyan-500', action: handleExportReport },
                 { icon: RefreshCw, label: 'Refresh', color: 'text-pink-500', action: handleSync },
@@ -2262,6 +2271,189 @@ export default function MilestonesClient() {
                 className="bg-gradient-to-r from-rose-600 to-pink-600 text-white"
               >
                 {isSubmitting ? 'Creating...' : 'Create Milestone'}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Risk Analysis Dialog */}
+        <Dialog open={showRiskAnalysisDialog} onOpenChange={setShowRiskAnalysisDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <AlertTriangle className="w-5 h-5 text-amber-500" />
+                Risk Analysis & Management
+              </DialogTitle>
+              <DialogDescription>
+                Identify, assess, and manage project risks to ensure milestone success
+              </DialogDescription>
+            </DialogHeader>
+
+            {/* Existing Risks Summary */}
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-4 gap-3">
+                <div className="p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+                  <div className="text-2xl font-bold text-red-600">
+                    {mockMilestones.reduce((acc, m) => acc + m.risks.filter(r => r.impact === 'critical').length, 0)}
+                  </div>
+                  <div className="text-xs text-red-600">Critical Risks</div>
+                </div>
+                <div className="p-3 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800">
+                  <div className="text-2xl font-bold text-amber-600">
+                    {mockMilestones.reduce((acc, m) => acc + m.risks.filter(r => r.impact === 'high').length, 0)}
+                  </div>
+                  <div className="text-xs text-amber-600">High Impact</div>
+                </div>
+                <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+                  <div className="text-2xl font-bold text-blue-600">
+                    {mockMilestones.reduce((acc, m) => acc + m.risks.filter(r => r.status === 'mitigating').length, 0)}
+                  </div>
+                  <div className="text-xs text-blue-600">Being Mitigated</div>
+                </div>
+                <div className="p-3 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
+                  <div className="text-2xl font-bold text-green-600">
+                    {mockMilestones.reduce((acc, m) => acc + m.risks.filter(r => r.status === 'mitigated').length, 0)}
+                  </div>
+                  <div className="text-xs text-green-600">Mitigated</div>
+                </div>
+              </div>
+
+              <div className="border-t pt-4">
+                <h4 className="font-semibold mb-3">Add New Risk</h4>
+                <div className="space-y-3">
+                  <div className="space-y-2">
+                    <Label htmlFor="risk_title">Risk Title *</Label>
+                    <Input
+                      id="risk_title"
+                      placeholder="e.g., Resource availability constraint"
+                      value={riskForm.title}
+                      onChange={(e) => setRiskForm(prev => ({ ...prev, title: e.target.value }))}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="risk_description">Description</Label>
+                    <Input
+                      id="risk_description"
+                      placeholder="Describe the risk and its potential impact"
+                      value={riskForm.description}
+                      onChange={(e) => setRiskForm(prev => ({ ...prev, description: e.target.value }))}
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="risk_probability">Probability</Label>
+                      <select
+                        id="risk_probability"
+                        className="w-full h-10 px-3 rounded-md border border-input bg-background"
+                        value={riskForm.probability}
+                        onChange={(e) => setRiskForm(prev => ({ ...prev, probability: e.target.value as 'low' | 'medium' | 'high' | 'very_high' }))}
+                      >
+                        <option value="low">Low</option>
+                        <option value="medium">Medium</option>
+                        <option value="high">High</option>
+                        <option value="very_high">Very High</option>
+                      </select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="risk_impact">Impact Level</Label>
+                      <select
+                        id="risk_impact"
+                        className="w-full h-10 px-3 rounded-md border border-input bg-background"
+                        value={riskForm.impact}
+                        onChange={(e) => setRiskForm(prev => ({ ...prev, impact: e.target.value as 'low' | 'medium' | 'high' | 'critical' }))}
+                      >
+                        <option value="low">Low</option>
+                        <option value="medium">Medium</option>
+                        <option value="high">High</option>
+                        <option value="critical">Critical</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="risk_mitigation">Mitigation Strategy</Label>
+                    <Input
+                      id="risk_mitigation"
+                      placeholder="How will this risk be mitigated?"
+                      value={riskForm.mitigation}
+                      onChange={(e) => setRiskForm(prev => ({ ...prev, mitigation: e.target.value }))}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="risk_owner">Risk Owner</Label>
+                    <Input
+                      id="risk_owner"
+                      placeholder="Person responsible for managing this risk"
+                      value={riskForm.owner}
+                      onChange={(e) => setRiskForm(prev => ({ ...prev, owner: e.target.value }))}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Risk Matrix Preview */}
+              <div className="border-t pt-4">
+                <h4 className="font-semibold mb-3">Risk Assessment Matrix</h4>
+                <div className="grid grid-cols-5 gap-1 text-xs">
+                  <div className="col-span-1"></div>
+                  <div className="text-center p-1 font-medium">Low</div>
+                  <div className="text-center p-1 font-medium">Medium</div>
+                  <div className="text-center p-1 font-medium">High</div>
+                  <div className="text-center p-1 font-medium">Critical</div>
+
+                  <div className="text-right p-1 font-medium">Very High</div>
+                  <div className={`p-2 rounded ${riskForm.probability === 'very_high' && riskForm.impact === 'low' ? 'ring-2 ring-black dark:ring-white' : ''} bg-amber-200`}></div>
+                  <div className={`p-2 rounded ${riskForm.probability === 'very_high' && riskForm.impact === 'medium' ? 'ring-2 ring-black dark:ring-white' : ''} bg-orange-300`}></div>
+                  <div className={`p-2 rounded ${riskForm.probability === 'very_high' && riskForm.impact === 'high' ? 'ring-2 ring-black dark:ring-white' : ''} bg-red-400`}></div>
+                  <div className={`p-2 rounded ${riskForm.probability === 'very_high' && riskForm.impact === 'critical' ? 'ring-2 ring-black dark:ring-white' : ''} bg-red-600`}></div>
+
+                  <div className="text-right p-1 font-medium">High</div>
+                  <div className={`p-2 rounded ${riskForm.probability === 'high' && riskForm.impact === 'low' ? 'ring-2 ring-black dark:ring-white' : ''} bg-yellow-200`}></div>
+                  <div className={`p-2 rounded ${riskForm.probability === 'high' && riskForm.impact === 'medium' ? 'ring-2 ring-black dark:ring-white' : ''} bg-amber-300`}></div>
+                  <div className={`p-2 rounded ${riskForm.probability === 'high' && riskForm.impact === 'high' ? 'ring-2 ring-black dark:ring-white' : ''} bg-orange-400`}></div>
+                  <div className={`p-2 rounded ${riskForm.probability === 'high' && riskForm.impact === 'critical' ? 'ring-2 ring-black dark:ring-white' : ''} bg-red-500`}></div>
+
+                  <div className="text-right p-1 font-medium">Medium</div>
+                  <div className={`p-2 rounded ${riskForm.probability === 'medium' && riskForm.impact === 'low' ? 'ring-2 ring-black dark:ring-white' : ''} bg-green-200`}></div>
+                  <div className={`p-2 rounded ${riskForm.probability === 'medium' && riskForm.impact === 'medium' ? 'ring-2 ring-black dark:ring-white' : ''} bg-yellow-300`}></div>
+                  <div className={`p-2 rounded ${riskForm.probability === 'medium' && riskForm.impact === 'high' ? 'ring-2 ring-black dark:ring-white' : ''} bg-amber-400`}></div>
+                  <div className={`p-2 rounded ${riskForm.probability === 'medium' && riskForm.impact === 'critical' ? 'ring-2 ring-black dark:ring-white' : ''} bg-orange-500`}></div>
+
+                  <div className="text-right p-1 font-medium">Low</div>
+                  <div className={`p-2 rounded ${riskForm.probability === 'low' && riskForm.impact === 'low' ? 'ring-2 ring-black dark:ring-white' : ''} bg-green-100`}></div>
+                  <div className={`p-2 rounded ${riskForm.probability === 'low' && riskForm.impact === 'medium' ? 'ring-2 ring-black dark:ring-white' : ''} bg-green-300`}></div>
+                  <div className={`p-2 rounded ${riskForm.probability === 'low' && riskForm.impact === 'high' ? 'ring-2 ring-black dark:ring-white' : ''} bg-yellow-400`}></div>
+                  <div className={`p-2 rounded ${riskForm.probability === 'low' && riskForm.impact === 'critical' ? 'ring-2 ring-black dark:ring-white' : ''} bg-amber-500`}></div>
+                </div>
+                <p className="text-xs text-slate-500 mt-2 text-center">
+                  Current selection highlighted based on probability and impact
+                </p>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setShowRiskAnalysisDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                onClick={() => {
+                  if (!riskForm.title.trim()) {
+                    toast.error('Risk title is required')
+                    return
+                  }
+                  toast.success('Risk added to analysis')
+                  setRiskForm({
+                    title: '',
+                    description: '',
+                    probability: 'medium',
+                    impact: 'medium',
+                    mitigation: '',
+                    owner: ''
+                  })
+                  setShowRiskAnalysisDialog(false)
+                }}
+                className="bg-gradient-to-r from-amber-600 to-orange-600 text-white"
+              >
+                Add Risk
               </Button>
             </div>
           </DialogContent>

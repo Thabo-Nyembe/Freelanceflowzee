@@ -346,12 +346,6 @@ const mockDocsActivities = [
   { id: '3', user: 'System', action: 'Generated', target: 'changelog from commits', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'update' as const },
 ]
 
-const mockDocsQuickActions = [
-  { id: '1', label: 'New Page', icon: 'plus', action: () => toast.success('Page created successfully'), variant: 'default' as const },
-  { id: '2', label: 'Search Docs', icon: 'search', action: () => toast.success('Search completed'), variant: 'default' as const },
-  { id: '3', label: 'Export PDF', icon: 'download', action: () => toast.success('PDF exported successfully'), variant: 'outline' as const },
-]
-
 export default function DocumentationClient() {
   const [activeTab, setActiveTab] = useState('dashboard')
   const [searchQuery, setSearchQuery] = useState('')
@@ -363,6 +357,21 @@ export default function DocumentationClient() {
   const [selectedChangelog, setSelectedChangelog] = useState<DocChangelog | null>(null)
   const [selectedLocale, setSelectedLocale] = useState<DocLocale | null>(null)
   const [settingsTab, setSettingsTab] = useState('general')
+
+  // Quick Actions Dialog States
+  const [showQuickSearchDialog, setShowQuickSearchDialog] = useState(false)
+  const [showExportPdfDialog, setShowExportPdfDialog] = useState(false)
+  const [quickSearchQuery, setQuickSearchQuery] = useState('')
+  const [quickSearchResults, setQuickSearchResults] = useState<DocPage[]>([])
+  const [exportPdfOptions, setExportPdfOptions] = useState({
+    space: 'all',
+    includeImages: true,
+    includeComments: false,
+    format: 'pdf' as 'pdf' | 'markdown' | 'html',
+    pageRange: 'all' as 'all' | 'selected'
+  })
+  const [selectedPagesForExport, setSelectedPagesForExport] = useState<string[]>([])
+  const [isExporting, setIsExporting] = useState(false)
 
   // Supabase CRUD hook for real database operations
   const {
@@ -739,6 +748,113 @@ export default function DocumentationClient() {
     })
     setShowNewSpace(false)
   }
+
+  // Quick Search Handler
+  const handleQuickSearch = (query: string) => {
+    setQuickSearchQuery(query)
+    if (query.length > 0) {
+      const results = mockPages.filter(page =>
+        page.title.toLowerCase().includes(query.toLowerCase()) ||
+        page.excerpt.toLowerCase().includes(query.toLowerCase()) ||
+        page.labels.some(label => label.toLowerCase().includes(query.toLowerCase()))
+      )
+      setQuickSearchResults(results)
+    } else {
+      setQuickSearchResults([])
+    }
+  }
+
+  // Select search result
+  const handleSelectSearchResult = (page: DocPage) => {
+    setSelectedPage(page)
+    setShowQuickSearchDialog(false)
+    setQuickSearchQuery('')
+    setQuickSearchResults([])
+    setActiveTab('pages')
+    toast.success('Page Selected', {
+      description: `Navigated to "${page.title}"`
+    })
+  }
+
+  // Export PDF Handler
+  const handleExportPdf = async () => {
+    setIsExporting(true)
+
+    // Simulate export process
+    await new Promise(resolve => setTimeout(resolve, 2000))
+
+    const pagesToExport = exportPdfOptions.pageRange === 'all'
+      ? mockPages
+      : mockPages.filter(p => selectedPagesForExport.includes(p.id))
+
+    setIsExporting(false)
+    setShowExportPdfDialog(false)
+
+    toast.success('Export Complete', {
+      description: `Successfully exported ${pagesToExport.length} pages as ${exportPdfOptions.format.toUpperCase()}`
+    })
+
+    // Reset selection
+    setSelectedPagesForExport([])
+    setExportPdfOptions({
+      space: 'all',
+      includeImages: true,
+      includeComments: false,
+      format: 'pdf',
+      pageRange: 'all'
+    })
+  }
+
+  // Toggle page selection for export
+  const togglePageExportSelection = (pageId: string) => {
+    setSelectedPagesForExport(prev =>
+      prev.includes(pageId)
+        ? prev.filter(id => id !== pageId)
+        : [...prev, pageId]
+    )
+  }
+
+  // Quick Actions with dialog-based workflows
+  const mockDocsQuickActions = [
+    {
+      id: '1',
+      label: 'New Page',
+      icon: 'plus',
+      action: () => {
+        resetDocForm()
+        setShowCreateDocDialog(true)
+      },
+      variant: 'default' as const
+    },
+    {
+      id: '2',
+      label: 'Search Docs',
+      icon: 'search',
+      action: () => {
+        setQuickSearchQuery('')
+        setQuickSearchResults([])
+        setShowQuickSearchDialog(true)
+      },
+      variant: 'default' as const
+    },
+    {
+      id: '3',
+      label: 'Export PDF',
+      icon: 'download',
+      action: () => {
+        setExportPdfOptions({
+          space: 'all',
+          includeImages: true,
+          includeComments: false,
+          format: 'pdf',
+          pageRange: 'all'
+        })
+        setSelectedPagesForExport([])
+        setShowExportPdfDialog(true)
+      },
+      variant: 'outline' as const
+    },
+  ]
 
   // Helper to get status badge color for Supabase docs
   const getSupabaseDocStatusColor = (status: DocStatus): string => {
@@ -2511,6 +2627,262 @@ export default function DocumentationClient() {
                 disabled={mutating}
               >
                 {mutating ? 'Deleting...' : 'Delete Documentation'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Quick Search Dialog */}
+        <Dialog open={showQuickSearchDialog} onOpenChange={setShowQuickSearchDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-3">
+                <Search className="h-5 w-5 text-purple-600" />
+                Quick Search Documentation
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Input
+                  placeholder="Search by title, content, or labels..."
+                  value={quickSearchQuery}
+                  onChange={(e) => handleQuickSearch(e.target.value)}
+                  className="pl-10"
+                  autoFocus
+                />
+              </div>
+
+              <div className="text-sm text-gray-500">
+                {quickSearchQuery.length > 0 ? (
+                  <span>{quickSearchResults.length} result{quickSearchResults.length !== 1 ? 's' : ''} found</span>
+                ) : (
+                  <span>Start typing to search documentation...</span>
+                )}
+              </div>
+
+              <ScrollArea className="h-[300px]">
+                {quickSearchResults.length > 0 ? (
+                  <div className="space-y-2">
+                    {quickSearchResults.map((page) => (
+                      <div
+                        key={page.id}
+                        onClick={() => handleSelectSearchResult(page)}
+                        className="flex items-center gap-4 p-3 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded-lg cursor-pointer border border-transparent hover:border-purple-200 dark:hover:border-purple-700 transition-all"
+                      >
+                        <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+                          <FileText className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <h4 className="font-medium truncate">{page.title}</h4>
+                            <Badge className={getStatusColor(page.status)}>{page.status}</Badge>
+                          </div>
+                          <p className="text-sm text-gray-500 truncate">{page.excerpt}</p>
+                          <div className="flex items-center gap-2 mt-1">
+                            {page.labels.slice(0, 3).map((label) => (
+                              <Badge key={label} variant="outline" className="text-xs">
+                                <Tag className="h-2 w-2 mr-1" />
+                                {label}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                        <div className="text-right text-sm text-gray-500">
+                          <p>{page.reading_time}</p>
+                          <p>{page.views.toLocaleString()} views</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : quickSearchQuery.length > 0 ? (
+                  <div className="text-center py-8">
+                    <Search className="h-12 w-12 text-gray-300 mx-auto mb-3" />
+                    <p className="text-gray-500">No matching documentation found</p>
+                    <p className="text-sm text-gray-400 mt-1">Try different keywords or check your spelling</p>
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <BookOpen className="h-12 w-12 text-gray-300 mx-auto mb-3" />
+                    <p className="text-gray-500">Search your documentation</p>
+                    <p className="text-sm text-gray-400 mt-1">Find pages by title, content, or labels</p>
+                  </div>
+                )}
+              </ScrollArea>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowQuickSearchDialog(false)}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Export PDF Dialog */}
+        <Dialog open={showExportPdfDialog} onOpenChange={setShowExportPdfDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-3">
+                <Download className="h-5 w-5 text-purple-600" />
+                Export Documentation
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-6 py-4">
+              {/* Export Format */}
+              <div>
+                <Label className="text-sm font-medium">Export Format</Label>
+                <div className="grid grid-cols-3 gap-3 mt-2">
+                  {(['pdf', 'markdown', 'html'] as const).map((format) => (
+                    <div
+                      key={format}
+                      onClick={() => setExportPdfOptions(prev => ({ ...prev, format }))}
+                      className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                        exportPdfOptions.format === format
+                          ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20'
+                          : 'border-gray-200 dark:border-gray-700 hover:border-purple-300'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2 mb-1">
+                        {format === 'pdf' && <FileText className="h-4 w-4 text-red-500" />}
+                        {format === 'markdown' && <Code className="h-4 w-4 text-gray-600" />}
+                        {format === 'html' && <Globe className="h-4 w-4 text-blue-500" />}
+                        <span className="font-medium uppercase">{format}</span>
+                      </div>
+                      <p className="text-xs text-gray-500">
+                        {format === 'pdf' && 'Print-ready document'}
+                        {format === 'markdown' && 'Plain text format'}
+                        {format === 'html' && 'Web-ready export'}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Space Selection */}
+              <div>
+                <Label className="text-sm font-medium">Documentation Space</Label>
+                <Select
+                  value={exportPdfOptions.space}
+                  onValueChange={(value) => setExportPdfOptions(prev => ({ ...prev, space: value }))}
+                >
+                  <SelectTrigger className="mt-2">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Spaces</SelectItem>
+                    {mockSpaces.map((space) => (
+                      <SelectItem key={space.id} value={space.id}>
+                        {space.icon} {space.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Page Range */}
+              <div>
+                <Label className="text-sm font-medium">Pages to Export</Label>
+                <div className="grid grid-cols-2 gap-3 mt-2">
+                  <div
+                    onClick={() => setExportPdfOptions(prev => ({ ...prev, pageRange: 'all' }))}
+                    className={`p-3 rounded-lg border-2 cursor-pointer transition-all ${
+                      exportPdfOptions.pageRange === 'all'
+                        ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20'
+                        : 'border-gray-200 dark:border-gray-700 hover:border-purple-300'
+                    }`}
+                  >
+                    <span className="font-medium">All Pages</span>
+                    <p className="text-xs text-gray-500">{mockPages.length} pages total</p>
+                  </div>
+                  <div
+                    onClick={() => setExportPdfOptions(prev => ({ ...prev, pageRange: 'selected' }))}
+                    className={`p-3 rounded-lg border-2 cursor-pointer transition-all ${
+                      exportPdfOptions.pageRange === 'selected'
+                        ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20'
+                        : 'border-gray-200 dark:border-gray-700 hover:border-purple-300'
+                    }`}
+                  >
+                    <span className="font-medium">Selected Pages</span>
+                    <p className="text-xs text-gray-500">{selectedPagesForExport.length} selected</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Page Selection (when selected pages is chosen) */}
+              {exportPdfOptions.pageRange === 'selected' && (
+                <div>
+                  <Label className="text-sm font-medium mb-2 block">Select Pages</Label>
+                  <ScrollArea className="h-[150px] border rounded-lg p-2">
+                    <div className="space-y-1">
+                      {mockPages.map((page) => (
+                        <div
+                          key={page.id}
+                          onClick={() => togglePageExportSelection(page.id)}
+                          className={`flex items-center gap-3 p-2 rounded cursor-pointer transition-all ${
+                            selectedPagesForExport.includes(page.id)
+                              ? 'bg-purple-100 dark:bg-purple-900/30'
+                              : 'hover:bg-gray-100 dark:hover:bg-gray-800'
+                          }`}
+                        >
+                          <div className={`w-4 h-4 rounded border-2 flex items-center justify-center ${
+                            selectedPagesForExport.includes(page.id)
+                              ? 'border-purple-500 bg-purple-500'
+                              : 'border-gray-300'
+                          }`}>
+                            {selectedPagesForExport.includes(page.id) && (
+                              <CheckCircle2 className="h-3 w-3 text-white" />
+                            )}
+                          </div>
+                          <span className="flex-1 text-sm">{page.title}</span>
+                          <Badge variant="outline" className="text-xs">{page.reading_time}</Badge>
+                        </div>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                </div>
+              )}
+
+              {/* Export Options */}
+              <div className="space-y-3">
+                <Label className="text-sm font-medium">Export Options</Label>
+                <div className="flex items-center justify-between p-3 border rounded-lg">
+                  <div>
+                    <span className="text-sm font-medium">Include Images</span>
+                    <p className="text-xs text-gray-500">Embed all images in export</p>
+                  </div>
+                  <Switch
+                    checked={exportPdfOptions.includeImages}
+                    onCheckedChange={(checked) => setExportPdfOptions(prev => ({ ...prev, includeImages: checked }))}
+                  />
+                </div>
+                <div className="flex items-center justify-between p-3 border rounded-lg">
+                  <div>
+                    <span className="text-sm font-medium">Include Comments</span>
+                    <p className="text-xs text-gray-500">Add page comments to export</p>
+                  </div>
+                  <Switch
+                    checked={exportPdfOptions.includeComments}
+                    onCheckedChange={(checked) => setExportPdfOptions(prev => ({ ...prev, includeComments: checked }))}
+                  />
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowExportPdfDialog(false)}>Cancel</Button>
+              <Button
+                className="bg-gradient-to-r from-purple-600 to-fuchsia-600"
+                onClick={handleExportPdf}
+                disabled={isExporting || (exportPdfOptions.pageRange === 'selected' && selectedPagesForExport.length === 0)}
+              >
+                {isExporting ? (
+                  <>
+                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                    Exporting...
+                  </>
+                ) : (
+                  <>
+                    <Download className="h-4 w-4 mr-2" />
+                    Export {exportPdfOptions.format.toUpperCase()}
+                  </>
+                )}
               </Button>
             </DialogFooter>
           </DialogContent>

@@ -563,6 +563,8 @@ export default function EventsClient() {
   const [newAttendeeEmail, setNewAttendeeEmail] = useState('')
   const [emailSubject, setEmailSubject] = useState('')
   const [emailBody, setEmailBody] = useState('')
+  const [showSearchAttendeesDialog, setShowSearchAttendeesDialog] = useState(false)
+  const [attendeeSearchQuery, setAttendeeSearchQuery] = useState('')
   const [eventToEdit, setEventToEdit] = useState<SupabaseEvent | null>(null)
   const [eventToDelete, setEventToDelete] = useState<SupabaseEvent | null>(null)
 
@@ -1597,7 +1599,7 @@ export default function EventsClient() {
                   { icon: Send, label: 'Send Reminder', color: 'from-orange-500 to-amber-600', action: () => { setEmailSubject('Event Reminder'); setEmailBody('This is a friendly reminder about the upcoming event.'); setShowEmailDialog(true) } },
                   { icon: Download, label: 'Export List', color: 'from-cyan-500 to-blue-600', action: handleExportAttendees },
                   { icon: Filter, label: 'Filter', color: 'from-pink-500 to-rose-600', action: handleFilterAttendees },
-                  { icon: Search, label: 'Search', color: 'from-indigo-500 to-purple-600', action: () => toast.info('Use the search bar above to find attendees') },
+                  { icon: Search, label: 'Search', color: 'from-indigo-500 to-purple-600', action: () => setShowSearchAttendeesDialog(true) },
                   { icon: CreditCard, label: 'Refunds', color: 'from-gray-500 to-gray-600', action: handleRefunds },
                 ].map((action, i) => (
                   <Button
@@ -3100,6 +3102,83 @@ export default function EventsClient() {
               }}
             >
               Send Email
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Search Attendees Dialog */}
+      <Dialog open={showSearchAttendeesDialog} onOpenChange={setShowSearchAttendeesDialog}>
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Search className="w-5 h-5 text-indigo-600" />
+              Search Attendees
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <Input
+                placeholder="Search by name, email, ticket type, or order number..."
+                value={attendeeSearchQuery}
+                onChange={(e) => setAttendeeSearchQuery(e.target.value)}
+                className="pl-10"
+                autoFocus
+              />
+            </div>
+            <div className="space-y-2 max-h-[400px] overflow-y-auto">
+              {mockAttendees
+                .filter(attendee =>
+                  attendeeSearchQuery.trim() === '' ||
+                  attendee.name.toLowerCase().includes(attendeeSearchQuery.toLowerCase()) ||
+                  attendee.email.toLowerCase().includes(attendeeSearchQuery.toLowerCase()) ||
+                  attendee.ticketType.toLowerCase().includes(attendeeSearchQuery.toLowerCase()) ||
+                  attendee.orderNumber.toLowerCase().includes(attendeeSearchQuery.toLowerCase())
+                )
+                .map(attendee => (
+                  <div
+                    key={attendee.id}
+                    className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer"
+                    onClick={() => {
+                      toast.success(`Selected attendee: ${attendee.name}`)
+                      setShowSearchAttendeesDialog(false)
+                      setAttendeeSearchQuery('')
+                    }}
+                  >
+                    <div className="flex items-center gap-3">
+                      <Avatar className="w-10 h-10">
+                        <AvatarFallback className="bg-gradient-to-br from-indigo-500 to-purple-500 text-white">
+                          {attendee.name.split(' ').map(n => n[0]).join('')}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <div className="font-medium text-gray-900 dark:text-white">{attendee.name}</div>
+                        <div className="text-sm text-gray-500">{attendee.email}</div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <Badge className={getAttendeeStatusColor(attendee.status)}>{attendee.status}</Badge>
+                      <div className="text-xs text-gray-500 mt-1">{attendee.ticketType} - {attendee.orderNumber}</div>
+                    </div>
+                  </div>
+                ))}
+              {attendeeSearchQuery.trim() !== '' && mockAttendees.filter(attendee =>
+                attendee.name.toLowerCase().includes(attendeeSearchQuery.toLowerCase()) ||
+                attendee.email.toLowerCase().includes(attendeeSearchQuery.toLowerCase()) ||
+                attendee.ticketType.toLowerCase().includes(attendeeSearchQuery.toLowerCase()) ||
+                attendee.orderNumber.toLowerCase().includes(attendeeSearchQuery.toLowerCase())
+              ).length === 0 && (
+                <div className="text-center py-8 text-gray-500">
+                  <Search className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                  <p>No attendees found matching "{attendeeSearchQuery}"</p>
+                </div>
+              )}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setShowSearchAttendeesDialog(false); setAttendeeSearchQuery('') }}>
+              Close
             </Button>
           </DialogFooter>
         </DialogContent>

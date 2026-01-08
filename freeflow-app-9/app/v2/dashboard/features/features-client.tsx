@@ -411,14 +411,8 @@ const mockFeaturesActivities = [
   { id: '3', user: 'QA', action: 'Approved', target: 'Mobile App v2 for beta', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'update' as const },
 ]
 
-const mockFeaturesQuickActions = [
-  { id: '1', label: 'New Feature', icon: 'plus', action: () => toast.success('New Feature', { description: 'Feature form ready' }), variant: 'default' as const },
-  { id: '2', label: 'View Roadmap', icon: 'map', action: () => toast.success('Roadmap', { description: 'Roadmap loaded' }), variant: 'default' as const },
-  { id: '3', label: 'Export Report', icon: 'download', action: () => toast.success('Report Exported', { description: 'Feature report downloaded' }), variant: 'outline' as const },
-]
-
 export default function FeaturesClient() {
-  const [features] = useState<Feature[]>(mockFeatures)
+  const [features, setFeatures] = useState<Feature[]>(mockFeatures)
   const [segments] = useState<Segment[]>(mockSegments)
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('All')
@@ -429,6 +423,79 @@ export default function FeaturesClient() {
   const [selectedFeature, setSelectedFeature] = useState<Feature | null>(null)
   const [activeTab, setActiveTab] = useState('features')
   const [settingsTab, setSettingsTab] = useState('general')
+
+  // Dialog states
+  const [newFeatureDialogOpen, setNewFeatureDialogOpen] = useState(false)
+  const [toggleFlagDialogOpen, setToggleFlagDialogOpen] = useState(false)
+  const [rolloutDialogOpen, setRolloutDialogOpen] = useState(false)
+  const [abTestDialogOpen, setAbTestDialogOpen] = useState(false)
+  const [segmentDialogOpen, setSegmentDialogOpen] = useState(false)
+  const [metricsDialogOpen, setMetricsDialogOpen] = useState(false)
+  const [compareDialogOpen, setCompareDialogOpen] = useState(false)
+  const [exportDialogOpen, setExportDialogOpen] = useState(false)
+
+  // Form states for New Feature
+  const [newFeatureForm, setNewFeatureForm] = useState({
+    name: '',
+    key: '',
+    description: '',
+    category: 'AI & ML',
+    priority: 'medium' as Priority,
+    team: '',
+    platforms: [] as string[]
+  })
+
+  // Form states for Toggle Flag
+  const [toggleFlagForm, setToggleFlagForm] = useState({
+    selectedFeatureId: '',
+    enabled: false
+  })
+
+  // Form states for Rollout
+  const [rolloutForm, setRolloutForm] = useState({
+    selectedFeatureId: '',
+    percentage: 10,
+    stage: 'canary' as RolloutStage,
+    segments: [] as string[]
+  })
+
+  // Form states for A/B Test
+  const [abTestForm, setAbTestForm] = useState({
+    selectedFeatureId: '',
+    testName: '',
+    variants: [
+      { name: 'Control', percentage: 50 },
+      { name: 'Variant A', percentage: 50 }
+    ],
+    metrics: ['Conversion', 'Engagement']
+  })
+
+  // Form states for Segment
+  const [segmentForm, setSegmentForm] = useState({
+    name: '',
+    description: '',
+    attribute: '',
+    operator: '=',
+    value: ''
+  })
+
+  // Export options
+  const [exportOptions, setExportOptions] = useState({
+    format: 'csv',
+    includeMetrics: true,
+    includeRollout: true,
+    dateRange: 'all'
+  })
+
+  // Compare selection
+  const [compareSelection, setCompareSelection] = useState<string[]>([])
+
+  // Quick actions with dialog handlers
+  const mockFeaturesQuickActions = [
+    { id: '1', label: 'New Feature', icon: 'plus', action: () => setNewFeatureDialogOpen(true), variant: 'default' as const },
+    { id: '2', label: 'View Roadmap', icon: 'map', action: () => setActiveTab('roadmap'), variant: 'default' as const },
+    { id: '3', label: 'Export Report', icon: 'download', action: () => setExportDialogOpen(true), variant: 'outline' as const },
+  ]
 
   // Filtered and sorted features
   const filteredFeatures = useMemo(() => {
@@ -539,21 +606,138 @@ export default function FeaturesClient() {
 
   // Handlers
   const handleCreateFeature = () => {
-    toast.info('Create Feature', {
-      description: 'Opening feature form...'
-    })
+    if (!newFeatureForm.name || !newFeatureForm.key) {
+      toast.error('Please fill in required fields')
+      return
+    }
+    const newFeature: Feature = {
+      id: `feature_${Date.now()}`,
+      key: newFeatureForm.key,
+      name: newFeatureForm.name,
+      description: newFeatureForm.description,
+      status: 'idea',
+      priority: newFeatureForm.priority,
+      category: newFeatureForm.category,
+      tags: [],
+      owner: mockOwners[0],
+      team: newFeatureForm.team || 'Unassigned',
+      createdAt: new Date().toISOString().split('T')[0],
+      updatedAt: new Date().toISOString().split('T')[0],
+      votes: [],
+      comments: [],
+      rice: { reach: 50, impact: 2, confidence: 70, effort: 5, score: 14 },
+      dependencies: [],
+      linkedIssues: [],
+      platforms: newFeatureForm.platforms as ('web' | 'ios' | 'android' | 'api')[]
+    }
+    setFeatures(prev => [newFeature, ...prev])
+    setNewFeatureDialogOpen(false)
+    setNewFeatureForm({ name: '', key: '', description: '', category: 'AI & ML', priority: 'medium', team: '', platforms: [] })
+    toast.success('Feature created successfully', { description: `${newFeature.name} has been added to the backlog` })
   }
 
-  const handleMoveFeature = (featureId: string, newStatus: string) => {
-    toast.success('Feature moved', {
-      description: `Feature moved to ${newStatus}`
-    })
+  const handleToggleFlag = () => {
+    if (!toggleFlagForm.selectedFeatureId) {
+      toast.error('Please select a feature')
+      return
+    }
+    setFeatures(prev => prev.map(f =>
+      f.id === toggleFlagForm.selectedFeatureId
+        ? { ...f, status: toggleFlagForm.enabled ? 'released' : 'archived' }
+        : f
+    ))
+    setToggleFlagDialogOpen(false)
+    toast.success(`Feature flag ${toggleFlagForm.enabled ? 'enabled' : 'disabled'}`)
   }
 
-  const handleExportRoadmap = () => {
-    toast.success('Exporting roadmap', {
-      description: 'Roadmap will be downloaded'
-    })
+  const handleStartRollout = () => {
+    if (!rolloutForm.selectedFeatureId) {
+      toast.error('Please select a feature')
+      return
+    }
+    setFeatures(prev => prev.map(f =>
+      f.id === rolloutForm.selectedFeatureId
+        ? {
+            ...f,
+            status: 'in_progress',
+            rollout: {
+              stage: rolloutForm.stage,
+              percentage: rolloutForm.percentage,
+              targetSegments: rolloutForm.segments,
+              environments: ['production'],
+              startDate: new Date().toISOString().split('T')[0]
+            }
+          }
+        : f
+    ))
+    setRolloutDialogOpen(false)
+    toast.success('Rollout started', { description: `Rolling out to ${rolloutForm.percentage}% of users` })
+  }
+
+  const handleCreateABTest = () => {
+    if (!abTestForm.selectedFeatureId || !abTestForm.testName) {
+      toast.error('Please fill in required fields')
+      return
+    }
+    setFeatures(prev => prev.map(f =>
+      f.id === abTestForm.selectedFeatureId
+        ? {
+            ...f,
+            abTest: {
+              id: `ab_${Date.now()}`,
+              name: abTestForm.testName,
+              variants: abTestForm.variants.map((v, i) => ({ id: `var_${i}`, name: v.name, percentage: v.percentage })),
+              status: 'running',
+              metrics: abTestForm.metrics.map(m => ({ name: m, control: 0, variant: 0 }))
+            }
+          }
+        : f
+    ))
+    setAbTestDialogOpen(false)
+    toast.success('A/B Test created', { description: `${abTestForm.testName} is now running` })
+  }
+
+  const handleCreateSegment = () => {
+    if (!segmentForm.name || !segmentForm.attribute || !segmentForm.value) {
+      toast.error('Please fill in required fields')
+      return
+    }
+    // In a real app, this would create a segment in the backend
+    setSegmentDialogOpen(false)
+    toast.success('Segment created', { description: `${segmentForm.name} segment is now active` })
+    setSegmentForm({ name: '', description: '', attribute: '', operator: '=', value: '' })
+  }
+
+  const handleExportReport = () => {
+    // Simulate export
+    const data = features.map(f => ({
+      name: f.name,
+      key: f.key,
+      status: f.status,
+      priority: f.priority,
+      votes: f.votes.length,
+      ...(exportOptions.includeMetrics && f.metrics ? { adoption: f.metrics.adoption, usage: f.metrics.usage } : {}),
+      ...(exportOptions.includeRollout && f.rollout ? { rolloutPercentage: f.rollout.percentage } : {})
+    }))
+
+    // Create downloadable file
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `features-export-${new Date().toISOString().split('T')[0]}.${exportOptions.format === 'csv' ? 'json' : exportOptions.format}`
+    a.click()
+    URL.revokeObjectURL(url)
+
+    setExportDialogOpen(false)
+    toast.success('Export completed', { description: `${features.length} features exported` })
+  }
+
+  const handleMoveFeature = (featureId: string, newStatus: FeatureStatus) => {
+    setFeatures(prev => prev.map(f =>
+      f.id === featureId ? { ...f, status: newStatus, updatedAt: new Date().toISOString().split('T')[0] } : f
+    ))
+    toast.success('Feature moved', { description: `Feature moved to ${newStatus.replace('_', ' ')}` })
   }
 
   return (
@@ -571,7 +755,7 @@ export default function FeaturesClient() {
                 Plan, prioritize, and ship features with confidence
               </p>
             </div>
-            <Button className="bg-white text-indigo-600 hover:bg-white/90">
+            <Button className="bg-white text-indigo-600 hover:bg-white/90" onClick={() => setNewFeatureDialogOpen(true)}>
               <Plus className="h-4 w-4 mr-2" />
               New Feature
             </Button>
@@ -686,17 +870,18 @@ export default function FeaturesClient() {
             {/* Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
-                { label: 'New Feature', icon: Plus, color: 'from-indigo-500 to-purple-500' },
-                { label: 'Toggle Flag', icon: ToggleRight, color: 'from-green-500 to-emerald-500' },
-                { label: 'Start Rollout', icon: TrendingUp, color: 'from-blue-500 to-cyan-500' },
-                { label: 'A/B Test', icon: Target, color: 'from-orange-500 to-red-500' },
-                { label: 'Add Segment', icon: Users, color: 'from-purple-500 to-pink-500' },
-                { label: 'View Metrics', icon: BarChart3, color: 'from-teal-500 to-cyan-500' },
-                { label: 'Compare', icon: GitBranch, color: 'from-pink-500 to-rose-500' },
-                { label: 'Export', icon: ExternalLink, color: 'from-gray-500 to-gray-600' }
+                { label: 'New Feature', icon: Plus, color: 'from-indigo-500 to-purple-500', action: () => setNewFeatureDialogOpen(true) },
+                { label: 'Toggle Flag', icon: ToggleRight, color: 'from-green-500 to-emerald-500', action: () => setToggleFlagDialogOpen(true) },
+                { label: 'Start Rollout', icon: TrendingUp, color: 'from-blue-500 to-cyan-500', action: () => setRolloutDialogOpen(true) },
+                { label: 'A/B Test', icon: Target, color: 'from-orange-500 to-red-500', action: () => setAbTestDialogOpen(true) },
+                { label: 'Add Segment', icon: Users, color: 'from-purple-500 to-pink-500', action: () => setSegmentDialogOpen(true) },
+                { label: 'View Metrics', icon: BarChart3, color: 'from-teal-500 to-cyan-500', action: () => setMetricsDialogOpen(true) },
+                { label: 'Compare', icon: GitBranch, color: 'from-pink-500 to-rose-500', action: () => setCompareDialogOpen(true) },
+                { label: 'Export', icon: ExternalLink, color: 'from-gray-500 to-gray-600', action: () => setExportDialogOpen(true) }
               ].map((action, i) => (
                 <button
                   key={i}
+                  onClick={action.action}
                   className="flex flex-col items-center gap-2 p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:shadow-lg hover:scale-105 transition-all group"
                 >
                   <div className={`p-2 rounded-lg bg-gradient-to-br ${action.color} text-white group-hover:scale-110 transition-transform`}>
@@ -746,6 +931,18 @@ export default function FeaturesClient() {
                       <option value="in_progress">In Progress</option>
                       <option value="testing">Testing</option>
                       <option value="released">Released</option>
+                    </select>
+
+                    <select
+                      value={selectedPriority}
+                      onChange={(e) => setSelectedPriority(e.target.value as Priority | 'all')}
+                      className="border rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-800"
+                    >
+                      <option value="all">All Priority</option>
+                      <option value="critical">Critical</option>
+                      <option value="high">High</option>
+                      <option value="medium">Medium</option>
+                      <option value="low">Low</option>
                     </select>
 
                     <select
@@ -807,6 +1004,23 @@ export default function FeaturesClient() {
                                 <Avatar className="h-5 w-5">
                                   <AvatarFallback>{feature.owner.name[0]}</AvatarFallback>
                                 </Avatar>
+                              </div>
+                              <div className="flex items-center gap-1 mt-2 pt-2 border-t">
+                                <select
+                                  className="w-full text-xs px-2 py-1 rounded border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800"
+                                  value={feature.status}
+                                  onClick={(e) => e.stopPropagation()}
+                                  onChange={(e) => {
+                                    e.stopPropagation()
+                                    handleMoveFeature(feature.id, e.target.value as FeatureStatus)
+                                  }}
+                                >
+                                  <option value="idea">Idea</option>
+                                  <option value="planned">Planned</option>
+                                  <option value="in_progress">In Progress</option>
+                                  <option value="testing">Testing</option>
+                                  <option value="released">Released</option>
+                                </select>
                               </div>
                             </CardContent>
                           </Card>
@@ -873,10 +1087,25 @@ export default function FeaturesClient() {
                           </td>
                           <td className="p-4">
                             <div className="flex items-center gap-1">
-                              <Button variant="ghost" size="sm">
+                              <Button variant="ghost" size="sm" onClick={(e) => {
+                                e.stopPropagation()
+                                setSelectedFeature(feature)
+                              }}>
                                 <Eye className="h-4 w-4" />
                               </Button>
-                              <Button variant="ghost" size="sm">
+                              <Button variant="ghost" size="sm" onClick={(e) => {
+                                e.stopPropagation()
+                                setNewFeatureForm({
+                                  name: feature.name,
+                                  key: feature.key,
+                                  description: feature.description,
+                                  category: feature.category,
+                                  priority: feature.priority,
+                                  team: feature.team,
+                                  platforms: [...feature.platforms]
+                                })
+                                setNewFeatureDialogOpen(true)
+                              }}>
                                 <Edit className="h-4 w-4" />
                               </Button>
                             </div>
@@ -1052,7 +1281,7 @@ export default function FeaturesClient() {
 
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold">User Segments</h2>
-              <Button>
+              <Button onClick={() => setSegmentDialogOpen(true)}>
                 <Plus className="h-4 w-4 mr-2" />
                 Create Segment
               </Button>
@@ -1115,7 +1344,7 @@ export default function FeaturesClient() {
 
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold">A/B Experiments</h2>
-              <Button>
+              <Button onClick={() => setAbTestDialogOpen(true)}>
                 <Plus className="h-4 w-4 mr-2" />
                 New Experiment
               </Button>
@@ -1796,7 +2025,11 @@ export default function FeaturesClient() {
                       <div className="text-center py-8 text-gray-500">
                         <Flag className="h-12 w-12 mx-auto mb-4 text-gray-300" />
                         <p>No rollout configured yet</p>
-                        <Button className="mt-4">Configure Rollout</Button>
+                        <Button className="mt-4" onClick={() => {
+                          setRolloutForm(prev => ({ ...prev, selectedFeatureId: selectedFeature.id }))
+                          setSelectedFeature(null)
+                          setRolloutDialogOpen(true)
+                        }}>Configure Rollout</Button>
                       </div>
                     )}
                   </TabsContent>
@@ -1852,7 +2085,16 @@ export default function FeaturesClient() {
                         <ThumbsUp className="h-5 w-5 text-indigo-600" />
                         <span className="font-semibold">{selectedFeature.votes.length} votes</span>
                       </div>
-                      <Button variant="outline" size="sm">
+                      <Button variant="outline" size="sm" onClick={() => {
+                        const newVote = { id: `vote_${Date.now()}`, userId: 'current_user', userName: 'You', createdAt: new Date().toISOString() }
+                        setFeatures(prev => prev.map(f =>
+                          f.id === selectedFeature.id
+                            ? { ...f, votes: [...f.votes, newVote] }
+                            : f
+                        ))
+                        setSelectedFeature(prev => prev ? { ...prev, votes: [...prev.votes, newVote] } : prev)
+                        toast.success('Vote recorded', { description: 'Your vote has been added' })
+                      }}>
                         <ThumbsUp className="h-4 w-4 mr-2" />
                         Vote
                       </Button>
@@ -1891,6 +2133,665 @@ export default function FeaturesClient() {
               </Tabs>
             </>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* New Feature Dialog */}
+      <Dialog open={newFeatureDialogOpen} onOpenChange={setNewFeatureDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Plus className="h-5 w-5 text-indigo-600" />
+              Create New Feature
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Feature Name *</label>
+                <Input
+                  placeholder="e.g., Dark Mode Support"
+                  value={newFeatureForm.name}
+                  onChange={(e) => setNewFeatureForm(prev => ({ ...prev, name: e.target.value }))}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Feature Key *</label>
+                <Input
+                  placeholder="e.g., dark_mode"
+                  value={newFeatureForm.key}
+                  onChange={(e) => setNewFeatureForm(prev => ({ ...prev, key: e.target.value.toLowerCase().replace(/\s+/g, '_') }))}
+                />
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Description</label>
+              <textarea
+                className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 min-h-[100px]"
+                placeholder="Describe the feature..."
+                value={newFeatureForm.description}
+                onChange={(e) => setNewFeatureForm(prev => ({ ...prev, description: e.target.value }))}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Category</label>
+                <select
+                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+                  value={newFeatureForm.category}
+                  onChange={(e) => setNewFeatureForm(prev => ({ ...prev, category: e.target.value }))}
+                >
+                  {categories.filter(c => c !== 'All').map(cat => (
+                    <option key={cat} value={cat}>{cat}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Priority</label>
+                <select
+                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+                  value={newFeatureForm.priority}
+                  onChange={(e) => setNewFeatureForm(prev => ({ ...prev, priority: e.target.value as Priority }))}
+                >
+                  <option value="low">Low</option>
+                  <option value="medium">Medium</option>
+                  <option value="high">High</option>
+                  <option value="critical">Critical</option>
+                </select>
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Team</label>
+              <Input
+                placeholder="e.g., Platform, Frontend, Mobile"
+                value={newFeatureForm.team}
+                onChange={(e) => setNewFeatureForm(prev => ({ ...prev, team: e.target.value }))}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Platforms</label>
+              <div className="flex gap-2">
+                {['web', 'ios', 'android', 'api'].map(platform => (
+                  <button
+                    key={platform}
+                    type="button"
+                    className={`px-3 py-1 rounded-lg border ${
+                      newFeatureForm.platforms.includes(platform)
+                        ? 'bg-indigo-100 border-indigo-300 text-indigo-700'
+                        : 'border-gray-200 dark:border-gray-700'
+                    }`}
+                    onClick={() => setNewFeatureForm(prev => ({
+                      ...prev,
+                      platforms: prev.platforms.includes(platform)
+                        ? prev.platforms.filter(p => p !== platform)
+                        : [...prev.platforms, platform]
+                    }))}
+                  >
+                    {platform}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setNewFeatureDialogOpen(false)}>Cancel</Button>
+            <Button onClick={handleCreateFeature}>Create Feature</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Toggle Flag Dialog */}
+      <Dialog open={toggleFlagDialogOpen} onOpenChange={setToggleFlagDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <ToggleRight className="h-5 w-5 text-green-600" />
+              Toggle Feature Flag
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Select Feature</label>
+              <select
+                className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+                value={toggleFlagForm.selectedFeatureId}
+                onChange={(e) => setToggleFlagForm(prev => ({ ...prev, selectedFeatureId: e.target.value }))}
+              >
+                <option value="">Choose a feature...</option>
+                {features.map(f => (
+                  <option key={f.id} value={f.id}>{f.name} ({f.key})</option>
+                ))}
+              </select>
+            </div>
+            <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+              <div>
+                <p className="font-medium text-gray-900 dark:text-white">Enable Feature</p>
+                <p className="text-sm text-gray-500">Toggle the feature flag on or off</p>
+              </div>
+              <button
+                onClick={() => setToggleFlagForm(prev => ({ ...prev, enabled: !prev.enabled }))}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                  toggleFlagForm.enabled ? 'bg-green-600' : 'bg-gray-300'
+                }`}
+              >
+                <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  toggleFlagForm.enabled ? 'translate-x-6' : 'translate-x-1'
+                }`} />
+              </button>
+            </div>
+            {toggleFlagForm.selectedFeatureId && (
+              <div className="p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800">
+                <p className="text-sm text-amber-700 dark:text-amber-400">
+                  {toggleFlagForm.enabled
+                    ? 'This will release the feature to all users immediately.'
+                    : 'This will archive the feature and disable it for all users.'}
+                </p>
+              </div>
+            )}
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setToggleFlagDialogOpen(false)}>Cancel</Button>
+            <Button onClick={handleToggleFlag} className={toggleFlagForm.enabled ? 'bg-green-600 hover:bg-green-700' : ''}>
+              {toggleFlagForm.enabled ? 'Enable Flag' : 'Disable Flag'}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Rollout Dialog */}
+      <Dialog open={rolloutDialogOpen} onOpenChange={setRolloutDialogOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <TrendingUp className="h-5 w-5 text-blue-600" />
+              Start Feature Rollout
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Select Feature</label>
+              <select
+                className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+                value={rolloutForm.selectedFeatureId}
+                onChange={(e) => setRolloutForm(prev => ({ ...prev, selectedFeatureId: e.target.value }))}
+              >
+                <option value="">Choose a feature...</option>
+                {features.filter(f => f.status !== 'released').map(f => (
+                  <option key={f.id} value={f.id}>{f.name}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Rollout Stage</label>
+              <select
+                className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+                value={rolloutForm.stage}
+                onChange={(e) => setRolloutForm(prev => ({ ...prev, stage: e.target.value as RolloutStage }))}
+              >
+                <option value="canary">Canary (1-5%)</option>
+                <option value="beta">Beta (10-25%)</option>
+                <option value="ga">General Availability (50-75%)</option>
+                <option value="full">Full Rollout (100%)</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Rollout Percentage: {rolloutForm.percentage}%
+              </label>
+              <input
+                type="range"
+                min="1"
+                max="100"
+                value={rolloutForm.percentage}
+                onChange={(e) => setRolloutForm(prev => ({ ...prev, percentage: parseInt(e.target.value) }))}
+                className="w-full"
+              />
+              <div className="flex justify-between text-xs text-gray-500 mt-1">
+                <span>1%</span>
+                <span>50%</span>
+                <span>100%</span>
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Target Segments</label>
+              <div className="flex flex-wrap gap-2">
+                {mockSegments.map(seg => (
+                  <button
+                    key={seg.id}
+                    type="button"
+                    className={`px-3 py-1 rounded-lg border text-sm ${
+                      rolloutForm.segments.includes(seg.name)
+                        ? 'bg-blue-100 border-blue-300 text-blue-700'
+                        : 'border-gray-200 dark:border-gray-700'
+                    }`}
+                    onClick={() => setRolloutForm(prev => ({
+                      ...prev,
+                      segments: prev.segments.includes(seg.name)
+                        ? prev.segments.filter(s => s !== seg.name)
+                        : [...prev.segments, seg.name]
+                    }))}
+                  >
+                    {seg.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setRolloutDialogOpen(false)}>Cancel</Button>
+            <Button onClick={handleStartRollout}>Start Rollout</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* A/B Test Dialog */}
+      <Dialog open={abTestDialogOpen} onOpenChange={setAbTestDialogOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Target className="h-5 w-5 text-orange-600" />
+              Create A/B Test
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Select Feature</label>
+              <select
+                className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+                value={abTestForm.selectedFeatureId}
+                onChange={(e) => setAbTestForm(prev => ({ ...prev, selectedFeatureId: e.target.value }))}
+              >
+                <option value="">Choose a feature...</option>
+                {features.filter(f => !f.abTest).map(f => (
+                  <option key={f.id} value={f.id}>{f.name}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Test Name</label>
+              <Input
+                placeholder="e.g., Button Color Test"
+                value={abTestForm.testName}
+                onChange={(e) => setAbTestForm(prev => ({ ...prev, testName: e.target.value }))}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Variants</label>
+              <div className="space-y-2">
+                {abTestForm.variants.map((variant, idx) => (
+                  <div key={idx} className="flex items-center gap-2">
+                    <Input
+                      value={variant.name}
+                      onChange={(e) => setAbTestForm(prev => ({
+                        ...prev,
+                        variants: prev.variants.map((v, i) => i === idx ? { ...v, name: e.target.value } : v)
+                      }))}
+                      className="flex-1"
+                    />
+                    <Input
+                      type="number"
+                      value={variant.percentage}
+                      onChange={(e) => setAbTestForm(prev => ({
+                        ...prev,
+                        variants: prev.variants.map((v, i) => i === idx ? { ...v, percentage: parseInt(e.target.value) || 0 } : v)
+                      }))}
+                      className="w-20"
+                    />
+                    <span className="text-sm text-gray-500">%</span>
+                  </div>
+                ))}
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                className="mt-2"
+                onClick={() => setAbTestForm(prev => ({
+                  ...prev,
+                  variants: [...prev.variants, { name: `Variant ${String.fromCharCode(65 + prev.variants.length - 1)}`, percentage: 0 }]
+                }))}
+              >
+                <Plus className="h-4 w-4 mr-1" /> Add Variant
+              </Button>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Metrics to Track</label>
+              <div className="flex flex-wrap gap-2">
+                {['Conversion', 'Engagement', 'Time on Page', 'Bounce Rate', 'Revenue'].map(metric => (
+                  <button
+                    key={metric}
+                    type="button"
+                    className={`px-3 py-1 rounded-lg border text-sm ${
+                      abTestForm.metrics.includes(metric)
+                        ? 'bg-orange-100 border-orange-300 text-orange-700'
+                        : 'border-gray-200 dark:border-gray-700'
+                    }`}
+                    onClick={() => setAbTestForm(prev => ({
+                      ...prev,
+                      metrics: prev.metrics.includes(metric)
+                        ? prev.metrics.filter(m => m !== metric)
+                        : [...prev.metrics, metric]
+                    }))}
+                  >
+                    {metric}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setAbTestDialogOpen(false)}>Cancel</Button>
+            <Button onClick={handleCreateABTest}>Create Test</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Segment Dialog */}
+      <Dialog open={segmentDialogOpen} onOpenChange={setSegmentDialogOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Users className="h-5 w-5 text-purple-600" />
+              Create User Segment
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Segment Name</label>
+              <Input
+                placeholder="e.g., Premium Users"
+                value={segmentForm.name}
+                onChange={(e) => setSegmentForm(prev => ({ ...prev, name: e.target.value }))}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Description</label>
+              <Input
+                placeholder="Describe this segment..."
+                value={segmentForm.description}
+                onChange={(e) => setSegmentForm(prev => ({ ...prev, description: e.target.value }))}
+              />
+            </div>
+            <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Targeting Rule</label>
+              <div className="flex items-center gap-2">
+                <select
+                  className="flex-1 px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900"
+                  value={segmentForm.attribute}
+                  onChange={(e) => setSegmentForm(prev => ({ ...prev, attribute: e.target.value }))}
+                >
+                  <option value="">Select attribute...</option>
+                  <option value="plan">Plan</option>
+                  <option value="country">Country</option>
+                  <option value="signup_date">Signup Date</option>
+                  <option value="sessions">Sessions</option>
+                  <option value="revenue">Revenue</option>
+                </select>
+                <select
+                  className="w-24 px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900"
+                  value={segmentForm.operator}
+                  onChange={(e) => setSegmentForm(prev => ({ ...prev, operator: e.target.value }))}
+                >
+                  <option value="=">=</option>
+                  <option value="!=">!=</option>
+                  <option value=">">&gt;</option>
+                  <option value="<">&lt;</option>
+                  <option value="contains">contains</option>
+                </select>
+                <Input
+                  placeholder="Value"
+                  className="flex-1"
+                  value={segmentForm.value}
+                  onChange={(e) => setSegmentForm(prev => ({ ...prev, value: e.target.value }))}
+                />
+              </div>
+            </div>
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setSegmentDialogOpen(false)}>Cancel</Button>
+            <Button onClick={handleCreateSegment}>Create Segment</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Metrics Dialog */}
+      <Dialog open={metricsDialogOpen} onOpenChange={setMetricsDialogOpen}>
+        <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <BarChart3 className="h-5 w-5 text-teal-600" />
+              Feature Metrics Overview
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-6 py-4">
+            <div className="grid grid-cols-3 gap-4">
+              <Card>
+                <CardContent className="p-4 text-center">
+                  <div className="text-3xl font-bold text-green-600">72%</div>
+                  <div className="text-sm text-gray-500">Avg Adoption</div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-4 text-center">
+                  <div className="text-3xl font-bold text-blue-600">85%</div>
+                  <div className="text-sm text-gray-500">Avg Usage</div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-4 text-center">
+                  <div className="text-3xl font-bold text-purple-600">91%</div>
+                  <div className="text-sm text-gray-500">Avg Satisfaction</div>
+                </CardContent>
+              </Card>
+            </div>
+            <div>
+              <h4 className="font-medium mb-3">Feature Performance</h4>
+              <div className="space-y-3">
+                {features.filter(f => f.metrics).map(feature => (
+                  <div key={feature.id} className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="font-medium">{feature.name}</span>
+                      <Badge className={getStatusColor(feature.status)}>{feature.status}</Badge>
+                    </div>
+                    <div className="grid grid-cols-4 gap-2 text-sm">
+                      <div>
+                        <span className="text-gray-500">Adoption:</span>
+                        <span className="ml-1 font-medium">{feature.metrics?.adoption}%</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-500">Usage:</span>
+                        <span className="ml-1 font-medium">{feature.metrics?.usage}%</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-500">Satisfaction:</span>
+                        <span className="ml-1 font-medium">{feature.metrics?.satisfaction}%</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-500">Error Rate:</span>
+                        <span className="ml-1 font-medium text-red-600">{feature.metrics?.errorRate}%</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          <div className="flex justify-end">
+            <Button variant="outline" onClick={() => setMetricsDialogOpen(false)}>Close</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Compare Dialog */}
+      <Dialog open={compareDialogOpen} onOpenChange={setCompareDialogOpen}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <GitBranch className="h-5 w-5 text-pink-600" />
+              Compare Features
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Select features to compare (up to 3)
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {features.map(f => (
+                  <button
+                    key={f.id}
+                    type="button"
+                    disabled={!compareSelection.includes(f.id) && compareSelection.length >= 3}
+                    className={`px-3 py-1 rounded-lg border text-sm ${
+                      compareSelection.includes(f.id)
+                        ? 'bg-pink-100 border-pink-300 text-pink-700'
+                        : 'border-gray-200 dark:border-gray-700 disabled:opacity-50'
+                    }`}
+                    onClick={() => setCompareSelection(prev =>
+                      prev.includes(f.id) ? prev.filter(id => id !== f.id) : [...prev, f.id]
+                    )}
+                  >
+                    {f.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+            {compareSelection.length > 0 && (
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b">
+                      <th className="text-left p-3">Attribute</th>
+                      {compareSelection.map(id => {
+                        const f = features.find(feat => feat.id === id)
+                        return <th key={id} className="text-left p-3">{f?.name}</th>
+                      })}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr className="border-b">
+                      <td className="p-3 font-medium">Status</td>
+                      {compareSelection.map(id => {
+                        const f = features.find(feat => feat.id === id)
+                        return <td key={id} className="p-3"><Badge className={getStatusColor(f!.status)}>{f?.status}</Badge></td>
+                      })}
+                    </tr>
+                    <tr className="border-b">
+                      <td className="p-3 font-medium">Priority</td>
+                      {compareSelection.map(id => {
+                        const f = features.find(feat => feat.id === id)
+                        return <td key={id} className="p-3"><Badge className={getPriorityColor(f!.priority)}>{f?.priority}</Badge></td>
+                      })}
+                    </tr>
+                    <tr className="border-b">
+                      <td className="p-3 font-medium">RICE Score</td>
+                      {compareSelection.map(id => {
+                        const f = features.find(feat => feat.id === id)
+                        return <td key={id} className="p-3 font-bold text-indigo-600">{f?.rice.score.toFixed(1)}</td>
+                      })}
+                    </tr>
+                    <tr className="border-b">
+                      <td className="p-3 font-medium">Votes</td>
+                      {compareSelection.map(id => {
+                        const f = features.find(feat => feat.id === id)
+                        return <td key={id} className="p-3">{f?.votes.length}</td>
+                      })}
+                    </tr>
+                    <tr className="border-b">
+                      <td className="p-3 font-medium">Team</td>
+                      {compareSelection.map(id => {
+                        const f = features.find(feat => feat.id === id)
+                        return <td key={id} className="p-3">{f?.team}</td>
+                      })}
+                    </tr>
+                    <tr>
+                      <td className="p-3 font-medium">Adoption</td>
+                      {compareSelection.map(id => {
+                        const f = features.find(feat => feat.id === id)
+                        return <td key={id} className="p-3">{f?.metrics?.adoption ? `${f.metrics.adoption}%` : 'N/A'}</td>
+                      })}
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => { setCompareDialogOpen(false); setCompareSelection([]) }}>Close</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Export Dialog */}
+      <Dialog open={exportDialogOpen} onOpenChange={setExportDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <ExternalLink className="h-5 w-5 text-gray-600" />
+              Export Features
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Export Format</label>
+              <select
+                className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+                value={exportOptions.format}
+                onChange={(e) => setExportOptions(prev => ({ ...prev, format: e.target.value }))}
+              >
+                <option value="json">JSON</option>
+                <option value="csv">CSV</option>
+                <option value="xlsx">Excel (XLSX)</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Include</label>
+              <div className="space-y-2">
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={exportOptions.includeMetrics}
+                    onChange={(e) => setExportOptions(prev => ({ ...prev, includeMetrics: e.target.checked }))}
+                    className="rounded"
+                  />
+                  <span className="text-sm">Feature Metrics</span>
+                </label>
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={exportOptions.includeRollout}
+                    onChange={(e) => setExportOptions(prev => ({ ...prev, includeRollout: e.target.checked }))}
+                    className="rounded"
+                  />
+                  <span className="text-sm">Rollout Configuration</span>
+                </label>
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Date Range</label>
+              <select
+                className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+                value={exportOptions.dateRange}
+                onChange={(e) => setExportOptions(prev => ({ ...prev, dateRange: e.target.value }))}
+              >
+                <option value="all">All Time</option>
+                <option value="30d">Last 30 Days</option>
+                <option value="90d">Last 90 Days</option>
+                <option value="year">This Year</option>
+              </select>
+            </div>
+            <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                {features.length} features will be exported
+              </p>
+            </div>
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setExportDialogOpen(false)}>Cancel</Button>
+            <Button onClick={handleExportReport}>
+              <ExternalLink className="h-4 w-4 mr-2" />
+              Export
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

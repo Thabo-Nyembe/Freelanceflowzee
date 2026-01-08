@@ -340,11 +340,7 @@ const mockIntegrationsActivities = [
   { id: '3', user: 'System', action: 'Synced', target: '2,450 records from HubSpot', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
 ]
 
-const mockIntegrationsQuickActions = [
-  { id: '1', label: 'Add Integration', icon: 'plus', action: () => toast.success('Integration Wizard', { description: 'Select an app to connect from the directory' }), variant: 'default' as const },
-  { id: '2', label: 'Test Connection', icon: 'refresh', action: () => toast.success('Connection Test Passed', { description: 'All integrations responding correctly' }), variant: 'default' as const },
-  { id: '3', label: 'View Logs', icon: 'file', action: () => toast.success('Integration Logs', { description: 'Showing recent integration activity' }), variant: 'outline' as const },
-]
+// Quick actions will be defined inside the component to access state setters
 
 export default function ThirdPartyIntegrationsClient() {
   const [apps] = useState<IntegrationApp[]>(mockApps)
@@ -357,6 +353,110 @@ export default function ThirdPartyIntegrationsClient() {
   const [selectedZap, setSelectedZap] = useState<Zap | null>(null)
   const [activeTab, setActiveTab] = useState('zaps')
   const [settingsTab, setSettingsTab] = useState('general')
+
+  // Dialog states for quick actions
+  const [showAddIntegrationDialog, setShowAddIntegrationDialog] = useState(false)
+  const [showTestConnectionDialog, setShowTestConnectionDialog] = useState(false)
+  const [showViewLogsDialog, setShowViewLogsDialog] = useState(false)
+
+  // Form states for Add Integration dialog
+  const [newIntegrationApp, setNewIntegrationApp] = useState('')
+  const [newIntegrationAuthType, setNewIntegrationAuthType] = useState<'oauth' | 'api_key' | 'basic'>('oauth')
+  const [newIntegrationApiKey, setNewIntegrationApiKey] = useState('')
+  const [newIntegrationUsername, setNewIntegrationUsername] = useState('')
+  const [newIntegrationPassword, setNewIntegrationPassword] = useState('')
+
+  // Test connection states
+  const [testConnectionAppId, setTestConnectionAppId] = useState('')
+  const [testConnectionStatus, setTestConnectionStatus] = useState<'idle' | 'testing' | 'success' | 'error'>('idle')
+  const [testConnectionMessage, setTestConnectionMessage] = useState('')
+
+  // Logs filter states
+  const [logsFilterStatus, setLogsFilterStatus] = useState<'all' | 'success' | 'error' | 'skipped'>('all')
+  const [logsFilterZapId, setLogsFilterZapId] = useState('')
+
+  // Quick actions with dialog triggers
+  const integrationsQuickActions = [
+    { id: '1', label: 'Add Integration', icon: 'plus', action: () => setShowAddIntegrationDialog(true), variant: 'default' as const },
+    { id: '2', label: 'Test Connection', icon: 'refresh', action: () => setShowTestConnectionDialog(true), variant: 'default' as const },
+    { id: '3', label: 'View Logs', icon: 'file', action: () => setShowViewLogsDialog(true), variant: 'outline' as const },
+  ]
+
+  // Handler for adding new integration
+  const handleAddIntegration = () => {
+    if (!newIntegrationApp) {
+      toast.error('Please select an app')
+      return
+    }
+
+    if (newIntegrationAuthType === 'api_key' && !newIntegrationApiKey) {
+      toast.error('Please enter an API key')
+      return
+    }
+
+    if (newIntegrationAuthType === 'basic' && (!newIntegrationUsername || !newIntegrationPassword)) {
+      toast.error('Please enter username and password')
+      return
+    }
+
+    const selectedApp = mockApps.find(a => a.id === newIntegrationApp)
+    toast.success('Integration Connected', {
+      description: `${selectedApp?.name} has been successfully connected using ${newIntegrationAuthType === 'api_key' ? 'API Key' : newIntegrationAuthType === 'basic' ? 'Basic Auth' : 'OAuth'}`
+    })
+
+    // Reset form
+    setNewIntegrationApp('')
+    setNewIntegrationAuthType('oauth')
+    setNewIntegrationApiKey('')
+    setNewIntegrationUsername('')
+    setNewIntegrationPassword('')
+    setShowAddIntegrationDialog(false)
+  }
+
+  // Handler for testing connection
+  const handleTestConnection = async () => {
+    if (!testConnectionAppId) {
+      toast.error('Please select a connection to test')
+      return
+    }
+
+    setTestConnectionStatus('testing')
+    setTestConnectionMessage('Testing connection...')
+
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 2000))
+
+    const connection = connections.find(c => c.id === testConnectionAppId)
+    const isSuccess = connection?.status === 'connected'
+
+    if (isSuccess) {
+      setTestConnectionStatus('success')
+      setTestConnectionMessage(`Connection to ${connection?.app.name} is healthy. Response time: 124ms`)
+    } else {
+      setTestConnectionStatus('error')
+      setTestConnectionMessage(`Connection to ${connection?.app.name} failed. Please check credentials and try again.`)
+    }
+  }
+
+  // Reset test connection dialog
+  const resetTestConnectionDialog = () => {
+    setTestConnectionAppId('')
+    setTestConnectionStatus('idle')
+    setTestConnectionMessage('')
+    setShowTestConnectionDialog(false)
+  }
+
+  // Filter logs based on selected filters
+  const filteredLogs = useMemo(() => {
+    let result = logs
+    if (logsFilterStatus !== 'all') {
+      result = result.filter(l => l.status === logsFilterStatus)
+    }
+    if (logsFilterZapId) {
+      result = result.filter(l => l.zapId === logsFilterZapId)
+    }
+    return result
+  }, [logs, logsFilterStatus, logsFilterZapId])
 
   // Stats
   const stats = useMemo(() => ({
@@ -1695,7 +1795,7 @@ export default function ThirdPartyIntegrationsClient() {
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockIntegrationsQuickActions}
+            actions={integrationsQuickActions}
             variant="grid"
           />
         </div>
@@ -1889,6 +1989,385 @@ export default function ThirdPartyIntegrationsClient() {
               </div>
             </>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Integration Dialog */}
+      <Dialog open={showAddIntegrationDialog} onOpenChange={setShowAddIntegrationDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Plus className="h-5 w-5 text-orange-500" />
+              Add New Integration
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-6">
+            <div>
+              <Label>Select Application</Label>
+              <Select value={newIntegrationApp} onValueChange={setNewIntegrationApp}>
+                <SelectTrigger className="mt-1">
+                  <SelectValue placeholder="Choose an app to connect..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {mockApps.map(app => (
+                    <SelectItem key={app.id} value={app.id}>
+                      <div className="flex items-center gap-2">
+                        <div className="w-6 h-6 rounded bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center text-white text-xs font-bold">
+                          {app.name[0]}
+                        </div>
+                        <span>{app.name}</span>
+                        <span className="text-xs text-gray-500">({app.category})</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label>Authentication Type</Label>
+              <Select value={newIntegrationAuthType} onValueChange={(value: 'oauth' | 'api_key' | 'basic') => setNewIntegrationAuthType(value)}>
+                <SelectTrigger className="mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="oauth">
+                    <div className="flex items-center gap-2">
+                      <Shield className="h-4 w-4 text-blue-500" />
+                      OAuth 2.0 (Recommended)
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="api_key">
+                    <div className="flex items-center gap-2">
+                      <Key className="h-4 w-4 text-amber-500" />
+                      API Key
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="basic">
+                    <div className="flex items-center gap-2">
+                      <Lock className="h-4 w-4 text-gray-500" />
+                      Basic Authentication
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {newIntegrationAuthType === 'oauth' && (
+              <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                <div className="flex items-start gap-3">
+                  <Shield className="h-5 w-5 text-blue-500 mt-0.5" />
+                  <div>
+                    <p className="font-medium text-blue-700 dark:text-blue-400">OAuth Authentication</p>
+                    <p className="text-sm text-blue-600 dark:text-blue-300 mt-1">
+                      You will be redirected to {mockApps.find(a => a.id === newIntegrationApp)?.name || 'the application'} to authorize access.
+                      This is the most secure authentication method.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {newIntegrationAuthType === 'api_key' && (
+              <div className="space-y-3">
+                <div>
+                  <Label>API Key</Label>
+                  <Input
+                    type="password"
+                    value={newIntegrationApiKey}
+                    onChange={(e) => setNewIntegrationApiKey(e.target.value)}
+                    placeholder="Enter your API key..."
+                    className="mt-1 font-mono"
+                  />
+                </div>
+                <p className="text-xs text-gray-500">
+                  Your API key will be encrypted and stored securely.
+                </p>
+              </div>
+            )}
+
+            {newIntegrationAuthType === 'basic' && (
+              <div className="space-y-3">
+                <div>
+                  <Label>Username</Label>
+                  <Input
+                    value={newIntegrationUsername}
+                    onChange={(e) => setNewIntegrationUsername(e.target.value)}
+                    placeholder="Enter username..."
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label>Password</Label>
+                  <Input
+                    type="password"
+                    value={newIntegrationPassword}
+                    onChange={(e) => setNewIntegrationPassword(e.target.value)}
+                    placeholder="Enter password..."
+                    className="mt-1"
+                  />
+                </div>
+              </div>
+            )}
+
+            <div className="flex items-center gap-3 pt-4 border-t">
+              <Button variant="outline" className="flex-1" onClick={() => setShowAddIntegrationDialog(false)}>
+                Cancel
+              </Button>
+              <Button className="flex-1 bg-orange-500 hover:bg-orange-600" onClick={handleAddIntegration}>
+                <Link2 className="h-4 w-4 mr-2" />
+                {newIntegrationAuthType === 'oauth' ? 'Continue with OAuth' : 'Connect Integration'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Test Connection Dialog */}
+      <Dialog open={showTestConnectionDialog} onOpenChange={(open) => !open && resetTestConnectionDialog()}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <RefreshCcw className="h-5 w-5 text-blue-500" />
+              Test Connection
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-6">
+            <div>
+              <Label>Select Connection to Test</Label>
+              <Select value={testConnectionAppId} onValueChange={setTestConnectionAppId}>
+                <SelectTrigger className="mt-1">
+                  <SelectValue placeholder="Choose a connection..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {connections.map(conn => (
+                    <SelectItem key={conn.id} value={conn.id}>
+                      <div className="flex items-center gap-2">
+                        <div className="w-6 h-6 rounded bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center text-white text-xs font-bold">
+                          {conn.app.name[0]}
+                        </div>
+                        <span>{conn.app.name}</span>
+                        <Badge className={`ml-2 ${getStatusColor(conn.status)}`}>
+                          {conn.status}
+                        </Badge>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {testConnectionStatus !== 'idle' && (
+              <div className={`p-4 rounded-lg ${
+                testConnectionStatus === 'testing' ? 'bg-blue-50 dark:bg-blue-900/20' :
+                testConnectionStatus === 'success' ? 'bg-green-50 dark:bg-green-900/20' :
+                'bg-red-50 dark:bg-red-900/20'
+              }`}>
+                <div className="flex items-start gap-3">
+                  {testConnectionStatus === 'testing' && (
+                    <RefreshCcw className="h-5 w-5 text-blue-500 animate-spin" />
+                  )}
+                  {testConnectionStatus === 'success' && (
+                    <CheckCircle className="h-5 w-5 text-green-500" />
+                  )}
+                  {testConnectionStatus === 'error' && (
+                    <XCircle className="h-5 w-5 text-red-500" />
+                  )}
+                  <div>
+                    <p className={`font-medium ${
+                      testConnectionStatus === 'testing' ? 'text-blue-700 dark:text-blue-400' :
+                      testConnectionStatus === 'success' ? 'text-green-700 dark:text-green-400' :
+                      'text-red-700 dark:text-red-400'
+                    }`}>
+                      {testConnectionStatus === 'testing' ? 'Testing Connection...' :
+                       testConnectionStatus === 'success' ? 'Connection Successful' :
+                       'Connection Failed'}
+                    </p>
+                    <p className={`text-sm mt-1 ${
+                      testConnectionStatus === 'testing' ? 'text-blue-600 dark:text-blue-300' :
+                      testConnectionStatus === 'success' ? 'text-green-600 dark:text-green-300' :
+                      'text-red-600 dark:text-red-300'
+                    }`}>
+                      {testConnectionMessage}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {testConnectionAppId && testConnectionStatus === 'idle' && (
+              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <h4 className="font-medium mb-2">Connection Details</h4>
+                {(() => {
+                  const conn = connections.find(c => c.id === testConnectionAppId)
+                  if (!conn) return null
+                  return (
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">App:</span>
+                        <span className="font-medium">{conn.app.name}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">Auth Type:</span>
+                        <span className="font-medium capitalize">{conn.credentials.type.replace('_', ' ')}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">Connected:</span>
+                        <span className="font-medium">{new Date(conn.connectedAt).toLocaleDateString()}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">Last Sync:</span>
+                        <span className="font-medium">{conn.lastSync ? new Date(conn.lastSync).toLocaleString() : 'Never'}</span>
+                      </div>
+                    </div>
+                  )
+                })()}
+              </div>
+            )}
+
+            <div className="flex items-center gap-3 pt-4 border-t">
+              <Button variant="outline" className="flex-1" onClick={resetTestConnectionDialog}>
+                Close
+              </Button>
+              <Button
+                className="flex-1 bg-blue-500 hover:bg-blue-600"
+                onClick={handleTestConnection}
+                disabled={!testConnectionAppId || testConnectionStatus === 'testing'}
+              >
+                <Activity className="h-4 w-4 mr-2" />
+                {testConnectionStatus === 'testing' ? 'Testing...' : 'Run Test'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* View Logs Dialog */}
+      <Dialog open={showViewLogsDialog} onOpenChange={setShowViewLogsDialog}>
+        <DialogContent className="max-w-3xl max-h-[80vh]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <History className="h-5 w-5 text-purple-500" />
+              Integration Logs
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div className="flex items-center gap-4">
+              <div className="flex-1">
+                <Label className="text-xs text-gray-500">Filter by Status</Label>
+                <Select value={logsFilterStatus} onValueChange={(value: 'all' | 'success' | 'error' | 'skipped') => setLogsFilterStatus(value)}>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Statuses</SelectItem>
+                    <SelectItem value="success">
+                      <div className="flex items-center gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-500" />
+                        Success
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="error">
+                      <div className="flex items-center gap-2">
+                        <XCircle className="h-4 w-4 text-red-500" />
+                        Error
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="skipped">
+                      <div className="flex items-center gap-2">
+                        <AlertCircle className="h-4 w-4 text-yellow-500" />
+                        Skipped
+                      </div>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex-1">
+                <Label className="text-xs text-gray-500">Filter by Zap</Label>
+                <Select value={logsFilterZapId} onValueChange={setLogsFilterZapId}>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder="All Zaps" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">All Zaps</SelectItem>
+                    {zaps.map(zap => (
+                      <SelectItem key={zap.id} value={zap.id}>{zap.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="border rounded-lg overflow-hidden max-h-[400px] overflow-y-auto">
+              <div className="divide-y">
+                {filteredLogs.length === 0 ? (
+                  <div className="p-8 text-center text-gray-500">
+                    <History className="h-12 w-12 mx-auto mb-3 text-gray-300" />
+                    <p>No logs match your filters</p>
+                  </div>
+                ) : (
+                  filteredLogs.map(log => (
+                    <div key={log.id} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-800">
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-start gap-3">
+                          {log.status === 'success' && <CheckCircle className="h-5 w-5 text-green-500 mt-0.5" />}
+                          {log.status === 'error' && <XCircle className="h-5 w-5 text-red-500 mt-0.5" />}
+                          {log.status === 'skipped' && <AlertCircle className="h-5 w-5 text-yellow-500 mt-0.5" />}
+                          <div>
+                            <div className="font-medium">{log.zapName}</div>
+                            <div className="text-sm text-gray-500">
+                              {new Date(log.triggeredAt).toLocaleString()}
+                            </div>
+                            {log.error && (
+                              <div className="mt-2 p-2 bg-red-50 dark:bg-red-900/20 rounded text-sm text-red-600 dark:text-red-400">
+                                {log.error}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-4 text-sm">
+                          <div className="text-center">
+                            <div className="font-medium">{log.duration}s</div>
+                            <div className="text-xs text-gray-500">Duration</div>
+                          </div>
+                          <div className="text-center">
+                            <div className="font-medium">{log.stepsExecuted}</div>
+                            <div className="text-xs text-gray-500">Steps</div>
+                          </div>
+                          <Badge className={getStatusColor(
+                            log.status === 'success' ? 'connected' :
+                            log.status === 'error' ? 'error' : 'pending'
+                          )}>
+                            {log.status}
+                          </Badge>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between pt-4 border-t">
+              <div className="text-sm text-gray-500">
+                Showing {filteredLogs.length} of {logs.length} logs
+              </div>
+              <div className="flex items-center gap-2">
+                <Button variant="outline" size="sm" onClick={() => {
+                  setLogsFilterStatus('all')
+                  setLogsFilterZapId('')
+                }}>
+                  Clear Filters
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => setShowViewLogsDialog(false)}>
+                  Close
+                </Button>
+              </div>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

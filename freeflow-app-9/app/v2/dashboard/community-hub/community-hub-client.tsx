@@ -764,11 +764,7 @@ const communityHubActivities = [
   { id: '3', user: 'System', action: 'generated', target: 'weekly report', timestamp: '1h ago', type: 'info' as const },
 ]
 
-const communityHubQuickActions = [
-  { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => toast.success('Item Created', { description: 'New community item ready' }) },
-  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => toast.success('Data Exported', { description: 'Community data exported' }) },
-  { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => toast.success('Settings', { description: 'Community settings opened' }) },
-]
+// Quick actions will be defined inside the component to use dialog state setters
 
 export default function CommunityHubClient() {
   const { userId, loading: userLoading } = useCurrentUser()
@@ -777,6 +773,177 @@ export default function CommunityHubClient() {
   const [state, dispatch] = useReducer(communityReducer, initialState)
   const [activeTab, setActiveTab] = useState<string>('feed')
   const [blockUser, setBlockUser] = useState<{ id: string; name: string } | null>(null)
+
+  // Quick Actions Dialog States
+  const [showNewItemDialog, setShowNewItemDialog] = useState(false)
+  const [showExportDialog, setShowExportDialog] = useState(false)
+  const [showSettingsDialog, setShowSettingsDialog] = useState(false)
+
+  // New Item Form State
+  const [newItemForm, setNewItemForm] = useState({
+    type: 'post' as 'post' | 'event' | 'group' | 'job',
+    title: '',
+    content: '',
+    category: '',
+    tags: ''
+  })
+
+  // Export Form State
+  const [exportForm, setExportForm] = useState({
+    format: 'csv' as 'csv' | 'json' | 'pdf',
+    dataType: 'all' as 'all' | 'posts' | 'members' | 'events' | 'groups',
+    dateRange: 'all' as 'all' | 'week' | 'month' | 'year',
+    includeAnalytics: true
+  })
+
+  // Settings Form State
+  const [settingsForm, setSettingsForm] = useState({
+    emailNotifications: true,
+    pushNotifications: true,
+    profileVisibility: 'public' as 'public' | 'connections' | 'private',
+    showOnlineStatus: true,
+    allowMessages: true,
+    allowConnectionRequests: true
+  })
+
+  // Quick Actions with Dialog handlers
+  const communityHubQuickActions = useMemo(() => [
+    { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => setShowNewItemDialog(true) },
+    { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => setShowExportDialog(true) },
+    { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => setShowSettingsDialog(true) },
+  ], [])
+
+  // Quick Action Dialog Handlers
+  const handleCreateNewItem = async () => {
+    if (!newItemForm.title.trim()) {
+      toast.error('Title is required')
+      return
+    }
+
+    logger.info('Creating new community item', {
+      type: newItemForm.type,
+      title: newItemForm.title,
+      category: newItemForm.category
+    })
+
+    try {
+      const response = await fetch('/api/community', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create',
+          resourceType: newItemForm.type,
+          data: {
+            title: newItemForm.title,
+            content: newItemForm.content,
+            category: newItemForm.category,
+            tags: newItemForm.tags.split(',').map(t => t.trim()).filter(Boolean)
+          }
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to create item')
+      }
+
+      const result = await response.json()
+
+      toast.success(`${newItemForm.type.charAt(0).toUpperCase() + newItemForm.type.slice(1)} created successfully!`, {
+        description: `"${newItemForm.title}" has been published to the community`
+      })
+
+      setNewItemForm({ type: 'post', title: '', content: '', category: '', tags: '' })
+      setShowNewItemDialog(false)
+    } catch (error: any) {
+      logger.error('Failed to create item', { error: error.message })
+      toast.error('Failed to create item', { description: error.message })
+    }
+  }
+
+  const handleExportData = async () => {
+    logger.info('Exporting community data', {
+      format: exportForm.format,
+      dataType: exportForm.dataType,
+      dateRange: exportForm.dateRange
+    })
+
+    try {
+      toast.promise(
+        (async () => {
+          // Simulate export process
+          await new Promise(resolve => setTimeout(resolve, 1500))
+
+          const exportData = {
+            format: exportForm.format,
+            dataType: exportForm.dataType,
+            dateRange: exportForm.dateRange,
+            includeAnalytics: exportForm.includeAnalytics,
+            exportedAt: new Date().toISOString()
+          }
+
+          // Create and download file
+          const blob = new Blob([JSON.stringify(exportData, null, 2)], {
+            type: exportForm.format === 'json' ? 'application/json' : 'text/csv'
+          })
+          const url = URL.createObjectURL(blob)
+          const a = document.createElement('a')
+          a.href = url
+          a.download = `community-export-${exportForm.dataType}-${Date.now()}.${exportForm.format}`
+          document.body.appendChild(a)
+          a.click()
+          document.body.removeChild(a)
+          URL.revokeObjectURL(url)
+
+          return exportData
+        })(),
+        {
+          loading: 'Preparing export...',
+          success: `Community data exported as ${exportForm.format.toUpperCase()}`,
+          error: 'Export failed'
+        }
+      )
+
+      setShowExportDialog(false)
+    } catch (error: any) {
+      logger.error('Failed to export data', { error: error.message })
+      toast.error('Export failed', { description: error.message })
+    }
+  }
+
+  const handleSaveSettings = async () => {
+    logger.info('Saving community settings', settingsForm)
+
+    try {
+      toast.promise(
+        (async () => {
+          // Simulate settings save
+          await new Promise(resolve => setTimeout(resolve, 1000))
+
+          // In production, this would save to the API
+          const response = await fetch('/api/community', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              action: 'updateSettings',
+              data: settingsForm
+            })
+          })
+
+          return settingsForm
+        })(),
+        {
+          loading: 'Saving settings...',
+          success: 'Community settings saved successfully',
+          error: 'Failed to save settings'
+        }
+      )
+
+      setShowSettingsDialog(false)
+    } catch (error: any) {
+      logger.error('Failed to save settings', { error: error.message })
+      toast.error('Failed to save settings', { description: error.message })
+    }
+  }
 
   // Handlers
   const handleLikePost = async (id: string) => {
@@ -3095,6 +3262,251 @@ export default function CommunityHubClient() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* New Item Dialog */}
+      <Dialog open={showNewItemDialog} onOpenChange={setShowNewItemDialog}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Create New Community Item</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="item-type">Item Type</Label>
+              <select
+                id="item-type"
+                className="w-full px-3 py-2 border rounded-md bg-background"
+                value={newItemForm.type}
+                onChange={(e) => setNewItemForm({ ...newItemForm, type: e.target.value as 'post' | 'event' | 'group' | 'job' })}
+              >
+                <option value="post">Post</option>
+                <option value="event">Event</option>
+                <option value="group">Group</option>
+                <option value="job">Job Listing</option>
+              </select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="item-title">Title</Label>
+              <Input
+                id="item-title"
+                placeholder={`Enter ${newItemForm.type} title...`}
+                value={newItemForm.title}
+                onChange={(e) => setNewItemForm({ ...newItemForm, title: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="item-content">Content</Label>
+              <Textarea
+                id="item-content"
+                placeholder={`Describe your ${newItemForm.type}...`}
+                rows={4}
+                value={newItemForm.content}
+                onChange={(e) => setNewItemForm({ ...newItemForm, content: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="item-category">Category</Label>
+              <select
+                id="item-category"
+                className="w-full px-3 py-2 border rounded-md bg-background"
+                value={newItemForm.category}
+                onChange={(e) => setNewItemForm({ ...newItemForm, category: e.target.value })}
+              >
+                <option value="">Select category...</option>
+                <option value="development">Development</option>
+                <option value="design">Design</option>
+                <option value="marketing">Marketing</option>
+                <option value="business">Business</option>
+                <option value="networking">Networking</option>
+                <option value="education">Education</option>
+              </select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="item-tags">Tags (comma-separated)</Label>
+              <Input
+                id="item-tags"
+                placeholder="react, typescript, community..."
+                value={newItemForm.tags}
+                onChange={(e) => setNewItemForm({ ...newItemForm, tags: e.target.value })}
+              />
+            </div>
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setShowNewItemDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleCreateNewItem}>
+              <Plus className="w-4 h-4 mr-2" />
+              Create {newItemForm.type.charAt(0).toUpperCase() + newItemForm.type.slice(1)}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Export Dialog */}
+      <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
+        <DialogContent className="sm:max-w-[450px]">
+          <DialogHeader>
+            <DialogTitle>Export Community Data</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="export-format">Export Format</Label>
+              <select
+                id="export-format"
+                className="w-full px-3 py-2 border rounded-md bg-background"
+                value={exportForm.format}
+                onChange={(e) => setExportForm({ ...exportForm, format: e.target.value as 'csv' | 'json' | 'pdf' })}
+              >
+                <option value="csv">CSV (Spreadsheet)</option>
+                <option value="json">JSON (Raw Data)</option>
+                <option value="pdf">PDF (Report)</option>
+              </select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="export-data">Data to Export</Label>
+              <select
+                id="export-data"
+                className="w-full px-3 py-2 border rounded-md bg-background"
+                value={exportForm.dataType}
+                onChange={(e) => setExportForm({ ...exportForm, dataType: e.target.value as 'all' | 'posts' | 'members' | 'events' | 'groups' })}
+              >
+                <option value="all">All Data</option>
+                <option value="posts">Posts Only</option>
+                <option value="members">Members Only</option>
+                <option value="events">Events Only</option>
+                <option value="groups">Groups Only</option>
+              </select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="export-range">Date Range</Label>
+              <select
+                id="export-range"
+                className="w-full px-3 py-2 border rounded-md bg-background"
+                value={exportForm.dateRange}
+                onChange={(e) => setExportForm({ ...exportForm, dateRange: e.target.value as 'all' | 'week' | 'month' | 'year' })}
+              >
+                <option value="all">All Time</option>
+                <option value="week">Last Week</option>
+                <option value="month">Last Month</option>
+                <option value="year">Last Year</option>
+              </select>
+            </div>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="include-analytics">Include Analytics Data</Label>
+              <Switch
+                id="include-analytics"
+                checked={exportForm.includeAnalytics}
+                onCheckedChange={(checked) => setExportForm({ ...exportForm, includeAnalytics: checked })}
+              />
+            </div>
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setShowExportDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleExportData}>
+              <BarChart3 className="w-4 h-4 mr-2" />
+              Export Data
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Settings Dialog */}
+      <Dialog open={showSettingsDialog} onOpenChange={setShowSettingsDialog}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Community Settings</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-6 py-4">
+            <div className="space-y-4">
+              <h4 className="font-medium text-sm">Notifications</h4>
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label htmlFor="email-notifications">Email Notifications</Label>
+                  <p className="text-xs text-muted-foreground">Receive updates via email</p>
+                </div>
+                <Switch
+                  id="email-notifications"
+                  checked={settingsForm.emailNotifications}
+                  onCheckedChange={(checked) => setSettingsForm({ ...settingsForm, emailNotifications: checked })}
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label htmlFor="push-notifications">Push Notifications</Label>
+                  <p className="text-xs text-muted-foreground">Receive browser notifications</p>
+                </div>
+                <Switch
+                  id="push-notifications"
+                  checked={settingsForm.pushNotifications}
+                  onCheckedChange={(checked) => setSettingsForm({ ...settingsForm, pushNotifications: checked })}
+                />
+              </div>
+            </div>
+            <div className="space-y-4">
+              <h4 className="font-medium text-sm">Privacy</h4>
+              <div className="space-y-2">
+                <Label htmlFor="profile-visibility">Profile Visibility</Label>
+                <select
+                  id="profile-visibility"
+                  className="w-full px-3 py-2 border rounded-md bg-background"
+                  value={settingsForm.profileVisibility}
+                  onChange={(e) => setSettingsForm({ ...settingsForm, profileVisibility: e.target.value as 'public' | 'connections' | 'private' })}
+                >
+                  <option value="public">Public - Anyone can view</option>
+                  <option value="connections">Connections Only</option>
+                  <option value="private">Private - Hidden from search</option>
+                </select>
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label htmlFor="online-status">Show Online Status</Label>
+                  <p className="text-xs text-muted-foreground">Let others see when you are online</p>
+                </div>
+                <Switch
+                  id="online-status"
+                  checked={settingsForm.showOnlineStatus}
+                  onCheckedChange={(checked) => setSettingsForm({ ...settingsForm, showOnlineStatus: checked })}
+                />
+              </div>
+            </div>
+            <div className="space-y-4">
+              <h4 className="font-medium text-sm">Communication</h4>
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label htmlFor="allow-messages">Allow Messages</Label>
+                  <p className="text-xs text-muted-foreground">Receive direct messages from members</p>
+                </div>
+                <Switch
+                  id="allow-messages"
+                  checked={settingsForm.allowMessages}
+                  onCheckedChange={(checked) => setSettingsForm({ ...settingsForm, allowMessages: checked })}
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label htmlFor="allow-connections">Allow Connection Requests</Label>
+                  <p className="text-xs text-muted-foreground">Let others send you connection requests</p>
+                </div>
+                <Switch
+                  id="allow-connections"
+                  checked={settingsForm.allowConnectionRequests}
+                  onCheckedChange={(checked) => setSettingsForm({ ...settingsForm, allowConnectionRequests: checked })}
+                />
+              </div>
+            </div>
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setShowSettingsDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSaveSettings}>
+              Save Settings
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

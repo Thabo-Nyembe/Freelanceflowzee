@@ -191,11 +191,7 @@ const mockMobileAppActivities = [
   { id: '3', user: 'QA Manager', action: 'Flagged', target: '3 critical bugs for hotfix', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'warning' as const },
 ]
 
-const mockMobileAppQuickActions = [
-  { id: '1', label: 'New Build', icon: 'plus', action: () => toast.success('Build Started', { description: 'Mobile build initiated' }), variant: 'default' as const },
-  { id: '2', label: 'Submit Review', icon: 'send', action: () => toast.success('Submitted for Review', { description: 'App submitted to store' }), variant: 'default' as const },
-  { id: '3', label: 'View Analytics', icon: 'chart', action: () => toast.success('Analytics Loaded', { description: 'App metrics ready' }), variant: 'outline' as const },
-]
+// mockMobileAppQuickActions is now defined inside the component to access state setters
 
 export default function MobileAppClient({ initialFeatures, initialVersions, initialStats }: MobileAppClientProps) {
   const supabase = createClient()
@@ -221,6 +217,27 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
   const [showCreateBuildModal, setShowCreateBuildModal] = useState(false)
   const [showCreateCampaignModal, setShowCreateCampaignModal] = useState(false)
   const [showCreateIapModal, setShowCreateIapModal] = useState(false)
+
+  // Quick Action Dialog states
+  const [showNewBuildDialog, setShowNewBuildDialog] = useState(false)
+  const [showSubmitReviewDialog, setShowSubmitReviewDialog] = useState(false)
+  const [showViewAnalyticsDialog, setShowViewAnalyticsDialog] = useState(false)
+  const [showUploadBuildDialog, setShowUploadBuildDialog] = useState(false)
+  const [showSendPushDialog, setShowSendPushDialog] = useState(false)
+  const [showCrashReportsDialog, setShowCrashReportsDialog] = useState(false)
+  const [showUpdateMetadataDialog, setShowUpdateMetadataDialog] = useState(false)
+
+  // Quick Action form states
+  const [submitReviewForm, setSubmitReviewForm] = useState({ buildId: '', notes: '' })
+  const [pushNotificationForm, setPushNotificationForm] = useState({ title: '', message: '', targetAudience: 'all' })
+  const [metadataForm, setMetadataForm] = useState({ appName: 'FreeFlow Mobile', description: '', keywords: '', category: 'productivity' })
+
+  // Quick Actions array (defined inside component to access state setters)
+  const mobileAppQuickActions = [
+    { id: '1', label: 'New Build', icon: 'plus', action: () => setShowNewBuildDialog(true), variant: 'default' as const },
+    { id: '2', label: 'Submit Review', icon: 'send', action: () => setShowSubmitReviewDialog(true), variant: 'default' as const },
+    { id: '3', label: 'View Analytics', icon: 'chart', action: () => setShowViewAnalyticsDialog(true), variant: 'outline' as const },
+  ]
 
   // Fetch user ID on mount
   useEffect(() => {
@@ -589,19 +606,20 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
             {/* Overview Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Upload, label: 'Submit', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400' },
-                { icon: Smartphone, label: 'TestFlight', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
-                { icon: Star, label: 'Reviews', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
-                { icon: BarChart3, label: 'Analytics', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
-                { icon: Bell, label: 'Push', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
-                { icon: Key, label: 'In-App', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400' },
-                { icon: Shield, label: 'Privacy', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
-                { icon: Settings, label: 'Settings', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' },
+                { icon: Upload, label: 'Submit', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400', onClick: () => setShowSubmitReviewDialog(true) },
+                { icon: Smartphone, label: 'TestFlight', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => setShowNewBuildDialog(true) },
+                { icon: Star, label: 'Reviews', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', onClick: () => setActiveTab('reviews') },
+                { icon: BarChart3, label: 'Analytics', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => setShowViewAnalyticsDialog(true) },
+                { icon: Bell, label: 'Push', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => setShowSendPushDialog(true) },
+                { icon: Key, label: 'In-App', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', onClick: () => setActiveTab('iap') },
+                { icon: Shield, label: 'Privacy', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', onClick: () => { setActiveTab('settings'); setSettingsTab('advanced'); } },
+                { icon: Settings, label: 'Settings', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', onClick: () => setActiveTab('settings') },
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={action.onClick}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -744,12 +762,12 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
                   </CardHeader>
                   <CardContent className="space-y-2">
                     {[
-                      { label: 'Upload New Build', icon: Upload, color: 'text-indigo-600' },
-                      { label: 'Send Push Notification', icon: Bell, color: 'text-blue-600' },
-                      { label: 'View Crash Reports', icon: Bug, color: 'text-red-600' },
-                      { label: 'Update App Metadata', icon: Settings, color: 'text-gray-600' },
+                      { label: 'Upload New Build', icon: Upload, color: 'text-indigo-600', onClick: () => setShowUploadBuildDialog(true) },
+                      { label: 'Send Push Notification', icon: Bell, color: 'text-blue-600', onClick: () => setShowSendPushDialog(true) },
+                      { label: 'View Crash Reports', icon: Bug, color: 'text-red-600', onClick: () => setShowCrashReportsDialog(true) },
+                      { label: 'Update App Metadata', icon: Settings, color: 'text-gray-600', onClick: () => setShowUpdateMetadataDialog(true) },
                     ].map((action, i) => (
-                      <button key={i} className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 text-left">
+                      <button key={i} className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 text-left" onClick={action.onClick}>
                         <action.icon className={`h-5 w-5 ${action.color}`} />
                         <span className="text-sm">{action.label}</span>
                       </button>
@@ -1954,7 +1972,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockMobileAppQuickActions}
+            actions={mobileAppQuickActions}
             variant="grid"
           />
         </div>
@@ -2211,6 +2229,443 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowCreateIapModal(false)}>Cancel</Button>
               <Button onClick={handleCreateIap} disabled={isLoading}>{isLoading ? 'Creating...' : 'Add Product'}</Button>
+            </DialogFooter>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* New Build Dialog */}
+      <Dialog open={showNewBuildDialog} onOpenChange={setShowNewBuildDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Upload className="h-5 w-5 text-indigo-600" />
+              Start New Build
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Version Number</Label>
+              <Input
+                placeholder="e.g., 2.6.0"
+                value={buildForm.version}
+                onChange={(e) => setBuildForm({ ...buildForm, version: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label>Build Number</Label>
+              <Input
+                placeholder="e.g., 260"
+                value={buildForm.buildNumber}
+                onChange={(e) => setBuildForm({ ...buildForm, buildNumber: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label>Platform</Label>
+              <Select value={buildForm.platform} onValueChange={(v: Platform) => setBuildForm({ ...buildForm, platform: v })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ios">iOS</SelectItem>
+                  <SelectItem value="android">Android</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Release Type</Label>
+              <Select value={buildForm.releaseType} onValueChange={(v: ReleaseType) => setBuildForm({ ...buildForm, releaseType: v })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="beta">Beta (TestFlight/Internal)</SelectItem>
+                  <SelectItem value="internal">Internal Only</SelectItem>
+                  <SelectItem value="production">Production</SelectItem>
+                  <SelectItem value="staged">Staged Rollout</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+              <p className="text-sm text-blue-700 dark:text-blue-300">
+                The build will be processed and available for testing within 15-30 minutes after upload.
+              </p>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowNewBuildDialog(false)}>Cancel</Button>
+              <Button onClick={async () => {
+                await handleCreateBuild()
+                setShowNewBuildDialog(false)
+              }} disabled={isLoading} className="bg-indigo-600 hover:bg-indigo-700">
+                {isLoading ? 'Starting...' : 'Start Build'}
+              </Button>
+            </DialogFooter>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Submit for Review Dialog */}
+      <Dialog open={showSubmitReviewDialog} onOpenChange={setShowSubmitReviewDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Send className="h-5 w-5 text-fuchsia-600" />
+              Submit for App Store Review
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Select Build</Label>
+              <Select value={submitReviewForm.buildId} onValueChange={(v) => setSubmitReviewForm({ ...submitReviewForm, buildId: v })}>
+                <SelectTrigger><SelectValue placeholder="Choose a build to submit" /></SelectTrigger>
+                <SelectContent>
+                  {filteredBuilds.filter(b => b.status === 'ready' || b.status === 'approved').map(build => (
+                    <SelectItem key={build.id} value={build.id}>
+                      v{build.version} ({build.buildNumber}) - {build.platform.toUpperCase()}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Review Notes (Optional)</Label>
+              <textarea
+                className="w-full px-3 py-2 border rounded-lg text-sm"
+                rows={3}
+                placeholder="Notes for the App Store review team..."
+                value={submitReviewForm.notes}
+                onChange={(e) => setSubmitReviewForm({ ...submitReviewForm, notes: e.target.value })}
+              />
+            </div>
+            <div className="p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
+              <p className="text-sm text-amber-700 dark:text-amber-300">
+                App Store review typically takes 24-48 hours. Ensure all metadata and screenshots are up to date.
+              </p>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowSubmitReviewDialog(false)}>Cancel</Button>
+              <Button onClick={async () => {
+                if (submitReviewForm.buildId) {
+                  const build = filteredBuilds.find(b => b.id === submitReviewForm.buildId)
+                  if (build) {
+                    await handleSubmitToStore(submitReviewForm.buildId, build.platform)
+                    setShowSubmitReviewDialog(false)
+                    setSubmitReviewForm({ buildId: '', notes: '' })
+                  }
+                } else {
+                  toast.error('Please select a build to submit')
+                }
+              }} disabled={isLoading} className="bg-fuchsia-600 hover:bg-fuchsia-700">
+                {isLoading ? 'Submitting...' : 'Submit for Review'}
+              </Button>
+            </DialogFooter>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* View Analytics Dialog */}
+      <Dialog open={showViewAnalyticsDialog} onOpenChange={setShowViewAnalyticsDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <BarChart3 className="h-5 w-5 text-indigo-600" />
+              App Analytics Overview
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="grid grid-cols-4 gap-4">
+              <div className="p-4 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg text-center">
+                <p className="text-2xl font-bold text-indigo-600">{(stats.totalDownloads / 1000000).toFixed(1)}M</p>
+                <p className="text-xs text-gray-500">Total Downloads</p>
+              </div>
+              <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg text-center">
+                <p className="text-2xl font-bold text-green-600">{(stats.monthlyActiveUsers / 1000).toFixed(0)}K</p>
+                <p className="text-xs text-gray-500">Monthly Active</p>
+              </div>
+              <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg text-center">
+                <p className="text-2xl font-bold text-yellow-600">{stats.avgRating}</p>
+                <p className="text-xs text-gray-500">Avg Rating</p>
+              </div>
+              <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg text-center">
+                <p className="text-2xl font-bold text-red-600">{stats.crashFreeRate}%</p>
+                <p className="text-xs text-gray-500">Crash-Free</p>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="p-4 border rounded-lg">
+                <h4 className="font-medium mb-2">Platform Breakdown</h4>
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span className="flex items-center gap-2"><Apple className="h-4 w-4" /> iOS</span>
+                    <span>{(stats.iosDownloads / 1000000).toFixed(1)}M ({((stats.iosDownloads / stats.totalDownloads) * 100).toFixed(0)}%)</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="flex items-center gap-2"><Smartphone className="h-4 w-4" /> Android</span>
+                    <span>{(stats.androidDownloads / 1000000).toFixed(1)}M ({((stats.androidDownloads / stats.totalDownloads) * 100).toFixed(0)}%)</span>
+                  </div>
+                </div>
+              </div>
+              <div className="p-4 border rounded-lg">
+                <h4 className="font-medium mb-2">Engagement</h4>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span>DAU</span>
+                    <span>{(stats.dailyActiveUsers / 1000).toFixed(0)}K</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Avg Session</span>
+                    <span>{stats.avgSessionLength}m</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>7-Day Retention</span>
+                    <span>{stats.retention7Day}%</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowViewAnalyticsDialog(false)}>Close</Button>
+              <Button onClick={() => { setShowViewAnalyticsDialog(false); setActiveTab('analytics'); }} className="bg-indigo-600 hover:bg-indigo-700">
+                View Full Analytics
+              </Button>
+            </DialogFooter>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Upload Build Dialog */}
+      <Dialog open={showUploadBuildDialog} onOpenChange={setShowUploadBuildDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Upload className="h-5 w-5 text-indigo-600" />
+              Upload New Build
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center">
+              <Upload className="h-10 w-10 text-gray-400 mx-auto mb-3" />
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                Drag and drop your IPA or APK file here
+              </p>
+              <p className="text-xs text-gray-500">or</p>
+              <Button variant="outline" className="mt-2" onClick={() => toast.info('File browser would open here')}>
+                Browse Files
+              </Button>
+            </div>
+            <div>
+              <Label>Version Number</Label>
+              <Input
+                placeholder="e.g., 2.6.0"
+                value={buildForm.version}
+                onChange={(e) => setBuildForm({ ...buildForm, version: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label>Platform</Label>
+              <Select value={buildForm.platform} onValueChange={(v: Platform) => setBuildForm({ ...buildForm, platform: v })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ios">iOS (.ipa)</SelectItem>
+                  <SelectItem value="android">Android (.apk / .aab)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowUploadBuildDialog(false)}>Cancel</Button>
+              <Button onClick={async () => {
+                await handleCreateBuild()
+                setShowUploadBuildDialog(false)
+              }} disabled={isLoading} className="bg-indigo-600 hover:bg-indigo-700">
+                {isLoading ? 'Uploading...' : 'Upload Build'}
+              </Button>
+            </DialogFooter>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Send Push Notification Dialog */}
+      <Dialog open={showSendPushDialog} onOpenChange={setShowSendPushDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Bell className="h-5 w-5 text-blue-600" />
+              Send Push Notification
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Notification Title</Label>
+              <Input
+                placeholder="e.g., New Feature Available!"
+                value={pushNotificationForm.title}
+                onChange={(e) => setPushNotificationForm({ ...pushNotificationForm, title: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label>Message</Label>
+              <textarea
+                className="w-full px-3 py-2 border rounded-lg text-sm"
+                rows={3}
+                placeholder="Your notification message..."
+                value={pushNotificationForm.message}
+                onChange={(e) => setPushNotificationForm({ ...pushNotificationForm, message: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label>Target Audience</Label>
+              <Select value={pushNotificationForm.targetAudience} onValueChange={(v) => setPushNotificationForm({ ...pushNotificationForm, targetAudience: v })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Users</SelectItem>
+                  <SelectItem value="ios">iOS Users Only</SelectItem>
+                  <SelectItem value="android">Android Users Only</SelectItem>
+                  <SelectItem value="active">Active Users (Last 7 days)</SelectItem>
+                  <SelectItem value="inactive">Inactive Users</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+              <p className="text-sm text-blue-700 dark:text-blue-300">
+                Estimated reach: ~{pushNotificationForm.targetAudience === 'all' ? '890K' : pushNotificationForm.targetAudience === 'ios' ? '480K' : '410K'} users
+              </p>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowSendPushDialog(false)}>Cancel</Button>
+              <Button onClick={async () => {
+                if (!pushNotificationForm.title || !pushNotificationForm.message) {
+                  toast.error('Please fill in all fields')
+                  return
+                }
+                setCampaignForm({
+                  title: pushNotificationForm.title,
+                  message: pushNotificationForm.message,
+                  platform: pushNotificationForm.targetAudience as Platform,
+                  targetAudience: pushNotificationForm.targetAudience === 'all' ? 'All Users' : pushNotificationForm.targetAudience
+                })
+                await handleCreateCampaign()
+                setShowSendPushDialog(false)
+                setPushNotificationForm({ title: '', message: '', targetAudience: 'all' })
+              }} disabled={isLoading} className="bg-blue-600 hover:bg-blue-700">
+                {isLoading ? 'Sending...' : 'Send Notification'}
+              </Button>
+            </DialogFooter>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Crash Reports Dialog */}
+      <Dialog open={showCrashReportsDialog} onOpenChange={setShowCrashReportsDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Bug className="h-5 w-5 text-red-600" />
+              Crash Reports
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="grid grid-cols-3 gap-4">
+              <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg text-center">
+                <p className="text-2xl font-bold text-red-600">32</p>
+                <p className="text-xs text-gray-500">Total Crashes (24h)</p>
+              </div>
+              <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg text-center">
+                <p className="text-2xl font-bold text-green-600">{stats.crashFreeRate}%</p>
+                <p className="text-xs text-gray-500">Crash-Free Rate</p>
+              </div>
+              <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg text-center">
+                <p className="text-2xl font-bold text-yellow-600">3</p>
+                <p className="text-xs text-gray-500">Affected Versions</p>
+              </div>
+            </div>
+            <div className="border rounded-lg divide-y">
+              <div className="p-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-800">
+                <div>
+                  <p className="font-medium">NullPointerException in UserProfile.java</p>
+                  <p className="text-sm text-gray-500">v2.5.0 (Android) - 18 occurrences</p>
+                </div>
+                <Badge className="bg-red-100 text-red-700">Critical</Badge>
+              </div>
+              <div className="p-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-800">
+                <div>
+                  <p className="font-medium">Thread 1: EXC_BAD_ACCESS in CoreData</p>
+                  <p className="text-sm text-gray-500">v2.5.1 (iOS) - 8 occurrences</p>
+                </div>
+                <Badge className="bg-orange-100 text-orange-700">High</Badge>
+              </div>
+              <div className="p-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-800">
+                <div>
+                  <p className="font-medium">OutOfMemoryError in ImageCache</p>
+                  <p className="text-sm text-gray-500">v2.5.0 (Android) - 6 occurrences</p>
+                </div>
+                <Badge className="bg-yellow-100 text-yellow-700">Medium</Badge>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowCrashReportsDialog(false)}>Close</Button>
+              <Button onClick={() => { setShowCrashReportsDialog(false); setActiveTab('analytics'); }} className="bg-red-600 hover:bg-red-700">
+                View Full Report
+              </Button>
+            </DialogFooter>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Update App Metadata Dialog */}
+      <Dialog open={showUpdateMetadataDialog} onOpenChange={setShowUpdateMetadataDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Settings className="h-5 w-5 text-gray-600" />
+              Update App Metadata
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>App Name</Label>
+              <Input
+                placeholder="Your app name"
+                value={metadataForm.appName}
+                onChange={(e) => setMetadataForm({ ...metadataForm, appName: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label>Description</Label>
+              <textarea
+                className="w-full px-3 py-2 border rounded-lg text-sm"
+                rows={4}
+                placeholder="App description for the store listing..."
+                value={metadataForm.description}
+                onChange={(e) => setMetadataForm({ ...metadataForm, description: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label>Keywords</Label>
+              <Input
+                placeholder="productivity, tasks, workflow"
+                value={metadataForm.keywords}
+                onChange={(e) => setMetadataForm({ ...metadataForm, keywords: e.target.value })}
+              />
+              <p className="text-xs text-gray-500 mt-1">Comma-separated keywords for App Store search</p>
+            </div>
+            <div>
+              <Label>Category</Label>
+              <Select value={metadataForm.category} onValueChange={(v) => setMetadataForm({ ...metadataForm, category: v })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="productivity">Productivity</SelectItem>
+                  <SelectItem value="business">Business</SelectItem>
+                  <SelectItem value="utilities">Utilities</SelectItem>
+                  <SelectItem value="lifestyle">Lifestyle</SelectItem>
+                  <SelectItem value="education">Education</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowUpdateMetadataDialog(false)}>Cancel</Button>
+              <Button onClick={async () => {
+                await handleSaveSettings('metadata')
+                setShowUpdateMetadataDialog(false)
+                toast.success('Metadata updated', { description: 'App store listing will be updated with the next release.' })
+              }} disabled={isLoading}>
+                {isLoading ? 'Saving...' : 'Save Metadata'}
+              </Button>
             </DialogFooter>
           </div>
         </DialogContent>

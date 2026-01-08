@@ -546,11 +546,7 @@ const mockBugsActivities = [
   { id: '3', user: 'System', action: 'Auto-assigned', target: '5 bugs to available developers', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'update' as const },
 ]
 
-const mockBugsQuickActions = [
-  { id: '1', label: 'Report Bug', icon: 'plus', action: () => toast.success('Bug Report', { description: 'Describe the issue and attach screenshots' }), variant: 'default' as const },
-  { id: '2', label: 'Run Tests', icon: 'play', action: () => toast.success('Test Suite Complete', { description: '245 tests passed, 3 failed' }), variant: 'default' as const },
-  { id: '3', label: 'Export Report', icon: 'download', action: () => toast.success('Report Exported', { description: 'Bug summary exported to PDF' }), variant: 'outline' as const },
-]
+// Quick actions will be defined inside the component to access state setters
 
 export default function BugsClient() {
   const supabase = createClient()
@@ -574,6 +570,46 @@ export default function BugsClient() {
   const [showCreateDialog, setShowCreateDialog] = useState(false)
   const [showEditDialog, setShowEditDialog] = useState(false)
   const [editingBug, setEditingBug] = useState<DbBug | null>(null)
+
+  // Quick Action Dialog States
+  const [showRunTestsDialog, setShowRunTestsDialog] = useState(false)
+  const [showExportReportDialog, setShowExportReportDialog] = useState(false)
+  const [isRunningTests, setIsRunningTests] = useState(false)
+  const [isExportingReport, setIsExportingReport] = useState(false)
+  const [testResults, setTestResults] = useState<{ passed: number; failed: number; skipped: number } | null>(null)
+  const [exportFormat, setExportFormat] = useState('pdf')
+  const [exportDateRange, setExportDateRange] = useState('all')
+
+  // Handler for running tests
+  const handleRunTests = async () => {
+    setIsRunningTests(true)
+    setTestResults(null)
+    // Simulate running tests
+    await new Promise(resolve => setTimeout(resolve, 2000))
+    const passed = Math.floor(Math.random() * 50) + 200
+    const failed = Math.floor(Math.random() * 5)
+    const skipped = Math.floor(Math.random() * 10)
+    setTestResults({ passed, failed, skipped })
+    setIsRunningTests(false)
+    toast.success('Test Suite Complete', { description: `${passed} passed, ${failed} failed, ${skipped} skipped` })
+  }
+
+  // Handler for exporting report
+  const handleExportReport = async () => {
+    setIsExportingReport(true)
+    // Simulate export process
+    await new Promise(resolve => setTimeout(resolve, 1500))
+    setIsExportingReport(false)
+    setShowExportReportDialog(false)
+    toast.success('Report Exported', { description: `Bug summary exported to ${exportFormat.toUpperCase()}` })
+  }
+
+  // Quick Actions for toolbar (defined inside component to access setters)
+  const bugsQuickActions = [
+    { id: '1', label: 'Report Bug', icon: 'plus', action: () => setShowCreateDialog(true), variant: 'default' as const },
+    { id: '2', label: 'Run Tests', icon: 'play', action: () => setShowRunTestsDialog(true), variant: 'default' as const },
+    { id: '3', label: 'Export Report', icon: 'download', action: () => setShowExportReportDialog(true), variant: 'outline' as const },
+  ]
 
   // Form State
   const [formData, setFormData] = useState({
@@ -1989,7 +2025,7 @@ export default function BugsClient() {
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockBugsQuickActions}
+            actions={bugsQuickActions}
             variant="grid"
           />
         </div>
@@ -2404,6 +2440,196 @@ export default function BugsClient() {
               <Button onClick={handleUpdateBug} disabled={isSaving || !formData.title}>
                 {isSaving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                 Save Changes
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Run Tests Dialog */}
+        <Dialog open={showRunTestsDialog} onOpenChange={setShowRunTestsDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Play className="w-5 h-5 text-green-600" />
+                Run Test Suite
+              </DialogTitle>
+              <DialogDescription>
+                Execute automated tests to verify bug fixes and ensure code quality
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-3">
+                <Label>Test Configuration</Label>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                    <span className="text-sm">Unit Tests</span>
+                    <Switch defaultChecked />
+                  </div>
+                  <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                    <span className="text-sm">Integration Tests</span>
+                    <Switch defaultChecked />
+                  </div>
+                  <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                    <span className="text-sm">E2E Tests</span>
+                    <Switch />
+                  </div>
+                  <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                    <span className="text-sm">Regression Tests</span>
+                    <Switch defaultChecked />
+                  </div>
+                </div>
+              </div>
+
+              {isRunningTests && (
+                <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                  <div className="flex items-center gap-3 mb-2">
+                    <Loader2 className="w-5 h-5 animate-spin text-blue-600" />
+                    <span className="font-medium text-blue-700 dark:text-blue-400">Running tests...</span>
+                  </div>
+                  <Progress value={65} className="h-2" />
+                </div>
+              )}
+
+              {testResults && (
+                <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                  <h4 className="font-medium mb-3">Test Results</h4>
+                  <div className="grid grid-cols-3 gap-3">
+                    <div className="text-center p-3 bg-green-100 dark:bg-green-900/30 rounded-lg">
+                      <CheckCircle className="w-6 h-6 mx-auto mb-1 text-green-600" />
+                      <p className="text-2xl font-bold text-green-700">{testResults.passed}</p>
+                      <p className="text-xs text-green-600">Passed</p>
+                    </div>
+                    <div className="text-center p-3 bg-red-100 dark:bg-red-900/30 rounded-lg">
+                      <XCircle className="w-6 h-6 mx-auto mb-1 text-red-600" />
+                      <p className="text-2xl font-bold text-red-700">{testResults.failed}</p>
+                      <p className="text-xs text-red-600">Failed</p>
+                    </div>
+                    <div className="text-center p-3 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg">
+                      <Minus className="w-6 h-6 mx-auto mb-1 text-yellow-600" />
+                      <p className="text-2xl font-bold text-yellow-700">{testResults.skipped}</p>
+                      <p className="text-xs text-yellow-600">Skipped</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => { setShowRunTestsDialog(false); setTestResults(null); }}>
+                Close
+              </Button>
+              <Button onClick={handleRunTests} disabled={isRunningTests}>
+                {isRunningTests ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Running...
+                  </>
+                ) : (
+                  <>
+                    <Play className="w-4 h-4 mr-2" />
+                    Run Tests
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Export Report Dialog */}
+        <Dialog open={showExportReportDialog} onOpenChange={setShowExportReportDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Download className="w-5 h-5 text-purple-600" />
+                Export Bug Report
+              </DialogTitle>
+              <DialogDescription>
+                Generate and download a comprehensive bug report
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="grid gap-2">
+                <Label>Export Format</Label>
+                <Select value={exportFormat} onValueChange={setExportFormat}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select format" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="pdf">PDF Document</SelectItem>
+                    <SelectItem value="csv">CSV Spreadsheet</SelectItem>
+                    <SelectItem value="xlsx">Excel Spreadsheet</SelectItem>
+                    <SelectItem value="json">JSON Data</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="grid gap-2">
+                <Label>Date Range</Label>
+                <Select value={exportDateRange} onValueChange={setExportDateRange}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select date range" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Time</SelectItem>
+                    <SelectItem value="week">Last 7 Days</SelectItem>
+                    <SelectItem value="month">Last 30 Days</SelectItem>
+                    <SelectItem value="quarter">Last Quarter</SelectItem>
+                    <SelectItem value="year">Last Year</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-3">
+                <Label>Include in Report</Label>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                    <span className="text-sm">Bug Details</span>
+                    <Switch defaultChecked />
+                  </div>
+                  <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                    <span className="text-sm">Resolution Statistics</span>
+                    <Switch defaultChecked />
+                  </div>
+                  <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                    <span className="text-sm">Team Performance</span>
+                    <Switch defaultChecked />
+                  </div>
+                  <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                    <span className="text-sm">Severity Breakdown</span>
+                    <Switch defaultChecked />
+                  </div>
+                  <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                    <span className="text-sm">Comments & Activity</span>
+                    <Switch />
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                <div className="flex items-center gap-2 mb-2">
+                  <BarChart3 className="w-5 h-5 text-purple-600" />
+                  <span className="font-medium text-purple-700 dark:text-purple-400">Report Preview</span>
+                </div>
+                <p className="text-sm text-purple-600 dark:text-purple-300">
+                  {stats.total} bugs total, {stats.open} open, {stats.resolved} resolved
+                </p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowExportReportDialog(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleExportReport} disabled={isExportingReport}>
+                {isExportingReport ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Exporting...
+                  </>
+                ) : (
+                  <>
+                    <Download className="w-4 h-4 mr-2" />
+                    Export Report
+                  </>
+                )}
               </Button>
             </DialogFooter>
           </DialogContent>

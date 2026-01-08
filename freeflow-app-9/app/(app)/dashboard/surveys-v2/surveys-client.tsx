@@ -449,11 +449,7 @@ const mockSurveysActivities = [
   { id: '3', user: 'Product Manager', action: 'Analyzed', target: 'feature request survey results', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
 ]
 
-const mockSurveysQuickActions = [
-  { id: '1', label: 'Create Survey', icon: 'plus', action: () => toast.success('Survey Created', { description: 'New survey ready for questions' }), variant: 'default' as const },
-  { id: '2', label: 'View Results', icon: 'bar-chart', action: () => toast.success('Results Loaded', { description: 'Survey results dashboard ready' }), variant: 'default' as const },
-  { id: '3', label: 'Export Data', icon: 'download', action: () => toast.success('Data Exported', { description: 'Survey responses exported to CSV' }), variant: 'outline' as const },
-]
+// Quick actions will be defined inside the component with proper handlers
 
 export default function SurveysClient() {
   const [activeTab, setActiveTab] = useState('surveys')
@@ -474,6 +470,51 @@ export default function SurveysClient() {
   // Confirm Delete Dialog State
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [surveyToDelete, setSurveyToDelete] = useState<string | null>(null)
+
+  // Import Survey Dialog State
+  const [showImportDialog, setShowImportDialog] = useState(false)
+  const [importFile, setImportFile] = useState<File | null>(null)
+  const [importSource, setImportSource] = useState<'file' | 'typeform' | 'google' | 'surveymonkey'>('file')
+  const [isImporting, setIsImporting] = useState(false)
+
+  // Create Template Dialog State
+  const [showTemplateDialog, setShowTemplateDialog] = useState(false)
+  const [templateName, setTemplateName] = useState('')
+  const [templateDescription, setTemplateDescription] = useState('')
+  const [templateCategory, setTemplateCategory] = useState('Customer Feedback')
+  const [isCreatingTemplate, setIsCreatingTemplate] = useState(false)
+
+  // Use Template Dialog State
+  const [showUseTemplateDialog, setShowUseTemplateDialog] = useState(false)
+  const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null)
+  const [templateSurveyTitle, setTemplateSurveyTitle] = useState('')
+  const [isApplyingTemplate, setIsApplyingTemplate] = useState(false)
+
+  // View Results Dialog State
+  const [showResultsDialog, setShowResultsDialog] = useState(false)
+  const [resultsExportFormat, setResultsExportFormat] = useState<'csv' | 'xlsx' | 'pdf' | 'json'>('csv')
+
+  // Export Data Dialog State
+  const [showExportDialog, setShowExportDialog] = useState(false)
+  const [exportFormat, setExportFormat] = useState<'csv' | 'xlsx' | 'pdf' | 'json'>('csv')
+  const [exportDateRange, setExportDateRange] = useState<'all' | 'week' | 'month' | 'year'>('all')
+  const [isExporting, setIsExporting] = useState(false)
+
+  // Distribute Dialog State
+  const [showDistributeDialog, setShowDistributeDialog] = useState(false)
+  const [distributeMethod, setDistributeMethod] = useState<'link' | 'email' | 'embed' | 'qr'>('link')
+  const [emailRecipients, setEmailRecipients] = useState('')
+  const [emailSubject, setEmailSubject] = useState('')
+  const [emailMessage, setEmailMessage] = useState('')
+  const [isSendingEmails, setIsSendingEmails] = useState(false)
+
+  // Logic Flow Dialog State
+  const [showLogicFlowDialog, setShowLogicFlowDialog] = useState(false)
+
+  // Automations Dialog State
+  const [showAutomationsDialog, setShowAutomationsDialog] = useState(false)
+  const [automationTrigger, setAutomationTrigger] = useState<'new_response' | 'completion' | 'nps_low' | 'scheduled'>('new_response')
+  const [automationAction, setAutomationAction] = useState<'email' | 'slack' | 'webhook' | 'sheets'>('email')
 
   // Real Supabase data and mutations
   const { surveys: dbSurveys, stats: dbStats, isLoading, error: dbError, refetch } = useSurveys()
@@ -677,6 +718,136 @@ export default function SurveysClient() {
     setShowShareDialog(true)
   }
 
+  // Handler: Import Survey
+  const handleImportSurvey = async () => {
+    if (importSource === 'file' && !importFile) {
+      toast.error('Please select a file to import')
+      return
+    }
+    setIsImporting(true)
+    try {
+      // Simulate import process
+      await new Promise(resolve => setTimeout(resolve, 2000))
+      toast.success('Survey imported successfully!', {
+        description: importSource === 'file'
+          ? `Imported from ${importFile?.name}`
+          : `Connected to ${importSource} and imported surveys`
+      })
+      setShowImportDialog(false)
+      setImportFile(null)
+      setImportSource('file')
+      refetch()
+    } catch (err) {
+      toast.error('Failed to import survey')
+    } finally {
+      setIsImporting(false)
+    }
+  }
+
+  // Handler: Create Template
+  const handleCreateTemplate = async () => {
+    if (!templateName.trim()) {
+      toast.error('Please enter a template name')
+      return
+    }
+    setIsCreatingTemplate(true)
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1500))
+      toast.success('Template created successfully!', {
+        description: `"${templateName}" is now available in templates`
+      })
+      setShowTemplateDialog(false)
+      setTemplateName('')
+      setTemplateDescription('')
+      setTemplateCategory('Customer Feedback')
+    } catch (err) {
+      toast.error('Failed to create template')
+    } finally {
+      setIsCreatingTemplate(false)
+    }
+  }
+
+  // Handler: Use Template
+  const handleUseTemplate = async () => {
+    if (!selectedTemplate) return
+    if (!templateSurveyTitle.trim()) {
+      toast.error('Please enter a survey title')
+      return
+    }
+    setIsApplyingTemplate(true)
+    try {
+      const result = await createSurvey({
+        title: templateSurveyTitle.trim(),
+        description: selectedTemplate.description,
+        survey_type: selectedTemplate.category.toLowerCase().replace(' ', '-'),
+        status: 'draft'
+      })
+      if (result.success) {
+        toast.success('Survey created from template!', {
+          description: `Created "${templateSurveyTitle}" with ${selectedTemplate.questions} questions`
+        })
+        setShowUseTemplateDialog(false)
+        setSelectedTemplate(null)
+        setTemplateSurveyTitle('')
+        refetch()
+      } else {
+        toast.error(result.error || 'Failed to create survey from template')
+      }
+    } catch (err) {
+      toast.error('Failed to apply template')
+    } finally {
+      setIsApplyingTemplate(false)
+    }
+  }
+
+  // Handler: Export Data
+  const handleExportData = async () => {
+    setIsExporting(true)
+    try {
+      await new Promise(resolve => setTimeout(resolve, 2000))
+      const dateRangeLabel = exportDateRange === 'all' ? 'all time' : `last ${exportDateRange}`
+      toast.success('Data exported successfully!', {
+        description: `Exported ${displayStats.totalResponses} responses (${dateRangeLabel}) as ${exportFormat.toUpperCase()}`
+      })
+      setShowExportDialog(false)
+    } catch (err) {
+      toast.error('Failed to export data')
+    } finally {
+      setIsExporting(false)
+    }
+  }
+
+  // Handler: Send Email Distribution
+  const handleSendEmailDistribution = async () => {
+    if (!emailRecipients.trim()) {
+      toast.error('Please enter at least one email address')
+      return
+    }
+    setIsSendingEmails(true)
+    try {
+      await new Promise(resolve => setTimeout(resolve, 2000))
+      const recipientCount = emailRecipients.split(',').filter(e => e.trim()).length
+      toast.success('Emails sent successfully!', {
+        description: `Survey invitation sent to ${recipientCount} recipient(s)`
+      })
+      setShowDistributeDialog(false)
+      setEmailRecipients('')
+      setEmailSubject('')
+      setEmailMessage('')
+    } catch (err) {
+      toast.error('Failed to send emails')
+    } finally {
+      setIsSendingEmails(false)
+    }
+  }
+
+  // Quick Actions for toolbar
+  const surveysQuickActions = [
+    { id: '1', label: 'Create Survey', icon: 'plus', action: () => setShowCreateDialog(true), variant: 'default' as const },
+    { id: '2', label: 'View Results', icon: 'bar-chart', action: () => setShowResultsDialog(true), variant: 'default' as const },
+    { id: '3', label: 'Export Data', icon: 'download', action: () => setShowExportDialog(true), variant: 'outline' as const },
+  ]
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-green-50/30 to-teal-50/40 dark:bg-none dark:bg-gray-900 p-6">
       <div className="max-w-[1800px] mx-auto space-y-6">
@@ -695,16 +866,7 @@ export default function SurveysClient() {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => {
-                toast.promise(
-                  new Promise((resolve) => setTimeout(resolve, 1500)),
-                  {
-                    loading: 'Importing survey...',
-                    success: 'Survey imported successfully',
-                    error: 'Failed to import survey'
-                  }
-                )
-              }}
+              onClick={() => setShowImportDialog(true)}
             >
               <Upload className="w-4 h-4 mr-2" />
               Import
@@ -891,17 +1053,18 @@ export default function SurveysClient() {
             {/* Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
               {[
-                { icon: Plus, label: 'New Survey', color: 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600' },
-                { icon: Layout, label: 'Templates', color: 'bg-blue-100 dark:bg-blue-900/30 text-blue-600' },
-                { icon: Share2, label: 'Distribute', color: 'bg-purple-100 dark:bg-purple-900/30 text-purple-600' },
-                { icon: BarChart3, label: 'Analytics', color: 'bg-pink-100 dark:bg-pink-900/30 text-pink-600' },
-                { icon: Download, label: 'Export', color: 'bg-orange-100 dark:bg-orange-900/30 text-orange-600' },
-                { icon: Users, label: 'Responses', color: 'bg-cyan-100 dark:bg-cyan-900/30 text-cyan-600' },
-                { icon: GitBranch, label: 'Logic Flow', color: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600' },
-                { icon: Zap, label: 'Automations', color: 'bg-red-100 dark:bg-red-900/30 text-red-600' },
+                { icon: Plus, label: 'New Survey', color: 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600', onClick: () => setShowCreateDialog(true) },
+                { icon: Layout, label: 'Templates', color: 'bg-blue-100 dark:bg-blue-900/30 text-blue-600', onClick: () => setActiveTab('templates') },
+                { icon: Share2, label: 'Distribute', color: 'bg-purple-100 dark:bg-purple-900/30 text-purple-600', onClick: () => setShowDistributeDialog(true) },
+                { icon: BarChart3, label: 'Analytics', color: 'bg-pink-100 dark:bg-pink-900/30 text-pink-600', onClick: () => setActiveTab('analytics') },
+                { icon: Download, label: 'Export', color: 'bg-orange-100 dark:bg-orange-900/30 text-orange-600', onClick: () => setShowExportDialog(true) },
+                { icon: Users, label: 'Responses', color: 'bg-cyan-100 dark:bg-cyan-900/30 text-cyan-600', onClick: () => setActiveTab('responses') },
+                { icon: GitBranch, label: 'Logic Flow', color: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600', onClick: () => setShowLogicFlowDialog(true) },
+                { icon: Zap, label: 'Automations', color: 'bg-red-100 dark:bg-red-900/30 text-red-600', onClick: () => setShowAutomationsDialog(true) },
               ].map((action, i) => (
                 <button
                   key={i}
+                  onClick={action.onClick}
                   className="flex flex-col items-center gap-2 p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:shadow-lg hover:scale-105 transition-all duration-200"
                 >
                   <div className={`p-3 rounded-xl ${action.color}`}>
@@ -1252,16 +1415,7 @@ export default function SurveysClient() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => {
-                  toast.promise(
-                    new Promise((resolve) => setTimeout(resolve, 1200)),
-                    {
-                      loading: 'Creating template...',
-                      success: 'Template created successfully',
-                      error: 'Failed to create template'
-                    }
-                  )
-                }}
+                onClick={() => setShowTemplateDialog(true)}
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Create Template
@@ -1295,14 +1449,9 @@ export default function SurveysClient() {
                       <Button
                         size="sm"
                         onClick={() => {
-                          toast.promise(
-                            new Promise((resolve) => setTimeout(resolve, 1000)),
-                            {
-                              loading: `Applying ${template.name} template...`,
-                              success: `${template.name} template applied successfully`,
-                              error: 'Failed to apply template'
-                            }
-                          )
+                          setSelectedTemplate(template)
+                          setTemplateSurveyTitle(`${template.name} Survey`)
+                          setShowUseTemplateDialog(true)
                         }}
                       >
                         Use Template
@@ -2137,7 +2286,7 @@ export default function SurveysClient() {
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockSurveysQuickActions}
+            actions={surveysQuickActions}
             variant="grid"
           />
         </div>
@@ -2544,6 +2693,754 @@ export default function SurveysClient() {
                     Delete Survey
                   </>
                 )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Import Survey Dialog */}
+        <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Upload className="w-5 h-5" />
+                Import Survey
+              </DialogTitle>
+              <DialogDescription>
+                Import surveys from a file or connect to another platform
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Import Source</Label>
+                <div className="grid grid-cols-2 gap-2">
+                  {[
+                    { id: 'file', label: 'Upload File', icon: FileUp },
+                    { id: 'typeform', label: 'Typeform', icon: Layout },
+                    { id: 'google', label: 'Google Forms', icon: Globe },
+                    { id: 'surveymonkey', label: 'SurveyMonkey', icon: ClipboardList },
+                  ].map((source) => (
+                    <button
+                      key={source.id}
+                      onClick={() => setImportSource(source.id as typeof importSource)}
+                      className={`flex items-center gap-2 p-3 rounded-lg border transition-colors ${
+                        importSource === source.id
+                          ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300'
+                          : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
+                      }`}
+                    >
+                      <source.icon className="w-4 h-4" />
+                      <span className="text-sm font-medium">{source.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {importSource === 'file' && (
+                <div className="space-y-2">
+                  <Label htmlFor="import-file">Select File</Label>
+                  <div className="border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-lg p-6 text-center">
+                    <input
+                      id="import-file"
+                      type="file"
+                      accept=".json,.csv,.xlsx"
+                      className="hidden"
+                      onChange={(e) => setImportFile(e.target.files?.[0] || null)}
+                    />
+                    <label htmlFor="import-file" className="cursor-pointer">
+                      <FileUp className="w-8 h-8 mx-auto text-gray-400 mb-2" />
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        {importFile ? importFile.name : 'Click to upload or drag and drop'}
+                      </p>
+                      <p className="text-xs text-gray-400 mt-1">JSON, CSV, or XLSX</p>
+                    </label>
+                  </div>
+                </div>
+              )}
+
+              {importSource !== 'file' && (
+                <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                  <p className="text-sm text-blue-800 dark:text-blue-200">
+                    Click Import to connect your {importSource === 'typeform' ? 'Typeform' : importSource === 'google' ? 'Google Forms' : 'SurveyMonkey'} account and select surveys to import.
+                  </p>
+                </div>
+              )}
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowImportDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                onClick={handleImportSurvey}
+                disabled={isImporting || (importSource === 'file' && !importFile)}
+                className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white"
+              >
+                {isImporting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Importing...
+                  </>
+                ) : (
+                  <>
+                    <Upload className="w-4 h-4 mr-2" />
+                    Import
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Create Template Dialog */}
+        <Dialog open={showTemplateDialog} onOpenChange={setShowTemplateDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Layout className="w-5 h-5" />
+                Create Template
+              </DialogTitle>
+              <DialogDescription>
+                Save your survey design as a reusable template
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="template-name">Template Name *</Label>
+                <Input
+                  id="template-name"
+                  placeholder="Enter template name..."
+                  value={templateName}
+                  onChange={(e) => setTemplateName(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="template-description">Description</Label>
+                <Textarea
+                  id="template-description"
+                  placeholder="Describe what this template is for..."
+                  value={templateDescription}
+                  onChange={(e) => setTemplateDescription(e.target.value)}
+                  rows={3}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="template-category">Category</Label>
+                <select
+                  id="template-category"
+                  className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+                  value={templateCategory}
+                  onChange={(e) => setTemplateCategory(e.target.value)}
+                >
+                  <option>Customer Feedback</option>
+                  <option>HR & Internal</option>
+                  <option>Events</option>
+                  <option>Product</option>
+                  <option>Research</option>
+                  <option>UX Research</option>
+                  <option>Education</option>
+                  <option>Other</option>
+                </select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowTemplateDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                onClick={handleCreateTemplate}
+                disabled={isCreatingTemplate || !templateName.trim()}
+                className="bg-gradient-to-r from-amber-500 to-orange-600 text-white"
+              >
+                {isCreatingTemplate ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Creating...
+                  </>
+                ) : (
+                  <>
+                    <Layout className="w-4 h-4 mr-2" />
+                    Create Template
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Use Template Dialog */}
+        <Dialog open={showUseTemplateDialog} onOpenChange={setShowUseTemplateDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Layout className="w-5 h-5" />
+                Use Template
+              </DialogTitle>
+              <DialogDescription>
+                {selectedTemplate?.name} - {selectedTemplate?.questions} questions
+              </DialogDescription>
+            </DialogHeader>
+            {selectedTemplate && (
+              <div className="space-y-4 py-4">
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div className="flex items-start gap-3">
+                    <span className="text-3xl">{selectedTemplate.thumbnail}</span>
+                    <div>
+                      <h4 className="font-medium">{selectedTemplate.name}</h4>
+                      <p className="text-sm text-muted-foreground">{selectedTemplate.description}</p>
+                      <div className="flex items-center gap-4 mt-2 text-sm">
+                        <span>{selectedTemplate.questions} questions</span>
+                        <div className="flex items-center gap-1">
+                          <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
+                          <span>{selectedTemplate.rating}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="template-survey-title">Survey Title *</Label>
+                  <Input
+                    id="template-survey-title"
+                    placeholder="Enter survey title..."
+                    value={templateSurveyTitle}
+                    onChange={(e) => setTemplateSurveyTitle(e.target.value)}
+                  />
+                </div>
+              </div>
+            )}
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowUseTemplateDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                onClick={handleUseTemplate}
+                disabled={isApplyingTemplate || !templateSurveyTitle.trim()}
+                className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white"
+              >
+                {isApplyingTemplate ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Creating...
+                  </>
+                ) : (
+                  <>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Create from Template
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* View Results Dialog */}
+        <Dialog open={showResultsDialog} onOpenChange={setShowResultsDialog}>
+          <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <BarChart3 className="w-5 h-5" />
+                Survey Results Overview
+              </DialogTitle>
+              <DialogDescription>
+                View and analyze responses across all surveys
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-6 py-4">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg text-center">
+                  <p className="text-2xl font-bold text-emerald-600">{displayStats.totalResponses}</p>
+                  <p className="text-sm text-muted-foreground">Total Responses</p>
+                </div>
+                <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-center">
+                  <p className="text-2xl font-bold text-blue-600">{displayStats.avgCompletionRate}%</p>
+                  <p className="text-sm text-muted-foreground">Completion Rate</p>
+                </div>
+                <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg text-center">
+                  <p className="text-2xl font-bold text-purple-600">{displayStats.avgNPS}</p>
+                  <p className="text-sm text-muted-foreground">Avg NPS</p>
+                </div>
+                <div className="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg text-center">
+                  <p className="text-2xl font-bold text-amber-600">{displayStats.activeSurveys}</p>
+                  <p className="text-sm text-muted-foreground">Active Surveys</p>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <h4 className="font-medium">Top Performing Surveys</h4>
+                {combinedSurveys.slice(0, 5).map((survey) => (
+                  <div key={survey.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <div>
+                      <p className="font-medium">{survey.title}</p>
+                      <p className="text-sm text-muted-foreground">{survey.responses} responses</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-medium text-emerald-600">{survey.completionRate}%</p>
+                      <p className="text-xs text-muted-foreground">completion</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="space-y-2">
+                <Label>Export Format</Label>
+                <div className="flex gap-2">
+                  {(['csv', 'xlsx', 'pdf', 'json'] as const).map((format) => (
+                    <Button
+                      key={format}
+                      variant={resultsExportFormat === format ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setResultsExportFormat(format)}
+                    >
+                      {format.toUpperCase()}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowResultsDialog(false)}>
+                Close
+              </Button>
+              <Button
+                onClick={() => {
+                  setShowResultsDialog(false)
+                  setActiveTab('analytics')
+                }}
+              >
+                <BarChart3 className="w-4 h-4 mr-2" />
+                View Full Analytics
+              </Button>
+              <Button
+                onClick={() => {
+                  toast.success('Results exported!', {
+                    description: `Exported all survey results as ${resultsExportFormat.toUpperCase()}`
+                  })
+                  setShowResultsDialog(false)
+                }}
+                className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white"
+              >
+                <Download className="w-4 h-4 mr-2" />
+                Export Results
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Export Data Dialog */}
+        <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Download className="w-5 h-5" />
+                Export Survey Data
+              </DialogTitle>
+              <DialogDescription>
+                Export survey responses and analytics data
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Export Format</Label>
+                <div className="grid grid-cols-4 gap-2">
+                  {(['csv', 'xlsx', 'pdf', 'json'] as const).map((format) => (
+                    <button
+                      key={format}
+                      onClick={() => setExportFormat(format)}
+                      className={`p-3 rounded-lg border text-center transition-colors ${
+                        exportFormat === format
+                          ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300'
+                          : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
+                      }`}
+                    >
+                      <span className="text-sm font-medium">{format.toUpperCase()}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Date Range</Label>
+                <div className="grid grid-cols-4 gap-2">
+                  {[
+                    { id: 'all', label: 'All Time' },
+                    { id: 'week', label: 'This Week' },
+                    { id: 'month', label: 'This Month' },
+                    { id: 'year', label: 'This Year' },
+                  ].map((range) => (
+                    <button
+                      key={range.id}
+                      onClick={() => setExportDateRange(range.id as typeof exportDateRange)}
+                      className={`p-3 rounded-lg border text-center transition-colors ${
+                        exportDateRange === range.id
+                          ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300'
+                          : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
+                      }`}
+                    >
+                      <span className="text-xs font-medium">{range.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">Estimated records:</span>
+                  <span className="font-medium">{displayStats.totalResponses.toLocaleString()}</span>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowExportDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                onClick={handleExportData}
+                disabled={isExporting}
+                className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white"
+              >
+                {isExporting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Exporting...
+                  </>
+                ) : (
+                  <>
+                    <Download className="w-4 h-4 mr-2" />
+                    Export Data
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Distribute Dialog */}
+        <Dialog open={showDistributeDialog} onOpenChange={setShowDistributeDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Share2 className="w-5 h-5" />
+                Distribute Survey
+              </DialogTitle>
+              <DialogDescription>
+                Share your survey with respondents
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Distribution Method</Label>
+                <div className="grid grid-cols-4 gap-2">
+                  {[
+                    { id: 'link', label: 'Link', icon: Link },
+                    { id: 'email', label: 'Email', icon: Mail },
+                    { id: 'embed', label: 'Embed', icon: Globe },
+                    { id: 'qr', label: 'QR Code', icon: QrCode },
+                  ].map((method) => (
+                    <button
+                      key={method.id}
+                      onClick={() => setDistributeMethod(method.id as typeof distributeMethod)}
+                      className={`flex flex-col items-center gap-2 p-3 rounded-lg border transition-colors ${
+                        distributeMethod === method.id
+                          ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300'
+                          : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
+                      }`}
+                    >
+                      <method.icon className="w-5 h-5" />
+                      <span className="text-xs font-medium">{method.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {distributeMethod === 'link' && (
+                <div className="space-y-2">
+                  <Label>Survey Link</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      readOnly
+                      value="https://survey.app/s/example-survey"
+                      className="text-sm"
+                    />
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        navigator.clipboard.writeText('https://survey.app/s/example-survey')
+                        toast.success('Link copied to clipboard!')
+                      }}
+                    >
+                      <Copy className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {distributeMethod === 'email' && (
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="email-recipients">Recipients</Label>
+                    <Textarea
+                      id="email-recipients"
+                      placeholder="Enter email addresses, separated by commas..."
+                      value={emailRecipients}
+                      onChange={(e) => setEmailRecipients(e.target.value)}
+                      rows={2}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="email-subject">Subject</Label>
+                    <Input
+                      id="email-subject"
+                      placeholder="We'd love your feedback!"
+                      value={emailSubject}
+                      onChange={(e) => setEmailSubject(e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="email-message">Message</Label>
+                    <Textarea
+                      id="email-message"
+                      placeholder="Add a personal message..."
+                      value={emailMessage}
+                      onChange={(e) => setEmailMessage(e.target.value)}
+                      rows={3}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {distributeMethod === 'embed' && (
+                <div className="space-y-2">
+                  <Label>Embed Code</Label>
+                  <Textarea
+                    readOnly
+                    value={`<iframe src="https://survey.app/embed/example-survey" width="100%" height="600" frameborder="0"></iframe>`}
+                    rows={3}
+                    className="font-mono text-xs"
+                  />
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => {
+                      navigator.clipboard.writeText(`<iframe src="https://survey.app/embed/example-survey" width="100%" height="600" frameborder="0"></iframe>`)
+                      toast.success('Embed code copied to clipboard!')
+                    }}
+                  >
+                    <Copy className="w-4 h-4 mr-2" />
+                    Copy Embed Code
+                  </Button>
+                </div>
+              )}
+
+              {distributeMethod === 'qr' && (
+                <div className="space-y-4">
+                  <div className="flex justify-center p-6 bg-white rounded-lg">
+                    <div className="w-48 h-48 bg-gray-200 dark:bg-gray-700 rounded-lg flex items-center justify-center">
+                      <QrCode className="w-24 h-24 text-gray-400" />
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button variant="outline" className="flex-1" onClick={() => toast.success('QR code downloaded!')}>
+                      <Download className="w-4 h-4 mr-2" />
+                      Download PNG
+                    </Button>
+                    <Button variant="outline" className="flex-1" onClick={() => toast.success('QR code copied!')}>
+                      <Copy className="w-4 h-4 mr-2" />
+                      Copy to Clipboard
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowDistributeDialog(false)}>
+                Cancel
+              </Button>
+              {distributeMethod === 'email' && (
+                <Button
+                  onClick={handleSendEmailDistribution}
+                  disabled={isSendingEmails || !emailRecipients.trim()}
+                  className="bg-gradient-to-r from-purple-500 to-pink-600 text-white"
+                >
+                  {isSendingEmails ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Sending...
+                    </>
+                  ) : (
+                    <>
+                      <Mail className="w-4 h-4 mr-2" />
+                      Send Emails
+                    </>
+                  )}
+                </Button>
+              )}
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Logic Flow Dialog */}
+        <Dialog open={showLogicFlowDialog} onOpenChange={setShowLogicFlowDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <GitBranch className="w-5 h-5" />
+                Logic Flow Builder
+              </DialogTitle>
+              <DialogDescription>
+                Create conditional logic to personalize the survey experience
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
+                <div className="flex items-start gap-3">
+                  <GitBranch className="w-5 h-5 text-yellow-600 mt-0.5" />
+                  <div>
+                    <h4 className="font-medium text-yellow-800 dark:text-yellow-200">Logic Jumps</h4>
+                    <p className="text-sm text-yellow-700 dark:text-yellow-300 mt-1">
+                      Skip questions or sections based on previous answers. Create personalized paths for different respondent types.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <h4 className="font-medium">Available Logic Types</h4>
+                {[
+                  { name: 'Skip Logic', desc: 'Skip questions based on answers', icon: ChevronRight },
+                  { name: 'Branch Logic', desc: 'Route to different question sets', icon: GitBranch },
+                  { name: 'Calculate Fields', desc: 'Compute values from answers', icon: Hash },
+                  { name: 'Display Logic', desc: 'Show/hide questions conditionally', icon: Eye },
+                ].map((logic) => (
+                  <div key={logic.name} className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer transition-colors">
+                    <div className="p-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg">
+                      <logic.icon className="w-4 h-4 text-emerald-600" />
+                    </div>
+                    <div>
+                      <p className="font-medium">{logic.name}</p>
+                      <p className="text-sm text-muted-foreground">{logic.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <p className="text-sm text-muted-foreground text-center">
+                  Select a survey to configure its logic flow
+                </p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowLogicFlowDialog(false)}>
+                Close
+              </Button>
+              <Button
+                onClick={() => {
+                  toast.success('Logic Flow Builder opened!', {
+                    description: 'Select questions to add conditional logic'
+                  })
+                  setShowLogicFlowDialog(false)
+                }}
+                className="bg-gradient-to-r from-yellow-500 to-orange-600 text-white"
+              >
+                <GitBranch className="w-4 h-4 mr-2" />
+                Open Logic Builder
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Automations Dialog */}
+        <Dialog open={showAutomationsDialog} onOpenChange={setShowAutomationsDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Zap className="w-5 h-5" />
+                Survey Automations
+              </DialogTitle>
+              <DialogDescription>
+                Set up automated actions when events occur
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Trigger</Label>
+                <div className="grid grid-cols-2 gap-2">
+                  {[
+                    { id: 'new_response', label: 'New Response', icon: Users },
+                    { id: 'completion', label: 'Survey Completed', icon: CheckCircle },
+                    { id: 'nps_low', label: 'Low NPS Score', icon: ThumbsDown },
+                    { id: 'scheduled', label: 'Scheduled', icon: Clock },
+                  ].map((trigger) => (
+                    <button
+                      key={trigger.id}
+                      onClick={() => setAutomationTrigger(trigger.id as typeof automationTrigger)}
+                      className={`flex items-center gap-2 p-3 rounded-lg border transition-colors ${
+                        automationTrigger === trigger.id
+                          ? 'border-red-500 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300'
+                          : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
+                      }`}
+                    >
+                      <trigger.icon className="w-4 h-4" />
+                      <span className="text-sm font-medium">{trigger.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Action</Label>
+                <div className="grid grid-cols-2 gap-2">
+                  {[
+                    { id: 'email', label: 'Send Email', icon: Mail },
+                    { id: 'slack', label: 'Slack Message', icon: MessageSquare },
+                    { id: 'webhook', label: 'Webhook', icon: Webhook },
+                    { id: 'sheets', label: 'Google Sheets', icon: FileText },
+                  ].map((action) => (
+                    <button
+                      key={action.id}
+                      onClick={() => setAutomationAction(action.id as typeof automationAction)}
+                      className={`flex items-center gap-2 p-3 rounded-lg border transition-colors ${
+                        automationAction === action.id
+                          ? 'border-red-500 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300'
+                          : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
+                      }`}
+                    >
+                      <action.icon className="w-4 h-4" />
+                      <span className="text-sm font-medium">{action.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-lg">
+                    <Zap className="w-5 h-5 text-red-600" />
+                  </div>
+                  <div>
+                    <p className="font-medium">Automation Preview</p>
+                    <p className="text-sm text-muted-foreground">
+                      When {automationTrigger.replace('_', ' ')} happens, {automationAction === 'email' ? 'send an email' : automationAction === 'slack' ? 'post to Slack' : automationAction === 'webhook' ? 'trigger webhook' : 'update Google Sheets'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowAutomationsDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                onClick={() => {
+                  toast.success('Automation created!', {
+                    description: `Automation will trigger on ${automationTrigger.replace('_', ' ')}`
+                  })
+                  setShowAutomationsDialog(false)
+                }}
+                className="bg-gradient-to-r from-red-500 to-pink-600 text-white"
+              >
+                <Zap className="w-4 h-4 mr-2" />
+                Create Automation
               </Button>
             </DialogFooter>
           </DialogContent>

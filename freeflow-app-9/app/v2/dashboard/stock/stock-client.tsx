@@ -696,12 +696,6 @@ const mockStockActivities = [
   { id: '3', user: 'Procurement', action: 'Created', target: 'reorder for 12 low-stock items', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
 ]
 
-const mockStockQuickActions = [
-  { id: '1', label: 'Add Stock', icon: 'plus', action: () => toast.success('Add Stock', { description: 'Enter stock details to add' }), variant: 'default' as const },
-  { id: '2', label: 'Transfer', icon: 'arrow-right', action: () => toast.success('Transfer Ready', { description: 'Select items to transfer' }), variant: 'default' as const },
-  { id: '3', label: 'Count', icon: 'clipboard', action: () => toast.success('Stock Count', { description: 'Count started for selected items' }), variant: 'outline' as const },
-]
-
 export default function StockClient() {
   const [activeTab, setActiveTab] = useState('inventory')
   const [products] = useState<Product[]>(mockProducts)
@@ -717,6 +711,93 @@ export default function StockClient() {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
   const [showProductDialog, setShowProductDialog] = useState(false)
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list')
+
+  // Dialog states for QuickActions
+  const [showAddStockDialog, setShowAddStockDialog] = useState(false)
+  const [showTransferDialog, setShowTransferDialog] = useState(false)
+  const [showCountDialog, setShowCountDialog] = useState(false)
+
+  // Add Stock form state
+  const [addStockForm, setAddStockForm] = useState({
+    productId: '',
+    warehouseId: '',
+    quantity: '',
+    batchNumber: '',
+    notes: ''
+  })
+
+  // Transfer form state
+  const [transferForm, setTransferForm] = useState({
+    productId: '',
+    fromWarehouseId: '',
+    toWarehouseId: '',
+    quantity: '',
+    notes: ''
+  })
+
+  // Count form state
+  const [countForm, setCountForm] = useState({
+    warehouseId: '',
+    countType: 'cycle' as 'full' | 'cycle' | 'spot',
+    scheduledDate: '',
+    assignedTo: ''
+  })
+
+  // QuickActions with real dialog handlers
+  const mockStockQuickActions = [
+    { id: '1', label: 'Add Stock', icon: 'plus', action: () => setShowAddStockDialog(true), variant: 'default' as const },
+    { id: '2', label: 'Transfer', icon: 'arrow-right', action: () => setShowTransferDialog(true), variant: 'default' as const },
+    { id: '3', label: 'Count', icon: 'clipboard', action: () => setShowCountDialog(true), variant: 'outline' as const },
+  ]
+
+  // Handle Add Stock submission
+  const handleAddStockSubmit = () => {
+    if (!addStockForm.productId || !addStockForm.warehouseId || !addStockForm.quantity) {
+      toast.error('Missing required fields', { description: 'Please fill in product, warehouse, and quantity' })
+      return
+    }
+    const product = products.find(p => p.id === addStockForm.productId)
+    const warehouse = warehouses.find(w => w.id === addStockForm.warehouseId)
+    toast.success('Stock Added Successfully', {
+      description: `Added ${addStockForm.quantity} units of ${product?.name || 'product'} to ${warehouse?.name || 'warehouse'}`
+    })
+    setAddStockForm({ productId: '', warehouseId: '', quantity: '', batchNumber: '', notes: '' })
+    setShowAddStockDialog(false)
+  }
+
+  // Handle Transfer submission
+  const handleTransferSubmit = () => {
+    if (!transferForm.productId || !transferForm.fromWarehouseId || !transferForm.toWarehouseId || !transferForm.quantity) {
+      toast.error('Missing required fields', { description: 'Please fill in all transfer details' })
+      return
+    }
+    if (transferForm.fromWarehouseId === transferForm.toWarehouseId) {
+      toast.error('Invalid Transfer', { description: 'Source and destination warehouses must be different' })
+      return
+    }
+    const product = products.find(p => p.id === transferForm.productId)
+    const fromWarehouse = warehouses.find(w => w.id === transferForm.fromWarehouseId)
+    const toWarehouse = warehouses.find(w => w.id === transferForm.toWarehouseId)
+    toast.success('Transfer Initiated', {
+      description: `Transferring ${transferForm.quantity} units of ${product?.name || 'product'} from ${fromWarehouse?.name || 'source'} to ${toWarehouse?.name || 'destination'}`
+    })
+    setTransferForm({ productId: '', fromWarehouseId: '', toWarehouseId: '', quantity: '', notes: '' })
+    setShowTransferDialog(false)
+  }
+
+  // Handle Stock Count submission
+  const handleCountSubmit = () => {
+    if (!countForm.warehouseId || !countForm.scheduledDate) {
+      toast.error('Missing required fields', { description: 'Please select warehouse and schedule date' })
+      return
+    }
+    const warehouse = warehouses.find(w => w.id === countForm.warehouseId)
+    toast.success('Stock Count Scheduled', {
+      description: `${countForm.countType.charAt(0).toUpperCase() + countForm.countType.slice(1)} count scheduled for ${warehouse?.name || 'warehouse'} on ${countForm.scheduledDate}`
+    })
+    setCountForm({ warehouseId: '', countType: 'cycle', scheduledDate: '', assignedTo: '' })
+    setShowCountDialog(false)
+  }
 
   // Filtered products
   const filteredProducts = useMemo(() => {
@@ -1942,6 +2023,248 @@ export default function StockClient() {
               </div>
             </>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Stock Dialog */}
+      <Dialog open={showAddStockDialog} onOpenChange={setShowAddStockDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Plus className="w-5 h-5 text-green-600" />
+              Add Stock
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium mb-2 block">Product *</label>
+              <select
+                value={addStockForm.productId}
+                onChange={(e) => setAddStockForm({ ...addStockForm, productId: e.target.value })}
+                className="w-full px-3 py-2 rounded-lg border bg-white dark:bg-gray-800 text-sm"
+              >
+                <option value="">Select a product</option>
+                {products.map((product) => (
+                  <option key={product.id} value={product.id}>
+                    {product.sku} - {product.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-2 block">Warehouse *</label>
+              <select
+                value={addStockForm.warehouseId}
+                onChange={(e) => setAddStockForm({ ...addStockForm, warehouseId: e.target.value })}
+                className="w-full px-3 py-2 rounded-lg border bg-white dark:bg-gray-800 text-sm"
+              >
+                <option value="">Select a warehouse</option>
+                {warehouses.map((warehouse) => (
+                  <option key={warehouse.id} value={warehouse.id}>
+                    {warehouse.code} - {warehouse.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-2 block">Quantity *</label>
+              <Input
+                type="number"
+                placeholder="Enter quantity to add"
+                value={addStockForm.quantity}
+                onChange={(e) => setAddStockForm({ ...addStockForm, quantity: e.target.value })}
+                min="1"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-2 block">Batch Number</label>
+              <Input
+                placeholder="Optional batch/lot number"
+                value={addStockForm.batchNumber}
+                onChange={(e) => setAddStockForm({ ...addStockForm, batchNumber: e.target.value })}
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-2 block">Notes</label>
+              <Input
+                placeholder="Add any notes about this stock addition"
+                value={addStockForm.notes}
+                onChange={(e) => setAddStockForm({ ...addStockForm, notes: e.target.value })}
+              />
+            </div>
+            <div className="flex gap-3 pt-4">
+              <Button variant="outline" className="flex-1" onClick={() => setShowAddStockDialog(false)}>
+                Cancel
+              </Button>
+              <Button className="flex-1 bg-green-600 hover:bg-green-700" onClick={handleAddStockSubmit}>
+                <Plus className="w-4 h-4 mr-2" />
+                Add Stock
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Transfer Stock Dialog */}
+      <Dialog open={showTransferDialog} onOpenChange={setShowTransferDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <ArrowRightLeft className="w-5 h-5 text-blue-600" />
+              Transfer Stock
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium mb-2 block">Product *</label>
+              <select
+                value={transferForm.productId}
+                onChange={(e) => setTransferForm({ ...transferForm, productId: e.target.value })}
+                className="w-full px-3 py-2 rounded-lg border bg-white dark:bg-gray-800 text-sm"
+              >
+                <option value="">Select a product</option>
+                {products.filter(p => p.quantity > 0).map((product) => (
+                  <option key={product.id} value={product.id}>
+                    {product.sku} - {product.name} ({product.availableQuantity} available)
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium mb-2 block">From Warehouse *</label>
+                <select
+                  value={transferForm.fromWarehouseId}
+                  onChange={(e) => setTransferForm({ ...transferForm, fromWarehouseId: e.target.value })}
+                  className="w-full px-3 py-2 rounded-lg border bg-white dark:bg-gray-800 text-sm"
+                >
+                  <option value="">Select source</option>
+                  {warehouses.map((warehouse) => (
+                    <option key={warehouse.id} value={warehouse.id}>
+                      {warehouse.code}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="text-sm font-medium mb-2 block">To Warehouse *</label>
+                <select
+                  value={transferForm.toWarehouseId}
+                  onChange={(e) => setTransferForm({ ...transferForm, toWarehouseId: e.target.value })}
+                  className="w-full px-3 py-2 rounded-lg border bg-white dark:bg-gray-800 text-sm"
+                >
+                  <option value="">Select destination</option>
+                  {warehouses.map((warehouse) => (
+                    <option key={warehouse.id} value={warehouse.id}>
+                      {warehouse.code}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-2 block">Transfer Quantity *</label>
+              <Input
+                type="number"
+                placeholder="Enter quantity to transfer"
+                value={transferForm.quantity}
+                onChange={(e) => setTransferForm({ ...transferForm, quantity: e.target.value })}
+                min="1"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-2 block">Notes</label>
+              <Input
+                placeholder="Reason for transfer or special instructions"
+                value={transferForm.notes}
+                onChange={(e) => setTransferForm({ ...transferForm, notes: e.target.value })}
+              />
+            </div>
+            <div className="flex gap-3 pt-4">
+              <Button variant="outline" className="flex-1" onClick={() => setShowTransferDialog(false)}>
+                Cancel
+              </Button>
+              <Button className="flex-1 bg-blue-600 hover:bg-blue-700" onClick={handleTransferSubmit}>
+                <ArrowRightLeft className="w-4 h-4 mr-2" />
+                Initiate Transfer
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Stock Count Dialog */}
+      <Dialog open={showCountDialog} onOpenChange={setShowCountDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <ClipboardCheck className="w-5 h-5 text-purple-600" />
+              Schedule Stock Count
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium mb-2 block">Warehouse *</label>
+              <select
+                value={countForm.warehouseId}
+                onChange={(e) => setCountForm({ ...countForm, warehouseId: e.target.value })}
+                className="w-full px-3 py-2 rounded-lg border bg-white dark:bg-gray-800 text-sm"
+              >
+                <option value="">Select a warehouse</option>
+                {warehouses.map((warehouse) => (
+                  <option key={warehouse.id} value={warehouse.id}>
+                    {warehouse.code} - {warehouse.name} ({warehouse.productCount} products)
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-2 block">Count Type</label>
+              <select
+                value={countForm.countType}
+                onChange={(e) => setCountForm({ ...countForm, countType: e.target.value as 'full' | 'cycle' | 'spot' })}
+                className="w-full px-3 py-2 rounded-lg border bg-white dark:bg-gray-800 text-sm"
+              >
+                <option value="cycle">Cycle Count (Partial inventory)</option>
+                <option value="full">Full Count (Complete inventory)</option>
+                <option value="spot">Spot Check (Random verification)</option>
+              </select>
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-2 block">Scheduled Date *</label>
+              <Input
+                type="date"
+                value={countForm.scheduledDate}
+                onChange={(e) => setCountForm({ ...countForm, scheduledDate: e.target.value })}
+                min={new Date().toISOString().split('T')[0]}
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-2 block">Assign To</label>
+              <Input
+                placeholder="Team member names (comma-separated)"
+                value={countForm.assignedTo}
+                onChange={(e) => setCountForm({ ...countForm, assignedTo: e.target.value })}
+              />
+            </div>
+            <div className="bg-muted/50 p-3 rounded-lg text-sm">
+              <p className="font-medium mb-1">Count Type Details:</p>
+              <ul className="text-muted-foreground space-y-1">
+                <li><strong>Cycle:</strong> Count a portion of inventory on a rotating basis</li>
+                <li><strong>Full:</strong> Complete physical inventory of all items</li>
+                <li><strong>Spot:</strong> Quick verification of specific items</li>
+              </ul>
+            </div>
+            <div className="flex gap-3 pt-4">
+              <Button variant="outline" className="flex-1" onClick={() => setShowCountDialog(false)}>
+                Cancel
+              </Button>
+              <Button className="flex-1 bg-purple-600 hover:bg-purple-700" onClick={handleCountSubmit}>
+                <Calendar className="w-4 h-4 mr-2" />
+                Schedule Count
+              </Button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

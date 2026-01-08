@@ -312,11 +312,7 @@ const mockPerfAnalyticsActivities = [
   { id: '3', user: 'Platform Lead', action: 'Scaled', target: 'web tier to 12 instances', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
 ]
 
-const mockPerfAnalyticsQuickActions = [
-  { id: '1', label: 'New Alert', icon: 'bell', action: () => toast.success('Alert Builder', { description: 'Set thresholds for latency, error rate, and throughput' }), variant: 'default' as const },
-  { id: '2', label: 'Dashboard', icon: 'layout', action: () => toast.success('Dashboard Ready', { description: 'Real-time performance metrics loaded' }), variant: 'default' as const },
-  { id: '3', label: 'Export', icon: 'download', action: () => toast.success('Report Exported', { description: 'Performance report saved to CSV' }), variant: 'outline' as const },
-]
+// Quick actions will be defined inside the component to access state setters
 
 export default function PerformanceAnalyticsClient() {
   const [activeTab, setActiveTab] = useState('overview')
@@ -329,6 +325,32 @@ export default function PerformanceAnalyticsClient() {
   const [settingsTab, setSettingsTab] = useState('general')
   const [showCreateDashboardDialog, setShowCreateDashboardDialog] = useState(false)
   const [showCreateAlertDialog, setShowCreateAlertDialog] = useState(false)
+
+  // New dialog states for quick actions
+  const [showNewAlertDialog, setShowNewAlertDialog] = useState(false)
+  const [showExportDialog, setShowExportDialog] = useState(false)
+  const [showRefreshDialog, setShowRefreshDialog] = useState(false)
+
+  // New alert form state
+  const [newAlertName, setNewAlertName] = useState('')
+  const [newAlertMetric, setNewAlertMetric] = useState('latency_p99')
+  const [newAlertCondition, setNewAlertCondition] = useState('>')
+  const [newAlertThreshold, setNewAlertThreshold] = useState('')
+  const [newAlertSeverity, setNewAlertSeverity] = useState<'low' | 'medium' | 'high' | 'critical'>('medium')
+  const [newAlertNotifyEmail, setNewAlertNotifyEmail] = useState(true)
+  const [newAlertNotifySlack, setNewAlertNotifySlack] = useState(false)
+
+  // Export form state
+  const [exportFormat, setExportFormat] = useState('csv')
+  const [exportTimeRange, setExportTimeRange] = useState('24h')
+  const [exportMetrics, setExportMetrics] = useState(true)
+  const [exportTraces, setExportTraces] = useState(true)
+  const [exportLogs, setExportLogs] = useState(false)
+  const [isExporting, setIsExporting] = useState(false)
+
+  // Refresh state
+  const [isRefreshing, setIsRefreshing] = useState(false)
+  const [lastRefresh, setLastRefresh] = useState<Date | null>(null)
 
   // Calculate stats
   const healthyServices = mockServices.filter(s => s.status === 'healthy').length
@@ -390,23 +412,92 @@ export default function PerformanceAnalyticsClient() {
     return `${(ms / 1000).toFixed(2)}s`
   }
 
+  // Quick actions for toolbar (now with dialog-based workflows)
+  const perfAnalyticsQuickActions = [
+    { id: '1', label: 'New Alert', icon: 'bell', action: () => setShowNewAlertDialog(true), variant: 'default' as const },
+    { id: '2', label: 'Dashboard', icon: 'layout', action: () => setShowCreateDashboardDialog(true), variant: 'default' as const },
+    { id: '3', label: 'Export', icon: 'download', action: () => setShowExportDialog(true), variant: 'outline' as const },
+  ]
+
   // Handlers
   const handleRefreshMetrics = () => {
-    toast.info('Refreshing metrics', {
-      description: 'Fetching latest performance data...'
+    setShowRefreshDialog(true)
+  }
+
+  const handleConfirmRefresh = async () => {
+    setIsRefreshing(true)
+    // Simulate refresh delay
+    await new Promise(resolve => setTimeout(resolve, 2000))
+    setIsRefreshing(false)
+    setLastRefresh(new Date())
+    setShowRefreshDialog(false)
+    toast.success('Metrics refreshed', {
+      description: 'All performance data has been updated'
     })
   }
 
   const handleExportReport = () => {
-    toast.success('Exporting report', {
-      description: 'Performance report will be downloaded'
+    setShowExportDialog(true)
+  }
+
+  const handleConfirmExport = async () => {
+    setIsExporting(true)
+    // Simulate export delay
+    await new Promise(resolve => setTimeout(resolve, 2500))
+    setIsExporting(false)
+    setShowExportDialog(false)
+
+    const dataTypes = []
+    if (exportMetrics) dataTypes.push('metrics')
+    if (exportTraces) dataTypes.push('traces')
+    if (exportLogs) dataTypes.push('logs')
+
+    toast.success('Export completed', {
+      description: `${dataTypes.join(', ')} exported as ${exportFormat.toUpperCase()} for ${exportTimeRange}`
     })
   }
 
-  const handleSetAlert = (metric: string) => {
-    toast.success('Alert created', {
-      description: `You'll be notified of ${metric} changes`
+  const handleCreateAlert = () => {
+    if (!newAlertName || !newAlertThreshold) {
+      toast.error('Missing required fields', {
+        description: 'Please fill in alert name and threshold value'
+      })
+      return
+    }
+
+    const newAlert: Alert = {
+      id: `alert-${Date.now()}`,
+      name: newAlertName,
+      severity: newAlertSeverity,
+      status: 'firing',
+      metric: newAlertMetric,
+      condition: `${newAlertCondition} ${newAlertThreshold}`,
+      value: 0,
+      threshold: parseFloat(newAlertThreshold),
+      triggeredAt: new Date().toISOString()
+    }
+
+    // In a real app, this would save to backend
+    console.log('Created alert:', newAlert)
+
+    toast.success('Alert created successfully', {
+      description: `Monitoring ${newAlertMetric} ${newAlertCondition} ${newAlertThreshold}`
     })
+
+    // Reset form
+    setNewAlertName('')
+    setNewAlertMetric('latency_p99')
+    setNewAlertCondition('>')
+    setNewAlertThreshold('')
+    setNewAlertSeverity('medium')
+    setNewAlertNotifyEmail(true)
+    setNewAlertNotifySlack(false)
+    setShowNewAlertDialog(false)
+  }
+
+  const handleSetAlert = (metric: string) => {
+    setNewAlertMetric(metric)
+    setShowNewAlertDialog(true)
   }
 
   return (
@@ -1780,7 +1871,7 @@ export default function PerformanceAnalyticsClient() {
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockPerfAnalyticsQuickActions}
+            actions={perfAnalyticsQuickActions}
             variant="grid"
           />
         </div>
@@ -1876,6 +1967,292 @@ export default function PerformanceAnalyticsClient() {
               <button onClick={() => setShowTraceDialog(false)} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
                 Close
               </button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* New Alert Dialog */}
+        <Dialog open={showNewAlertDialog} onOpenChange={setShowNewAlertDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Bell className="w-5 h-5 text-blue-600" />
+                Create New Alert
+              </DialogTitle>
+              <DialogDescription>
+                Configure alert thresholds and notification settings
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="alert-name">Alert Name</Label>
+                <Input
+                  id="alert-name"
+                  placeholder="e.g., High Latency Alert"
+                  value={newAlertName}
+                  onChange={(e) => setNewAlertName(e.target.value)}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Metric</Label>
+                  <Select value={newAlertMetric} onValueChange={setNewAlertMetric}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="latency_p99">Latency P99</SelectItem>
+                      <SelectItem value="latency_p95">Latency P95</SelectItem>
+                      <SelectItem value="error_rate">Error Rate</SelectItem>
+                      <SelectItem value="throughput">Throughput</SelectItem>
+                      <SelectItem value="cpu_usage">CPU Usage</SelectItem>
+                      <SelectItem value="memory_usage">Memory Usage</SelectItem>
+                      <SelectItem value="disk_usage">Disk Usage</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Severity</Label>
+                  <Select value={newAlertSeverity} onValueChange={(v) => setNewAlertSeverity(v as 'low' | 'medium' | 'high' | 'critical')}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="low">Low</SelectItem>
+                      <SelectItem value="medium">Medium</SelectItem>
+                      <SelectItem value="high">High</SelectItem>
+                      <SelectItem value="critical">Critical</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Condition</Label>
+                  <Select value={newAlertCondition} onValueChange={setNewAlertCondition}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value=">">Greater than (&gt;)</SelectItem>
+                      <SelectItem value=">=">Greater or equal (&gt;=)</SelectItem>
+                      <SelectItem value="<">Less than (&lt;)</SelectItem>
+                      <SelectItem value="<=">Less or equal (&lt;=)</SelectItem>
+                      <SelectItem value="==">Equal to (==)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="threshold">Threshold Value</Label>
+                  <Input
+                    id="threshold"
+                    type="number"
+                    placeholder="e.g., 500"
+                    value={newAlertThreshold}
+                    onChange={(e) => setNewAlertThreshold(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-3 pt-4 border-t border-gray-100 dark:border-gray-700">
+                <Label className="text-sm font-medium">Notification Channels</Label>
+                <div className="flex items-center justify-between py-2">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+                      <span className="text-sm">@</span>
+                    </div>
+                    <span className="text-sm text-gray-700 dark:text-gray-300">Email Notifications</span>
+                  </div>
+                  <Switch checked={newAlertNotifyEmail} onCheckedChange={setNewAlertNotifyEmail} />
+                </div>
+                <div className="flex items-center justify-between py-2">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center">
+                      <span className="text-sm">#</span>
+                    </div>
+                    <span className="text-sm text-gray-700 dark:text-gray-300">Slack Notifications</span>
+                  </div>
+                  <Switch checked={newAlertNotifySlack} onCheckedChange={setNewAlertNotifySlack} />
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowNewAlertDialog(false)}>Cancel</Button>
+              <Button className="bg-blue-600 hover:bg-blue-700" onClick={handleCreateAlert}>
+                Create Alert
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Export Dialog */}
+        <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Download className="w-5 h-5 text-green-600" />
+                Export Performance Data
+              </DialogTitle>
+              <DialogDescription>
+                Configure your data export settings
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Export Format</Label>
+                  <Select value={exportFormat} onValueChange={setExportFormat}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="csv">CSV</SelectItem>
+                      <SelectItem value="json">JSON</SelectItem>
+                      <SelectItem value="xlsx">Excel (XLSX)</SelectItem>
+                      <SelectItem value="pdf">PDF Report</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Time Range</Label>
+                  <Select value={exportTimeRange} onValueChange={setExportTimeRange}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="1h">Last 1 hour</SelectItem>
+                      <SelectItem value="6h">Last 6 hours</SelectItem>
+                      <SelectItem value="24h">Last 24 hours</SelectItem>
+                      <SelectItem value="7d">Last 7 days</SelectItem>
+                      <SelectItem value="30d">Last 30 days</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="space-y-3 pt-4 border-t border-gray-100 dark:border-gray-700">
+                <Label className="text-sm font-medium">Data to Include</Label>
+                <div className="flex items-center justify-between py-2">
+                  <div className="flex items-center gap-2">
+                    <Gauge className="w-4 h-4 text-blue-600" />
+                    <span className="text-sm text-gray-700 dark:text-gray-300">Metrics Data</span>
+                  </div>
+                  <Switch checked={exportMetrics} onCheckedChange={setExportMetrics} />
+                </div>
+                <div className="flex items-center justify-between py-2">
+                  <div className="flex items-center gap-2">
+                    <Layers className="w-4 h-4 text-purple-600" />
+                    <span className="text-sm text-gray-700 dark:text-gray-300">Distributed Traces</span>
+                  </div>
+                  <Switch checked={exportTraces} onCheckedChange={setExportTraces} />
+                </div>
+                <div className="flex items-center justify-between py-2">
+                  <div className="flex items-center gap-2">
+                    <Terminal className="w-4 h-4 text-green-600" />
+                    <span className="text-sm text-gray-700 dark:text-gray-300">Log Entries</span>
+                  </div>
+                  <Switch checked={exportLogs} onCheckedChange={setExportLogs} />
+                </div>
+              </div>
+
+              {/* Export size estimate */}
+              <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-gray-500">Estimated file size:</span>
+                  <span className="font-medium text-gray-900 dark:text-white">
+                    ~{exportFormat === 'pdf' ? '2.4' : exportFormat === 'xlsx' ? '1.8' : '1.2'} MB
+                  </span>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowExportDialog(false)}>Cancel</Button>
+              <Button
+                className="bg-green-600 hover:bg-green-700"
+                onClick={handleConfirmExport}
+                disabled={isExporting || (!exportMetrics && !exportTraces && !exportLogs)}
+              >
+                {isExporting ? (
+                  <>
+                    <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                    Exporting...
+                  </>
+                ) : (
+                  <>
+                    <Download className="w-4 h-4 mr-2" />
+                    Export Data
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Refresh Metrics Dialog */}
+        <Dialog open={showRefreshDialog} onOpenChange={setShowRefreshDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <RefreshCw className="w-5 h-5 text-blue-600" />
+                Refresh Metrics
+              </DialogTitle>
+              <DialogDescription>
+                Fetch the latest performance data from all sources
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                <h4 className="font-medium text-blue-800 dark:text-blue-200 mb-2">Data Sources</h4>
+                <ul className="space-y-2 text-sm text-blue-700 dark:text-blue-300">
+                  <li className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full" />
+                    AWS CloudWatch - Connected
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full" />
+                    Prometheus - Connected
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full" />
+                    PostgreSQL - Connected
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-yellow-500 rounded-full" />
+                    Elasticsearch - Degraded
+                  </li>
+                </ul>
+              </div>
+
+              {lastRefresh && (
+                <div className="text-sm text-gray-500">
+                  Last refreshed: {lastRefresh.toLocaleTimeString()}
+                </div>
+              )}
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowRefreshDialog(false)}>Cancel</Button>
+              <Button
+                className="bg-blue-600 hover:bg-blue-700"
+                onClick={handleConfirmRefresh}
+                disabled={isRefreshing}
+              >
+                {isRefreshing ? (
+                  <>
+                    <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                    Refreshing...
+                  </>
+                ) : (
+                  <>
+                    <RefreshCw className="w-4 h-4 mr-2" />
+                    Refresh Now
+                  </>
+                )}
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

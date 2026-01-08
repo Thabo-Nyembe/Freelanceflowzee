@@ -398,20 +398,8 @@ const mockSprintsActivities = [
   { id: '3', user: 'Scrum Master', action: 'Updated', target: 'Sprint 24 capacity', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
 ]
 
-const mockSprintsQuickActions = [
-  { id: '1', label: 'New Story', icon: 'plus', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 800)),
-    { loading: 'Creating new story...', success: 'Story created successfully', error: 'Failed to create story' }
-  ), variant: 'default' as const },
-  { id: '2', label: 'Start Sprint', icon: 'play', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1000)),
-    { loading: 'Starting sprint...', success: 'Sprint started successfully', error: 'Failed to start sprint' }
-  ), variant: 'default' as const },
-  { id: '3', label: 'Backlog', icon: 'list', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 600)),
-    { loading: 'Loading backlog...', success: 'Backlog loaded', error: 'Failed to load backlog' }
-  ), variant: 'outline' as const },
-]
+// Quick actions now use dialog-based workflows instead of toast-only patterns
+// The actual quick actions are defined inside the component with proper dialog handlers
 
 export default function SprintsClient() {
   const [activeTab, setActiveTab] = useState('sprints')
@@ -433,6 +421,17 @@ export default function SprintsClient() {
   const [showNewStoryDialog, setShowNewStoryDialog] = useState(false)
   const [showStartSprintDialog, setShowStartSprintDialog] = useState(false)
   const [showBacklogDialog, setShowBacklogDialog] = useState(false)
+
+  // Form states for new story dialog (quick action)
+  const [newStoryTitle, setNewStoryTitle] = useState('')
+  const [newStoryDescription, setNewStoryDescription] = useState('')
+  const [newStoryPoints, setNewStoryPoints] = useState('3')
+  const [newStoryPriority, setNewStoryPriority] = useState('medium')
+  const [selectedSprintForStory, setSelectedSprintForStory] = useState<string | null>(null)
+
+  // Form states for start sprint dialog (quick action)
+  const [sprintToStart, setSprintToStart] = useState<string | null>(null)
+  const [sprintDuration, setSprintDuration] = useState('2')
 
   // Form states for creating sprint
   const [newSprintName, setNewSprintName] = useState('')
@@ -573,6 +572,98 @@ export default function SprintsClient() {
     setNewTaskPriority('medium')
     setNewTaskStoryPoints('3')
     setNewTaskEstimatedHours('8')
+  }
+
+  // Reset story form (quick action dialog)
+  const resetStoryForm = () => {
+    setNewStoryTitle('')
+    setNewStoryDescription('')
+    setNewStoryPoints('3')
+    setNewStoryPriority('medium')
+    setSelectedSprintForStory(null)
+  }
+
+  // Reset start sprint form (quick action dialog)
+  const resetStartSprintForm = () => {
+    setSprintToStart(null)
+    setSprintDuration('2')
+  }
+
+  // Submit new story from quick action dialog
+  const handleSubmitNewStory = async () => {
+    if (!newStoryTitle.trim()) {
+      toast.error('Validation Error', {
+        description: 'Story title is required'
+      })
+      return
+    }
+
+    // Use first planning sprint or active sprint if no sprint selected
+    const targetSprintId = selectedSprintForStory ||
+      mockSprints.find(s => s.status === 'planning')?.id ||
+      mockSprints.find(s => s.status === 'active')?.id
+
+    if (!targetSprintId) {
+      toast.error('No Sprint Available', {
+        description: 'Please create a sprint first before adding stories'
+      })
+      return
+    }
+
+    try {
+      await createTask({
+        sprint_id: targetSprintId,
+        title: newStoryTitle,
+        description: newStoryDescription || null,
+        priority: newStoryPriority,
+        story_points: parseInt(newStoryPoints) || 3,
+        estimated_hours: parseInt(newStoryPoints) * 2, // Estimate 2 hours per story point
+        status: 'todo',
+        progress: 0,
+        actual_hours: 0,
+        labels: ['story'],
+      })
+
+      toast.success('Story Created', {
+        description: `"${newStoryTitle}" has been added to the sprint`
+      })
+      setShowNewStoryDialog(false)
+      resetStoryForm()
+      refetchTasks()
+      refetchSprints()
+    } catch (error) {
+      toast.error('Failed to Create Story', {
+        description: error instanceof Error ? error.message : 'An error occurred'
+      })
+    }
+  }
+
+  // Submit start sprint from quick action dialog
+  const handleSubmitStartSprint = async () => {
+    if (!sprintToStart) {
+      toast.error('Validation Error', {
+        description: 'Please select a sprint to start'
+      })
+      return
+    }
+
+    const sprint = mockSprints.find(s => s.id === sprintToStart) ||
+                   dbSprints.find(s => s.id === sprintToStart)
+    const sprintName = sprint?.name || 'Sprint'
+
+    try {
+      await startSprint(sprintToStart)
+      toast.success('Sprint Started', {
+        description: `"${sprintName}" is now active with ${sprintDuration}-week duration`
+      })
+      setShowStartSprintDialog(false)
+      resetStartSprintForm()
+      refetchSprints()
+    } catch (error) {
+      toast.error('Failed to Start Sprint', {
+        description: error instanceof Error ? error.message : 'An error occurred'
+      })
+    }
   }
 
   // Create Sprint - opens dialog
@@ -2801,7 +2892,10 @@ export default function SprintsClient() {
         {/* ============================================================================ */}
         {/* NEW STORY DIALOG (Quick Action) */}
         {/* ============================================================================ */}
-        <Dialog open={showNewStoryDialog} onOpenChange={setShowNewStoryDialog}>
+        <Dialog open={showNewStoryDialog} onOpenChange={(open) => {
+          setShowNewStoryDialog(open)
+          if (!open) resetStoryForm()
+        }}>
           <DialogContent className="max-w-lg">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
@@ -2809,22 +2903,57 @@ export default function SprintsClient() {
                 Create New Story
               </DialogTitle>
               <DialogDescription>
-                Add a new user story to the current sprint backlog.
+                Add a new user story to the sprint backlog.
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
               <div className="space-y-2">
+                <Label htmlFor="story-sprint">Target Sprint</Label>
+                <Select value={selectedSprintForStory || ''} onValueChange={setSelectedSprintForStory}>
+                  <SelectTrigger id="story-sprint">
+                    <SelectValue placeholder="Select sprint..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {mockSprints
+                      .filter(s => s.status === 'planning' || s.status === 'active')
+                      .map(sprint => (
+                        <SelectItem key={sprint.id} value={sprint.id}>
+                          {sprint.name} ({sprint.status})
+                        </SelectItem>
+                      ))}
+                    {dbSprints
+                      .filter(s => s.status === 'planning' || s.status === 'active')
+                      .map(sprint => (
+                        <SelectItem key={sprint.id} value={sprint.id}>
+                          {sprint.name} ({sprint.status}) - DB
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
                 <Label htmlFor="story-title">Story Title</Label>
-                <Input id="story-title" placeholder="As a user, I want to..." />
+                <Input
+                  id="story-title"
+                  placeholder="As a user, I want to..."
+                  value={newStoryTitle}
+                  onChange={(e) => setNewStoryTitle(e.target.value)}
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="story-description">Description</Label>
-                <Textarea id="story-description" placeholder="Describe the acceptance criteria..." rows={3} />
+                <Textarea
+                  id="story-description"
+                  placeholder="Describe the acceptance criteria..."
+                  rows={3}
+                  value={newStoryDescription}
+                  onChange={(e) => setNewStoryDescription(e.target.value)}
+                />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="story-points">Story Points</Label>
-                  <Select defaultValue="3">
+                  <Select value={newStoryPoints} onValueChange={setNewStoryPoints}>
                     <SelectTrigger id="story-points">
                       <SelectValue placeholder="Points" />
                     </SelectTrigger>
@@ -2840,7 +2969,7 @@ export default function SprintsClient() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="story-priority">Priority</Label>
-                  <Select defaultValue="medium">
+                  <Select value={newStoryPriority} onValueChange={setNewStoryPriority}>
                     <SelectTrigger id="story-priority">
                       <SelectValue placeholder="Priority" />
                     </SelectTrigger>
@@ -2855,15 +2984,27 @@ export default function SprintsClient() {
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setShowNewStoryDialog(false)}>
+              <Button variant="outline" onClick={() => {
+                setShowNewStoryDialog(false)
+                resetStoryForm()
+              }}>
                 Cancel
               </Button>
-              <Button onClick={() => {
-                toast.success('Story created successfully')
-                setShowNewStoryDialog(false)
-              }}>
-                <Plus className="w-4 h-4 mr-2" />
-                Create Story
+              <Button
+                onClick={handleSubmitNewStory}
+                disabled={isCreatingTask || !newStoryTitle.trim()}
+              >
+                {isCreatingTask ? (
+                  <>
+                    <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                    Creating...
+                  </>
+                ) : (
+                  <>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Create Story
+                  </>
+                )}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -2872,7 +3013,10 @@ export default function SprintsClient() {
         {/* ============================================================================ */}
         {/* START SPRINT DIALOG (Quick Action) */}
         {/* ============================================================================ */}
-        <Dialog open={showStartSprintDialog} onOpenChange={setShowStartSprintDialog}>
+        <Dialog open={showStartSprintDialog} onOpenChange={(open) => {
+          setShowStartSprintDialog(open)
+          if (!open) resetStartSprintForm()
+        }}>
           <DialogContent className="max-w-lg">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
@@ -2886,7 +3030,7 @@ export default function SprintsClient() {
             <div className="space-y-4 py-4">
               <div className="space-y-2">
                 <Label htmlFor="select-sprint">Select Sprint</Label>
-                <Select>
+                <Select value={sprintToStart || ''} onValueChange={setSprintToStart}>
                   <SelectTrigger id="select-sprint">
                     <SelectValue placeholder="Choose a sprint..." />
                   </SelectTrigger>
@@ -2898,12 +3042,19 @@ export default function SprintsClient() {
                           {sprint.name} ({sprint.key})
                         </SelectItem>
                       ))}
+                    {dbSprints
+                      .filter(s => s.status === 'planning')
+                      .map(sprint => (
+                        <SelectItem key={sprint.id} value={sprint.id}>
+                          {sprint.name} ({sprint.sprint_code}) - DB
+                        </SelectItem>
+                      ))}
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="sprint-duration">Sprint Duration</Label>
-                <Select defaultValue="2">
+                <Select value={sprintDuration} onValueChange={setSprintDuration}>
                   <SelectTrigger id="sprint-duration">
                     <SelectValue placeholder="Duration" />
                   </SelectTrigger>
@@ -2915,6 +3066,13 @@ export default function SprintsClient() {
                   </SelectContent>
                 </Select>
               </div>
+              {sprintToStart && (
+                <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+                  <p className="text-sm text-green-700 dark:text-green-400">
+                    Ready to start sprint with {sprintDuration}-week duration. This will lock the sprint scope and begin tracking.
+                  </p>
+                </div>
+              )}
               <div className="p-3 bg-muted rounded-lg">
                 <p className="text-sm text-muted-foreground">
                   Starting a sprint will lock its scope and begin tracking velocity and burndown metrics.
@@ -2922,15 +3080,28 @@ export default function SprintsClient() {
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setShowStartSprintDialog(false)}>
+              <Button variant="outline" onClick={() => {
+                setShowStartSprintDialog(false)
+                resetStartSprintForm()
+              }}>
                 Cancel
               </Button>
-              <Button onClick={() => {
-                toast.success('Sprint started successfully')
-                setShowStartSprintDialog(false)
-              }} className="bg-green-600 hover:bg-green-700">
-                <PlayCircle className="w-4 h-4 mr-2" />
-                Start Sprint
+              <Button
+                onClick={handleSubmitStartSprint}
+                disabled={isStartingSprint || !sprintToStart}
+                className="bg-green-600 hover:bg-green-700"
+              >
+                {isStartingSprint ? (
+                  <>
+                    <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                    Starting...
+                  </>
+                ) : (
+                  <>
+                    <PlayCircle className="w-4 h-4 mr-2" />
+                    Start Sprint
+                  </>
+                )}
               </Button>
             </DialogFooter>
           </DialogContent>

@@ -1375,6 +1375,168 @@ export default function WidgetsClient() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Quick Action: New Item Dialog */}
+      <Dialog open={showNewItemDialog} onOpenChange={setShowNewItemDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Create New Widget</DialogTitle>
+            <DialogDescription>
+              Add a new widget to your dashboard
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div>
+              <Label>Widget Name</Label>
+              <Input
+                placeholder="Enter widget name"
+                className="mt-2"
+              />
+            </div>
+            <div>
+              <Label>Widget Type</Label>
+              <Select defaultValue="metric">
+                <SelectTrigger className="mt-2">
+                  <SelectValue placeholder="Select type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="metric">Metric</SelectItem>
+                  <SelectItem value="chart">Chart</SelectItem>
+                  <SelectItem value="table">Table</SelectItem>
+                  <SelectItem value="activity">Activity</SelectItem>
+                  <SelectItem value="quick-actions">Quick Actions</SelectItem>
+                  <SelectItem value="calendar">Calendar</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowNewItemDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={() => {
+              toast.success('Widget created successfully')
+              setShowNewItemDialog(false)
+            }}>
+              <Plus className="h-4 w-4 mr-2" />
+              Create Widget
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Quick Action: Export Dialog */}
+      <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Export Widgets</DialogTitle>
+            <DialogDescription>
+              Export your widget configuration
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div className="text-center">
+              <Download className="h-12 w-12 mx-auto text-blue-500 mb-4" />
+              <p className="text-sm text-muted-foreground">
+                Export all {stats.total} widgets as a JSON configuration file
+              </p>
+            </div>
+            <div>
+              <Label>Export Format</Label>
+              <Select defaultValue="json">
+                <SelectTrigger className="mt-2">
+                  <SelectValue placeholder="Select format" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="json">JSON</SelectItem>
+                  <SelectItem value="csv">CSV</SelectItem>
+                  <SelectItem value="yaml">YAML</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowExportDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={() => {
+              handleExportConfig()
+              setShowExportDialog(false)
+            }}>
+              <Download className="h-4 w-4 mr-2" />
+              Export
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Quick Action: Settings Dialog */}
+      <Dialog open={showSettingsDialog} onOpenChange={setShowSettingsDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Widget Settings</DialogTitle>
+            <DialogDescription>
+              Configure your widget preferences
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div>
+              <Label>Default Refresh Interval</Label>
+              <Select defaultValue="60">
+                <SelectTrigger className="mt-2">
+                  <SelectValue placeholder="Select interval" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="30">30 seconds</SelectItem>
+                  <SelectItem value="60">1 minute</SelectItem>
+                  <SelectItem value="300">5 minutes</SelectItem>
+                  <SelectItem value="600">10 minutes</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Default Widget Size</Label>
+              <Select defaultValue="medium">
+                <SelectTrigger className="mt-2">
+                  <SelectValue placeholder="Select size" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="small">Small</SelectItem>
+                  <SelectItem value="medium">Medium</SelectItem>
+                  <SelectItem value="large">Large</SelectItem>
+                  <SelectItem value="full">Full Width</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-center gap-2">
+              <Checkbox id="auto-refresh" defaultChecked />
+              <Label htmlFor="auto-refresh">Enable auto-refresh for all widgets</Label>
+            </div>
+            <div className="flex items-center gap-2">
+              <Checkbox id="show-legends" defaultChecked />
+              <Label htmlFor="show-legends">Show legends on chart widgets</Label>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowSettingsDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={() => {
+              toast.success('Settings saved successfully')
+              setShowSettingsDialog(false)
+            }}>
+              <Settings className="h-4 w-4 mr-2" />
+              Save Settings
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

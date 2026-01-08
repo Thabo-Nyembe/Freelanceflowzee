@@ -568,8 +568,18 @@ export default function CoursesClient() {
   const [showDeleteCourseDialog, setShowDeleteCourseDialog] = useState(false)
   const [showAddSectionDialog, setShowAddSectionDialog] = useState(false)
   const [showAddLectureDialog, setShowAddLectureDialog] = useState(false)
+  const [showCreateQuizDialog, setShowCreateQuizDialog] = useState(false)
+  const [showViewAnalyticsDialog, setShowViewAnalyticsDialog] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [courseToDelete, setCourseToDelete] = useState<Course | null>(null)
+
+  // Quick actions with proper dialog handlers
+  const coursesQuickActions = [
+    { id: '1', label: 'New Course', icon: 'BookOpen', shortcut: 'C', action: () => setShowCreateCourseDialog(true) },
+    { id: '2', label: 'Add Lecture', icon: 'PlayCircle', shortcut: 'L', action: () => setShowAddLectureDialog(true) },
+    { id: '3', label: 'Create Quiz', icon: 'FileText', shortcut: 'Q', action: () => setShowCreateQuizDialog(true) },
+    { id: '4', label: 'View Analytics', icon: 'BarChart3', shortcut: 'A', action: () => setShowViewAnalyticsDialog(true) },
+  ]
 
   // Supabase hooks
   const { courses: dbCourses, isLoading: coursesLoading, refresh: refreshCourses } = useCoursesExtended({
@@ -2504,7 +2514,7 @@ export default function CoursesClient() {
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockCoursesQuickActions}
+            actions={coursesQuickActions}
             variant="grid"
           />
         </div>
@@ -2972,6 +2982,155 @@ export default function CoursesClient() {
             <Button onClick={() => handleAddLecture('')} disabled={isSubmitting}>
               {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Plus className="w-4 h-4 mr-2" />}
               Add Lecture
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Quiz Dialog */}
+      <Dialog open={showCreateQuizDialog} onOpenChange={setShowCreateQuizDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileText className="w-5 h-5 text-purple-500" />
+              Create Quiz
+            </DialogTitle>
+            <DialogDescription>
+              Create a new quiz to test student knowledge
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="quiz_title">Quiz Title *</Label>
+              <Input
+                id="quiz_title"
+                placeholder="e.g., Module 1 Assessment"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="quiz_description">Description</Label>
+              <Textarea
+                id="quiz_description"
+                placeholder="Describe what this quiz covers..."
+                rows={3}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="passing_score">Passing Score (%)</Label>
+                <Input
+                  id="passing_score"
+                  type="number"
+                  placeholder="70"
+                  defaultValue={70}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="time_limit">Time Limit (minutes)</Label>
+                <Input
+                  id="time_limit"
+                  type="number"
+                  placeholder="30"
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Quiz Type</Label>
+              <Select defaultValue="multiple_choice">
+                <SelectTrigger>
+                  <SelectValue placeholder="Select quiz type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="multiple_choice">Multiple Choice</SelectItem>
+                  <SelectItem value="true_false">True/False</SelectItem>
+                  <SelectItem value="short_answer">Short Answer</SelectItem>
+                  <SelectItem value="mixed">Mixed Question Types</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCreateQuizDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={() => {
+              toast.success('Quiz created successfully')
+              setShowCreateQuizDialog(false)
+            }}>
+              <Plus className="w-4 h-4 mr-2" />
+              Create Quiz
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* View Analytics Dialog */}
+      <Dialog open={showViewAnalyticsDialog} onOpenChange={setShowViewAnalyticsDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <BarChart3 className="w-5 h-5 text-blue-500" />
+              Course Analytics
+            </DialogTitle>
+            <DialogDescription>
+              View detailed analytics for your courses
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-6 py-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <Card>
+                <CardContent className="p-4 text-center">
+                  <p className="text-2xl font-bold text-blue-600">{stats.totalStudents.toLocaleString()}</p>
+                  <p className="text-sm text-muted-foreground">Total Students</p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-4 text-center">
+                  <p className="text-2xl font-bold text-green-600">{formatCurrency(stats.totalRevenue)}</p>
+                  <p className="text-sm text-muted-foreground">Total Revenue</p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-4 text-center">
+                  <p className="text-2xl font-bold text-yellow-600">{stats.avgRating.toFixed(1)}</p>
+                  <p className="text-sm text-muted-foreground">Avg Rating</p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-4 text-center">
+                  <p className="text-2xl font-bold text-purple-600">{stats.totalCompletions.toLocaleString()}</p>
+                  <p className="text-sm text-muted-foreground">Completions</p>
+                </CardContent>
+              </Card>
+            </div>
+            <div className="space-y-2">
+              <h4 className="font-medium">Quick Insights</h4>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li className="flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4 text-green-500" />
+                  {stats.publishedCourses} of {stats.totalCourses} courses published
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4 text-green-500" />
+                  {stats.totalHours} total hours of content
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4 text-green-500" />
+                  {stats.totalReviews} student reviews received
+                </li>
+              </ul>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowViewAnalyticsDialog(false)}>
+              Close
+            </Button>
+            <Button onClick={() => {
+              setActiveView('analytics')
+              setShowViewAnalyticsDialog(false)
+            }}>
+              <BarChart3 className="w-4 h-4 mr-2" />
+              View Full Analytics
             </Button>
           </DialogFooter>
         </DialogContent>

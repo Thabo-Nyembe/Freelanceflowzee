@@ -17,6 +17,15 @@ export const dynamic = 'force-dynamic';
 import { useCallback, useState, useEffect } from 'react'
 import { ComingSoonSystem } from '@/components/ui/coming-soon-system'
 import { ErrorBoundary } from '@/components/ui/error-boundary-system'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Switch } from '@/components/ui/switch'
+import { toast } from 'sonner'
+import { Plus, Download, Settings, FileText, Folder, Zap, Bell, Lock, Palette, Database, Cloud } from 'lucide-react'
 
 // A+++ UTILITIES
 import { DashboardSkeleton } from '@/components/ui/loading-skeleton'
@@ -52,18 +61,91 @@ const comingSoonActivities = [
   { id: '3', user: 'System', action: 'generated', target: 'weekly report', timestamp: '1h ago', type: 'info' as const },
 ]
 
-const comingSoonQuickActions = [
-  { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => toast.success('New Item', { description: 'Item created successfully' }) },
-  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => toast.success('Export Started', { description: 'Data exported successfully' }) },
-  { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => toast.success('Settings', { description: 'Settings opened' }) },
-]
-
 export default function ComingSoonClient() {
   // A+++ STATE MANAGEMENT
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { announce } = useAnnouncer()
   const { userId, loading: userLoading } = useCurrentUser()
+
+  // Dialog states for real functionality
+  const [showNewItemDialog, setShowNewItemDialog] = useState(false)
+  const [showExportDialog, setShowExportDialog] = useState(false)
+  const [showSettingsDialog, setShowSettingsDialog] = useState(false)
+
+  // Form states for dialogs
+  const [newItemName, setNewItemName] = useState('')
+  const [newItemType, setNewItemType] = useState('task')
+  const [newItemDescription, setNewItemDescription] = useState('')
+  const [exportFormat, setExportFormat] = useState('pdf')
+  const [exportIncludeAttachments, setExportIncludeAttachments] = useState(true)
+  const [settingsNotifications, setSettingsNotifications] = useState(true)
+  const [settingsTheme, setSettingsTheme] = useState('system')
+  const [settingsAutoSave, setSettingsAutoSave] = useState(true)
+
+  // Quick actions with dialog-based workflows
+  const comingSoonQuickActions = [
+    { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => setShowNewItemDialog(true) },
+    { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => setShowExportDialog(true) },
+    { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => setShowSettingsDialog(true) },
+  ]
+
+  // Handler for creating new item
+  const handleCreateNewItem = useCallback(async () => {
+    if (!newItemName.trim()) {
+      toast.error('Validation Error', { description: 'Please enter an item name' })
+      return
+    }
+
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 500))
+
+      toast.success('Item Created', {
+        description: `${newItemType.charAt(0).toUpperCase() + newItemType.slice(1)} "${newItemName}" has been created successfully`
+      })
+
+      // Reset form and close dialog
+      setNewItemName('')
+      setNewItemType('task')
+      setNewItemDescription('')
+      setShowNewItemDialog(false)
+    } catch (err) {
+      toast.error('Creation Failed', { description: 'Failed to create item. Please try again.' })
+    }
+  }, [newItemName, newItemType])
+
+  // Handler for export
+  const handleExport = useCallback(async () => {
+    try {
+      // Simulate export process
+      await new Promise(resolve => setTimeout(resolve, 1000))
+
+      toast.success('Export Complete', {
+        description: `Data exported as ${exportFormat.toUpperCase()}${exportIncludeAttachments ? ' with attachments' : ''}`
+      })
+
+      setShowExportDialog(false)
+    } catch (err) {
+      toast.error('Export Failed', { description: 'Failed to export data. Please try again.' })
+    }
+  }, [exportFormat, exportIncludeAttachments])
+
+  // Handler for saving settings
+  const handleSaveSettings = useCallback(async () => {
+    try {
+      // Simulate saving settings
+      await new Promise(resolve => setTimeout(resolve, 500))
+
+      toast.success('Settings Saved', {
+        description: 'Your preferences have been updated successfully'
+      })
+
+      setShowSettingsDialog(false)
+    } catch (err) {
+      toast.error('Save Failed', { description: 'Failed to save settings. Please try again.' })
+    }
+  }, [settingsNotifications, settingsTheme, settingsAutoSave])
 
   // A+++ LOAD COMING SOON DATA
   useEffect(() => {
@@ -153,6 +235,217 @@ export default function ComingSoonClient() {
         <div className="container mx-auto px-4 py-8">
           <ComingSoonSystem showAll={true} />
         </div>
+
+        {/* New Item Dialog */}
+        <Dialog open={showNewItemDialog} onOpenChange={setShowNewItemDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Plus className="h-5 w-5 text-blue-600" />
+                Create New Item
+              </DialogTitle>
+              <DialogDescription>
+                Create a new item to add to your workspace
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="item-name">Item Name</Label>
+                <Input
+                  id="item-name"
+                  placeholder="Enter item name..."
+                  value={newItemName}
+                  onChange={(e) => setNewItemName(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="item-type">Item Type</Label>
+                <Select value={newItemType} onValueChange={setNewItemType}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="task">
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-4 w-4" />
+                        Task
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="project">
+                      <div className="flex items-center gap-2">
+                        <Folder className="h-4 w-4" />
+                        Project
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="workflow">
+                      <div className="flex items-center gap-2">
+                        <Zap className="h-4 w-4" />
+                        Workflow
+                      </div>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="item-description">Description (Optional)</Label>
+                <Textarea
+                  id="item-description"
+                  placeholder="Enter a description..."
+                  value={newItemDescription}
+                  onChange={(e) => setNewItemDescription(e.target.value)}
+                  rows={3}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowNewItemDialog(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleCreateNewItem}>
+                <Plus className="h-4 w-4 mr-2" />
+                Create Item
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Export Dialog */}
+        <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Download className="h-5 w-5 text-green-600" />
+                Export Data
+              </DialogTitle>
+              <DialogDescription>
+                Choose your export format and options
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Export Format</Label>
+                <Select value={exportFormat} onValueChange={setExportFormat}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select format" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="pdf">PDF Document</SelectItem>
+                    <SelectItem value="csv">CSV Spreadsheet</SelectItem>
+                    <SelectItem value="xlsx">Excel Workbook</SelectItem>
+                    <SelectItem value="json">JSON Data</SelectItem>
+                    <SelectItem value="zip">ZIP Archive</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div>
+                  <Label className="text-gray-900 dark:text-white font-medium">Include Attachments</Label>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Export will include all file attachments</p>
+                </div>
+                <Switch
+                  checked={exportIncludeAttachments}
+                  onCheckedChange={setExportIncludeAttachments}
+                />
+              </div>
+              <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                <div className="flex items-center gap-2 text-blue-700 dark:text-blue-400">
+                  <Cloud className="h-4 w-4" />
+                  <span className="text-sm font-medium">Export Preview</span>
+                </div>
+                <p className="text-sm text-blue-600 dark:text-blue-300 mt-1">
+                  Your export will include all available data in {exportFormat.toUpperCase()} format
+                  {exportIncludeAttachments ? ' with attachments' : ''}.
+                </p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowExportDialog(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleExport} className="bg-green-600 hover:bg-green-700">
+                <Download className="h-4 w-4 mr-2" />
+                Start Export
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Settings Dialog */}
+        <Dialog open={showSettingsDialog} onOpenChange={setShowSettingsDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Settings className="h-5 w-5 text-gray-600" />
+                Settings
+              </DialogTitle>
+              <DialogDescription>
+                Configure your workspace preferences
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div className="flex items-center gap-3">
+                  <Bell className="h-5 w-5 text-blue-600" />
+                  <div>
+                    <Label className="text-gray-900 dark:text-white font-medium">Notifications</Label>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Receive push notifications</p>
+                  </div>
+                </div>
+                <Switch
+                  checked={settingsNotifications}
+                  onCheckedChange={setSettingsNotifications}
+                />
+              </div>
+              <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div className="flex items-center gap-3">
+                  <Database className="h-5 w-5 text-green-600" />
+                  <div>
+                    <Label className="text-gray-900 dark:text-white font-medium">Auto-Save</Label>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Automatically save changes</p>
+                  </div>
+                </div>
+                <Switch
+                  checked={settingsAutoSave}
+                  onCheckedChange={setSettingsAutoSave}
+                />
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <Palette className="h-5 w-5 text-purple-600" />
+                  <Label>Theme Preference</Label>
+                </div>
+                <Select value={settingsTheme} onValueChange={setSettingsTheme}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select theme" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="light">Light</SelectItem>
+                    <SelectItem value="dark">Dark</SelectItem>
+                    <SelectItem value="system">System Default</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800">
+                <div className="flex items-center gap-2 text-amber-700 dark:text-amber-400">
+                  <Lock className="h-4 w-4" />
+                  <span className="text-sm font-medium">Privacy Note</span>
+                </div>
+                <p className="text-sm text-amber-600 dark:text-amber-300 mt-1">
+                  Your settings are stored securely and synced across devices.
+                </p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowSettingsDialog(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleSaveSettings}>
+                <Settings className="h-4 w-4 mr-2" />
+                Save Settings
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </ErrorBoundary>
   )

@@ -451,11 +451,7 @@ const cryptoPaymentsActivities = [
   { id: '3', user: 'System', action: 'generated', target: 'weekly report', timestamp: '1h ago', type: 'info' as const },
 ]
 
-const cryptoPaymentsQuickActions = [
-  { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => toast.success('Payment Created', { description: 'New crypto payment ready' }) },
-  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => toast.success('Data Exported', { description: 'Crypto payment data exported' }) },
-  { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => toast.success('Settings', { description: 'Payment settings opened' }) },
-]
+// Quick actions defined inside component to access state setters
 
 export default function CryptoPaymentsClient() {
   logger.debug('Component mounting')
@@ -495,6 +491,63 @@ export default function CryptoPaymentsClient() {
   // Confirmation Dialog States
   const [cancelTransaction, setCancelTransaction] = useState<CryptoTransaction | null>(null)
   const [refundTransaction, setRefundTransaction] = useState<CryptoTransaction | null>(null)
+
+  // Quick Action Dialog States
+  const [showQuickNewPaymentDialog, setShowQuickNewPaymentDialog] = useState(false)
+  const [showExportDialog, setShowExportDialog] = useState(false)
+  const [showPaymentSettingsDialog, setShowPaymentSettingsDialog] = useState(false)
+
+  // Export Form State
+  const [exportFormat, setExportFormat] = useState<'csv' | 'json' | 'pdf'>('csv')
+  const [exportDateRange, setExportDateRange] = useState<'all' | 'week' | 'month' | 'year'>('month')
+  const [exportIncludeCompleted, setExportIncludeCompleted] = useState(true)
+  const [exportIncludePending, setExportIncludePending] = useState(true)
+
+  // Payment Settings State
+  const [autoConvertToFiat, setAutoConvertToFiat] = useState(true)
+  const [defaultCurrency, setDefaultCurrency] = useState<CryptoCurrency>('BTC')
+  const [paymentExpiration, setPaymentExpiration] = useState(30)
+  const [enableNotifications, setEnableNotifications] = useState(true)
+  const [requireConfirmations, setRequireConfirmations] = useState(6)
+
+  // Quick New Payment Form State
+  const [quickPaymentAmount, setQuickPaymentAmount] = useState(100)
+  const [quickPaymentCurrency, setQuickPaymentCurrency] = useState<CryptoCurrency>('BTC')
+  const [quickPaymentDescription, setQuickPaymentDescription] = useState('')
+
+  // Quick Actions with dialog handlers
+  const cryptoPaymentsQuickActions = useMemo(() => [
+    {
+      id: '1',
+      label: 'New Payment',
+      icon: 'Plus',
+      shortcut: 'N',
+      action: () => {
+        logger.info('Quick action: Opening new payment dialog')
+        setShowQuickNewPaymentDialog(true)
+      }
+    },
+    {
+      id: '2',
+      label: 'Export',
+      icon: 'Download',
+      shortcut: 'E',
+      action: () => {
+        logger.info('Quick action: Opening export dialog')
+        setShowExportDialog(true)
+      }
+    },
+    {
+      id: '3',
+      label: 'Settings',
+      icon: 'Settings',
+      shortcut: 'S',
+      action: () => {
+        logger.info('Quick action: Opening payment settings dialog')
+        setShowPaymentSettingsDialog(true)
+      }
+    },
+  ], [])
 
   // Load mock data
   useEffect(() => {
@@ -847,6 +900,169 @@ export default function CryptoPaymentsClient() {
       description: `${address.substring(0, 20)}... - Ready to paste`
     })
     announce('Address copied', 'polite')
+  }
+
+  // Quick Payment Handler
+  const handleQuickCreatePayment = async () => {
+    logger.info('Quick creating crypto payment', {
+      amount: quickPaymentAmount,
+      currency: quickPaymentCurrency,
+      description: quickPaymentDescription
+    })
+
+    if (quickPaymentAmount <= 0) {
+      toast.error('Please enter a valid amount')
+      return
+    }
+
+    if (!quickPaymentDescription.trim()) {
+      toast.error('Please enter a payment description')
+      return
+    }
+
+    try {
+      dispatch({ type: 'SET_LOADING', isLoading: true })
+
+      const cryptoAmount = quickPaymentAmount / (quickPaymentCurrency === 'BTC' ? 45000 : quickPaymentCurrency === 'ETH' ? 2500 : 1)
+      const fee = Math.random() * 5
+      const network = quickPaymentCurrency === 'BTC' ? 'Bitcoin' : quickPaymentCurrency === 'SOL' ? 'Solana' : 'Ethereum'
+      const requiredConfirmations = quickPaymentCurrency === 'BTC' ? 6 : 12
+
+      const newTransaction: CryptoTransaction = {
+        id: `TX-${Date.now()}`,
+        type: 'payment',
+        amount: cryptoAmount,
+        currency: quickPaymentCurrency,
+        usdAmount: quickPaymentAmount,
+        fee,
+        status: 'pending',
+        toAddress: `0x${Math.random().toString(36).substr(2, 40)}`,
+        confirmations: 0,
+        requiredConfirmations,
+        network,
+        description: quickPaymentDescription,
+        metadata: {
+          invoiceId: `INV-${Date.now()}`
+        },
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        expiresAt: new Date(Date.now() + 30 * 60 * 1000).toISOString()
+      }
+
+      dispatch({ type: 'ADD_TRANSACTION', transaction: newTransaction })
+
+      // Reset form
+      setQuickPaymentAmount(100)
+      setQuickPaymentDescription('')
+      setShowQuickNewPaymentDialog(false)
+
+      toast.success('Quick payment created', {
+        description: `${formatCryptoAmount(cryptoAmount, quickPaymentCurrency)} - ${formatUSD(quickPaymentAmount)}`
+      })
+      announce('Quick payment created successfully', 'polite')
+    } catch (error) {
+      logger.error('Quick payment creation failed', { error })
+      toast.error('Failed to create quick payment')
+    } finally {
+      dispatch({ type: 'SET_LOADING', isLoading: false })
+    }
+  }
+
+  // Export Handler
+  const handleExportData = async () => {
+    logger.info('Exporting crypto payment data', {
+      format: exportFormat,
+      dateRange: exportDateRange,
+      includeCompleted: exportIncludeCompleted,
+      includePending: exportIncludePending
+    })
+
+    try {
+      // Filter transactions based on settings
+      let transactionsToExport = [...state.transactions]
+
+      if (!exportIncludeCompleted) {
+        transactionsToExport = transactionsToExport.filter(t => t.status !== 'completed')
+      }
+      if (!exportIncludePending) {
+        transactionsToExport = transactionsToExport.filter(t => t.status !== 'pending')
+      }
+
+      // Filter by date range
+      const now = new Date()
+      if (exportDateRange === 'week') {
+        const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
+        transactionsToExport = transactionsToExport.filter(t => new Date(t.createdAt) >= weekAgo)
+      } else if (exportDateRange === 'month') {
+        const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
+        transactionsToExport = transactionsToExport.filter(t => new Date(t.createdAt) >= monthAgo)
+      } else if (exportDateRange === 'year') {
+        const yearAgo = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000)
+        transactionsToExport = transactionsToExport.filter(t => new Date(t.createdAt) >= yearAgo)
+      }
+
+      let content: string
+      let mimeType: string
+      let filename: string
+
+      if (exportFormat === 'csv') {
+        const headers = ['ID', 'Type', 'Amount', 'Currency', 'USD Amount', 'Fee', 'Status', 'Network', 'Description', 'Created At']
+        const rows = transactionsToExport.map(t => [
+          t.id, t.type, t.amount, t.currency, t.usdAmount, t.fee, t.status, t.network, t.description, t.createdAt
+        ])
+        content = [headers.join(','), ...rows.map(r => r.join(','))].join('\n')
+        mimeType = 'text/csv'
+        filename = `crypto-payments-export-${new Date().toISOString().split('T')[0]}.csv`
+      } else if (exportFormat === 'json') {
+        content = JSON.stringify(transactionsToExport, null, 2)
+        mimeType = 'application/json'
+        filename = `crypto-payments-export-${new Date().toISOString().split('T')[0]}.json`
+      } else {
+        // PDF - for demo, we'll just create a text summary
+        content = `Crypto Payments Export\n${'='.repeat(50)}\n\nTotal Transactions: ${transactionsToExport.length}\nTotal Volume: ${formatUSD(transactionsToExport.reduce((sum, t) => sum + t.usdAmount, 0))}\n\nTransactions:\n${transactionsToExport.map(t => `- ${t.id}: ${formatCryptoAmount(t.amount, t.currency)} (${t.status})`).join('\n')}`
+        mimeType = 'text/plain'
+        filename = `crypto-payments-export-${new Date().toISOString().split('T')[0]}.txt`
+      }
+
+      // Create and download file
+      const blob = new Blob([content], { type: mimeType })
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = filename
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
+
+      setShowExportDialog(false)
+
+      toast.success('Data exported successfully', {
+        description: `${transactionsToExport.length} transactions exported as ${exportFormat.toUpperCase()}`
+      })
+      announce('Data exported successfully', 'polite')
+    } catch (error) {
+      logger.error('Export failed', { error })
+      toast.error('Failed to export data')
+    }
+  }
+
+  // Payment Settings Handler
+  const handleSavePaymentSettings = () => {
+    logger.info('Saving payment settings', {
+      autoConvertToFiat,
+      defaultCurrency,
+      paymentExpiration,
+      enableNotifications,
+      requireConfirmations
+    })
+
+    // In a real app, this would save to backend/localStorage
+    toast.success('Payment settings saved', {
+      description: `Default: ${defaultCurrency}, Expiration: ${paymentExpiration}min, Confirmations: ${requireConfirmations}`
+    })
+    announce('Payment settings saved successfully', 'polite')
+    setShowPaymentSettingsDialog(false)
   }
 
   // ========================================
@@ -1684,6 +1900,294 @@ export default function CryptoPaymentsClient() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Quick New Payment Dialog */}
+      <Dialog open={showQuickNewPaymentDialog} onOpenChange={setShowQuickNewPaymentDialog}>
+        <DialogContent className="max-w-md bg-slate-900 border-gray-700">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <Plus className="w-5 h-5 text-purple-400" />
+              Quick Payment
+            </DialogTitle>
+            <DialogDescription className="text-gray-400">
+              Create a new crypto payment request quickly
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div>
+              <Label className="text-gray-300">Amount (USD)</Label>
+              <Input
+                type="number"
+                value={quickPaymentAmount}
+                onChange={(e) => setQuickPaymentAmount(Number(e.target.value))}
+                placeholder="100.00"
+                className="bg-slate-800 border-gray-700 text-white"
+                min="1"
+                step="0.01"
+              />
+            </div>
+
+            <div>
+              <Label className="text-gray-300">Cryptocurrency</Label>
+              <select
+                value={quickPaymentCurrency}
+                onChange={(e) => setQuickPaymentCurrency(e.target.value as CryptoCurrency)}
+                className="w-full px-3 py-2 bg-slate-800 border border-gray-700 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+              >
+                <option value="BTC">Bitcoin (BTC)</option>
+                <option value="ETH">Ethereum (ETH)</option>
+                <option value="USDT">Tether (USDT)</option>
+                <option value="USDC">USD Coin (USDC)</option>
+                <option value="SOL">Solana (SOL)</option>
+              </select>
+            </div>
+
+            <div>
+              <Label className="text-gray-300">Description</Label>
+              <Input
+                value={quickPaymentDescription}
+                onChange={(e) => setQuickPaymentDescription(e.target.value)}
+                placeholder="Payment for..."
+                className="bg-slate-800 border-gray-700 text-white"
+              />
+            </div>
+
+            <div className="p-3 bg-purple-500/10 border border-purple-500/30 rounded-lg">
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-400">Estimated:</span>
+                <span className="text-white font-medium">
+                  {formatCryptoAmount(
+                    quickPaymentAmount / (quickPaymentCurrency === 'BTC' ? 45000 : quickPaymentCurrency === 'ETH' ? 2500 : 1),
+                    quickPaymentCurrency
+                  )}
+                </span>
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <Button
+                onClick={handleQuickCreatePayment}
+                disabled={state.isLoading}
+                className="flex-1 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Create Payment
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => setShowQuickNewPaymentDialog(false)}
+                className="border-gray-700 hover:bg-slate-800"
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Export Dialog */}
+      <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
+        <DialogContent className="max-w-md bg-slate-900 border-gray-700">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <BarChart3 className="w-5 h-5 text-green-400" />
+              Export Payment Data
+            </DialogTitle>
+            <DialogDescription className="text-gray-400">
+              Configure and download your crypto payment data
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div>
+              <Label className="text-gray-300">Export Format</Label>
+              <select
+                value={exportFormat}
+                onChange={(e) => setExportFormat(e.target.value as 'csv' | 'json' | 'pdf')}
+                className="w-full px-3 py-2 bg-slate-800 border border-gray-700 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+              >
+                <option value="csv">CSV (Spreadsheet)</option>
+                <option value="json">JSON (Developer)</option>
+                <option value="pdf">PDF (Report)</option>
+              </select>
+            </div>
+
+            <div>
+              <Label className="text-gray-300">Date Range</Label>
+              <select
+                value={exportDateRange}
+                onChange={(e) => setExportDateRange(e.target.value as 'all' | 'week' | 'month' | 'year')}
+                className="w-full px-3 py-2 bg-slate-800 border border-gray-700 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+              >
+                <option value="week">Last 7 Days</option>
+                <option value="month">Last 30 Days</option>
+                <option value="year">Last Year</option>
+                <option value="all">All Time</option>
+              </select>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-gray-300">Include Transactions</Label>
+              <div className="flex items-center gap-4">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={exportIncludeCompleted}
+                    onChange={(e) => setExportIncludeCompleted(e.target.checked)}
+                    className="w-4 h-4 rounded border-gray-700 bg-slate-800 text-purple-600 focus:ring-purple-500"
+                  />
+                  <span className="text-sm text-gray-300">Completed</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={exportIncludePending}
+                    onChange={(e) => setExportIncludePending(e.target.checked)}
+                    className="w-4 h-4 rounded border-gray-700 bg-slate-800 text-purple-600 focus:ring-purple-500"
+                  />
+                  <span className="text-sm text-gray-300">Pending</span>
+                </label>
+              </div>
+            </div>
+
+            <div className="p-3 bg-green-500/10 border border-green-500/30 rounded-lg">
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-400">Transactions to export:</span>
+                <span className="text-white font-medium">{state.transactions.length}</span>
+              </div>
+              <div className="flex justify-between text-sm mt-1">
+                <span className="text-gray-400">Total volume:</span>
+                <span className="text-white font-medium">{formatUSD(stats.totalVolume)}</span>
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <Button
+                onClick={handleExportData}
+                className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
+              >
+                <Receipt className="w-4 h-4 mr-2" />
+                Export Data
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => setShowExportDialog(false)}
+                className="border-gray-700 hover:bg-slate-800"
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Payment Settings Dialog */}
+      <Dialog open={showPaymentSettingsDialog} onOpenChange={setShowPaymentSettingsDialog}>
+        <DialogContent className="max-w-lg bg-slate-900 border-gray-700">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <Wallet className="w-5 h-5 text-blue-400" />
+              Payment Settings
+            </DialogTitle>
+            <DialogDescription className="text-gray-400">
+              Configure your crypto payment preferences
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div className="flex items-center justify-between p-3 bg-slate-800 rounded-lg">
+              <div>
+                <Label className="text-white">Auto-convert to Fiat</Label>
+                <p className="text-xs text-gray-400 mt-1">Automatically convert crypto to USD upon receipt</p>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={autoConvertToFiat}
+                  onChange={(e) => setAutoConvertToFiat(e.target.checked)}
+                  className="sr-only peer"
+                />
+                <div className="w-11 h-6 bg-gray-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-purple-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+              </label>
+            </div>
+
+            <div>
+              <Label className="text-gray-300">Default Cryptocurrency</Label>
+              <select
+                value={defaultCurrency}
+                onChange={(e) => setDefaultCurrency(e.target.value as CryptoCurrency)}
+                className="w-full px-3 py-2 bg-slate-800 border border-gray-700 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+              >
+                <option value="BTC">Bitcoin (BTC)</option>
+                <option value="ETH">Ethereum (ETH)</option>
+                <option value="USDT">Tether (USDT)</option>
+                <option value="USDC">USD Coin (USDC)</option>
+                <option value="SOL">Solana (SOL)</option>
+              </select>
+            </div>
+
+            <div>
+              <Label className="text-gray-300">Payment Expiration (minutes)</Label>
+              <Input
+                type="number"
+                value={paymentExpiration}
+                onChange={(e) => setPaymentExpiration(Number(e.target.value))}
+                min="5"
+                max="1440"
+                className="bg-slate-800 border-gray-700 text-white"
+              />
+              <p className="text-xs text-gray-400 mt-1">Time before pending payments expire (5-1440 min)</p>
+            </div>
+
+            <div>
+              <Label className="text-gray-300">Required Confirmations</Label>
+              <Input
+                type="number"
+                value={requireConfirmations}
+                onChange={(e) => setRequireConfirmations(Number(e.target.value))}
+                min="1"
+                max="12"
+                className="bg-slate-800 border-gray-700 text-white"
+              />
+              <p className="text-xs text-gray-400 mt-1">Number of blockchain confirmations required</p>
+            </div>
+
+            <div className="flex items-center justify-between p-3 bg-slate-800 rounded-lg">
+              <div>
+                <Label className="text-white">Email Notifications</Label>
+                <p className="text-xs text-gray-400 mt-1">Receive email alerts for payment events</p>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={enableNotifications}
+                  onChange={(e) => setEnableNotifications(e.target.checked)}
+                  className="sr-only peer"
+                />
+                <div className="w-11 h-6 bg-gray-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-purple-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+              </label>
+            </div>
+
+            <div className="flex gap-3">
+              <Button
+                onClick={handleSavePaymentSettings}
+                className="flex-1 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700"
+              >
+                <CheckCircle className="w-4 h-4 mr-2" />
+                Save Settings
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => setShowPaymentSettingsDialog(false)}
+                className="border-gray-700 hover:bg-slate-800"
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

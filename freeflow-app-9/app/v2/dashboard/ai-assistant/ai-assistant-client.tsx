@@ -437,23 +437,13 @@ const mockAIAssistantActivities = [
   { id: '3', user: 'Data Scientist', action: 'analyzed', target: 'conversation patterns', timestamp: '1h ago', type: 'info' as const },
 ]
 
+// Note: This mock data is kept for backwards compatibility but the component uses
+// the quickActions array defined inside the component with proper dialog handlers
 const mockAIAssistantQuickActions = [
-  { id: '1', label: 'New Chat', icon: 'MessageSquare', shortcut: 'N', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 500)),
-    { loading: 'Creating new conversation...', success: 'New chat started', error: 'Failed to create chat' }
-  ) },
-  { id: '2', label: 'Templates', icon: 'FileText', shortcut: 'T', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 600)),
-    { loading: 'Loading prompt templates...', success: 'Templates ready', error: 'Failed to load templates' }
-  ) },
-  { id: '3', label: 'Knowledge', icon: 'Database', shortcut: 'K', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 800)),
-    { loading: 'Loading knowledge base...', success: 'Knowledge base loaded', error: 'Failed to load knowledge' }
-  ) },
-  { id: '4', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 400)),
-    { loading: 'Loading AI settings...', success: 'Settings opened', error: 'Failed to load settings' }
-  ) },
+  { id: '1', label: 'New Chat', icon: 'MessageSquare', shortcut: 'N', action: () => console.log('Open New Chat Dialog') },
+  { id: '2', label: 'Templates', icon: 'FileText', shortcut: 'T', action: () => console.log('Open Templates Dialog') },
+  { id: '3', label: 'Knowledge', icon: 'Database', shortcut: 'K', action: () => console.log('Open Knowledge Dialog') },
+  { id: '4', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => console.log('Open AI Settings Dialog') },
 ]
 
 export default function AIAssistantClient() {
@@ -1018,6 +1008,14 @@ export default function AIAssistantClient() {
     conversations: stats.totalConversations || usageStats.conversations,
     messages: stats.totalMessages || usageStats.messages
   }
+
+  // Quick actions with proper dialog handlers (replaces toast-only actions)
+  const quickActions = [
+    { id: '1', label: 'New Chat', icon: 'MessageSquare', shortcut: 'N', action: () => setShowNewChatDialog(true) },
+    { id: '2', label: 'Templates', icon: 'FileText', shortcut: 'T', action: () => setShowTemplatesDialog(true) },
+    { id: '3', label: 'Knowledge', icon: 'Database', shortcut: 'K', action: () => setShowKnowledgeDialog(true) },
+    { id: '4', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => setShowAISettingsDialog(true) },
+  ]
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-violet-50 via-white to-purple-50 dark:bg-none dark:bg-gray-900">
@@ -1991,7 +1989,7 @@ export default function AIAssistantClient() {
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockAIAssistantQuickActions}
+            actions={quickActions}
             variant="grid"
           />
         </div>
@@ -2298,6 +2296,227 @@ export default function AIAssistantClient() {
                   Clear Current Conversation History
                 </button>
               </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* New Chat Dialog (Quick Action) */}
+      <Dialog open={showNewChatDialog} onOpenChange={setShowNewChatDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <MessageSquare className="h-5 w-5 text-violet-600" />
+              Start New Chat
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <p className="text-gray-600 dark:text-gray-400">
+              Start a new conversation with the AI assistant. Choose your preferred mode and model.
+            </p>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Conversation Mode
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                {Object.entries(modeConfig).map(([mode, config]) => (
+                  <button
+                    key={mode}
+                    onClick={() => setSelectedMode(mode as ConversationMode)}
+                    className={`flex items-center gap-2 p-3 rounded-xl border transition-colors ${
+                      selectedMode === mode
+                        ? 'border-violet-500 bg-violet-50 dark:bg-violet-900/30'
+                        : 'border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'
+                    }`}
+                  >
+                    {config.icon}
+                    <span className="text-sm font-medium">{config.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="flex justify-end gap-3 pt-4">
+              <button
+                onClick={() => setShowNewChatDialog(false)}
+                className="px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  handleNewConversation()
+                  setShowNewChatDialog(false)
+                }}
+                className="px-4 py-2 bg-violet-600 text-white rounded-xl hover:bg-violet-700 transition-colors"
+              >
+                Start Chat
+              </button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Templates Dialog (Quick Action) */}
+      <Dialog open={showTemplatesDialog} onOpenChange={setShowTemplatesDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5 text-violet-600" />
+              Prompt Templates
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-gray-600 dark:text-gray-400 mb-4">
+              Select a template to quickly start your conversation with pre-configured prompts.
+            </p>
+            <ScrollArea className="h-[400px]">
+              <div className="space-y-3">
+                {prompts.map(prompt => (
+                  <button
+                    key={prompt.id}
+                    onClick={() => {
+                      handleUsePrompt(prompt)
+                      setShowTemplatesDialog(false)
+                    }}
+                    className="w-full p-4 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-violet-500 hover:bg-violet-50 dark:hover:bg-violet-900/20 transition-colors text-left"
+                  >
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h4 className="font-medium text-gray-900 dark:text-white">{prompt.name}</h4>
+                          {prompt.starred && <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />}
+                        </div>
+                        <p className="text-sm text-gray-500 mt-1">{prompt.description}</p>
+                      </div>
+                      <span className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded-full text-xs text-gray-600 dark:text-gray-400">
+                        {prompt.category}
+                      </span>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </ScrollArea>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Knowledge Base Dialog (Quick Action) */}
+      <Dialog open={showKnowledgeDialog} onOpenChange={setShowKnowledgeDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Database className="h-5 w-5 text-violet-600" />
+              Knowledge Base
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-gray-600 dark:text-gray-400 mb-4">
+              Manage your uploaded files and documents that the AI can reference.
+            </p>
+            <div className="mb-4">
+              <label className="block">
+                <input
+                  type="file"
+                  onChange={handleFileUpload}
+                  className="hidden"
+                  accept=".pdf,.doc,.docx,.txt,.csv,.json,.js,.ts,.py,.java"
+                />
+                <div className="flex items-center justify-center gap-2 p-4 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl cursor-pointer hover:border-violet-500 transition-colors">
+                  <Upload className="h-5 w-5 text-gray-400" />
+                  <span className="text-gray-600 dark:text-gray-400">Click to upload or drag files here</span>
+                </div>
+              </label>
+            </div>
+            <ScrollArea className="h-[300px]">
+              <div className="space-y-2">
+                {files.map(file => (
+                  <div
+                    key={file.id}
+                    className="flex items-center justify-between p-3 rounded-xl border border-gray-200 dark:border-gray-700"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg">
+                        {getFileIcon(file.type)}
+                      </div>
+                      <div>
+                        <p className="font-medium text-gray-900 dark:text-white">{file.name}</p>
+                        <p className="text-sm text-gray-500">{formatBytes(file.size)} - {file.chunks} chunks</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className={`px-2 py-1 rounded-full text-xs ${
+                        file.status === 'ready'
+                          ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300'
+                          : file.status === 'processing'
+                          ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300'
+                          : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300'
+                      }`}>
+                        {file.status}
+                      </span>
+                      <button
+                        onClick={() => handleDeleteFile(file.id)}
+                        className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                      >
+                        <Trash2 className="h-4 w-4 text-gray-400 hover:text-red-500" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* AI Settings Dialog (Quick Action) */}
+      <Dialog open={showAISettingsDialog} onOpenChange={setShowAISettingsDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Settings className="h-5 w-5 text-violet-600" />
+              Quick AI Settings
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-6 py-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Select AI Model
+              </label>
+              <div className="space-y-2">
+                {models.map(model => (
+                  <button
+                    key={model.id}
+                    onClick={() => {
+                      setSelectedModel(model.id)
+                      toast.success(`Model changed to ${model.name}`)
+                    }}
+                    className={`w-full flex items-center justify-between p-3 rounded-xl border transition-colors ${
+                      selectedModel === model.id
+                        ? 'border-violet-500 bg-violet-50 dark:bg-violet-900/30'
+                        : 'border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={`p-2 rounded-lg ${model.provider === 'OpenAI' ? 'bg-emerald-100 dark:bg-emerald-900/30' : 'bg-amber-100 dark:bg-amber-900/30'}`}>
+                        <Brain className={`h-4 w-4 ${model.provider === 'OpenAI' ? 'text-emerald-600' : 'text-amber-600'}`} />
+                      </div>
+                      <div className="text-left">
+                        <p className="font-medium text-gray-900 dark:text-white">{model.name}</p>
+                        <p className="text-xs text-gray-500">{model.provider} - {model.context} context</p>
+                      </div>
+                    </div>
+                    <span className="text-xs text-gray-400">{model.speed}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="flex justify-end gap-3 pt-4">
+              <button
+                onClick={() => setShowAISettingsDialog(false)}
+                className="px-4 py-2 bg-violet-600 text-white rounded-xl hover:bg-violet-700 transition-colors"
+              >
+                Done
+              </button>
             </div>
           </div>
         </DialogContent>

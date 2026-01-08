@@ -21,6 +21,19 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { toast } from 'sonner'
 import {
   CheckCircle,
   XCircle,
@@ -43,7 +56,10 @@ import {
   FileText,
   Users,
   DollarSign,
-  MessageSquare
+  MessageSquare,
+  Plus,
+  Download,
+  Settings
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -349,11 +365,7 @@ const comprehensiveTestingActivities = [
   { id: '3', user: 'System', action: 'generated', target: 'weekly report', timestamp: '1h ago', type: 'info' as const },
 ]
 
-const comprehensiveTestingQuickActions = [
-  { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => toast.success('New Test Item', { description: 'Test item created' }) },
-  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => toast.success('Export Started', { description: 'Data exported successfully' }) },
-  { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => toast.success('Settings', { description: 'Testing settings loaded' }) },
-]
+// Quick actions will be defined inside component to access dialog state setters
 
 export default function ComprehensiveTestingClient() {
   // A+++ STATE MANAGEMENT
@@ -367,6 +379,140 @@ export default function ComprehensiveTestingClient() {
   const [activeCategory, setActiveCategory] = React.useState('all')
   const [isRunningTests, setIsRunningTests] = React.useState(false)
   const [currentTest, setCurrentTest] = React.useState<string | null>(null)
+
+  // Dialog states for QuickActions
+  const [showNewItemDialog, setShowNewItemDialog] = React.useState(false)
+  const [showExportDialog, setShowExportDialog] = React.useState(false)
+  const [showSettingsDialog, setShowSettingsDialog] = React.useState(false)
+
+  // Form states for New Item dialog
+  const [newItemName, setNewItemName] = React.useState('')
+  const [newItemCategory, setNewItemCategory] = React.useState('')
+  const [newItemDescription, setNewItemDescription] = React.useState('')
+
+  // Form states for Export dialog
+  const [exportFormat, setExportFormat] = React.useState('json')
+  const [exportRange, setExportRange] = React.useState('all')
+
+  // Form states for Settings dialog
+  const [autoRunTests, setAutoRunTests] = React.useState(false)
+  const [testTimeout, setTestTimeout] = React.useState('30')
+  const [notifyOnComplete, setNotifyOnComplete] = React.useState(true)
+
+  // QuickActions with dialog triggers
+  const comprehensiveTestingQuickActions = [
+    { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => setShowNewItemDialog(true) },
+    { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => setShowExportDialog(true) },
+    { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => setShowSettingsDialog(true) },
+  ]
+
+  // Handler for creating new test item
+  const handleCreateNewItem = () => {
+    if (!newItemName.trim()) {
+      toast.error('Validation Error', { description: 'Item name is required' })
+      return
+    }
+    if (!newItemCategory) {
+      toast.error('Validation Error', { description: 'Please select a category' })
+      return
+    }
+
+    // Create new test item
+    const newTest: FeatureTest = {
+      id: `custom-${Date.now()}`,
+      name: newItemName,
+      path: `/dashboard/custom/${newItemName.toLowerCase().replace(/\s+/g, '-')}`,
+      category: newItemCategory,
+      description: newItemDescription || 'Custom test item',
+      icon: TestTube,
+      status: 'pending',
+      buttons: ['Test Button 1', 'Test Button 2']
+    }
+
+    setTests(prev => [...prev, newTest])
+    toast.success('Test Item Created', { description: `${newItemName} has been added to the test suite` })
+
+    // Reset form
+    setNewItemName('')
+    setNewItemCategory('')
+    setNewItemDescription('')
+    setShowNewItemDialog(false)
+  }
+
+  // Handler for exporting test data
+  const handleExportData = () => {
+    const dataToExport = exportRange === 'all'
+      ? tests
+      : exportRange === 'passed'
+        ? tests.filter(t => t.status === 'passed')
+        : exportRange === 'failed'
+          ? tests.filter(t => t.status === 'failed')
+          : tests.filter(t => t.status === 'pending')
+
+    let content: string
+    let filename: string
+    let mimeType: string
+
+    if (exportFormat === 'json') {
+      content = JSON.stringify(dataToExport, null, 2)
+      filename = `test-results-${Date.now()}.json`
+      mimeType = 'application/json'
+    } else if (exportFormat === 'csv') {
+      const headers = ['ID', 'Name', 'Path', 'Category', 'Status', 'Description']
+      const rows = dataToExport.map(t => [t.id, t.name, t.path, t.category, t.status, t.description])
+      content = [headers.join(','), ...rows.map(r => r.join(','))].join('\n')
+      filename = `test-results-${Date.now()}.csv`
+      mimeType = 'text/csv'
+    } else {
+      const lines = dataToExport.map(t => `${t.name} (${t.category}): ${t.status}\n  Path: ${t.path}\n  ${t.description}`)
+      content = `Test Results Export\n${'='.repeat(50)}\n\n${lines.join('\n\n')}`
+      filename = `test-results-${Date.now()}.txt`
+      mimeType = 'text/plain'
+    }
+
+    // Create and download file
+    const blob = new Blob([content], { type: mimeType })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = filename
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+
+    toast.success('Export Complete', { description: `${dataToExport.length} test results exported as ${exportFormat.toUpperCase()}` })
+    setShowExportDialog(false)
+  }
+
+  // Handler for saving settings
+  const handleSaveSettings = () => {
+    // Save settings to localStorage
+    const settings = {
+      autoRunTests,
+      testTimeout: parseInt(testTimeout),
+      notifyOnComplete
+    }
+    localStorage.setItem('comprehensive-testing-settings', JSON.stringify(settings))
+
+    toast.success('Settings Saved', { description: 'Your testing preferences have been updated' })
+    setShowSettingsDialog(false)
+  }
+
+  // Load settings from localStorage on mount
+  React.useEffect(() => {
+    const savedSettings = localStorage.getItem('comprehensive-testing-settings')
+    if (savedSettings) {
+      try {
+        const settings = JSON.parse(savedSettings)
+        setAutoRunTests(settings.autoRunTests ?? false)
+        setTestTimeout(String(settings.testTimeout ?? 30))
+        setNotifyOnComplete(settings.notifyOnComplete ?? true)
+      } catch (e) {
+        // Ignore parsing errors
+      }
+    }
+  }, [])
 
   // A+++ LOAD COMPREHENSIVE TESTING DATA
   React.useEffect(() => {
@@ -755,6 +901,200 @@ export default function ComprehensiveTestingClient() {
           ))}
         </div>
       </div>
+
+      {/* New Item Dialog */}
+      <Dialog open={showNewItemDialog} onOpenChange={setShowNewItemDialog}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Plus className="h-5 w-5 text-blue-600" />
+              Create New Test Item
+            </DialogTitle>
+            <DialogDescription>
+              Add a custom test item to the comprehensive testing suite. Fill in the details below.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="itemName">Item Name *</Label>
+              <Input
+                id="itemName"
+                placeholder="Enter test item name..."
+                value={newItemName}
+                onChange={(e) => setNewItemName(e.target.value)}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="itemCategory">Category *</Label>
+              <Select value={newItemCategory} onValueChange={setNewItemCategory}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a category" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Core Business">Core Business</SelectItem>
+                  <SelectItem value="AI Tools">AI Tools</SelectItem>
+                  <SelectItem value="Creative Suite">Creative Suite</SelectItem>
+                  <SelectItem value="Business Management">Business Management</SelectItem>
+                  <SelectItem value="Communication">Communication</SelectItem>
+                  <SelectItem value="Storage & Files">Storage & Files</SelectItem>
+                  <SelectItem value="Custom">Custom</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="itemDescription">Description</Label>
+              <Textarea
+                id="itemDescription"
+                placeholder="Describe what this test item covers..."
+                value={newItemDescription}
+                onChange={(e) => setNewItemDescription(e.target.value)}
+                rows={3}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowNewItemDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleCreateNewItem} className="bg-gradient-to-r from-blue-600 to-indigo-600">
+              <Plus className="h-4 w-4 mr-2" />
+              Create Item
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Export Dialog */}
+      <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Download className="h-5 w-5 text-green-600" />
+              Export Test Results
+            </DialogTitle>
+            <DialogDescription>
+              Export your test results in various formats for reporting and analysis.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="exportFormat">Export Format</Label>
+              <Select value={exportFormat} onValueChange={setExportFormat}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="json">JSON - Full data structure</SelectItem>
+                  <SelectItem value="csv">CSV - Spreadsheet compatible</SelectItem>
+                  <SelectItem value="txt">Text - Human readable report</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="exportRange">Data Range</Label>
+              <Select value={exportRange} onValueChange={setExportRange}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Tests ({tests.length})</SelectItem>
+                  <SelectItem value="passed">Passed Only ({tests.filter(t => t.status === 'passed').length})</SelectItem>
+                  <SelectItem value="failed">Failed Only ({tests.filter(t => t.status === 'failed').length})</SelectItem>
+                  <SelectItem value="pending">Pending Only ({tests.filter(t => t.status === 'pending').length})</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                <strong>Preview:</strong> {
+                  exportRange === 'all'
+                    ? tests.length
+                    : exportRange === 'passed'
+                      ? tests.filter(t => t.status === 'passed').length
+                      : exportRange === 'failed'
+                        ? tests.filter(t => t.status === 'failed').length
+                        : tests.filter(t => t.status === 'pending').length
+                } tests will be exported as {exportFormat.toUpperCase()}
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowExportDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleExportData} className="bg-gradient-to-r from-green-600 to-emerald-600">
+              <Download className="h-4 w-4 mr-2" />
+              Export Data
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Settings Dialog */}
+      <Dialog open={showSettingsDialog} onOpenChange={setShowSettingsDialog}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Settings className="h-5 w-5 text-purple-600" />
+              Testing Settings
+            </DialogTitle>
+            <DialogDescription>
+              Configure your comprehensive testing preferences and behavior.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+              <div>
+                <Label htmlFor="autoRun" className="font-medium">Auto-run Tests on Load</Label>
+                <p className="text-sm text-gray-500">Automatically start testing when the page loads</p>
+              </div>
+              <input
+                type="checkbox"
+                id="autoRun"
+                checked={autoRunTests}
+                onChange={(e) => setAutoRunTests(e.target.checked)}
+                className="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="timeout">Test Timeout (seconds)</Label>
+              <Select value={testTimeout} onValueChange={setTestTimeout}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="10">10 seconds</SelectItem>
+                  <SelectItem value="30">30 seconds</SelectItem>
+                  <SelectItem value="60">60 seconds</SelectItem>
+                  <SelectItem value="120">2 minutes</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+              <div>
+                <Label htmlFor="notify" className="font-medium">Notify on Completion</Label>
+                <p className="text-sm text-gray-500">Show notification when all tests complete</p>
+              </div>
+              <input
+                type="checkbox"
+                id="notify"
+                checked={notifyOnComplete}
+                onChange={(e) => setNotifyOnComplete(e.target.checked)}
+                className="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowSettingsDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSaveSettings} className="bg-gradient-to-r from-purple-600 to-indigo-600">
+              <Settings className="h-4 w-4 mr-2" />
+              Save Settings
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

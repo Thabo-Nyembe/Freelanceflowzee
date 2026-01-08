@@ -441,11 +441,11 @@ const mockMotionGraphicsActivities = [
   { id: '3', user: 'Art Director', action: 'approved', target: 'final composition', timestamp: '3h ago', type: 'success' as const },
 ]
 
-const mockMotionGraphicsQuickActions = [
-  { id: '1', label: 'New Project', icon: 'Film', shortcut: 'N', action: () => toast.success('New project created!') },
-  { id: '2', label: 'Render', icon: 'Play', shortcut: 'R', action: () => toast.success('Render queued successfully!') },
-  { id: '3', label: 'Assets', icon: 'Folder', shortcut: 'A', action: () => toast.success('Asset manager opened!') },
-  { id: '4', label: 'Templates', icon: 'Layout', shortcut: 'T', action: () => toast.success('Template gallery opened!') },
+const mockMotionGraphicsQuickActionsBase = [
+  { id: '1', label: 'New Project', icon: 'Film', shortcut: 'N' },
+  { id: '2', label: 'Render', icon: 'Play', shortcut: 'R' },
+  { id: '3', label: 'Assets', icon: 'Folder', shortcut: 'A' },
+  { id: '4', label: 'Templates', icon: 'Layout', shortcut: 'T' },
 ]
 
 // Database types
@@ -535,6 +535,14 @@ export default function MotionGraphicsClient({
   const [showAssetsDialog, setShowAssetsDialog] = useState(false)
   const [showTemplatesDialog, setShowTemplatesDialog] = useState(false)
   const [formState, setFormState] = useState<ProjectFormState>(initialFormState)
+
+  // Quick actions with proper dialog handlers
+  const quickActions = useMemo(() => [
+    { ...mockMotionGraphicsQuickActionsBase[0], action: () => setShowCreateDialog(true) },
+    { ...mockMotionGraphicsQuickActionsBase[1], action: () => setShowRenderDialog(true) },
+    { ...mockMotionGraphicsQuickActionsBase[2], action: () => setShowAssetsDialog(true) },
+    { ...mockMotionGraphicsQuickActionsBase[3], action: () => setShowTemplatesDialog(true) },
+  ], [])
 
   const stats = useMemo(() => {
     const total = initialAnimations.length
@@ -2173,7 +2181,7 @@ export default function MotionGraphicsClient({
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockMotionGraphicsQuickActions}
+            actions={quickActions}
             variant="grid"
           />
         </div>
@@ -2405,6 +2413,170 @@ export default function MotionGraphicsClient({
                 disabled={isSubmitting}
               >
                 {isSubmitting ? 'Creating...' : 'Create Project'}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Render Dialog */}
+        <Dialog open={showRenderDialog} onOpenChange={setShowRenderDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Play className="w-5 h-5 text-green-500" />
+                Render Queue
+              </DialogTitle>
+              <DialogDescription>Configure and start rendering your motion graphics project</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">Select Project</label>
+                <select className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
+                  <option value="">Choose a project to render...</option>
+                  {initialAnimations.map(anim => (
+                    <option key={anim.id} value={anim.id}>{anim.title}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2">Output Format</label>
+                  <select className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
+                    <option value="mp4">MP4 (H.264)</option>
+                    <option value="mov">MOV (ProRes)</option>
+                    <option value="webm">WebM</option>
+                    <option value="gif">GIF</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">Resolution</label>
+                  <select className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
+                    <option value="1080p">1080p HD</option>
+                    <option value="4k">4K Ultra HD</option>
+                    <option value="720p">720p</option>
+                  </select>
+                </div>
+              </div>
+              <div className="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+                <p className="text-sm text-gray-600 dark:text-gray-400">Estimated render time: ~15 minutes</p>
+              </div>
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setShowRenderDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                className="bg-gradient-to-r from-green-500 to-emerald-600 text-white"
+                onClick={() => {
+                  toast.success('Render job added to queue!')
+                  setShowRenderDialog(false)
+                }}
+              >
+                <Play className="w-4 h-4 mr-2" />
+                Start Render
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Assets Manager Dialog */}
+        <Dialog open={showAssetsDialog} onOpenChange={setShowAssetsDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Folder className="w-5 h-5 text-amber-500" />
+                Asset Manager
+              </DialogTitle>
+              <DialogDescription>Browse and manage your motion graphics assets</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="flex gap-2">
+                <Input placeholder="Search assets..." className="flex-1" />
+                <Button variant="outline">
+                  <Upload className="w-4 h-4 mr-2" />
+                  Upload
+                </Button>
+              </div>
+              <div className="grid grid-cols-4 gap-3">
+                {['Videos', 'Images', 'Audio', 'Fonts'].map((category) => (
+                  <div
+                    key={category}
+                    className="p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50 cursor-pointer text-center"
+                  >
+                    <Folder className="w-8 h-8 mx-auto mb-2 text-amber-500" />
+                    <p className="text-sm font-medium">{category}</p>
+                    <p className="text-xs text-gray-500">0 items</p>
+                  </div>
+                ))}
+              </div>
+              <div className="p-8 border-2 border-dashed rounded-lg text-center">
+                <Upload className="w-10 h-10 mx-auto mb-3 text-gray-400" />
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Drag and drop files here, or click to browse
+                </p>
+                <p className="text-xs text-gray-500 mt-1">
+                  Supports: MP4, MOV, PNG, JPG, WAV, MP3, OTF, TTF
+                </p>
+              </div>
+            </div>
+            <div className="flex justify-end">
+              <Button variant="outline" onClick={() => setShowAssetsDialog(false)}>
+                Close
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Templates Gallery Dialog */}
+        <Dialog open={showTemplatesDialog} onOpenChange={setShowTemplatesDialog}>
+          <DialogContent className="max-w-3xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <LayoutTemplate className="w-5 h-5 text-blue-500" />
+                Template Gallery
+              </DialogTitle>
+              <DialogDescription>Choose from professionally designed motion graphics templates</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="flex gap-2">
+                <Input placeholder="Search templates..." className="flex-1" />
+                <select className="px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
+                  <option value="all">All Categories</option>
+                  <option value="intro">Intros</option>
+                  <option value="outro">Outros</option>
+                  <option value="lower-third">Lower Thirds</option>
+                  <option value="transition">Transitions</option>
+                </select>
+              </div>
+              <div className="grid grid-cols-3 gap-4 max-h-[400px] overflow-y-auto">
+                {mockPresets.map((preset) => (
+                  <div
+                    key={preset.id}
+                    className="border rounded-lg overflow-hidden hover:shadow-lg transition-shadow cursor-pointer group"
+                  >
+                    <div className="aspect-video bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900 flex items-center justify-center">
+                      <LayoutTemplate className="w-12 h-12 text-gray-400 group-hover:text-blue-500 transition-colors" />
+                    </div>
+                    <div className="p-3">
+                      <p className="font-medium text-sm">{preset.name}</p>
+                      <p className="text-xs text-gray-500">{preset.category}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="flex justify-between">
+              <Button variant="outline" onClick={() => setShowTemplatesDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white"
+                onClick={() => {
+                  toast.success('Template applied!')
+                  setShowTemplatesDialog(false)
+                }}
+              >
+                Use Template
               </Button>
             </div>
           </DialogContent>

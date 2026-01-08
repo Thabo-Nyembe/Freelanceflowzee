@@ -7,7 +7,9 @@ import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
+import { Textarea } from '@/components/ui/textarea'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Progress } from '@/components/ui/progress'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -529,12 +531,6 @@ const mockRoadmapActivities = [
   { id: '3', user: 'Engineering', action: 'Completed', target: 'infrastructure milestone', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
 ]
 
-const mockRoadmapQuickActions = [
-  { id: '1', label: 'New Initiative', icon: 'plus', action: () => toast.success('New Initiative', { description: 'Define objectives, timeline, and key results' }), variant: 'default' as const },
-  { id: '2', label: 'Timeline', icon: 'calendar', action: () => toast.success('Timeline View', { description: 'Viewing Q1-Q4 roadmap with milestones' }), variant: 'default' as const },
-  { id: '3', label: 'Share', icon: 'share', action: () => { navigator.clipboard.writeText('https://kazi.app/roadmap/2024'); toast.success('Link Copied', { description: 'Roadmap link copied to clipboard' }); }, variant: 'outline' as const },
-]
-
 export default function RoadmapClient({ initialInitiatives, initialMilestones }: RoadmapClientProps) {
   const [activeTab, setActiveTab] = useState('roadmap')
   const [viewMode, setViewMode] = useState<ViewMode>('timeline')
@@ -543,6 +539,38 @@ export default function RoadmapClient({ initialInitiatives, initialMilestones }:
   const [selectedFeature, setSelectedFeature] = useState<Feature | null>(null)
   const [isFeatureDialogOpen, setIsFeatureDialogOpen] = useState(false)
   const [settingsTab, setSettingsTab] = useState('general')
+
+  // Dialog states for quick actions
+  const [showNewInitiativeDialog, setShowNewInitiativeDialog] = useState(false)
+  const [showTimelineDialog, setShowTimelineDialog] = useState(false)
+
+  // Form states for New Initiative dialog
+  const [newInitiative, setNewInitiative] = useState({
+    title: '',
+    description: '',
+    objective: '',
+    quarter: 'Q1' as Quarter,
+    priority: 'medium' as Priority,
+    theme: '',
+    keyResults: ''
+  })
+
+  // Form state for Timeline dialog
+  const [timelineSettings, setTimelineSettings] = useState({
+    startQuarter: 'Q1' as Quarter,
+    endQuarter: 'Q4' as Quarter,
+    year: 2025,
+    showMilestones: true,
+    showDependencies: true,
+    groupBy: 'quarter' as 'quarter' | 'theme' | 'team'
+  })
+
+  // Quick actions with dialog-based workflows
+  const roadmapQuickActions = [
+    { id: '1', label: 'New Initiative', icon: 'plus', action: () => setShowNewInitiativeDialog(true), variant: 'default' as const },
+    { id: '2', label: 'Timeline', icon: 'calendar', action: () => setShowTimelineDialog(true), variant: 'default' as const },
+    { id: '3', label: 'Share', icon: 'share', action: () => { navigator.clipboard.writeText('https://kazi.app/roadmap/2024'); toast.success('Link Copied', { description: 'Roadmap link copied to clipboard' }); }, variant: 'outline' as const },
+  ]
 
   const features = mockFeatures
   const releases = mockReleases
@@ -738,6 +766,50 @@ export default function RoadmapClient({ initialInitiatives, initialMilestones }:
 
   const handleDeleteRoadmap = () => {
     toast.error('Delete Roadmap', { description: 'This action cannot be undone' })
+  }
+
+  // Handler for creating new initiative
+  const handleCreateInitiative = () => {
+    if (!newInitiative.title.trim()) {
+      toast.error('Validation Error', { description: 'Initiative title is required' })
+      return
+    }
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 800)),
+      {
+        loading: 'Creating initiative...',
+        success: () => {
+          setShowNewInitiativeDialog(false)
+          setNewInitiative({
+            title: '',
+            description: '',
+            objective: '',
+            quarter: 'Q1',
+            priority: 'medium',
+            theme: '',
+            keyResults: ''
+          })
+          return `Initiative "${newInitiative.title}" created successfully`
+        },
+        error: 'Failed to create initiative'
+      }
+    )
+  }
+
+  // Handler for applying timeline settings
+  const handleApplyTimelineSettings = () => {
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 600)),
+      {
+        loading: 'Applying timeline settings...',
+        success: () => {
+          setShowTimelineDialog(false)
+          setViewMode('timeline')
+          return `Timeline configured: ${timelineSettings.startQuarter}-${timelineSettings.endQuarter} ${timelineSettings.year}`
+        },
+        error: 'Failed to apply timeline settings'
+      }
+    )
   }
 
   // Group features by status for Kanban view
@@ -1862,7 +1934,7 @@ export default function RoadmapClient({ initialInitiatives, initialMilestones }:
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockRoadmapQuickActions}
+            actions={roadmapQuickActions}
             variant="grid"
           />
         </div>
@@ -2005,6 +2077,258 @@ export default function RoadmapClient({ initialInitiatives, initialMilestones }:
                 </ScrollArea>
               </>
             )}
+          </DialogContent>
+        </Dialog>
+
+        {/* New Initiative Dialog */}
+        <Dialog open={showNewInitiativeDialog} onOpenChange={setShowNewInitiativeDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-teal-500 to-cyan-600 flex items-center justify-center text-white">
+                  <Plus className="w-5 h-5" />
+                </div>
+                Create New Initiative
+              </DialogTitle>
+              <DialogDescription>
+                Define the initiative details, objectives, timeline, and key results
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="initiative-title">Initiative Title *</Label>
+                <Input
+                  id="initiative-title"
+                  placeholder="e.g., Mobile App Launch, Enterprise Features"
+                  value={newInitiative.title}
+                  onChange={(e) => setNewInitiative(prev => ({ ...prev, title: e.target.value }))}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="initiative-description">Description</Label>
+                <Textarea
+                  id="initiative-description"
+                  placeholder="Describe the initiative's purpose and scope..."
+                  rows={3}
+                  value={newInitiative.description}
+                  onChange={(e) => setNewInitiative(prev => ({ ...prev, description: e.target.value }))}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="initiative-quarter">Target Quarter</Label>
+                  <Select
+                    value={newInitiative.quarter}
+                    onValueChange={(value) => setNewInitiative(prev => ({ ...prev, quarter: value as Quarter }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select quarter" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Q1">Q1 2025</SelectItem>
+                      <SelectItem value="Q2">Q2 2025</SelectItem>
+                      <SelectItem value="Q3">Q3 2025</SelectItem>
+                      <SelectItem value="Q4">Q4 2025</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="initiative-priority">Priority</Label>
+                  <Select
+                    value={newInitiative.priority}
+                    onValueChange={(value) => setNewInitiative(prev => ({ ...prev, priority: value as Priority }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select priority" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="critical">Critical</SelectItem>
+                      <SelectItem value="high">High</SelectItem>
+                      <SelectItem value="medium">Medium</SelectItem>
+                      <SelectItem value="low">Low</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="initiative-objective">Strategic Objective</Label>
+                <Input
+                  id="initiative-objective"
+                  placeholder="e.g., Increase user engagement by 30%"
+                  value={newInitiative.objective}
+                  onChange={(e) => setNewInitiative(prev => ({ ...prev, objective: e.target.value }))}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="initiative-theme">Theme</Label>
+                <Select
+                  value={newInitiative.theme}
+                  onValueChange={(value) => setNewInitiative(prev => ({ ...prev, theme: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select theme" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="AI & Intelligence">AI & Intelligence</SelectItem>
+                    <SelectItem value="Platform">Platform</SelectItem>
+                    <SelectItem value="Collaboration">Collaboration</SelectItem>
+                    <SelectItem value="Security">Security</SelectItem>
+                    <SelectItem value="Performance">Performance</SelectItem>
+                    <SelectItem value="Mobile">Mobile</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="initiative-key-results">Key Results</Label>
+                <Textarea
+                  id="initiative-key-results"
+                  placeholder="Enter key results (one per line)..."
+                  rows={3}
+                  value={newInitiative.keyResults}
+                  onChange={(e) => setNewInitiative(prev => ({ ...prev, keyResults: e.target.value }))}
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 pt-4 border-t">
+              <Button variant="outline" onClick={() => setShowNewInitiativeDialog(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleCreateInitiative} className="bg-gradient-to-r from-teal-500 to-cyan-600 hover:from-teal-600 hover:to-cyan-700">
+                <Plus className="w-4 h-4 mr-2" />
+                Create Initiative
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Timeline Settings Dialog */}
+        <Dialog open={showTimelineDialog} onOpenChange={setShowTimelineDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-teal-500 to-cyan-600 flex items-center justify-center text-white">
+                  <Calendar className="w-5 h-5" />
+                </div>
+                Timeline View Settings
+              </DialogTitle>
+              <DialogDescription>
+                Configure the timeline view for your roadmap with milestones
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Start Quarter</Label>
+                  <Select
+                    value={timelineSettings.startQuarter}
+                    onValueChange={(value) => setTimelineSettings(prev => ({ ...prev, startQuarter: value as Quarter }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Q1">Q1</SelectItem>
+                      <SelectItem value="Q2">Q2</SelectItem>
+                      <SelectItem value="Q3">Q3</SelectItem>
+                      <SelectItem value="Q4">Q4</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>End Quarter</Label>
+                  <Select
+                    value={timelineSettings.endQuarter}
+                    onValueChange={(value) => setTimelineSettings(prev => ({ ...prev, endQuarter: value as Quarter }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Q1">Q1</SelectItem>
+                      <SelectItem value="Q2">Q2</SelectItem>
+                      <SelectItem value="Q3">Q3</SelectItem>
+                      <SelectItem value="Q4">Q4</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Year</Label>
+                <Select
+                  value={String(timelineSettings.year)}
+                  onValueChange={(value) => setTimelineSettings(prev => ({ ...prev, year: parseInt(value) }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="2024">2024</SelectItem>
+                    <SelectItem value="2025">2025</SelectItem>
+                    <SelectItem value="2026">2026</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Group By</Label>
+                <Select
+                  value={timelineSettings.groupBy}
+                  onValueChange={(value) => setTimelineSettings(prev => ({ ...prev, groupBy: value as 'quarter' | 'theme' | 'team' }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="quarter">Quarter</SelectItem>
+                    <SelectItem value="theme">Theme</SelectItem>
+                    <SelectItem value="team">Team</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-3 pt-2">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label>Show Milestones</Label>
+                    <p className="text-sm text-muted-foreground">Display milestone markers on timeline</p>
+                  </div>
+                  <Switch
+                    checked={timelineSettings.showMilestones}
+                    onCheckedChange={(checked) => setTimelineSettings(prev => ({ ...prev, showMilestones: checked }))}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label>Show Dependencies</Label>
+                    <p className="text-sm text-muted-foreground">Display feature dependency lines</p>
+                  </div>
+                  <Switch
+                    checked={timelineSettings.showDependencies}
+                    onCheckedChange={(checked) => setTimelineSettings(prev => ({ ...prev, showDependencies: checked }))}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 pt-4 border-t">
+              <Button variant="outline" onClick={() => setShowTimelineDialog(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleApplyTimelineSettings} className="bg-gradient-to-r from-teal-500 to-cyan-600 hover:from-teal-600 hover:to-cyan-700">
+                <Calendar className="w-4 h-4 mr-2" />
+                Apply Settings
+              </Button>
+            </div>
           </DialogContent>
         </Dialog>
       </div>

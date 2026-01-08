@@ -447,20 +447,7 @@ const mockAddOnsActivities = [
   { id: '3', user: 'Admin', action: 'Configured', target: 'Jira Sync settings', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'update' as const },
 ]
 
-const mockAddOnsQuickActions = [
-  { id: '1', label: 'Browse Add-Ons', icon: 'store', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 800)),
-    { loading: 'Loading add-ons marketplace...', success: 'Marketplace loaded successfully', error: 'Failed to load marketplace' }
-  ), variant: 'default' as const },
-  { id: '2', label: 'Update All', icon: 'refresh', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 2000)),
-    { loading: 'Checking for updates...', success: 'All add-ons are up to date', error: 'Failed to check for updates' }
-  ), variant: 'default' as const },
-  { id: '3', label: 'Settings', icon: 'settings', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 500)),
-    { loading: 'Opening add-ons settings...', success: 'Add-ons settings opened', error: 'Failed to open settings' }
-  ), variant: 'outline' as const },
-]
+// Quick actions removed - using dialog-based handlers instead
 
 export default function AddOnsClient() {
   const [activeTab, setActiveTab] = useState('discover')
@@ -476,6 +463,18 @@ export default function AddOnsClient() {
   const [showBrowseDialog, setShowBrowseDialog] = useState(false)
   const [showUpdateAllDialog, setShowUpdateAllDialog] = useState(false)
   const [showQuickSettingsDialog, setShowQuickSettingsDialog] = useState(false)
+
+  // Dialog states for Quick Actions grid
+  const [showInstallNewDialog, setShowInstallNewDialog] = useState(false)
+  const [showManageDialog, setShowManageDialog] = useState(false)
+  const [showFeaturedDialog, setShowFeaturedDialog] = useState(false)
+  const [showSecurityScanDialog, setShowSecurityScanDialog] = useState(false)
+  const [showDevelopDialog, setShowDevelopDialog] = useState(false)
+
+  // State for dialogs with forms
+  const [installSearch, setInstallSearch] = useState('')
+  const [securityScanRunning, setSecurityScanRunning] = useState(false)
+  const [securityScanProgress, setSecurityScanProgress] = useState(0)
 
   // Quick actions with proper dialog handlers
   const quickActionsWithDialogs = [
@@ -735,16 +734,16 @@ export default function AddOnsClient() {
         {/* Quick Actions */}
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
           {[
-            { icon: Store, label: 'Browse All', desc: 'Explore marketplace', color: 'from-orange-500 to-pink-600' },
-            { icon: Download, label: 'Install New', desc: 'Get add-ons', color: 'from-blue-500 to-indigo-600' },
-            { icon: Package, label: 'Manage', desc: 'Your add-ons', color: 'from-green-500 to-emerald-600' },
-            { icon: Crown, label: 'Featured', desc: 'Top picks', color: 'from-amber-500 to-orange-600' },
-            { icon: RefreshCw, label: 'Updates', desc: 'Check updates', color: 'from-purple-500 to-violet-600' },
-            { icon: Shield, label: 'Security', desc: 'Scan add-ons', color: 'from-red-500 to-rose-600' },
-            { icon: Code, label: 'Develop', desc: 'Create add-ons', color: 'from-cyan-500 to-blue-600' },
-            { icon: Settings, label: 'Settings', desc: 'Configure', color: 'from-gray-500 to-slate-600' }
+            { icon: Store, label: 'Browse All', desc: 'Explore marketplace', color: 'from-orange-500 to-pink-600', onClick: () => setShowBrowseDialog(true) },
+            { icon: Download, label: 'Install New', desc: 'Get add-ons', color: 'from-blue-500 to-indigo-600', onClick: () => setShowInstallNewDialog(true) },
+            { icon: Package, label: 'Manage', desc: 'Your add-ons', color: 'from-green-500 to-emerald-600', onClick: () => setShowManageDialog(true) },
+            { icon: Crown, label: 'Featured', desc: 'Top picks', color: 'from-amber-500 to-orange-600', onClick: () => setShowFeaturedDialog(true) },
+            { icon: RefreshCw, label: 'Updates', desc: 'Check updates', color: 'from-purple-500 to-violet-600', onClick: () => setShowUpdateAllDialog(true) },
+            { icon: Shield, label: 'Security', desc: 'Scan add-ons', color: 'from-red-500 to-rose-600', onClick: () => setShowSecurityScanDialog(true) },
+            { icon: Code, label: 'Develop', desc: 'Create add-ons', color: 'from-cyan-500 to-blue-600', onClick: () => setShowDevelopDialog(true) },
+            { icon: Settings, label: 'Settings', desc: 'Configure', color: 'from-gray-500 to-slate-600', onClick: () => setShowQuickSettingsDialog(true) }
           ].map((action, idx) => (
-            <Card key={idx} className="cursor-pointer hover:shadow-lg transition-all hover:-translate-y-0.5 group bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0">
+            <Card key={idx} className="cursor-pointer hover:shadow-lg transition-all hover:-translate-y-0.5 group bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0" onClick={action.onClick}>
               <CardContent className="p-4 text-center">
                 <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${action.color} flex items-center justify-center mx-auto mb-2 group-hover:scale-110 transition-transform`}>
                   <action.icon className="w-5 h-5 text-white" />
@@ -2049,6 +2048,352 @@ export default function AddOnsClient() {
                 >
                   <Settings className="w-4 h-4 mr-2" />
                   All Settings
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Install New Add-On Dialog */}
+        <Dialog open={showInstallNewDialog} onOpenChange={setShowInstallNewDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Download className="w-5 h-5 text-blue-500" />
+                Install New Add-On
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p className="text-gray-600 dark:text-gray-400">
+                Search and install add-ons from our marketplace.
+              </p>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Input
+                  placeholder="Search for add-ons..."
+                  value={installSearch}
+                  onChange={(e) => setInstallSearch(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+              <div className="max-h-64 overflow-y-auto space-y-2">
+                {mockAddOns
+                  .filter(a => a.status === 'available')
+                  .filter(a => installSearch === '' || a.name.toLowerCase().includes(installSearch.toLowerCase()))
+                  .map((addOn) => {
+                    const CategoryIcon = getCategoryIcon(addOn.category)
+                    return (
+                      <div key={addOn.id} className="flex items-center justify-between p-3 rounded-lg border hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900/30 dark:to-indigo-900/30 flex items-center justify-center">
+                            <CategoryIcon className="w-5 h-5 text-blue-600" />
+                          </div>
+                          <div>
+                            <h4 className="font-medium">{addOn.name}</h4>
+                            <p className="text-xs text-gray-500">{addOn.shortDescription}</p>
+                          </div>
+                        </div>
+                        <Button
+                          size="sm"
+                          onClick={() => {
+                            handleInstallAddOn(addOn.name)
+                            setShowInstallNewDialog(false)
+                          }}
+                        >
+                          <Download className="w-3 h-3 mr-1" />
+                          Install
+                        </Button>
+                      </div>
+                    )
+                  })}
+              </div>
+              <div className="flex justify-end gap-3 pt-4">
+                <Button variant="outline" onClick={() => setShowInstallNewDialog(false)}>
+                  Close
+                </Button>
+                <Button
+                  className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white"
+                  onClick={() => {
+                    setShowInstallNewDialog(false)
+                    setActiveTab('discover')
+                  }}
+                >
+                  <Store className="w-4 h-4 mr-2" />
+                  Browse All
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Manage Add-Ons Dialog */}
+        <Dialog open={showManageDialog} onOpenChange={setShowManageDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Package className="w-5 h-5 text-green-500" />
+                Manage Your Add-Ons
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p className="text-gray-600 dark:text-gray-400">
+                View and manage your {installedAddOns.length} installed add-ons.
+              </p>
+              <div className="max-h-80 overflow-y-auto space-y-2">
+                {installedAddOns.map((addOn) => {
+                  const CategoryIcon = getCategoryIcon(addOn.category)
+                  return (
+                    <div key={addOn.id} className="flex items-center justify-between p-3 rounded-lg border">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-green-100 to-emerald-100 dark:from-green-900/30 dark:to-emerald-900/30 flex items-center justify-center">
+                          <CategoryIcon className="w-5 h-5 text-green-600" />
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <h4 className="font-medium">{addOn.name}</h4>
+                            <Badge className="bg-green-100 text-green-700">Active</Badge>
+                          </div>
+                          <p className="text-xs text-gray-500">v{addOn.version} - {addOn.size}</p>
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button variant="outline" size="sm" onClick={() => {
+                          setSelectedAddOn(addOn)
+                          setShowManageDialog(false)
+                          setShowAddOnDialog(true)
+                        }}>
+                          <Settings className="w-3 h-3" />
+                        </Button>
+                        <Button variant="outline" size="sm" className="text-red-600" onClick={() => {
+                          handleUninstallAddOn(addOn.name)
+                        }}>
+                          <Trash2 className="w-3 h-3" />
+                        </Button>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+              <div className="flex justify-end gap-3 pt-4">
+                <Button variant="outline" onClick={() => setShowManageDialog(false)}>
+                  Close
+                </Button>
+                <Button
+                  className="bg-gradient-to-r from-green-500 to-emerald-600 text-white"
+                  onClick={() => {
+                    setShowManageDialog(false)
+                    setActiveTab('installed')
+                  }}
+                >
+                  <Package className="w-4 h-4 mr-2" />
+                  View All Installed
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Featured Add-Ons Dialog */}
+        <Dialog open={showFeaturedDialog} onOpenChange={setShowFeaturedDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Crown className="w-5 h-5 text-amber-500" />
+                Featured Add-Ons
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p className="text-gray-600 dark:text-gray-400">
+                Hand-picked premium add-ons recommended by our team.
+              </p>
+              <div className="grid grid-cols-2 gap-3 max-h-80 overflow-y-auto">
+                {featuredAddOns.map((addOn) => {
+                  const CategoryIcon = getCategoryIcon(addOn.category)
+                  return (
+                    <div
+                      key={addOn.id}
+                      className="p-3 rounded-lg border hover:shadow-md transition-all cursor-pointer"
+                      onClick={() => {
+                        setSelectedAddOn(addOn)
+                        setShowFeaturedDialog(false)
+                        setShowAddOnDialog(true)
+                      }}
+                    >
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900/30 dark:to-orange-900/30 flex items-center justify-center">
+                          <CategoryIcon className="w-4 h-4 text-amber-600" />
+                        </div>
+                        <div>
+                          <h4 className="font-medium text-sm">{addOn.name}</h4>
+                          <div className="flex items-center gap-1 text-xs text-yellow-600">
+                            <Star className="w-3 h-3 fill-yellow-500" />
+                            {addOn.rating.toFixed(1)}
+                          </div>
+                        </div>
+                      </div>
+                      <p className="text-xs text-gray-500 line-clamp-2">{addOn.shortDescription}</p>
+                      <div className="mt-2">
+                        <Badge className={getPricingColor(addOn.pricingType)} variant="outline">
+                          {addOn.pricingType === 'free' ? 'Free' : formatPrice(addOn.price, addOn.currency)}
+                        </Badge>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+              <div className="flex justify-end gap-3 pt-4">
+                <Button variant="outline" onClick={() => setShowFeaturedDialog(false)}>
+                  Close
+                </Button>
+                <Button
+                  className="bg-gradient-to-r from-amber-500 to-orange-600 text-white"
+                  onClick={() => {
+                    setShowFeaturedDialog(false)
+                    setActiveTab('featured')
+                  }}
+                >
+                  <Crown className="w-4 h-4 mr-2" />
+                  View All Featured
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Security Scan Dialog */}
+        <Dialog open={showSecurityScanDialog} onOpenChange={setShowSecurityScanDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Shield className="w-5 h-5 text-red-500" />
+                Security Scan
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p className="text-gray-600 dark:text-gray-400">
+                Scan all installed add-ons for security vulnerabilities.
+              </p>
+              <div className="p-4 rounded-lg bg-red-50 dark:bg-red-900/20">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-sm font-medium">Add-ons to scan</span>
+                  <span className="font-bold text-red-600">{installedAddOns.length}</span>
+                </div>
+                {securityScanRunning && (
+                  <div className="space-y-2">
+                    <Progress value={securityScanProgress} className="h-2" />
+                    <p className="text-xs text-gray-500 text-center">Scanning... {securityScanProgress}%</p>
+                  </div>
+                )}
+              </div>
+              <div className="space-y-2">
+                {installedAddOns.map((addOn) => (
+                  <div key={addOn.id} className="flex items-center justify-between p-2 rounded-lg border">
+                    <span className="text-sm">{addOn.name}</span>
+                    {securityScanProgress === 100 ? (
+                      <Badge className="bg-green-100 text-green-700">
+                        <CheckCircle2 className="w-3 h-3 mr-1" />
+                        Secure
+                      </Badge>
+                    ) : (
+                      <Badge variant="outline">Pending</Badge>
+                    )}
+                  </div>
+                ))}
+              </div>
+              <div className="flex justify-end gap-3 pt-4">
+                <Button variant="outline" onClick={() => {
+                  setShowSecurityScanDialog(false)
+                  setSecurityScanRunning(false)
+                  setSecurityScanProgress(0)
+                }}>
+                  Close
+                </Button>
+                <Button
+                  className="bg-gradient-to-r from-red-500 to-rose-600 text-white"
+                  disabled={securityScanRunning}
+                  onClick={() => {
+                    setSecurityScanRunning(true)
+                    setSecurityScanProgress(0)
+                    const interval = setInterval(() => {
+                      setSecurityScanProgress(prev => {
+                        if (prev >= 100) {
+                          clearInterval(interval)
+                          setSecurityScanRunning(false)
+                          toast.success('Security scan complete', {
+                            description: 'All add-ons passed security checks!'
+                          })
+                          return 100
+                        }
+                        return prev + 10
+                      })
+                    }, 300)
+                  }}
+                >
+                  <Shield className="w-4 h-4 mr-2" />
+                  {securityScanRunning ? 'Scanning...' : 'Start Scan'}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Develop Add-On Dialog */}
+        <Dialog open={showDevelopDialog} onOpenChange={setShowDevelopDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Code className="w-5 h-5 text-cyan-500" />
+                Develop Add-Ons
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p className="text-gray-600 dark:text-gray-400">
+                Create and publish your own add-ons to the marketplace.
+              </p>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="p-4 rounded-lg bg-cyan-50 dark:bg-cyan-900/20 text-center">
+                  <FileText className="w-8 h-8 mx-auto text-cyan-600 mb-2" />
+                  <h4 className="font-medium text-sm">Documentation</h4>
+                  <p className="text-xs text-gray-500 mt-1">Learn how to build add-ons</p>
+                </div>
+                <div className="p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20 text-center">
+                  <Code className="w-8 h-8 mx-auto text-blue-600 mb-2" />
+                  <h4 className="font-medium text-sm">API Reference</h4>
+                  <p className="text-xs text-gray-500 mt-1">Explore available APIs</p>
+                </div>
+                <div className="p-4 rounded-lg bg-purple-50 dark:bg-purple-900/20 text-center">
+                  <Package className="w-8 h-8 mx-auto text-purple-600 mb-2" />
+                  <h4 className="font-medium text-sm">Starter Kit</h4>
+                  <p className="text-xs text-gray-500 mt-1">Download template project</p>
+                </div>
+                <div className="p-4 rounded-lg bg-green-50 dark:bg-green-900/20 text-center">
+                  <Upload className="w-8 h-8 mx-auto text-green-600 mb-2" />
+                  <h4 className="font-medium text-sm">Submit Add-On</h4>
+                  <p className="text-xs text-gray-500 mt-1">Publish to marketplace</p>
+                </div>
+              </div>
+              <div className="p-4 rounded-lg border bg-gray-50 dark:bg-gray-800">
+                <h4 className="font-medium mb-2">Quick Start</h4>
+                <div className="bg-gray-900 text-green-400 p-3 rounded-lg font-mono text-sm">
+                  <p>$ npx create-addon my-addon</p>
+                  <p>$ cd my-addon</p>
+                  <p>$ npm run dev</p>
+                </div>
+              </div>
+              <div className="flex justify-end gap-3 pt-4">
+                <Button variant="outline" onClick={() => setShowDevelopDialog(false)}>
+                  Close
+                </Button>
+                <Button
+                  className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white"
+                  onClick={() => {
+                    setShowDevelopDialog(false)
+                    setActiveTab('settings')
+                    setSettingsTab('developer')
+                  }}
+                >
+                  <Code className="w-4 h-4 mr-2" />
+                  Developer Settings
                 </Button>
               </div>
             </div>

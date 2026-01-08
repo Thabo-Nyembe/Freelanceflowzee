@@ -376,20 +376,7 @@ const aPlusShowcaseActivities = [
   { id: '3', user: 'System', action: 'generated', target: 'weekly report', timestamp: '1h ago', type: 'info' as const },
 ]
 
-const aPlusShowcaseQuickActions = [
-  { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1500)),
-    { loading: 'Creating new component...', success: 'Component created successfully', error: 'Failed to create component' }
-  ) },
-  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1500)),
-    { loading: 'Exporting showcase...', success: 'Export completed', error: 'Failed to export' }
-  ) },
-  { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1500)),
-    { loading: 'Opening settings...', success: 'Settings loaded', error: 'Failed to load settings' }
-  ) },
-]
+// Quick actions are defined inside the component to access setState functions
 
 export default function APlusShowcaseClient() {
   logger.debug('A+ showcase component mounting')
@@ -420,11 +407,33 @@ export default function APlusShowcaseClient() {
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [showDetailsModal, setShowDetailsModal] = useState(false)
 
+  // Quick action dialog states
+  const [showNewItemDialog, setShowNewItemDialog] = useState(false)
+  const [showExportDialog, setShowExportDialog] = useState(false)
+  const [showSettingsDialog, setShowSettingsDialog] = useState(false)
+
   // Form states
   const [componentName, setComponentName] = useState('')
   const [componentDescription, setComponentDescription] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<ComponentCategory>('ui')
   const [selectedDifficulty, setSelectedDifficulty] = useState<DifficultyLevel>('beginner')
+
+  // Export dialog form states
+  const [exportFormat, setExportFormat] = useState<'json' | 'csv' | 'zip'>('json')
+  const [exportIncludePremium, setExportIncludePremium] = useState(true)
+  const [exportIncludeCode, setExportIncludeCode] = useState(true)
+
+  // Settings dialog form states
+  const [settingsViewMode, setSettingsViewMode] = useState<ViewMode>('grid')
+  const [settingsAutoSave, setSettingsAutoSave] = useState(true)
+  const [settingsNotifications, setSettingsNotifications] = useState(true)
+
+  // Quick actions for the toolbar
+  const aPlusShowcaseQuickActions = [
+    { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => setShowNewItemDialog(true) },
+    { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => setShowExportDialog(true) },
+    { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => setShowSettingsDialog(true) },
+  ]
 
   // ============================================================================
   // A++++ LOAD DATA
@@ -674,6 +683,134 @@ export default function APlusShowcaseClient() {
       })
       toast.error('Failed to copy share link')
     }
+  }
+
+  // ============================================================================
+  // A++++ DIALOG HANDLERS
+  // ============================================================================
+
+  const handleCreateNewComponent = () => {
+    if (!componentName.trim()) {
+      toast.error('Component name is required')
+      return
+    }
+
+    const newComponent: ComponentShowcase = {
+      id: `COMP-${String(state.components.length + 1).padStart(3, '0')}`,
+      name: componentName,
+      description: componentDescription || `Professional ${componentName} component`,
+      category: selectedCategory,
+      difficulty: selectedDifficulty,
+      code: `// ${componentName} Component\nimport React from 'react'\n\nexport function ${componentName.replace(/\s+/g, '')}() {\n  return (\n    <div className="component">\n      {/* Component implementation */}\n    </div>\n  )\n}`,
+      preview: `https://picsum.photos/seed/${Date.now()}/600/400`,
+      language: 'tsx',
+      tags: [selectedCategory, selectedDifficulty, 'custom'],
+      popularity: 0,
+      examples: 0,
+      downloads: 0,
+      isFavorite: false,
+      isPremium: false,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      author: 'You',
+      version: '1.0.0',
+      dependencies: ['react', 'typescript']
+    }
+
+    dispatch({ type: 'ADD_COMPONENT', component: newComponent })
+
+    logger.info('New component created', { componentId: newComponent.id, name: newComponent.name })
+
+    toast.success('Component created successfully', {
+      description: `${newComponent.name} has been added to the ${selectedCategory} category`
+    })
+
+    // Reset form
+    setComponentName('')
+    setComponentDescription('')
+    setSelectedCategory('ui')
+    setSelectedDifficulty('beginner')
+    setShowNewItemDialog(false)
+    announce('Component created successfully', 'polite')
+  }
+
+  const handleExportShowcase = () => {
+    const componentsToExport = exportIncludePremium
+      ? state.components
+      : state.components.filter(c => !c.isPremium)
+
+    const exportData = componentsToExport.map(c => ({
+      id: c.id,
+      name: c.name,
+      description: c.description,
+      category: c.category,
+      difficulty: c.difficulty,
+      ...(exportIncludeCode ? { code: c.code } : {}),
+      language: c.language,
+      tags: c.tags,
+      popularity: c.popularity,
+      downloads: c.downloads,
+      author: c.author,
+      version: c.version
+    }))
+
+    let blob: Blob
+    let fileName: string
+
+    if (exportFormat === 'json') {
+      blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
+      fileName = `component-showcase-${new Date().toISOString().split('T')[0]}.json`
+    } else if (exportFormat === 'csv') {
+      const headers = Object.keys(exportData[0] || {}).join(',')
+      const rows = exportData.map(c => Object.values(c).map(v =>
+        typeof v === 'object' ? JSON.stringify(v) : v
+      ).join(','))
+      blob = new Blob([headers + '\n' + rows.join('\n')], { type: 'text/csv' })
+      fileName = `component-showcase-${new Date().toISOString().split('T')[0]}.csv`
+    } else {
+      // For zip, just export as JSON for now
+      blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
+      fileName = `component-showcase-${new Date().toISOString().split('T')[0]}.json`
+    }
+
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = fileName
+    a.click()
+    URL.revokeObjectURL(url)
+
+    logger.info('Showcase exported', {
+      format: exportFormat,
+      componentCount: exportData.length,
+      includeCode: exportIncludeCode,
+      includePremium: exportIncludePremium
+    })
+
+    toast.success('Export completed', {
+      description: `${exportData.length} components exported as ${exportFormat.toUpperCase()}`
+    })
+
+    setShowExportDialog(false)
+    announce('Export completed', 'polite')
+  }
+
+  const handleSaveSettings = () => {
+    // Apply view mode setting
+    dispatch({ type: 'SET_VIEW_MODE', viewMode: settingsViewMode })
+
+    logger.info('Settings saved', {
+      viewMode: settingsViewMode,
+      autoSave: settingsAutoSave,
+      notifications: settingsNotifications
+    })
+
+    toast.success('Settings saved', {
+      description: `View mode: ${settingsViewMode}, Auto-save: ${settingsAutoSave ? 'On' : 'Off'}, Notifications: ${settingsNotifications ? 'On' : 'Off'}`
+    })
+
+    setShowSettingsDialog(false)
+    announce('Settings saved', 'polite')
   }
 
   function getCategoryIcon(category: ComponentCategory) {
@@ -1328,6 +1465,253 @@ export default function APlusShowcaseClient() {
             >
               <Share2 className="h-4 w-4 mr-2" />
               Share
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* New Item Dialog */}
+      <Dialog open={showNewItemDialog} onOpenChange={setShowNewItemDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Create New Component</DialogTitle>
+            <DialogDescription>
+              Add a new component to your showcase library
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="component-name">Component Name</Label>
+              <Input
+                id="component-name"
+                placeholder="e.g., Gradient Button"
+                value={componentName}
+                onChange={(e) => setComponentName(e.target.value)}
+                className="bg-slate-900/50 border-slate-700"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="component-description">Description</Label>
+              <Input
+                id="component-description"
+                placeholder="Brief description of the component"
+                value={componentDescription}
+                onChange={(e) => setComponentDescription(e.target.value)}
+                className="bg-slate-900/50 border-slate-700"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Category</Label>
+                <Select
+                  value={selectedCategory}
+                  onValueChange={(value) => setSelectedCategory(value as ComponentCategory)}
+                >
+                  <SelectTrigger className="bg-slate-900/50 border-slate-700">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categoryOptions.map((cat) => (
+                      <SelectItem key={cat.id} value={cat.id}>
+                        {cat.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Difficulty</Label>
+                <Select
+                  value={selectedDifficulty}
+                  onValueChange={(value) => setSelectedDifficulty(value as DifficultyLevel)}
+                >
+                  <SelectTrigger className="bg-slate-900/50 border-slate-700">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="beginner">Beginner</SelectItem>
+                    <SelectItem value="intermediate">Intermediate</SelectItem>
+                    <SelectItem value="advanced">Advanced</SelectItem>
+                    <SelectItem value="expert">Expert</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowNewItemDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleCreateNewComponent}
+              className="bg-gradient-to-r from-purple-500 to-pink-500"
+            >
+              Create Component
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Export Dialog */}
+      <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Export Showcase</DialogTitle>
+            <DialogDescription>
+              Configure and download your component showcase
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Export Format</Label>
+              <Select
+                value={exportFormat}
+                onValueChange={(value) => setExportFormat(value as 'json' | 'csv' | 'zip')}
+              >
+                <SelectTrigger className="bg-slate-900/50 border-slate-700">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="json">JSON (Recommended)</SelectItem>
+                  <SelectItem value="csv">CSV (Spreadsheet)</SelectItem>
+                  <SelectItem value="zip">ZIP Archive</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-3">
+              <Label>Export Options</Label>
+              <div className="flex items-center justify-between p-3 bg-slate-800/50 rounded-lg">
+                <div>
+                  <p className="text-sm font-medium text-white">Include Code Snippets</p>
+                  <p className="text-xs text-gray-400">Export component source code</p>
+                </div>
+                <Button
+                  variant={exportIncludeCode ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setExportIncludeCode(!exportIncludeCode)}
+                  className={exportIncludeCode ? 'bg-gradient-to-r from-purple-500 to-pink-500' : ''}
+                >
+                  {exportIncludeCode ? 'Included' : 'Excluded'}
+                </Button>
+              </div>
+
+              <div className="flex items-center justify-between p-3 bg-slate-800/50 rounded-lg">
+                <div>
+                  <p className="text-sm font-medium text-white">Include Premium Components</p>
+                  <p className="text-xs text-gray-400">Export premium tier components</p>
+                </div>
+                <Button
+                  variant={exportIncludePremium ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setExportIncludePremium(!exportIncludePremium)}
+                  className={exportIncludePremium ? 'bg-gradient-to-r from-purple-500 to-pink-500' : ''}
+                >
+                  {exportIncludePremium ? 'Included' : 'Excluded'}
+                </Button>
+              </div>
+            </div>
+
+            <div className="p-3 bg-slate-800/30 rounded-lg">
+              <p className="text-sm text-gray-400">
+                <span className="font-medium text-white">{state.components.length}</span> components will be exported
+              </p>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowExportDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleExportShowcase}
+              className="bg-gradient-to-r from-purple-500 to-pink-500"
+            >
+              <Download className="h-4 w-4 mr-2" />
+              Export
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Settings Dialog */}
+      <Dialog open={showSettingsDialog} onOpenChange={setShowSettingsDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Showcase Settings</DialogTitle>
+            <DialogDescription>
+              Configure your component showcase preferences
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Default View Mode</Label>
+              <Select
+                value={settingsViewMode}
+                onValueChange={(value) => setSettingsViewMode(value as ViewMode)}
+              >
+                <SelectTrigger className="bg-slate-900/50 border-slate-700">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="grid">Grid View</SelectItem>
+                  <SelectItem value="list">List View</SelectItem>
+                  <SelectItem value="code">Code View</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-3">
+              <Label>Preferences</Label>
+              <div className="flex items-center justify-between p-3 bg-slate-800/50 rounded-lg">
+                <div>
+                  <p className="text-sm font-medium text-white">Auto-save Favorites</p>
+                  <p className="text-xs text-gray-400">Automatically save favorites to your profile</p>
+                </div>
+                <Button
+                  variant={settingsAutoSave ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setSettingsAutoSave(!settingsAutoSave)}
+                  className={settingsAutoSave ? 'bg-gradient-to-r from-purple-500 to-pink-500' : ''}
+                >
+                  {settingsAutoSave ? 'On' : 'Off'}
+                </Button>
+              </div>
+
+              <div className="flex items-center justify-between p-3 bg-slate-800/50 rounded-lg">
+                <div>
+                  <p className="text-sm font-medium text-white">Component Notifications</p>
+                  <p className="text-xs text-gray-400">Get notified about new components</p>
+                </div>
+                <Button
+                  variant={settingsNotifications ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setSettingsNotifications(!settingsNotifications)}
+                  className={settingsNotifications ? 'bg-gradient-to-r from-purple-500 to-pink-500' : ''}
+                >
+                  {settingsNotifications ? 'On' : 'Off'}
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowSettingsDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSaveSettings}
+              className="bg-gradient-to-r from-purple-500 to-pink-500"
+            >
+              <Settings className="h-4 w-4 mr-2" />
+              Save Settings
             </Button>
           </DialogFooter>
         </DialogContent>

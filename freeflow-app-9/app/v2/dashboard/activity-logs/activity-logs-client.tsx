@@ -391,12 +391,7 @@ const mockLogsActivities = [
   { id: '3', user: 'SRE Team', action: 'resolved', target: 'database connection issue', timestamp: '30m ago', type: 'success' as const },
 ]
 
-const mockLogsQuickActions = [
-  { id: '1', label: 'Search Logs', icon: 'Search', shortcut: 'S', action: () => {} },
-  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => {} },
-  { id: '3', label: 'Set Alert', icon: 'Bell', shortcut: 'A', action: () => {} },
-  { id: '4', label: 'Live Tail', icon: 'Activity', shortcut: 'L', action: () => {} },
-]
+// Quick actions are defined inside the component to access state setters
 
 export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientProps) {
   const [activeTab, setActiveTab] = useState('logs')
@@ -412,6 +407,14 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
   const [showLiveTailDialog, setShowLiveTailDialog] = useState(false)
   const [isLiveMode, setIsLiveMode] = useState(true)
   const [expandedLogs, setExpandedLogs] = useState<Set<string>>(new Set())
+
+  // Quick actions with proper dialog handlers
+  const logsQuickActions = [
+    { id: '1', label: 'Search Logs', icon: 'Search', shortcut: 'S', action: () => setShowSearchLogsDialog(true) },
+    { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => setShowExportDialog(true) },
+    { id: '3', label: 'Set Alert', icon: 'Bell', shortcut: 'A', action: () => setShowSetAlertDialog(true) },
+    { id: '4', label: 'Live Tail', icon: 'Activity', shortcut: 'L', action: () => setShowLiveTailDialog(true) },
+  ]
   const [timeRange, setTimeRange] = useState('1h')
   const [settingsTab, setSettingsTab] = useState('general')
 
@@ -1745,7 +1748,7 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockLogsQuickActions}
+            actions={logsQuickActions}
             variant="grid"
           />
         </div>
@@ -1882,6 +1885,300 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
             </button>
             <button className="px-4 py-2 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700">
               Save Query
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Search Logs Dialog */}
+      <Dialog open={showSearchLogsDialog} onOpenChange={setShowSearchLogsDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Search className="w-5 h-5 text-purple-600" />
+              Advanced Log Search
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Search Query</label>
+              <input
+                type="text"
+                className="w-full px-3 py-2 bg-white dark:bg-gray-800 border dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 dark:text-white font-mono"
+                placeholder="level:error AND service:api-gateway"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Time Range</label>
+                <Select defaultValue="1h">
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="15m">Last 15 minutes</SelectItem>
+                    <SelectItem value="1h">Last 1 hour</SelectItem>
+                    <SelectItem value="24h">Last 24 hours</SelectItem>
+                    <SelectItem value="7d">Last 7 days</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Log Level</label>
+                <Select defaultValue="all">
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Levels</SelectItem>
+                    <SelectItem value="error">Error</SelectItem>
+                    <SelectItem value="warn">Warning</SelectItem>
+                    <SelectItem value="info">Info</SelectItem>
+                    <SelectItem value="debug">Debug</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Service Filter</label>
+              <Input placeholder="e.g., auth-service, payment-service" />
+            </div>
+          </div>
+          <div className="flex items-center justify-end gap-3 pt-4 border-t dark:border-gray-700">
+            <button
+              onClick={() => setShowSearchLogsDialog(false)}
+              className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg font-medium"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={() => {
+                toast.success('Search executed', { description: 'Displaying search results' })
+                setShowSearchLogsDialog(false)
+              }}
+              className="px-4 py-2 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 flex items-center gap-2"
+            >
+              <Search className="w-4 h-4" />
+              Search
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Export Logs Dialog */}
+      <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Download className="w-5 h-5 text-green-600" />
+              Export Logs
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Export Format</label>
+              <Select defaultValue="json">
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="json">JSON</SelectItem>
+                  <SelectItem value="csv">CSV</SelectItem>
+                  <SelectItem value="ndjson">NDJSON (Newline Delimited)</SelectItem>
+                  <SelectItem value="parquet">Parquet</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Time Range</label>
+              <Select defaultValue="current">
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="current">Current View</SelectItem>
+                  <SelectItem value="1h">Last 1 Hour</SelectItem>
+                  <SelectItem value="24h">Last 24 Hours</SelectItem>
+                  <SelectItem value="7d">Last 7 Days</SelectItem>
+                  <SelectItem value="30d">Last 30 Days</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-center gap-2">
+              <Switch id="includeMetadata" />
+              <Label htmlFor="includeMetadata">Include metadata fields</Label>
+            </div>
+            <div className="flex items-center gap-2">
+              <Switch id="compressExport" defaultChecked />
+              <Label htmlFor="compressExport">Compress export (gzip)</Label>
+            </div>
+          </div>
+          <div className="flex items-center justify-end gap-3 pt-4 border-t dark:border-gray-700">
+            <button
+              onClick={() => setShowExportDialog(false)}
+              className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg font-medium"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={() => {
+                toast.success('Export started', { description: 'Your logs are being exported' })
+                setShowExportDialog(false)
+              }}
+              className="px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 flex items-center gap-2"
+            >
+              <Download className="w-4 h-4" />
+              Export
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Set Alert Dialog */}
+      <Dialog open={showSetAlertDialog} onOpenChange={setShowSetAlertDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Bell className="w-5 h-5 text-yellow-600" />
+              Create Log Alert
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Alert Name</label>
+              <Input placeholder="e.g., High Error Rate Alert" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Condition</label>
+              <Select defaultValue="count">
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="count">Log Count</SelectItem>
+                  <SelectItem value="pattern">Pattern Match</SelectItem>
+                  <SelectItem value="anomaly">Anomaly Detection</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Threshold</label>
+                <Input type="number" placeholder="100" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Time Window</label>
+                <Select defaultValue="5m">
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1m">1 minute</SelectItem>
+                    <SelectItem value="5m">5 minutes</SelectItem>
+                    <SelectItem value="15m">15 minutes</SelectItem>
+                    <SelectItem value="1h">1 hour</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Severity</label>
+              <Select defaultValue="warning">
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="info">Info</SelectItem>
+                  <SelectItem value="warning">Warning</SelectItem>
+                  <SelectItem value="critical">Critical</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <div className="flex items-center justify-end gap-3 pt-4 border-t dark:border-gray-700">
+            <button
+              onClick={() => setShowSetAlertDialog(false)}
+              className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg font-medium"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={() => {
+                toast.success('Alert created', { description: 'Your alert rule has been configured' })
+                setShowSetAlertDialog(false)
+              }}
+              className="px-4 py-2 bg-yellow-600 text-white rounded-lg font-medium hover:bg-yellow-700 flex items-center gap-2"
+            >
+              <Bell className="w-4 h-4" />
+              Create Alert
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Live Tail Dialog */}
+      <Dialog open={showLiveTailDialog} onOpenChange={setShowLiveTailDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Activity className="w-5 h-5 text-blue-600" />
+              Live Tail Configuration
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+              <div className="flex items-center gap-2 text-blue-700 dark:text-blue-400">
+                <Activity className="w-4 h-4" />
+                <span className="font-medium">Live streaming will begin when you start</span>
+              </div>
+              <p className="text-sm text-blue-600 dark:text-blue-300 mt-1">
+                View real-time logs as they arrive from your services
+              </p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Filter Query</label>
+              <Input placeholder="level:error OR level:warn" className="font-mono" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Sources</label>
+              <Select defaultValue="all">
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Sources</SelectItem>
+                  <SelectItem value="api">API Only</SelectItem>
+                  <SelectItem value="web">Web Only</SelectItem>
+                  <SelectItem value="worker">Workers Only</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-center gap-2">
+              <Switch id="highlightErrors" defaultChecked />
+              <Label htmlFor="highlightErrors">Highlight errors and warnings</Label>
+            </div>
+            <div className="flex items-center gap-2">
+              <Switch id="autoScroll" defaultChecked />
+              <Label htmlFor="autoScroll">Auto-scroll to new logs</Label>
+            </div>
+          </div>
+          <div className="flex items-center justify-end gap-3 pt-4 border-t dark:border-gray-700">
+            <button
+              onClick={() => setShowLiveTailDialog(false)}
+              className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg font-medium"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={() => {
+                setIsLiveMode(true)
+                toast.success('Live tail started', { description: 'Streaming logs in real-time' })
+                setShowLiveTailDialog(false)
+              }}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 flex items-center gap-2"
+            >
+              <Play className="w-4 h-4" />
+              Start Live Tail
             </button>
           </div>
         </DialogContent>

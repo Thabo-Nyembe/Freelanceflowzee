@@ -11,9 +11,13 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Progress } from '@/components/ui/progress'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Switch } from '@/components/ui/switch'
+import { Textarea } from '@/components/ui/textarea'
+import { Checkbox } from '@/components/ui/checkbox'
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
@@ -72,7 +76,12 @@ import {
   Fingerprint,
   ScanEye,
   Network,
-  Unplug
+  Unplug,
+  Filter,
+  Zap,
+  RotateCcw,
+  Check,
+  X
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -436,20 +445,7 @@ const mockExtensionsActivities = [
   { id: '3', user: 'System', action: 'Disabled', target: 'deprecated Theme Pack', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'warning' as const },
 ]
 
-const mockExtensionsQuickActions = [
-  { id: '1', label: 'Browse All', icon: 'grid', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 800)),
-    { loading: 'Loading extensions gallery...', success: 'Extensions gallery loaded', error: 'Failed to load gallery' }
-  ), variant: 'default' as const },
-  { id: '2', label: 'Check Updates', icon: 'refresh', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1500)),
-    { loading: 'Checking for extension updates...', success: 'All extensions are up to date', error: 'Failed to check for updates' }
-  ), variant: 'default' as const },
-  { id: '3', label: 'Manage', icon: 'settings', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 500)),
-    { loading: 'Opening extension manager...', success: 'Extension manager opened', error: 'Failed to open manager' }
-  ), variant: 'outline' as const },
-]
+// Quick actions are now defined inside the component with useState dialog triggers
 
 // ============================================================================
 // MAIN COMPONENT
@@ -462,6 +458,25 @@ export default function ExtensionsClient() {
   const [categoryFilter, setCategoryFilter] = useState<string>('all')
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [settingsTab, setSettingsTab] = useState('general')
+
+  // Dialog states for quick actions
+  const [browseDialogOpen, setBrowseDialogOpen] = useState(false)
+  const [checkUpdatesDialogOpen, setCheckUpdatesDialogOpen] = useState(false)
+  const [manageDialogOpen, setManageDialogOpen] = useState(false)
+
+  // Browse dialog state
+  const [browseCategory, setBrowseCategory] = useState('all')
+  const [browseSortBy, setBrowseSortBy] = useState('popular')
+  const [browseRatingFilter, setBrowseRatingFilter] = useState('any')
+
+  // Check updates dialog state
+  const [isCheckingUpdates, setIsCheckingUpdates] = useState(false)
+  const [updateResults, setUpdateResults] = useState<{ name: string; currentVersion: string; newVersion: string; hasUpdate: boolean }[]>([])
+  const [selectedUpdates, setSelectedUpdates] = useState<string[]>([])
+
+  // Manage dialog state
+  const [manageAction, setManageAction] = useState<'enable' | 'disable' | 'uninstall' | null>(null)
+  const [selectedManagedExtensions, setSelectedManagedExtensions] = useState<string[]>([])
 
   // Stats calculations
   const stats = useMemo(() => {
@@ -531,6 +546,119 @@ export default function ExtensionsClient() {
       description: `Configuring ${extensionName}...`
     })
   }
+
+  // Browse dialog handlers
+  const handleBrowseApply = () => {
+    setCategoryFilter(browseCategory)
+    setBrowseDialogOpen(false)
+    toast.success('Filters applied', {
+      description: `Showing ${browseCategory === 'all' ? 'all categories' : browseCategory} sorted by ${browseSortBy}`
+    })
+  }
+
+  // Check updates handlers
+  const handleCheckUpdates = () => {
+    setIsCheckingUpdates(true)
+    setUpdateResults([])
+    setSelectedUpdates([])
+
+    // Simulate checking for updates
+    setTimeout(() => {
+      const results = installedExtensions.map(ext => ({
+        name: ext.name,
+        currentVersion: ext.version,
+        newVersion: Math.random() > 0.5 ? `${parseInt(ext.version.split('.')[0]) + 1}.0.0` : ext.version,
+        hasUpdate: Math.random() > 0.5
+      }))
+      setUpdateResults(results)
+      setIsCheckingUpdates(false)
+    }, 2000)
+  }
+
+  const handleInstallUpdates = () => {
+    if (selectedUpdates.length === 0) {
+      toast.error('No updates selected', {
+        description: 'Please select at least one extension to update'
+      })
+      return
+    }
+
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 1500)),
+      {
+        loading: `Installing ${selectedUpdates.length} update(s)...`,
+        success: `Successfully updated ${selectedUpdates.length} extension(s)`,
+        error: 'Failed to install updates'
+      }
+    )
+    setCheckUpdatesDialogOpen(false)
+    setSelectedUpdates([])
+  }
+
+  const toggleUpdateSelection = (name: string) => {
+    setSelectedUpdates(prev =>
+      prev.includes(name) ? prev.filter(n => n !== name) : [...prev, name]
+    )
+  }
+
+  // Manage extensions handlers
+  const handleManageAction = () => {
+    if (selectedManagedExtensions.length === 0) {
+      toast.error('No extensions selected', {
+        description: 'Please select at least one extension to manage'
+      })
+      return
+    }
+
+    const actionText = manageAction === 'enable' ? 'Enabling' : manageAction === 'disable' ? 'Disabling' : 'Uninstalling'
+    const successText = manageAction === 'enable' ? 'enabled' : manageAction === 'disable' ? 'disabled' : 'uninstalled'
+
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 1000)),
+      {
+        loading: `${actionText} ${selectedManagedExtensions.length} extension(s)...`,
+        success: `Successfully ${successText} ${selectedManagedExtensions.length} extension(s)`,
+        error: `Failed to ${manageAction} extensions`
+      }
+    )
+    setManageDialogOpen(false)
+    setSelectedManagedExtensions([])
+    setManageAction(null)
+  }
+
+  const toggleManagedExtension = (id: string) => {
+    setSelectedManagedExtensions(prev =>
+      prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
+    )
+  }
+
+  // Quick actions with dialog triggers
+  const quickActions = [
+    {
+      id: '1',
+      label: 'Browse All',
+      icon: 'grid',
+      action: () => setBrowseDialogOpen(true),
+      variant: 'default' as const
+    },
+    {
+      id: '2',
+      label: 'Check Updates',
+      icon: 'refresh',
+      action: () => {
+        setCheckUpdatesDialogOpen(true)
+        handleCheckUpdates()
+      },
+      variant: 'default' as const
+    },
+    {
+      id: '3',
+      label: 'Manage',
+      icon: 'settings',
+      action: () => setManageDialogOpen(true),
+      variant: 'outline' as const
+    },
+  ]
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-indigo-50/30 to-blue-50/40 dark:bg-none dark:bg-gray-900">
@@ -1729,7 +1857,7 @@ export default function ExtensionsClient() {
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockExtensionsQuickActions}
+            actions={quickActions}
             variant="grid"
           />
         </div>
@@ -1874,6 +2002,393 @@ export default function ExtensionsClient() {
               </div>
             )}
           </ScrollArea>
+        </DialogContent>
+      </Dialog>
+
+      {/* Browse All Extensions Dialog */}
+      <Dialog open={browseDialogOpen} onOpenChange={setBrowseDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Filter className="w-5 h-5" />
+              Browse Extensions
+            </DialogTitle>
+            <DialogDescription>
+              Filter and browse the extension marketplace
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-6 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Category</Label>
+                <Select value={browseCategory} onValueChange={setBrowseCategory}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Categories</SelectItem>
+                    <SelectItem value="productivity">Productivity</SelectItem>
+                    <SelectItem value="developer">Developer Tools</SelectItem>
+                    <SelectItem value="security">Security</SelectItem>
+                    <SelectItem value="social">Social & Communication</SelectItem>
+                    <SelectItem value="entertainment">Entertainment</SelectItem>
+                    <SelectItem value="utilities">Utilities</SelectItem>
+                    <SelectItem value="shopping">Shopping</SelectItem>
+                    <SelectItem value="themes">Themes</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Sort By</Label>
+                <Select value={browseSortBy} onValueChange={setBrowseSortBy}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Sort by" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="popular">Most Popular</SelectItem>
+                    <SelectItem value="rating">Highest Rated</SelectItem>
+                    <SelectItem value="newest">Newest</SelectItem>
+                    <SelectItem value="updated">Recently Updated</SelectItem>
+                    <SelectItem value="name">Name (A-Z)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Minimum Rating</Label>
+              <Select value={browseRatingFilter} onValueChange={setBrowseRatingFilter}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Minimum rating" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="any">Any Rating</SelectItem>
+                  <SelectItem value="4.5">4.5+ Stars</SelectItem>
+                  <SelectItem value="4.0">4.0+ Stars</SelectItem>
+                  <SelectItem value="3.5">3.5+ Stars</SelectItem>
+                  <SelectItem value="3.0">3.0+ Stars</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="p-4 bg-muted/30 rounded-lg">
+              <h4 className="font-medium mb-2">Quick Filters</h4>
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setBrowseCategory('all')
+                    setBrowseSortBy('popular')
+                    setBrowseRatingFilter('4.5')
+                  }}
+                >
+                  <Star className="w-3 h-3 mr-1" />
+                  Top Rated
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setBrowseCategory('all')
+                    setBrowseSortBy('newest')
+                    setBrowseRatingFilter('any')
+                  }}
+                >
+                  <Sparkles className="w-3 h-3 mr-1" />
+                  New Arrivals
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setBrowseCategory('security')
+                    setBrowseSortBy('popular')
+                    setBrowseRatingFilter('any')
+                  }}
+                >
+                  <Shield className="w-3 h-3 mr-1" />
+                  Security
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setBrowseCategory('developer')
+                    setBrowseSortBy('popular')
+                    setBrowseRatingFilter('any')
+                  }}
+                >
+                  <Code className="w-3 h-3 mr-1" />
+                  Developer
+                </Button>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setBrowseDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleBrowseApply}>
+              <Filter className="w-4 h-4 mr-2" />
+              Apply Filters
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Check Updates Dialog */}
+      <Dialog open={checkUpdatesDialogOpen} onOpenChange={setCheckUpdatesDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <RefreshCw className="w-5 h-5" />
+              Check for Updates
+            </DialogTitle>
+            <DialogDescription>
+              Check and install updates for your installed extensions
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            {isCheckingUpdates ? (
+              <div className="flex flex-col items-center justify-center py-8">
+                <RefreshCw className="w-8 h-8 animate-spin text-purple-600 mb-4" />
+                <p className="text-sm text-muted-foreground">Checking for updates...</p>
+                <Progress value={45} className="w-48 mt-4" />
+              </div>
+            ) : updateResults.length > 0 ? (
+              <>
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <p className="font-medium">
+                      {updateResults.filter(r => r.hasUpdate).length} update(s) available
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      {selectedUpdates.length} selected for update
+                    </p>
+                  </div>
+                  {updateResults.filter(r => r.hasUpdate).length > 0 && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        const allWithUpdates = updateResults.filter(r => r.hasUpdate).map(r => r.name)
+                        setSelectedUpdates(allWithUpdates)
+                      }}
+                    >
+                      Select All
+                    </Button>
+                  )}
+                </div>
+                <ScrollArea className="h-[300px]">
+                  <div className="space-y-2">
+                    {updateResults.map((result) => (
+                      <div
+                        key={result.name}
+                        className={`flex items-center justify-between p-3 rounded-lg border ${
+                          result.hasUpdate ? 'bg-muted/30' : 'bg-muted/10'
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          {result.hasUpdate && (
+                            <Checkbox
+                              checked={selectedUpdates.includes(result.name)}
+                              onCheckedChange={() => toggleUpdateSelection(result.name)}
+                            />
+                          )}
+                          <div>
+                            <p className="font-medium">{result.name}</p>
+                            <p className="text-sm text-muted-foreground">
+                              v{result.currentVersion}
+                              {result.hasUpdate && (
+                                <span className="text-green-600 ml-2">
+                                  → v{result.newVersion}
+                                </span>
+                              )}
+                            </p>
+                          </div>
+                        </div>
+                        <div>
+                          {result.hasUpdate ? (
+                            <Badge className="bg-green-100 text-green-800">Update Available</Badge>
+                          ) : (
+                            <Badge variant="outline" className="text-muted-foreground">
+                              <Check className="w-3 h-3 mr-1" />
+                              Up to date
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </ScrollArea>
+              </>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
+                <Check className="w-12 h-12 text-green-500 mb-4" />
+                <p>All extensions are up to date</p>
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setCheckUpdatesDialogOpen(false)}>
+              Close
+            </Button>
+            {!isCheckingUpdates && updateResults.filter(r => r.hasUpdate).length > 0 && (
+              <Button onClick={handleInstallUpdates} disabled={selectedUpdates.length === 0}>
+                <Download className="w-4 h-4 mr-2" />
+                Install Selected ({selectedUpdates.length})
+              </Button>
+            )}
+            {!isCheckingUpdates && (
+              <Button variant="outline" onClick={handleCheckUpdates}>
+                <RotateCcw className="w-4 h-4 mr-2" />
+                Check Again
+              </Button>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Manage Extensions Dialog */}
+      <Dialog open={manageDialogOpen} onOpenChange={setManageDialogOpen}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Settings className="w-5 h-5" />
+              Manage Extensions
+            </DialogTitle>
+            <DialogDescription>
+              Enable, disable, or uninstall multiple extensions at once
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="flex items-center gap-2 mb-4">
+              <Label className="mr-2">Action:</Label>
+              <div className="flex gap-2">
+                <Button
+                  variant={manageAction === 'enable' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setManageAction('enable')}
+                >
+                  <Zap className="w-4 h-4 mr-1" />
+                  Enable
+                </Button>
+                <Button
+                  variant={manageAction === 'disable' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setManageAction('disable')}
+                >
+                  <Unplug className="w-4 h-4 mr-1" />
+                  Disable
+                </Button>
+                <Button
+                  variant={manageAction === 'uninstall' ? 'destructive' : 'outline'}
+                  size="sm"
+                  onClick={() => setManageAction('uninstall')}
+                >
+                  <Trash2 className="w-4 h-4 mr-1" />
+                  Uninstall
+                </Button>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-muted-foreground">
+                {selectedManagedExtensions.length} of {installedExtensions.length} selected
+              </p>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setSelectedManagedExtensions(installedExtensions.map(e => e.id))}
+                >
+                  Select All
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setSelectedManagedExtensions([])}
+                >
+                  Clear Selection
+                </Button>
+              </div>
+            </div>
+
+            <ScrollArea className="h-[350px]">
+              <div className="space-y-2">
+                {installedExtensions.map((ext) => (
+                  <div
+                    key={ext.id}
+                    className={`flex items-center justify-between p-4 rounded-lg border cursor-pointer transition-colors ${
+                      selectedManagedExtensions.includes(ext.id)
+                        ? 'bg-purple-50 dark:bg-purple-900/20 border-purple-300 dark:border-purple-700'
+                        : 'bg-muted/30 hover:bg-muted/50'
+                    }`}
+                    onClick={() => toggleManagedExtension(ext.id)}
+                  >
+                    <div className="flex items-center gap-4">
+                      <Checkbox
+                        checked={selectedManagedExtensions.includes(ext.id)}
+                        onCheckedChange={() => toggleManagedExtension(ext.id)}
+                      />
+                      <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 flex items-center justify-center text-xl">
+                        {ext.icon}
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <p className="font-medium">{ext.name}</p>
+                          {ext.developerVerified && (
+                            <ShieldCheck className="w-4 h-4 text-blue-500" />
+                          )}
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          {ext.developer} • v{ext.version}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <Badge className={getInstallStatusColor(ext.installStatus)}>
+                        {ext.installStatus}
+                      </Badge>
+                      <span className="text-sm text-muted-foreground">{ext.size}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+
+            {manageAction && selectedManagedExtensions.length > 0 && (
+              <div className={`p-4 rounded-lg ${
+                manageAction === 'uninstall'
+                  ? 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800'
+                  : 'bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800'
+              }`}>
+                <p className={`text-sm ${manageAction === 'uninstall' ? 'text-red-700 dark:text-red-300' : 'text-blue-700 dark:text-blue-300'}`}>
+                  {manageAction === 'enable' && `${selectedManagedExtensions.length} extension(s) will be enabled and become active.`}
+                  {manageAction === 'disable' && `${selectedManagedExtensions.length} extension(s) will be disabled but remain installed.`}
+                  {manageAction === 'uninstall' && `Warning: ${selectedManagedExtensions.length} extension(s) will be permanently removed.`}
+                </p>
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => {
+              setManageDialogOpen(false)
+              setSelectedManagedExtensions([])
+              setManageAction(null)
+            }}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleManageAction}
+              disabled={!manageAction || selectedManagedExtensions.length === 0}
+              variant={manageAction === 'uninstall' ? 'destructive' : 'default'}
+            >
+              {manageAction === 'enable' && <Zap className="w-4 h-4 mr-2" />}
+              {manageAction === 'disable' && <Unplug className="w-4 h-4 mr-2" />}
+              {manageAction === 'uninstall' && <Trash2 className="w-4 h-4 mr-2" />}
+              {manageAction ? `${manageAction.charAt(0).toUpperCase() + manageAction.slice(1)} Selected` : 'Select an Action'}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

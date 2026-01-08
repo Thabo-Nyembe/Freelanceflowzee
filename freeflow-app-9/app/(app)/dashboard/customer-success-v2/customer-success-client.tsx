@@ -502,6 +502,26 @@ export default function CustomerSuccessClient() {
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null)
   const [activeTab, setActiveTab] = useState('portfolio')
   const [settingsTab, setSettingsTab] = useState('general')
+  const [showTriggersDialog, setShowTriggersDialog] = useState(false)
+  const [showEnrollmentsDialog, setShowEnrollmentsDialog] = useState(false)
+
+  // Form state for triggers dialog
+  const [triggerForm, setTriggerForm] = useState({
+    name: '',
+    type: 'health_score' as 'health_score' | 'usage_drop' | 'renewal_approaching' | 'nps_change',
+    condition: 'below' as 'below' | 'above' | 'equals',
+    threshold: 70,
+    playbookId: '',
+    enabled: true
+  })
+
+  // Mock data for enrollments
+  const [enrollments] = useState([
+    { id: '1', customer: 'Acme Corporation', playbook: 'At-Risk Recovery', status: 'active', startedAt: '2024-03-15', progress: 60 },
+    { id: '2', customer: 'GlobalTech Inc', playbook: 'Renewal Preparation', status: 'active', startedAt: '2024-03-10', progress: 30 },
+    { id: '3', customer: 'InnovateCo', playbook: 'Expansion Play', status: 'active', startedAt: '2024-03-01', progress: 80 },
+    { id: '4', customer: 'StartupXYZ', playbook: 'Onboarding', status: 'completed', startedAt: '2024-02-15', progress: 100 },
+  ])
 
   // Quick actions with real functionality
   const mockCSQuickActions = [
@@ -1193,9 +1213,9 @@ export default function CustomerSuccessClient() {
               {[
                 { icon: Plus, label: 'New Playbook', desc: 'Create new', color: 'text-orange-500', action: () => createPlaybook() },
                 { icon: BookOpen, label: 'Templates', desc: 'Start fast', color: 'text-blue-500', action: () => window.open('/dashboard/templates?type=playbook', '_blank') },
-                { icon: Target, label: 'Set Triggers', desc: 'Automation', color: 'text-purple-500', action: () => toast.info('Opening trigger configuration') },
+                { icon: Target, label: 'Set Triggers', desc: 'Automation', color: 'text-purple-500', action: () => setShowTriggersDialog(true) },
                 { icon: BarChart3, label: 'Analytics', desc: 'Performance', color: 'text-green-500', action: () => window.open('/dashboard/analytics?view=playbooks', '_blank') },
-                { icon: Users, label: 'Enrollments', desc: 'Active runs', color: 'text-pink-500', action: () => toast.info('Viewing active playbook enrollments') },
+                { icon: Users, label: 'Enrollments', desc: 'Active runs', color: 'text-pink-500', action: () => setShowEnrollmentsDialog(true) },
                 { icon: Clock, label: 'Schedule', desc: 'Timing', color: 'text-amber-500', action: () => window.open('/dashboard/calendar?view=playbooks', '_blank') },
                 { icon: GraduationCap, label: 'Training', desc: 'Best practices', color: 'text-cyan-500', action: () => window.open('/dashboard/help-center?topic=playbooks', '_blank') },
                 { icon: Download, label: 'Export', desc: 'Share playbook', color: 'text-gray-500', action: () => {
@@ -2016,6 +2036,289 @@ export default function CustomerSuccessClient() {
               </Tabs>
             </>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Set Triggers Dialog */}
+      <Dialog open={showTriggersDialog} onOpenChange={setShowTriggersDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Target className="h-5 w-5 text-purple-600" />
+              Configure Playbook Triggers
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-6 py-4">
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium mb-2 block">Trigger Name</label>
+                <Input
+                  placeholder="e.g., Low Health Score Alert"
+                  value={triggerForm.name}
+                  onChange={(e) => setTriggerForm({ ...triggerForm, name: e.target.value })}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Trigger Type</label>
+                  <select
+                    value={triggerForm.type}
+                    onChange={(e) => setTriggerForm({ ...triggerForm, type: e.target.value as typeof triggerForm.type })}
+                    className="w-full border rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-800"
+                  >
+                    <option value="health_score">Health Score Change</option>
+                    <option value="usage_drop">Usage Drop</option>
+                    <option value="renewal_approaching">Renewal Approaching</option>
+                    <option value="nps_change">NPS Change</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Condition</label>
+                  <select
+                    value={triggerForm.condition}
+                    onChange={(e) => setTriggerForm({ ...triggerForm, condition: e.target.value as typeof triggerForm.condition })}
+                    className="w-full border rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-800"
+                  >
+                    <option value="below">Falls Below</option>
+                    <option value="above">Rises Above</option>
+                    <option value="equals">Equals</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Threshold Value</label>
+                  <Input
+                    type="number"
+                    value={triggerForm.threshold}
+                    onChange={(e) => setTriggerForm({ ...triggerForm, threshold: parseInt(e.target.value) || 0 })}
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Activate Playbook</label>
+                  <select
+                    value={triggerForm.playbookId}
+                    onChange={(e) => setTriggerForm({ ...triggerForm, playbookId: e.target.value })}
+                    className="w-full border rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-800"
+                  >
+                    <option value="">Select a playbook...</option>
+                    {playbooks.map(p => (
+                      <option key={p.id} value={p.id}>{p.name}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div>
+                  <div className="font-medium">Enable Trigger</div>
+                  <div className="text-sm text-gray-500">Automatically run when conditions are met</div>
+                </div>
+                <Switch
+                  checked={triggerForm.enabled}
+                  onCheckedChange={(checked) => setTriggerForm({ ...triggerForm, enabled: checked })}
+                />
+              </div>
+            </div>
+
+            <div className="border-t pt-4">
+              <h4 className="font-medium mb-3">Existing Triggers</h4>
+              <div className="space-y-2">
+                {[
+                  { name: 'At-Risk Detection', type: 'Health Score < 70', playbook: 'At-Risk Recovery', enabled: true },
+                  { name: 'Renewal Reminder', type: '90 days before renewal', playbook: 'Renewal Preparation', enabled: true },
+                  { name: 'Expansion Signal', type: 'Health Score > 85', playbook: 'Expansion Play', enabled: false },
+                ].map((trigger, i) => (
+                  <div key={i} className="flex items-center justify-between p-3 bg-white dark:bg-gray-700 rounded-lg border">
+                    <div>
+                      <div className="font-medium text-sm">{trigger.name}</div>
+                      <div className="text-xs text-gray-500">{trigger.type} → {trigger.playbook}</div>
+                    </div>
+                    <Badge variant={trigger.enabled ? 'default' : 'secondary'}>
+                      {trigger.enabled ? 'Active' : 'Disabled'}
+                    </Badge>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-3 pt-4 border-t">
+            <Button variant="outline" onClick={() => setShowTriggersDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={async () => {
+                if (!triggerForm.name || !triggerForm.playbookId) {
+                  toast.error('Please fill in all required fields')
+                  return
+                }
+                await apiPost('/api/customer-success/triggers', triggerForm, {
+                  loading: 'Creating trigger...',
+                  success: 'Trigger created successfully',
+                  error: 'Failed to create trigger'
+                })
+                setShowTriggersDialog(false)
+                setTriggerForm({
+                  name: '',
+                  type: 'health_score',
+                  condition: 'below',
+                  threshold: 70,
+                  playbookId: '',
+                  enabled: true
+                })
+              }}
+            >
+              <Zap className="h-4 w-4 mr-2" />
+              Create Trigger
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Enrollments Dialog */}
+      <Dialog open={showEnrollmentsDialog} onOpenChange={setShowEnrollmentsDialog}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Users className="h-5 w-5 text-pink-600" />
+              Active Playbook Enrollments
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div className="flex items-center gap-4">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Input placeholder="Search enrollments..." className="pl-9" />
+              </div>
+              <select className="border rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-800">
+                <option value="all">All Playbooks</option>
+                {playbooks.map(p => (
+                  <option key={p.id} value={p.id}>{p.name}</option>
+                ))}
+              </select>
+              <select className="border rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-800">
+                <option value="all">All Status</option>
+                <option value="active">Active</option>
+                <option value="paused">Paused</option>
+                <option value="completed">Completed</option>
+              </select>
+            </div>
+
+            <div className="grid grid-cols-4 gap-4">
+              <Card className="p-4">
+                <div className="text-2xl font-bold text-emerald-600">{enrollments.filter(e => e.status === 'active').length}</div>
+                <div className="text-sm text-gray-500">Active</div>
+              </Card>
+              <Card className="p-4">
+                <div className="text-2xl font-bold text-blue-600">{enrollments.filter(e => e.status === 'completed').length}</div>
+                <div className="text-sm text-gray-500">Completed</div>
+              </Card>
+              <Card className="p-4">
+                <div className="text-2xl font-bold text-amber-600">0</div>
+                <div className="text-sm text-gray-500">Paused</div>
+              </Card>
+              <Card className="p-4">
+                <div className="text-2xl font-bold text-purple-600">{enrollments.length}</div>
+                <div className="text-sm text-gray-500">Total</div>
+              </Card>
+            </div>
+
+            <ScrollArea className="h-[400px]">
+              <div className="space-y-3">
+                {enrollments.map(enrollment => (
+                  <Card key={enrollment.id} className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-4">
+                        <Avatar className="h-10 w-10">
+                          <AvatarFallback className="bg-gradient-to-br from-emerald-500 to-teal-500 text-white">
+                            {enrollment.customer.substring(0, 2)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <div className="font-medium">{enrollment.customer}</div>
+                          <div className="text-sm text-gray-500">{enrollment.playbook}</div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <div className="text-right">
+                          <div className="text-sm font-medium">{enrollment.progress}%</div>
+                          <div className="text-xs text-gray-500">Started {enrollment.startedAt}</div>
+                        </div>
+                        <Badge variant={enrollment.status === 'active' ? 'default' : enrollment.status === 'completed' ? 'secondary' : 'outline'}>
+                          {enrollment.status}
+                        </Badge>
+                      </div>
+                    </div>
+                    <div className="mt-3">
+                      <Progress value={enrollment.progress} className="h-2" />
+                    </div>
+                    <div className="mt-3 flex justify-end gap-2">
+                      {enrollment.status === 'active' && (
+                        <>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => toast.info(`Pausing ${enrollment.customer}'s enrollment`)}
+                          >
+                            Pause
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              const customer = customers.find(c => c.name === enrollment.customer)
+                              if (customer) setSelectedCustomer(customer)
+                              setShowEnrollmentsDialog(false)
+                            }}
+                          >
+                            View Customer
+                          </Button>
+                        </>
+                      )}
+                      {enrollment.status === 'completed' && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => toast.success(`Re-enrolling ${enrollment.customer} in ${enrollment.playbook}`)}
+                        >
+                          Re-enroll
+                        </Button>
+                      )}
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            </ScrollArea>
+          </div>
+
+          <div className="flex justify-between items-center pt-4 border-t">
+            <Button
+              variant="outline"
+              onClick={() => {
+                const exportData = enrollments.map(e => ({
+                  Customer: e.customer,
+                  Playbook: e.playbook,
+                  Status: e.status,
+                  StartedAt: e.startedAt,
+                  Progress: `${e.progress}%`
+                }))
+                downloadAsCsv(exportData, 'playbook-enrollments.csv')
+              }}
+            >
+              <Download className="h-4 w-4 mr-2" />
+              Export
+            </Button>
+            <Button onClick={() => setShowEnrollmentsDialog(false)}>
+              Close
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

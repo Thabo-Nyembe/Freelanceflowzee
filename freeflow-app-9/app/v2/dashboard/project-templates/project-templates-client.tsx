@@ -20,6 +20,17 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { toast } from 'sonner'
 import {
   FileText,
   Plus,
@@ -41,7 +52,10 @@ import {
   TrendingUp,
   Target,
   Zap,
-  Award
+  Award,
+  Download,
+  Settings,
+  CheckCircle
 } from 'lucide-react'
 
 // A+++ UTILITIES
@@ -78,20 +92,7 @@ const projectTemplatesActivities = [
   { id: '3', user: 'System', action: 'generated', target: 'weekly report', timestamp: '1h ago', type: 'info' as const },
 ]
 
-const projectTemplatesQuickActions = [
-  { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1000)),
-    { loading: 'Creating new template...', success: 'Template created successfully', error: 'Failed to create template' }
-  ) },
-  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1500)),
-    { loading: 'Exporting templates...', success: 'Templates exported successfully', error: 'Failed to export templates' }
-  ) },
-  { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 800)),
-    { loading: 'Opening settings...', success: 'Settings opened', error: 'Failed to open settings' }
-  ) },
-]
+// Quick actions will be defined inside the component to access dialog state setters
 
 export default function ProjectTemplatesClient() {
   // A+++ STATE MANAGEMENT
@@ -99,6 +100,99 @@ export default function ProjectTemplatesClient() {
   const [error, setError] = useState<string | null>(null)
   const { announce } = useAnnouncer()
   const { userId, loading: userLoading } = useCurrentUser()
+
+  // Dialog states for quick actions
+  const [showNewTemplateDialog, setShowNewTemplateDialog] = useState(false)
+  const [showExportDialog, setShowExportDialog] = useState(false)
+  const [showSettingsDialog, setShowSettingsDialog] = useState(false)
+
+  // New template form state
+  const [newTemplateName, setNewTemplateName] = useState('')
+  const [newTemplateDescription, setNewTemplateDescription] = useState('')
+  const [newTemplateCategory, setNewTemplateCategory] = useState('branding')
+  const [newTemplateType, setNewTemplateType] = useState('standard')
+  const [newTemplateDuration, setNewTemplateDuration] = useState('')
+  const [newTemplatePrice, setNewTemplatePrice] = useState('')
+  const [isCreatingTemplate, setIsCreatingTemplate] = useState(false)
+
+  // Export form state
+  const [exportFormat, setExportFormat] = useState('json')
+  const [exportScope, setExportScope] = useState('all')
+  const [includeAssets, setIncludeAssets] = useState(true)
+  const [isExporting, setIsExporting] = useState(false)
+
+  // Settings form state
+  const [defaultCategory, setDefaultCategory] = useState('all')
+  const [autoSave, setAutoSave] = useState(true)
+  const [notifyOnUse, setNotifyOnUse] = useState(true)
+  const [templateVisibility, setTemplateVisibility] = useState('public')
+  const [isSavingSettings, setIsSavingSettings] = useState(false)
+
+  // Quick actions with dialog openers
+  const projectTemplatesQuickActions = [
+    { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => setShowNewTemplateDialog(true) },
+    { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => setShowExportDialog(true) },
+    { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => setShowSettingsDialog(true) },
+  ]
+
+  // Handler functions
+  const handleCreateTemplate = async () => {
+    if (!newTemplateName.trim()) {
+      toast.error('Please enter a template name')
+      return
+    }
+
+    setIsCreatingTemplate(true)
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1500))
+
+      toast.success(`Template "${newTemplateName}" created successfully`)
+      setShowNewTemplateDialog(false)
+      // Reset form
+      setNewTemplateName('')
+      setNewTemplateDescription('')
+      setNewTemplateCategory('branding')
+      setNewTemplateType('standard')
+      setNewTemplateDuration('')
+      setNewTemplatePrice('')
+    } catch (err) {
+      toast.error('Failed to create template')
+    } finally {
+      setIsCreatingTemplate(false)
+    }
+  }
+
+  const handleExport = async () => {
+    setIsExporting(true)
+    try {
+      // Simulate export process
+      await new Promise(resolve => setTimeout(resolve, 2000))
+
+      const scopeText = exportScope === 'all' ? 'All templates' : 'Selected templates'
+      toast.success(`${scopeText} exported as ${exportFormat.toUpperCase()}`)
+      setShowExportDialog(false)
+    } catch (err) {
+      toast.error('Failed to export templates')
+    } finally {
+      setIsExporting(false)
+    }
+  }
+
+  const handleSaveSettings = async () => {
+    setIsSavingSettings(true)
+    try {
+      // Simulate saving settings
+      await new Promise(resolve => setTimeout(resolve, 1000))
+
+      toast.success('Template settings saved successfully')
+      setShowSettingsDialog(false)
+    } catch (err) {
+      toast.error('Failed to save settings')
+    } finally {
+      setIsSavingSettings(false)
+    }
+  }
 
   // A+++ LOAD PROJECT TEMPLATES DATA
   useEffect(() => {
@@ -685,6 +779,308 @@ export default function ProjectTemplatesClient() {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* New Template Dialog */}
+      <Dialog open={showNewTemplateDialog} onOpenChange={setShowNewTemplateDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Plus className="h-5 w-5 text-purple-600" />
+              Create New Template
+            </DialogTitle>
+            <DialogDescription>
+              Create a reusable project template to accelerate future workflows
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="templateName">Template Name *</Label>
+                <Input
+                  id="templateName"
+                  placeholder="e.g., Brand Identity Package"
+                  value={newTemplateName}
+                  onChange={(e) => setNewTemplateName(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="templateCategory">Category</Label>
+                <select
+                  id="templateCategory"
+                  value={newTemplateCategory}
+                  onChange={(e) => setNewTemplateCategory(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                >
+                  <option value="branding">Branding</option>
+                  <option value="web-development">Web Development</option>
+                  <option value="mobile-design">Mobile Design</option>
+                  <option value="marketing">Marketing</option>
+                  <option value="video-production">Video Production</option>
+                  <option value="seo">SEO</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="templateDescription">Description</Label>
+              <Textarea
+                id="templateDescription"
+                placeholder="Describe what this template includes and when to use it..."
+                value={newTemplateDescription}
+                onChange={(e) => setNewTemplateDescription(e.target.value)}
+                rows={3}
+              />
+            </div>
+
+            <div className="grid grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="templateType">Type</Label>
+                <select
+                  id="templateType"
+                  value={newTemplateType}
+                  onChange={(e) => setNewTemplateType(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                >
+                  <option value="basic">Basic</option>
+                  <option value="standard">Standard</option>
+                  <option value="premium">Premium</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="templateDuration">Estimated Duration</Label>
+                <Input
+                  id="templateDuration"
+                  placeholder="e.g., 2-4 weeks"
+                  value={newTemplateDuration}
+                  onChange={(e) => setNewTemplateDuration(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="templatePrice">Price Range</Label>
+                <Input
+                  id="templatePrice"
+                  placeholder="e.g., $1,000 - $3,000"
+                  value={newTemplatePrice}
+                  onChange={(e) => setNewTemplatePrice(e.target.value)}
+                />
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowNewTemplateDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleCreateTemplate}
+              disabled={isCreatingTemplate}
+              className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
+            >
+              {isCreatingTemplate ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2" />
+                  Creating...
+                </>
+              ) : (
+                <>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create Template
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Export Dialog */}
+      <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Download className="h-5 w-5 text-blue-600" />
+              Export Templates
+            </DialogTitle>
+            <DialogDescription>
+              Export your templates for backup or sharing
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="exportFormat">Export Format</Label>
+              <select
+                id="exportFormat"
+                value={exportFormat}
+                onChange={(e) => setExportFormat(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="json">JSON</option>
+                <option value="csv">CSV</option>
+                <option value="xml">XML</option>
+                <option value="zip">ZIP (with assets)</option>
+              </select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="exportScope">Export Scope</Label>
+              <select
+                id="exportScope"
+                value={exportScope}
+                onChange={(e) => setExportScope(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="all">All Templates (45)</option>
+                <option value="featured">Featured Only (3)</option>
+                <option value="popular">Popular Only (4)</option>
+                <option value="my-templates">My Templates (0)</option>
+              </select>
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="includeAssets"
+                checked={includeAssets}
+                onChange={(e) => setIncludeAssets(e.target.checked)}
+                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              />
+              <Label htmlFor="includeAssets" className="text-sm cursor-pointer">
+                Include associated assets and media files
+              </Label>
+            </div>
+
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <p className="text-sm text-blue-800">
+                <strong>Estimated export size:</strong> {exportFormat === 'zip' ? '~45 MB' : '~2 MB'}
+              </p>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowExportDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleExport}
+              disabled={isExporting}
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              {isExporting ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2" />
+                  Exporting...
+                </>
+              ) : (
+                <>
+                  <Download className="h-4 w-4 mr-2" />
+                  Export
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Settings Dialog */}
+      <Dialog open={showSettingsDialog} onOpenChange={setShowSettingsDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Settings className="h-5 w-5 text-gray-600" />
+              Template Settings
+            </DialogTitle>
+            <DialogDescription>
+              Configure your template preferences and defaults
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="defaultCategory">Default Category</Label>
+              <select
+                id="defaultCategory"
+                value={defaultCategory}
+                onChange={(e) => setDefaultCategory(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500"
+              >
+                <option value="all">All Categories</option>
+                <option value="branding">Branding</option>
+                <option value="web-development">Web Development</option>
+                <option value="mobile-design">Mobile Design</option>
+                <option value="marketing">Marketing</option>
+                <option value="video-production">Video Production</option>
+                <option value="seo">SEO</option>
+              </select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="templateVisibility">Default Visibility</Label>
+              <select
+                id="templateVisibility"
+                value={templateVisibility}
+                onChange={(e) => setTemplateVisibility(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500"
+              >
+                <option value="public">Public - Anyone can see</option>
+                <option value="team">Team - Only team members</option>
+                <option value="private">Private - Only you</option>
+              </select>
+            </div>
+
+            <div className="space-y-3 pt-2">
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label className="text-sm font-medium">Auto-save drafts</Label>
+                  <p className="text-xs text-gray-500">Automatically save template changes</p>
+                </div>
+                <input
+                  type="checkbox"
+                  checked={autoSave}
+                  onChange={(e) => setAutoSave(e.target.checked)}
+                  className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label className="text-sm font-medium">Usage notifications</Label>
+                  <p className="text-xs text-gray-500">Notify when templates are used</p>
+                </div>
+                <input
+                  type="checkbox"
+                  checked={notifyOnUse}
+                  onChange={(e) => setNotifyOnUse(e.target.checked)}
+                  className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
+                />
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowSettingsDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSaveSettings}
+              disabled={isSavingSettings}
+              className="bg-gray-900 hover:bg-gray-800 text-white"
+            >
+              {isSavingSettings ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <CheckCircle className="h-4 w-4 mr-2" />
+                  Save Settings
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

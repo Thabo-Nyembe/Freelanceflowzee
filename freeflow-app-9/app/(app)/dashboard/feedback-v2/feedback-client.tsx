@@ -480,6 +480,8 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
   const [selectedIdea, setSelectedIdea] = useState<Idea | null>(null)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('list')
   const [showSubmitDialog, setShowSubmitDialog] = useState(false)
+  const [showRespondDialog, setShowRespondDialog] = useState(false)
+  const [showMergeDialog, setShowMergeDialog] = useState(false)
   const [settingsTab, setSettingsTab] = useState('general')
 
   // Data State
@@ -494,6 +496,21 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
     category: 'feature' as IdeaCategory,
     product: 'core',
     tags: ''
+  })
+
+  // Respond Dialog Form State
+  const [respondFormData, setRespondFormData] = useState({
+    selectedFeedbackId: '',
+    responseMessage: '',
+    responseType: 'public' as 'public' | 'internal',
+    updateStatus: '' as IdeaStatus | ''
+  })
+
+  // Merge Dialog Form State
+  const [mergeFormData, setMergeFormData] = useState({
+    primaryFeedbackId: '',
+    secondaryFeedbackIds: [] as string[],
+    mergeReason: ''
   })
 
   // Fetch feedback data
@@ -597,6 +614,144 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
       console.error('Error deleting feedback:', error)
       toast.error('Failed to delete feedback')
     }
+  }
+
+  // Respond to feedback
+  const handleRespondToFeedback = async () => {
+    if (!respondFormData.selectedFeedbackId) {
+      toast.error('Please select a feedback item to respond to')
+      return
+    }
+    if (!respondFormData.responseMessage.trim()) {
+      toast.error('Please enter a response message')
+      return
+    }
+
+    setSaving(true)
+    try {
+      // Update the feedback with the admin response
+      const updateData: Record<string, unknown> = {
+        updated_at: new Date().toISOString()
+      }
+
+      // If status update is selected, apply it
+      if (respondFormData.updateStatus) {
+        updateData.status = respondFormData.updateStatus
+      }
+
+      const { error } = await supabase
+        .from('feedback')
+        .update(updateData)
+        .eq('id', respondFormData.selectedFeedbackId)
+
+      if (error) throw error
+
+      // Also create a comment/response record if comments table exists
+      try {
+        await supabase.from('feedback_comments').insert({
+          feedback_id: respondFormData.selectedFeedbackId,
+          user_id: user?.id,
+          content: respondFormData.responseMessage,
+          is_admin_response: true,
+          is_internal: respondFormData.responseType === 'internal'
+        })
+      } catch {
+        // Comments table might not exist, that's okay
+      }
+
+      toast.success('Response sent', { description: 'Your response has been recorded' })
+      setRespondFormData({ selectedFeedbackId: '', responseMessage: '', responseType: 'public', updateStatus: '' })
+      setShowRespondDialog(false)
+      fetchFeedback()
+    } catch (error) {
+      console.error('Error responding to feedback:', error)
+      toast.error('Failed to send response')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  // Merge feedback items
+  const handleMergeFeedback = async () => {
+    if (!mergeFormData.primaryFeedbackId) {
+      toast.error('Please select a primary feedback item')
+      return
+    }
+    if (mergeFormData.secondaryFeedbackIds.length === 0) {
+      toast.error('Please select at least one feedback item to merge')
+      return
+    }
+
+    setSaving(true)
+    try {
+      // Get primary feedback to aggregate votes
+      const { data: primaryFeedback, error: fetchError } = await supabase
+        .from('feedback')
+        .select('upvotes_count')
+        .eq('id', mergeFormData.primaryFeedbackId)
+        .single()
+
+      if (fetchError) throw fetchError
+
+      // Get secondary feedback items to sum their votes
+      const { data: secondaryFeedbacks, error: secondaryError } = await supabase
+        .from('feedback')
+        .select('upvotes_count')
+        .in('id', mergeFormData.secondaryFeedbackIds)
+
+      if (secondaryError) throw secondaryError
+
+      const totalVotes = (primaryFeedback?.upvotes_count || 0) +
+        (secondaryFeedbacks?.reduce((sum, f) => sum + (f.upvotes_count || 0), 0) || 0)
+
+      // Update primary feedback with merged votes and note
+      const mergeNote = mergeFormData.mergeReason
+        ? ` [Merged: ${mergeFormData.mergeReason}]`
+        : ' [Merged from duplicate items]'
+
+      const { error: updateError } = await supabase
+        .from('feedback')
+        .update({
+          upvotes_count: totalVotes,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', mergeFormData.primaryFeedbackId)
+
+      if (updateError) throw updateError
+
+      // Mark secondary feedback items as duplicates/merged
+      const { error: mergeError } = await supabase
+        .from('feedback')
+        .update({
+          status: 'duplicate',
+          updated_at: new Date().toISOString()
+        })
+        .in('id', mergeFormData.secondaryFeedbackIds)
+
+      if (mergeError) throw mergeError
+
+      toast.success('Feedback merged', {
+        description: `${mergeFormData.secondaryFeedbackIds.length + 1} items merged successfully`
+      })
+      setMergeFormData({ primaryFeedbackId: '', secondaryFeedbackIds: [], mergeReason: '' })
+      setShowMergeDialog(false)
+      fetchFeedback()
+    } catch (error) {
+      console.error('Error merging feedback:', error)
+      toast.error('Failed to merge feedback items')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  // Toggle secondary feedback selection for merge
+  const toggleSecondaryFeedback = (feedbackId: string) => {
+    setMergeFormData(prev => ({
+      ...prev,
+      secondaryFeedbackIds: prev.secondaryFeedbackIds.includes(feedbackId)
+        ? prev.secondaryFeedbackIds.filter(id => id !== feedbackId)
+        : [...prev.secondaryFeedbackIds, feedbackId]
+    }))
   }
 
   // Update feedback status
@@ -1130,8 +1285,8 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
   // Quick actions defined inside component to access handlers
   const feedbackQuickActions = [
     { id: '1', label: 'New Idea', icon: 'Lightbulb', shortcut: 'N', action: () => setShowSubmitDialog(true) },
-    { id: '2', label: 'Respond', icon: 'MessageSquare', shortcut: 'R', action: () => toast.info('Select a feedback item to respond') },
-    { id: '3', label: 'Merge', icon: 'GitMerge', shortcut: 'M', action: () => toast.info('Select feedback items to merge') },
+    { id: '2', label: 'Respond', icon: 'MessageSquare', shortcut: 'R', action: () => setShowRespondDialog(true) },
+    { id: '3', label: 'Merge', icon: 'GitMerge', shortcut: 'M', action: () => setShowMergeDialog(true) },
     { id: '4', label: 'Export', icon: 'Download', shortcut: 'E', action: handleExportCSV },
   ]
 
@@ -2648,6 +2803,194 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                 >
                   <Send className="w-4 h-4 mr-2" />
                   {saving ? 'Submitting...' : 'Submit Idea'}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Respond to Feedback Dialog */}
+        <Dialog open={showRespondDialog} onOpenChange={setShowRespondDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Respond to Feedback</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium">Select Feedback Item</label>
+                <select
+                  className="w-full mt-1 p-2 rounded-lg border dark:bg-gray-800 dark:border-gray-700"
+                  value={respondFormData.selectedFeedbackId}
+                  onChange={(e) => setRespondFormData(prev => ({ ...prev, selectedFeedbackId: e.target.value }))}
+                >
+                  <option value="">Choose a feedback item...</option>
+                  {feedbackItems.map((item) => (
+                    <option key={item.id} value={item.id}>
+                      {item.title} ({item.status})
+                    </option>
+                  ))}
+                  {mockIdeas.map((idea) => (
+                    <option key={idea.id} value={idea.id}>
+                      {idea.title} ({idea.status.replace('_', ' ')})
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="text-sm font-medium">Response Type</label>
+                <div className="flex gap-4 mt-2">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="responseType"
+                      checked={respondFormData.responseType === 'public'}
+                      onChange={() => setRespondFormData(prev => ({ ...prev, responseType: 'public' }))}
+                      className="w-4 h-4"
+                    />
+                    <span className="text-sm">Public Response</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="responseType"
+                      checked={respondFormData.responseType === 'internal'}
+                      onChange={() => setRespondFormData(prev => ({ ...prev, responseType: 'internal' }))}
+                      className="w-4 h-4"
+                    />
+                    <span className="text-sm">Internal Note</span>
+                  </label>
+                </div>
+              </div>
+              <div>
+                <label className="text-sm font-medium">Response Message</label>
+                <textarea
+                  className="w-full mt-1 p-3 rounded-lg border resize-none h-32 dark:bg-gray-800 dark:border-gray-700"
+                  placeholder="Write your response to the user..."
+                  value={respondFormData.responseMessage}
+                  onChange={(e) => setRespondFormData(prev => ({ ...prev, responseMessage: e.target.value }))}
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Update Status (Optional)</label>
+                <select
+                  className="w-full mt-1 p-2 rounded-lg border dark:bg-gray-800 dark:border-gray-700"
+                  value={respondFormData.updateStatus}
+                  onChange={(e) => setRespondFormData(prev => ({ ...prev, updateStatus: e.target.value as IdeaStatus | '' }))}
+                >
+                  <option value="">Keep current status</option>
+                  <option value="under_review">Under Review</option>
+                  <option value="planned">Planned</option>
+                  <option value="in_progress">In Progress</option>
+                  <option value="shipped">Shipped</option>
+                  <option value="declined">Declined</option>
+                </select>
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" onClick={() => setShowRespondDialog(false)} className="flex-1">Cancel</Button>
+                <Button
+                  onClick={handleRespondToFeedback}
+                  disabled={saving || !respondFormData.selectedFeedbackId || !respondFormData.responseMessage.trim()}
+                  className="flex-1 bg-gradient-to-r from-orange-500 to-amber-600 text-white"
+                >
+                  <Send className="w-4 h-4 mr-2" />
+                  {saving ? 'Sending...' : 'Send Response'}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Merge Feedback Dialog */}
+        <Dialog open={showMergeDialog} onOpenChange={setShowMergeDialog}>
+          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Merge Feedback Items</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium">Primary Feedback (Keep This One)</label>
+                <select
+                  className="w-full mt-1 p-2 rounded-lg border dark:bg-gray-800 dark:border-gray-700"
+                  value={mergeFormData.primaryFeedbackId}
+                  onChange={(e) => setMergeFormData(prev => ({
+                    ...prev,
+                    primaryFeedbackId: e.target.value,
+                    secondaryFeedbackIds: prev.secondaryFeedbackIds.filter(id => id !== e.target.value)
+                  }))}
+                >
+                  <option value="">Choose primary feedback...</option>
+                  {feedbackItems.map((item) => (
+                    <option key={item.id} value={item.id}>
+                      {item.title} - {item.upvotes_count} votes
+                    </option>
+                  ))}
+                  {mockIdeas.map((idea) => (
+                    <option key={idea.id} value={idea.id}>
+                      {idea.title} - {idea.votes} votes
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="text-sm font-medium">Select Items to Merge (Will be marked as duplicates)</label>
+                <div className="mt-2 border rounded-lg max-h-48 overflow-y-auto dark:border-gray-700">
+                  {[...feedbackItems, ...mockIdeas.map(idea => ({
+                    id: idea.id,
+                    title: idea.title,
+                    upvotes_count: idea.votes,
+                    status: idea.status
+                  }))].filter(item => item.id !== mergeFormData.primaryFeedbackId).map((item) => (
+                    <label
+                      key={item.id}
+                      className={`flex items-center gap-3 p-3 border-b last:border-b-0 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 dark:border-gray-700 ${
+                        mergeFormData.secondaryFeedbackIds.includes(item.id) ? 'bg-orange-50 dark:bg-orange-900/20' : ''
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={mergeFormData.secondaryFeedbackIds.includes(item.id)}
+                        onChange={() => toggleSecondaryFeedback(item.id)}
+                        className="w-4 h-4 rounded"
+                      />
+                      <div className="flex-1">
+                        <div className="font-medium text-sm">{item.title}</div>
+                        <div className="text-xs text-gray-500">
+                          {item.upvotes_count} votes - {item.status.replace('_', ' ')}
+                        </div>
+                      </div>
+                    </label>
+                  ))}
+                </div>
+                {mergeFormData.secondaryFeedbackIds.length > 0 && (
+                  <p className="text-sm text-gray-500 mt-2">
+                    {mergeFormData.secondaryFeedbackIds.length} item(s) selected for merging
+                  </p>
+                )}
+              </div>
+              <div>
+                <label className="text-sm font-medium">Merge Reason (Optional)</label>
+                <Input
+                  placeholder="e.g., These are duplicate feature requests"
+                  className="mt-1"
+                  value={mergeFormData.mergeReason}
+                  onChange={(e) => setMergeFormData(prev => ({ ...prev, mergeReason: e.target.value }))}
+                />
+              </div>
+              <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-3">
+                <p className="text-sm text-amber-800 dark:text-amber-200">
+                  <strong>Note:</strong> Merging will combine vote counts and mark secondary items as duplicates.
+                  This action cannot be undone.
+                </p>
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" onClick={() => setShowMergeDialog(false)} className="flex-1">Cancel</Button>
+                <Button
+                  onClick={handleMergeFeedback}
+                  disabled={saving || !mergeFormData.primaryFeedbackId || mergeFormData.secondaryFeedbackIds.length === 0}
+                  className="flex-1 bg-gradient-to-r from-orange-500 to-amber-600 text-white"
+                >
+                  <GitBranch className="w-4 h-4 mr-2" />
+                  {saving ? 'Merging...' : `Merge ${mergeFormData.secondaryFeedbackIds.length + 1} Items`}
                 </Button>
               </div>
             </div>

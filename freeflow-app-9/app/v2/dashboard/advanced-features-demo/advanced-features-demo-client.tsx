@@ -33,10 +33,20 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { Input } from '@/components/ui/input'
+import { Switch } from '@/components/ui/switch'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import {
   Zap, Radio, Smartphone, Sparkles,
   Users, MessageSquare, Loader2,
-  Check, Copy, RefreshCw
+  Check, Copy, RefreshCw, Plus, Download, Settings, FileText, Image, Code, Bell, Lock, Palette
 } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -78,21 +88,6 @@ const advancedFeaturesDemoActivities = [
   { id: '1', user: 'Alexandra Chen', action: 'updated', target: 'system settings', timestamp: '5m ago', type: 'info' as const },
   { id: '2', user: 'Marcus Johnson', action: 'completed', target: 'task review', timestamp: '15m ago', type: 'success' as const },
   { id: '3', user: 'System', action: 'generated', target: 'weekly report', timestamp: '1h ago', type: 'info' as const },
-]
-
-const advancedFeaturesDemoQuickActions = [
-  { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 800)),
-    { loading: 'Creating new item...', success: 'New item created successfully', error: 'Failed to create item' }
-  ) },
-  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1000)),
-    { loading: 'Exporting data...', success: 'Data exported successfully', error: 'Failed to export data' }
-  ) },
-  { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 500)),
-    { loading: 'Opening settings...', success: 'Settings panel opened', error: 'Failed to open settings' }
-  ) },
 ]
 
 export default function AdvancedFeaturesDemoClient() {
@@ -374,39 +369,373 @@ function AIContentDemo() {
 // ==================== VIRTUAL SCROLLING DEMO ====================
 
 function VirtualScrollingDemo() {
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Zap className="w-5 h-5" />
-          Virtual Scrolling Component Ready
-        </CardTitle>
-        <CardDescription>
-          High-performance virtual scrolling component available for integration
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          <div className="flex items-center gap-4 flex-wrap">
-            <Badge variant="secondary">Component: Created</Badge>
-            <Badge variant="secondary">Performance: 50-70% faster</Badge>
-            <Badge variant="secondary">Memory: Optimized</Badge>
-            <Badge className="bg-green-500">Status: Ready</Badge>
-          </div>
+  // Dialog states for quick actions
+  const [newItemDialogOpen, setNewItemDialogOpen] = useState(false)
+  const [exportDialogOpen, setExportDialogOpen] = useState(false)
+  const [settingsDialogOpen, setSettingsDialogOpen] = useState(false)
 
-          <div className="p-6 bg-muted rounded-lg space-y-3">
-            
-        {/* V2 Competitive Upgrade Components */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-          <AIInsightsPanel insights={advancedFeaturesDemoAIInsights} />
-          <PredictiveAnalytics predictions={advancedFeaturesDemoPredictions} />
-          <CollaborationIndicator collaborators={advancedFeaturesDemoCollaborators} />
-        </div>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-          <QuickActionsToolbar actions={advancedFeaturesDemoQuickActions} />
-          <ActivityFeed activities={advancedFeaturesDemoActivities} />
-        </div>
-<h4 className="font-medium">Virtual List Features</h4>
+  // New Item form state
+  const [newItemName, setNewItemName] = useState('')
+  const [newItemType, setNewItemType] = useState<'document' | 'image' | 'code'>('document')
+  const [newItemDescription, setNewItemDescription] = useState('')
+  const [isCreatingItem, setIsCreatingItem] = useState(false)
+
+  // Export form state
+  const [exportFormat, setExportFormat] = useState<'json' | 'csv' | 'pdf'>('json')
+  const [exportDateRange, setExportDateRange] = useState<'all' | 'week' | 'month' | 'year'>('all')
+  const [includeMetadata, setIncludeMetadata] = useState(true)
+  const [isExporting, setIsExporting] = useState(false)
+
+  // Settings form state
+  const [notificationsEnabled, setNotificationsEnabled] = useState(true)
+  const [autoSaveEnabled, setAutoSaveEnabled] = useState(true)
+  const [darkModeEnabled, setDarkModeEnabled] = useState(false)
+  const [privacyMode, setPrivacyMode] = useState(false)
+  const [isSavingSettings, setIsSavingSettings] = useState(false)
+
+  // Handle create new item
+  const handleCreateNewItem = async () => {
+    if (!newItemName.trim()) {
+      toast.error('Please enter an item name')
+      return
+    }
+    setIsCreatingItem(true)
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      toast.success(`${newItemType.charAt(0).toUpperCase() + newItemType.slice(1)} "${newItemName}" created successfully`)
+      setNewItemDialogOpen(false)
+      setNewItemName('')
+      setNewItemDescription('')
+      setNewItemType('document')
+    } catch {
+      toast.error('Failed to create item')
+    } finally {
+      setIsCreatingItem(false)
+    }
+  }
+
+  // Handle export
+  const handleExport = async () => {
+    setIsExporting(true)
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1500))
+      const filename = `virtual-scroll-export-${new Date().toISOString().split('T')[0]}.${exportFormat}`
+      toast.success(`Data exported successfully as ${filename}`)
+      setExportDialogOpen(false)
+    } catch {
+      toast.error('Failed to export data')
+    } finally {
+      setIsExporting(false)
+    }
+  }
+
+  // Handle save settings
+  const handleSaveSettings = async () => {
+    setIsSavingSettings(true)
+    try {
+      await new Promise(resolve => setTimeout(resolve, 800))
+      toast.success('Settings saved successfully')
+      setSettingsDialogOpen(false)
+    } catch {
+      toast.error('Failed to save settings')
+    } finally {
+      setIsSavingSettings(false)
+    }
+  }
+
+  // Quick actions with dialog openers
+  const quickActions = [
+    { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => setNewItemDialogOpen(true) },
+    { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => setExportDialogOpen(true) },
+    { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => setSettingsDialogOpen(true) },
+  ]
+
+  return (
+    <>
+      {/* New Item Dialog */}
+      <Dialog open={newItemDialogOpen} onOpenChange={setNewItemDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Plus className="w-5 h-5" />
+              Create New Item
+            </DialogTitle>
+            <DialogDescription>
+              Add a new item to your virtual scrolling workspace.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="vs-item-name">Item Name</Label>
+              <Input
+                id="vs-item-name"
+                placeholder="Enter item name..."
+                value={newItemName}
+                onChange={(e) => setNewItemName(e.target.value)}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label>Item Type</Label>
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant={newItemType === 'document' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setNewItemType('document')}
+                  className="flex-1"
+                >
+                  <FileText className="w-4 h-4 mr-2" />
+                  Document
+                </Button>
+                <Button
+                  type="button"
+                  variant={newItemType === 'image' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setNewItemType('image')}
+                  className="flex-1"
+                >
+                  <Image className="w-4 h-4 mr-2" />
+                  Image
+                </Button>
+                <Button
+                  type="button"
+                  variant={newItemType === 'code' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setNewItemType('code')}
+                  className="flex-1"
+                >
+                  <Code className="w-4 h-4 mr-2" />
+                  Code
+                </Button>
+              </div>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="vs-item-description">Description (optional)</Label>
+              <Textarea
+                id="vs-item-description"
+                placeholder="Enter a brief description..."
+                value={newItemDescription}
+                onChange={(e) => setNewItemDescription(e.target.value)}
+                rows={3}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setNewItemDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleCreateNewItem} disabled={isCreatingItem}>
+              {isCreatingItem ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Creating...
+                </>
+              ) : (
+                <>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Create Item
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Export Dialog */}
+      <Dialog open={exportDialogOpen} onOpenChange={setExportDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Download className="w-5 h-5" />
+              Export Data
+            </DialogTitle>
+            <DialogDescription>
+              Export your virtual scrolling data in various formats.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label>Export Format</Label>
+              <Select value={exportFormat} onValueChange={(v) => setExportFormat(v as 'json' | 'csv' | 'pdf')}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="json">JSON - Raw Data</SelectItem>
+                  <SelectItem value="csv">CSV - Spreadsheet Compatible</SelectItem>
+                  <SelectItem value="pdf">PDF - Formatted Report</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-2">
+              <Label>Date Range</Label>
+              <Select value={exportDateRange} onValueChange={(v) => setExportDateRange(v as 'all' | 'week' | 'month' | 'year')}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Time</SelectItem>
+                  <SelectItem value="week">Last 7 Days</SelectItem>
+                  <SelectItem value="month">Last 30 Days</SelectItem>
+                  <SelectItem value="year">Last Year</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
+              <div className="space-y-0.5">
+                <Label htmlFor="vs-include-metadata">Include Metadata</Label>
+                <p className="text-xs text-muted-foreground">Include timestamps, user info, and system data</p>
+              </div>
+              <Switch
+                id="vs-include-metadata"
+                checked={includeMetadata}
+                onCheckedChange={setIncludeMetadata}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setExportDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleExport} disabled={isExporting}>
+              {isExporting ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Exporting...
+                </>
+              ) : (
+                <>
+                  <Download className="w-4 h-4 mr-2" />
+                  Export Data
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Settings Dialog */}
+      <Dialog open={settingsDialogOpen} onOpenChange={setSettingsDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Settings className="w-5 h-5" />
+              Virtual Scrolling Settings
+            </DialogTitle>
+            <DialogDescription>
+              Configure your virtual scrolling preferences.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
+              <div className="flex items-center gap-3">
+                <Bell className="w-5 h-5 text-muted-foreground" />
+                <div className="space-y-0.5">
+                  <Label htmlFor="vs-notifications">Notifications</Label>
+                  <p className="text-xs text-muted-foreground">Receive alerts and updates</p>
+                </div>
+              </div>
+              <Switch
+                id="vs-notifications"
+                checked={notificationsEnabled}
+                onCheckedChange={setNotificationsEnabled}
+              />
+            </div>
+            <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
+              <div className="flex items-center gap-3">
+                <RefreshCw className="w-5 h-5 text-muted-foreground" />
+                <div className="space-y-0.5">
+                  <Label htmlFor="vs-auto-save">Auto-Save</Label>
+                  <p className="text-xs text-muted-foreground">Automatically save changes</p>
+                </div>
+              </div>
+              <Switch
+                id="vs-auto-save"
+                checked={autoSaveEnabled}
+                onCheckedChange={setAutoSaveEnabled}
+              />
+            </div>
+            <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
+              <div className="flex items-center gap-3">
+                <Palette className="w-5 h-5 text-muted-foreground" />
+                <div className="space-y-0.5">
+                  <Label htmlFor="vs-dark-mode">Dark Mode</Label>
+                  <p className="text-xs text-muted-foreground">Use dark theme</p>
+                </div>
+              </div>
+              <Switch
+                id="vs-dark-mode"
+                checked={darkModeEnabled}
+                onCheckedChange={setDarkModeEnabled}
+              />
+            </div>
+            <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
+              <div className="flex items-center gap-3">
+                <Lock className="w-5 h-5 text-muted-foreground" />
+                <div className="space-y-0.5">
+                  <Label htmlFor="vs-privacy-mode">Privacy Mode</Label>
+                  <p className="text-xs text-muted-foreground">Hide sensitive information</p>
+                </div>
+              </div>
+              <Switch
+                id="vs-privacy-mode"
+                checked={privacyMode}
+                onCheckedChange={setPrivacyMode}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setSettingsDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSaveSettings} disabled={isSavingSettings}>
+              {isSavingSettings ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <Check className="w-4 h-4 mr-2" />
+                  Save Settings
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Zap className="w-5 h-5" />
+            Virtual Scrolling Component Ready
+          </CardTitle>
+          <CardDescription>
+            High-performance virtual scrolling component available for integration
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div className="flex items-center gap-4 flex-wrap">
+              <Badge variant="secondary">Component: Created</Badge>
+              <Badge variant="secondary">Performance: 50-70% faster</Badge>
+              <Badge variant="secondary">Memory: Optimized</Badge>
+              <Badge className="bg-green-500">Status: Ready</Badge>
+            </div>
+
+            <div className="p-6 bg-muted rounded-lg space-y-3">
+              {/* V2 Competitive Upgrade Components */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                <AIInsightsPanel insights={advancedFeaturesDemoAIInsights} />
+                <PredictiveAnalytics predictions={advancedFeaturesDemoPredictions} />
+                <CollaborationIndicator collaborators={advancedFeaturesDemoCollaborators} />
+              </div>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                <QuickActionsToolbar actions={quickActions} />
+                <ActivityFeed activities={advancedFeaturesDemoActivities} />
+              </div>
+              <h4 className="font-medium">Virtual List Features</h4>
             <ul className="space-y-2 text-sm">
               {[
                 'Renders only visible items for massive performance gains',
@@ -434,19 +763,20 @@ function VirtualScrollingDemo() {
             </p>
           </div>
 
-          <div className="p-4 bg-muted rounded-lg">
-            <p className="text-xs font-mono">
-              {`<VirtualList
+            <div className="p-4 bg-muted rounded-lg">
+              <p className="text-xs font-mono">
+                {`<VirtualList
   items={largeArray}
   renderItem={(item) => <ItemComponent item={item} />}
   itemHeight={80}
   height={600}
 />`}
-            </p>
+              </p>
+            </div>
           </div>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </>
   )
 }
 

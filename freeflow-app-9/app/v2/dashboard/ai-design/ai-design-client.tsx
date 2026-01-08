@@ -369,6 +369,12 @@ export default function AIDesignClient() {
   const [selectedGeneration, setSelectedGeneration] = useState<Generation | null>(null)
   const [showGenerationDialog, setShowGenerationDialog] = useState(false)
 
+  // Quick action dialog states
+  const [showNewGenerationDialog, setShowNewGenerationDialog] = useState(false)
+  const [showGalleryDialog, setShowGalleryDialog] = useState(false)
+  const [showUpscaleDialog, setShowUpscaleDialog] = useState(false)
+  const [showStyleEditorDialog, setShowStyleEditorDialog] = useState(false)
+
   // Generation form state
   const [prompt, setPrompt] = useState('')
   const [negativePrompt, setNegativePrompt] = useState('')
@@ -603,6 +609,14 @@ export default function AIDesignClient() {
       setIsLoading(false)
     }
   }
+
+  // Quick actions with proper dialog handlers
+  const aiDesignQuickActions = [
+    { id: '1', label: 'New Generation', icon: 'Wand2', shortcut: 'G', action: () => setShowNewGenerationDialog(true) },
+    { id: '2', label: 'Browse Gallery', icon: 'Image', shortcut: 'B', action: () => setShowGalleryDialog(true) },
+    { id: '3', label: 'Upscale Image', icon: 'ZoomIn', shortcut: 'U', action: () => setShowUpscaleDialog(true) },
+    { id: '4', label: 'Edit Style', icon: 'Palette', shortcut: 'S', action: () => setShowStyleEditorDialog(true) },
+  ]
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-fuchsia-50 via-white to-purple-50 dark:bg-none dark:bg-gray-900">
@@ -1981,7 +1995,7 @@ export default function AIDesignClient() {
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockAIDesignQuickActions}
+            actions={aiDesignQuickActions}
             variant="grid"
           />
         </div>
@@ -2080,6 +2094,194 @@ export default function AIDesignClient() {
                 </div>
               </div>
             )}
+          </DialogContent>
+        </Dialog>
+
+        {/* New Generation Dialog */}
+        <Dialog open={showNewGenerationDialog} onOpenChange={setShowNewGenerationDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Wand2 className="w-5 h-5 text-fuchsia-500" />
+                New AI Generation
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Create stunning AI-generated images with text prompts. Choose your style, model, and quality settings.
+              </p>
+              <div className="p-4 rounded-lg bg-fuchsia-50 dark:bg-fuchsia-900/20 border border-fuchsia-200 dark:border-fuchsia-800">
+                <div className="flex items-center gap-3 mb-2">
+                  <Sparkles className="w-5 h-5 text-fuchsia-600" />
+                  <span className="font-medium text-fuchsia-700 dark:text-fuchsia-400">Quick Start</span>
+                </div>
+                <p className="text-sm text-fuchsia-600 dark:text-fuchsia-300">
+                  Head to the Generate tab to start creating your AI artwork.
+                </p>
+              </div>
+              <div className="flex gap-3">
+                <Button
+                  className="flex-1 bg-gradient-to-r from-fuchsia-500 to-purple-600 text-white"
+                  onClick={() => {
+                    setShowNewGenerationDialog(false)
+                    setActiveTab('generate')
+                  }}
+                >
+                  <Sparkles className="w-4 h-4 mr-2" />
+                  Go to Generator
+                </Button>
+                <Button variant="outline" onClick={() => setShowNewGenerationDialog(false)}>
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Browse Gallery Dialog */}
+        <Dialog open={showGalleryDialog} onOpenChange={setShowGalleryDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Image className="w-5 h-5 text-pink-500" />
+                Browse Gallery
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                View and manage all your AI-generated images. Filter by style, date, or favorites.
+              </p>
+              <div className="grid grid-cols-3 gap-2">
+                {generations.slice(0, 6).map((gen) => (
+                  <div
+                    key={gen.id}
+                    className="aspect-square rounded-lg bg-gradient-to-br from-pink-200 to-purple-200 dark:from-pink-900 dark:to-purple-900 cursor-pointer hover:opacity-80 transition-opacity"
+                    onClick={() => {
+                      setSelectedGeneration(gen)
+                      setShowGalleryDialog(false)
+                      setShowGenerationDialog(true)
+                    }}
+                  />
+                ))}
+              </div>
+              <div className="flex gap-3">
+                <Button
+                  className="flex-1 bg-gradient-to-r from-pink-500 to-rose-600 text-white"
+                  onClick={() => {
+                    setShowGalleryDialog(false)
+                    setActiveTab('gallery')
+                  }}
+                >
+                  <Image className="w-4 h-4 mr-2" />
+                  Open Full Gallery
+                </Button>
+                <Button variant="outline" onClick={() => setShowGalleryDialog(false)}>
+                  Close
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Upscale Image Dialog */}
+        <Dialog open={showUpscaleDialog} onOpenChange={setShowUpscaleDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Maximize2 className="w-5 h-5 text-violet-500" />
+                Upscale Image
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Enhance your images to higher resolutions using AI upscaling technology.
+              </p>
+              <div className="p-4 rounded-lg bg-violet-50 dark:bg-violet-900/20 border border-violet-200 dark:border-violet-800">
+                <div className="flex items-center gap-3 mb-2">
+                  <Zap className="w-5 h-5 text-violet-600" />
+                  <span className="font-medium text-violet-700 dark:text-violet-400">Upscale Options</span>
+                </div>
+                <div className="space-y-2 text-sm text-violet-600 dark:text-violet-300">
+                  <div className="flex items-center justify-between">
+                    <span>2x Upscale</span>
+                    <Badge>2 credits</Badge>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span>4x Upscale (4K)</span>
+                    <Badge>5 credits</Badge>
+                  </div>
+                </div>
+              </div>
+              <p className="text-sm text-gray-500">
+                Select an image from your gallery to upscale it.
+              </p>
+              <div className="flex gap-3">
+                <Button
+                  className="flex-1 bg-gradient-to-r from-violet-500 to-purple-600 text-white"
+                  onClick={() => {
+                    setShowUpscaleDialog(false)
+                    setActiveTab('gallery')
+                  }}
+                >
+                  <Image className="w-4 h-4 mr-2" />
+                  Select from Gallery
+                </Button>
+                <Button variant="outline" onClick={() => setShowUpscaleDialog(false)}>
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Style Editor Dialog */}
+        <Dialog open={showStyleEditorDialog} onOpenChange={setShowStyleEditorDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Palette className="w-5 h-5 text-amber-500" />
+                Edit Style Presets
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Customize your design style presets and create your own unique styles.
+              </p>
+              <div className="grid grid-cols-2 gap-2">
+                {(['photorealistic', 'anime', 'digital_art', '3d_render', 'oil_painting', 'minimalist'] as StylePreset[]).map((style) => (
+                  <button
+                    key={style}
+                    onClick={() => {
+                      setSelectedStyle(style)
+                      setShowStyleEditorDialog(false)
+                      setActiveTab('generate')
+                    }}
+                    className={`p-3 rounded-lg text-sm font-medium transition-colors ${
+                      selectedStyle === style
+                        ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 border-2 border-amber-300'
+                        : 'bg-gray-50 dark:bg-gray-700/50 text-gray-600 dark:text-gray-400 hover:bg-gray-100'
+                    }`}
+                  >
+                    {style.replace('_', ' ')}
+                  </button>
+                ))}
+              </div>
+              <div className="flex gap-3">
+                <Button
+                  className="flex-1 bg-gradient-to-r from-amber-500 to-orange-600 text-white"
+                  onClick={() => {
+                    setShowStyleEditorDialog(false)
+                    setActiveTab('styles')
+                  }}
+                >
+                  <Palette className="w-4 h-4 mr-2" />
+                  Browse All Styles
+                </Button>
+                <Button variant="outline" onClick={() => setShowStyleEditorDialog(false)}>
+                  Close
+                </Button>
+              </div>
+            </div>
           </DialogContent>
         </Dialog>
       </div>

@@ -563,9 +563,13 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
   const [showEditCourseDialog, setShowEditCourseDialog] = useState(false)
   const [showDeleteCourseDialog, setShowDeleteCourseDialog] = useState(false)
   const [showEnrollDialog, setShowEnrollDialog] = useState(false)
+  const [showStartLessonDialog, setShowStartLessonDialog] = useState(false)
+  const [showDownloadCertificateDialog, setShowDownloadCertificateDialog] = useState(false)
   const [courseToEdit, setCourseToEdit] = useState<TrainingProgram | null>(null)
   const [courseToDelete, setCourseToDelete] = useState<TrainingProgram | null>(null)
   const [courseToEnroll, setCourseToEnroll] = useState<Course | null>(null)
+  const [currentLessonName, setCurrentLessonName] = useState<string>('')
+  const [currentCertificate, setCurrentCertificate] = useState<{ courseName: string; url?: string } | null>(null)
 
   // Form states
   const [courseForm, setCourseForm] = useState<CourseFormData>(defaultCourseForm)
@@ -727,17 +731,13 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
   }, [courseToEnroll, enrollmentForm, supabase, refetch])
 
   const handleStartLesson = useCallback((lessonName: string) => {
-    toast.info('Starting Lesson', { description: `Loading "${lessonName}"...` })
-    // In a real app, this would navigate to the lesson player
+    setCurrentLessonName(lessonName)
+    setShowStartLessonDialog(true)
   }, [])
 
   const handleDownloadCertificate = useCallback(async (courseName: string, certificateUrl?: string) => {
-    if (certificateUrl) {
-      window.open(certificateUrl, '_blank')
-      toast.success('Downloading Certificate', { description: `Certificate for "${courseName}" is downloading` })
-    } else {
-      toast.error('Certificate Not Available', { description: 'No certificate available for this course' })
-    }
+    setCurrentCertificate({ courseName, url: certificateUrl })
+    setShowDownloadCertificateDialog(true)
   }, [])
 
   const handleBookmarkCourse = useCallback(async (course: Course) => {
@@ -2754,6 +2754,126 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
                   </>
                 )}
               </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Start Lesson Dialog */}
+        <Dialog open={showStartLessonDialog} onOpenChange={setShowStartLessonDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <PlayCircle className="w-5 h-5 text-emerald-600" />
+                Start Lesson
+              </DialogTitle>
+              <DialogDescription>
+                You are about to start the lesson: "{currentLessonName}"
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg border border-emerald-200 dark:border-emerald-800">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="p-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg">
+                    <Video className="h-6 w-6 text-emerald-600" />
+                  </div>
+                  <div>
+                    <div className="font-medium">{currentLessonName}</div>
+                    <div className="text-sm text-gray-500">Ready to begin</div>
+                  </div>
+                </div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">
+                  The lesson player will open in a new window. Make sure you have a stable internet connection for the best experience.
+                </div>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-gray-500">
+                <Clock className="w-4 h-4" />
+                <span>Your progress will be tracked automatically</span>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowStartLessonDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                className="bg-emerald-600 hover:bg-emerald-700"
+                onClick={() => {
+                  toast.success('Lesson Started', { description: `Now playing "${currentLessonName}"` })
+                  setShowStartLessonDialog(false)
+                }}
+              >
+                <Play className="w-4 h-4 mr-2" />
+                Start Lesson
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Download Certificate Dialog */}
+        <Dialog open={showDownloadCertificateDialog} onOpenChange={setShowDownloadCertificateDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Award className="w-5 h-5 text-yellow-600" />
+                Download Certificate
+              </DialogTitle>
+              <DialogDescription>
+                {currentCertificate?.url
+                  ? `Your certificate for "${currentCertificate?.courseName}" is ready to download.`
+                  : `Certificate for "${currentCertificate?.courseName}" is not yet available.`}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              {currentCertificate?.url ? (
+                <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="p-2 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg">
+                      <Award className="h-6 w-6 text-yellow-600" />
+                    </div>
+                    <div>
+                      <div className="font-medium">{currentCertificate?.courseName}</div>
+                      <div className="text-sm text-gray-500">Certificate of Completion</div>
+                    </div>
+                  </div>
+                  <div className="text-sm text-gray-600 dark:text-gray-400">
+                    Your certificate will be downloaded as a PDF file. You can share it on LinkedIn or add it to your professional portfolio.
+                  </div>
+                </div>
+              ) : (
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg">
+                      <Award className="h-6 w-6 text-gray-400" />
+                    </div>
+                    <div>
+                      <div className="font-medium text-gray-500">Certificate Not Available</div>
+                      <div className="text-sm text-gray-400">Complete the course to earn your certificate</div>
+                    </div>
+                  </div>
+                  <div className="text-sm text-gray-500">
+                    You need to complete all course requirements and pass the final assessment to receive your certificate.
+                  </div>
+                </div>
+              )}
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowDownloadCertificateDialog(false)}>
+                Close
+              </Button>
+              {currentCertificate?.url && (
+                <Button
+                  className="bg-yellow-600 hover:bg-yellow-700"
+                  onClick={() => {
+                    if (currentCertificate?.url) {
+                      window.open(currentCertificate.url, '_blank')
+                      toast.success('Downloading Certificate', { description: `Certificate for "${currentCertificate.courseName}" is downloading` })
+                    }
+                    setShowDownloadCertificateDialog(false)
+                  }}
+                >
+                  <Download className="w-4 h-4 mr-2" />
+                  Download PDF
+                </Button>
+              )}
             </DialogFooter>
           </DialogContent>
         </Dialog>

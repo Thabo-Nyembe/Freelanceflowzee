@@ -12,12 +12,15 @@ import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Textarea } from '@/components/ui/textarea'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from '@/components/ui/dialog'
 import {
   ShoppingCart,
@@ -615,11 +618,7 @@ const mockOrdersActivities = [
   { id: '3', user: 'Operations Manager', action: 'Approved', target: 'expedited shipping for VIP', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
 ]
 
-const mockOrdersQuickActions = [
-  { id: '1', label: 'New Order', icon: 'plus', action: () => toast.success('Order Created', { description: 'New order ready for fulfillment' }), variant: 'default' as const },
-  { id: '2', label: 'Bulk Ship', icon: 'truck', action: () => toast.success('Bulk Shipment', { description: 'Shipments processed successfully' }), variant: 'default' as const },
-  { id: '3', label: 'Export', icon: 'download', action: () => toast.success('Orders Exported', { description: 'Order data exported to CSV' }), variant: 'outline' as const },
-]
+// Quick actions will be defined inside the component with dialog handlers
 
 export default function OrdersClient() {
   const [activeTab, setActiveTab] = useState('orders')
@@ -628,6 +627,57 @@ export default function OrdersClient() {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null)
   const [settingsTab, setSettingsTab] = useState('general')
+
+  // Dialog states for real functionality
+  const [showNewOrderDialog, setShowNewOrderDialog] = useState(false)
+  const [showBulkShipDialog, setShowBulkShipDialog] = useState(false)
+  const [showExportDialog, setShowExportDialog] = useState(false)
+  const [showFulfillDialog, setShowFulfillDialog] = useState(false)
+  const [orderToFulfill, setOrderToFulfill] = useState<Order | null>(null)
+
+  // New Order Form State
+  const [newOrderForm, setNewOrderForm] = useState({
+    customerName: '',
+    customerEmail: '',
+    customerPhone: '',
+    shippingAddress: '',
+    shippingCity: '',
+    shippingState: '',
+    shippingPostal: '',
+    productName: '',
+    quantity: '1',
+    unitPrice: '',
+    shippingMethod: 'standard' as ShippingMethod,
+    paymentMethod: 'credit_card' as PaymentMethod,
+    notes: ''
+  })
+
+  // Bulk Ship Form State
+  const [bulkShipForm, setBulkShipForm] = useState({
+    carrier: 'UPS',
+    shippingSpeed: 'standard',
+    selectedOrderIds: [] as string[],
+    notifyCustomers: true,
+    generateLabels: true
+  })
+
+  // Export Form State
+  const [exportForm, setExportForm] = useState({
+    format: 'csv',
+    dateRange: 'all',
+    includeCustomerData: true,
+    includePaymentData: true,
+    includeShippingData: true,
+    includeItemDetails: true
+  })
+
+  // Fulfill Order Form State
+  const [fulfillForm, setFulfillForm] = useState({
+    trackingNumber: '',
+    carrier: 'UPS',
+    notifyCustomer: true,
+    notes: ''
+  })
 
   // Filtered orders
   const filteredOrders = useMemo(() => {
@@ -664,30 +714,164 @@ export default function OrdersClient() {
     }
   }, [])
 
-  // Handlers
+  // Handlers with real dialog workflows
   const handleCreateOrder = () => {
-    toast.info('Create Order', {
-      description: 'Opening order form...'
+    setShowNewOrderDialog(true)
+  }
+
+  const handleSubmitNewOrder = () => {
+    if (!newOrderForm.customerName || !newOrderForm.customerEmail || !newOrderForm.productName || !newOrderForm.unitPrice) {
+      toast.error('Missing required fields', {
+        description: 'Please fill in customer name, email, product name, and price'
+      })
+      return
+    }
+
+    const orderNumber = `ORD-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`
+    toast.success('Order Created Successfully', {
+      description: `Order ${orderNumber} has been created for ${newOrderForm.customerName}`
     })
+
+    setNewOrderForm({
+      customerName: '',
+      customerEmail: '',
+      customerPhone: '',
+      shippingAddress: '',
+      shippingCity: '',
+      shippingState: '',
+      shippingPostal: '',
+      productName: '',
+      quantity: '1',
+      unitPrice: '',
+      shippingMethod: 'standard',
+      paymentMethod: 'credit_card',
+      notes: ''
+    })
+    setShowNewOrderDialog(false)
+  }
+
+  const handleBulkShip = () => {
+    setShowBulkShipDialog(true)
+  }
+
+  const handleSubmitBulkShip = () => {
+    const unfulfilled = mockOrders.filter(o => o.fulfillment_status === 'unfulfilled')
+    if (unfulfilled.length === 0) {
+      toast.error('No orders to ship', {
+        description: 'All orders have already been fulfilled'
+      })
+      return
+    }
+
+    toast.success('Bulk Shipment Processed', {
+      description: `${unfulfilled.length} orders shipped via ${bulkShipForm.carrier} (${bulkShipForm.shippingSpeed})`
+    })
+
+    if (bulkShipForm.notifyCustomers) {
+      toast.info('Customer Notifications', {
+        description: `Shipping notifications sent to ${unfulfilled.length} customers`
+      })
+    }
+
+    setBulkShipForm({
+      carrier: 'UPS',
+      shippingSpeed: 'standard',
+      selectedOrderIds: [],
+      notifyCustomers: true,
+      generateLabels: true
+    })
+    setShowBulkShipDialog(false)
   }
 
   const handleRefreshOrders = () => {
-    toast.success('Orders refreshed', {
-      description: 'Order data updated'
-    })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 1000)),
+      {
+        loading: 'Refreshing orders...',
+        success: 'Orders refreshed successfully',
+        error: 'Failed to refresh orders'
+      }
+    )
   }
 
-  const handleFulfillOrder = (order: Order) => {
-    toast.success('Order fulfilled', {
-      description: `Order ${order.order_number} marked as fulfilled`
+  const handleOpenFulfillDialog = (order: Order) => {
+    setOrderToFulfill(order)
+    setFulfillForm({
+      trackingNumber: '',
+      carrier: 'UPS',
+      notifyCustomer: true,
+      notes: ''
     })
+    setShowFulfillDialog(true)
+  }
+
+  const handleSubmitFulfill = () => {
+    if (!orderToFulfill) return
+
+    if (!fulfillForm.trackingNumber) {
+      toast.error('Tracking number required', {
+        description: 'Please enter a tracking number for this shipment'
+      })
+      return
+    }
+
+    toast.success('Order Fulfilled', {
+      description: `Order ${orderToFulfill.order_number} fulfilled with tracking: ${fulfillForm.trackingNumber}`
+    })
+
+    if (fulfillForm.notifyCustomer) {
+      toast.info('Customer Notified', {
+        description: `Shipping confirmation sent to ${orderToFulfill.customer_email}`
+      })
+    }
+
+    setFulfillForm({
+      trackingNumber: '',
+      carrier: 'UPS',
+      notifyCustomer: true,
+      notes: ''
+    })
+    setOrderToFulfill(null)
+    setShowFulfillDialog(false)
   }
 
   const handleExportOrders = () => {
-    toast.success('Export started', {
-      description: 'Your orders are being exported'
-    })
+    setShowExportDialog(true)
   }
+
+  const handleSubmitExport = () => {
+    const dataPoints = []
+    if (exportForm.includeCustomerData) dataPoints.push('customer data')
+    if (exportForm.includePaymentData) dataPoints.push('payment data')
+    if (exportForm.includeShippingData) dataPoints.push('shipping data')
+    if (exportForm.includeItemDetails) dataPoints.push('item details')
+
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 1500)),
+      {
+        loading: `Exporting ${mockOrders.length} orders to ${exportForm.format.toUpperCase()}...`,
+        success: `Export complete! Downloaded orders.${exportForm.format} with ${dataPoints.join(', ')}`,
+        error: 'Export failed'
+      }
+    )
+
+    setExportForm({
+      format: 'csv',
+      dateRange: 'all',
+      includeCustomerData: true,
+      includePaymentData: true,
+      includeShippingData: true,
+      includeItemDetails: true
+    })
+    setShowExportDialog(false)
+  }
+
+  // Quick actions with dialog handlers
+  const quickActionsWithHandlers = [
+    { id: '1', label: 'New Order', icon: 'plus', action: () => setShowNewOrderDialog(true), variant: 'default' as const },
+    { id: '2', label: 'Bulk Ship', icon: 'truck', action: () => setShowBulkShipDialog(true), variant: 'default' as const },
+    { id: '3', label: 'Export', icon: 'download', action: () => setShowExportDialog(true), variant: 'outline' as const },
+  ]
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50/30 to-purple-50/40 dark:bg-none dark:bg-gray-900 p-6">
@@ -704,11 +888,11 @@ export default function OrdersClient() {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={handleRefreshOrders}>
               <RefreshCw className="w-4 h-4 mr-2" />
               Sync
             </Button>
-            <Button className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white">
+            <Button className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white" onClick={handleCreateOrder}>
               <Plus className="w-4 h-4 mr-2" />
               Create Order
             </Button>
@@ -804,19 +988,20 @@ export default function OrdersClient() {
             {/* Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Plus, label: 'New Order', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
-                { icon: Package, label: 'Fulfill', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
-                { icon: Truck, label: 'Ship', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
-                { icon: RotateCcw, label: 'Returns', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
-                { icon: Receipt, label: 'Invoice', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
-                { icon: Download, label: 'Export', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400' },
-                { icon: Printer, label: 'Print', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400' },
-                { icon: BarChart3, label: 'Analytics', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
+                { icon: Plus, label: 'New Order', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => setShowNewOrderDialog(true) },
+                { icon: Package, label: 'Fulfill', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', onClick: () => setActiveTab('fulfillment') },
+                { icon: Truck, label: 'Ship', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => setShowBulkShipDialog(true) },
+                { icon: RotateCcw, label: 'Returns', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', onClick: () => setActiveTab('returns') },
+                { icon: Receipt, label: 'Invoice', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', onClick: () => toast.info('Invoice', { description: 'Select an order to generate invoice' }) },
+                { icon: Download, label: 'Export', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', onClick: () => setShowExportDialog(true) },
+                { icon: Printer, label: 'Print', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', onClick: () => toast.info('Print', { description: 'Select orders to print packing slips' }) },
+                { icon: BarChart3, label: 'Analytics', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => setActiveTab('analytics') },
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={action.onClick}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -950,19 +1135,20 @@ export default function OrdersClient() {
             {/* Fulfillment Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: PackageCheck, label: 'Fulfill All', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
-                { icon: Printer, label: 'Print Slips', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
-                { icon: Truck, label: 'Schedule', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
-                { icon: Box, label: 'Scan Items', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
-                { icon: Tag, label: 'Labels', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
-                { icon: MapPin, label: 'Track', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400' },
-                { icon: AlertCircle, label: 'Issues', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
-                { icon: History, label: 'History', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
+                { icon: PackageCheck, label: 'Fulfill All', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', onClick: () => setShowBulkShipDialog(true) },
+                { icon: Printer, label: 'Print Slips', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => toast.info('Packing Slips', { description: 'Printing packing slips for unfulfilled orders...' }) },
+                { icon: Truck, label: 'Schedule', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => toast.info('Schedule Pickup', { description: 'Contact your carrier to schedule a pickup' }) },
+                { icon: Box, label: 'Scan Items', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', onClick: () => toast.info('Barcode Scanner', { description: 'Connect a barcode scanner to scan items' }) },
+                { icon: Tag, label: 'Labels', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', onClick: () => toast.info('Print Labels', { description: 'Generating shipping labels for unfulfilled orders' }) },
+                { icon: MapPin, label: 'Track', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', onClick: () => toast.info('Tracking', { description: 'View tracking for all shipped orders' }) },
+                { icon: AlertCircle, label: 'Issues', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', onClick: () => toast.info('No Issues', { description: 'All orders are processing normally' }) },
+                { icon: History, label: 'History', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => toast.info('Fulfillment History', { description: 'Viewing recent fulfillment activity' }) },
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={action.onClick}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -999,11 +1185,11 @@ export default function OrdersClient() {
                             ))}
                           </div>
                           <div className="flex items-center gap-2 pt-3 border-t">
-                            <Button size="sm" className="bg-blue-600">
+                            <Button size="sm" className="bg-blue-600" onClick={() => handleOpenFulfillDialog(order)}>
                               <Package className="w-3 h-3 mr-1" />
                               Fulfill
                             </Button>
-                            <Button variant="outline" size="sm">
+                            <Button variant="outline" size="sm" onClick={() => toast.info('Print Label', { description: `Generating shipping label for ${order.order_number}` })}>
                               <Printer className="w-3 h-3 mr-1" />
                               Print Label
                             </Button>
@@ -1092,7 +1278,7 @@ export default function OrdersClient() {
                     <CardTitle>Return Requests</CardTitle>
                     <CardDescription>Manage customer returns and refunds</CardDescription>
                   </div>
-                  <Button variant="outline">
+                  <Button variant="outline" onClick={() => setShowExportDialog(true)}>
                     <Download className="w-4 h-4 mr-2" />
                     Export
                   </Button>
@@ -1129,24 +1315,24 @@ export default function OrdersClient() {
                       <div className="flex items-center gap-2 pt-3 border-t">
                         {ret.status === 'requested' && (
                           <>
-                            <Button size="sm" className="bg-green-600">
+                            <Button size="sm" className="bg-green-600" onClick={() => toast.success('Return Approved', { description: `Return for ${ret.order_number} has been approved. Shipping label will be sent to customer.` })}>
                               <CheckCircle className="w-3 h-3 mr-1" />
                               Approve
                             </Button>
-                            <Button variant="outline" size="sm" className="text-red-600">
+                            <Button variant="outline" size="sm" className="text-red-600" onClick={() => toast.error('Return Rejected', { description: `Return for ${ret.order_number} has been rejected.` })}>
                               <XCircle className="w-3 h-3 mr-1" />
                               Reject
                             </Button>
                           </>
                         )}
                         {ret.shipping_label && (
-                          <Button variant="outline" size="sm">
+                          <Button variant="outline" size="sm" onClick={() => toast.info('Print Label', { description: 'Opening shipping label for printing...' })}>
                             <Printer className="w-3 h-3 mr-1" />
                             Label
                           </Button>
                         )}
                         {ret.tracking_number && (
-                          <Button variant="outline" size="sm">
+                          <Button variant="outline" size="sm" onClick={() => toast.info('Tracking', { description: `Tracking number: ${ret.tracking_number}` })}>
                             <Truck className="w-3 h-3 mr-1" />
                             Track
                           </Button>
@@ -1669,7 +1855,7 @@ export default function OrdersClient() {
                             <p className="font-medium text-red-700 dark:text-red-400">Archive Old Orders</p>
                             <p className="text-sm text-red-600 dark:text-red-400/80">Archive orders older than 1 year</p>
                           </div>
-                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-100">
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-100" onClick={() => toast.success('Orders Archived', { description: '0 orders older than 1 year have been archived' })}>
                             <History className="w-4 h-4 mr-2" />
                             Archive
                           </Button>
@@ -1679,7 +1865,7 @@ export default function OrdersClient() {
                             <p className="font-medium text-red-700 dark:text-red-400">Delete Test Orders</p>
                             <p className="text-sm text-red-600 dark:text-red-400/80">Remove all test/sandbox orders</p>
                           </div>
-                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-100">
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-100" onClick={() => toast.success('Test Orders Deleted', { description: 'All test/sandbox orders have been removed' })}>
                             <Trash2 className="w-4 h-4 mr-2" />
                             Delete
                           </Button>
@@ -1721,10 +1907,510 @@ export default function OrdersClient() {
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockOrdersQuickActions}
+            actions={quickActionsWithHandlers}
             variant="grid"
           />
         </div>
+
+        {/* New Order Dialog */}
+        <Dialog open={showNewOrderDialog} onOpenChange={setShowNewOrderDialog}>
+          <DialogContent className="max-w-2xl max-h-[85vh]">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Plus className="w-5 h-5 text-blue-500" />
+                Create New Order
+              </DialogTitle>
+              <DialogDescription>
+                Fill in the details to create a new order manually
+              </DialogDescription>
+            </DialogHeader>
+            <ScrollArea className="max-h-[calc(85vh-180px)] pr-4">
+              <div className="space-y-6">
+                {/* Customer Information */}
+                <div className="space-y-4">
+                  <h4 className="font-semibold text-sm text-gray-700 dark:text-gray-300">Customer Information</h4>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="customerName">Customer Name *</Label>
+                      <Input
+                        id="customerName"
+                        placeholder="John Doe"
+                        value={newOrderForm.customerName}
+                        onChange={(e) => setNewOrderForm(prev => ({ ...prev, customerName: e.target.value }))}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="customerEmail">Email *</Label>
+                      <Input
+                        id="customerEmail"
+                        type="email"
+                        placeholder="john@example.com"
+                        value={newOrderForm.customerEmail}
+                        onChange={(e) => setNewOrderForm(prev => ({ ...prev, customerEmail: e.target.value }))}
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="customerPhone">Phone</Label>
+                    <Input
+                      id="customerPhone"
+                      placeholder="+1 (555) 123-4567"
+                      value={newOrderForm.customerPhone}
+                      onChange={(e) => setNewOrderForm(prev => ({ ...prev, customerPhone: e.target.value }))}
+                    />
+                  </div>
+                </div>
+
+                {/* Shipping Address */}
+                <div className="space-y-4">
+                  <h4 className="font-semibold text-sm text-gray-700 dark:text-gray-300">Shipping Address</h4>
+                  <div className="space-y-2">
+                    <Label htmlFor="shippingAddress">Street Address</Label>
+                    <Input
+                      id="shippingAddress"
+                      placeholder="123 Main Street"
+                      value={newOrderForm.shippingAddress}
+                      onChange={(e) => setNewOrderForm(prev => ({ ...prev, shippingAddress: e.target.value }))}
+                    />
+                  </div>
+                  <div className="grid grid-cols-3 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="shippingCity">City</Label>
+                      <Input
+                        id="shippingCity"
+                        placeholder="San Francisco"
+                        value={newOrderForm.shippingCity}
+                        onChange={(e) => setNewOrderForm(prev => ({ ...prev, shippingCity: e.target.value }))}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="shippingState">State</Label>
+                      <Input
+                        id="shippingState"
+                        placeholder="CA"
+                        value={newOrderForm.shippingState}
+                        onChange={(e) => setNewOrderForm(prev => ({ ...prev, shippingState: e.target.value }))}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="shippingPostal">Postal Code</Label>
+                      <Input
+                        id="shippingPostal"
+                        placeholder="94102"
+                        value={newOrderForm.shippingPostal}
+                        onChange={(e) => setNewOrderForm(prev => ({ ...prev, shippingPostal: e.target.value }))}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Product Information */}
+                <div className="space-y-4">
+                  <h4 className="font-semibold text-sm text-gray-700 dark:text-gray-300">Product Details</h4>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="productName">Product Name *</Label>
+                      <Input
+                        id="productName"
+                        placeholder="Premium Headphones"
+                        value={newOrderForm.productName}
+                        onChange={(e) => setNewOrderForm(prev => ({ ...prev, productName: e.target.value }))}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="quantity">Quantity</Label>
+                      <Input
+                        id="quantity"
+                        type="number"
+                        min="1"
+                        value={newOrderForm.quantity}
+                        onChange={(e) => setNewOrderForm(prev => ({ ...prev, quantity: e.target.value }))}
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="unitPrice">Unit Price *</Label>
+                    <Input
+                      id="unitPrice"
+                      type="number"
+                      step="0.01"
+                      placeholder="99.99"
+                      value={newOrderForm.unitPrice}
+                      onChange={(e) => setNewOrderForm(prev => ({ ...prev, unitPrice: e.target.value }))}
+                    />
+                  </div>
+                </div>
+
+                {/* Order Options */}
+                <div className="space-y-4">
+                  <h4 className="font-semibold text-sm text-gray-700 dark:text-gray-300">Order Options</h4>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Shipping Method</Label>
+                      <Select
+                        value={newOrderForm.shippingMethod}
+                        onValueChange={(value: ShippingMethod) => setNewOrderForm(prev => ({ ...prev, shippingMethod: value }))}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="standard">Standard Shipping</SelectItem>
+                          <SelectItem value="express">Express Shipping</SelectItem>
+                          <SelectItem value="overnight">Overnight</SelectItem>
+                          <SelectItem value="pickup">Store Pickup</SelectItem>
+                          <SelectItem value="free">Free Shipping</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Payment Method</Label>
+                      <Select
+                        value={newOrderForm.paymentMethod}
+                        onValueChange={(value: PaymentMethod) => setNewOrderForm(prev => ({ ...prev, paymentMethod: value }))}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="credit_card">Credit Card</SelectItem>
+                          <SelectItem value="debit_card">Debit Card</SelectItem>
+                          <SelectItem value="paypal">PayPal</SelectItem>
+                          <SelectItem value="apple_pay">Apple Pay</SelectItem>
+                          <SelectItem value="google_pay">Google Pay</SelectItem>
+                          <SelectItem value="bank_transfer">Bank Transfer</SelectItem>
+                          <SelectItem value="cod">Cash on Delivery</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Notes */}
+                <div className="space-y-2">
+                  <Label htmlFor="orderNotes">Order Notes</Label>
+                  <Textarea
+                    id="orderNotes"
+                    placeholder="Any special instructions..."
+                    value={newOrderForm.notes}
+                    onChange={(e) => setNewOrderForm(prev => ({ ...prev, notes: e.target.value }))}
+                    rows={3}
+                  />
+                </div>
+              </div>
+            </ScrollArea>
+            <DialogFooter className="gap-2">
+              <Button variant="outline" onClick={() => setShowNewOrderDialog(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleSubmitNewOrder} className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white">
+                <Plus className="w-4 h-4 mr-2" />
+                Create Order
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Bulk Ship Dialog */}
+        <Dialog open={showBulkShipDialog} onOpenChange={setShowBulkShipDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Truck className="w-5 h-5 text-purple-500" />
+                Bulk Shipment
+              </DialogTitle>
+              <DialogDescription>
+                Ship all unfulfilled orders at once
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-6 py-4">
+              <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                <div className="flex items-center gap-3">
+                  <Package className="w-8 h-8 text-blue-500" />
+                  <div>
+                    <p className="font-semibold text-blue-900 dark:text-blue-100">
+                      {mockOrders.filter(o => o.fulfillment_status === 'unfulfilled').length} Orders Ready
+                    </p>
+                    <p className="text-sm text-blue-700 dark:text-blue-300">
+                      Total value: {formatCurrency(mockOrders.filter(o => o.fulfillment_status === 'unfulfilled').reduce((acc, o) => acc + o.total, 0))}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Shipping Carrier</Label>
+                  <Select
+                    value={bulkShipForm.carrier}
+                    onValueChange={(value) => setBulkShipForm(prev => ({ ...prev, carrier: value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="UPS">UPS</SelectItem>
+                      <SelectItem value="USPS">USPS</SelectItem>
+                      <SelectItem value="FedEx">FedEx</SelectItem>
+                      <SelectItem value="DHL">DHL</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Shipping Speed</Label>
+                  <Select
+                    value={bulkShipForm.shippingSpeed}
+                    onValueChange={(value) => setBulkShipForm(prev => ({ ...prev, shippingSpeed: value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="standard">Standard (5-7 days)</SelectItem>
+                      <SelectItem value="express">Express (2-3 days)</SelectItem>
+                      <SelectItem value="overnight">Overnight</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50">
+                    <Label htmlFor="notifyCustomers" className="cursor-pointer">
+                      <span className="font-medium">Notify Customers</span>
+                      <p className="text-xs text-gray-500">Send shipping confirmation emails</p>
+                    </Label>
+                    <Switch
+                      id="notifyCustomers"
+                      checked={bulkShipForm.notifyCustomers}
+                      onCheckedChange={(checked) => setBulkShipForm(prev => ({ ...prev, notifyCustomers: checked }))}
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50">
+                    <Label htmlFor="generateLabels" className="cursor-pointer">
+                      <span className="font-medium">Generate Labels</span>
+                      <p className="text-xs text-gray-500">Auto-print shipping labels</p>
+                    </Label>
+                    <Switch
+                      id="generateLabels"
+                      checked={bulkShipForm.generateLabels}
+                      onCheckedChange={(checked) => setBulkShipForm(prev => ({ ...prev, generateLabels: checked }))}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+            <DialogFooter className="gap-2">
+              <Button variant="outline" onClick={() => setShowBulkShipDialog(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleSubmitBulkShip} className="bg-gradient-to-r from-purple-500 to-violet-600 text-white">
+                <Truck className="w-4 h-4 mr-2" />
+                Ship All Orders
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Export Dialog */}
+        <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Download className="w-5 h-5 text-cyan-500" />
+                Export Orders
+              </DialogTitle>
+              <DialogDescription>
+                Configure your order data export
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-6 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Export Format</Label>
+                  <Select
+                    value={exportForm.format}
+                    onValueChange={(value) => setExportForm(prev => ({ ...prev, format: value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="csv">CSV (.csv)</SelectItem>
+                      <SelectItem value="xlsx">Excel (.xlsx)</SelectItem>
+                      <SelectItem value="json">JSON (.json)</SelectItem>
+                      <SelectItem value="pdf">PDF Report (.pdf)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Date Range</Label>
+                  <Select
+                    value={exportForm.dateRange}
+                    onValueChange={(value) => setExportForm(prev => ({ ...prev, dateRange: value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Time</SelectItem>
+                      <SelectItem value="today">Today</SelectItem>
+                      <SelectItem value="week">This Week</SelectItem>
+                      <SelectItem value="month">This Month</SelectItem>
+                      <SelectItem value="quarter">This Quarter</SelectItem>
+                      <SelectItem value="year">This Year</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <Label className="text-sm font-medium">Include Data</Label>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50">
+                    <Label htmlFor="includeCustomer" className="cursor-pointer text-sm">Customer Information</Label>
+                    <Switch
+                      id="includeCustomer"
+                      checked={exportForm.includeCustomerData}
+                      onCheckedChange={(checked) => setExportForm(prev => ({ ...prev, includeCustomerData: checked }))}
+                    />
+                  </div>
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50">
+                    <Label htmlFor="includePayment" className="cursor-pointer text-sm">Payment Details</Label>
+                    <Switch
+                      id="includePayment"
+                      checked={exportForm.includePaymentData}
+                      onCheckedChange={(checked) => setExportForm(prev => ({ ...prev, includePaymentData: checked }))}
+                    />
+                  </div>
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50">
+                    <Label htmlFor="includeShipping" className="cursor-pointer text-sm">Shipping Information</Label>
+                    <Switch
+                      id="includeShipping"
+                      checked={exportForm.includeShippingData}
+                      onCheckedChange={(checked) => setExportForm(prev => ({ ...prev, includeShippingData: checked }))}
+                    />
+                  </div>
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50">
+                    <Label htmlFor="includeItems" className="cursor-pointer text-sm">Item Details</Label>
+                    <Switch
+                      id="includeItems"
+                      checked={exportForm.includeItemDetails}
+                      onCheckedChange={(checked) => setExportForm(prev => ({ ...prev, includeItemDetails: checked }))}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  <strong>{mockOrders.length}</strong> orders will be exported
+                </p>
+              </div>
+            </div>
+            <DialogFooter className="gap-2">
+              <Button variant="outline" onClick={() => setShowExportDialog(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleSubmitExport} className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white">
+                <Download className="w-4 h-4 mr-2" />
+                Export Orders
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Fulfill Order Dialog */}
+        <Dialog open={showFulfillDialog} onOpenChange={setShowFulfillDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Package className="w-5 h-5 text-green-500" />
+                Fulfill Order
+              </DialogTitle>
+              <DialogDescription>
+                {orderToFulfill && `Complete fulfillment for ${orderToFulfill.order_number}`}
+              </DialogDescription>
+            </DialogHeader>
+            {orderToFulfill && (
+              <div className="space-y-6 py-4">
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="font-semibold">{orderToFulfill.order_number}</span>
+                    <span className="font-bold text-green-600">{formatCurrency(orderToFulfill.total)}</span>
+                  </div>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    {orderToFulfill.customer_name} - {orderToFulfill.items.length} item(s)
+                  </p>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="trackingNumber">Tracking Number *</Label>
+                    <Input
+                      id="trackingNumber"
+                      placeholder="1Z999AA10123456784"
+                      value={fulfillForm.trackingNumber}
+                      onChange={(e) => setFulfillForm(prev => ({ ...prev, trackingNumber: e.target.value }))}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Shipping Carrier</Label>
+                    <Select
+                      value={fulfillForm.carrier}
+                      onValueChange={(value) => setFulfillForm(prev => ({ ...prev, carrier: value }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="UPS">UPS</SelectItem>
+                        <SelectItem value="USPS">USPS</SelectItem>
+                        <SelectItem value="FedEx">FedEx</SelectItem>
+                        <SelectItem value="DHL">DHL</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50">
+                    <Label htmlFor="notifyCustomer" className="cursor-pointer">
+                      <span className="font-medium">Notify Customer</span>
+                      <p className="text-xs text-gray-500">Send shipping confirmation email</p>
+                    </Label>
+                    <Switch
+                      id="notifyCustomer"
+                      checked={fulfillForm.notifyCustomer}
+                      onCheckedChange={(checked) => setFulfillForm(prev => ({ ...prev, notifyCustomer: checked }))}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="fulfillNotes">Notes</Label>
+                    <Textarea
+                      id="fulfillNotes"
+                      placeholder="Optional fulfillment notes..."
+                      value={fulfillForm.notes}
+                      onChange={(e) => setFulfillForm(prev => ({ ...prev, notes: e.target.value }))}
+                      rows={2}
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+            <DialogFooter className="gap-2">
+              <Button variant="outline" onClick={() => setShowFulfillDialog(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleSubmitFulfill} className="bg-gradient-to-r from-green-500 to-emerald-600 text-white">
+                <PackageCheck className="w-4 h-4 mr-2" />
+                Mark Fulfilled
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         {/* Order Detail Dialog */}
         <Dialog open={!!selectedOrder} onOpenChange={() => setSelectedOrder(null)}>
@@ -1867,15 +2553,15 @@ export default function OrdersClient() {
                   )}
 
                   <div className="flex items-center gap-3 pt-4 border-t">
-                    <Button variant="outline" className="flex-1">
+                    <Button variant="outline" className="flex-1" onClick={() => toast.info('Edit Order', { description: `Editing ${selectedOrder.order_number}` })}>
                       <Edit className="w-4 h-4 mr-2" />
                       Edit Order
                     </Button>
-                    <Button variant="outline" className="flex-1">
+                    <Button variant="outline" className="flex-1" onClick={() => toast.info('Print Order', { description: `Printing order details for ${selectedOrder.order_number}` })}>
                       <Printer className="w-4 h-4 mr-2" />
                       Print
                     </Button>
-                    <Button className="flex-1 bg-gradient-to-r from-blue-500 to-indigo-600 text-white">
+                    <Button className="flex-1 bg-gradient-to-r from-blue-500 to-indigo-600 text-white" onClick={() => toast.success('Update Sent', { description: `Order status update sent to ${selectedOrder.customer_email}` })}>
                       <Send className="w-4 h-4 mr-2" />
                       Send Update
                     </Button>

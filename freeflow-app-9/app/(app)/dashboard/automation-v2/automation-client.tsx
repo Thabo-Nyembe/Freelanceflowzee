@@ -207,12 +207,7 @@ const mockAutomationActivities = [
   { id: '3', user: 'Ops Manager', action: 'optimized', target: 'invoice processing flow', timestamp: '1d ago', type: 'info' as const },
 ]
 
-const mockAutomationQuickActions = [
-  { id: '1', label: 'New Workflow', icon: 'GitBranch', shortcut: 'N', action: () => toast.success('Workflow created successfully') },
-  { id: '2', label: 'Templates', icon: 'Layers', shortcut: 'T', action: () => toast.success('Workflow templates gallery opened') },
-  { id: '3', label: 'Run History', icon: 'History', shortcut: 'H', action: () => toast.success('Execution history opened') },
-  { id: '4', label: 'Connections', icon: 'Plug', shortcut: 'C', action: () => toast.success('Integration connections opened') },
-]
+// Quick actions will be defined inside the component to access state setters
 
 // ============================================================================
 // MAIN COMPONENT - ZAPIER/MAKE LEVEL AUTOMATION
@@ -234,6 +229,12 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
   const [selectedAutomation, setSelectedAutomation] = useState<Automation | null>(null)
   const [showRunHistory, setShowRunHistory] = useState(false)
   const [showTestMode, setShowTestMode] = useState(false)
+
+  // Quick action dialog states
+  const [showNewWorkflowDialog, setShowNewWorkflowDialog] = useState(false)
+  const [showTemplatesGalleryDialog, setShowTemplatesGalleryDialog] = useState(false)
+  const [showRunHistoryDialog, setShowRunHistoryDialog] = useState(false)
+  const [showConnectionsDialog, setShowConnectionsDialog] = useState(false)
 
   // New automation form state
   const [newName, setNewName] = useState('')
@@ -258,6 +259,14 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
 
   // Form submission loading state
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // Quick actions with proper dialog openers
+  const automationQuickActions = useMemo(() => [
+    { id: '1', label: 'New Workflow', icon: 'GitBranch', shortcut: 'N', action: () => setShowNewWorkflowDialog(true) },
+    { id: '2', label: 'Templates', icon: 'Layers', shortcut: 'T', action: () => setShowTemplatesGalleryDialog(true) },
+    { id: '3', label: 'Run History', icon: 'History', shortcut: 'H', action: () => setShowRunHistoryDialog(true) },
+    { id: '4', label: 'Connections', icon: 'Plug', shortcut: 'C', action: () => setShowConnectionsDialog(true) },
+  ], [])
 
   // Calculate comprehensive stats
   const stats = useMemo(() => ({
@@ -2071,7 +2080,7 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockAutomationQuickActions}
+            actions={automationQuickActions}
             variant="grid"
           />
         </div>
@@ -2273,6 +2282,333 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
               >
                 <Puzzle className="h-4 w-4 mr-2" />
                 Connect
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* New Workflow Dialog (Quick Action) */}
+        <Dialog open={showNewWorkflowDialog} onOpenChange={setShowNewWorkflowDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Zap className="h-5 w-5 text-orange-600" />
+                Create New Workflow
+              </DialogTitle>
+              <DialogDescription>
+                Build a new automation workflow from scratch or start with a template
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="py-4 space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <Card
+                  className="p-4 cursor-pointer hover:border-orange-500 transition-colors"
+                  onClick={() => {
+                    setShowNewWorkflowDialog(false)
+                    setShowCreateDialog(true)
+                  }}
+                >
+                  <div className="flex flex-col items-center text-center gap-2">
+                    <div className="p-3 bg-orange-100 dark:bg-orange-900/30 rounded-full">
+                      <Plus className="h-6 w-6 text-orange-600" />
+                    </div>
+                    <h4 className="font-medium">Start from Scratch</h4>
+                    <p className="text-xs text-gray-500">Create a custom workflow</p>
+                  </div>
+                </Card>
+
+                <Card
+                  className="p-4 cursor-pointer hover:border-orange-500 transition-colors"
+                  onClick={() => {
+                    setShowNewWorkflowDialog(false)
+                    setShowTemplatesGalleryDialog(true)
+                  }}
+                >
+                  <div className="flex flex-col items-center text-center gap-2">
+                    <div className="p-3 bg-purple-100 dark:bg-purple-900/30 rounded-full">
+                      <Sparkles className="h-6 w-6 text-purple-600" />
+                    </div>
+                    <h4 className="font-medium">Use a Template</h4>
+                    <p className="text-xs text-gray-500">Start with a pre-built workflow</p>
+                  </div>
+                </Card>
+              </div>
+
+              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <h4 className="font-medium mb-2 flex items-center gap-2">
+                  <TrendingUp className="h-4 w-4 text-green-600" />
+                  Popular Triggers
+                </h4>
+                <div className="flex flex-wrap gap-2">
+                  <Badge variant="outline" className="cursor-pointer hover:bg-orange-50">Webhook</Badge>
+                  <Badge variant="outline" className="cursor-pointer hover:bg-orange-50">Schedule</Badge>
+                  <Badge variant="outline" className="cursor-pointer hover:bg-orange-50">Form Submit</Badge>
+                  <Badge variant="outline" className="cursor-pointer hover:bg-orange-50">Email</Badge>
+                </div>
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowNewWorkflowDialog(false)}>
+                Cancel
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Templates Gallery Dialog (Quick Action) */}
+        <Dialog open={showTemplatesGalleryDialog} onOpenChange={setShowTemplatesGalleryDialog}>
+          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Sparkles className="h-5 w-5 text-purple-600" />
+                Workflow Templates Gallery
+              </DialogTitle>
+              <DialogDescription>
+                Choose a pre-built template to get started quickly
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="py-4 space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                {TEMPLATES.slice(0, 6).map(template => (
+                  <Card
+                    key={template.id}
+                    className="p-4 cursor-pointer hover:border-purple-500 transition-colors"
+                    onClick={() => {
+                      setShowTemplatesGalleryDialog(false)
+                      setSelectedTemplate(template)
+                      setShowTemplateDialog(true)
+                    }}
+                  >
+                    <div className="flex items-start gap-3">
+                      <span className="text-2xl">{template.icon}</span>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <h4 className="font-medium text-sm">{template.name}</h4>
+                          {template.isNew && <Badge className="text-xs bg-blue-100 text-blue-700">New</Badge>}
+                          {template.isPremium && <Badge className="text-xs bg-purple-100 text-purple-700">Pro</Badge>}
+                        </div>
+                        <p className="text-xs text-gray-500 mt-1 line-clamp-2">{template.description}</p>
+                        <div className="flex items-center gap-2 mt-2 text-xs text-gray-400">
+                          <Users className="h-3 w-3" />
+                          {template.usageCount.toLocaleString()} uses
+                        </div>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() => {
+                  setShowTemplatesGalleryDialog(false)
+                  setActiveTab('templates')
+                }}
+              >
+                Browse All Templates
+                <ArrowRight className="h-4 w-4 ml-2" />
+              </Button>
+            </div>
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowTemplatesGalleryDialog(false)}>
+                Close
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Run History Dialog (Quick Action) */}
+        <Dialog open={showRunHistoryDialog} onOpenChange={setShowRunHistoryDialog}>
+          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <History className="h-5 w-5 text-blue-600" />
+                Execution History
+              </DialogTitle>
+              <DialogDescription>
+                View recent automation runs and their status
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="py-4 space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex gap-2">
+                  <Badge variant="outline" className="bg-green-50 text-green-700">
+                    <CheckCircle className="h-3 w-3 mr-1" />
+                    {RUN_LOGS.filter(r => r.status === 'success').length} Success
+                  </Badge>
+                  <Badge variant="outline" className="bg-red-50 text-red-700">
+                    <XCircle className="h-3 w-3 mr-1" />
+                    {RUN_LOGS.filter(r => r.status === 'failed').length} Failed
+                  </Badge>
+                  <Badge variant="outline" className="bg-blue-50 text-blue-700">
+                    <Activity className="h-3 w-3 mr-1" />
+                    {RUN_LOGS.filter(r => r.status === 'running').length} Running
+                  </Badge>
+                </div>
+                <Button size="sm" variant="ghost" onClick={() => toast.success('History refreshed')}>
+                  <RefreshCw className="h-4 w-4" />
+                </Button>
+              </div>
+
+              <div className="space-y-2">
+                {RUN_LOGS.map(log => (
+                  <Card key={log.id} className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        {log.status === 'success' && <CheckCircle className="h-5 w-5 text-green-600" />}
+                        {log.status === 'failed' && <XCircle className="h-5 w-5 text-red-600" />}
+                        {log.status === 'running' && <Activity className="h-5 w-5 text-blue-600 animate-pulse" />}
+                        {log.status === 'pending' && <Clock className="h-5 w-5 text-gray-400" />}
+                        <div>
+                          <div className="font-medium text-sm">Automation {log.automationId}</div>
+                          <div className="text-xs text-gray-500">
+                            {new Date(log.startedAt).toLocaleString()}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <Badge className={
+                          log.status === 'success' ? 'bg-green-100 text-green-700' :
+                          log.status === 'failed' ? 'bg-red-100 text-red-700' :
+                          log.status === 'running' ? 'bg-blue-100 text-blue-700' :
+                          'bg-gray-100 text-gray-700'
+                        }>
+                          {log.status}
+                        </Badge>
+                        {log.duration && (
+                          <div className="text-xs text-gray-500 mt-1">
+                            {log.duration}ms
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    {log.error && (
+                      <div className="mt-2 p-2 bg-red-50 dark:bg-red-900/20 rounded text-xs text-red-600">
+                        {log.error}
+                      </div>
+                    )}
+                  </Card>
+                ))}
+              </div>
+
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() => {
+                  setShowRunHistoryDialog(false)
+                  setActiveTab('history')
+                }}
+              >
+                View Full History
+                <ArrowRight className="h-4 w-4 ml-2" />
+              </Button>
+            </div>
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowRunHistoryDialog(false)}>
+                Close
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Connections Dialog (Quick Action) */}
+        <Dialog open={showConnectionsDialog} onOpenChange={setShowConnectionsDialog}>
+          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Puzzle className="h-5 w-5 text-cyan-600" />
+                Integration Connections
+              </DialogTitle>
+              <DialogDescription>
+                Manage your connected apps and services
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="py-4 space-y-4">
+              <div className="flex items-center justify-between mb-4">
+                <Badge variant="outline" className="bg-green-50 text-green-700">
+                  <CheckCircle className="h-3 w-3 mr-1" />
+                  {INTEGRATIONS.filter(i => i.isConnected).length} Connected
+                </Badge>
+                <Badge variant="outline">
+                  {INTEGRATIONS.length} Total Available
+                </Badge>
+              </div>
+
+              <div className="space-y-2">
+                <h4 className="font-medium text-sm text-gray-600">Connected Apps</h4>
+                {INTEGRATIONS.filter(i => i.isConnected).map(integration => (
+                  <Card key={integration.id} className="p-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <span className="text-xl">{integration.icon}</span>
+                        <div>
+                          <div className="font-medium text-sm">{integration.name}</div>
+                          <div className="text-xs text-gray-500">{integration.category}</div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge className="bg-green-100 text-green-700 text-xs">Connected</Badge>
+                        <Button size="sm" variant="ghost">
+                          <Settings className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+
+              <div className="space-y-2">
+                <h4 className="font-medium text-sm text-gray-600">Available to Connect</h4>
+                <div className="grid grid-cols-2 gap-2">
+                  {INTEGRATIONS.filter(i => !i.isConnected).slice(0, 4).map(integration => (
+                    <Card
+                      key={integration.id}
+                      className="p-3 cursor-pointer hover:border-cyan-500 transition-colors"
+                      onClick={() => {
+                        setShowConnectionsDialog(false)
+                        setSelectedIntegration(integration)
+                        setShowIntegrationDialog(true)
+                      }}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg">{integration.icon}</span>
+                        <div>
+                          <div className="font-medium text-sm">{integration.name}</div>
+                          <div className="text-xs text-gray-500">{integration.category}</div>
+                        </div>
+                        {integration.isPremium && (
+                          <Badge className="ml-auto text-xs bg-purple-100 text-purple-700">Pro</Badge>
+                        )}
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() => {
+                  setShowConnectionsDialog(false)
+                  setActiveTab('integrations')
+                }}
+              >
+                Browse All Integrations
+                <ArrowRight className="h-4 w-4 ml-2" />
+              </Button>
+            </div>
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowConnectionsDialog(false)}>
+                Close
               </Button>
             </DialogFooter>
           </DialogContent>

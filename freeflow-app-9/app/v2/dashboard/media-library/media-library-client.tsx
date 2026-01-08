@@ -2632,6 +2632,836 @@ export default function MediaLibraryClient({
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+        {/* Share Mode Dialog */}
+        <Dialog open={showShareModeDialog} onOpenChange={setShowShareModeDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Share2 className="w-5 h-5 text-green-500" />
+                Share Assets
+              </DialogTitle>
+              <DialogDescription>
+                Select assets from the list to generate shareable links.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-800/50">
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Choose assets from your library to create public or private share links.
+                  You can set expiration dates and access permissions.
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <Input placeholder="Search assets to share..." />
+                <Button variant="outline" size="icon">
+                  <Search className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowShareModeDialog(false)}>Cancel</Button>
+              <Button onClick={() => { setShowShareModeDialog(false); toast.success('Share mode enabled - select assets from the list'); }}>
+                Enable Share Mode
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Brand Kit Dialog */}
+        <Dialog open={showBrandKitDialog} onOpenChange={setShowBrandKitDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Palette className="w-5 h-5 text-red-500" />
+                Brand Kit
+              </DialogTitle>
+              <DialogDescription>
+                Manage your brand assets, colors, and guidelines.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <Card className="p-4 cursor-pointer hover:shadow-md transition-shadow">
+                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 mb-2" />
+                  <p className="font-medium">Primary Colors</p>
+                  <p className="text-sm text-gray-500">4 colors defined</p>
+                </Card>
+                <Card className="p-4 cursor-pointer hover:shadow-md transition-shadow">
+                  <FileText className="w-10 h-10 text-gray-400 mb-2" />
+                  <p className="font-medium">Logo Assets</p>
+                  <p className="text-sm text-gray-500">12 variations</p>
+                </Card>
+                <Card className="p-4 cursor-pointer hover:shadow-md transition-shadow">
+                  <Settings className="w-10 h-10 text-gray-400 mb-2" />
+                  <p className="font-medium">Typography</p>
+                  <p className="text-sm text-gray-500">3 font families</p>
+                </Card>
+                <Card className="p-4 cursor-pointer hover:shadow-md transition-shadow">
+                  <FileImage className="w-10 h-10 text-gray-400 mb-2" />
+                  <p className="font-medium">Templates</p>
+                  <p className="text-sm text-gray-500">8 templates</p>
+                </Card>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowBrandKitDialog(false)}>Close</Button>
+              <Button onClick={() => { setShowBrandKitDialog(false); toast.success('Brand Kit opened'); }}>
+                Manage Brand Kit
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Folder Tree Dialog */}
+        <Dialog open={showFolderTreeDialog} onOpenChange={setShowFolderTreeDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <FolderTree className="w-5 h-5 text-cyan-500" />
+                Folder Hierarchy
+              </DialogTitle>
+              <DialogDescription>
+                View and navigate your folder structure.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-2 max-h-[400px] overflow-y-auto">
+              {initialFolders.map((folder) => (
+                <div key={folder.id} className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50 cursor-pointer">
+                  <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${folder.color} flex items-center justify-center`}>
+                    <FolderOpen className="w-4 h-4 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-medium">{folder.name}</p>
+                    <p className="text-sm text-gray-500">{folder.assetCount} assets</p>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-gray-400" />
+                </div>
+              ))}
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowFolderTreeDialog(false)}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Bulk Move Dialog */}
+        <Dialog open={showBulkMoveDialog} onOpenChange={setShowBulkMoveDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Move className="w-5 h-5 text-purple-500" />
+                Bulk Move Assets
+              </DialogTitle>
+              <DialogDescription>
+                Select multiple assets to move between folders.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-800/50">
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  First, select the assets you want to move from the asset grid, then choose a destination folder.
+                </p>
+              </div>
+              <div className="space-y-2">
+                <Label>Destination Folder</Label>
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select destination folder" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="root">Root (No folder)</SelectItem>
+                    {initialFolders.map((folder) => (
+                      <SelectItem key={folder.id} value={folder.id}>{folder.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowBulkMoveDialog(false)}>Cancel</Button>
+              <Button onClick={() => { setShowBulkMoveDialog(false); toast.success('Bulk move mode enabled - select assets to move'); }}>
+                Start Selection
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Sort Folders Dialog */}
+        <Dialog open={showSortFoldersDialog} onOpenChange={setShowSortFoldersDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <SortAsc className="w-5 h-5 text-red-500" />
+                Sort Folders
+              </DialogTitle>
+              <DialogDescription>
+                Choose how to sort your folders.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-2">
+              {[
+                { label: 'Name (A-Z)', value: 'name-asc' },
+                { label: 'Name (Z-A)', value: 'name-desc' },
+                { label: 'Date Created (Newest)', value: 'date-desc' },
+                { label: 'Date Created (Oldest)', value: 'date-asc' },
+                { label: 'Asset Count (Most)', value: 'count-desc' },
+                { label: 'Asset Count (Least)', value: 'count-asc' },
+                { label: 'Size (Largest)', value: 'size-desc' },
+                { label: 'Size (Smallest)', value: 'size-asc' },
+              ].map((option) => (
+                <div key={option.value} className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50 cursor-pointer">
+                  <input type="radio" name="sort" value={option.value} className="w-4 h-4" />
+                  <span>{option.label}</span>
+                </div>
+              ))}
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowSortFoldersDialog(false)}>Cancel</Button>
+              <Button onClick={() => { setShowSortFoldersDialog(false); toast.success('Folders sorted'); }}>
+                Apply Sort
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Folder Permissions Dialog */}
+        <Dialog open={showFolderPermissionsDialog} onOpenChange={setShowFolderPermissionsDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Shield className="w-5 h-5 text-indigo-500" />
+                Folder Permissions
+              </DialogTitle>
+              <DialogDescription>
+                Manage access levels for your folders.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Select Folder</Label>
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Choose a folder" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {initialFolders.map((folder) => (
+                      <SelectItem key={folder.id} value={folder.id}>{folder.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Access Level</Label>
+                <Select defaultValue="private">
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="private">Private - Only you</SelectItem>
+                    <SelectItem value="team">Team - Your team members</SelectItem>
+                    <SelectItem value="organization">Organization - All members</SelectItem>
+                    <SelectItem value="public">Public - Anyone with link</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex items-center justify-between p-3 border rounded-lg">
+                <div>
+                  <p className="font-medium">Inherit from parent</p>
+                  <p className="text-sm text-gray-500">Use parent folder permissions</p>
+                </div>
+                <Switch />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowFolderPermissionsDialog(false)}>Cancel</Button>
+              <Button onClick={() => { setShowFolderPermissionsDialog(false); toast.success('Permissions updated'); }}>
+                Save Permissions
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Browse Collections Dialog */}
+        <Dialog open={showBrowseCollectionsDialog} onOpenChange={setShowBrowseCollectionsDialog}>
+          <DialogContent className="max-w-2xl max-h-[80vh]">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <LayoutGrid className="w-5 h-5 text-pink-500" />
+                Browse Collections
+              </DialogTitle>
+              <DialogDescription>
+                View all your media collections.
+              </DialogDescription>
+            </DialogHeader>
+            <ScrollArea className="max-h-[50vh]">
+              <div className="grid grid-cols-2 gap-4 p-2">
+                {mockCollections.map((collection) => (
+                  <Card key={collection.id} className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => { setShowBrowseCollectionsDialog(false); setSelectedCollection(collection); }}>
+                    <CardContent className="p-4">
+                      <div className="h-20 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg mb-3 flex items-center justify-center">
+                        <LayoutGrid className="w-8 h-8 text-white/80" />
+                      </div>
+                      <h4 className="font-medium">{collection.name}</h4>
+                      <p className="text-sm text-gray-500">{collection.assetCount} assets</p>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </ScrollArea>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowBrowseCollectionsDialog(false)}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Share Collections Dialog */}
+        <Dialog open={showShareCollectionsDialog} onOpenChange={setShowShareCollectionsDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Share2 className="w-5 h-5 text-blue-500" />
+                Share Collections
+              </DialogTitle>
+              <DialogDescription>
+                Share your collections publicly or with specific people.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Select Collection</Label>
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Choose a collection" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {mockCollections.map((collection) => (
+                      <SelectItem key={collection.id} value={collection.id}>{collection.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50">
+                <Label className="text-sm">Share Link</Label>
+                <div className="flex items-center gap-2 mt-2">
+                  <Input value="https://freeflow.com/c/..." readOnly className="text-sm" />
+                  <Button size="sm" variant="outline">
+                    <Copy className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowShareCollectionsDialog(false)}>Cancel</Button>
+              <Button onClick={() => { setShowShareCollectionsDialog(false); toast.success('Collection shared'); }}>
+                Share
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Tag Manager Dialog */}
+        <Dialog open={showTagManagerDialog} onOpenChange={setShowTagManagerDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Tag className="w-5 h-5 text-amber-500" />
+                Tag Manager
+              </DialogTitle>
+              <DialogDescription>
+                Manage tags for your assets and collections.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <Input placeholder="Add new tag..." />
+                <Button>Add</Button>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {['marketing', 'product', 'hero', 'banner', 'video', 'audio', 'document', 'brand'].map((tag) => (
+                  <Badge key={tag} variant="secondary" className="gap-1 cursor-pointer hover:bg-gray-200">
+                    {tag}
+                    <span className="ml-1 text-gray-400 hover:text-red-500">&times;</span>
+                  </Badge>
+                ))}
+              </div>
+              <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50">
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  AI-suggested tags will appear automatically when you upload new assets.
+                </p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowTagManagerDialog(false)}>Close</Button>
+              <Button onClick={() => { setShowTagManagerDialog(false); toast.success('Tags updated'); }}>
+                Save Tags
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Collaboration Dialog */}
+        <Dialog open={showCollaborationDialog} onOpenChange={setShowCollaborationDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Users className="w-5 h-5 text-green-500" />
+                Collaboration
+              </DialogTitle>
+              <DialogDescription>
+                Invite team members to collaborate on collections.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <Input placeholder="Enter email address..." type="email" />
+                <Button>Invite</Button>
+              </div>
+              <div className="space-y-2">
+                <Label>Current Collaborators</Label>
+                {['Sarah Johnson', 'Michael Chen', 'Emma Wilson'].map((name) => (
+                  <div key={name} className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50">
+                    <div className="flex items-center gap-3">
+                      <Avatar className="w-8 h-8">
+                        <AvatarFallback>{name[0]}</AvatarFallback>
+                      </Avatar>
+                      <span>{name}</span>
+                    </div>
+                    <Select defaultValue="editor">
+                      <SelectTrigger className="w-24">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="viewer">Viewer</SelectItem>
+                        <SelectItem value="editor">Editor</SelectItem>
+                        <SelectItem value="admin">Admin</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowCollaborationDialog(false)}>Close</Button>
+              <Button onClick={() => { setShowCollaborationDialog(false); toast.success('Collaborators updated'); }}>
+                Save Changes
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Privacy Settings Dialog */}
+        <Dialog open={showPrivacySettingsDialog} onOpenChange={setShowPrivacySettingsDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Lock className="w-5 h-5 text-red-500" />
+                Privacy Settings
+              </DialogTitle>
+              <DialogDescription>
+                Control who can view and access your collections.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Default Privacy</Label>
+                <Select defaultValue="private">
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="private">Private</SelectItem>
+                    <SelectItem value="team">Team Only</SelectItem>
+                    <SelectItem value="public">Public</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                {[
+                  { label: 'Allow downloads', desc: 'Others can download assets', checked: true },
+                  { label: 'Show in search', desc: 'Appear in public searches', checked: false },
+                  { label: 'Require password', desc: 'Password protect shared links', checked: false },
+                  { label: 'Expiring links', desc: 'Links expire after set time', checked: true },
+                ].map((setting) => (
+                  <div key={setting.label} className="flex items-center justify-between p-3 border rounded-lg">
+                    <div>
+                      <p className="font-medium">{setting.label}</p>
+                      <p className="text-sm text-gray-500">{setting.desc}</p>
+                    </div>
+                    <Switch defaultChecked={setting.checked} />
+                  </div>
+                ))}
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowPrivacySettingsDialog(false)}>Cancel</Button>
+              <Button onClick={() => { setShowPrivacySettingsDialog(false); toast.success('Privacy settings saved'); }}>
+                Save Settings
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Duplicate Collection Dialog */}
+        <Dialog open={showDuplicateCollectionDialog} onOpenChange={setShowDuplicateCollectionDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Copy className="w-5 h-5 text-cyan-500" />
+                Duplicate Collection
+              </DialogTitle>
+              <DialogDescription>
+                Create a copy of an existing collection.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Select Collection to Duplicate</Label>
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Choose a collection" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {mockCollections.map((collection) => (
+                      <SelectItem key={collection.id} value={collection.id}>{collection.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>New Collection Name</Label>
+                <Input placeholder="Enter name for the copy..." />
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch defaultChecked />
+                <Label>Include all assets</Label>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowDuplicateCollectionDialog(false)}>Cancel</Button>
+              <Button onClick={() => { setShowDuplicateCollectionDialog(false); toast.success('Collection duplicated'); }}>
+                Duplicate
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Cloud Import Dialog */}
+        <Dialog open={showCloudImportDialog} onOpenChange={setShowCloudImportDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <FolderSync className="w-5 h-5 text-cyan-500" />
+                Cloud Import
+              </DialogTitle>
+              <DialogDescription>
+                Import files from your connected cloud storage.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                {[
+                  { name: 'Google Drive', icon: '🔵', connected: true },
+                  { name: 'Dropbox', icon: '📦', connected: true },
+                  { name: 'OneDrive', icon: '☁️', connected: false },
+                  { name: 'iCloud', icon: '🍎', connected: false },
+                ].map((service) => (
+                  <Card key={service.name} className={`p-4 cursor-pointer hover:shadow-md transition-shadow ${!service.connected && 'opacity-50'}`}>
+                    <div className="text-2xl mb-2">{service.icon}</div>
+                    <p className="font-medium">{service.name}</p>
+                    <p className="text-xs text-gray-500">{service.connected ? 'Connected' : 'Not connected'}</p>
+                  </Card>
+                ))}
+              </div>
+              <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50">
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Select a connected service to browse and import files.
+                </p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowCloudImportDialog(false)}>Cancel</Button>
+              <Button onClick={() => { setShowCloudImportDialog(false); toast.success('Opening cloud browser...'); }}>
+                Browse Files
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* URL Import Dialog */}
+        <Dialog open={showUrlImportDialog} onOpenChange={setShowUrlImportDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Link2 className="w-5 h-5 text-amber-500" />
+                Import from URL
+              </DialogTitle>
+              <DialogDescription>
+                Import files directly from a web URL.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>File URL</Label>
+                <Input placeholder="https://example.com/file.jpg" type="url" />
+              </div>
+              <div className="space-y-2">
+                <Label>File Name (optional)</Label>
+                <Input placeholder="Leave blank to use original name" />
+              </div>
+              <div className="space-y-2">
+                <Label>Destination Folder</Label>
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select folder" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="root">Root</SelectItem>
+                    {initialFolders.map((folder) => (
+                      <SelectItem key={folder.id} value={folder.id}>{folder.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowUrlImportDialog(false)}>Cancel</Button>
+              <Button onClick={() => { setShowUrlImportDialog(false); toast.success('Import started...'); }}>
+                Import
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Analytics Overview Dialog */}
+        <Dialog open={showAnalyticsOverviewDialog} onOpenChange={setShowAnalyticsOverviewDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <BarChart3 className="w-5 h-5 text-orange-500" />
+                Analytics Overview
+              </DialogTitle>
+              <DialogDescription>
+                Key metrics for your media library.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid grid-cols-2 gap-4">
+              <Card className="p-4">
+                <p className="text-sm text-gray-500">Total Assets</p>
+                <p className="text-3xl font-bold">{stats.totalAssets}</p>
+                <p className="text-xs text-green-500">+18.5% from last month</p>
+              </Card>
+              <Card className="p-4">
+                <p className="text-sm text-gray-500">Storage Used</p>
+                <p className="text-3xl font-bold">{formatSize(stats.totalSize)}</p>
+                <p className="text-xs text-green-500">+12.3% from last month</p>
+              </Card>
+              <Card className="p-4">
+                <p className="text-sm text-gray-500">Total Views</p>
+                <p className="text-3xl font-bold">{stats.totalViews.toLocaleString()}</p>
+                <p className="text-xs text-green-500">+25.7% from last month</p>
+              </Card>
+              <Card className="p-4">
+                <p className="text-sm text-gray-500">Total Downloads</p>
+                <p className="text-3xl font-bold">{stats.totalDownloads.toLocaleString()}</p>
+                <p className="text-xs text-green-500">+15.4% from last month</p>
+              </Card>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowAnalyticsOverviewDialog(false)}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Trends Dialog */}
+        <Dialog open={showTrendsDialog} onOpenChange={setShowTrendsDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <TrendingUp className="w-5 h-5 text-green-500" />
+                Usage Trends
+              </DialogTitle>
+              <DialogDescription>
+                View trends and patterns in your media usage.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="h-48 flex items-center justify-center border rounded-lg bg-gray-50 dark:bg-gray-800/50">
+                <div className="text-center text-gray-400">
+                  <TrendingUp className="w-12 h-12 mx-auto mb-2" />
+                  <p>Trend chart placeholder</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-3 gap-4">
+                <div className="p-3 rounded-lg bg-green-50 dark:bg-green-900/20">
+                  <p className="text-sm text-green-600">Most Viewed</p>
+                  <p className="font-medium">Product Images</p>
+                </div>
+                <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20">
+                  <p className="text-sm text-blue-600">Most Downloaded</p>
+                  <p className="font-medium">Brand Assets</p>
+                </div>
+                <div className="p-3 rounded-lg bg-purple-50 dark:bg-purple-900/20">
+                  <p className="text-sm text-purple-600">Most Shared</p>
+                  <p className="font-medium">Marketing Videos</p>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowTrendsDialog(false)}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Distribution Dialog */}
+        <Dialog open={showDistributionDialog} onOpenChange={setShowDistributionDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <PieChart className="w-5 h-5 text-purple-500" />
+                Asset Distribution
+              </DialogTitle>
+              <DialogDescription>
+                Breakdown of assets by type.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="h-48 flex items-center justify-center border rounded-lg bg-gray-50 dark:bg-gray-800/50">
+                <div className="text-center text-gray-400">
+                  <PieChart className="w-12 h-12 mx-auto mb-2" />
+                  <p>Distribution chart placeholder</p>
+                </div>
+              </div>
+              <div className="space-y-2">
+                {[
+                  { type: 'Images', count: stats.imageCount, color: 'bg-blue-500' },
+                  { type: 'Videos', count: stats.videoCount, color: 'bg-red-500' },
+                  { type: 'Audio', count: stats.audioCount, color: 'bg-green-500' },
+                  { type: 'Documents', count: stats.docCount, color: 'bg-orange-500' },
+                ].map((item) => (
+                  <div key={item.type} className="flex items-center gap-3">
+                    <div className={`w-3 h-3 rounded-full ${item.color}`} />
+                    <span className="flex-1">{item.type}</span>
+                    <span className="font-medium">{item.count}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowDistributionDialog(false)}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Real-time Stats Dialog */}
+        <Dialog open={showRealtimeStatsDialog} onOpenChange={setShowRealtimeStatsDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Activity className="w-5 h-5 text-red-500" />
+                Real-time Statistics
+              </DialogTitle>
+              <DialogDescription>
+                Live monitoring of your media library activity.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <Card className="p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                    <span className="text-sm text-gray-500">Active Now</span>
+                  </div>
+                  <p className="text-2xl font-bold">24</p>
+                  <p className="text-xs text-gray-500">Users viewing</p>
+                </Card>
+                <Card className="p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
+                    <span className="text-sm text-gray-500">Uploads</span>
+                  </div>
+                  <p className="text-2xl font-bold">3</p>
+                  <p className="text-xs text-gray-500">In progress</p>
+                </Card>
+              </div>
+              <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-800/50">
+                <p className="text-sm font-medium mb-2">Recent Activity</p>
+                <div className="space-y-2 text-sm">
+                  <p className="text-gray-600">User uploaded "hero-image.jpg" - 2s ago</p>
+                  <p className="text-gray-600">User viewed "product-video.mp4" - 15s ago</p>
+                  <p className="text-gray-600">User downloaded "brand-kit.zip" - 30s ago</p>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowRealtimeStatsDialog(false)}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Report Builder Dialog */}
+        <Dialog open={showReportBuilderDialog} onOpenChange={setShowReportBuilderDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <FileText className="w-5 h-5 text-indigo-500" />
+                Report Builder
+              </DialogTitle>
+              <DialogDescription>
+                Generate custom reports for your media library.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Report Type</Label>
+                <Select defaultValue="usage">
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="usage">Usage Report</SelectItem>
+                    <SelectItem value="storage">Storage Report</SelectItem>
+                    <SelectItem value="activity">Activity Report</SelectItem>
+                    <SelectItem value="audit">Audit Report</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Date Range</Label>
+                <Select defaultValue="30">
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="7">Last 7 days</SelectItem>
+                    <SelectItem value="30">Last 30 days</SelectItem>
+                    <SelectItem value="90">Last 90 days</SelectItem>
+                    <SelectItem value="365">Last year</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Format</Label>
+                <Select defaultValue="pdf">
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="pdf">PDF</SelectItem>
+                    <SelectItem value="csv">CSV</SelectItem>
+                    <SelectItem value="xlsx">Excel</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowReportBuilderDialog(false)}>Cancel</Button>
+              <Button onClick={() => { setShowReportBuilderDialog(false); toast.success('Report generation started'); }}>
+                Generate Report
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   )

@@ -191,11 +191,7 @@ const mockMobileAppActivities = [
   { id: '3', user: 'QA Manager', action: 'Flagged', target: '3 critical bugs for hotfix', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'warning' as const },
 ]
 
-const mockMobileAppQuickActions = [
-  { id: '1', label: 'New Build', icon: 'plus', action: () => toast.success('Build Queued', { description: 'Mobile build started successfully' }), variant: 'default' as const },
-  { id: '2', label: 'Submit Review', icon: 'send', action: () => toast.success('Submitted for Review', { description: 'App submitted to App Store for review' }), variant: 'default' as const },
-  { id: '3', label: 'View Analytics', icon: 'chart', action: () => toast.success('Analytics Loaded', { description: 'Mobile app analytics dashboard ready' }), variant: 'outline' as const },
-]
+// Quick actions will be defined inside the component to access state setters
 
 export default function MobileAppClient({ initialFeatures, initialVersions, initialStats }: MobileAppClientProps) {
   const supabase = createClient()
@@ -221,6 +217,24 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
   const [showCreateBuildModal, setShowCreateBuildModal] = useState(false)
   const [showCreateCampaignModal, setShowCreateCampaignModal] = useState(false)
   const [showCreateIapModal, setShowCreateIapModal] = useState(false)
+
+  // Quick Action Dialog States
+  const [showQueueBuildDialog, setShowQueueBuildDialog] = useState(false)
+  const [showSubmitReviewDialog, setShowSubmitReviewDialog] = useState(false)
+  const [showAnalyticsDialog, setShowAnalyticsDialog] = useState(false)
+
+  // Quick Action Form States
+  const [queueBuildForm, setQueueBuildForm] = useState({
+    version: '',
+    platform: 'ios' as Platform,
+    buildType: 'debug' as 'debug' | 'release',
+    branch: 'main'
+  })
+  const [submitReviewForm, setSubmitReviewForm] = useState({
+    buildId: '',
+    releaseNotes: '',
+    targetAudience: 'all'
+  })
 
   // Fetch user ID on mount
   useEffect(() => {
@@ -500,6 +514,54 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
       }
     )
   }, [])
+
+  // Quick Action Handlers
+  const handleQueueBuild = async () => {
+    if (!userId || !queueBuildForm.version.trim()) {
+      toast.error('Missing required fields', { description: 'Please fill in version number' })
+      return
+    }
+    setIsLoading(true)
+    try {
+      const { error } = await supabase.from('mobile_app_builds').insert({
+        user_id: userId,
+        version: queueBuildForm.version,
+        platform: queueBuildForm.platform,
+        build_type: queueBuildForm.buildType,
+        branch: queueBuildForm.branch,
+        status: 'queued',
+        queued_at: new Date().toISOString()
+      })
+      if (error) throw error
+      toast.success('Build Queued', { description: `${queueBuildForm.platform.toUpperCase()} build v${queueBuildForm.version} has been queued for processing` })
+      setQueueBuildForm({ version: '', platform: 'ios', buildType: 'debug', branch: 'main' })
+      setShowQueueBuildDialog(false)
+    } catch (err: any) {
+      toast.error('Failed to queue build', { description: err.message })
+    } finally { setIsLoading(false) }
+  }
+
+  const handleSubmitForReview = async () => {
+    if (!userId || !submitReviewForm.buildId || !submitReviewForm.releaseNotes.trim()) {
+      toast.error('Missing required fields', { description: 'Please select a build and provide release notes' })
+      return
+    }
+    setIsLoading(true)
+    try {
+      const { error } = await supabase.from('mobile_app_builds').update({
+        status: 'submitted',
+        release_notes: submitReviewForm.releaseNotes,
+        target_audience: submitReviewForm.targetAudience,
+        submitted_at: new Date().toISOString()
+      }).eq('id', submitReviewForm.buildId)
+      if (error) throw error
+      toast.success('Submitted for Review', { description: 'Your app has been submitted to the App Store for review' })
+      setSubmitReviewForm({ buildId: '', releaseNotes: '', targetAudience: 'all' })
+      setShowSubmitReviewDialog(false)
+    } catch (err: any) {
+      toast.error('Submission failed', { description: err.message })
+    } finally { setIsLoading(false) }
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-blue-50 to-cyan-50 dark:bg-none dark:bg-gray-900">
@@ -1971,7 +2033,11 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockMobileAppQuickActions}
+            actions={[
+              { id: '1', label: 'New Build', icon: 'plus', action: () => setShowQueueBuildDialog(true), variant: 'default' as const },
+              { id: '2', label: 'Submit Review', icon: 'send', action: () => setShowSubmitReviewDialog(true), variant: 'default' as const },
+              { id: '3', label: 'View Analytics', icon: 'chart', action: () => setShowAnalyticsDialog(true), variant: 'outline' as const },
+            ]}
             variant="grid"
           />
         </div>
@@ -2228,6 +2294,263 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowCreateIapModal(false)}>Cancel</Button>
               <Button onClick={handleCreateIap} disabled={isLoading}>{isLoading ? 'Creating...' : 'Add Product'}</Button>
+            </DialogFooter>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Queue Build Dialog */}
+      <Dialog open={showQueueBuildDialog} onOpenChange={setShowQueueBuildDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Upload className="h-5 w-5 text-indigo-600" />
+              Queue New Build
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Version Number</Label>
+              <Input
+                placeholder="e.g., 3.0.0"
+                value={queueBuildForm.version}
+                onChange={(e) => setQueueBuildForm({ ...queueBuildForm, version: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label>Platform</Label>
+              <Select value={queueBuildForm.platform} onValueChange={(v: Platform) => setQueueBuildForm({ ...queueBuildForm, platform: v })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ios">iOS</SelectItem>
+                  <SelectItem value="android">Android</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Build Type</Label>
+              <Select value={queueBuildForm.buildType} onValueChange={(v: 'debug' | 'release') => setQueueBuildForm({ ...queueBuildForm, buildType: v })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="debug">Debug</SelectItem>
+                  <SelectItem value="release">Release</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Git Branch</Label>
+              <Input
+                placeholder="e.g., main, develop, feature/xyz"
+                value={queueBuildForm.branch}
+                onChange={(e) => setQueueBuildForm({ ...queueBuildForm, branch: e.target.value })}
+              />
+            </div>
+            <div className="p-4 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg">
+              <h4 className="font-medium text-indigo-700 dark:text-indigo-300 mb-2">Build Queue Info</h4>
+              <ul className="text-sm text-indigo-600 dark:text-indigo-400 space-y-1">
+                <li>Build will be processed in CI/CD pipeline</li>
+                <li>Estimated build time: 15-30 minutes</li>
+                <li>You will be notified when complete</li>
+              </ul>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowQueueBuildDialog(false)}>Cancel</Button>
+              <Button onClick={handleQueueBuild} disabled={isLoading} className="bg-indigo-600 hover:bg-indigo-700">
+                {isLoading ? 'Queueing...' : 'Queue Build'}
+              </Button>
+            </DialogFooter>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Submit for Review Dialog */}
+      <Dialog open={showSubmitReviewDialog} onOpenChange={setShowSubmitReviewDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Send className="h-5 w-5 text-green-600" />
+              Submit to App Store Review
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Select Build</Label>
+              <Select value={submitReviewForm.buildId} onValueChange={(v) => setSubmitReviewForm({ ...submitReviewForm, buildId: v })}>
+                <SelectTrigger><SelectValue placeholder="Choose a build to submit" /></SelectTrigger>
+                <SelectContent>
+                  {filteredBuilds.filter(b => b.status === 'ready' || b.status === 'approved').map(build => (
+                    <SelectItem key={build.id} value={build.id}>
+                      v{build.version} ({build.buildNumber}) - {build.platform.toUpperCase()}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Release Notes (What&apos;s New)</Label>
+              <textarea
+                className="w-full px-3 py-2 border rounded-lg min-h-[100px] dark:bg-gray-800 dark:border-gray-700"
+                placeholder="Describe the new features and improvements in this version..."
+                value={submitReviewForm.releaseNotes}
+                onChange={(e) => setSubmitReviewForm({ ...submitReviewForm, releaseNotes: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label>Target Audience</Label>
+              <Select value={submitReviewForm.targetAudience} onValueChange={(v) => setSubmitReviewForm({ ...submitReviewForm, targetAudience: v })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Users</SelectItem>
+                  <SelectItem value="new">New Users Only</SelectItem>
+                  <SelectItem value="existing">Existing Users Only</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800">
+              <h4 className="font-medium text-amber-700 dark:text-amber-300 mb-2">Review Guidelines</h4>
+              <ul className="text-sm text-amber-600 dark:text-amber-400 space-y-1">
+                <li>App review typically takes 24-48 hours</li>
+                <li>Ensure all metadata is complete and accurate</li>
+                <li>Test thoroughly before submission</li>
+              </ul>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowSubmitReviewDialog(false)}>Cancel</Button>
+              <Button onClick={handleSubmitForReview} disabled={isLoading} className="bg-green-600 hover:bg-green-700">
+                {isLoading ? 'Submitting...' : 'Submit for Review'}
+              </Button>
+            </DialogFooter>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Analytics Dialog */}
+      <Dialog open={showAnalyticsDialog} onOpenChange={setShowAnalyticsDialog}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <BarChart3 className="h-5 w-5 text-blue-600" />
+              Mobile App Analytics Dashboard
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-6">
+            {/* Key Metrics */}
+            <div className="grid grid-cols-4 gap-4">
+              <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-center">
+                <Download className="h-6 w-6 mx-auto text-blue-600 dark:text-blue-400 mb-2" />
+                <p className="text-2xl font-bold text-blue-700 dark:text-blue-300">{(stats.totalDownloads / 1000000).toFixed(1)}M</p>
+                <p className="text-sm text-blue-600 dark:text-blue-400">Total Downloads</p>
+              </div>
+              <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg text-center">
+                <Users className="h-6 w-6 mx-auto text-green-600 dark:text-green-400 mb-2" />
+                <p className="text-2xl font-bold text-green-700 dark:text-green-300">{(stats.monthlyActiveUsers / 1000).toFixed(0)}K</p>
+                <p className="text-sm text-green-600 dark:text-green-400">Monthly Active</p>
+              </div>
+              <div className="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg text-center">
+                <Star className="h-6 w-6 mx-auto text-amber-600 dark:text-amber-400 mb-2" />
+                <p className="text-2xl font-bold text-amber-700 dark:text-amber-300">{stats.avgRating.toFixed(1)}</p>
+                <p className="text-sm text-amber-600 dark:text-amber-400">Avg Rating</p>
+              </div>
+              <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg text-center">
+                <TrendingUp className="h-6 w-6 mx-auto text-purple-600 dark:text-purple-400 mb-2" />
+                <p className="text-2xl font-bold text-purple-700 dark:text-purple-300">${(stats.revenue / 1000).toFixed(0)}K</p>
+                <p className="text-sm text-purple-600 dark:text-purple-400">Revenue (MTD)</p>
+              </div>
+            </div>
+
+            {/* Platform Breakdown */}
+            <div className="grid grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-sm flex items-center gap-2">
+                    <Apple className="h-4 w-4" />
+                    iOS Performance
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-500">Downloads</span>
+                      <span className="font-medium">{(stats.iosDownloads / 1000000).toFixed(1)}M</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-500">App Store Rating</span>
+                      <span className="font-medium">4.7</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-500">Crash-Free Rate</span>
+                      <span className="font-medium text-green-600">99.4%</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-500">Day 7 Retention</span>
+                      <span className="font-medium">44%</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-sm flex items-center gap-2">
+                    <Smartphone className="h-4 w-4" />
+                    Android Performance
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-500">Downloads</span>
+                      <span className="font-medium">{(stats.androidDownloads / 1000000).toFixed(1)}M</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-500">Play Store Rating</span>
+                      <span className="font-medium">4.5</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-500">Crash-Free Rate</span>
+                      <span className="font-medium text-green-600">99.0%</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-500">Day 7 Retention</span>
+                      <span className="font-medium">40%</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Engagement Metrics */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm">User Engagement</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-4 gap-4">
+                  <div className="text-center p-4 border rounded-lg">
+                    <p className="text-xl font-bold">{stats.avgSessionLength}m</p>
+                    <p className="text-xs text-gray-500">Avg Session</p>
+                  </div>
+                  <div className="text-center p-4 border rounded-lg">
+                    <p className="text-xl font-bold">{(stats.dailyActiveUsers / 1000).toFixed(0)}K</p>
+                    <p className="text-xs text-gray-500">Daily Active</p>
+                  </div>
+                  <div className="text-center p-4 border rounded-lg">
+                    <p className="text-xl font-bold">{stats.retention7Day}%</p>
+                    <p className="text-xs text-gray-500">7-Day Retention</p>
+                  </div>
+                  <div className="text-center p-4 border rounded-lg">
+                    <p className="text-xl font-bold">{stats.crashFreeRate}%</p>
+                    <p className="text-xs text-gray-500">Crash-Free</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setActiveTab('analytics')}>
+                <BarChart3 className="h-4 w-4 mr-2" />
+                View Full Analytics
+              </Button>
+              <Button onClick={() => setShowAnalyticsDialog(false)}>Close</Button>
             </DialogFooter>
           </div>
         </DialogContent>

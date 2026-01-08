@@ -510,11 +510,7 @@ const mockKnowledgeArticlesActivities = [
   { id: '3', user: 'Product Expert', action: 'Updated', target: 'troubleshooting guide', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
 ]
 
-const mockKnowledgeArticlesQuickActions = [
-  { id: '1', label: 'New Article', icon: 'plus', action: () => toast.success('New Article', { description: 'Article editor ready' }), variant: 'default' as const },
-  { id: '2', label: 'Templates', icon: 'layout', action: () => toast.success('Templates', { description: 'Article templates loaded' }), variant: 'default' as const },
-  { id: '3', label: 'Analytics', icon: 'bar-chart', action: () => toast.success('Analytics', { description: 'Article analytics loaded' }), variant: 'outline' as const },
-]
+// Quick actions are defined inside the component to access state setters
 
 export default function KnowledgeArticlesClient({ initialArticles, initialStats }: KnowledgeArticlesClientProps) {
   const [activeTab, setActiveTab] = useState('articles')
@@ -530,6 +526,93 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
   const [typeFilter, setTypeFilter] = useState<ArticleType | 'all'>('all')
   const [expandedSpaces, setExpandedSpaces] = useState<Set<string>>(new Set(['s1', 's4']))
   const [settingsTab, setSettingsTab] = useState('general')
+
+  // Dialog states for QuickActions
+  const [showNewArticleDialog, setShowNewArticleDialog] = useState(false)
+  const [showTemplatesDialog, setShowTemplatesDialog] = useState(false)
+  const [showAnalyticsDialog, setShowAnalyticsDialog] = useState(false)
+
+  // New Article form state
+  const [newArticleTitle, setNewArticleTitle] = useState('')
+  const [newArticleExcerpt, setNewArticleExcerpt] = useState('')
+  const [newArticleContent, setNewArticleContent] = useState('')
+  const [newArticleType, setNewArticleType] = useState<ArticleType>('page')
+  const [newArticleLevel, setNewArticleLevel] = useState<ArticleLevel>('beginner')
+  const [newArticleSpaceId, setNewArticleSpaceId] = useState('')
+  const [newArticleLabels, setNewArticleLabels] = useState('')
+
+  // Selected template for preview
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null)
+
+  // Quick actions with real dialog functionality
+  const knowledgeArticlesQuickActions = [
+    { id: '1', label: 'New Article', icon: 'plus', action: () => setShowNewArticleDialog(true), variant: 'default' as const },
+    { id: '2', label: 'Templates', icon: 'layout', action: () => setShowTemplatesDialog(true), variant: 'default' as const },
+    { id: '3', label: 'Analytics', icon: 'bar-chart', action: () => setShowAnalyticsDialog(true), variant: 'outline' as const },
+  ]
+
+  // Handler for creating a new article
+  const handleCreateNewArticle = () => {
+    if (!newArticleTitle.trim()) {
+      toast.error('Title required', { description: 'Please enter an article title' })
+      return
+    }
+    if (!newArticleSpaceId) {
+      toast.error('Space required', { description: 'Please select a space for the article' })
+      return
+    }
+
+    const newArticle: Article = {
+      id: `art${Date.now()}`,
+      title: newArticleTitle.trim(),
+      slug: newArticleTitle.trim().toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
+      excerpt: newArticleExcerpt.trim() || 'No description provided',
+      content: newArticleContent.trim() || '',
+      status: 'draft',
+      type: newArticleType,
+      level: newArticleLevel,
+      spaceId: newArticleSpaceId,
+      spaceName: spaces.find(s => s.id === newArticleSpaceId)?.name || 'Unknown',
+      author: mockAuthors[0],
+      contributors: [mockAuthors[0]],
+      labels: newArticleLabels.split(',').map(l => l.trim()).filter(Boolean),
+      readTime: Math.max(1, Math.ceil((newArticleContent.length || 100) / 1000)),
+      views: 0,
+      likes: 0,
+      bookmarks: 0,
+      shares: 0,
+      rating: 0,
+      totalRatings: 0,
+      commentsCount: 0,
+      versions: [],
+      comments: [],
+      relatedArticles: [],
+      permissions: [],
+      isStarred: false,
+      isPinned: false,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    }
+
+    setArticles(prev => [newArticle, ...prev])
+    setShowNewArticleDialog(false)
+    setNewArticleTitle('')
+    setNewArticleExcerpt('')
+    setNewArticleContent('')
+    setNewArticleType('page')
+    setNewArticleLevel('beginner')
+    setNewArticleSpaceId('')
+    setNewArticleLabels('')
+    toast.success('Article created', { description: `"${newArticle.title}" has been created as a draft` })
+  }
+
+  // Handler for using a template
+  const handleUseTemplate = (template: Template) => {
+    setNewArticleType(template.type)
+    setShowTemplatesDialog(false)
+    setShowNewArticleDialog(true)
+    toast.success('Template applied', { description: `Using "${template.name}" template` })
+  }
 
   // Computed values
   const filteredArticles = useMemo(() => {
@@ -1772,7 +1855,7 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockKnowledgeArticlesQuickActions}
+            actions={knowledgeArticlesQuickActions}
             variant="grid"
           />
         </div>
@@ -1913,6 +1996,374 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
                   <Trash2 className="w-4 h-4" /> Delete
                 </Button>
               </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* New Article Dialog */}
+        <Dialog open={showNewArticleDialog} onOpenChange={setShowNewArticleDialog}>
+          <DialogContent className="max-w-2xl max-h-[90vh]">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <FilePlus className="w-5 h-5 text-blue-600" />
+                Create New Article
+              </DialogTitle>
+              <DialogDescription>
+                Create a new knowledge base article. Fill in the details below.
+              </DialogDescription>
+            </DialogHeader>
+
+            <ScrollArea className="max-h-[60vh] pr-4">
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="article-title">Title *</Label>
+                  <Input
+                    id="article-title"
+                    placeholder="Enter article title"
+                    value={newArticleTitle}
+                    onChange={(e) => setNewArticleTitle(e.target.value)}
+                    className="mt-1"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="article-excerpt">Excerpt / Summary</Label>
+                  <Textarea
+                    id="article-excerpt"
+                    placeholder="Brief description of the article"
+                    value={newArticleExcerpt}
+                    onChange={(e) => setNewArticleExcerpt(e.target.value)}
+                    className="mt-1"
+                    rows={2}
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="article-space">Space *</Label>
+                    <select
+                      id="article-space"
+                      value={newArticleSpaceId}
+                      onChange={(e) => setNewArticleSpaceId(e.target.value)}
+                      className="w-full mt-1 border rounded-md p-2 bg-background"
+                    >
+                      <option value="">Select a space</option>
+                      {spaces.map(space => (
+                        <option key={space.id} value={space.id}>{space.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <Label htmlFor="article-type">Type</Label>
+                    <select
+                      id="article-type"
+                      value={newArticleType}
+                      onChange={(e) => setNewArticleType(e.target.value as ArticleType)}
+                      className="w-full mt-1 border rounded-md p-2 bg-background"
+                    >
+                      <option value="page">Page</option>
+                      <option value="blog">Blog</option>
+                      <option value="how-to">How-To</option>
+                      <option value="tutorial">Tutorial</option>
+                      <option value="reference">Reference</option>
+                      <option value="faq">FAQ</option>
+                      <option value="template">Template</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="article-level">Difficulty Level</Label>
+                    <select
+                      id="article-level"
+                      value={newArticleLevel}
+                      onChange={(e) => setNewArticleLevel(e.target.value as ArticleLevel)}
+                      className="w-full mt-1 border rounded-md p-2 bg-background"
+                    >
+                      <option value="beginner">Beginner</option>
+                      <option value="intermediate">Intermediate</option>
+                      <option value="advanced">Advanced</option>
+                      <option value="expert">Expert</option>
+                    </select>
+                  </div>
+                  <div>
+                    <Label htmlFor="article-labels">Labels (comma separated)</Label>
+                    <Input
+                      id="article-labels"
+                      placeholder="tutorial, api, guide"
+                      value={newArticleLabels}
+                      onChange={(e) => setNewArticleLabels(e.target.value)}
+                      className="mt-1"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="article-content">Content</Label>
+                  <Textarea
+                    id="article-content"
+                    placeholder="Write your article content here..."
+                    value={newArticleContent}
+                    onChange={(e) => setNewArticleContent(e.target.value)}
+                    className="mt-1 min-h-[200px] font-mono"
+                    rows={8}
+                  />
+                </div>
+              </div>
+            </ScrollArea>
+
+            <div className="flex items-center justify-between pt-4 border-t">
+              <Button variant="outline" onClick={() => setShowNewArticleDialog(false)}>
+                Cancel
+              </Button>
+              <div className="flex items-center gap-2">
+                <Button variant="outline" onClick={() => setShowTemplatesDialog(true)}>
+                  <LayoutTemplate className="w-4 h-4 mr-2" />
+                  Use Template
+                </Button>
+                <Button onClick={handleCreateNewArticle} className="bg-gradient-to-r from-blue-500 to-indigo-600">
+                  <FilePlus className="w-4 h-4 mr-2" />
+                  Create Article
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Templates Dialog */}
+        <Dialog open={showTemplatesDialog} onOpenChange={setShowTemplatesDialog}>
+          <DialogContent className="max-w-3xl max-h-[90vh]">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <LayoutTemplate className="w-5 h-5 text-purple-600" />
+                Article Templates
+              </DialogTitle>
+              <DialogDescription>
+                Choose a template to quickly create structured content
+              </DialogDescription>
+            </DialogHeader>
+
+            <ScrollArea className="max-h-[60vh] pr-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {templates.map(template => (
+                  <Card
+                    key={template.id}
+                    className={`p-4 cursor-pointer transition-all hover:shadow-md ${
+                      selectedTemplateId === template.id ? 'ring-2 ring-purple-500' : ''
+                    }`}
+                    onClick={() => setSelectedTemplateId(template.id)}
+                  >
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center">
+                          <LayoutTemplate className="w-5 h-5 text-white" />
+                        </div>
+                        <div>
+                          <h4 className="font-semibold">{template.name}</h4>
+                          <span className="text-xs text-muted-foreground">{template.category}</span>
+                        </div>
+                      </div>
+                      {template.isGlobal && <Badge variant="secondary">Global</Badge>}
+                    </div>
+
+                    <p className="text-sm text-muted-foreground mb-3">{template.description}</p>
+
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <Badge variant="outline">{template.type}</Badge>
+                        <span>Used {template.usageCount} times</span>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            </ScrollArea>
+
+            <div className="flex items-center justify-between pt-4 border-t">
+              <Button variant="outline" onClick={() => setShowTemplatesDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                onClick={() => {
+                  const template = templates.find(t => t.id === selectedTemplateId)
+                  if (template) {
+                    handleUseTemplate(template)
+                  } else {
+                    toast.error('Select a template', { description: 'Please select a template to use' })
+                  }
+                }}
+                disabled={!selectedTemplateId}
+                className="bg-gradient-to-r from-purple-500 to-indigo-600"
+              >
+                <LayoutTemplate className="w-4 h-4 mr-2" />
+                Use Template
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Analytics Dialog */}
+        <Dialog open={showAnalyticsDialog} onOpenChange={setShowAnalyticsDialog}>
+          <DialogContent className="max-w-4xl max-h-[90vh]">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <BarChart3 className="w-5 h-5 text-green-600" />
+                Knowledge Base Analytics
+              </DialogTitle>
+              <DialogDescription>
+                Performance metrics and insights for your knowledge base
+              </DialogDescription>
+            </DialogHeader>
+
+            <ScrollArea className="max-h-[65vh] pr-4">
+              <div className="space-y-6">
+                {/* Overview Stats */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <Card className="p-4 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20">
+                    <div className="flex items-center gap-2 mb-2">
+                      <FileText className="w-4 h-4 text-blue-600" />
+                      <span className="text-xs text-muted-foreground">Total Articles</span>
+                    </div>
+                    <p className="text-2xl font-bold">{stats.totalArticles}</p>
+                    <p className="text-xs text-green-600">+24 this month</p>
+                  </Card>
+                  <Card className="p-4 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Eye className="w-4 h-4 text-green-600" />
+                      <span className="text-xs text-muted-foreground">Total Views</span>
+                    </div>
+                    <p className="text-2xl font-bold">{(stats.totalViews / 1000).toFixed(1)}K</p>
+                    <p className="text-xs text-green-600">+12.5% vs last month</p>
+                  </Card>
+                  <Card className="p-4 bg-gradient-to-br from-purple-50 to-violet-50 dark:from-purple-900/20 dark:to-violet-900/20">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Users className="w-4 h-4 text-purple-600" />
+                      <span className="text-xs text-muted-foreground">Contributors</span>
+                    </div>
+                    <p className="text-2xl font-bold">{stats.totalContributors}</p>
+                    <p className="text-xs text-green-600">+3 this month</p>
+                  </Card>
+                  <Card className="p-4 bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-900/20 dark:to-amber-900/20">
+                    <div className="flex items-center gap-2 mb-2">
+                      <TrendingUp className="w-4 h-4 text-orange-600" />
+                      <span className="text-xs text-muted-foreground">Growth Rate</span>
+                    </div>
+                    <p className="text-2xl font-bold">{stats.growthRate}%</p>
+                    <p className="text-xs text-green-600">+5.2% vs last month</p>
+                  </Card>
+                </div>
+
+                {/* Content Distribution */}
+                <Card className="p-4">
+                  <h4 className="font-medium mb-4 flex items-center gap-2">
+                    <FolderTree className="w-4 h-4 text-blue-600" />
+                    Content by Space
+                  </h4>
+                  <div className="space-y-3">
+                    {spaces.map(space => {
+                      const percentage = Math.round((space.articlesCount / stats.totalArticles) * 100)
+                      return (
+                        <div key={space.id}>
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-sm font-medium">{space.name}</span>
+                            <span className="text-xs text-muted-foreground">{space.articlesCount} articles ({percentage}%)</span>
+                          </div>
+                          <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                            <div
+                              className="h-2 rounded-full transition-all"
+                              style={{ width: `${percentage}%`, backgroundColor: space.color }}
+                            />
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </Card>
+
+                {/* Top Performing Articles */}
+                <Card className="p-4">
+                  <h4 className="font-medium mb-4 flex items-center gap-2">
+                    <Award className="w-4 h-4 text-yellow-600" />
+                    Top Performing Articles
+                  </h4>
+                  <div className="space-y-3">
+                    {popularArticles.slice(0, 5).map((article, index) => (
+                      <div key={article.id} className="flex items-center gap-3 p-2 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <span className="w-6 h-6 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-xs font-bold">
+                          {index + 1}
+                        </span>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium truncate">{article.title}</p>
+                          <p className="text-xs text-muted-foreground">{article.spaceName}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm font-bold">{article.views.toLocaleString()}</p>
+                          <p className="text-xs text-muted-foreground">views</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </Card>
+
+                {/* Status Distribution */}
+                <Card className="p-4">
+                  <h4 className="font-medium mb-4 flex items-center gap-2">
+                    <FileCheck className="w-4 h-4 text-green-600" />
+                    Content Status
+                  </h4>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="text-center p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                      <p className="text-2xl font-bold text-green-700">{stats.publishedArticles}</p>
+                      <p className="text-xs text-muted-foreground">Published</p>
+                    </div>
+                    <div className="text-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                      <p className="text-2xl font-bold text-gray-700">{stats.draftArticles}</p>
+                      <p className="text-xs text-muted-foreground">Drafts</p>
+                    </div>
+                    <div className="text-center p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
+                      <p className="text-2xl font-bold text-yellow-700">{articles.filter(a => a.status === 'review').length}</p>
+                      <p className="text-xs text-muted-foreground">In Review</p>
+                    </div>
+                    <div className="text-center p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                      <p className="text-2xl font-bold text-red-700">{articles.filter(a => a.status === 'archived').length}</p>
+                      <p className="text-xs text-muted-foreground">Archived</p>
+                    </div>
+                  </div>
+                </Card>
+
+                {/* Reading Time Distribution */}
+                <Card className="p-4">
+                  <h4 className="font-medium mb-4 flex items-center gap-2">
+                    <Timer className="w-4 h-4 text-cyan-600" />
+                    Reading Time Insights
+                  </h4>
+                  <div className="grid grid-cols-3 gap-4">
+                    <div className="text-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                      <p className="text-xl font-bold">{stats.avgReadTime}m</p>
+                      <p className="text-xs text-muted-foreground">Avg Read Time</p>
+                    </div>
+                    <div className="text-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                      <p className="text-xl font-bold">{Math.min(...articles.map(a => a.readTime))}m</p>
+                      <p className="text-xs text-muted-foreground">Shortest</p>
+                    </div>
+                    <div className="text-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                      <p className="text-xl font-bold">{Math.max(...articles.map(a => a.readTime))}m</p>
+                      <p className="text-xs text-muted-foreground">Longest</p>
+                    </div>
+                  </div>
+                </Card>
+              </div>
+            </ScrollArea>
+
+            <div className="flex items-center justify-between pt-4 border-t">
+              <Button variant="outline" onClick={() => setShowAnalyticsDialog(false)}>
+                Close
+              </Button>
+              <Button variant="outline" className="gap-2">
+                <Download className="w-4 h-4" />
+                Export Report
+              </Button>
             </div>
           </DialogContent>
         </Dialog>

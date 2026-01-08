@@ -464,11 +464,7 @@ const mockPricingActivities = [
   { id: '3', user: 'System', action: 'Updated pricing for', target: 'EU region', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'update' as const },
 ]
 
-const mockPricingQuickActions = [
-  { id: '1', label: 'New Plan', icon: 'plus', action: () => toast.success('Plan Created', { description: 'New pricing plan ready' }), variant: 'default' as const },
-  { id: '2', label: 'Create Coupon', icon: 'tag', action: () => toast.success('Coupon Created', { description: 'Discount code ready to use' }), variant: 'default' as const },
-  { id: '3', label: 'Analytics', icon: 'chart', action: () => toast.success('Analytics Loaded', { description: 'Pricing performance metrics ready' }), variant: 'outline' as const },
-]
+// Quick actions will be defined inside component to access state setters
 
 export default function PricingClient({
   initialPlans = mockPlans
@@ -494,6 +490,7 @@ export default function PricingClient({
   const [couponForm, setCouponForm] = useState<CouponFormState>(initialCouponForm)
   const [editingPlanId, setEditingPlanId] = useState<string | null>(null)
   const [editingCouponId, setEditingCouponId] = useState<string | null>(null)
+  const [showAnalyticsDialog, setShowAnalyticsDialog] = useState(false)
 
   // Fetch plans from Supabase
   const fetchPlans = useCallback(async () => {
@@ -581,6 +578,13 @@ export default function PricingClient({
     { label: 'Avg Churn', value: `${stats.avgChurn.toFixed(1)}%`, change: -5.2, icon: ArrowDownRight, color: 'from-red-500 to-rose-600' },
     { label: 'Coupons Active', value: mockCoupons.filter(c => c.isActive).length.toString(), change: 25, icon: Tag, color: 'from-pink-500 to-rose-600' }
   ]
+
+  // Quick actions with dialog-based workflows
+  const pricingQuickActions = useMemo(() => [
+    { id: '1', label: 'New Plan', icon: 'plus', action: () => setShowCreatePlanDialog(true), variant: 'default' as const },
+    { id: '2', label: 'Create Coupon', icon: 'tag', action: () => setShowCreateCouponDialog(true), variant: 'default' as const },
+    { id: '3', label: 'Analytics', icon: 'chart', action: () => setShowAnalyticsDialog(true), variant: 'outline' as const },
+  ], [])
 
   // CRUD: Create Plan
   const handleCreatePlan = async () => {
@@ -2091,7 +2095,7 @@ export default function PricingClient({
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockPricingQuickActions}
+            actions={pricingQuickActions}
             variant="grid"
           />
         </div>
@@ -2410,6 +2414,202 @@ export default function PricingClient({
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? 'Creating...' : 'Create Coupon'}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Analytics Dialog */}
+        <Dialog open={showAnalyticsDialog} onOpenChange={setShowAnalyticsDialog}>
+          <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-gradient-to-br from-violet-500 to-purple-600">
+                  <BarChart3 className="w-5 h-5 text-white" />
+                </div>
+                Pricing Analytics
+              </DialogTitle>
+              <DialogDescription>
+                Comprehensive pricing performance metrics and revenue insights
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-6">
+              {/* Key Metrics */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="p-4 rounded-xl bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-200 dark:border-green-800">
+                  <p className="text-sm text-green-600 dark:text-green-400 font-medium">MRR</p>
+                  <p className="text-2xl font-bold text-green-700 dark:text-green-300">{formatCurrency(stats.mrr)}</p>
+                  <p className="text-xs text-green-500 flex items-center gap-1 mt-1">
+                    <TrendingUp className="w-3 h-3" /> +18.5% vs last month
+                  </p>
+                </div>
+                <div className="p-4 rounded-xl bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 border border-blue-200 dark:border-blue-800">
+                  <p className="text-sm text-blue-600 dark:text-blue-400 font-medium">ARR</p>
+                  <p className="text-2xl font-bold text-blue-700 dark:text-blue-300">{formatCurrency(stats.arr)}</p>
+                  <p className="text-xs text-blue-500 flex items-center gap-1 mt-1">
+                    <TrendingUp className="w-3 h-3" /> +22.3% vs last year
+                  </p>
+                </div>
+                <div className="p-4 rounded-xl bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border border-purple-200 dark:border-purple-800">
+                  <p className="text-sm text-purple-600 dark:text-purple-400 font-medium">ARPU</p>
+                  <p className="text-2xl font-bold text-purple-700 dark:text-purple-300">{formatCurrency(stats.arpu)}</p>
+                  <p className="text-xs text-purple-500 flex items-center gap-1 mt-1">
+                    <TrendingUp className="w-3 h-3" /> +8.7% improvement
+                  </p>
+                </div>
+                <div className="p-4 rounded-xl bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border border-amber-200 dark:border-amber-800">
+                  <p className="text-sm text-amber-600 dark:text-amber-400 font-medium">Total Subscribers</p>
+                  <p className="text-2xl font-bold text-amber-700 dark:text-amber-300">{stats.totalSubscribers.toLocaleString()}</p>
+                  <p className="text-xs text-amber-500 flex items-center gap-1 mt-1">
+                    <Users className="w-3 h-3" /> {stats.paidSubscribers.toLocaleString()} paid
+                  </p>
+                </div>
+              </div>
+
+              {/* Plan Performance */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <Card className="border-0 shadow-sm">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-base">Revenue by Plan</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {initialPlans.map((plan) => {
+                      const percentage = stats.totalRevenue > 0 ? (plan.revenue / stats.totalRevenue) * 100 : 0
+                      return (
+                        <div key={plan.id}>
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-sm font-medium">{plan.name}</span>
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm text-gray-500">{formatCurrency(plan.revenue)}</span>
+                              <Badge variant="outline" className="text-xs">{percentage.toFixed(1)}%</Badge>
+                            </div>
+                          </div>
+                          <Progress value={percentage} className="h-2" />
+                        </div>
+                      )
+                    })}
+                  </CardContent>
+                </Card>
+
+                <Card className="border-0 shadow-sm">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-base">Subscriber Distribution</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {initialPlans.map((plan) => {
+                      const percentage = stats.totalSubscribers > 0 ? (plan.subscriberCount / stats.totalSubscribers) * 100 : 0
+                      return (
+                        <div key={plan.id}>
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-sm font-medium">{plan.name}</span>
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm text-gray-500">{plan.subscriberCount.toLocaleString()}</span>
+                              <Badge variant="outline" className="text-xs">{percentage.toFixed(1)}%</Badge>
+                            </div>
+                          </div>
+                          <Progress value={percentage} className="h-2" />
+                        </div>
+                      )
+                    })}
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Churn & Conversion */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <Card className="border-0 shadow-sm">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-base">Churn Rate by Plan</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {initialPlans.filter(p => p.prices.monthly > 0).map((plan) => (
+                      <div key={plan.id} className="flex items-center justify-between">
+                        <span className="text-sm">{plan.name}</span>
+                        <div className="flex items-center gap-2">
+                          <span className={`font-semibold ${plan.churnRate < 5 ? 'text-green-600' : plan.churnRate < 10 ? 'text-yellow-600' : 'text-red-600'}`}>
+                            {plan.churnRate}%
+                          </span>
+                          {plan.churnRate < 5 ? (
+                            <CheckCircle2 className="w-4 h-4 text-green-500" />
+                          ) : plan.churnRate < 10 ? (
+                            <AlertCircle className="w-4 h-4 text-yellow-500" />
+                          ) : (
+                            <XCircle className="w-4 h-4 text-red-500" />
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+
+                <Card className="border-0 shadow-sm">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-base">Conversion Metrics</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-500">Free to Paid</span>
+                      <span className="font-semibold">12.5%</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-500">Trial Conversion</span>
+                      <span className="font-semibold">45.2%</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-500">Upgrade Rate</span>
+                      <span className="font-semibold">18.7%</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-500">Annual Adoption</span>
+                      <span className="font-semibold">67%</span>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-0 shadow-sm">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-base">Coupon Performance</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-500">Active Coupons</span>
+                      <span className="font-semibold">{mockCoupons.filter(c => c.isActive).length}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-500">Total Redemptions</span>
+                      <span className="font-semibold">{mockCoupons.reduce((sum, c) => sum + c.redemptionsCount, 0).toLocaleString()}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-500">Top Coupon</span>
+                      <span className="font-semibold font-mono text-xs">TRIAL30</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-500">Avg Discount</span>
+                      <span className="font-semibold">28%</span>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-3 pt-4 border-t">
+                <Button variant="outline" onClick={() => setShowAnalyticsDialog(false)}>
+                  Close
+                </Button>
+                <Button variant="outline" onClick={handleExportPricing}>
+                  <Download className="w-4 h-4 mr-2" />
+                  Export Data
+                </Button>
+                <Button
+                  className="bg-gradient-to-r from-violet-500 to-purple-600 text-white"
+                  onClick={() => {
+                    setShowAnalyticsDialog(false)
+                    setActiveTab('analytics')
+                  }}
+                >
+                  <BarChart3 className="w-4 h-4 mr-2" />
+                  Full Analytics Dashboard
                 </Button>
               </div>
             </div>

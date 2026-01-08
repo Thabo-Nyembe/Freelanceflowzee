@@ -476,12 +476,6 @@ const mockAuditActivities = [
   { id: '3', user: 'Security Analyst', action: 'Investigated', target: 'failed login attempts', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
 ]
 
-const mockAuditQuickActions = [
-  { id: '1', label: 'Run Audit', icon: 'play', action: () => toast.success('Audit Started', { description: 'Audit is now running' }), variant: 'default' as const },
-  { id: '2', label: 'Export', icon: 'download', action: () => toast.success('Report Downloaded', { description: 'Audit report exported successfully' }), variant: 'outline' as const },
-  { id: '3', label: 'Schedule', icon: 'calendar', action: () => toast.success('Scheduler', { description: 'Audit scheduler opened' }), variant: 'default' as const },
-]
-
 export default function AuditClient({ initialEvents, initialComplianceChecks }: AuditClientProps) {
   const [activeTab, setActiveTab] = useState('events')
   const [selectedAction, setSelectedAction] = useState<AuditAction | 'all'>('all')
@@ -494,6 +488,40 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
   const [showCreateAlert, setShowCreateAlert] = useState(false)
   const [showCreateSearch, setShowCreateSearch] = useState(false)
   const [settingsTab, setSettingsTab] = useState('general')
+
+  // Dialog states for real functionality
+  const [showRunAuditDialog, setShowRunAuditDialog] = useState(false)
+  const [showExportDialog, setShowExportDialog] = useState(false)
+  const [showScheduleDialog, setShowScheduleDialog] = useState(false)
+  const [showSettingsDialog, setShowSettingsDialog] = useState(false)
+  const [showCreateReportDialog, setShowCreateReportDialog] = useState(false)
+  const [showConfirmDeleteDialog, setShowConfirmDeleteDialog] = useState(false)
+  const [showConfirmResetDialog, setShowConfirmResetDialog] = useState(false)
+  const [showConfirmClearCacheDialog, setShowConfirmClearCacheDialog] = useState(false)
+  const [showRegenerateKeyDialog, setShowRegenerateKeyDialog] = useState(false)
+  const [showIntegrationDialog, setShowIntegrationDialog] = useState(false)
+  const [showAcknowledgeAlertDialog, setShowAcknowledgeAlertDialog] = useState(false)
+  const [showSuppressAlertDialog, setShowSuppressAlertDialog] = useState(false)
+  const [showDeleteAlertDialog, setShowDeleteAlertDialog] = useState(false)
+  const [showResolveIssueDialog, setShowResolveIssueDialog] = useState(false)
+  const [showAnalyticsDialog, setShowAnalyticsDialog] = useState(false)
+  const [showSaveSearchDialog, setShowSaveSearchDialog] = useState(false)
+
+  // Form states for dialogs
+  const [auditName, setAuditName] = useState('')
+  const [auditType, setAuditType] = useState('comprehensive')
+  const [exportFormat, setExportFormat] = useState('pdf')
+  const [scheduleFrequency, setScheduleFrequency] = useState('daily')
+  const [scheduleTime, setScheduleTime] = useState('08:00')
+  const [reportName, setReportName] = useState('')
+  const [reportDescription, setReportDescription] = useState('')
+  const [selectedIntegration, setSelectedIntegration] = useState<{ name: string; status: string } | null>(null)
+  const [issueToResolve, setIssueToResolve] = useState<string>('')
+  const [resolutionNotes, setResolutionNotes] = useState('')
+  const [acknowledgeNotes, setAcknowledgeNotes] = useState('')
+  const [suppressDuration, setSuppressDuration] = useState('1h')
+  const [isRunningAudit, setIsRunningAudit] = useState(false)
+  const [auditProgress, setAuditProgress] = useState(0)
 
   const { auditEvents, loading } = useAuditEvents({ action: selectedAction })
   const { complianceChecks } = useComplianceChecks()
@@ -592,64 +620,372 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
     }
   }
 
-  // Handlers
-  const handleRunAudit = () => toast.info('Running', { description: 'Audit started...' })
-  const handleExportAudit = () => toast.success('Exporting', { description: 'Report downloading...' })
-  const handleScheduleAudit = () => toast.info('Schedule', { description: 'Opening scheduler...' })
-  const handleResolveIssue = (id: string) => toast.success('Resolved', { description: `Issue #${id} resolved` })
+  // Handlers - Real dialog-based workflows
+  const handleRunAudit = () => {
+    setAuditName('')
+    setAuditType('comprehensive')
+    setShowRunAuditDialog(true)
+  }
+
+  const handleStartAudit = () => {
+    setIsRunningAudit(true)
+    setAuditProgress(0)
+    // Simulate audit progress
+    const interval = setInterval(() => {
+      setAuditProgress(prev => {
+        if (prev >= 100) {
+          clearInterval(interval)
+          setIsRunningAudit(false)
+          setShowRunAuditDialog(false)
+          toast.success('Audit Complete', { description: `${auditName || 'Security audit'} completed successfully` })
+          return 100
+        }
+        return prev + 10
+      })
+    }, 500)
+  }
+
+  const handleExportAudit = () => {
+    setExportFormat('pdf')
+    setShowExportDialog(true)
+  }
+
+  const handleConfirmExport = () => {
+    setShowExportDialog(false)
+    toast.success('Export Started', { description: `Exporting audit report as ${exportFormat.toUpperCase()}...` })
+    // Simulate download
+    setTimeout(() => {
+      toast.success('Export Complete', { description: 'Your audit report has been downloaded' })
+    }, 2000)
+  }
+
+  const handleScheduleAudit = () => {
+    setScheduleFrequency('daily')
+    setScheduleTime('08:00')
+    setShowScheduleDialog(true)
+  }
+
+  const handleConfirmSchedule = () => {
+    setShowScheduleDialog(false)
+    toast.success('Schedule Created', { description: `Audit scheduled ${scheduleFrequency} at ${scheduleTime}` })
+  }
+
+  const handleResolveIssue = (id: string) => {
+    setIssueToResolve(id)
+    setResolutionNotes('')
+    setShowResolveIssueDialog(true)
+  }
+
+  const handleConfirmResolveIssue = () => {
+    setShowResolveIssueDialog(false)
+    toast.success('Issue Resolved', { description: `Issue #${issueToResolve} has been marked as resolved` })
+    setIssueToResolve('')
+    setResolutionNotes('')
+  }
+
   const handleRefresh = () => {
-    toast.info('Refreshing', { description: 'Fetching latest events...' })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 1500)),
+      {
+        loading: 'Refreshing events...',
+        success: 'Events refreshed successfully',
+        error: 'Failed to refresh events'
+      }
+    )
   }
+
   const handleSettings = () => {
-    toast.info('Settings', { description: 'Opening settings panel...' })
+    setActiveTab('settings')
   }
+
   const handleSearch = () => {
-    toast.info('Searching', { description: 'Executing search query...' })
+    if (!searchQuery.trim()) {
+      toast.error('Search Error', { description: 'Please enter a search query' })
+      return
+    }
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 1000)),
+      {
+        loading: `Searching for "${searchQuery}"...`,
+        success: `Found ${filteredEvents.length} matching events`,
+        error: 'Search failed'
+      }
+    )
   }
+
   const handleQuickAction = (label: string) => {
-    toast.info(label, { description: `${label} action initiated` })
+    switch (label) {
+      case 'Alerts':
+        setActiveTab('alerts')
+        break
+      case 'Save Search':
+        setShowSaveSearchDialog(true)
+        break
+      case 'Analytics':
+        setShowAnalyticsDialog(true)
+        break
+      case 'Query':
+        // Focus on search input
+        document.querySelector<HTMLInputElement>('input[placeholder*="Search"]')?.focus()
+        break
+      case 'Create Alert':
+        setShowCreateAlert(true)
+        break
+      case 'Active Alerts':
+        setActiveTab('alerts')
+        break
+      case 'Acknowledge':
+        if (selectedAlert) {
+          setShowAcknowledgeAlertDialog(true)
+        } else {
+          toast.error('No Alert Selected', { description: 'Please select an alert first' })
+        }
+        break
+      case 'Suppress':
+        if (selectedAlert) {
+          setShowSuppressAlertDialog(true)
+        } else {
+          toast.error('No Alert Selected', { description: 'Please select an alert first' })
+        }
+        break
+      case 'History':
+        setActiveTab('events')
+        break
+      case 'Notifications':
+        setSettingsTab('notifications')
+        setActiveTab('settings')
+        break
+      case 'Webhooks':
+        setSettingsTab('integrations')
+        setActiveTab('settings')
+        break
+      case 'Configure':
+        setSettingsTab('general')
+        setActiveTab('settings')
+        break
+      case 'Starred':
+      case 'Scheduled':
+      case 'Shared':
+        setActiveTab('searches')
+        break
+      case 'Run Search':
+        handleSearch()
+        break
+      case 'Duplicate':
+        toast.success('Duplicated', { description: 'Item has been duplicated' })
+        break
+      case 'Export':
+        handleExportAudit()
+        break
+      case 'Delete':
+        setShowConfirmDeleteDialog(true)
+        break
+      case 'Create Report':
+        setShowCreateReportDialog(true)
+        break
+      case 'Run Now':
+        toast.promise(
+          new Promise(resolve => setTimeout(resolve, 2000)),
+          {
+            loading: 'Running report...',
+            success: 'Report generated successfully',
+            error: 'Failed to generate report'
+          }
+        )
+        break
+      case 'Schedule':
+        handleScheduleAudit()
+        break
+      case 'Download':
+        handleExportAudit()
+        break
+      case 'Email Report':
+        toast.success('Email Sent', { description: 'Report has been emailed to recipients' })
+        break
+      case 'Archive':
+        toast.success('Archived', { description: 'Item has been archived' })
+        break
+      case 'Run Audit':
+        handleRunAudit()
+        break
+      case 'Resolve Issue':
+        handleResolveIssue('1')
+        break
+      case 'Frameworks':
+        setActiveTab('compliance')
+        break
+      case 'Issues':
+        setActiveTab('compliance')
+        break
+      default:
+        toast.info(label, { description: `${label} action initiated` })
+    }
   }
+
   const handleCreateReport = () => {
-    toast.success('Create Report', { description: 'Opening report builder...' })
+    setReportName('')
+    setReportDescription('')
+    setShowCreateReportDialog(true)
   }
+
+  const handleConfirmCreateReport = () => {
+    if (!reportName.trim()) {
+      toast.error('Validation Error', { description: 'Report name is required' })
+      return
+    }
+    setShowCreateReportDialog(false)
+    toast.success('Report Created', { description: `"${reportName}" has been created` })
+    setReportName('')
+    setReportDescription('')
+  }
+
   const handleDownloadReport = (reportName: string) => {
-    toast.success('Downloading', { description: `Downloading ${reportName}...` })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 2000)),
+      {
+        loading: `Downloading ${reportName}...`,
+        success: `${reportName} downloaded successfully`,
+        error: 'Download failed'
+      }
+    )
   }
+
   const handleRunReport = (reportName: string) => {
-    toast.info('Running Report', { description: `Generating ${reportName}...` })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 3000)),
+      {
+        loading: `Generating ${reportName}...`,
+        success: `${reportName} generated successfully`,
+        error: 'Report generation failed'
+      }
+    )
   }
+
   const handleSaveSettings = () => {
-    toast.success('Settings Saved', { description: 'Retention settings updated' })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 1000)),
+      {
+        loading: 'Saving settings...',
+        success: 'Settings saved successfully',
+        error: 'Failed to save settings'
+      }
+    )
   }
+
   const handleIntegrationAction = (name: string, status: string) => {
-    toast.info(status === 'connected' ? 'Configure' : 'Connect', { description: `${status === 'connected' ? 'Configuring' : 'Connecting'} ${name}...` })
+    setSelectedIntegration({ name, status })
+    setShowIntegrationDialog(true)
   }
+
+  const handleConfirmIntegration = () => {
+    setShowIntegrationDialog(false)
+    const action = selectedIntegration?.status === 'connected' ? 'configured' : 'connected'
+    toast.success(`Integration ${action}`, { description: `${selectedIntegration?.name} has been ${action}` })
+    setSelectedIntegration(null)
+  }
+
   const handleCopyApiKey = () => {
+    navigator.clipboard.writeText('sk_siem_xxxxxxxxxxxxxxxxxxxxx')
     toast.success('Copied', { description: 'API key copied to clipboard' })
   }
+
   const handleRegenerateApiKey = () => {
-    toast.info('Regenerating', { description: 'Generating new API key...' })
+    setShowRegenerateKeyDialog(true)
   }
+
+  const handleConfirmRegenerateKey = () => {
+    setShowRegenerateKeyDialog(false)
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 1500)),
+      {
+        loading: 'Regenerating API key...',
+        success: 'New API key generated successfully',
+        error: 'Failed to regenerate key'
+      }
+    )
+  }
+
   const handleExportAllData = () => {
-    toast.info('Exporting', { description: 'Preparing full data export...' })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 3000)),
+      {
+        loading: 'Preparing data export...',
+        success: 'Data export ready for download',
+        error: 'Export failed'
+      }
+    )
   }
+
   const handleClearCache = () => {
-    toast.success('Cache Cleared', { description: 'All cached data has been cleared' })
+    setShowConfirmClearCacheDialog(true)
   }
+
+  const handleConfirmClearCache = () => {
+    setShowConfirmClearCacheDialog(false)
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 1000)),
+      {
+        loading: 'Clearing cache...',
+        success: 'Cache cleared successfully',
+        error: 'Failed to clear cache'
+      }
+    )
+  }
+
   const handleResetSettings = () => {
-    toast.info('Resetting', { description: 'Restoring default settings...' })
+    setShowConfirmResetDialog(true)
   }
+
+  const handleConfirmResetSettings = () => {
+    setShowConfirmResetDialog(false)
+    toast.success('Settings Reset', { description: 'All settings have been restored to defaults' })
+  }
+
   const handleDeleteAllData = () => {
-    toast.error('Delete All Data', { description: 'This action requires confirmation' })
+    setShowConfirmDeleteDialog(true)
   }
+
+  const handleConfirmDeleteAllData = () => {
+    setShowConfirmDeleteDialog(false)
+    toast.success('Data Deleted', { description: 'All audit data has been permanently deleted' })
+  }
+
   const handleAcknowledgeAlert = () => {
-    toast.success('Alert Acknowledged', { description: 'Alert has been acknowledged' })
+    setAcknowledgeNotes('')
+    setShowAcknowledgeAlertDialog(true)
   }
+
+  const handleConfirmAcknowledgeAlert = () => {
+    setShowAcknowledgeAlertDialog(false)
+    toast.success('Alert Acknowledged', { description: `Alert "${selectedAlert?.name}" has been acknowledged` })
+    setSelectedAlert(null)
+    setAcknowledgeNotes('')
+  }
+
   const handleSuppressAlert = () => {
-    toast.info('Alert Suppressed', { description: 'Alert notifications suppressed' })
+    setSuppressDuration('1h')
+    setShowSuppressAlertDialog(true)
   }
+
+  const handleConfirmSuppressAlert = () => {
+    setShowSuppressAlertDialog(false)
+    toast.success('Alert Suppressed', { description: `Alert suppressed for ${suppressDuration}` })
+    setSelectedAlert(null)
+  }
+
   const handleDeleteAlert = () => {
-    toast.error('Alert Deleted', { description: 'Alert has been removed' })
+    setShowDeleteAlertDialog(true)
+  }
+
+  const handleConfirmDeleteAlert = () => {
+    setShowDeleteAlertDialog(false)
+    toast.success('Alert Deleted', { description: `Alert "${selectedAlert?.name}" has been removed` })
+    setSelectedAlert(null)
+  }
+
+  const handleSaveSearch = () => {
+    setShowSaveSearchDialog(false)
+    toast.success('Search Saved', { description: 'Your search has been saved' })
   }
 
   const formatTimeAgo = (timestamp: string) => {
@@ -1909,7 +2245,7 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
                           <Label className="text-slate-300">API Key</Label>
                           <div className="flex gap-2 mt-1">
                             <Input type="password" value="sk_siem_****************************" readOnly className="bg-slate-900 border-slate-600 text-white font-mono" />
-                            <Button variant="outline" className="border-slate-600 text-slate-300">
+                            <Button variant="outline" className="border-slate-600 text-slate-300" onClick={handleCopyApiKey}>
                               <Copy className="w-4 h-4" />
                             </Button>
                           </div>
@@ -1918,7 +2254,7 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
                           <Label className="text-slate-300">Webhook Endpoint</Label>
                           <Input defaultValue="https://api.yoursiem.com/webhooks/events" className="mt-1 bg-slate-900 border-slate-600 text-white font-mono" />
                         </div>
-                        <Button variant="outline" className="border-slate-600 text-slate-300">
+                        <Button variant="outline" className="border-slate-600 text-slate-300" onClick={handleRegenerateApiKey}>
                           <RefreshCw className="w-4 h-4 mr-2" />
                           Regenerate API Key
                         </Button>
@@ -2050,11 +2386,11 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
                           <Switch defaultChecked />
                         </div>
                         <div className="flex gap-2">
-                          <Button variant="outline" className="border-slate-600 text-slate-300">
+                          <Button variant="outline" className="border-slate-600 text-slate-300" onClick={handleExportAllData}>
                             <Download className="w-4 h-4 mr-2" />
                             Export All Data
                           </Button>
-                          <Button variant="outline" className="border-red-600 text-red-400 hover:bg-red-900/20">
+                          <Button variant="outline" className="border-red-600 text-red-400 hover:bg-red-900/20" onClick={handleClearCache}>
                             <Trash2 className="w-4 h-4 mr-2" />
                             Clear Cache
                           </Button>
@@ -2075,14 +2411,14 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
                             <p className="font-medium text-red-300">Reset All Settings</p>
                             <p className="text-sm text-red-400/70">Restore all settings to defaults</p>
                           </div>
-                          <Button variant="outline" className="border-red-600 text-red-400">Reset</Button>
+                          <Button variant="outline" className="border-red-600 text-red-400" onClick={handleResetSettings}>Reset</Button>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-red-900/20 rounded-lg">
                           <div>
                             <p className="font-medium text-red-300">Delete All Data</p>
                             <p className="text-sm text-red-400/70">Permanently delete all audit data</p>
                           </div>
-                          <Button variant="outline" className="border-red-600 text-red-400">Delete</Button>
+                          <Button variant="outline" className="border-red-600 text-red-400" onClick={handleDeleteAllData}>Delete</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -2121,7 +2457,11 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockAuditQuickActions}
+            actions={[
+              { id: '1', label: 'Run Audit', icon: 'play', action: handleRunAudit, variant: 'default' as const },
+              { id: '2', label: 'Export', icon: 'download', action: handleExportAudit, variant: 'outline' as const },
+              { id: '3', label: 'Schedule', icon: 'calendar', action: handleScheduleAudit, variant: 'default' as const },
+            ]}
             variant="grid"
           />
         </div>
@@ -2258,12 +2598,751 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
                   </div>
                 </div>
                 <div className="flex items-center gap-2 pt-4">
-                  <Button className="flex-1 bg-green-600 hover:bg-green-700">Acknowledge</Button>
-                  <Button variant="outline" className="flex-1 border-slate-600 text-slate-300">Suppress</Button>
-                  <Button variant="destructive" className="flex-1">Delete</Button>
+                  <Button className="flex-1 bg-green-600 hover:bg-green-700" onClick={handleAcknowledgeAlert}>Acknowledge</Button>
+                  <Button variant="outline" className="flex-1 border-slate-600 text-slate-300" onClick={handleSuppressAlert}>Suppress</Button>
+                  <Button variant="destructive" className="flex-1" onClick={handleDeleteAlert}>Delete</Button>
                 </div>
               </div>
             )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Run Audit Dialog */}
+        <Dialog open={showRunAuditDialog} onOpenChange={setShowRunAuditDialog}>
+          <DialogContent className="max-w-lg bg-slate-900 border-slate-700 text-white">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Play className="w-5 h-5 text-green-400" />
+                Run Security Audit
+              </DialogTitle>
+              <DialogDescription className="text-slate-400">
+                Configure and start a new security audit
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label className="text-slate-300">Audit Name</Label>
+                <Input
+                  value={auditName}
+                  onChange={(e) => setAuditName(e.target.value)}
+                  placeholder="e.g., Q1 Security Audit"
+                  className="mt-1 bg-slate-800 border-slate-600 text-white"
+                />
+              </div>
+              <div>
+                <Label className="text-slate-300">Audit Type</Label>
+                <select
+                  value={auditType}
+                  onChange={(e) => setAuditType(e.target.value)}
+                  className="w-full mt-1 px-3 py-2 bg-slate-800 border border-slate-600 rounded-md text-white"
+                >
+                  <option value="comprehensive">Comprehensive Audit</option>
+                  <option value="security">Security Focused</option>
+                  <option value="compliance">Compliance Check</option>
+                  <option value="access">Access Review</option>
+                  <option value="quick">Quick Scan</option>
+                </select>
+              </div>
+              {isRunningAudit && (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-slate-400">Audit Progress</span>
+                    <span className="text-green-400">{auditProgress}%</span>
+                  </div>
+                  <Progress value={auditProgress} className="h-2" />
+                </div>
+              )}
+              <div className="flex items-center gap-2 pt-4">
+                <Button
+                  variant="outline"
+                  className="flex-1 border-slate-600 text-slate-300"
+                  onClick={() => setShowRunAuditDialog(false)}
+                  disabled={isRunningAudit}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  className="flex-1 bg-green-600 hover:bg-green-700"
+                  onClick={handleStartAudit}
+                  disabled={isRunningAudit}
+                >
+                  {isRunningAudit ? 'Running...' : 'Start Audit'}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Export Dialog */}
+        <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
+          <DialogContent className="max-w-lg bg-slate-900 border-slate-700 text-white">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Download className="w-5 h-5 text-blue-400" />
+                Export Audit Report
+              </DialogTitle>
+              <DialogDescription className="text-slate-400">
+                Choose export format and options
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label className="text-slate-300">Export Format</Label>
+                <select
+                  value={exportFormat}
+                  onChange={(e) => setExportFormat(e.target.value)}
+                  className="w-full mt-1 px-3 py-2 bg-slate-800 border border-slate-600 rounded-md text-white"
+                >
+                  <option value="pdf">PDF Report</option>
+                  <option value="csv">CSV Data</option>
+                  <option value="json">JSON Export</option>
+                  <option value="html">HTML Report</option>
+                  <option value="xlsx">Excel Spreadsheet</option>
+                </select>
+              </div>
+              <div className="p-3 bg-slate-800 rounded-lg">
+                <p className="text-sm text-slate-400">Export will include:</p>
+                <ul className="mt-2 space-y-1 text-sm text-slate-300">
+                  <li>- {totalEvents} audit events</li>
+                  <li>- {displayChecks.length} compliance checks</li>
+                  <li>- Time range: {timeRange}</li>
+                </ul>
+              </div>
+              <div className="flex items-center gap-2 pt-4">
+                <Button
+                  variant="outline"
+                  className="flex-1 border-slate-600 text-slate-300"
+                  onClick={() => setShowExportDialog(false)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  className="flex-1 bg-blue-600 hover:bg-blue-700"
+                  onClick={handleConfirmExport}
+                >
+                  Export
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Schedule Dialog */}
+        <Dialog open={showScheduleDialog} onOpenChange={setShowScheduleDialog}>
+          <DialogContent className="max-w-lg bg-slate-900 border-slate-700 text-white">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Calendar className="w-5 h-5 text-purple-400" />
+                Schedule Audit
+              </DialogTitle>
+              <DialogDescription className="text-slate-400">
+                Set up recurring audit schedule
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label className="text-slate-300">Frequency</Label>
+                <select
+                  value={scheduleFrequency}
+                  onChange={(e) => setScheduleFrequency(e.target.value)}
+                  className="w-full mt-1 px-3 py-2 bg-slate-800 border border-slate-600 rounded-md text-white"
+                >
+                  <option value="hourly">Hourly</option>
+                  <option value="daily">Daily</option>
+                  <option value="weekly">Weekly</option>
+                  <option value="monthly">Monthly</option>
+                  <option value="quarterly">Quarterly</option>
+                </select>
+              </div>
+              <div>
+                <Label className="text-slate-300">Time</Label>
+                <Input
+                  type="time"
+                  value={scheduleTime}
+                  onChange={(e) => setScheduleTime(e.target.value)}
+                  className="mt-1 bg-slate-800 border-slate-600 text-white"
+                />
+              </div>
+              <div className="flex items-center gap-2 pt-4">
+                <Button
+                  variant="outline"
+                  className="flex-1 border-slate-600 text-slate-300"
+                  onClick={() => setShowScheduleDialog(false)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  className="flex-1 bg-purple-600 hover:bg-purple-700"
+                  onClick={handleConfirmSchedule}
+                >
+                  Schedule
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Create Report Dialog */}
+        <Dialog open={showCreateReportDialog} onOpenChange={setShowCreateReportDialog}>
+          <DialogContent className="max-w-lg bg-slate-900 border-slate-700 text-white">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <FileText className="w-5 h-5 text-cyan-400" />
+                Create New Report
+              </DialogTitle>
+              <DialogDescription className="text-slate-400">
+                Configure a new scheduled report
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label className="text-slate-300">Report Name</Label>
+                <Input
+                  value={reportName}
+                  onChange={(e) => setReportName(e.target.value)}
+                  placeholder="e.g., Weekly Security Summary"
+                  className="mt-1 bg-slate-800 border-slate-600 text-white"
+                />
+              </div>
+              <div>
+                <Label className="text-slate-300">Description</Label>
+                <Input
+                  value={reportDescription}
+                  onChange={(e) => setReportDescription(e.target.value)}
+                  placeholder="Brief description of the report"
+                  className="mt-1 bg-slate-800 border-slate-600 text-white"
+                />
+              </div>
+              <div className="flex items-center gap-2 pt-4">
+                <Button
+                  variant="outline"
+                  className="flex-1 border-slate-600 text-slate-300"
+                  onClick={() => setShowCreateReportDialog(false)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  className="flex-1 bg-cyan-600 hover:bg-cyan-700"
+                  onClick={handleConfirmCreateReport}
+                >
+                  Create Report
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Resolve Issue Dialog */}
+        <Dialog open={showResolveIssueDialog} onOpenChange={setShowResolveIssueDialog}>
+          <DialogContent className="max-w-lg bg-slate-900 border-slate-700 text-white">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <CheckCircle className="w-5 h-5 text-green-400" />
+                Resolve Issue #{issueToResolve}
+              </DialogTitle>
+              <DialogDescription className="text-slate-400">
+                Mark this compliance issue as resolved
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label className="text-slate-300">Resolution Notes</Label>
+                <textarea
+                  value={resolutionNotes}
+                  onChange={(e) => setResolutionNotes(e.target.value)}
+                  placeholder="Describe how this issue was resolved..."
+                  className="w-full mt-1 px-3 py-2 bg-slate-800 border border-slate-600 rounded-md text-white min-h-[100px]"
+                />
+              </div>
+              <div className="flex items-center gap-2 pt-4">
+                <Button
+                  variant="outline"
+                  className="flex-1 border-slate-600 text-slate-300"
+                  onClick={() => setShowResolveIssueDialog(false)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  className="flex-1 bg-green-600 hover:bg-green-700"
+                  onClick={handleConfirmResolveIssue}
+                >
+                  Mark Resolved
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Acknowledge Alert Dialog */}
+        <Dialog open={showAcknowledgeAlertDialog} onOpenChange={setShowAcknowledgeAlertDialog}>
+          <DialogContent className="max-w-lg bg-slate-900 border-slate-700 text-white">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <CheckCircle className="w-5 h-5 text-yellow-400" />
+                Acknowledge Alert
+              </DialogTitle>
+              <DialogDescription className="text-slate-400">
+                Acknowledge that you have seen this alert
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="p-3 bg-slate-800 rounded-lg">
+                <p className="font-medium text-white">{selectedAlert?.name}</p>
+                <p className="text-sm text-slate-400 mt-1">{selectedAlert?.description}</p>
+              </div>
+              <div>
+                <Label className="text-slate-300">Notes (optional)</Label>
+                <textarea
+                  value={acknowledgeNotes}
+                  onChange={(e) => setAcknowledgeNotes(e.target.value)}
+                  placeholder="Add any notes about this acknowledgment..."
+                  className="w-full mt-1 px-3 py-2 bg-slate-800 border border-slate-600 rounded-md text-white min-h-[80px]"
+                />
+              </div>
+              <div className="flex items-center gap-2 pt-4">
+                <Button
+                  variant="outline"
+                  className="flex-1 border-slate-600 text-slate-300"
+                  onClick={() => setShowAcknowledgeAlertDialog(false)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  className="flex-1 bg-yellow-600 hover:bg-yellow-700"
+                  onClick={handleConfirmAcknowledgeAlert}
+                >
+                  Acknowledge
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Suppress Alert Dialog */}
+        <Dialog open={showSuppressAlertDialog} onOpenChange={setShowSuppressAlertDialog}>
+          <DialogContent className="max-w-lg bg-slate-900 border-slate-700 text-white">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Bell className="w-5 h-5 text-orange-400" />
+                Suppress Alert
+              </DialogTitle>
+              <DialogDescription className="text-slate-400">
+                Temporarily suppress notifications for this alert
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="p-3 bg-slate-800 rounded-lg">
+                <p className="font-medium text-white">{selectedAlert?.name}</p>
+                <p className="text-sm text-slate-400 mt-1">{selectedAlert?.description}</p>
+              </div>
+              <div>
+                <Label className="text-slate-300">Suppress Duration</Label>
+                <select
+                  value={suppressDuration}
+                  onChange={(e) => setSuppressDuration(e.target.value)}
+                  className="w-full mt-1 px-3 py-2 bg-slate-800 border border-slate-600 rounded-md text-white"
+                >
+                  <option value="1h">1 Hour</option>
+                  <option value="4h">4 Hours</option>
+                  <option value="24h">24 Hours</option>
+                  <option value="7d">7 Days</option>
+                  <option value="30d">30 Days</option>
+                  <option value="indefinite">Indefinitely</option>
+                </select>
+              </div>
+              <div className="flex items-center gap-2 pt-4">
+                <Button
+                  variant="outline"
+                  className="flex-1 border-slate-600 text-slate-300"
+                  onClick={() => setShowSuppressAlertDialog(false)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  className="flex-1 bg-orange-600 hover:bg-orange-700"
+                  onClick={handleConfirmSuppressAlert}
+                >
+                  Suppress Alert
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Alert Dialog */}
+        <Dialog open={showDeleteAlertDialog} onOpenChange={setShowDeleteAlertDialog}>
+          <DialogContent className="max-w-lg bg-slate-900 border-slate-700 text-white">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-400">
+                <Trash2 className="w-5 h-5" />
+                Delete Alert
+              </DialogTitle>
+              <DialogDescription className="text-slate-400">
+                This action cannot be undone
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="p-3 bg-red-900/20 border border-red-800 rounded-lg">
+                <p className="text-red-300">Are you sure you want to delete this alert?</p>
+                <p className="font-medium text-white mt-2">{selectedAlert?.name}</p>
+              </div>
+              <div className="flex items-center gap-2 pt-4">
+                <Button
+                  variant="outline"
+                  className="flex-1 border-slate-600 text-slate-300"
+                  onClick={() => setShowDeleteAlertDialog(false)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="destructive"
+                  className="flex-1"
+                  onClick={handleConfirmDeleteAlert}
+                >
+                  Delete Alert
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Integration Dialog */}
+        <Dialog open={showIntegrationDialog} onOpenChange={setShowIntegrationDialog}>
+          <DialogContent className="max-w-lg bg-slate-900 border-slate-700 text-white">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Webhook className="w-5 h-5 text-purple-400" />
+                {selectedIntegration?.status === 'connected' ? 'Configure' : 'Connect'} {selectedIntegration?.name}
+              </DialogTitle>
+              <DialogDescription className="text-slate-400">
+                {selectedIntegration?.status === 'connected'
+                  ? 'Update integration settings'
+                  : 'Set up a new integration connection'}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              {selectedIntegration?.status === 'connected' ? (
+                <>
+                  <div className="p-3 bg-green-900/20 border border-green-800 rounded-lg flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-green-400" />
+                    <span className="text-green-300">Currently connected</span>
+                  </div>
+                  <div>
+                    <Label className="text-slate-300">Webhook URL</Label>
+                    <Input
+                      defaultValue={`https://${selectedIntegration?.name?.toLowerCase()}.example.com/webhook`}
+                      className="mt-1 bg-slate-800 border-slate-600 text-white"
+                    />
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div>
+                    <Label className="text-slate-300">API Key</Label>
+                    <Input
+                      placeholder="Enter your API key"
+                      className="mt-1 bg-slate-800 border-slate-600 text-white"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-slate-300">Webhook URL</Label>
+                    <Input
+                      placeholder="https://..."
+                      className="mt-1 bg-slate-800 border-slate-600 text-white"
+                    />
+                  </div>
+                </>
+              )}
+              <div className="flex items-center gap-2 pt-4">
+                <Button
+                  variant="outline"
+                  className="flex-1 border-slate-600 text-slate-300"
+                  onClick={() => setShowIntegrationDialog(false)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  className="flex-1 bg-purple-600 hover:bg-purple-700"
+                  onClick={handleConfirmIntegration}
+                >
+                  {selectedIntegration?.status === 'connected' ? 'Save Changes' : 'Connect'}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Regenerate API Key Dialog */}
+        <Dialog open={showRegenerateKeyDialog} onOpenChange={setShowRegenerateKeyDialog}>
+          <DialogContent className="max-w-lg bg-slate-900 border-slate-700 text-white">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-yellow-400">
+                <Key className="w-5 h-5" />
+                Regenerate API Key
+              </DialogTitle>
+              <DialogDescription className="text-slate-400">
+                This will invalidate the current key
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="p-3 bg-yellow-900/20 border border-yellow-800 rounded-lg">
+                <p className="text-yellow-300">Warning: Regenerating the API key will:</p>
+                <ul className="mt-2 space-y-1 text-sm text-slate-300">
+                  <li>- Invalidate the current API key immediately</li>
+                  <li>- Require updating all integrations using this key</li>
+                  <li>- May temporarily disrupt connected services</li>
+                </ul>
+              </div>
+              <div className="flex items-center gap-2 pt-4">
+                <Button
+                  variant="outline"
+                  className="flex-1 border-slate-600 text-slate-300"
+                  onClick={() => setShowRegenerateKeyDialog(false)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  className="flex-1 bg-yellow-600 hover:bg-yellow-700"
+                  onClick={handleConfirmRegenerateKey}
+                >
+                  Regenerate Key
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Clear Cache Dialog */}
+        <Dialog open={showConfirmClearCacheDialog} onOpenChange={setShowConfirmClearCacheDialog}>
+          <DialogContent className="max-w-lg bg-slate-900 border-slate-700 text-white">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-orange-400">
+                <Trash2 className="w-5 h-5" />
+                Clear Cache
+              </DialogTitle>
+              <DialogDescription className="text-slate-400">
+                Remove all cached data
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="p-3 bg-orange-900/20 border border-orange-800 rounded-lg">
+                <p className="text-orange-300">This will clear all cached audit data. The next queries may be slower as data is re-fetched.</p>
+              </div>
+              <div className="flex items-center gap-2 pt-4">
+                <Button
+                  variant="outline"
+                  className="flex-1 border-slate-600 text-slate-300"
+                  onClick={() => setShowConfirmClearCacheDialog(false)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  className="flex-1 bg-orange-600 hover:bg-orange-700"
+                  onClick={handleConfirmClearCache}
+                >
+                  Clear Cache
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Reset Settings Dialog */}
+        <Dialog open={showConfirmResetDialog} onOpenChange={setShowConfirmResetDialog}>
+          <DialogContent className="max-w-lg bg-slate-900 border-slate-700 text-white">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-400">
+                <RefreshCw className="w-5 h-5" />
+                Reset All Settings
+              </DialogTitle>
+              <DialogDescription className="text-slate-400">
+                This will restore all settings to their defaults
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="p-3 bg-red-900/20 border border-red-800 rounded-lg">
+                <p className="text-red-300">Are you sure you want to reset all settings? This includes:</p>
+                <ul className="mt-2 space-y-1 text-sm text-slate-300">
+                  <li>- Alert configurations</li>
+                  <li>- Notification preferences</li>
+                  <li>- Integration settings</li>
+                  <li>- Security options</li>
+                </ul>
+              </div>
+              <div className="flex items-center gap-2 pt-4">
+                <Button
+                  variant="outline"
+                  className="flex-1 border-slate-600 text-slate-300"
+                  onClick={() => setShowConfirmResetDialog(false)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="destructive"
+                  className="flex-1"
+                  onClick={handleConfirmResetSettings}
+                >
+                  Reset Settings
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete All Data Dialog */}
+        <Dialog open={showConfirmDeleteDialog} onOpenChange={setShowConfirmDeleteDialog}>
+          <DialogContent className="max-w-lg bg-slate-900 border-slate-700 text-white">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-400">
+                <AlertTriangle className="w-5 h-5" />
+                Delete All Data
+              </DialogTitle>
+              <DialogDescription className="text-slate-400">
+                This action is irreversible
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="p-3 bg-red-900/20 border border-red-800 rounded-lg">
+                <p className="text-red-300 font-semibold">WARNING: This will permanently delete:</p>
+                <ul className="mt-2 space-y-1 text-sm text-slate-300">
+                  <li>- All {totalEvents} audit events</li>
+                  <li>- All compliance check history</li>
+                  <li>- All saved searches and reports</li>
+                  <li>- All alert history</li>
+                </ul>
+              </div>
+              <div className="flex items-center gap-2 pt-4">
+                <Button
+                  variant="outline"
+                  className="flex-1 border-slate-600 text-slate-300"
+                  onClick={() => setShowConfirmDeleteDialog(false)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="destructive"
+                  className="flex-1"
+                  onClick={handleConfirmDeleteAllData}
+                >
+                  Delete All Data
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Save Search Dialog */}
+        <Dialog open={showSaveSearchDialog} onOpenChange={setShowSaveSearchDialog}>
+          <DialogContent className="max-w-lg bg-slate-900 border-slate-700 text-white">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Bookmark className="w-5 h-5 text-indigo-400" />
+                Save Search
+              </DialogTitle>
+              <DialogDescription className="text-slate-400">
+                Save the current search for quick access later
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label className="text-slate-300">Search Name</Label>
+                <Input
+                  placeholder="e.g., Failed Login Attempts"
+                  className="mt-1 bg-slate-800 border-slate-600 text-white"
+                />
+              </div>
+              <div className="p-3 bg-slate-800 rounded-lg">
+                <p className="text-xs text-slate-500">Current Query</p>
+                <code className="text-sm text-green-400 font-mono">
+                  {searchQuery || 'No query entered'}
+                </code>
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <Switch id="schedule-search" />
+                  <Label htmlFor="schedule-search" className="text-slate-300">Schedule this search</Label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Switch id="share-search" />
+                  <Label htmlFor="share-search" className="text-slate-300">Share with team</Label>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 pt-4">
+                <Button
+                  variant="outline"
+                  className="flex-1 border-slate-600 text-slate-300"
+                  onClick={() => setShowSaveSearchDialog(false)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  className="flex-1 bg-indigo-600 hover:bg-indigo-700"
+                  onClick={handleSaveSearch}
+                >
+                  Save Search
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Analytics Dialog */}
+        <Dialog open={showAnalyticsDialog} onOpenChange={setShowAnalyticsDialog}>
+          <DialogContent className="max-w-2xl bg-slate-900 border-slate-700 text-white">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <BarChart3 className="w-5 h-5 text-teal-400" />
+                Security Analytics
+              </DialogTitle>
+              <DialogDescription className="text-slate-400">
+                Overview of security metrics and trends
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="grid grid-cols-4 gap-4">
+                <div className="p-3 bg-slate-800 rounded-lg text-center">
+                  <p className="text-2xl font-bold text-white">{totalEvents}</p>
+                  <p className="text-xs text-slate-400">Total Events</p>
+                </div>
+                <div className="p-3 bg-slate-800 rounded-lg text-center">
+                  <p className="text-2xl font-bold text-red-400">{criticalCount}</p>
+                  <p className="text-xs text-slate-400">Critical</p>
+                </div>
+                <div className="p-3 bg-slate-800 rounded-lg text-center">
+                  <p className="text-2xl font-bold text-green-400">{avgComplianceScore.toFixed(0)}%</p>
+                  <p className="text-xs text-slate-400">Compliance</p>
+                </div>
+                <div className="p-3 bg-slate-800 rounded-lg text-center">
+                  <p className="text-2xl font-bold text-yellow-400">{activeAlerts}</p>
+                  <p className="text-xs text-slate-400">Active Alerts</p>
+                </div>
+              </div>
+              <div className="p-4 bg-slate-800 rounded-lg">
+                <h4 className="font-medium text-white mb-3">Event Distribution</h4>
+                <div className="space-y-2">
+                  {mockFieldStats[0]?.topValues.map((val) => (
+                    <div key={val.value} className="flex items-center gap-2">
+                      <span className="text-sm text-slate-400 w-20">{val.value}</span>
+                      <div className="flex-1 h-4 bg-slate-700 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-gradient-to-r from-teal-500 to-cyan-500"
+                          style={{ width: `${val.percent}%` }}
+                        />
+                      </div>
+                      <span className="text-sm text-slate-400 w-12 text-right">{val.percent}%</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="flex items-center gap-2 pt-4">
+                <Button
+                  className="flex-1 bg-teal-600 hover:bg-teal-700"
+                  onClick={() => setShowAnalyticsDialog(false)}
+                >
+                  Close
+                </Button>
+              </div>
+            </div>
           </DialogContent>
         </Dialog>
       </div>

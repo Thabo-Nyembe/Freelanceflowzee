@@ -165,21 +165,6 @@ const mockContractsActivities = [
   { id: '3', user: 'System', action: 'Reminder sent for', target: 'Expiring contracts', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'update' as const },
 ]
 
-const mockContractsQuickActions = [
-  { id: '1', label: 'New Contract', icon: 'file-plus', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 800)),
-    { loading: 'Creating new contract...', success: 'Contract created', error: 'Failed to create contract' }
-  ), variant: 'default' as const },
-  { id: '2', label: 'Send for Signing', icon: 'send', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1200)),
-    { loading: 'Sending contract for signature...', success: 'Contract sent for signing', error: 'Failed to send contract' }
-  ), variant: 'default' as const },
-  { id: '3', label: 'Templates', icon: 'copy', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 600)),
-    { loading: 'Loading templates...', success: 'Templates loaded', error: 'Failed to load templates' }
-  ), variant: 'outline' as const },
-]
-
 export default function ContractsClient({ initialContracts }: { initialContracts: Contract[] }) {
   const [activeTab, setActiveTab] = useState('dashboard')
   const [searchQuery, setSearchQuery] = useState('')
@@ -1990,8 +1975,8 @@ export default function ContractsClient({ initialContracts }: { initialContracts
           <QuickActionsToolbar
             actions={[
               { id: '1', label: 'New Contract', icon: 'file-plus', action: () => setShowNewContract(true), variant: 'default' as const },
-              { id: '2', label: 'Send for Signing', icon: 'send', action: () => toast.info('Select a contract to send for signing'), variant: 'default' as const },
-              { id: '3', label: 'Templates', icon: 'copy', action: () => setActiveTab('templates'), variant: 'outline' as const },
+              { id: '2', label: 'Send for Signing', icon: 'send', action: () => setShowSendForSigningDialog(true), variant: 'default' as const },
+              { id: '3', label: 'Templates', icon: 'copy', action: () => setShowTemplatesDialog(true), variant: 'outline' as const },
             ]}
             variant="grid"
           />
@@ -2272,6 +2257,128 @@ export default function ContractsClient({ initialContracts }: { initialContracts
                 <p className="text-sm text-gray-500 mt-2">Creating contract...</p>
               </div>
             )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Send for Signing Dialog */}
+      <Dialog open={showSendForSigningDialog} onOpenChange={setShowSendForSigningDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg">
+                <Send className="h-5 w-5 text-white" />
+              </div>
+              Send for Signing
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 mt-4">
+            <p className="text-gray-600 dark:text-gray-400">
+              Select a contract to send for electronic signature.
+            </p>
+            <div className="space-y-2">
+              <Label>Select Contract</Label>
+              <Select>
+                <SelectTrigger>
+                  <SelectValue placeholder="Choose a contract..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {envelopes.filter(e => e.status === 'draft').map(envelope => (
+                    <SelectItem key={envelope.id} value={envelope.id}>
+                      {envelope.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Recipient Email</Label>
+              <Input type="email" placeholder="recipient@example.com" />
+            </div>
+            <div className="space-y-2">
+              <Label>Message (Optional)</Label>
+              <Input placeholder="Add a message for the recipient..." />
+            </div>
+            <div className="flex justify-end gap-3 pt-4">
+              <Button variant="outline" onClick={() => setShowSendForSigningDialog(false)}>
+                Cancel
+              </Button>
+              <Button onClick={() => {
+                toast.success('Contract sent for signing')
+                setShowSendForSigningDialog(false)
+              }}>
+                <Send className="h-4 w-4 mr-2" />
+                Send for Signing
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Templates Dialog */}
+      <Dialog open={showTemplatesDialog} onOpenChange={setShowTemplatesDialog}>
+        <DialogContent className="max-w-3xl max-h-[80vh]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              <div className="p-2 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg">
+                <Copy className="h-5 w-5 text-white" />
+              </div>
+              Contract Templates
+            </DialogTitle>
+          </DialogHeader>
+          <ScrollArea className="h-[60vh] mt-4">
+            <div className="space-y-3 pr-4">
+              {templates.map(template => (
+                <Card key={template.id} className="hover:border-purple-300 dark:hover:border-purple-700 transition-colors cursor-pointer">
+                  <CardContent className="p-4">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <h4 className="font-medium">{template.name}</h4>
+                          {template.is_starred && <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />}
+                        </div>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                          {template.description}
+                        </p>
+                        <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
+                          <span className="flex items-center gap-1">
+                            <FileText className="h-3 w-3" />
+                            {template.documents_count} docs
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Users className="h-3 w-3" />
+                            {template.recipients_count} recipients
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <PenTool className="h-3 w-3" />
+                            {template.fields_count} fields
+                          </span>
+                          <span>Used {template.usage_count} times</span>
+                        </div>
+                      </div>
+                      <Button size="sm" variant="outline" onClick={() => {
+                        toast.success(`Template "${template.name}" selected`)
+                        setShowTemplatesDialog(false)
+                        setShowNewContract(true)
+                      }}>
+                        Use Template
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </ScrollArea>
+          <div className="flex justify-end gap-3 pt-4 border-t">
+            <Button variant="outline" onClick={() => setShowTemplatesDialog(false)}>
+              Close
+            </Button>
+            <Button onClick={() => {
+              setShowTemplatesDialog(false)
+              setActiveTab('templates')
+            }}>
+              View All Templates
+            </Button>
           </div>
         </DialogContent>
       </Dialog>

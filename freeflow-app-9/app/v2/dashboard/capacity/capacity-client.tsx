@@ -334,20 +334,7 @@ const mockCapacityActivities = [
   { id: '3', user: 'HR Partner', action: 'Onboarded', target: '2 new contractors', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
 ]
 
-const mockCapacityQuickActions = [
-  { id: '1', label: 'Allocate', icon: 'plus', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1500)),
-    { loading: 'Opening allocation wizard...', success: 'Allocation wizard ready', error: 'Failed to open allocation' }
-  ), variant: 'default' as const },
-  { id: '2', label: 'Balance', icon: 'shuffle', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 2000)),
-    { loading: 'Balancing team capacity...', success: 'Capacity balanced successfully', error: 'Failed to balance capacity' }
-  ), variant: 'default' as const },
-  { id: '3', label: 'Report', icon: 'bar-chart', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1800)),
-    { loading: 'Generating capacity report...', success: 'Report generated successfully', error: 'Failed to generate report' }
-  ), variant: 'outline' as const },
-]
+// Quick actions are now defined inside the component to access state setters
 
 export default function CapacityClient({ initialCapacity }: { initialCapacity: Capacity[] }) {
   const [activeTab, setActiveTab] = useState('overview')
@@ -359,6 +346,40 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
   const [settingsTab, setSettingsTab] = useState('scheduling')
   const { capacity, loading, error } = useCapacity({ resourceType: resourceTypeFilter, status: statusFilter })
   const displayCapacity = capacity.length > 0 ? capacity : initialCapacity
+
+  // Dialog states for Quick Actions
+  const [allocateDialogOpen, setAllocateDialogOpen] = useState(false)
+  const [balanceDialogOpen, setBalanceDialogOpen] = useState(false)
+  const [reportDialogOpen, setReportDialogOpen] = useState(false)
+
+  // Allocation form state
+  const [allocationForm, setAllocationForm] = useState({
+    memberId: '',
+    projectId: '',
+    hoursPerWeek: 8,
+    startDate: '',
+    endDate: '',
+    notes: ''
+  })
+
+  // Balance form state
+  const [balanceForm, setBalanceForm] = useState({
+    balanceMode: 'automatic',
+    targetUtilization: 85,
+    prioritizeProjects: [] as string[],
+    excludeMembers: [] as string[],
+    preserveExisting: true
+  })
+
+  // Report form state
+  const [reportForm, setReportForm] = useState({
+    reportType: 'utilization',
+    dateRange: 'current_week',
+    includeForecast: true,
+    includeFinancials: false,
+    groupBy: 'team',
+    format: 'pdf'
+  })
 
   // Calculate stats
   const stats = useMemo(() => {
@@ -384,22 +405,56 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
 
   // Handlers
   const handleAllocateResource = () => {
-    toast.info('Allocate Resource', {
-      description: 'Opening allocation form...'
+    setAllocateDialogOpen(true)
+  }
+
+  const handleSubmitAllocation = () => {
+    if (!allocationForm.memberId || !allocationForm.projectId) {
+      toast.error('Please select a team member and project')
+      return
+    }
+    toast.success('Allocation created', {
+      description: `Successfully allocated ${allocationForm.hoursPerWeek}h/week`
+    })
+    setAllocateDialogOpen(false)
+    setAllocationForm({
+      memberId: '',
+      projectId: '',
+      hoursPerWeek: 8,
+      startDate: '',
+      endDate: '',
+      notes: ''
     })
   }
 
   const handleBalanceWorkload = () => {
+    setBalanceDialogOpen(true)
+  }
+
+  const handleSubmitBalance = () => {
     toast.success('Workload balanced', {
-      description: 'Team capacity optimized'
+      description: `Target utilization set to ${balanceForm.targetUtilization}%`
     })
+    setBalanceDialogOpen(false)
   }
 
   const handleExportCapacity = () => {
-    toast.success('Exporting capacity', {
-      description: 'Capacity report will be downloaded'
-    })
+    setReportDialogOpen(true)
   }
+
+  const handleGenerateReport = () => {
+    toast.success('Report generated', {
+      description: `${reportForm.reportType} report (${reportForm.format.toUpperCase()}) is ready`
+    })
+    setReportDialogOpen(false)
+  }
+
+  // Quick actions with real dialog functionality
+  const capacityQuickActions = [
+    { id: '1', label: 'Allocate', icon: 'plus', action: () => setAllocateDialogOpen(true), variant: 'default' as const },
+    { id: '2', label: 'Balance', icon: 'shuffle', action: () => setBalanceDialogOpen(true), variant: 'default' as const },
+    { id: '3', label: 'Report', icon: 'bar-chart', action: () => setReportDialogOpen(true), variant: 'outline' as const },
+  ]
 
   if (error) return <div className="p-8"><div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded dark:bg-red-900/20 dark:border-red-800 dark:text-red-400">Error: {error.message}</div></div>
 
@@ -1892,7 +1947,7 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockCapacityQuickActions}
+            actions={capacityQuickActions}
             variant="grid"
           />
         </div>
@@ -1903,6 +1958,347 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
           </div>
         )}
       </div>
+
+      {/* Allocate Resource Dialog */}
+      <Dialog open={allocateDialogOpen} onOpenChange={setAllocateDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Plus className="w-5 h-5 text-indigo-600" />
+              Allocate Resource
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-6 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Team Member</Label>
+                <Select
+                  value={allocationForm.memberId}
+                  onValueChange={(value) => setAllocationForm(prev => ({ ...prev, memberId: value }))}
+                >
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder="Select team member" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {mockTeamMembers.map(member => (
+                      <SelectItem key={member.id} value={member.id}>
+                        <div className="flex items-center gap-2">
+                          <span>{member.name}</span>
+                          <span className="text-xs text-gray-500">({member.availableHours}h available)</span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Project</Label>
+                <Select
+                  value={allocationForm.projectId}
+                  onValueChange={(value) => setAllocationForm(prev => ({ ...prev, projectId: value }))}
+                >
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder="Select project" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {mockProjects.map(project => (
+                      <SelectItem key={project.id} value={project.id}>
+                        <div className="flex items-center gap-2">
+                          <div className="w-3 h-3 rounded-full" style={{ backgroundColor: project.color }} />
+                          <span>{project.name}</span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <Label>Hours Per Week</Label>
+                <Input
+                  type="number"
+                  value={allocationForm.hoursPerWeek}
+                  onChange={(e) => setAllocationForm(prev => ({ ...prev, hoursPerWeek: parseInt(e.target.value) || 0 }))}
+                  className="mt-1"
+                  min={1}
+                  max={40}
+                />
+              </div>
+              <div>
+                <Label>Start Date</Label>
+                <Input
+                  type="date"
+                  value={allocationForm.startDate}
+                  onChange={(e) => setAllocationForm(prev => ({ ...prev, startDate: e.target.value }))}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label>End Date</Label>
+                <Input
+                  type="date"
+                  value={allocationForm.endDate}
+                  onChange={(e) => setAllocationForm(prev => ({ ...prev, endDate: e.target.value }))}
+                  className="mt-1"
+                />
+              </div>
+            </div>
+
+            <div>
+              <Label>Notes (Optional)</Label>
+              <Input
+                placeholder="Add any notes about this allocation..."
+                value={allocationForm.notes}
+                onChange={(e) => setAllocationForm(prev => ({ ...prev, notes: e.target.value }))}
+                className="mt-1"
+              />
+            </div>
+
+            {allocationForm.memberId && (
+              <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                <div className="text-sm font-medium text-blue-800 dark:text-blue-300 mb-2">Allocation Preview</div>
+                <div className="text-sm text-blue-700 dark:text-blue-400">
+                  {mockTeamMembers.find(m => m.id === allocationForm.memberId)?.name} will be allocated
+                  {' '}{allocationForm.hoursPerWeek}h/week to{' '}
+                  {mockProjects.find(p => p.id === allocationForm.projectId)?.name || 'selected project'}
+                </div>
+              </div>
+            )}
+
+            <div className="flex justify-end gap-3 pt-4 border-t">
+              <Button variant="outline" onClick={() => setAllocateDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleSubmitAllocation} className="bg-indigo-600 hover:bg-indigo-700">
+                Create Allocation
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Balance Workload Dialog */}
+      <Dialog open={balanceDialogOpen} onOpenChange={setBalanceDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Shuffle className="w-5 h-5 text-purple-600" />
+              Balance Team Capacity
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-6 py-4">
+            <div>
+              <Label>Balance Mode</Label>
+              <Select
+                value={balanceForm.balanceMode}
+                onValueChange={(value) => setBalanceForm(prev => ({ ...prev, balanceMode: value }))}
+              >
+                <SelectTrigger className="mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="automatic">Automatic - AI-powered optimization</SelectItem>
+                  <SelectItem value="manual">Manual - Review suggestions before applying</SelectItem>
+                  <SelectItem value="conservative">Conservative - Minimal changes</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label>Target Utilization: {balanceForm.targetUtilization}%</Label>
+              <div className="flex items-center gap-4 mt-2">
+                <Input
+                  type="range"
+                  min={50}
+                  max={100}
+                  value={balanceForm.targetUtilization}
+                  onChange={(e) => setBalanceForm(prev => ({ ...prev, targetUtilization: parseInt(e.target.value) }))}
+                  className="flex-1"
+                />
+                <span className={`text-sm font-medium ${
+                  balanceForm.targetUtilization > 90 ? 'text-red-600' :
+                  balanceForm.targetUtilization > 80 ? 'text-amber-600' :
+                  'text-green-600'
+                }`}>{balanceForm.targetUtilization}%</span>
+              </div>
+              <p className="text-xs text-gray-500 mt-1">Recommended: 75-85% for sustainable workload</p>
+            </div>
+
+            <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+              <div>
+                <Label>Preserve Existing Allocations</Label>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Only redistribute unallocated hours</p>
+              </div>
+              <Switch
+                checked={balanceForm.preserveExisting}
+                onCheckedChange={(checked) => setBalanceForm(prev => ({ ...prev, preserveExisting: checked }))}
+              />
+            </div>
+
+            <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+              <div className="text-sm font-medium text-purple-800 dark:text-purple-300 mb-2">Current Status</div>
+              <div className="grid grid-cols-3 gap-4 text-center">
+                <div>
+                  <div className="text-lg font-bold text-purple-700 dark:text-purple-400">{mockTeamMembers.filter(m => m.status === 'overbooked').length}</div>
+                  <div className="text-xs text-purple-600 dark:text-purple-500">Overbooked</div>
+                </div>
+                <div>
+                  <div className="text-lg font-bold text-purple-700 dark:text-purple-400">{mockTeamMembers.filter(m => m.status === 'available').length}</div>
+                  <div className="text-xs text-purple-600 dark:text-purple-500">Underutilized</div>
+                </div>
+                <div>
+                  <div className="text-lg font-bold text-purple-700 dark:text-purple-400">{mockTeamMembers.reduce((s, m) => s + Math.max(0, m.availableHours), 0)}h</div>
+                  <div className="text-xs text-purple-600 dark:text-purple-500">Available</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 pt-4 border-t">
+              <Button variant="outline" onClick={() => setBalanceDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleSubmitBalance} className="bg-purple-600 hover:bg-purple-700">
+                Balance Workload
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Generate Report Dialog */}
+      <Dialog open={reportDialogOpen} onOpenChange={setReportDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <BarChart3 className="w-5 h-5 text-blue-600" />
+              Generate Capacity Report
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-6 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Report Type</Label>
+                <Select
+                  value={reportForm.reportType}
+                  onValueChange={(value) => setReportForm(prev => ({ ...prev, reportType: value }))}
+                >
+                  <SelectTrigger className="mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="utilization">Utilization Report</SelectItem>
+                    <SelectItem value="allocation">Allocation Summary</SelectItem>
+                    <SelectItem value="forecast">Capacity Forecast</SelectItem>
+                    <SelectItem value="project">Project Resource Report</SelectItem>
+                    <SelectItem value="team">Team Availability Report</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Date Range</Label>
+                <Select
+                  value={reportForm.dateRange}
+                  onValueChange={(value) => setReportForm(prev => ({ ...prev, dateRange: value }))}
+                >
+                  <SelectTrigger className="mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="current_week">Current Week</SelectItem>
+                    <SelectItem value="current_month">Current Month</SelectItem>
+                    <SelectItem value="last_30_days">Last 30 Days</SelectItem>
+                    <SelectItem value="last_quarter">Last Quarter</SelectItem>
+                    <SelectItem value="custom">Custom Range</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Group By</Label>
+                <Select
+                  value={reportForm.groupBy}
+                  onValueChange={(value) => setReportForm(prev => ({ ...prev, groupBy: value }))}
+                >
+                  <SelectTrigger className="mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="team">Team Member</SelectItem>
+                    <SelectItem value="project">Project</SelectItem>
+                    <SelectItem value="department">Department</SelectItem>
+                    <SelectItem value="client">Client</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Export Format</Label>
+                <Select
+                  value={reportForm.format}
+                  onValueChange={(value) => setReportForm(prev => ({ ...prev, format: value }))}
+                >
+                  <SelectTrigger className="mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="pdf">PDF Document</SelectItem>
+                    <SelectItem value="xlsx">Excel Spreadsheet</SelectItem>
+                    <SelectItem value="csv">CSV File</SelectItem>
+                    <SelectItem value="json">JSON Data</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                <div>
+                  <Label>Include Forecast Data</Label>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Add 6-week capacity predictions</p>
+                </div>
+                <Switch
+                  checked={reportForm.includeForecast}
+                  onCheckedChange={(checked) => setReportForm(prev => ({ ...prev, includeForecast: checked }))}
+                />
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                <div>
+                  <Label>Include Financial Data</Label>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Add hourly rates and budget information</p>
+                </div>
+                <Switch
+                  checked={reportForm.includeFinancials}
+                  onCheckedChange={(checked) => setReportForm(prev => ({ ...prev, includeFinancials: checked }))}
+                />
+              </div>
+            </div>
+
+            <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+              <div className="text-sm font-medium text-blue-800 dark:text-blue-300 mb-2">Report Preview</div>
+              <div className="text-sm text-blue-700 dark:text-blue-400">
+                {reportForm.reportType.charAt(0).toUpperCase() + reportForm.reportType.slice(1).replace('_', ' ')} report
+                {' '}grouped by {reportForm.groupBy}
+                {reportForm.includeForecast && ' with forecast data'}
+                {reportForm.includeFinancials && ' including financials'}
+                {' '}exported as {reportForm.format.toUpperCase()}
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 pt-4 border-t">
+              <Button variant="outline" onClick={() => setReportDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleGenerateReport} className="bg-blue-600 hover:bg-blue-700">
+                <Download className="w-4 h-4 mr-2" />
+                Generate Report
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

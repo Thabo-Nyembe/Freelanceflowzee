@@ -212,20 +212,7 @@ const mockExpensesActivities = [
   { id: '3', user: 'Accountant', action: 'Processed', target: '$8,500 reimbursement batch', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
 ]
 
-const mockExpensesQuickActions = [
-  { id: '1', label: 'New Expense', icon: 'plus', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 800)),
-    { loading: 'Opening expense form...', success: 'New expense form ready', error: 'Failed to open expense form' }
-  ), variant: 'default' as const },
-  { id: '2', label: 'Scan Receipt', icon: 'camera', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1000)),
-    { loading: 'Initializing receipt scanner...', success: 'Receipt scanner ready', error: 'Failed to initialize scanner' }
-  ), variant: 'default' as const },
-  { id: '3', label: 'Report', icon: 'file-text', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 600)),
-    { loading: 'Generating expense report...', success: 'Expense report generated', error: 'Failed to generate report' }
-  ), variant: 'outline' as const },
-]
+// Quick actions will be defined inside component to access state
 
 export default function ExpensesClient({ initialExpenses }: ExpensesClientProps) {
   const [activeTab, setActiveTab] = useState('reports')
@@ -236,6 +223,38 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
   const [showReportDialog, setShowReportDialog] = useState(false)
   const [showNewExpenseDialog, setShowNewExpenseDialog] = useState(false)
   const [settingsTab, setSettingsTab] = useState('general')
+
+  // Quick Actions Dialog States
+  const [showScanReceiptDialog, setShowScanReceiptDialog] = useState(false)
+  const [showGenerateReportDialog, setShowGenerateReportDialog] = useState(false)
+  const [showAddMileageDialog, setShowAddMileageDialog] = useState(false)
+  const [showPerDiemDialog, setShowPerDiemDialog] = useState(false)
+  const [showLinkCardDialog, setShowLinkCardDialog] = useState(false)
+
+  // Form states for dialogs
+  const [scanReceiptFile, setScanReceiptFile] = useState<File | null>(null)
+  const [scanReceiptProcessing, setScanReceiptProcessing] = useState(false)
+  const [reportDateRange, setReportDateRange] = useState({ start: '', end: '' })
+  const [reportFormat, setReportFormat] = useState('pdf')
+  const [generatingReport, setGeneratingReport] = useState(false)
+  const [mileageForm, setMileageForm] = useState({
+    origin: '',
+    destination: '',
+    distance: 0,
+    purpose: '',
+    date: new Date().toISOString().split('T')[0]
+  })
+  const [perDiemForm, setPerDiemForm] = useState({
+    location: '',
+    startDate: '',
+    endDate: '',
+    meals: { breakfast: true, lunch: true, dinner: true }
+  })
+  const [linkCardForm, setLinkCardForm] = useState({
+    cardType: 'visa',
+    lastFour: '',
+    nickname: ''
+  })
 
   // Database integration - use real expenses hooks
   const { data: dbExpenses, loading: expensesLoading, refetch } = useExpenses({ status: statusFilter as any })
@@ -449,10 +468,129 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
   }
 
   const handleAddReceipt = () => {
-    toast.info('Add Receipt', {
-      description: 'Opening receipt scanner...'
-    })
+    setShowScanReceiptDialog(true)
   }
+
+  // Scan Receipt Handler
+  const handleScanReceipt = async () => {
+    if (!scanReceiptFile) {
+      toast.error('Please select a receipt file')
+      return
+    }
+    setScanReceiptProcessing(true)
+    try {
+      // Simulate OCR processing
+      await new Promise(resolve => setTimeout(resolve, 2000))
+      toast.success('Receipt scanned successfully', {
+        description: 'Expense data extracted and ready for review'
+      })
+      setScanReceiptFile(null)
+      setShowScanReceiptDialog(false)
+    } catch (error) {
+      toast.error('Failed to scan receipt')
+    } finally {
+      setScanReceiptProcessing(false)
+    }
+  }
+
+  // Generate Report Handler
+  const handleGenerateReport = async () => {
+    if (!reportDateRange.start || !reportDateRange.end) {
+      toast.error('Please select a date range')
+      return
+    }
+    setGeneratingReport(true)
+    try {
+      // Simulate report generation
+      await new Promise(resolve => setTimeout(resolve, 1500))
+      toast.success('Expense report generated', {
+        description: `${reportFormat.toUpperCase()} report for ${reportDateRange.start} to ${reportDateRange.end}`
+      })
+      setReportDateRange({ start: '', end: '' })
+      setShowGenerateReportDialog(false)
+    } catch (error) {
+      toast.error('Failed to generate report')
+    } finally {
+      setGeneratingReport(false)
+    }
+  }
+
+  // Add Mileage Handler
+  const handleAddMileage = async () => {
+    if (!mileageForm.origin || !mileageForm.destination || !mileageForm.distance) {
+      toast.error('Please fill in all required fields')
+      return
+    }
+    try {
+      const reimbursement = mileageForm.distance * 0.67
+      toast.success('Mileage entry added', {
+        description: `${mileageForm.distance} miles - $${reimbursement.toFixed(2)} reimbursement`
+      })
+      setMileageForm({
+        origin: '',
+        destination: '',
+        distance: 0,
+        purpose: '',
+        date: new Date().toISOString().split('T')[0]
+      })
+      setShowAddMileageDialog(false)
+    } catch (error) {
+      toast.error('Failed to add mileage entry')
+    }
+  }
+
+  // Request Per Diem Handler
+  const handleRequestPerDiem = async () => {
+    if (!perDiemForm.location || !perDiemForm.startDate || !perDiemForm.endDate) {
+      toast.error('Please fill in all required fields')
+      return
+    }
+    try {
+      const days = Math.ceil((new Date(perDiemForm.endDate).getTime() - new Date(perDiemForm.startDate).getTime()) / (1000 * 60 * 60 * 24)) + 1
+      const dailyRate = 79 // Default GSA rate
+      const totalAmount = days * dailyRate
+      toast.success('Per diem request submitted', {
+        description: `${days} days in ${perDiemForm.location} - $${totalAmount} total`
+      })
+      setPerDiemForm({
+        location: '',
+        startDate: '',
+        endDate: '',
+        meals: { breakfast: true, lunch: true, dinner: true }
+      })
+      setShowPerDiemDialog(false)
+    } catch (error) {
+      toast.error('Failed to submit per diem request')
+    }
+  }
+
+  // Link Card Handler
+  const handleLinkCard = async () => {
+    if (!linkCardForm.lastFour || linkCardForm.lastFour.length !== 4) {
+      toast.error('Please enter the last 4 digits of your card')
+      return
+    }
+    try {
+      toast.success('Card linked successfully', {
+        description: `${linkCardForm.cardType.toUpperCase()} ending in ${linkCardForm.lastFour} connected`
+      })
+      setLinkCardForm({
+        cardType: 'visa',
+        lastFour: '',
+        nickname: ''
+      })
+      setShowLinkCardDialog(false)
+    } catch (error) {
+      toast.error('Failed to link card')
+    }
+  }
+
+  // Quick Actions with real dialog functionality
+  const expensesQuickActions = [
+    { id: '1', label: 'New Expense', icon: 'plus', action: () => setShowNewExpenseDialog(true), variant: 'default' as const },
+    { id: '2', label: 'Scan Receipt', icon: 'camera', action: () => setShowScanReceiptDialog(true), variant: 'default' as const },
+    { id: '3', label: 'Report', icon: 'file-text', action: () => setShowGenerateReportDialog(true), variant: 'outline' as const },
+  ]
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-violet-50 to-fuchsia-50 dark:bg-none dark:bg-gray-900">
@@ -659,12 +797,12 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
                   </CardHeader>
                   <CardContent className="space-y-2">
                     {[
-                      { label: 'Scan Receipt', icon: Camera, color: 'text-purple-600' },
-                      { label: 'Add Mileage', icon: Car, color: 'text-blue-600' },
-                      { label: 'Request Per Diem', icon: Calendar, color: 'text-green-600' },
-                      { label: 'Link Card Transaction', icon: CreditCard, color: 'text-orange-600' },
+                      { label: 'Scan Receipt', icon: Camera, color: 'text-purple-600', onClick: () => setShowScanReceiptDialog(true) },
+                      { label: 'Add Mileage', icon: Car, color: 'text-blue-600', onClick: () => setShowAddMileageDialog(true) },
+                      { label: 'Request Per Diem', icon: Calendar, color: 'text-green-600', onClick: () => setShowPerDiemDialog(true) },
+                      { label: 'Link Card Transaction', icon: CreditCard, color: 'text-orange-600', onClick: () => setShowLinkCardDialog(true) },
                     ].map((action, i) => (
-                      <button key={i} className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 text-left">
+                      <button key={i} onClick={action.onClick} className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 text-left">
                         <action.icon className={`h-5 w-5 ${action.color}`} />
                         <span className="text-sm">{action.label}</span>
                       </button>
@@ -733,7 +871,7 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <CardTitle>Receipt Scanner</CardTitle>
-                    <Button className="bg-purple-600 hover:bg-purple-700">
+                    <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => setShowScanReceiptDialog(true)}>
                       <Camera className="h-4 w-4 mr-2" />
                       Scan Receipt
                     </Button>
@@ -782,7 +920,7 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
                   <CardHeader>
                     <div className="flex items-center justify-between">
                       <CardTitle>Mileage Log</CardTitle>
-                      <Button className="bg-purple-600 hover:bg-purple-700">
+                      <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => setShowAddMileageDialog(true)}>
                         <Plus className="h-4 w-4 mr-2" />
                         Add Trip
                       </Button>
@@ -854,7 +992,7 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
                   <CardHeader>
                     <div className="flex items-center justify-between">
                       <CardTitle>Per Diem Requests</CardTitle>
-                      <Button className="bg-purple-600 hover:bg-purple-700">
+                      <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => setShowPerDiemDialog(true)}>
                         <Plus className="h-4 w-4 mr-2" />
                         Request Per Diem
                       </Button>
@@ -1858,7 +1996,7 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockExpensesQuickActions}
+            actions={expensesQuickActions}
             variant="grid"
           />
         </div>
@@ -2102,6 +2240,374 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
                 disabled={creating || !newExpenseForm.title}
               >
                 {creating ? 'Creating...' : 'Create Report'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Scan Receipt Dialog */}
+      <Dialog open={showScanReceiptDialog} onOpenChange={setShowScanReceiptDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Camera className="h-5 w-5 text-purple-600" />
+              Scan Receipt
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="border-2 border-dashed rounded-xl p-8 text-center">
+              <Upload className="h-12 w-12 text-gray-300 mx-auto mb-3" />
+              <p className="text-sm text-gray-600 mb-2">Drop your receipt here or click to browse</p>
+              <input
+                type="file"
+                accept="image/*,.pdf"
+                className="hidden"
+                id="receipt-upload"
+                onChange={(e) => setScanReceiptFile(e.target.files?.[0] || null)}
+              />
+              <label htmlFor="receipt-upload">
+                <Button variant="outline" className="cursor-pointer" asChild>
+                  <span>Choose File</span>
+                </Button>
+              </label>
+              {scanReceiptFile && (
+                <p className="mt-2 text-sm text-purple-600">{scanReceiptFile.name}</p>
+              )}
+            </div>
+            <div className="bg-purple-50 p-4 rounded-lg">
+              <h4 className="font-medium text-purple-900 mb-2">AI-Powered OCR</h4>
+              <p className="text-sm text-purple-700">
+                Our AI will automatically extract merchant, amount, date, and category from your receipt.
+              </p>
+            </div>
+            <div className="flex gap-3">
+              <Button variant="outline" className="flex-1" onClick={() => {
+                setScanReceiptFile(null)
+                setShowScanReceiptDialog(false)
+              }}>
+                Cancel
+              </Button>
+              <Button
+                className="flex-1 bg-purple-600 hover:bg-purple-700"
+                onClick={handleScanReceipt}
+                disabled={scanReceiptProcessing || !scanReceiptFile}
+              >
+                {scanReceiptProcessing ? 'Processing...' : 'Scan Receipt'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Generate Report Dialog */}
+      <Dialog open={showGenerateReportDialog} onOpenChange={setShowGenerateReportDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5 text-blue-600" />
+              Generate Expense Report
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">Start Date</label>
+                <Input
+                  type="date"
+                  value={reportDateRange.start}
+                  onChange={(e) => setReportDateRange(prev => ({ ...prev, start: e.target.value }))}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">End Date</label>
+                <Input
+                  type="date"
+                  value={reportDateRange.end}
+                  onChange={(e) => setReportDateRange(prev => ({ ...prev, end: e.target.value }))}
+                />
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">Export Format</label>
+              <select
+                className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700"
+                value={reportFormat}
+                onChange={(e) => setReportFormat(e.target.value)}
+              >
+                <option value="pdf">PDF Report</option>
+                <option value="csv">CSV Spreadsheet</option>
+                <option value="excel">Excel Workbook</option>
+              </select>
+            </div>
+            <div className="bg-blue-50 p-4 rounded-lg">
+              <h4 className="font-medium text-blue-900 mb-2">Report Contents</h4>
+              <ul className="text-sm text-blue-700 space-y-1">
+                <li>- All expense reports in date range</li>
+                <li>- Category breakdown and totals</li>
+                <li>- Policy compliance summary</li>
+                <li>- Reimbursement status</li>
+              </ul>
+            </div>
+            <div className="flex gap-3">
+              <Button variant="outline" className="flex-1" onClick={() => setShowGenerateReportDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                className="flex-1 bg-blue-600 hover:bg-blue-700"
+                onClick={handleGenerateReport}
+                disabled={generatingReport || !reportDateRange.start || !reportDateRange.end}
+              >
+                <Download className="h-4 w-4 mr-2" />
+                {generatingReport ? 'Generating...' : 'Generate Report'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Mileage Dialog */}
+      <Dialog open={showAddMileageDialog} onOpenChange={setShowAddMileageDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Car className="h-5 w-5 text-blue-600" />
+              Add Mileage Entry
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-2">Date</label>
+              <Input
+                type="date"
+                value={mileageForm.date}
+                onChange={(e) => setMileageForm(prev => ({ ...prev, date: e.target.value }))}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">Origin</label>
+                <Input
+                  placeholder="e.g., Office"
+                  value={mileageForm.origin}
+                  onChange={(e) => setMileageForm(prev => ({ ...prev, origin: e.target.value }))}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Destination</label>
+                <Input
+                  placeholder="e.g., Client Site"
+                  value={mileageForm.destination}
+                  onChange={(e) => setMileageForm(prev => ({ ...prev, destination: e.target.value }))}
+                />
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">Distance (miles)</label>
+              <Input
+                type="number"
+                placeholder="0"
+                value={mileageForm.distance || ''}
+                onChange={(e) => setMileageForm(prev => ({ ...prev, distance: parseFloat(e.target.value) || 0 }))}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">Purpose</label>
+              <Input
+                placeholder="e.g., Client meeting"
+                value={mileageForm.purpose}
+                onChange={(e) => setMileageForm(prev => ({ ...prev, purpose: e.target.value }))}
+              />
+            </div>
+            {mileageForm.distance > 0 && (
+              <div className="bg-blue-50 p-4 rounded-lg">
+                <div className="flex justify-between items-center">
+                  <span className="text-blue-900">Estimated Reimbursement</span>
+                  <span className="text-xl font-bold text-blue-600">
+                    ${(mileageForm.distance * 0.67).toFixed(2)}
+                  </span>
+                </div>
+                <p className="text-xs text-blue-700 mt-1">Based on IRS rate of $0.67/mile</p>
+              </div>
+            )}
+            <div className="flex gap-3">
+              <Button variant="outline" className="flex-1" onClick={() => setShowAddMileageDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                className="flex-1 bg-blue-600 hover:bg-blue-700"
+                onClick={handleAddMileage}
+                disabled={!mileageForm.origin || !mileageForm.destination || !mileageForm.distance}
+              >
+                Add Mileage
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Per Diem Request Dialog */}
+      <Dialog open={showPerDiemDialog} onOpenChange={setShowPerDiemDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <MapPin className="h-5 w-5 text-green-600" />
+              Request Per Diem
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-2">Location</label>
+              <Input
+                placeholder="e.g., New York, NY"
+                value={perDiemForm.location}
+                onChange={(e) => setPerDiemForm(prev => ({ ...prev, location: e.target.value }))}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">Start Date</label>
+                <Input
+                  type="date"
+                  value={perDiemForm.startDate}
+                  onChange={(e) => setPerDiemForm(prev => ({ ...prev, startDate: e.target.value }))}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">End Date</label>
+                <Input
+                  type="date"
+                  value={perDiemForm.endDate}
+                  onChange={(e) => setPerDiemForm(prev => ({ ...prev, endDate: e.target.value }))}
+                />
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">Meals Included</label>
+              <div className="flex gap-4">
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={perDiemForm.meals.breakfast}
+                    onChange={(e) => setPerDiemForm(prev => ({
+                      ...prev,
+                      meals: { ...prev.meals, breakfast: e.target.checked }
+                    }))}
+                    className="rounded"
+                  />
+                  <span className="text-sm">Breakfast</span>
+                </label>
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={perDiemForm.meals.lunch}
+                    onChange={(e) => setPerDiemForm(prev => ({
+                      ...prev,
+                      meals: { ...prev.meals, lunch: e.target.checked }
+                    }))}
+                    className="rounded"
+                  />
+                  <span className="text-sm">Lunch</span>
+                </label>
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={perDiemForm.meals.dinner}
+                    onChange={(e) => setPerDiemForm(prev => ({
+                      ...prev,
+                      meals: { ...prev.meals, dinner: e.target.checked }
+                    }))}
+                    className="rounded"
+                  />
+                  <span className="text-sm">Dinner</span>
+                </label>
+              </div>
+            </div>
+            {perDiemForm.startDate && perDiemForm.endDate && (
+              <div className="bg-green-50 p-4 rounded-lg">
+                <div className="flex justify-between items-center">
+                  <span className="text-green-900">Estimated Per Diem</span>
+                  <span className="text-xl font-bold text-green-600">
+                    ${(Math.ceil((new Date(perDiemForm.endDate).getTime() - new Date(perDiemForm.startDate).getTime()) / (1000 * 60 * 60 * 24)) + 1) * 79}
+                  </span>
+                </div>
+                <p className="text-xs text-green-700 mt-1">Based on GSA rate of $79/day</p>
+              </div>
+            )}
+            <div className="flex gap-3">
+              <Button variant="outline" className="flex-1" onClick={() => setShowPerDiemDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                className="flex-1 bg-green-600 hover:bg-green-700"
+                onClick={handleRequestPerDiem}
+                disabled={!perDiemForm.location || !perDiemForm.startDate || !perDiemForm.endDate}
+              >
+                Submit Request
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Link Card Dialog */}
+      <Dialog open={showLinkCardDialog} onOpenChange={setShowLinkCardDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <CreditCard className="h-5 w-5 text-orange-600" />
+              Link Corporate Card
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-2">Card Type</label>
+              <select
+                className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700"
+                value={linkCardForm.cardType}
+                onChange={(e) => setLinkCardForm(prev => ({ ...prev, cardType: e.target.value }))}
+              >
+                <option value="visa">Visa</option>
+                <option value="mastercard">Mastercard</option>
+                <option value="amex">American Express</option>
+                <option value="discover">Discover</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">Last 4 Digits</label>
+              <Input
+                placeholder="1234"
+                maxLength={4}
+                value={linkCardForm.lastFour}
+                onChange={(e) => setLinkCardForm(prev => ({ ...prev, lastFour: e.target.value.replace(/\D/g, '') }))}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">Nickname (Optional)</label>
+              <Input
+                placeholder="e.g., Travel Card"
+                value={linkCardForm.nickname}
+                onChange={(e) => setLinkCardForm(prev => ({ ...prev, nickname: e.target.value }))}
+              />
+            </div>
+            <div className="bg-orange-50 p-4 rounded-lg">
+              <h4 className="font-medium text-orange-900 mb-2">Auto-Import Benefits</h4>
+              <ul className="text-sm text-orange-700 space-y-1">
+                <li>- Automatic transaction import</li>
+                <li>- Smart receipt matching</li>
+                <li>- Real-time spending alerts</li>
+              </ul>
+            </div>
+            <div className="flex gap-3">
+              <Button variant="outline" className="flex-1" onClick={() => setShowLinkCardDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                className="flex-1 bg-orange-600 hover:bg-orange-700"
+                onClick={handleLinkCard}
+                disabled={linkCardForm.lastFour.length !== 4}
+              >
+                Link Card
               </Button>
             </div>
           </div>

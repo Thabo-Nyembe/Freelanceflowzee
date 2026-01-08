@@ -414,10 +414,15 @@ const mockDataExportActivities = [
   { id: '3', user: 'DevOps', action: 'Fixed', target: 'MongoDB connection timeout', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
 ]
 
-const mockDataExportQuickActions = [
-  { id: '1', label: 'New Pipeline', icon: 'plus', action: () => toast.success('Pipeline created successfully'), variant: 'default' as const },
-  { id: '2', label: 'Run All Syncs', icon: 'play', action: () => toast.success('All syncs completed successfully'), variant: 'default' as const },
-  { id: '3', label: 'View Logs', icon: 'terminal', action: () => toast.success('Logs loaded successfully'), variant: 'outline' as const },
+// Quick actions - will be populated inside component with proper dialog handlers
+const getDataExportQuickActions = (
+  setShowNewPipelineQuickDialog: (v: boolean) => void,
+  setShowRunAllSyncsDialog: (v: boolean) => void,
+  setShowViewLogsDialog: (v: boolean) => void
+) => [
+  { id: '1', label: 'New Pipeline', icon: 'plus', action: () => setShowNewPipelineQuickDialog(true), variant: 'default' as const },
+  { id: '2', label: 'Run All Syncs', icon: 'play', action: () => setShowRunAllSyncsDialog(true), variant: 'default' as const },
+  { id: '3', label: 'View Logs', icon: 'terminal', action: () => setShowViewLogsDialog(true), variant: 'outline' as const },
 ]
 
 // Database export type
@@ -449,6 +454,23 @@ export default function DataExportClient() {
   const [showNewPipelineDialog, setShowNewPipelineDialog] = useState(false)
   const [showSchemaDialog, setShowSchemaDialog] = useState(false)
   const [settingsTab, setSettingsTab] = useState('general')
+
+  // Quick Actions Dialog States
+  const [showNewPipelineQuickDialog, setShowNewPipelineQuickDialog] = useState(false)
+  const [showRunAllSyncsDialog, setShowRunAllSyncsDialog] = useState(false)
+  const [showViewLogsDialog, setShowViewLogsDialog] = useState(false)
+
+  // Quick Actions Form State
+  const [newPipelineData, setNewPipelineData] = useState({
+    name: '',
+    description: '',
+    sourceType: 'postgresql',
+    destinationType: 'snowflake',
+    frequency: 'hourly'
+  })
+  const [syncProgress, setSyncProgress] = useState(0)
+  const [isSyncing, setIsSyncing] = useState(false)
+  const [selectedLogPipeline, setSelectedLogPipeline] = useState<string>('all')
 
   // Supabase state
   const [dataExports, setDataExports] = useState<DataExport[]>([])
@@ -633,6 +655,68 @@ export default function DataExportClient() {
       toast.error('Failed to cancel export', { description: error.message })
     }
   }
+
+  // Quick Actions Handlers
+  const handleCreatePipelineQuick = async () => {
+    if (!newPipelineData.name.trim()) {
+      toast.error('Pipeline name is required')
+      return
+    }
+    try {
+      // Simulate pipeline creation
+      toast.promise(
+        new Promise((resolve) => setTimeout(resolve, 1500)),
+        {
+          loading: 'Creating pipeline...',
+          success: () => {
+            setShowNewPipelineQuickDialog(false)
+            setNewPipelineData({
+              name: '',
+              description: '',
+              sourceType: 'postgresql',
+              destinationType: 'snowflake',
+              frequency: 'hourly'
+            })
+            return `Pipeline "${newPipelineData.name}" created successfully`
+          },
+          error: 'Failed to create pipeline'
+        }
+      )
+    } catch (error: any) {
+      toast.error('Failed to create pipeline', { description: error.message })
+    }
+  }
+
+  const handleRunAllSyncs = async () => {
+    setIsSyncing(true)
+    setSyncProgress(0)
+
+    // Simulate sync progress
+    const interval = setInterval(() => {
+      setSyncProgress(prev => {
+        if (prev >= 100) {
+          clearInterval(interval)
+          setIsSyncing(false)
+          toast.success('All syncs completed successfully', {
+            description: `${mockPipelines.length} pipelines synced`
+          })
+          setTimeout(() => {
+            setShowRunAllSyncsDialog(false)
+            setSyncProgress(0)
+          }, 1000)
+          return 100
+        }
+        return prev + Math.random() * 15
+      })
+    }, 500)
+  }
+
+  // Get quick actions with dialog handlers
+  const dataExportQuickActions = getDataExportQuickActions(
+    setShowNewPipelineQuickDialog,
+    setShowRunAllSyncsDialog,
+    setShowViewLogsDialog
+  )
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 dark:bg-none dark:bg-gray-900">
@@ -2127,11 +2211,248 @@ export default function DataExportClient() {
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockDataExportQuickActions}
+            actions={dataExportQuickActions}
             variant="grid"
           />
         </div>
       </div>
+
+      {/* New Pipeline Quick Dialog */}
+      <Dialog open={showNewPipelineQuickDialog} onOpenChange={setShowNewPipelineQuickDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <GitBranch className="w-5 h-5 text-green-600" />
+              Create New Pipeline
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Pipeline Name</Label>
+              <Input
+                placeholder="e.g., Customer Analytics Sync"
+                value={newPipelineData.name}
+                onChange={(e) => setNewPipelineData(prev => ({ ...prev, name: e.target.value }))}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Description</Label>
+              <Input
+                placeholder="Describe what this pipeline does"
+                value={newPipelineData.description}
+                onChange={(e) => setNewPipelineData(prev => ({ ...prev, description: e.target.value }))}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Source Type</Label>
+                <Select
+                  value={newPipelineData.sourceType}
+                  onValueChange={(v) => setNewPipelineData(prev => ({ ...prev, sourceType: v }))}
+                >
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="postgresql">PostgreSQL</SelectItem>
+                    <SelectItem value="mysql">MySQL</SelectItem>
+                    <SelectItem value="mongodb">MongoDB</SelectItem>
+                    <SelectItem value="salesforce">Salesforce</SelectItem>
+                    <SelectItem value="hubspot">HubSpot</SelectItem>
+                    <SelectItem value="s3">AWS S3</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Destination</Label>
+                <Select
+                  value={newPipelineData.destinationType}
+                  onValueChange={(v) => setNewPipelineData(prev => ({ ...prev, destinationType: v }))}
+                >
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="snowflake">Snowflake</SelectItem>
+                    <SelectItem value="bigquery">BigQuery</SelectItem>
+                    <SelectItem value="redshift">Redshift</SelectItem>
+                    <SelectItem value="s3">AWS S3</SelectItem>
+                    <SelectItem value="gcs">Google Cloud Storage</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Sync Frequency</Label>
+              <Select
+                value={newPipelineData.frequency}
+                onValueChange={(v) => setNewPipelineData(prev => ({ ...prev, frequency: v }))}
+              >
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="realtime">Real-time</SelectItem>
+                  <SelectItem value="hourly">Hourly</SelectItem>
+                  <SelectItem value="daily">Daily</SelectItem>
+                  <SelectItem value="weekly">Weekly</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex justify-end gap-2 pt-4">
+              <Button variant="outline" onClick={() => setShowNewPipelineQuickDialog(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleCreatePipelineQuick} className="bg-green-600 hover:bg-green-700">
+                <Plus className="w-4 h-4 mr-2" />
+                Create Pipeline
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Run All Syncs Dialog */}
+      <Dialog open={showRunAllSyncsDialog} onOpenChange={setShowRunAllSyncsDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Play className="w-5 h-5 text-blue-600" />
+              Run All Pipeline Syncs
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+              <p className="text-sm text-blue-700 dark:text-blue-300">
+                This will trigger a sync for all {mockPipelines.length} active pipelines.
+                Depending on data volume, this may take several minutes.
+              </p>
+            </div>
+
+            <div className="space-y-3">
+              <Label>Pipelines to Sync</Label>
+              {mockPipelines.map(pipeline => (
+                <div key={pipeline.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-3 h-3 rounded-full ${
+                      pipeline.status === 'active' || pipeline.status === 'running' ? 'bg-green-500' :
+                      pipeline.status === 'error' ? 'bg-red-500' : 'bg-yellow-500'
+                    }`} />
+                    <span className="font-medium">{pipeline.name}</span>
+                  </div>
+                  <Badge variant="outline">{pipeline.schedule.frequency}</Badge>
+                </div>
+              ))}
+            </div>
+
+            {isSyncing && (
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-sm">
+                  <span>Sync Progress</span>
+                  <span>{Math.round(syncProgress)}%</span>
+                </div>
+                <Progress value={syncProgress} className="h-2" />
+                <p className="text-xs text-gray-500">Syncing data from all sources...</p>
+              </div>
+            )}
+
+            <div className="flex justify-end gap-2 pt-4">
+              <Button variant="outline" onClick={() => setShowRunAllSyncsDialog(false)} disabled={isSyncing}>
+                Cancel
+              </Button>
+              <Button
+                onClick={handleRunAllSyncs}
+                disabled={isSyncing}
+                className="bg-blue-600 hover:bg-blue-700"
+              >
+                {isSyncing ? (
+                  <>
+                    <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                    Syncing...
+                  </>
+                ) : (
+                  <>
+                    <Play className="w-4 h-4 mr-2" />
+                    Start All Syncs
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* View Logs Dialog */}
+      <Dialog open={showViewLogsDialog} onOpenChange={setShowViewLogsDialog}>
+        <DialogContent className="max-w-3xl max-h-[80vh]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <History className="w-5 h-5 text-purple-600" />
+              Pipeline Logs
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="flex items-center gap-4">
+              <div className="flex-1">
+                <Label className="sr-only">Filter by Pipeline</Label>
+                <Select value={selectedLogPipeline} onValueChange={setSelectedLogPipeline}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Filter by pipeline" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Pipelines</SelectItem>
+                    {mockPipelines.map(p => (
+                      <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <Button variant="outline" size="sm">
+                <Download className="w-4 h-4 mr-2" />
+                Export Logs
+              </Button>
+            </div>
+
+            <ScrollArea className="h-[400px] border rounded-lg">
+              <div className="space-y-2 p-4">
+                {mockAuditLogs
+                  .filter(log => selectedLogPipeline === 'all' || log.resource.includes(selectedLogPipeline))
+                  .map(log => (
+                    <div key={log.id} className="flex items-start gap-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                      <div className="flex-shrink-0">
+                        {log.action === 'run' && <Play className="w-4 h-4 text-green-500" />}
+                        {log.action === 'error' && <XCircle className="w-4 h-4 text-red-500" />}
+                        {log.action === 'create' && <Plus className="w-4 h-4 text-blue-500" />}
+                        {log.action === 'update' && <Settings className="w-4 h-4 text-yellow-500" />}
+                        {log.action === 'delete' && <Trash2 className="w-4 h-4 text-red-500" />}
+                        {log.action === 'connect' && <Zap className="w-4 h-4 text-purple-500" />}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <Badge className={getAuditActionColor(log.action)} variant="outline">
+                            {log.action}
+                          </Badge>
+                          <span className="font-medium truncate">{log.resource}</span>
+                        </div>
+                        <p className="text-sm text-gray-500 mt-1">{log.details}</p>
+                        <div className="flex items-center gap-4 mt-2 text-xs text-gray-400">
+                          <span>{log.user}</span>
+                          <span>{new Date(log.timestamp).toLocaleString()}</span>
+                        </div>
+                      </div>
+                      <Badge variant="outline" className={log.status === 'success' ? 'text-green-600 border-green-200' : 'text-red-600 border-red-200'}>
+                        {log.status}
+                      </Badge>
+                    </div>
+                  ))}
+              </div>
+            </ScrollArea>
+
+            <div className="flex justify-between items-center pt-4">
+              <p className="text-sm text-gray-500">
+                Showing {mockAuditLogs.length} log entries
+              </p>
+              <Button variant="outline" onClick={() => setShowViewLogsDialog(false)}>
+                Close
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

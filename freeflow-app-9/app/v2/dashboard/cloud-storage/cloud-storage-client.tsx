@@ -467,20 +467,7 @@ const mockStorageActivities = [
   { id: '3', user: 'System', action: 'Completed', target: 'automatic backup', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'update' as const },
 ]
 
-const mockStorageQuickActions = [
-  { id: '1', label: 'Upload Files', icon: 'upload', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 800)),
-    { loading: 'Preparing upload...', success: 'Upload dialog opened', error: 'Failed to open upload' }
-  ), variant: 'default' as const },
-  { id: '2', label: 'New Folder', icon: 'folder-plus', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 500)),
-    { loading: 'Creating folder...', success: 'Folder created successfully', error: 'Failed to create folder' }
-  ), variant: 'default' as const },
-  { id: '3', label: 'Storage Report', icon: 'bar-chart', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1000)),
-    { loading: 'Generating storage report...', success: 'Storage report ready', error: 'Failed to generate report' }
-  ), variant: 'outline' as const },
-]
+// Quick actions will be defined inside the component to access state setters
 
 export default function CloudStorageClient() {
   // Initialize Supabase client and hook
@@ -505,6 +492,12 @@ export default function CloudStorageClient() {
   const [showShareDialog, setShowShareDialog] = useState(false)
   const [showDeleteConfirmDialog, setShowDeleteConfirmDialog] = useState(false)
   const [showMoveDialog, setShowMoveDialog] = useState(false)
+  const [showStorageReportDialog, setShowStorageReportDialog] = useState(false)
+
+  // Storage report state
+  const [reportType, setReportType] = useState<'summary' | 'detailed' | 'usage'>('summary')
+  const [reportDateRange, setReportDateRange] = useState<'7days' | '30days' | '90days' | 'all'>('30days')
+  const [isGeneratingReport, setIsGeneratingReport] = useState(false)
 
   // Form states
   const [newFolderName, setNewFolderName] = useState('')
@@ -1108,6 +1101,60 @@ export default function CloudStorageClient() {
     }
   }
 
+  // Generate storage report
+  const handleGenerateReport = async () => {
+    setIsGeneratingReport(true)
+    try {
+      // Simulate report generation
+      await new Promise(resolve => setTimeout(resolve, 1500))
+
+      // Create report data based on selected options
+      const reportData = {
+        type: reportType,
+        dateRange: reportDateRange,
+        generatedAt: new Date().toISOString(),
+        summary: {
+          totalStorage: formatSize(mockQuota.total),
+          usedStorage: formatSize(mockQuota.used),
+          availableStorage: formatSize(mockQuota.total - mockQuota.used),
+          usagePercentage: ((mockQuota.used / mockQuota.total) * 100).toFixed(1) + '%',
+          totalFiles: mockFiles.length,
+          totalFolders: mockFolders.length,
+          sharedFiles: sharedFiles.length,
+          starredFiles: starredFiles.length
+        },
+        breakdown: mockQuota.breakdown,
+        files: reportType === 'detailed' ? mockFiles : undefined
+      }
+
+      // Export as JSON
+      const dataStr = JSON.stringify(reportData, null, 2)
+      const blob = new Blob([dataStr], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `storage-report-${reportType}-${new Date().toISOString().split('T')[0]}.json`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+
+      toast.success('Report Generated', { description: `${reportType.charAt(0).toUpperCase() + reportType.slice(1)} storage report downloaded` })
+      setShowStorageReportDialog(false)
+    } catch (error: any) {
+      toast.error('Report Generation Failed', { description: error.message })
+    } finally {
+      setIsGeneratingReport(false)
+    }
+  }
+
+  // Define quick actions inside component to access state setters
+  const storageQuickActions = [
+    { id: '1', label: 'Upload Files', icon: 'upload', action: () => fileInputRef.current?.click(), variant: 'default' as const },
+    { id: '2', label: 'New Folder', icon: 'folder-plus', action: () => setShowCreateFolderDialog(true), variant: 'default' as const },
+    { id: '3', label: 'Storage Report', icon: 'bar-chart', action: () => setShowStorageReportDialog(true), variant: 'outline' as const },
+  ]
+
   const stats = [
     { label: 'Storage Used', value: formatSize(mockQuota.used), icon: HardDrive, change: '+2.3 GB', color: 'text-blue-600' },
     { label: 'Total Files', value: mockFiles.length.toString(), icon: File, change: '+12', color: 'text-indigo-600' },
@@ -1265,10 +1312,10 @@ export default function CloudStorageClient() {
               {[
                 { label: 'Upload', icon: Upload, color: 'from-sky-500 to-blue-500', onClick: handleUploadFile },
                 { label: 'New Folder', icon: FolderPlus, color: 'from-indigo-500 to-purple-500', onClick: handleCreateFolder },
-                { label: 'Share', icon: Share2, color: 'from-green-500 to-emerald-500', onClick: () => selectedFile ? handleShareFile(selectedFile) : toast.promise(Promise.resolve(), { loading: 'Checking...', success: 'Please select a file to share', error: 'Error' }) },
-                { label: 'Download', icon: Download, color: 'from-orange-500 to-red-500', onClick: () => selectedFile ? handleDownloadFile(selectedFile) : toast.promise(Promise.resolve(), { loading: 'Checking...', success: 'Please select a file to download', error: 'Error' }) },
-                { label: 'Move', icon: Move, color: 'from-purple-500 to-pink-500', onClick: () => selectedFile ? handleMove(selectedFile) : toast.promise(Promise.resolve(), { loading: 'Checking...', success: 'Please select a file to move', error: 'Error' }) },
-                { label: 'Copy', icon: Copy, color: 'from-teal-500 to-cyan-500', onClick: () => selectedFile ? handleCopy(selectedFile) : toast.promise(Promise.resolve(), { loading: 'Checking...', success: 'Please select a file to copy', error: 'Error' }) },
+                { label: 'Share', icon: Share2, color: 'from-green-500 to-emerald-500', onClick: () => selectedFile ? handleShareFile(selectedFile) : toast.info('Select a File', { description: 'Please select a file from the list below to share' }) },
+                { label: 'Download', icon: Download, color: 'from-orange-500 to-red-500', onClick: () => selectedFile ? handleDownloadFile(selectedFile) : toast.info('Select a File', { description: 'Please select a file from the list below to download' }) },
+                { label: 'Move', icon: Move, color: 'from-purple-500 to-pink-500', onClick: () => selectedFile ? handleMove(selectedFile) : toast.info('Select a File', { description: 'Please select a file from the list below to move' }) },
+                { label: 'Copy', icon: Copy, color: 'from-teal-500 to-cyan-500', onClick: () => selectedFile ? handleCopy(selectedFile) : toast.info('Select a File', { description: 'Please select a file from the list below to copy' }) },
                 { label: 'Sync', icon: RefreshCw, color: 'from-blue-500 to-indigo-500', onClick: handleSync },
                 { label: 'Scan', icon: FileText, color: 'from-gray-500 to-gray-600', onClick: handleScan }
               ].map((action, i) => (
@@ -2207,7 +2254,7 @@ export default function CloudStorageClient() {
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockStorageQuickActions}
+            actions={storageQuickActions}
             variant="grid"
           />
         </div>
@@ -2575,6 +2622,111 @@ export default function CloudStorageClient() {
             <Button onClick={handleMoveSubmit} className="bg-sky-600 hover:bg-sky-700">
               <Move className="w-4 h-4 mr-2" />
               Move
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Storage Report Dialog */}
+      <Dialog open={showStorageReportDialog} onOpenChange={setShowStorageReportDialog}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <HardDrive className="w-5 h-5 text-sky-600" />
+              Generate Storage Report
+            </DialogTitle>
+            <DialogDescription>
+              Create a detailed report of your cloud storage usage and file statistics.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-6 py-4">
+            {/* Report Type Selection */}
+            <div className="space-y-3">
+              <Label className="text-sm font-medium">Report Type</Label>
+              <div className="grid grid-cols-3 gap-3">
+                {[
+                  { value: 'summary', label: 'Summary', desc: 'Quick overview' },
+                  { value: 'detailed', label: 'Detailed', desc: 'Full file list' },
+                  { value: 'usage', label: 'Usage', desc: 'Storage trends' }
+                ].map((type) => (
+                  <button
+                    key={type.value}
+                    type="button"
+                    onClick={() => setReportType(type.value as 'summary' | 'detailed' | 'usage')}
+                    className={`p-3 rounded-lg border text-left transition-all ${
+                      reportType === type.value
+                        ? 'border-sky-500 bg-sky-50 dark:bg-sky-900/30'
+                        : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
+                    }`}
+                  >
+                    <p className="font-medium text-sm">{type.label}</p>
+                    <p className="text-xs text-gray-500">{type.desc}</p>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Date Range Selection */}
+            <div className="space-y-2">
+              <Label>Date Range</Label>
+              <Select value={reportDateRange} onValueChange={(v: '7days' | '30days' | '90days' | 'all') => setReportDateRange(v)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select date range" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="7days">Last 7 Days</SelectItem>
+                  <SelectItem value="30days">Last 30 Days</SelectItem>
+                  <SelectItem value="90days">Last 90 Days</SelectItem>
+                  <SelectItem value="all">All Time</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Report Preview */}
+            <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-800 space-y-3">
+              <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Report Preview</p>
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <div>
+                  <p className="text-gray-500">Storage Used</p>
+                  <p className="font-semibold">{formatSize(mockQuota.used)}</p>
+                </div>
+                <div>
+                  <p className="text-gray-500">Total Storage</p>
+                  <p className="font-semibold">{formatSize(mockQuota.total)}</p>
+                </div>
+                <div>
+                  <p className="text-gray-500">Total Files</p>
+                  <p className="font-semibold">{mockFiles.length}</p>
+                </div>
+                <div>
+                  <p className="text-gray-500">Shared Files</p>
+                  <p className="font-semibold">{sharedFiles.length}</p>
+                </div>
+              </div>
+              <Progress value={usedPercentage} className="h-2" />
+              <p className="text-xs text-gray-500">{usedPercentage.toFixed(1)}% of storage used</p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowStorageReportDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleGenerateReport}
+              disabled={isGeneratingReport}
+              className="bg-sky-600 hover:bg-sky-700"
+            >
+              {isGeneratingReport ? (
+                <>
+                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <Download className="w-4 h-4 mr-2" />
+                  Generate Report
+                </>
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>

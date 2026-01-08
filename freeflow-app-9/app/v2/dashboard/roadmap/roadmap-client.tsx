@@ -7,12 +7,14 @@ import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
 import { Progress } from '@/components/ui/progress'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import {
   Map,
   Target,
@@ -48,7 +50,12 @@ import {
   Trash2,
   Globe,
   Terminal,
-  RefreshCw
+  RefreshCw,
+  Copy,
+  X,
+  Check,
+  Zap,
+  AlertTriangle
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -529,20 +536,7 @@ const mockRoadmapActivities = [
   { id: '3', user: 'Engineering', action: 'Completed', target: 'infrastructure milestone', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
 ]
 
-const mockRoadmapQuickActions = [
-  { id: '1', label: 'New Initiative', icon: 'plus', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 800)),
-    { loading: 'Creating new initiative...', success: 'Initiative created successfully', error: 'Failed to create initiative' }
-  ), variant: 'default' as const },
-  { id: '2', label: 'Timeline', icon: 'calendar', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 600)),
-    { loading: 'Loading timeline view...', success: 'Timeline view loaded', error: 'Failed to load timeline' }
-  ), variant: 'default' as const },
-  { id: '3', label: 'Share', icon: 'share', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 500)),
-    { loading: 'Generating share link...', success: 'Roadmap link copied to clipboard', error: 'Failed to generate link' }
-  ), variant: 'outline' as const },
-]
+// Quick actions will be initialized with dialog handlers in component
 
 export default function RoadmapClient({ initialInitiatives, initialMilestones }: RoadmapClientProps) {
   const [activeTab, setActiveTab] = useState('roadmap')
@@ -552,6 +546,58 @@ export default function RoadmapClient({ initialInitiatives, initialMilestones }:
   const [selectedFeature, setSelectedFeature] = useState<Feature | null>(null)
   const [isFeatureDialogOpen, setIsFeatureDialogOpen] = useState(false)
   const [settingsTab, setSettingsTab] = useState('general')
+
+  // Dialog states for real workflows
+  const [isNewFeatureDialogOpen, setIsNewFeatureDialogOpen] = useState(false)
+  const [isNewReleaseDialogOpen, setIsNewReleaseDialogOpen] = useState(false)
+  const [isSubmitIdeaDialogOpen, setIsSubmitIdeaDialogOpen] = useState(false)
+  const [isSetOKRDialogOpen, setIsSetOKRDialogOpen] = useState(false)
+  const [isShareDialogOpen, setIsShareDialogOpen] = useState(false)
+  const [isExportDialogOpen, setIsExportDialogOpen] = useState(false)
+  const [isSyncJiraDialogOpen, setIsSyncJiraDialogOpen] = useState(false)
+  const [isAnalyticsDialogOpen, setIsAnalyticsDialogOpen] = useState(false)
+  const [isCommentDialogOpen, setIsCommentDialogOpen] = useState(false)
+  const [isVoteDialogOpen, setIsVoteDialogOpen] = useState(false)
+  const [isImportDialogOpen, setIsImportDialogOpen] = useState(false)
+  const [isArchiveDialogOpen, setIsArchiveDialogOpen] = useState(false)
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+  const [isIntegrationDialogOpen, setIsIntegrationDialogOpen] = useState(false)
+  const [isTimelineDialogOpen, setIsTimelineDialogOpen] = useState(false)
+  const [isInsightDialogOpen, setIsInsightDialogOpen] = useState(false)
+  const [selectedIntegration, setSelectedIntegration] = useState<string>('')
+  const [selectedInsight, setSelectedInsight] = useState<any>(null)
+
+  // Form states
+  const [newFeatureForm, setNewFeatureForm] = useState({
+    title: '',
+    description: '',
+    priority: 'medium' as Priority,
+    quarter: 'Q1' as Quarter,
+    theme: '',
+    team: '',
+    impact: 'moderate' as ImpactLevel,
+    effort: 'medium' as EffortLevel
+  })
+  const [newReleaseForm, setNewReleaseForm] = useState({
+    name: '',
+    version: '',
+    description: '',
+    targetDate: ''
+  })
+  const [newIdeaForm, setNewIdeaForm] = useState({
+    title: '',
+    description: '',
+    category: ''
+  })
+  const [newOKRForm, setNewOKRForm] = useState({
+    title: '',
+    description: '',
+    keyResults: ['', '', ''],
+    quarter: 'Q1' as Quarter
+  })
+  const [commentText, setCommentText] = useState('')
+  const [shareUrl, setShareUrl] = useState('')
+  const [exportFormat, setExportFormat] = useState('csv')
 
   const features = mockFeatures
   const releases = mockReleases
@@ -597,99 +643,228 @@ export default function RoadmapClient({ initialInitiatives, initialMilestones }:
     setIsFeatureDialogOpen(true)
   }
 
-  // Handlers
-  const handleShareRoadmap = () => toast.success('Copied', { description: 'Link copied' })
+  // Dialog-based Handlers
+  const handleShareRoadmap = () => {
+    setShareUrl(`https://roadmap.yourcompany.com/public/${Date.now().toString(36)}`)
+    setIsShareDialogOpen(true)
+  }
 
   const handleNewFeature = () => {
-    toast.info('New Feature', {
-      description: 'Opening feature creation form...'
+    setNewFeatureForm({
+      title: '',
+      description: '',
+      priority: 'medium',
+      quarter: 'Q1',
+      theme: '',
+      team: '',
+      impact: 'moderate',
+      effort: 'medium'
     })
+    setIsNewFeatureDialogOpen(true)
   }
 
   const handleVote = () => {
     if (!selectedFeature) return
-    toast.success('Vote recorded', {
-      description: `You voted for ${selectedFeature.title}`
-    })
+    setIsVoteDialogOpen(true)
   }
 
   const handleComment = () => {
     if (!selectedFeature) return
-    toast.info('Comment', {
-      description: 'Opening comment editor...'
-    })
+    setCommentText('')
+    setIsCommentDialogOpen(true)
   }
 
   const handleShareFeature = () => {
     if (!selectedFeature) return
-    toast.success('Link copied', {
-      description: `Share link for ${selectedFeature.title} copied`
-    })
+    setShareUrl(`https://roadmap.yourcompany.com/feature/${selectedFeature.id}`)
+    setIsShareDialogOpen(true)
   }
 
-  const handleAddMilestone = () => toast.info('Add', { description: 'Opening form...' })
-
-  const handleEditMilestone = (n: string) => toast.info('Edit', { description: `Editing "${n}"...` })
-
-  const handleCompleteMilestone = (n: string) => toast.success('Completed', { description: `"${n}" done` })
-
-  const handleExportRoadmap = () => toast.success('Exporting', { description: 'Roadmap downloading...' })
-
-  const handleQuickAction = (actionLabel: string) => {
-    toast.info(actionLabel, { description: `${actionLabel} action triggered` })
+  const handleExportRoadmap = () => {
+    setExportFormat('csv')
+    setIsExportDialogOpen(true)
   }
 
   const handleNewRelease = () => {
-    toast.info('New Release', { description: 'Opening release creation form...' })
+    setNewReleaseForm({
+      name: '',
+      version: '',
+      description: '',
+      targetDate: ''
+    })
+    setIsNewReleaseDialogOpen(true)
   }
 
   const handleSubmitIdea = () => {
-    toast.info('Submit Idea', { description: 'Opening idea submission form...' })
+    setNewIdeaForm({
+      title: '',
+      description: '',
+      category: ''
+    })
+    setIsSubmitIdeaDialogOpen(true)
   }
 
   const handleSetOKR = () => {
-    toast.info('Set OKR', { description: 'Opening OKR configuration...' })
+    setNewOKRForm({
+      title: '',
+      description: '',
+      keyResults: ['', '', ''],
+      quarter: 'Q1'
+    })
+    setIsSetOKRDialogOpen(true)
   }
 
   const handleSyncJira = () => {
-    toast.info('Sync Jira', { description: 'Syncing with Jira...' })
+    setIsSyncJiraDialogOpen(true)
   }
 
   const handleViewAnalytics = () => {
-    toast.info('Analytics', { description: 'Opening analytics dashboard...' })
+    setIsAnalyticsDialogOpen(true)
   }
 
   const handleRecalculateScores = () => {
-    toast.success('Recalculating', { description: 'RICE scores being recalculated...' })
+    // Simulate score recalculation
+    toast.success('RICE Scores Updated', { description: 'All feature scores have been recalculated based on current data' })
   }
 
   const handleAddFeature = () => {
-    toast.info('Add Feature', { description: 'Opening feature creation form...' })
+    setNewFeatureForm({
+      title: '',
+      description: '',
+      priority: 'medium',
+      quarter: 'Q1',
+      theme: '',
+      team: '',
+      impact: 'moderate',
+      effort: 'medium'
+    })
+    setIsNewFeatureDialogOpen(true)
   }
 
   const handleCopyPublicUrl = () => {
+    navigator.clipboard.writeText('https://roadmap.yourcompany.com/public')
     toast.success('URL Copied', { description: 'Public roadmap URL copied to clipboard' })
   }
 
   const handleManageIntegration = (integrationName: string) => {
-    toast.info('Manage Integration', { description: `Managing ${integrationName} integration...` })
+    setSelectedIntegration(integrationName)
+    setIsIntegrationDialogOpen(true)
   }
 
   const handleConnectIntegration = (integrationName: string) => {
-    toast.info('Connect Integration', { description: `Connecting to ${integrationName}...` })
+    setSelectedIntegration(integrationName)
+    setIsIntegrationDialogOpen(true)
   }
 
   const handleImportFeatures = () => {
-    toast.info('Import Features', { description: 'Opening CSV import wizard...' })
+    setIsImportDialogOpen(true)
   }
 
   const handleArchiveCompleted = () => {
-    toast.warning('Archive All', { description: 'All released features will be archived' })
+    setIsArchiveDialogOpen(true)
   }
 
   const handleDeleteRoadmap = () => {
-    toast.error('Delete Roadmap', { description: 'This action cannot be undone' })
+    setIsDeleteDialogOpen(true)
   }
+
+  const handleOpenTimeline = () => {
+    setIsTimelineDialogOpen(true)
+  }
+
+  const handleInsightAction = (insight: any) => {
+    setSelectedInsight(insight)
+    setIsInsightDialogOpen(true)
+  }
+
+  // Submit handlers for dialogs
+  const submitNewFeature = () => {
+    if (!newFeatureForm.title.trim()) {
+      toast.error('Validation Error', { description: 'Feature title is required' })
+      return
+    }
+    toast.success('Feature Created', { description: `"${newFeatureForm.title}" has been added to the roadmap` })
+    setIsNewFeatureDialogOpen(false)
+  }
+
+  const submitNewRelease = () => {
+    if (!newReleaseForm.name.trim() || !newReleaseForm.version.trim()) {
+      toast.error('Validation Error', { description: 'Release name and version are required' })
+      return
+    }
+    toast.success('Release Created', { description: `Release ${newReleaseForm.version} "${newReleaseForm.name}" has been scheduled` })
+    setIsNewReleaseDialogOpen(false)
+  }
+
+  const submitIdea = () => {
+    if (!newIdeaForm.title.trim()) {
+      toast.error('Validation Error', { description: 'Idea title is required' })
+      return
+    }
+    toast.success('Idea Submitted', { description: `Your idea "${newIdeaForm.title}" has been submitted for review` })
+    setIsSubmitIdeaDialogOpen(false)
+  }
+
+  const submitOKR = () => {
+    if (!newOKRForm.title.trim()) {
+      toast.error('Validation Error', { description: 'Objective title is required' })
+      return
+    }
+    toast.success('OKR Created', { description: `Objective "${newOKRForm.title}" has been set for ${newOKRForm.quarter}` })
+    setIsSetOKRDialogOpen(false)
+  }
+
+  const submitComment = () => {
+    if (!commentText.trim()) {
+      toast.error('Validation Error', { description: 'Comment cannot be empty' })
+      return
+    }
+    toast.success('Comment Posted', { description: `Your comment on "${selectedFeature?.title}" has been posted` })
+    setIsCommentDialogOpen(false)
+    setCommentText('')
+  }
+
+  const submitVote = () => {
+    toast.success('Vote Recorded', { description: `You voted for "${selectedFeature?.title}"` })
+    setIsVoteDialogOpen(false)
+  }
+
+  const copyShareUrl = () => {
+    navigator.clipboard.writeText(shareUrl)
+    toast.success('Link Copied', { description: 'Share link has been copied to clipboard' })
+  }
+
+  const exportRoadmap = () => {
+    toast.success('Export Started', { description: `Roadmap is being exported as ${exportFormat.toUpperCase()}` })
+    setIsExportDialogOpen(false)
+  }
+
+  const syncWithJira = () => {
+    toast.success('Jira Sync Started', { description: 'Syncing features with Jira. This may take a few moments.' })
+    setIsSyncJiraDialogOpen(false)
+  }
+
+  const confirmArchive = () => {
+    toast.success('Features Archived', { description: 'All released features have been archived' })
+    setIsArchiveDialogOpen(false)
+  }
+
+  const confirmDelete = () => {
+    toast.success('Roadmap Deleted', { description: 'The roadmap has been permanently deleted' })
+    setIsDeleteDialogOpen(false)
+  }
+
+  const handleImportFile = () => {
+    toast.success('Import Started', { description: 'Your features are being imported. This may take a moment.' })
+    setIsImportDialogOpen(false)
+  }
+
+  // Quick actions with dialog handlers
+  const roadmapQuickActions = [
+    { id: '1', label: 'New Initiative', icon: 'plus', action: handleNewFeature, variant: 'default' as const },
+    { id: '2', label: 'Timeline', icon: 'calendar', action: handleOpenTimeline, variant: 'default' as const },
+    { id: '3', label: 'Share', icon: 'share', action: handleShareRoadmap, variant: 'outline' as const },
+  ]
 
   // Group features by status for Kanban view
   const featuresByStatus = useMemo(() => {
@@ -1791,10 +1966,7 @@ export default function RoadmapClient({ initialInitiatives, initialMilestones }:
             <AIInsightsPanel
               insights={mockRoadmapAIInsights}
               title="Roadmap Intelligence"
-              onInsightAction={(insight) => toast.promise(
-              new Promise(resolve => setTimeout(resolve, 700)),
-              { loading: `Processing insight: ${insight.title}...`, success: `Insight "${insight.title}" action completed`, error: 'Failed to process insight' }
-            )}
+              onInsightAction={handleInsightAction}
             />
           </div>
           <div className="space-y-6">
@@ -1816,7 +1988,7 @@ export default function RoadmapClient({ initialInitiatives, initialMilestones }:
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockRoadmapQuickActions}
+            actions={roadmapQuickActions}
             variant="grid"
           />
         </div>
@@ -1959,6 +2131,879 @@ export default function RoadmapClient({ initialInitiatives, initialMilestones }:
                 </ScrollArea>
               </>
             )}
+          </DialogContent>
+        </Dialog>
+
+        {/* New Feature Dialog */}
+        <Dialog open={isNewFeatureDialogOpen} onOpenChange={setIsNewFeatureDialogOpen}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Plus className="w-5 h-5 text-teal-500" />
+                Create New Feature
+              </DialogTitle>
+              <DialogDescription>
+                Add a new feature to your product roadmap
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="col-span-2">
+                  <Label htmlFor="featureTitle">Feature Title</Label>
+                  <Input
+                    id="featureTitle"
+                    placeholder="Enter feature title"
+                    value={newFeatureForm.title}
+                    onChange={(e) => setNewFeatureForm({...newFeatureForm, title: e.target.value})}
+                  />
+                </div>
+                <div className="col-span-2">
+                  <Label htmlFor="featureDescription">Description</Label>
+                  <Textarea
+                    id="featureDescription"
+                    placeholder="Describe the feature"
+                    value={newFeatureForm.description}
+                    onChange={(e) => setNewFeatureForm({...newFeatureForm, description: e.target.value})}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="featurePriority">Priority</Label>
+                  <Select
+                    value={newFeatureForm.priority}
+                    onValueChange={(value: Priority) => setNewFeatureForm({...newFeatureForm, priority: value})}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select priority" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="critical">Critical</SelectItem>
+                      <SelectItem value="high">High</SelectItem>
+                      <SelectItem value="medium">Medium</SelectItem>
+                      <SelectItem value="low">Low</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="featureQuarter">Target Quarter</Label>
+                  <Select
+                    value={newFeatureForm.quarter}
+                    onValueChange={(value: Quarter) => setNewFeatureForm({...newFeatureForm, quarter: value})}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select quarter" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Q1">Q1 2025</SelectItem>
+                      <SelectItem value="Q2">Q2 2025</SelectItem>
+                      <SelectItem value="Q3">Q3 2025</SelectItem>
+                      <SelectItem value="Q4">Q4 2025</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="featureTheme">Theme</Label>
+                  <Input
+                    id="featureTheme"
+                    placeholder="e.g., AI & Intelligence"
+                    value={newFeatureForm.theme}
+                    onChange={(e) => setNewFeatureForm({...newFeatureForm, theme: e.target.value})}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="featureTeam">Team</Label>
+                  <Input
+                    id="featureTeam"
+                    placeholder="e.g., Platform"
+                    value={newFeatureForm.team}
+                    onChange={(e) => setNewFeatureForm({...newFeatureForm, team: e.target.value})}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="featureImpact">Impact Level</Label>
+                  <Select
+                    value={newFeatureForm.impact}
+                    onValueChange={(value: ImpactLevel) => setNewFeatureForm({...newFeatureForm, impact: value})}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select impact" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="transformational">Transformational</SelectItem>
+                      <SelectItem value="significant">Significant</SelectItem>
+                      <SelectItem value="moderate">Moderate</SelectItem>
+                      <SelectItem value="minor">Minor</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="featureEffort">Effort Level</Label>
+                  <Select
+                    value={newFeatureForm.effort}
+                    onValueChange={(value: EffortLevel) => setNewFeatureForm({...newFeatureForm, effort: value})}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select effort" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="xl">XL (3+ months)</SelectItem>
+                      <SelectItem value="large">Large (1-3 months)</SelectItem>
+                      <SelectItem value="medium">Medium (2-4 weeks)</SelectItem>
+                      <SelectItem value="small">Small (1 week)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsNewFeatureDialogOpen(false)}>Cancel</Button>
+              <Button onClick={submitNewFeature} className="bg-gradient-to-r from-teal-500 to-cyan-600">
+                <Plus className="w-4 h-4 mr-2" />
+                Create Feature
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* New Release Dialog */}
+        <Dialog open={isNewReleaseDialogOpen} onOpenChange={setIsNewReleaseDialogOpen}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Package className="w-5 h-5 text-green-500" />
+                Create New Release
+              </DialogTitle>
+              <DialogDescription>
+                Schedule a new product release
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label htmlFor="releaseName">Release Name</Label>
+                <Input
+                  id="releaseName"
+                  placeholder="e.g., Spring Release"
+                  value={newReleaseForm.name}
+                  onChange={(e) => setNewReleaseForm({...newReleaseForm, name: e.target.value})}
+                />
+              </div>
+              <div>
+                <Label htmlFor="releaseVersion">Version</Label>
+                <Input
+                  id="releaseVersion"
+                  placeholder="e.g., 2.5.0"
+                  value={newReleaseForm.version}
+                  onChange={(e) => setNewReleaseForm({...newReleaseForm, version: e.target.value})}
+                />
+              </div>
+              <div>
+                <Label htmlFor="releaseDescription">Description</Label>
+                <Textarea
+                  id="releaseDescription"
+                  placeholder="Describe the release"
+                  value={newReleaseForm.description}
+                  onChange={(e) => setNewReleaseForm({...newReleaseForm, description: e.target.value})}
+                />
+              </div>
+              <div>
+                <Label htmlFor="releaseDate">Target Date</Label>
+                <Input
+                  id="releaseDate"
+                  type="date"
+                  value={newReleaseForm.targetDate}
+                  onChange={(e) => setNewReleaseForm({...newReleaseForm, targetDate: e.target.value})}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsNewReleaseDialogOpen(false)}>Cancel</Button>
+              <Button onClick={submitNewRelease} className="bg-gradient-to-r from-green-500 to-emerald-600">
+                <Package className="w-4 h-4 mr-2" />
+                Create Release
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Submit Idea Dialog */}
+        <Dialog open={isSubmitIdeaDialogOpen} onOpenChange={setIsSubmitIdeaDialogOpen}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Lightbulb className="w-5 h-5 text-yellow-500" />
+                Submit New Idea
+              </DialogTitle>
+              <DialogDescription>
+                Share your product idea with the team
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label htmlFor="ideaTitle">Idea Title</Label>
+                <Input
+                  id="ideaTitle"
+                  placeholder="Enter your idea title"
+                  value={newIdeaForm.title}
+                  onChange={(e) => setNewIdeaForm({...newIdeaForm, title: e.target.value})}
+                />
+              </div>
+              <div>
+                <Label htmlFor="ideaDescription">Description</Label>
+                <Textarea
+                  id="ideaDescription"
+                  placeholder="Describe your idea in detail"
+                  value={newIdeaForm.description}
+                  onChange={(e) => setNewIdeaForm({...newIdeaForm, description: e.target.value})}
+                  rows={4}
+                />
+              </div>
+              <div>
+                <Label htmlFor="ideaCategory">Category</Label>
+                <Select
+                  value={newIdeaForm.category}
+                  onValueChange={(value) => setNewIdeaForm({...newIdeaForm, category: value})}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="UI/UX">UI/UX</SelectItem>
+                    <SelectItem value="Productivity">Productivity</SelectItem>
+                    <SelectItem value="Integration">Integration</SelectItem>
+                    <SelectItem value="Performance">Performance</SelectItem>
+                    <SelectItem value="Security">Security</SelectItem>
+                    <SelectItem value="Export">Export/Import</SelectItem>
+                    <SelectItem value="Other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsSubmitIdeaDialogOpen(false)}>Cancel</Button>
+              <Button onClick={submitIdea} className="bg-gradient-to-r from-yellow-500 to-amber-600">
+                <Lightbulb className="w-4 h-4 mr-2" />
+                Submit Idea
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Set OKR Dialog */}
+        <Dialog open={isSetOKRDialogOpen} onOpenChange={setIsSetOKRDialogOpen}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Target className="w-5 h-5 text-purple-500" />
+                Set Objective & Key Results
+              </DialogTitle>
+              <DialogDescription>
+                Define objectives and measurable key results
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label htmlFor="okrTitle">Objective</Label>
+                <Input
+                  id="okrTitle"
+                  placeholder="What do you want to achieve?"
+                  value={newOKRForm.title}
+                  onChange={(e) => setNewOKRForm({...newOKRForm, title: e.target.value})}
+                />
+              </div>
+              <div>
+                <Label htmlFor="okrDescription">Description</Label>
+                <Textarea
+                  id="okrDescription"
+                  placeholder="Describe the objective"
+                  value={newOKRForm.description}
+                  onChange={(e) => setNewOKRForm({...newOKRForm, description: e.target.value})}
+                />
+              </div>
+              <div>
+                <Label>Key Results</Label>
+                <div className="space-y-2 mt-2">
+                  {newOKRForm.keyResults.map((kr, idx) => (
+                    <Input
+                      key={idx}
+                      placeholder={`Key Result ${idx + 1}`}
+                      value={kr}
+                      onChange={(e) => {
+                        const updated = [...newOKRForm.keyResults]
+                        updated[idx] = e.target.value
+                        setNewOKRForm({...newOKRForm, keyResults: updated})
+                      }}
+                    />
+                  ))}
+                </div>
+              </div>
+              <div>
+                <Label htmlFor="okrQuarter">Quarter</Label>
+                <Select
+                  value={newOKRForm.quarter}
+                  onValueChange={(value: Quarter) => setNewOKRForm({...newOKRForm, quarter: value})}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select quarter" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Q1">Q1 2025</SelectItem>
+                    <SelectItem value="Q2">Q2 2025</SelectItem>
+                    <SelectItem value="Q3">Q3 2025</SelectItem>
+                    <SelectItem value="Q4">Q4 2025</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsSetOKRDialogOpen(false)}>Cancel</Button>
+              <Button onClick={submitOKR} className="bg-gradient-to-r from-purple-500 to-violet-600">
+                <Target className="w-4 h-4 mr-2" />
+                Set OKR
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Share Dialog */}
+        <Dialog open={isShareDialogOpen} onOpenChange={setIsShareDialogOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Share2 className="w-5 h-5 text-pink-500" />
+                Share Roadmap
+              </DialogTitle>
+              <DialogDescription>
+                Share your roadmap with team members or stakeholders
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label>Share Link</Label>
+                <div className="flex gap-2 mt-2">
+                  <Input value={shareUrl} readOnly className="flex-1" />
+                  <Button onClick={copyShareUrl} variant="outline">
+                    <Copy className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+              <div className="flex items-center justify-between py-2">
+                <div>
+                  <p className="font-medium">Allow commenting</p>
+                  <p className="text-sm text-muted-foreground">Viewers can leave comments</p>
+                </div>
+                <Switch />
+              </div>
+              <div className="flex items-center justify-between py-2">
+                <div>
+                  <p className="font-medium">Allow voting</p>
+                  <p className="text-sm text-muted-foreground">Viewers can vote on features</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsShareDialogOpen(false)}>Close</Button>
+              <Button onClick={copyShareUrl} className="bg-gradient-to-r from-pink-500 to-rose-600">
+                <Copy className="w-4 h-4 mr-2" />
+                Copy Link
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Export Dialog */}
+        <Dialog open={isExportDialogOpen} onOpenChange={setIsExportDialogOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Download className="w-5 h-5 text-green-500" />
+                Export Roadmap
+              </DialogTitle>
+              <DialogDescription>
+                Download your roadmap data
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label>Export Format</Label>
+                <Select value={exportFormat} onValueChange={setExportFormat}>
+                  <SelectTrigger className="mt-2">
+                    <SelectValue placeholder="Select format" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="csv">CSV (Spreadsheet)</SelectItem>
+                    <SelectItem value="json">JSON (Data)</SelectItem>
+                    <SelectItem value="pdf">PDF (Document)</SelectItem>
+                    <SelectItem value="png">PNG (Image)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="p-4 bg-muted/50 rounded-lg">
+                <p className="text-sm font-medium">Export includes:</p>
+                <ul className="text-sm text-muted-foreground mt-2 space-y-1">
+                  <li>- All features ({features.length} items)</li>
+                  <li>- All releases ({releases.length} items)</li>
+                  <li>- Feature metadata and progress</li>
+                </ul>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsExportDialogOpen(false)}>Cancel</Button>
+              <Button onClick={exportRoadmap} className="bg-gradient-to-r from-green-500 to-emerald-600">
+                <Download className="w-4 h-4 mr-2" />
+                Export
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Sync Jira Dialog */}
+        <Dialog open={isSyncJiraDialogOpen} onOpenChange={setIsSyncJiraDialogOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <GitBranch className="w-5 h-5 text-orange-500" />
+                Sync with Jira
+              </DialogTitle>
+              <DialogDescription>
+                Synchronize features with your Jira project
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg border border-orange-200 dark:border-orange-800">
+                <div className="flex items-center gap-2 mb-2">
+                  <Check className="w-4 h-4 text-green-500" />
+                  <p className="font-medium text-sm">Jira Connected</p>
+                </div>
+                <p className="text-sm text-muted-foreground">Project: ROADMAP-2025</p>
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between py-2">
+                  <div>
+                    <p className="font-medium text-sm">Sync features to Jira</p>
+                    <p className="text-xs text-muted-foreground">Create/update Jira issues</p>
+                  </div>
+                  <Switch defaultChecked />
+                </div>
+                <div className="flex items-center justify-between py-2">
+                  <div>
+                    <p className="font-medium text-sm">Sync status changes</p>
+                    <p className="text-xs text-muted-foreground">Update status in both systems</p>
+                  </div>
+                  <Switch defaultChecked />
+                </div>
+                <div className="flex items-center justify-between py-2">
+                  <div>
+                    <p className="font-medium text-sm">Two-way sync</p>
+                    <p className="text-xs text-muted-foreground">Pull changes from Jira</p>
+                  </div>
+                  <Switch />
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsSyncJiraDialogOpen(false)}>Cancel</Button>
+              <Button onClick={syncWithJira} className="bg-gradient-to-r from-orange-500 to-amber-600">
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Sync Now
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Analytics Dialog */}
+        <Dialog open={isAnalyticsDialogOpen} onOpenChange={setIsAnalyticsDialogOpen}>
+          <DialogContent className="max-w-3xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <BarChart3 className="w-5 h-5 text-cyan-500" />
+                Roadmap Analytics
+              </DialogTitle>
+              <DialogDescription>
+                Insights and metrics for your product roadmap
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-6 py-4">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="p-4 bg-muted/50 rounded-lg text-center">
+                  <p className="text-3xl font-bold text-teal-600">{stats.totalFeatures}</p>
+                  <p className="text-sm text-muted-foreground">Total Features</p>
+                </div>
+                <div className="p-4 bg-muted/50 rounded-lg text-center">
+                  <p className="text-3xl font-bold text-purple-600">{stats.inProgress}</p>
+                  <p className="text-sm text-muted-foreground">In Progress</p>
+                </div>
+                <div className="p-4 bg-muted/50 rounded-lg text-center">
+                  <p className="text-3xl font-bold text-green-600">{stats.released}</p>
+                  <p className="text-sm text-muted-foreground">Released</p>
+                </div>
+                <div className="p-4 bg-muted/50 rounded-lg text-center">
+                  <p className="text-3xl font-bold text-blue-600">{stats.avgProgress.toFixed(0)}%</p>
+                  <p className="text-sm text-muted-foreground">Avg Progress</p>
+                </div>
+              </div>
+              <div>
+                <h4 className="font-medium mb-3">Feature Distribution by Status</h4>
+                <div className="space-y-2">
+                  {['backlog', 'planned', 'in_progress', 'review', 'released'].map((status) => {
+                    const count = features.filter(f => f.status === status).length
+                    const percentage = (count / features.length) * 100
+                    return (
+                      <div key={status}>
+                        <div className="flex justify-between text-sm mb-1">
+                          <span className="capitalize">{status.replace('_', ' ')}</span>
+                          <span>{count} ({percentage.toFixed(0)}%)</span>
+                        </div>
+                        <Progress value={percentage} className="h-2" />
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+              <div>
+                <h4 className="font-medium mb-3">Top Voted Features</h4>
+                <div className="space-y-2">
+                  {features.sort((a, b) => b.votes - a.votes).slice(0, 3).map((feature) => (
+                    <div key={feature.id} className="flex items-center justify-between p-2 bg-muted/30 rounded-lg">
+                      <span className="text-sm font-medium">{feature.title}</span>
+                      <Badge variant="secondary">
+                        <ThumbsUp className="w-3 h-3 mr-1" />
+                        {feature.votes}
+                      </Badge>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsAnalyticsDialogOpen(false)}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Comment Dialog */}
+        <Dialog open={isCommentDialogOpen} onOpenChange={setIsCommentDialogOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <MessageSquare className="w-5 h-5 text-blue-500" />
+                Add Comment
+              </DialogTitle>
+              <DialogDescription>
+                Comment on {selectedFeature?.title}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <Textarea
+                placeholder="Write your comment..."
+                value={commentText}
+                onChange={(e) => setCommentText(e.target.value)}
+                rows={4}
+              />
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsCommentDialogOpen(false)}>Cancel</Button>
+              <Button onClick={submitComment} className="bg-gradient-to-r from-blue-500 to-indigo-600">
+                <MessageSquare className="w-4 h-4 mr-2" />
+                Post Comment
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Vote Dialog */}
+        <Dialog open={isVoteDialogOpen} onOpenChange={setIsVoteDialogOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <ThumbsUp className="w-5 h-5 text-amber-500" />
+                Vote for Feature
+              </DialogTitle>
+              <DialogDescription>
+                Your vote helps prioritize this feature
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="p-4 bg-muted/50 rounded-lg">
+                <h4 className="font-semibold mb-2">{selectedFeature?.title}</h4>
+                <p className="text-sm text-muted-foreground">{selectedFeature?.description}</p>
+                <div className="flex items-center gap-4 mt-4">
+                  <Badge variant="secondary">
+                    <ThumbsUp className="w-3 h-3 mr-1" />
+                    {selectedFeature?.votes} votes
+                  </Badge>
+                  <Badge variant="outline">{selectedFeature?.status.replace('_', ' ')}</Badge>
+                </div>
+              </div>
+              <p className="text-sm text-center text-muted-foreground">
+                Click confirm to add your vote to this feature
+              </p>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsVoteDialogOpen(false)}>Cancel</Button>
+              <Button onClick={submitVote} className="bg-gradient-to-r from-amber-500 to-orange-600">
+                <ThumbsUp className="w-4 h-4 mr-2" />
+                Confirm Vote
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Import Dialog */}
+        <Dialog open={isImportDialogOpen} onOpenChange={setIsImportDialogOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Upload className="w-5 h-5 text-blue-500" />
+                Import Features
+              </DialogTitle>
+              <DialogDescription>
+                Bulk import features from a CSV file
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center">
+                <Upload className="w-10 h-10 mx-auto text-muted-foreground mb-4" />
+                <p className="text-sm font-medium">Drop your CSV file here</p>
+                <p className="text-xs text-muted-foreground mt-1">or click to browse</p>
+                <input type="file" className="hidden" accept=".csv" />
+              </div>
+              <div className="p-3 bg-muted/50 rounded-lg">
+                <p className="text-xs text-muted-foreground">
+                  <strong>Required columns:</strong> title, description, priority, quarter, theme, team
+                </p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsImportDialogOpen(false)}>Cancel</Button>
+              <Button onClick={handleImportFile} className="bg-gradient-to-r from-blue-500 to-indigo-600">
+                <Upload className="w-4 h-4 mr-2" />
+                Import
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Archive Confirmation Dialog */}
+        <Dialog open={isArchiveDialogOpen} onOpenChange={setIsArchiveDialogOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-amber-600">
+                <AlertTriangle className="w-5 h-5" />
+                Archive Completed Features
+              </DialogTitle>
+              <DialogDescription>
+                This will archive all released features
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <p className="text-sm">
+                You are about to archive <strong>{features.filter(f => f.status === 'released').length}</strong> released features.
+                Archived features can be viewed in the archive section but will no longer appear in the main roadmap.
+              </p>
+              <div className="p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800">
+                <p className="text-sm text-amber-800 dark:text-amber-200">
+                  This action can be reversed from the archive section.
+                </p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsArchiveDialogOpen(false)}>Cancel</Button>
+              <Button onClick={confirmArchive} className="bg-amber-600 hover:bg-amber-700">
+                Archive Features
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Confirmation Dialog */}
+        <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-600">
+                <Trash2 className="w-5 h-5" />
+                Delete Roadmap
+              </DialogTitle>
+              <DialogDescription>
+                This action cannot be undone
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <p className="text-sm">
+                You are about to permanently delete this roadmap including all features, releases, and associated data.
+              </p>
+              <div className="p-3 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                <p className="text-sm text-red-800 dark:text-red-200 font-medium">
+                  Warning: This action is irreversible. All data will be permanently lost.
+                </p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>Cancel</Button>
+              <Button onClick={confirmDelete} variant="destructive">
+                <Trash2 className="w-4 h-4 mr-2" />
+                Delete Permanently
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Integration Dialog */}
+        <Dialog open={isIntegrationDialogOpen} onOpenChange={setIsIntegrationDialogOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Webhook className="w-5 h-5 text-purple-500" />
+                {selectedIntegration} Integration
+              </DialogTitle>
+              <DialogDescription>
+                Configure your {selectedIntegration} integration settings
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="p-4 bg-muted/50 rounded-lg">
+                <div className="flex items-center justify-between mb-4">
+                  <span className="font-medium">Connection Status</span>
+                  <Badge variant="outline" className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                    <Check className="w-3 h-3 mr-1" />
+                    Connected
+                  </Badge>
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between py-2 border-t">
+                    <span className="text-sm">Auto-sync enabled</span>
+                    <Switch defaultChecked />
+                  </div>
+                  <div className="flex items-center justify-between py-2">
+                    <span className="text-sm">Notify on changes</span>
+                    <Switch defaultChecked />
+                  </div>
+                </div>
+              </div>
+              <Button variant="outline" className="w-full text-red-600 hover:text-red-700">
+                <X className="w-4 h-4 mr-2" />
+                Disconnect Integration
+              </Button>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsIntegrationDialogOpen(false)}>Close</Button>
+              <Button className="bg-gradient-to-r from-purple-500 to-violet-600">
+                Save Settings
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Timeline Dialog */}
+        <Dialog open={isTimelineDialogOpen} onOpenChange={setIsTimelineDialogOpen}>
+          <DialogContent className="max-w-4xl max-h-[80vh] overflow-hidden">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <GanttChart className="w-5 h-5 text-teal-500" />
+                Roadmap Timeline
+              </DialogTitle>
+              <DialogDescription>
+                Visual timeline of all planned features and releases
+              </DialogDescription>
+            </DialogHeader>
+            <ScrollArea className="h-[500px] pr-4">
+              <div className="space-y-6 py-4">
+                {(['Q1', 'Q2', 'Q3', 'Q4'] as Quarter[]).map((quarter) => {
+                  const quarterFeatures = features.filter(f => f.quarter === quarter)
+                  return (
+                    <div key={quarter} className="relative pl-8 pb-6 border-l-2 border-teal-200 dark:border-teal-800">
+                      <div className="absolute -left-3 top-0 w-6 h-6 rounded-full bg-gradient-to-br from-teal-500 to-cyan-600 flex items-center justify-center text-white text-xs font-bold">
+                        {quarter[1]}
+                      </div>
+                      <div className="mb-4">
+                        <h4 className="font-semibold text-lg">{quarter} 2025</h4>
+                        <p className="text-sm text-muted-foreground">{quarterFeatures.length} features planned</p>
+                      </div>
+                      <div className="space-y-2">
+                        {quarterFeatures.map((feature) => (
+                          <div key={feature.id} className="p-3 bg-muted/50 rounded-lg flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <Badge className={getStatusColor(feature.status)} variant="secondary">
+                                {feature.status.replace('_', ' ')}
+                              </Badge>
+                              <span className="font-medium">{feature.title}</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Progress value={feature.progress} className="w-20 h-2" />
+                              <span className="text-sm text-muted-foreground">{feature.progress}%</span>
+                            </div>
+                          </div>
+                        ))}
+                        {quarterFeatures.length === 0 && (
+                          <p className="text-sm text-muted-foreground italic">No features planned for this quarter</p>
+                        )}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </ScrollArea>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsTimelineDialogOpen(false)}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Insight Action Dialog */}
+        <Dialog open={isInsightDialogOpen} onOpenChange={setIsInsightDialogOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Zap className="w-5 h-5 text-blue-500" />
+                Take Action on Insight
+              </DialogTitle>
+              <DialogDescription>
+                Process this AI-generated insight
+              </DialogDescription>
+            </DialogHeader>
+            {selectedInsight && (
+              <div className="space-y-4 py-4">
+                <div className={`p-4 rounded-lg ${
+                  selectedInsight.type === 'success' ? 'bg-green-50 dark:bg-green-900/20 border-green-200' :
+                  selectedInsight.type === 'warning' ? 'bg-amber-50 dark:bg-amber-900/20 border-amber-200' :
+                  'bg-blue-50 dark:bg-blue-900/20 border-blue-200'
+                } border`}>
+                  <h4 className="font-semibold">{selectedInsight.title}</h4>
+                  <p className="text-sm text-muted-foreground mt-1">{selectedInsight.description}</p>
+                  <Badge variant="outline" className="mt-2">{selectedInsight.category}</Badge>
+                </div>
+                <div>
+                  <Label>Action to take</Label>
+                  <Select defaultValue="acknowledge">
+                    <SelectTrigger className="mt-2">
+                      <SelectValue placeholder="Select action" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="acknowledge">Acknowledge</SelectItem>
+                      <SelectItem value="investigate">Investigate further</SelectItem>
+                      <SelectItem value="create_task">Create task</SelectItem>
+                      <SelectItem value="dismiss">Dismiss</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>Notes (optional)</Label>
+                  <Textarea placeholder="Add any notes about this insight..." className="mt-2" />
+                </div>
+              </div>
+            )}
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsInsightDialogOpen(false)}>Cancel</Button>
+              <Button
+                onClick={() => {
+                  toast.success('Action Completed', { description: `Insight "${selectedInsight?.title}" has been processed` })
+                  setIsInsightDialogOpen(false)
+                }}
+                className="bg-gradient-to-r from-blue-500 to-indigo-600"
+              >
+                <Check className="w-4 h-4 mr-2" />
+                Complete Action
+              </Button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
       </div>

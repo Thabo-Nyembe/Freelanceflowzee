@@ -13,13 +13,20 @@ import {
 
 
 import * as React from 'react'
-import { useMemo, useCallback, useDeferredValue, useTransition } from 'react'
+import { useMemo, useCallback, useDeferredValue, useTransition, useState } from 'react'
 import dynamic from 'next/dynamic'
 import { toast } from 'sonner'
 import { createFeatureLogger } from '@/lib/logger'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Switch } from '@/components/ui/switch'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Textarea } from '@/components/ui/textarea'
 
 // Import lightweight components (keep as regular imports)
 import { EnhancedBreadcrumb } from '@/components/ui/enhanced-breadcrumb'
@@ -149,21 +156,6 @@ const microFeaturesShowcaseActivities = [
   { id: '3', user: 'System', action: 'generated', target: 'weekly report', timestamp: '1h ago', type: 'info' as const },
 ]
 
-const microFeaturesShowcaseQuickActions = [
-  { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 800)),
-    { loading: 'Creating new item...', success: 'New item created successfully', error: 'Failed to create item' }
-  ) },
-  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1000)),
-    { loading: 'Exporting data...', success: 'Data exported successfully', error: 'Failed to export data' }
-  ) },
-  { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 500)),
-    { loading: 'Opening settings...', success: 'Settings panel opened', error: 'Failed to open settings' }
-  ) },
-]
-
 export default function MicroFeaturesShowcaseClient() {
   // A+++ STATE MANAGEMENT
   const { userId, loading: userLoading } = useCurrentUser()
@@ -171,6 +163,96 @@ export default function MicroFeaturesShowcaseClient() {
 
   const [isPageLoading, setIsPageLoading] = React.useState(true)
   const [error, setError] = React.useState<string | null>(null)
+
+  // Dialog state management for quick actions
+  const [showNewItemDialog, setShowNewItemDialog] = useState(false)
+  const [showExportDialog, setShowExportDialog] = useState(false)
+  const [showSettingsDialog, setShowSettingsDialog] = useState(false)
+
+  // New Item form state
+  const [newItemName, setNewItemName] = useState('')
+  const [newItemType, setNewItemType] = useState('component')
+  const [newItemDescription, setNewItemDescription] = useState('')
+  const [newItemPriority, setNewItemPriority] = useState('medium')
+
+  // Export form state
+  const [exportFormat, setExportFormat] = useState('json')
+  const [exportIncludeAnimations, setExportIncludeAnimations] = useState(true)
+  const [exportIncludeTooltips, setExportIncludeTooltips] = useState(true)
+  const [exportIncludeButtons, setExportIncludeButtons] = useState(true)
+  const [exportDateRange, setExportDateRange] = useState('all')
+
+  // Settings form state
+  const [settingsAnimationsEnabled, setSettingsAnimationsEnabled] = useState(true)
+  const [settingsAnimationSpeed, setSettingsAnimationSpeed] = useState('normal')
+  const [settingsTooltipDelay, setSettingsTooltipDelay] = useState('200')
+  const [settingsAutoSave, setSettingsAutoSave] = useState(true)
+  const [settingsTheme, setSettingsTheme] = useState('system')
+
+  // Handler for creating new item
+  const handleCreateNewItem = useCallback(async () => {
+    if (!newItemName.trim()) {
+      toast.error('Please enter an item name')
+      return
+    }
+
+    try {
+      await new Promise(resolve => setTimeout(resolve, 800))
+      toast.success('New item created successfully', {
+        description: `${newItemName} (${newItemType}) has been added to your showcase`
+      })
+      setShowNewItemDialog(false)
+      setNewItemName('')
+      setNewItemDescription('')
+      setNewItemType('component')
+      setNewItemPriority('medium')
+    } catch {
+      toast.error('Failed to create item')
+    }
+  }, [newItemName, newItemType])
+
+  // Handler for export
+  const handleExport = useCallback(async () => {
+    const selectedFeatures = []
+    if (exportIncludeAnimations) selectedFeatures.push('animations')
+    if (exportIncludeTooltips) selectedFeatures.push('tooltips')
+    if (exportIncludeButtons) selectedFeatures.push('buttons')
+
+    if (selectedFeatures.length === 0) {
+      toast.error('Please select at least one feature to export')
+      return
+    }
+
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      toast.success('Export completed successfully', {
+        description: `Exported ${selectedFeatures.join(', ')} in ${exportFormat.toUpperCase()} format`
+      })
+      setShowExportDialog(false)
+    } catch {
+      toast.error('Failed to export data')
+    }
+  }, [exportFormat, exportIncludeAnimations, exportIncludeTooltips, exportIncludeButtons])
+
+  // Handler for saving settings
+  const handleSaveSettings = useCallback(async () => {
+    try {
+      await new Promise(resolve => setTimeout(resolve, 500))
+      toast.success('Settings saved successfully', {
+        description: `Animation: ${settingsAnimationsEnabled ? 'On' : 'Off'}, Speed: ${settingsAnimationSpeed}, Theme: ${settingsTheme}`
+      })
+      setShowSettingsDialog(false)
+    } catch {
+      toast.error('Failed to save settings')
+    }
+  }, [settingsAnimationsEnabled, settingsAnimationSpeed, settingsTheme])
+
+  // Quick actions with real dialog functionality
+  const microFeaturesShowcaseQuickActions = useMemo(() => [
+    { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => setShowNewItemDialog(true) },
+    { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => setShowExportDialog(true) },
+    { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => setShowSettingsDialog(true) },
+  ], [])
 
   React.useEffect(() => {
     if (userId) {
@@ -349,6 +431,245 @@ export default function MicroFeaturesShowcaseClient() {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* New Item Dialog */}
+      <Dialog open={showNewItemDialog} onOpenChange={setShowNewItemDialog}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Create New Micro Feature Item</DialogTitle>
+            <DialogDescription>
+              Add a new component, animation, or interaction to your showcase.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="item-name">Item Name</Label>
+              <Input
+                id="item-name"
+                placeholder="Enter item name..."
+                value={newItemName}
+                onChange={(e) => setNewItemName(e.target.value)}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="item-type">Item Type</Label>
+              <Select value={newItemType} onValueChange={setNewItemType}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="component">Component</SelectItem>
+                  <SelectItem value="animation">Animation</SelectItem>
+                  <SelectItem value="interaction">Interaction</SelectItem>
+                  <SelectItem value="tooltip">Tooltip</SelectItem>
+                  <SelectItem value="button">Button Style</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="item-priority">Priority</Label>
+              <Select value={newItemPriority} onValueChange={setNewItemPriority}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select priority" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="low">Low</SelectItem>
+                  <SelectItem value="medium">Medium</SelectItem>
+                  <SelectItem value="high">High</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="item-description">Description</Label>
+              <Textarea
+                id="item-description"
+                placeholder="Describe the micro feature..."
+                value={newItemDescription}
+                onChange={(e) => setNewItemDescription(e.target.value)}
+                rows={3}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowNewItemDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleCreateNewItem}>
+              Create Item
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Export Dialog */}
+      <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Export Micro Features</DialogTitle>
+            <DialogDescription>
+              Export your micro features configuration and data.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="export-format">Export Format</Label>
+              <Select value={exportFormat} onValueChange={setExportFormat}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select format" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="json">JSON</SelectItem>
+                  <SelectItem value="csv">CSV</SelectItem>
+                  <SelectItem value="xml">XML</SelectItem>
+                  <SelectItem value="yaml">YAML</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="export-date-range">Date Range</Label>
+              <Select value={exportDateRange} onValueChange={setExportDateRange}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select date range" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Time</SelectItem>
+                  <SelectItem value="today">Today</SelectItem>
+                  <SelectItem value="week">This Week</SelectItem>
+                  <SelectItem value="month">This Month</SelectItem>
+                  <SelectItem value="quarter">This Quarter</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-3">
+              <Label>Include Features</Label>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="export-animations"
+                  checked={exportIncludeAnimations}
+                  onCheckedChange={(checked) => setExportIncludeAnimations(checked === true)}
+                />
+                <Label htmlFor="export-animations" className="font-normal">
+                  Animations ({microFeaturesShowcaseActivities.length} items)
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="export-tooltips"
+                  checked={exportIncludeTooltips}
+                  onCheckedChange={(checked) => setExportIncludeTooltips(checked === true)}
+                />
+                <Label htmlFor="export-tooltips" className="font-normal">
+                  Tooltips & Contextual Help
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="export-buttons"
+                  checked={exportIncludeButtons}
+                  onCheckedChange={(checked) => setExportIncludeButtons(checked === true)}
+                />
+                <Label htmlFor="export-buttons" className="font-normal">
+                  Enhanced Buttons & Interactions
+                </Label>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowExportDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleExport}>
+              Export Data
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Settings Dialog */}
+      <Dialog open={showSettingsDialog} onOpenChange={setShowSettingsDialog}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Micro Features Settings</DialogTitle>
+            <DialogDescription>
+              Configure your micro features showcase preferences.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label>Enable Animations</Label>
+                <p className="text-sm text-muted-foreground">
+                  Toggle micro animations on or off
+                </p>
+              </div>
+              <Switch
+                checked={settingsAnimationsEnabled}
+                onCheckedChange={setSettingsAnimationsEnabled}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="animation-speed">Animation Speed</Label>
+              <Select value={settingsAnimationSpeed} onValueChange={setSettingsAnimationSpeed}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select speed" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="slow">Slow (1.5x duration)</SelectItem>
+                  <SelectItem value="normal">Normal</SelectItem>
+                  <SelectItem value="fast">Fast (0.5x duration)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="tooltip-delay">Tooltip Delay (ms)</Label>
+              <Select value={settingsTooltipDelay} onValueChange={setSettingsTooltipDelay}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select delay" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="0">Instant (0ms)</SelectItem>
+                  <SelectItem value="100">Quick (100ms)</SelectItem>
+                  <SelectItem value="200">Normal (200ms)</SelectItem>
+                  <SelectItem value="500">Slow (500ms)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="theme">Theme Preference</Label>
+              <Select value={settingsTheme} onValueChange={setSettingsTheme}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select theme" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="system">System Default</SelectItem>
+                  <SelectItem value="light">Light Mode</SelectItem>
+                  <SelectItem value="dark">Dark Mode</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label>Auto-save Settings</Label>
+                <p className="text-sm text-muted-foreground">
+                  Automatically save changes as you make them
+                </p>
+              </div>
+              <Switch
+                checked={settingsAutoSave}
+                onCheckedChange={setSettingsAutoSave}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowSettingsDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSaveSettings}>
+              Save Settings
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </ErrorBoundary>
   )
 }

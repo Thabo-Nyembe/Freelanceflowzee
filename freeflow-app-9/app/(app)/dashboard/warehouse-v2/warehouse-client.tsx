@@ -71,6 +71,8 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 // Types
 type InventoryStatus = 'in_stock' | 'low_stock' | 'out_of_stock' | 'reserved' | 'damaged' | 'quarantine'
@@ -400,10 +402,7 @@ const mockWarehouseActivities = [
   { id: '2', user: 'Tom', action: 'Received', target: 'shipment PO-2024-156', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
 ]
 
-const mockWarehouseQuickActions = [
-  { id: '1', label: 'Add Inventory', icon: 'plus', action: () => toast.success('Add Inventory', { description: 'Enter item details and quantity' }), variant: 'default' as const },
-  { id: '2', label: 'Cycle Count', icon: 'clipboard', action: () => toast.success('Cycle Count Started', { description: '47 locations queued for verification' }), variant: 'outline' as const },
-]
+// Quick actions are now defined inside the component to use dialog state
 
 export default function WarehouseClient() {
   const [activeTab, setActiveTab] = useState('inventory')
@@ -415,6 +414,94 @@ export default function WarehouseClient() {
   const [zoneFilter, setZoneFilter] = useState<string>('all')
   const [priorityFilter, setPriorityFilter] = useState<TaskPriority | 'all'>('all')
   const [settingsTab, setSettingsTab] = useState('general')
+  const [showAddInventoryDialog, setShowAddInventoryDialog] = useState(false)
+  const [showCycleCountDialog, setShowCycleCountDialog] = useState(false)
+
+  // Form state for Add Inventory dialog
+  const [newInventory, setNewInventory] = useState({
+    sku: '',
+    name: '',
+    description: '',
+    category: '',
+    quantity: '',
+    unitCost: '',
+    zone: '',
+    binLocation: '',
+    reorderPoint: '',
+    reorderQuantity: ''
+  })
+
+  // Form state for Cycle Count dialog
+  const [cycleCount, setCycleCount] = useState({
+    zone: '',
+    countType: 'full',
+    priority: 'normal',
+    assignedTo: ''
+  })
+
+  // Quick actions with dialog-based workflows
+  const warehouseQuickActions = [
+    { id: '1', label: 'Add Inventory', icon: 'plus', action: () => setShowAddInventoryDialog(true), variant: 'default' as const },
+    { id: '2', label: 'Cycle Count', icon: 'clipboard', action: () => setShowCycleCountDialog(true), variant: 'outline' as const },
+  ]
+
+  // Handle Add Inventory submission
+  const handleAddInventory = () => {
+    if (!newInventory.sku || !newInventory.name || !newInventory.quantity) {
+      toast.error('Missing required fields', { description: 'Please fill in SKU, name, and quantity' })
+      return
+    }
+
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1500)),
+      {
+        loading: 'Adding inventory item...',
+        success: () => {
+          setShowAddInventoryDialog(false)
+          setNewInventory({
+            sku: '',
+            name: '',
+            description: '',
+            category: '',
+            quantity: '',
+            unitCost: '',
+            zone: '',
+            binLocation: '',
+            reorderPoint: '',
+            reorderQuantity: ''
+          })
+          return `Inventory item ${newInventory.sku} added successfully`
+        },
+        error: 'Failed to add inventory item'
+      }
+    )
+  }
+
+  // Handle Cycle Count submission
+  const handleStartCycleCount = () => {
+    if (!cycleCount.zone) {
+      toast.error('Zone required', { description: 'Please select a zone for the cycle count' })
+      return
+    }
+
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1500)),
+      {
+        loading: 'Starting cycle count...',
+        success: () => {
+          setShowCycleCountDialog(false)
+          setCycleCount({
+            zone: '',
+            countType: 'full',
+            priority: 'normal',
+            assignedTo: ''
+          })
+          return `Cycle count started for ${cycleCount.zone}`
+        },
+        error: 'Failed to start cycle count'
+      }
+    )
+  }
 
   // Stats calculations
   const stats = useMemo(() => {
@@ -1945,7 +2032,7 @@ export default function WarehouseClient() {
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockWarehouseQuickActions}
+            actions={warehouseQuickActions}
             variant="grid"
           />
         </div>
@@ -2028,6 +2115,256 @@ export default function WarehouseClient() {
               </div>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Inventory Dialog */}
+      <Dialog open={showAddInventoryDialog} onOpenChange={setShowAddInventoryDialog}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Plus className="w-5 h-5" />
+              Add New Inventory Item
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-6 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="sku">SKU *</Label>
+                <Input
+                  id="sku"
+                  placeholder="e.g., SKU-001234"
+                  value={newInventory.sku}
+                  onChange={(e) => setNewInventory({ ...newInventory, sku: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="name">Item Name *</Label>
+                <Input
+                  id="name"
+                  placeholder="Enter item name"
+                  value={newInventory.name}
+                  onChange={(e) => setNewInventory({ ...newInventory, name: e.target.value })}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="description">Description</Label>
+              <Input
+                id="description"
+                placeholder="Enter item description"
+                value={newInventory.description}
+                onChange={(e) => setNewInventory({ ...newInventory, description: e.target.value })}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="category">Category</Label>
+                <Select
+                  value={newInventory.category}
+                  onValueChange={(value) => setNewInventory({ ...newInventory, category: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="electronics">Electronics</SelectItem>
+                    <SelectItem value="apparel">Apparel</SelectItem>
+                    <SelectItem value="furniture">Furniture</SelectItem>
+                    <SelectItem value="food">Food & Beverage</SelectItem>
+                    <SelectItem value="automotive">Automotive</SelectItem>
+                    <SelectItem value="chemicals">Chemicals</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="quantity">Quantity *</Label>
+                <Input
+                  id="quantity"
+                  type="number"
+                  placeholder="Enter quantity"
+                  value={newInventory.quantity}
+                  onChange={(e) => setNewInventory({ ...newInventory, quantity: e.target.value })}
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="unitCost">Unit Cost ($)</Label>
+                <Input
+                  id="unitCost"
+                  type="number"
+                  step="0.01"
+                  placeholder="0.00"
+                  value={newInventory.unitCost}
+                  onChange={(e) => setNewInventory({ ...newInventory, unitCost: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="zone">Zone</Label>
+                <Select
+                  value={newInventory.zone}
+                  onValueChange={(value) => setNewInventory({ ...newInventory, zone: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select zone" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {mockZones.map((zone) => (
+                      <SelectItem key={zone.id} value={zone.code}>
+                        {zone.name} ({zone.code})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="binLocation">Bin Location</Label>
+                <Input
+                  id="binLocation"
+                  placeholder="e.g., A-01-01-A"
+                  value={newInventory.binLocation}
+                  onChange={(e) => setNewInventory({ ...newInventory, binLocation: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="reorderPoint">Reorder Point</Label>
+                <Input
+                  id="reorderPoint"
+                  type="number"
+                  placeholder="Minimum stock level"
+                  value={newInventory.reorderPoint}
+                  onChange={(e) => setNewInventory({ ...newInventory, reorderPoint: e.target.value })}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="reorderQuantity">Reorder Quantity</Label>
+              <Input
+                id="reorderQuantity"
+                type="number"
+                placeholder="Quantity to order when low"
+                value={newInventory.reorderQuantity}
+                onChange={(e) => setNewInventory({ ...newInventory, reorderQuantity: e.target.value })}
+              />
+            </div>
+
+            <div className="flex justify-end gap-3 pt-4 border-t">
+              <Button variant="outline" onClick={() => setShowAddInventoryDialog(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleAddInventory} className="gap-2">
+                <Plus className="w-4 h-4" />
+                Add Inventory
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Cycle Count Dialog */}
+      <Dialog open={showCycleCountDialog} onOpenChange={setShowCycleCountDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <ClipboardList className="w-5 h-5" />
+              Start Cycle Count
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-6 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="cycleZone">Zone to Count *</Label>
+              <Select
+                value={cycleCount.zone}
+                onValueChange={(value) => setCycleCount({ ...cycleCount, zone: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select zone" />
+                </SelectTrigger>
+                <SelectContent>
+                  {mockZones.map((zone) => (
+                    <SelectItem key={zone.id} value={zone.name}>
+                      {zone.name} - {zone.bin_count} bins
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="countType">Count Type</Label>
+              <Select
+                value={cycleCount.countType}
+                onValueChange={(value) => setCycleCount({ ...cycleCount, countType: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select count type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="full">Full Count - All items in zone</SelectItem>
+                  <SelectItem value="abc">ABC Count - High value items first</SelectItem>
+                  <SelectItem value="random">Random Sample - 10% of locations</SelectItem>
+                  <SelectItem value="variance">Variance Count - Discrepancy items only</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="countPriority">Priority</Label>
+              <Select
+                value={cycleCount.priority}
+                onValueChange={(value) => setCycleCount({ ...cycleCount, priority: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select priority" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="low">Low - Complete within 7 days</SelectItem>
+                  <SelectItem value="normal">Normal - Complete within 3 days</SelectItem>
+                  <SelectItem value="high">High - Complete within 24 hours</SelectItem>
+                  <SelectItem value="urgent">Urgent - Complete immediately</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="assignedTo">Assign To (Optional)</Label>
+              <Input
+                id="assignedTo"
+                placeholder="Enter team member name"
+                value={cycleCount.assignedTo}
+                onChange={(e) => setCycleCount({ ...cycleCount, assignedTo: e.target.value })}
+              />
+            </div>
+
+            <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
+              <p className="text-sm text-blue-700 dark:text-blue-300">
+                {cycleCount.zone ? (
+                  <>Estimated locations to count: {mockZones.find(z => z.name === cycleCount.zone)?.bin_count || 0} bins</>
+                ) : (
+                  <>Select a zone to see estimated locations</>
+                )}
+              </p>
+            </div>
+
+            <div className="flex justify-end gap-3 pt-4 border-t">
+              <Button variant="outline" onClick={() => setShowCycleCountDialog(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleStartCycleCount} className="gap-2">
+                <ClipboardList className="w-4 h-4" />
+                Start Count
+              </Button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

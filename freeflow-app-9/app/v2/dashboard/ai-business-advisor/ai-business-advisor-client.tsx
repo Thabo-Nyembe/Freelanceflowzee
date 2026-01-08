@@ -14,10 +14,10 @@ import {
 
 export const dynamic = 'force-dynamic';
 
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Brain, DollarSign, TrendingUp, Target, ArrowUpRight, ArrowDownRight, Lightbulb, AlertCircle } from 'lucide-react'
+import { Brain, DollarSign, TrendingUp, Target, ArrowUpRight, ArrowDownRight, Lightbulb, AlertCircle, Plus, Download, Settings, BarChart3 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
@@ -26,6 +26,13 @@ import { PricingIntelligence } from '@/components/ai/pricing-intelligence'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 import { useAnnouncer } from '@/lib/accessibility'
 import { createFeatureLogger } from '@/lib/logger'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Switch } from '@/components/ui/switch'
 
 const logger = createFeatureLogger('AIBusinessAdvisor')
 
@@ -57,24 +64,81 @@ const aiBusinessAdvisorActivities = [
   { id: '3', user: 'System', action: 'generated', target: 'weekly report', timestamp: '1h ago', type: 'info' as const },
 ]
 
-const aiBusinessAdvisorQuickActions = [
-  { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1000)),
-    { loading: 'Creating new item...', success: 'New item created', error: 'Failed to create item' }
-  ) },
-  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 2000)),
-    { loading: 'Exporting AI insights...', success: 'Insights exported successfully', error: 'Failed to export insights' }
-  ) },
-  { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 800)),
-    { loading: 'Loading settings...', success: 'Settings panel ready', error: 'Failed to load settings' }
-  ) },
-]
+// Quick actions will be defined inside the component to access useState setters
 
 export default function AiBusinessAdvisorClient() {
   const { userId, loading: userLoading } = useCurrentUser()
   const { announce } = useAnnouncer()
+
+  // Dialog states
+  const [newItemDialogOpen, setNewItemDialogOpen] = useState(false)
+  const [exportDialogOpen, setExportDialogOpen] = useState(false)
+  const [settingsDialogOpen, setSettingsDialogOpen] = useState(false)
+
+  // New Item form state
+  const [newItemData, setNewItemData] = useState({
+    name: '',
+    type: 'insight',
+    description: '',
+    priority: 'medium'
+  })
+
+  // Export form state
+  const [exportData, setExportData] = useState({
+    format: 'pdf',
+    dateRange: 'last30days',
+    includeCharts: true,
+    includeRecommendations: true
+  })
+
+  // Settings state
+  const [settingsData, setSettingsData] = useState({
+    autoAnalysis: true,
+    notifyInsights: true,
+    predictionFrequency: 'daily',
+    confidenceThreshold: '75',
+    enableAIRecommendations: true
+  })
+
+  // Quick actions with dialog openers
+  const aiBusinessAdvisorQuickActions = [
+    { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => setNewItemDialogOpen(true) },
+    { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => setExportDialogOpen(true) },
+    { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => setSettingsDialogOpen(true) },
+  ]
+
+  // Handle new item creation
+  const handleCreateItem = () => {
+    if (!newItemData.name.trim()) {
+      toast.error('Please enter an item name')
+      return
+    }
+    toast.success(`Created new ${newItemData.type}: "${newItemData.name}"`)
+    logger.info('New business insight item created', { ...newItemData, userId })
+    setNewItemData({ name: '', type: 'insight', description: '', priority: 'medium' })
+    setNewItemDialogOpen(false)
+  }
+
+  // Handle export
+  const handleExport = () => {
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 2000)),
+      {
+        loading: `Generating ${exportData.format.toUpperCase()} report...`,
+        success: `AI insights exported as ${exportData.format.toUpperCase()}`,
+        error: 'Export failed'
+      }
+    )
+    logger.info('AI insights exported', { ...exportData, userId })
+    setExportDialogOpen(false)
+  }
+
+  // Handle settings save
+  const handleSaveSettings = () => {
+    toast.success('AI Advisor settings saved')
+    logger.info('AI Advisor settings updated', { ...settingsData, userId })
+    setSettingsDialogOpen(false)
+  }
 
   useEffect(() => {
     if (userId) {
@@ -279,6 +343,279 @@ export default function AiBusinessAdvisorClient() {
           </div>
         </TabsContent>
       </Tabs>
+
+      {/* New Item Dialog */}
+      <Dialog open={newItemDialogOpen} onOpenChange={setNewItemDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Plus className="h-5 w-5 text-purple-600" />
+              Create New Business Insight
+            </DialogTitle>
+            <DialogDescription>
+              Add a new insight, goal, or action item to track in your AI Business Advisor.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="item-name">Name</Label>
+              <Input
+                id="item-name"
+                placeholder="Enter insight name..."
+                value={newItemData.name}
+                onChange={(e) => setNewItemData({ ...newItemData, name: e.target.value })}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="item-type">Type</Label>
+              <Select
+                value={newItemData.type}
+                onValueChange={(value) => setNewItemData({ ...newItemData, type: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="insight">
+                    <div className="flex items-center gap-2">
+                      <Lightbulb className="h-4 w-4" />
+                      Insight
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="goal">
+                    <div className="flex items-center gap-2">
+                      <Target className="h-4 w-4" />
+                      Goal
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="metric">
+                    <div className="flex items-center gap-2">
+                      <BarChart3 className="h-4 w-4" />
+                      Metric
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="opportunity">
+                    <div className="flex items-center gap-2">
+                      <TrendingUp className="h-4 w-4" />
+                      Opportunity
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="item-priority">Priority</Label>
+              <Select
+                value={newItemData.priority}
+                onValueChange={(value) => setNewItemData({ ...newItemData, priority: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select priority" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="high">High Priority</SelectItem>
+                  <SelectItem value="medium">Medium Priority</SelectItem>
+                  <SelectItem value="low">Low Priority</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="item-description">Description</Label>
+              <Textarea
+                id="item-description"
+                placeholder="Describe the insight or goal..."
+                value={newItemData.description}
+                onChange={(e) => setNewItemData({ ...newItemData, description: e.target.value })}
+                rows={3}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setNewItemDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleCreateItem} className="bg-purple-600 hover:bg-purple-700">
+              <Plus className="h-4 w-4 mr-2" />
+              Create Item
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Export Dialog */}
+      <Dialog open={exportDialogOpen} onOpenChange={setExportDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Download className="h-5 w-5 text-blue-600" />
+              Export AI Insights Report
+            </DialogTitle>
+            <DialogDescription>
+              Generate a comprehensive report of your business insights and AI recommendations.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="export-format">Export Format</Label>
+              <Select
+                value={exportData.format}
+                onValueChange={(value) => setExportData({ ...exportData, format: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select format" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="pdf">PDF Document</SelectItem>
+                  <SelectItem value="excel">Excel Spreadsheet</SelectItem>
+                  <SelectItem value="csv">CSV File</SelectItem>
+                  <SelectItem value="json">JSON Data</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="date-range">Date Range</Label>
+              <Select
+                value={exportData.dateRange}
+                onValueChange={(value) => setExportData({ ...exportData, dateRange: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select date range" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="last7days">Last 7 Days</SelectItem>
+                  <SelectItem value="last30days">Last 30 Days</SelectItem>
+                  <SelectItem value="last90days">Last 90 Days</SelectItem>
+                  <SelectItem value="lastYear">Last Year</SelectItem>
+                  <SelectItem value="allTime">All Time</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-4 pt-2">
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label>Include Charts & Visualizations</Label>
+                  <p className="text-sm text-gray-500">Add graphs and trend charts to the report</p>
+                </div>
+                <Switch
+                  checked={exportData.includeCharts}
+                  onCheckedChange={(checked) => setExportData({ ...exportData, includeCharts: checked })}
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label>Include AI Recommendations</Label>
+                  <p className="text-sm text-gray-500">Add AI-generated insights and suggestions</p>
+                </div>
+                <Switch
+                  checked={exportData.includeRecommendations}
+                  onCheckedChange={(checked) => setExportData({ ...exportData, includeRecommendations: checked })}
+                />
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setExportDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleExport} className="bg-blue-600 hover:bg-blue-700">
+              <Download className="h-4 w-4 mr-2" />
+              Export Report
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Settings Dialog */}
+      <Dialog open={settingsDialogOpen} onOpenChange={setSettingsDialogOpen}>
+        <DialogContent className="sm:max-w-[550px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Settings className="h-5 w-5 text-gray-600" />
+              AI Advisor Settings
+            </DialogTitle>
+            <DialogDescription>
+              Configure how the AI Business Advisor analyzes your data and provides recommendations.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label>Automatic Analysis</Label>
+                  <p className="text-sm text-gray-500">Continuously analyze business data for insights</p>
+                </div>
+                <Switch
+                  checked={settingsData.autoAnalysis}
+                  onCheckedChange={(checked) => setSettingsData({ ...settingsData, autoAnalysis: checked })}
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label>Insight Notifications</Label>
+                  <p className="text-sm text-gray-500">Receive alerts when new insights are discovered</p>
+                </div>
+                <Switch
+                  checked={settingsData.notifyInsights}
+                  onCheckedChange={(checked) => setSettingsData({ ...settingsData, notifyInsights: checked })}
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label>AI Recommendations</Label>
+                  <p className="text-sm text-gray-500">Enable AI-powered business recommendations</p>
+                </div>
+                <Switch
+                  checked={settingsData.enableAIRecommendations}
+                  onCheckedChange={(checked) => setSettingsData({ ...settingsData, enableAIRecommendations: checked })}
+                />
+              </div>
+            </div>
+            <div className="grid gap-2 pt-2">
+              <Label htmlFor="prediction-frequency">Prediction Update Frequency</Label>
+              <Select
+                value={settingsData.predictionFrequency}
+                onValueChange={(value) => setSettingsData({ ...settingsData, predictionFrequency: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select frequency" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="realtime">Real-time</SelectItem>
+                  <SelectItem value="hourly">Hourly</SelectItem>
+                  <SelectItem value="daily">Daily</SelectItem>
+                  <SelectItem value="weekly">Weekly</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="confidence-threshold">Confidence Threshold (%)</Label>
+              <div className="flex items-center gap-4">
+                <Input
+                  id="confidence-threshold"
+                  type="number"
+                  min="0"
+                  max="100"
+                  value={settingsData.confidenceThreshold}
+                  onChange={(e) => setSettingsData({ ...settingsData, confidenceThreshold: e.target.value })}
+                  className="w-24"
+                />
+                <p className="text-sm text-gray-500">
+                  Only show predictions with confidence above this threshold
+                </p>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setSettingsDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSaveSettings}>
+              <Settings className="h-4 w-4 mr-2" />
+              Save Settings
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

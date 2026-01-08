@@ -593,12 +593,7 @@ const mockCampaignActivities = [
   { id: '3', type: 'milestone' as const, title: 'Subscriber milestone', description: 'Email list reached 50,000 subscribers', user: { name: 'Marketing Team', avatar: '/avatars/marketing.jpg' }, timestamp: new Date(Date.now() - 86400000).toISOString(), metadata: {} },
 ]
 
-const mockCampaignQuickActions = [
-  { id: '1', label: 'New Campaign', icon: 'Mail', shortcut: '⌘N', action: () => toast.success('Campaign created successfully') },
-  { id: '2', label: 'Send Test', icon: 'Send', shortcut: '⌘T', action: () => toast.success('Test email sent successfully') },
-  { id: '3', label: 'View Analytics', icon: 'BarChart3', shortcut: '⌘A', action: () => toast.success('Analytics loaded') },
-  { id: '4', label: 'Manage Audience', icon: 'Users', shortcut: '⌘U', action: () => toast.success('Audience manager ready') },
-]
+// Quick actions moved inside component to access state setters
 
 // ============== MAIN COMPONENT ==============
 
@@ -706,6 +701,14 @@ export default function CampaignsClient() {
       return true
     })
   }, [statusFilter, typeFilter, searchQuery])
+
+  // Quick Actions with dialog openers instead of toast-only handlers
+  const campaignQuickActions = useMemo(() => [
+    { id: '1', label: 'New Campaign', icon: 'Mail', shortcut: '⌘N', action: () => setShowNewCampaignDialog(true) },
+    { id: '2', label: 'Send Test', icon: 'Send', shortcut: '⌘T', action: () => setShowSendTestDialog(true) },
+    { id: '3', label: 'View Analytics', icon: 'BarChart3', shortcut: '⌘A', action: () => setShowViewAnalyticsDialog(true) },
+    { id: '4', label: 'Manage Audience', icon: 'Users', shortcut: '⌘U', action: () => setShowAudienceDialog(true) },
+  ], [])
 
   // Handlers - Real Supabase Operations
   const [operationLoading, setOperationLoading] = useState<string | null>(null)
@@ -2635,6 +2638,189 @@ export default function CampaignsClient() {
         </DialogContent>
       </Dialog>
 
+      {/* Send Test Email Dialog */}
+      <Dialog open={showSendTestDialog} onOpenChange={setShowSendTestDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Send className="w-5 h-5 text-rose-600" />
+              Send Test Email
+            </DialogTitle>
+            <DialogDescription>Send a test email to preview your campaign before launching</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <Label>Recipient Email</Label>
+              <Input
+                type="email"
+                placeholder="Enter email address"
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label>Select Campaign</Label>
+              <select className="w-full mt-1 px-3 py-2 border rounded-md bg-background">
+                <option value="">Choose a campaign...</option>
+                {mockCampaigns.filter(c => c.status === 'draft' || c.status === 'scheduled').map(c => (
+                  <option key={c.id} value={c.id}>{c.name}</option>
+                ))}
+              </select>
+            </div>
+            <div className="flex items-center gap-2">
+              <Switch id="include-tracking" />
+              <Label htmlFor="include-tracking">Include tracking pixels</Label>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowSendTestDialog(false)}>Cancel</Button>
+            <Button
+              onClick={() => {
+                toast.success('Test email sent successfully')
+                setShowSendTestDialog(false)
+              }}
+              className="bg-gradient-to-r from-rose-600 to-pink-600"
+            >
+              <Send className="w-4 h-4 mr-2" />
+              Send Test
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* View Analytics Dialog */}
+      <Dialog open={showViewAnalyticsDialog} onOpenChange={setShowViewAnalyticsDialog}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <BarChart3 className="w-5 h-5 text-rose-600" />
+              Campaign Analytics
+            </DialogTitle>
+            <DialogDescription>View detailed performance metrics across all campaigns</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-6 py-4">
+            {/* Summary Stats */}
+            <div className="grid grid-cols-4 gap-4">
+              <div className="p-4 bg-rose-50 dark:bg-rose-900/20 rounded-lg text-center">
+                <div className="text-2xl font-bold text-rose-600">{stats.totalSent.toLocaleString()}</div>
+                <div className="text-sm text-muted-foreground">Emails Sent</div>
+              </div>
+              <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg text-center">
+                <div className="text-2xl font-bold text-green-600">{stats.avgOpenRate.toFixed(1)}%</div>
+                <div className="text-sm text-muted-foreground">Avg Open Rate</div>
+              </div>
+              <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-center">
+                <div className="text-2xl font-bold text-blue-600">{stats.avgClickRate.toFixed(1)}%</div>
+                <div className="text-sm text-muted-foreground">Avg Click Rate</div>
+              </div>
+              <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg text-center">
+                <div className="text-2xl font-bold text-purple-600">${stats.totalRevenue.toLocaleString()}</div>
+                <div className="text-sm text-muted-foreground">Total Revenue</div>
+              </div>
+            </div>
+
+            {/* Campaign Performance Table */}
+            <div>
+              <h4 className="font-medium mb-3">Campaign Performance</h4>
+              <div className="border rounded-lg overflow-hidden">
+                <table className="w-full text-sm">
+                  <thead className="bg-muted/50">
+                    <tr>
+                      <th className="text-left p-3">Campaign</th>
+                      <th className="text-right p-3">Sent</th>
+                      <th className="text-right p-3">Opens</th>
+                      <th className="text-right p-3">Clicks</th>
+                      <th className="text-right p-3">Revenue</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {mockCampaigns.slice(0, 5).map(c => (
+                      <tr key={c.id} className="border-t">
+                        <td className="p-3">{c.name}</td>
+                        <td className="text-right p-3">{c.stats.sent.toLocaleString()}</td>
+                        <td className="text-right p-3">{c.stats.openRate.toFixed(1)}%</td>
+                        <td className="text-right p-3">{c.stats.clickRate.toFixed(1)}%</td>
+                        <td className="text-right p-3">${c.stats.revenue.toLocaleString()}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowViewAnalyticsDialog(false)}>Close</Button>
+            <Button
+              onClick={() => {
+                handleExportCampaigns()
+                setShowViewAnalyticsDialog(false)
+              }}
+              className="bg-gradient-to-r from-rose-600 to-pink-600"
+            >
+              <Download className="w-4 h-4 mr-2" />
+              Export Report
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Manage Audience Dialog */}
+      <Dialog open={showAudienceDialog} onOpenChange={setShowAudienceDialog}>
+        <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Users className="w-5 h-5 text-rose-600" />
+              Manage Audiences
+            </DialogTitle>
+            <DialogDescription>View and manage your subscriber lists and segments</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            {/* Audience List */}
+            <div className="space-y-3">
+              {mockAudiences.map(audience => (
+                <div key={audience.id} className="p-4 border rounded-lg hover:bg-muted/50 transition-colors">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="font-medium">{audience.name}</h4>
+                      <p className="text-sm text-muted-foreground">{audience.description}</p>
+                    </div>
+                    <div className="text-right">
+                      <div className="font-semibold text-rose-600">{audience.stats.subscribed.toLocaleString()}</div>
+                      <div className="text-xs text-muted-foreground">subscribers</div>
+                    </div>
+                  </div>
+                  <div className="mt-3 flex items-center gap-4 text-sm text-muted-foreground">
+                    <span className="flex items-center gap-1">
+                      <TrendingUp className="w-3 h-3" />
+                      {audience.growthRate}% growth
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <MailOpen className="w-3 h-3" />
+                      {audience.stats.avgOpenRate.toFixed(1)}% open rate
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <MousePointerClick className="w-3 h-3" />
+                      {audience.stats.avgClickRate.toFixed(1)}% click rate
+                    </span>
+                  </div>
+                  <div className="mt-2 flex gap-2">
+                    {audience.tags.map(tag => (
+                      <Badge key={tag} variant="secondary" className="text-xs">{tag}</Badge>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAudienceDialog(false)}>Close</Button>
+            <Button className="bg-gradient-to-r from-rose-600 to-pink-600">
+              <UserPlus className="w-4 h-4 mr-2" />
+              Create Audience
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* AI-Powered Campaign Insights */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
         <AIInsightsPanel
@@ -2654,7 +2840,7 @@ export default function CampaignsClient() {
       </div>
 
       {/* Quick Actions Toolbar */}
-      <QuickActionsToolbar actions={mockCampaignQuickActions} />
+      <QuickActionsToolbar actions={campaignQuickActions} />
     </div>
   )
 }

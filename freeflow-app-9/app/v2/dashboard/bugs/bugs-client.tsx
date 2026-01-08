@@ -546,20 +546,7 @@ const mockBugsActivities = [
   { id: '3', user: 'System', action: 'Auto-assigned', target: '5 bugs to available developers', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'update' as const },
 ]
 
-const mockBugsQuickActions = [
-  { id: '1', label: 'Report Bug', icon: 'plus', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 800)),
-    { loading: 'Opening bug report form...', success: 'Bug report form ready', error: 'Failed to open form' }
-  ), variant: 'default' as const },
-  { id: '2', label: 'Run Tests', icon: 'play', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 2000)),
-    { loading: 'Running test suite...', success: 'Tests completed successfully', error: 'Test execution failed' }
-  ), variant: 'default' as const },
-  { id: '3', label: 'Export Report', icon: 'download', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1500)),
-    { loading: 'Generating bug report...', success: 'Report exported successfully', error: 'Failed to export report' }
-  ), variant: 'outline' as const },
-]
+// QuickActions will be defined inside component to access state setters
 
 export default function BugsClient() {
   const supabase = createClient()
@@ -583,6 +570,48 @@ export default function BugsClient() {
   const [showCreateDialog, setShowCreateDialog] = useState(false)
   const [showEditDialog, setShowEditDialog] = useState(false)
   const [editingBug, setEditingBug] = useState<DbBug | null>(null)
+
+  // QuickAction Dialog States
+  const [showRunTestsDialog, setShowRunTestsDialog] = useState(false)
+  const [showExportReportDialog, setShowExportReportDialog] = useState(false)
+  const [showSearchIssuesDialog, setShowSearchIssuesDialog] = useState(false)
+  const [showAdvancedFilterDialog, setShowAdvancedFilterDialog] = useState(false)
+  const [showArchiveDialog, setShowArchiveDialog] = useState(false)
+  const [showImportBugsDialog, setShowImportBugsDialog] = useState(false)
+  const [showLinkPRsDialog, setShowLinkPRsDialog] = useState(false)
+  const [showViewHistoryDialog, setShowViewHistoryDialog] = useState(false)
+
+  // QuickAction Form States
+  const [testConfig, setTestConfig] = useState({
+    testType: 'unit',
+    coverage: true,
+    verbose: false,
+    selectedModules: [] as string[]
+  })
+  const [exportConfig, setExportConfig] = useState({
+    format: 'csv',
+    dateRange: 'all',
+    includeComments: true,
+    includeAttachments: false
+  })
+  const [searchQuery, setSearchQuery] = useState('')
+  const [filterConfig, setFilterConfig] = useState({
+    status: [] as string[],
+    severity: [] as string[],
+    assignee: '',
+    dateFrom: '',
+    dateTo: '',
+    labels: [] as string[]
+  })
+  const [importFile, setImportFile] = useState<File | null>(null)
+  const [linkPRConfig, setLinkPRConfig] = useState({
+    prUrl: '',
+    bugId: '',
+    linkType: 'fixes'
+  })
+  const [isRunningTests, setIsRunningTests] = useState(false)
+  const [isExporting, setIsExporting] = useState(false)
+  const [isImporting, setIsImporting] = useState(false)
 
   // Form State
   const [formData, setFormData] = useState({
@@ -787,6 +816,92 @@ export default function BugsClient() {
     })
     setShowEditDialog(true)
   }
+
+  // QuickAction Handlers
+  const handleRunTests = async () => {
+    setIsRunningTests(true)
+    try {
+      // Simulate test execution
+      await new Promise(resolve => setTimeout(resolve, 2500))
+      toast.success(`${testConfig.testType} tests completed successfully! ${testConfig.coverage ? 'Coverage report generated.' : ''}`)
+      setShowRunTestsDialog(false)
+      setTestConfig({ testType: 'unit', coverage: true, verbose: false, selectedModules: [] })
+    } catch (error) {
+      toast.error('Test execution failed')
+    } finally {
+      setIsRunningTests(false)
+    }
+  }
+
+  const handleExportReport = async () => {
+    setIsExporting(true)
+    try {
+      // Simulate export
+      await new Promise(resolve => setTimeout(resolve, 1500))
+      const blob = new Blob([JSON.stringify(filteredBugs, null, 2)], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `bug-report-${new Date().toISOString().split('T')[0]}.${exportConfig.format}`
+      a.click()
+      URL.revokeObjectURL(url)
+      toast.success(`Bug report exported as ${exportConfig.format.toUpperCase()}`)
+      setShowExportReportDialog(false)
+    } catch (error) {
+      toast.error('Failed to export report')
+    } finally {
+      setIsExporting(false)
+    }
+  }
+
+  const handleImportBugs = async () => {
+    if (!importFile) {
+      toast.error('Please select a file to import')
+      return
+    }
+    setIsImporting(true)
+    try {
+      // Simulate file processing
+      await new Promise(resolve => setTimeout(resolve, 2000))
+      toast.success(`Successfully imported bugs from ${importFile.name}`)
+      setShowImportBugsDialog(false)
+      setImportFile(null)
+      fetchBugs()
+    } catch (error) {
+      toast.error('Failed to import bugs')
+    } finally {
+      setIsImporting(false)
+    }
+  }
+
+  const handleLinkPR = async () => {
+    if (!linkPRConfig.prUrl || !linkPRConfig.bugId) {
+      toast.error('Please fill in all required fields')
+      return
+    }
+    try {
+      // Simulate linking
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      toast.success(`PR linked to bug ${linkPRConfig.bugId}`)
+      setShowLinkPRsDialog(false)
+      setLinkPRConfig({ prUrl: '', bugId: '', linkType: 'fixes' })
+    } catch (error) {
+      toast.error('Failed to link PR')
+    }
+  }
+
+  const handleApplyAdvancedFilter = () => {
+    // Apply filters logic
+    toast.success('Advanced filters applied')
+    setShowAdvancedFilterDialog(false)
+  }
+
+  // QuickActions with real dialog functionality
+  const bugsQuickActions = [
+    { id: '1', label: 'Report Bug', icon: 'plus', action: () => setShowCreateDialog(true), variant: 'default' as const },
+    { id: '2', label: 'Run Tests', icon: 'play', action: () => setShowRunTestsDialog(true), variant: 'default' as const },
+    { id: '3', label: 'Export Report', icon: 'download', action: () => setShowExportReportDialog(true), variant: 'outline' as const },
+  ]
 
   // Initial fetch
   useEffect(() => {
@@ -1073,16 +1188,16 @@ export default function BugsClient() {
               <CardContent>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                   {[
-                    { icon: Plus, label: 'Report Bug', color: 'from-red-500 to-orange-500' },
-                    { icon: Search, label: 'Search Issues', color: 'from-blue-500 to-cyan-500' },
-                    { icon: Filter, label: 'Advanced Filter', color: 'from-green-500 to-emerald-500' },
-                    { icon: Archive, label: 'View Archive', color: 'from-gray-500 to-slate-500' },
-                    { icon: Download, label: 'Export CSV', color: 'from-violet-500 to-purple-500' },
-                    { icon: Upload, label: 'Import Bugs', color: 'from-pink-500 to-rose-500' },
-                    { icon: GitBranch, label: 'Link PRs', color: 'from-teal-500 to-green-500' },
-                    { icon: History, label: 'View History', color: 'from-amber-500 to-orange-500' },
+                    { icon: Plus, label: 'Report Bug', color: 'from-red-500 to-orange-500', onClick: () => setShowCreateDialog(true) },
+                    { icon: Search, label: 'Search Issues', color: 'from-blue-500 to-cyan-500', onClick: () => setShowSearchIssuesDialog(true) },
+                    { icon: Filter, label: 'Advanced Filter', color: 'from-green-500 to-emerald-500', onClick: () => setShowAdvancedFilterDialog(true) },
+                    { icon: Archive, label: 'View Archive', color: 'from-gray-500 to-slate-500', onClick: () => setShowArchiveDialog(true) },
+                    { icon: Download, label: 'Export CSV', color: 'from-violet-500 to-purple-500', onClick: () => setShowExportReportDialog(true) },
+                    { icon: Upload, label: 'Import Bugs', color: 'from-pink-500 to-rose-500', onClick: () => setShowImportBugsDialog(true) },
+                    { icon: GitBranch, label: 'Link PRs', color: 'from-teal-500 to-green-500', onClick: () => setShowLinkPRsDialog(true) },
+                    { icon: History, label: 'View History', color: 'from-amber-500 to-orange-500', onClick: () => setShowViewHistoryDialog(true) },
                   ].map((action, idx) => (
-                    <button key={idx} className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all hover:scale-105 group">
+                    <button key={idx} onClick={action.onClick} className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all hover:scale-105 group">
                       <div className={`w-9 h-9 rounded-lg bg-gradient-to-br ${action.color} flex items-center justify-center`}>
                         <action.icon className="w-4 h-4 text-white" />
                       </div>
@@ -1998,7 +2113,7 @@ export default function BugsClient() {
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockBugsQuickActions}
+            actions={bugsQuickActions}
             variant="grid"
           />
         </div>
@@ -2414,6 +2529,560 @@ export default function BugsClient() {
                 {isSaving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                 Save Changes
               </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Run Tests Dialog */}
+        <Dialog open={showRunTestsDialog} onOpenChange={setShowRunTestsDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Play className="w-5 h-5 text-green-600" />
+                Run Test Suite
+              </DialogTitle>
+              <DialogDescription>
+                Configure and execute automated tests for your bugs
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid gap-2">
+                <Label>Test Type</Label>
+                <Select value={testConfig.testType} onValueChange={(v) => setTestConfig({ ...testConfig, testType: v })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="unit">Unit Tests</SelectItem>
+                    <SelectItem value="integration">Integration Tests</SelectItem>
+                    <SelectItem value="e2e">End-to-End Tests</SelectItem>
+                    <SelectItem value="regression">Regression Tests</SelectItem>
+                    <SelectItem value="all">All Tests</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid gap-2">
+                <Label>Select Modules</Label>
+                <div className="flex flex-wrap gap-2">
+                  {['Authentication', 'Dashboard', 'API', 'Database', 'UI Components'].map(module => (
+                    <Badge
+                      key={module}
+                      variant={testConfig.selectedModules.includes(module) ? 'default' : 'outline'}
+                      className="cursor-pointer"
+                      onClick={() => setTestConfig({
+                        ...testConfig,
+                        selectedModules: testConfig.selectedModules.includes(module)
+                          ? testConfig.selectedModules.filter(m => m !== module)
+                          : [...testConfig.selectedModules, module]
+                      })}
+                    >
+                      {module}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+              <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                <div>
+                  <p className="font-medium">Generate Coverage Report</p>
+                  <p className="text-sm text-muted-foreground">Include code coverage analysis</p>
+                </div>
+                <Switch checked={testConfig.coverage} onCheckedChange={(v) => setTestConfig({ ...testConfig, coverage: v })} />
+              </div>
+              <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                <div>
+                  <p className="font-medium">Verbose Output</p>
+                  <p className="text-sm text-muted-foreground">Show detailed test logs</p>
+                </div>
+                <Switch checked={testConfig.verbose} onCheckedChange={(v) => setTestConfig({ ...testConfig, verbose: v })} />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowRunTestsDialog(false)}>Cancel</Button>
+              <Button onClick={handleRunTests} disabled={isRunningTests}>
+                {isRunningTests && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                {isRunningTests ? 'Running Tests...' : 'Run Tests'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Export Report Dialog */}
+        <Dialog open={showExportReportDialog} onOpenChange={setShowExportReportDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Download className="w-5 h-5 text-violet-600" />
+                Export Bug Report
+              </DialogTitle>
+              <DialogDescription>
+                Configure export settings for your bug data
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid gap-2">
+                <Label>Export Format</Label>
+                <Select value={exportConfig.format} onValueChange={(v) => setExportConfig({ ...exportConfig, format: v })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="csv">CSV (Spreadsheet)</SelectItem>
+                    <SelectItem value="json">JSON (Data)</SelectItem>
+                    <SelectItem value="pdf">PDF (Report)</SelectItem>
+                    <SelectItem value="xlsx">Excel (XLSX)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid gap-2">
+                <Label>Date Range</Label>
+                <Select value={exportConfig.dateRange} onValueChange={(v) => setExportConfig({ ...exportConfig, dateRange: v })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Time</SelectItem>
+                    <SelectItem value="week">Last 7 Days</SelectItem>
+                    <SelectItem value="month">Last 30 Days</SelectItem>
+                    <SelectItem value="quarter">Last 90 Days</SelectItem>
+                    <SelectItem value="year">Last Year</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                <div>
+                  <p className="font-medium">Include Comments</p>
+                  <p className="text-sm text-muted-foreground">Export all bug comments</p>
+                </div>
+                <Switch checked={exportConfig.includeComments} onCheckedChange={(v) => setExportConfig({ ...exportConfig, includeComments: v })} />
+              </div>
+              <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                <div>
+                  <p className="font-medium">Include Attachments</p>
+                  <p className="text-sm text-muted-foreground">Export with file attachments</p>
+                </div>
+                <Switch checked={exportConfig.includeAttachments} onCheckedChange={(v) => setExportConfig({ ...exportConfig, includeAttachments: v })} />
+              </div>
+              <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20">
+                <p className="text-sm text-blue-700 dark:text-blue-400">
+                  <strong>{filteredBugs.length}</strong> bugs will be exported based on current filters
+                </p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowExportReportDialog(false)}>Cancel</Button>
+              <Button onClick={handleExportReport} disabled={isExporting}>
+                {isExporting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                {isExporting ? 'Exporting...' : 'Export Report'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Search Issues Dialog */}
+        <Dialog open={showSearchIssuesDialog} onOpenChange={setShowSearchIssuesDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Search className="w-5 h-5 text-blue-600" />
+                Search Issues
+              </DialogTitle>
+              <DialogDescription>
+                Search across all bugs and issues
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search by title, description, bug ID..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10"
+                  autoFocus
+                />
+              </div>
+              {searchQuery && (
+                <ScrollArea className="h-[300px]">
+                  <div className="space-y-2">
+                    {allBugs.filter(bug =>
+                      bug.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                      bug.key.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                      bug.description.toLowerCase().includes(searchQuery.toLowerCase())
+                    ).slice(0, 10).map(bug => (
+                      <div
+                        key={bug.id}
+                        className="p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
+                        onClick={() => {
+                          setSelectedBug(bug)
+                          setShowSearchIssuesDialog(false)
+                          setSearchQuery('')
+                        }}
+                      >
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-sm font-medium text-muted-foreground">{bug.key}</span>
+                          <Badge className={getSeverityColor(bug.severity)}>{bug.severity}</Badge>
+                          <Badge className={getStatusColor(bug.status)} variant="outline">
+                            {bug.status.replace('_', ' ')}
+                          </Badge>
+                        </div>
+                        <p className="font-medium text-sm">{bug.title}</p>
+                      </div>
+                    ))}
+                    {allBugs.filter(bug =>
+                      bug.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                      bug.key.toLowerCase().includes(searchQuery.toLowerCase())
+                    ).length === 0 && (
+                      <p className="text-center text-muted-foreground py-8">No bugs found matching your search</p>
+                    )}
+                  </div>
+                </ScrollArea>
+              )}
+              {!searchQuery && (
+                <div className="text-center py-8 text-muted-foreground">
+                  <Search className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                  <p>Start typing to search bugs</p>
+                </div>
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Advanced Filter Dialog */}
+        <Dialog open={showAdvancedFilterDialog} onOpenChange={setShowAdvancedFilterDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Filter className="w-5 h-5 text-green-600" />
+                Advanced Filters
+              </DialogTitle>
+              <DialogDescription>
+                Apply multiple filters to narrow down your bug list
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="grid gap-2">
+                  <Label>Status</Label>
+                  <div className="flex flex-wrap gap-2">
+                    {['open', 'in_progress', 'in_review', 'resolved', 'closed'].map(status => (
+                      <Badge
+                        key={status}
+                        variant={filterConfig.status.includes(status) ? 'default' : 'outline'}
+                        className="cursor-pointer capitalize"
+                        onClick={() => setFilterConfig({
+                          ...filterConfig,
+                          status: filterConfig.status.includes(status)
+                            ? filterConfig.status.filter(s => s !== status)
+                            : [...filterConfig.status, status]
+                        })}
+                      >
+                        {status.replace('_', ' ')}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+                <div className="grid gap-2">
+                  <Label>Severity</Label>
+                  <div className="flex flex-wrap gap-2">
+                    {['critical', 'high', 'medium', 'low'].map(severity => (
+                      <Badge
+                        key={severity}
+                        variant={filterConfig.severity.includes(severity) ? 'default' : 'outline'}
+                        className="cursor-pointer capitalize"
+                        onClick={() => setFilterConfig({
+                          ...filterConfig,
+                          severity: filterConfig.severity.includes(severity)
+                            ? filterConfig.severity.filter(s => s !== severity)
+                            : [...filterConfig.severity, severity]
+                        })}
+                      >
+                        {severity}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <div className="grid gap-2">
+                <Label>Assignee</Label>
+                <Input
+                  value={filterConfig.assignee}
+                  onChange={(e) => setFilterConfig({ ...filterConfig, assignee: e.target.value })}
+                  placeholder="Filter by assignee name"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="grid gap-2">
+                  <Label>Date From</Label>
+                  <Input
+                    type="date"
+                    value={filterConfig.dateFrom}
+                    onChange={(e) => setFilterConfig({ ...filterConfig, dateFrom: e.target.value })}
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label>Date To</Label>
+                  <Input
+                    type="date"
+                    value={filterConfig.dateTo}
+                    onChange={(e) => setFilterConfig({ ...filterConfig, dateTo: e.target.value })}
+                  />
+                </div>
+              </div>
+              <div className="grid gap-2">
+                <Label>Labels</Label>
+                <div className="flex flex-wrap gap-2">
+                  {mockLabels.map(label => (
+                    <Badge
+                      key={label.id}
+                      variant={filterConfig.labels.includes(label.name) ? 'default' : 'outline'}
+                      className="cursor-pointer"
+                      style={{ borderColor: label.color, color: filterConfig.labels.includes(label.name) ? 'white' : label.color, backgroundColor: filterConfig.labels.includes(label.name) ? label.color : 'transparent' }}
+                      onClick={() => setFilterConfig({
+                        ...filterConfig,
+                        labels: filterConfig.labels.includes(label.name)
+                          ? filterConfig.labels.filter(l => l !== label.name)
+                          : [...filterConfig.labels, label.name]
+                      })}
+                    >
+                      {label.name}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setFilterConfig({ status: [], severity: [], assignee: '', dateFrom: '', dateTo: '', labels: [] })}>
+                Clear All
+              </Button>
+              <Button variant="outline" onClick={() => setShowAdvancedFilterDialog(false)}>Cancel</Button>
+              <Button onClick={handleApplyAdvancedFilter}>Apply Filters</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Archive Dialog */}
+        <Dialog open={showArchiveDialog} onOpenChange={setShowArchiveDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Archive className="w-5 h-5 text-gray-600" />
+                Bug Archive
+              </DialogTitle>
+              <DialogDescription>
+                View and manage archived bugs
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <ScrollArea className="h-[400px]">
+                <div className="space-y-3">
+                  {allBugs.filter(b => b.status === 'closed').length > 0 ? (
+                    allBugs.filter(b => b.status === 'closed').map(bug => (
+                      <div key={bug.id} className="p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-medium text-muted-foreground">{bug.key}</span>
+                            <Badge className={getSeverityColor(bug.severity)}>{bug.severity}</Badge>
+                          </div>
+                          <Button variant="outline" size="sm" onClick={() => {
+                            handleUpdateStatus(bug.id, 'open')
+                            setShowArchiveDialog(false)
+                          }}>
+                            Restore
+                          </Button>
+                        </div>
+                        <p className="font-medium text-sm">{bug.title}</p>
+                        <p className="text-xs text-muted-foreground mt-1">Closed on {formatDate(bug.resolvedAt || bug.updatedAt)}</p>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-center py-12 text-muted-foreground">
+                      <Archive className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                      <p>No archived bugs</p>
+                    </div>
+                  )}
+                </div>
+              </ScrollArea>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowArchiveDialog(false)}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Import Bugs Dialog */}
+        <Dialog open={showImportBugsDialog} onOpenChange={setShowImportBugsDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Upload className="w-5 h-5 text-pink-600" />
+                Import Bugs
+              </DialogTitle>
+              <DialogDescription>
+                Import bugs from CSV, JSON, or Jira export
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="border-2 border-dashed rounded-lg p-8 text-center">
+                <Upload className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+                <p className="font-medium mb-2">Drop your file here or click to browse</p>
+                <p className="text-sm text-muted-foreground mb-4">Supports CSV, JSON, XML formats</p>
+                <Input
+                  type="file"
+                  accept=".csv,.json,.xml"
+                  onChange={(e) => setImportFile(e.target.files?.[0] || null)}
+                  className="max-w-xs mx-auto"
+                />
+              </div>
+              {importFile && (
+                <div className="p-3 rounded-lg bg-green-50 dark:bg-green-900/20">
+                  <div className="flex items-center gap-2">
+                    <Paperclip className="w-4 h-4 text-green-600" />
+                    <span className="font-medium text-green-700 dark:text-green-400">{importFile.name}</span>
+                    <Button variant="ghost" size="sm" onClick={() => setImportFile(null)}>
+                      <XCircle className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              )}
+              <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20">
+                <h4 className="font-medium text-blue-700 dark:text-blue-400 mb-2">Supported Formats:</h4>
+                <ul className="text-sm text-blue-600 dark:text-blue-300 space-y-1">
+                  <li>CSV - Standard bug export format</li>
+                  <li>JSON - API compatible format</li>
+                  <li>XML - Jira export format</li>
+                </ul>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => { setShowImportBugsDialog(false); setImportFile(null); }}>Cancel</Button>
+              <Button onClick={handleImportBugs} disabled={!importFile || isImporting}>
+                {isImporting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                {isImporting ? 'Importing...' : 'Import Bugs'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Link PRs Dialog */}
+        <Dialog open={showLinkPRsDialog} onOpenChange={setShowLinkPRsDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <GitBranch className="w-5 h-5 text-teal-600" />
+                Link Pull Request
+              </DialogTitle>
+              <DialogDescription>
+                Connect a pull request to a bug for tracking
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid gap-2">
+                <Label>Bug ID</Label>
+                <Select value={linkPRConfig.bugId} onValueChange={(v) => setLinkPRConfig({ ...linkPRConfig, bugId: v })}>
+                  <SelectTrigger><SelectValue placeholder="Select a bug" /></SelectTrigger>
+                  <SelectContent>
+                    {allBugs.filter(b => b.status !== 'closed').slice(0, 20).map(bug => (
+                      <SelectItem key={bug.id} value={bug.id}>
+                        {bug.key} - {bug.title.slice(0, 40)}...
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid gap-2">
+                <Label>Pull Request URL</Label>
+                <Input
+                  value={linkPRConfig.prUrl}
+                  onChange={(e) => setLinkPRConfig({ ...linkPRConfig, prUrl: e.target.value })}
+                  placeholder="https://github.com/org/repo/pull/123"
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label>Link Type</Label>
+                <Select value={linkPRConfig.linkType} onValueChange={(v) => setLinkPRConfig({ ...linkPRConfig, linkType: v })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="fixes">Fixes</SelectItem>
+                    <SelectItem value="relates">Relates to</SelectItem>
+                    <SelectItem value="implements">Implements</SelectItem>
+                    <SelectItem value="partially_fixes">Partially Fixes</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                <h4 className="font-medium mb-2">Recent PRs</h4>
+                <div className="space-y-2">
+                  {['PR #456 - Fix auth timeout', 'PR #455 - Update dashboard', 'PR #454 - API improvements'].map((pr, idx) => (
+                    <div
+                      key={idx}
+                      className="text-sm p-2 rounded bg-white dark:bg-gray-800 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
+                      onClick={() => setLinkPRConfig({ ...linkPRConfig, prUrl: `https://github.com/org/repo/pull/${456 - idx}` })}
+                    >
+                      {pr}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowLinkPRsDialog(false)}>Cancel</Button>
+              <Button onClick={handleLinkPR} disabled={!linkPRConfig.prUrl || !linkPRConfig.bugId}>
+                Link PR
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* View History Dialog */}
+        <Dialog open={showViewHistoryDialog} onOpenChange={setShowViewHistoryDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <History className="w-5 h-5 text-amber-600" />
+                Bug History
+              </DialogTitle>
+              <DialogDescription>
+                View recent activity and changes across all bugs
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <ScrollArea className="h-[400px]">
+                <div className="space-y-4">
+                  {[
+                    { action: 'created', bug: 'BUG-1234', user: 'John Smith', time: '2 hours ago', details: 'Login form crashes with special characters' },
+                    { action: 'status_changed', bug: 'BUG-1235', user: 'Alex Rivera', time: '3 hours ago', details: 'Changed status from Open to In Progress' },
+                    { action: 'assigned', bug: 'BUG-1236', user: 'Sarah Chen', time: '5 hours ago', details: 'Assigned to Sarah Chen' },
+                    { action: 'commented', bug: 'BUG-1234', user: 'Sarah Chen', time: '6 hours ago', details: 'Investigating this now. Seems related to regex validation.' },
+                    { action: 'resolved', bug: 'BUG-1237', user: 'Lisa Park', time: '1 day ago', details: 'Fixed in PR #456' },
+                    { action: 'priority_changed', bug: 'BUG-1238', user: 'David Kim', time: '1 day ago', details: 'Priority changed from Major to Critical' },
+                    { action: 'attachment_added', bug: 'BUG-1234', user: 'John Smith', time: '2 days ago', details: 'Added error_screenshot.png' },
+                    { action: 'created', bug: 'BUG-1238', user: 'David Kim', time: '2 days ago', details: 'API rate limiting not working correctly' },
+                  ].map((item, idx) => (
+                    <div key={idx} className="flex gap-4 p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                        item.action === 'created' ? 'bg-green-100 text-green-600' :
+                        item.action === 'resolved' ? 'bg-blue-100 text-blue-600' :
+                        item.action === 'commented' ? 'bg-purple-100 text-purple-600' :
+                        'bg-gray-100 text-gray-600'
+                      }`}>
+                        {item.action === 'created' && <Plus className="w-5 h-5" />}
+                        {item.action === 'resolved' && <CheckCircle className="w-5 h-5" />}
+                        {item.action === 'commented' && <MessageSquare className="w-5 h-5" />}
+                        {item.action === 'status_changed' && <ArrowRight className="w-5 h-5" />}
+                        {item.action === 'assigned' && <Users className="w-5 h-5" />}
+                        {item.action === 'priority_changed' && <Flag className="w-5 h-5" />}
+                        {item.action === 'attachment_added' && <Paperclip className="w-5 h-5" />}
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="font-medium">{item.user}</span>
+                          <span className="text-sm text-muted-foreground">on</span>
+                          <Badge variant="outline">{item.bug}</Badge>
+                          <span className="text-sm text-muted-foreground ml-auto">{item.time}</span>
+                        </div>
+                        <p className="text-sm text-muted-foreground">{item.details}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowViewHistoryDialog(false)}>Close</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

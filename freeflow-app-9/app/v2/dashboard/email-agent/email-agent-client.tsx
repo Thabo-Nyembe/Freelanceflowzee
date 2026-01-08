@@ -134,12 +134,6 @@ const emailAgentActivities = [
   { id: '3', user: 'System', action: 'generated', target: 'weekly report', timestamp: '1h ago', type: 'info' as const },
 ]
 
-const emailAgentQuickActions = [
-  { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => toast.success('Item Created', { description: 'New email agent ready' }) },
-  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => toast.success('Data Exported', { description: 'Email data exported' }) },
-  { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => toast.success('Settings', { description: 'Email agent settings opened' }) },
-]
-
 export default function EmailAgentClient() {
   const { toast } = useToast();
   // A+++ UTILITIES
@@ -165,6 +159,148 @@ export default function EmailAgentClient() {
   const [setupCompleted, setSetupCompleted] = useState(false);
   const [integrations, setIntegrations] = useState<any[]>([]);
   const [integrationsLoading, setIntegrationsLoading] = useState(true);
+
+  // Dialog states for quick actions
+  const [showNewItemDialog, setShowNewItemDialog] = useState(false);
+  const [showExportDialog, setShowExportDialog] = useState(false);
+  const [showSettingsDialog, setShowSettingsDialog] = useState(false);
+
+  // New item form state
+  const [newItemName, setNewItemName] = useState('');
+  const [newItemType, setNewItemType] = useState('email_template');
+  const [newItemPriority, setNewItemPriority] = useState('medium');
+  const [newItemDescription, setNewItemDescription] = useState('');
+  const [creatingItem, setCreatingItem] = useState(false);
+
+  // Export form state
+  const [exportFormat, setExportFormat] = useState('csv');
+  const [exportDateRange, setExportDateRange] = useState('last_30_days');
+  const [exportIncludeAnalysis, setExportIncludeAnalysis] = useState(true);
+  const [exportIncludeResponses, setExportIncludeResponses] = useState(true);
+  const [exporting, setExporting] = useState(false);
+
+  // Quick settings state
+  const [quickSettingsNotifications, setQuickSettingsNotifications] = useState(true);
+  const [quickSettingsAutoAnalyze, setQuickSettingsAutoAnalyze] = useState(true);
+  const [quickSettingsResponseDelay, setQuickSettingsResponseDelay] = useState('immediate');
+  const [savingQuickSettings, setSavingQuickSettings] = useState(false);
+
+  // Quick actions with dialog handlers
+  const emailAgentQuickActions = [
+    { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => setShowNewItemDialog(true) },
+    { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => setShowExportDialog(true) },
+    { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => setShowSettingsDialog(true) },
+  ];
+
+  // Handler for creating new item
+  const handleCreateNewItem = async () => {
+    if (!newItemName.trim()) {
+      toast({
+        title: 'Validation Error',
+        description: 'Please enter a name for the item',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setCreatingItem(true);
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      toast({
+        title: 'Item Created',
+        description: `Successfully created "${newItemName}" as ${newItemType.replace('_', ' ')}`,
+      });
+
+      // Reset form and close dialog
+      setNewItemName('');
+      setNewItemType('email_template');
+      setNewItemPriority('medium');
+      setNewItemDescription('');
+      setShowNewItemDialog(false);
+
+      // Refresh data
+      loadDashboardData();
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to create item. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setCreatingItem(false);
+    }
+  };
+
+  // Handler for exporting data
+  const handleExportData = async () => {
+    setExporting(true);
+    try {
+      // Simulate export process
+      await new Promise(resolve => setTimeout(resolve, 1500));
+
+      const exportData = {
+        format: exportFormat,
+        dateRange: exportDateRange,
+        includeAnalysis: exportIncludeAnalysis,
+        includeResponses: exportIncludeResponses,
+        emails: emails,
+        statistics: statistics,
+        exportedAt: new Date().toISOString(),
+      };
+
+      // Create and download file
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `email-agent-export-${new Date().toISOString().split('T')[0]}.${exportFormat === 'json' ? 'json' : 'csv'}`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      toast({
+        title: 'Export Complete',
+        description: `Data exported as ${exportFormat.toUpperCase()} file`,
+      });
+
+      setShowExportDialog(false);
+    } catch (error) {
+      toast({
+        title: 'Export Failed',
+        description: 'Unable to export data. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  // Handler for saving quick settings
+  const handleSaveQuickSettings = async () => {
+    setSavingQuickSettings(true);
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 800));
+
+      toast({
+        title: 'Settings Saved',
+        description: 'Your quick settings have been updated',
+      });
+
+      setShowSettingsDialog(false);
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to save settings. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setSavingQuickSettings(false);
+    }
+  };
 
   // Load data on mount
   useEffect(() => {
@@ -1028,6 +1164,265 @@ export default function EmailAgentClient() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setSelectedEmail(null)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* New Item Dialog */}
+      <Dialog open={showNewItemDialog} onOpenChange={setShowNewItemDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Mail className="w-5 h-5 text-indigo-600" />
+              Create New Email Agent Item
+            </DialogTitle>
+            <DialogDescription>
+              Create a new template, automation rule, or response pattern for your email agent.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="item-name">Item Name</Label>
+              <Input
+                id="item-name"
+                placeholder="Enter item name..."
+                value={newItemName}
+                onChange={(e) => setNewItemName(e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="item-type">Item Type</Label>
+              <Select value={newItemType} onValueChange={setNewItemType}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="email_template">Email Template</SelectItem>
+                  <SelectItem value="response_pattern">Response Pattern</SelectItem>
+                  <SelectItem value="automation_rule">Automation Rule</SelectItem>
+                  <SelectItem value="filter_rule">Filter Rule</SelectItem>
+                  <SelectItem value="quotation_template">Quotation Template</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="item-priority">Priority</Label>
+              <Select value={newItemPriority} onValueChange={setNewItemPriority}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="low">Low</SelectItem>
+                  <SelectItem value="medium">Medium</SelectItem>
+                  <SelectItem value="high">High</SelectItem>
+                  <SelectItem value="urgent">Urgent</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="item-description">Description (Optional)</Label>
+              <Input
+                id="item-description"
+                placeholder="Brief description of this item..."
+                value={newItemDescription}
+                onChange={(e) => setNewItemDescription(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowNewItemDialog(false)} disabled={creatingItem}>
+              Cancel
+            </Button>
+            <Button onClick={handleCreateNewItem} disabled={creatingItem} className="gap-2">
+              {creatingItem ? (
+                <>
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                  Creating...
+                </>
+              ) : (
+                <>
+                  <Check className="w-4 h-4" />
+                  Create Item
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Export Dialog */}
+      <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileText className="w-5 h-5 text-green-600" />
+              Export Email Agent Data
+            </DialogTitle>
+            <DialogDescription>
+              Export your email data, analytics, and automation history.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="export-format">Export Format</Label>
+              <Select value={exportFormat} onValueChange={setExportFormat}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="csv">CSV (Spreadsheet)</SelectItem>
+                  <SelectItem value="json">JSON (Developer)</SelectItem>
+                  <SelectItem value="pdf">PDF (Report)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="export-range">Date Range</Label>
+              <Select value={exportDateRange} onValueChange={setExportDateRange}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="last_7_days">Last 7 Days</SelectItem>
+                  <SelectItem value="last_30_days">Last 30 Days</SelectItem>
+                  <SelectItem value="last_90_days">Last 90 Days</SelectItem>
+                  <SelectItem value="all_time">All Time</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <Separator />
+
+            <div className="space-y-3">
+              <Label>Include in Export</Label>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-600">AI Analysis Data</span>
+                <Switch
+                  checked={exportIncludeAnalysis}
+                  onCheckedChange={setExportIncludeAnalysis}
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-600">Generated Responses</span>
+                <Switch
+                  checked={exportIncludeResponses}
+                  onCheckedChange={setExportIncludeResponses}
+                />
+              </div>
+            </div>
+
+            <Alert>
+              <AlertCircle className="w-4 h-4" />
+              <AlertDescription className="text-xs">
+                Export includes {emails.length} emails and {statistics?.totalEmailsProcessed || 0} processed records.
+              </AlertDescription>
+            </Alert>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowExportDialog(false)} disabled={exporting}>
+              Cancel
+            </Button>
+            <Button onClick={handleExportData} disabled={exporting} className="gap-2">
+              {exporting ? (
+                <>
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                  Exporting...
+                </>
+              ) : (
+                <>
+                  <FileText className="w-4 h-4" />
+                  Export Data
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Quick Settings Dialog */}
+      <Dialog open={showSettingsDialog} onOpenChange={setShowSettingsDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Settings className="w-5 h-5 text-purple-600" />
+              Quick Settings
+            </DialogTitle>
+            <DialogDescription>
+              Quickly adjust common email agent settings.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label>Email Notifications</Label>
+                <p className="text-xs text-gray-500">Get notified when emails are processed</p>
+              </div>
+              <Switch
+                checked={quickSettingsNotifications}
+                onCheckedChange={setQuickSettingsNotifications}
+              />
+            </div>
+
+            <Separator />
+
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label>Auto-Analyze Emails</Label>
+                <p className="text-xs text-gray-500">Automatically analyze incoming emails</p>
+              </div>
+              <Switch
+                checked={quickSettingsAutoAnalyze}
+                onCheckedChange={setQuickSettingsAutoAnalyze}
+              />
+            </div>
+
+            <Separator />
+
+            <div className="space-y-2">
+              <Label htmlFor="response-delay">Response Delay</Label>
+              <Select value={quickSettingsResponseDelay} onValueChange={setQuickSettingsResponseDelay}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="immediate">Immediate</SelectItem>
+                  <SelectItem value="5_minutes">5 Minutes</SelectItem>
+                  <SelectItem value="15_minutes">15 Minutes</SelectItem>
+                  <SelectItem value="1_hour">1 Hour</SelectItem>
+                  <SelectItem value="manual">Manual Only</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-gray-500">Time to wait before sending automated responses</p>
+            </div>
+
+            <Alert className="border-blue-200 bg-blue-50 dark:bg-blue-950">
+              <Sparkles className="w-4 h-4 text-blue-600" />
+              <AlertDescription className="text-xs">
+                For advanced settings, visit the full Settings tab or the Integrations page.
+              </AlertDescription>
+            </Alert>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowSettingsDialog(false)} disabled={savingQuickSettings}>
+              Cancel
+            </Button>
+            <Button onClick={handleSaveQuickSettings} disabled={savingQuickSettings} className="gap-2">
+              {savingQuickSettings ? (
+                <>
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <Check className="w-4 h-4" />
+                  Save Settings
+                </>
+              )}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

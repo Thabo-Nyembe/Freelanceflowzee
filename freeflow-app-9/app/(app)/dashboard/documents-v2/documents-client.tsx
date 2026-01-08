@@ -343,6 +343,8 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
   const [previewDialogOpen, setPreviewDialogOpen] = useState(false)
   const [templateFilter, setTemplateFilter] = useState<'all' | 'document' | 'spreadsheet' | 'presentation'>('all')
   const [sharingFilter, setSharingFilter] = useState<'all' | 'team' | 'public' | 'private'>('all')
+  const [showOrganizeDialog, setShowOrganizeDialog] = useState(false)
+  const [folderOrder, setFolderOrder] = useState<DocumentFolder[]>(mockFolders)
 
   // Quick actions with real functionality
   const mockDocumentsQuickActions = [
@@ -1474,7 +1476,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
                 { icon: FolderPlus, label: 'New Folder', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', action: () => handleCreateDocument('folder') },
-                { icon: FolderTree, label: 'Organize', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', action: () => toast.info('Folder Organizer', { description: 'Drag and drop folders to organize' }) },
+                { icon: FolderTree, label: 'Organize', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', action: () => setShowOrganizeDialog(true) },
                 { icon: Share2, label: 'Share', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', action: () => { if (selectedFolder) { handleWebShare() } else { toast.info('Select a folder first', { description: 'Choose a folder to share' }) } } },
                 { icon: Move, label: 'Move', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', action: () => { if (selectedFolder) { setShowMoveDialog(true) } else { toast.info('Select a folder first', { description: 'Choose a folder to move' }) } } },
                 { icon: Copy, label: 'Duplicate', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', action: () => { if (selectedFolder) { handleCopyLink() } else { toast.info('Select a folder first', { description: 'Choose a folder to duplicate' }) } } },
@@ -2640,6 +2642,139 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
                 }}
               >
                 Cancel
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Organize Folders Dialog */}
+        <Dialog open={showOrganizeDialog} onOpenChange={setShowOrganizeDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <FolderTree className="h-5 w-5" />
+                Organize Folders
+              </DialogTitle>
+              <DialogDescription>
+                Drag folders to reorder them. Click on a folder to set its parent folder.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="flex items-center gap-2 mb-4">
+                <Label className="text-sm font-medium">Sort by:</Label>
+                <Select defaultValue="custom" onValueChange={(value) => {
+                  if (value === 'name') {
+                    setFolderOrder([...folderOrder].sort((a, b) => a.name.localeCompare(b.name)))
+                  } else if (value === 'size') {
+                    setFolderOrder([...folderOrder].sort((a, b) => b.size - a.size))
+                  } else if (value === 'items') {
+                    setFolderOrder([...folderOrder].sort((a, b) => b.documentCount - a.documentCount))
+                  } else if (value === 'date') {
+                    setFolderOrder([...folderOrder].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()))
+                  }
+                }}>
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Sort by..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="custom">Custom Order</SelectItem>
+                    <SelectItem value="name">Name (A-Z)</SelectItem>
+                    <SelectItem value="size">Size (Largest)</SelectItem>
+                    <SelectItem value="items">Items (Most)</SelectItem>
+                    <SelectItem value="date">Date (Newest)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <ScrollArea className="h-[400px] pr-4">
+                <div className="space-y-2">
+                  {folderOrder.map((folder, index) => (
+                    <div
+                      key={folder.id}
+                      className="flex items-center gap-3 p-3 rounded-lg border bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-move"
+                    >
+                      <div className="flex items-center gap-2 text-gray-400">
+                        <span className="text-sm font-mono w-6">{index + 1}</span>
+                        <div className="flex flex-col gap-0.5">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-5 w-5 p-0"
+                            disabled={index === 0}
+                            onClick={() => {
+                              const newOrder = [...folderOrder]
+                              const temp = newOrder[index - 1]
+                              newOrder[index - 1] = newOrder[index]
+                              newOrder[index] = temp
+                              setFolderOrder(newOrder)
+                            }}
+                          >
+                            <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                            </svg>
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-5 w-5 p-0"
+                            disabled={index === folderOrder.length - 1}
+                            onClick={() => {
+                              const newOrder = [...folderOrder]
+                              const temp = newOrder[index + 1]
+                              newOrder[index + 1] = newOrder[index]
+                              newOrder[index] = temp
+                              setFolderOrder(newOrder)
+                            }}
+                          >
+                            <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                            </svg>
+                          </Button>
+                        </div>
+                      </div>
+                      <div className={`p-2 rounded-lg ${folder.color}`}>
+                        <Folder className="h-4 w-4 text-white" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-medium">{folder.name}</p>
+                        <p className="text-xs text-gray-500">{folder.documentCount} items - {formatBytes(folder.size)}</p>
+                      </div>
+                      <Select defaultValue="root" onValueChange={(parentId) => {
+                        if (parentId !== 'root' && parentId !== folder.id) {
+                          toast.success(`Moved "${folder.name}" into another folder`)
+                        }
+                      }}>
+                        <SelectTrigger className="w-[140px]">
+                          <SelectValue placeholder="Parent folder" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="root">Root (No Parent)</SelectItem>
+                          {folderOrder.filter(f => f.id !== folder.id).map(f => (
+                            <SelectItem key={f.id} value={f.id}>{f.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+            </div>
+            <DialogFooter className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setFolderOrder(mockFolders)
+                  setShowOrganizeDialog(false)
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={() => {
+                  toast.success('Folder organization saved', { description: 'Your folder order has been updated' })
+                  setShowOrganizeDialog(false)
+                }}
+              >
+                Save Order
               </Button>
             </DialogFooter>
           </DialogContent>

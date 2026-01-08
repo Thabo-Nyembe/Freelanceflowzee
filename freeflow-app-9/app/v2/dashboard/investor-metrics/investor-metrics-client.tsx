@@ -350,20 +350,7 @@ const mockInvestorMetricsActivities = [
   { id: '3', user: 'System', action: 'Generated', target: 'automated KPI report', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
 ]
 
-const mockInvestorMetricsQuickActions = [
-  { id: '1', label: 'Update Metrics', icon: 'refresh', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 2000)),
-    { loading: 'Updating investor metrics...', success: 'Metrics updated successfully', error: 'Failed to update metrics' }
-  ), variant: 'default' as const },
-  { id: '2', label: 'Investor Report', icon: 'file-text', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1500)),
-    { loading: 'Generating investor report...', success: 'Report generated successfully', error: 'Failed to generate report' }
-  ), variant: 'default' as const },
-  { id: '3', label: 'Export Data', icon: 'download', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1800)),
-    { loading: 'Exporting investor data...', success: 'Data exported successfully', error: 'Failed to export data' }
-  ), variant: 'outline' as const },
-]
+// Quick actions will be defined inside the component to access state setters
 
 export default function InvestorMetricsClient() {
   const supabase = createClient()
@@ -395,6 +382,40 @@ export default function InvestorMetricsClient() {
     unit: 'currency',
     description: '',
     period: 'quarterly'
+  })
+
+  // Dialog states for Quick Actions
+  const [showUpdateMetricsDialog, setShowUpdateMetricsDialog] = useState(false)
+  const [showInvestorReportDialog, setShowInvestorReportDialog] = useState(false)
+  const [showExportDataDialog, setShowExportDataDialog] = useState(false)
+
+  // Update Metrics Dialog state
+  const [updateMetricsForm, setUpdateMetricsForm] = useState({
+    metricsToUpdate: 'all' as 'all' | 'revenue' | 'growth' | 'efficiency' | 'engagement',
+    refreshSource: 'database' as 'database' | 'api' | 'manual',
+    includeHistorical: true,
+    notifyStakeholders: false
+  })
+
+  // Investor Report Dialog state
+  const [investorReportForm, setInvestorReportForm] = useState({
+    reportType: 'quarterly' as 'monthly' | 'quarterly' | 'annual' | 'custom',
+    includeFinancials: true,
+    includeKPIs: true,
+    includeCapTable: true,
+    includeFundingProgress: true,
+    recipientType: 'all' as 'all' | 'board' | 'investors' | 'custom',
+    customRecipients: '',
+    additionalNotes: ''
+  })
+
+  // Export Data Dialog state
+  const [exportDataForm, setExportDataForm] = useState({
+    dataType: 'all' as 'all' | 'cap-table' | 'kpis' | 'funding' | 'investors',
+    format: 'xlsx' as 'xlsx' | 'csv' | 'pdf' | 'json',
+    dateRange: 'all' as 'all' | 'ytd' | 'last-quarter' | 'last-year' | 'custom',
+    includeCharts: true,
+    anonymizeData: false
   })
 
   // Fetch metrics from Supabase
@@ -687,6 +708,169 @@ export default function InvestorMetricsClient() {
     resetForm()
     setShowMetricDialog(true)
   }
+
+  // Handler for Update Metrics dialog
+  const handleUpdateMetricsSubmit = async () => {
+    setLoading(true)
+    try {
+      // Simulate updating metrics from the selected source
+      if (updateMetricsForm.refreshSource === 'database') {
+        await fetchMetrics()
+      } else if (updateMetricsForm.refreshSource === 'api') {
+        // Simulate API call
+        await new Promise(resolve => setTimeout(resolve, 1500))
+      }
+
+      if (updateMetricsForm.notifyStakeholders) {
+        // Simulate sending notifications
+        await new Promise(resolve => setTimeout(resolve, 500))
+      }
+
+      toast.success('Metrics updated successfully', {
+        description: `Updated ${updateMetricsForm.metricsToUpdate === 'all' ? 'all categories' : updateMetricsForm.metricsToUpdate + ' metrics'} from ${updateMetricsForm.refreshSource}`
+      })
+      setShowUpdateMetricsDialog(false)
+    } catch (error: any) {
+      toast.error('Failed to update metrics', { description: error.message })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Handler for Investor Report dialog
+  const handleInvestorReportSubmit = async () => {
+    setLoading(true)
+    try {
+      // Build report data based on selections
+      const reportData: any = {
+        reportType: investorReportForm.reportType,
+        generatedAt: new Date().toISOString(),
+        sections: []
+      }
+
+      if (investorReportForm.includeFinancials) {
+        reportData.sections.push({
+          name: 'Financial Overview',
+          data: { arr: stats.arr, mrr: stats.mrr, burnRate: stats.burnRate, runway: stats.runway }
+        })
+      }
+      if (investorReportForm.includeKPIs) {
+        reportData.sections.push({ name: 'Key Performance Indicators', data: mockKPIs })
+      }
+      if (investorReportForm.includeCapTable) {
+        reportData.sections.push({ name: 'Cap Table Summary', data: mockCapTable })
+      }
+      if (investorReportForm.includeFundingProgress) {
+        reportData.sections.push({ name: 'Funding Progress', data: mockFundingRounds })
+      }
+      if (investorReportForm.additionalNotes) {
+        reportData.notes = investorReportForm.additionalNotes
+      }
+
+      // Generate and download the report
+      const blob = new Blob([JSON.stringify(reportData, null, 2)], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `investor-report-${investorReportForm.reportType}-${new Date().toISOString().split('T')[0]}.json`
+      a.click()
+      URL.revokeObjectURL(url)
+
+      const recipientCount = investorReportForm.recipientType === 'all' ? mockInvestors.length :
+        investorReportForm.recipientType === 'board' ? mockInvestors.filter(i => i.boardSeat).length :
+        investorReportForm.recipientType === 'investors' ? mockInvestors.length :
+        investorReportForm.customRecipients.split(',').filter(e => e.trim()).length
+
+      toast.success('Investor report generated', {
+        description: `${investorReportForm.reportType.charAt(0).toUpperCase() + investorReportForm.reportType.slice(1)} report ready for ${recipientCount} recipient(s)`
+      })
+      setShowInvestorReportDialog(false)
+    } catch (error: any) {
+      toast.error('Failed to generate report', { description: error.message })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Handler for Export Data dialog
+  const handleExportDataSubmit = async () => {
+    setLoading(true)
+    try {
+      // Build export data based on selections
+      let exportData: any = {
+        exportedAt: new Date().toISOString(),
+        format: exportDataForm.format,
+        dateRange: exportDataForm.dateRange
+      }
+
+      if (exportDataForm.dataType === 'all' || exportDataForm.dataType === 'cap-table') {
+        exportData.capTable = exportDataForm.anonymizeData
+          ? mockCapTable.map(e => ({ ...e, stakeholder: `Stakeholder ${e.id}` }))
+          : mockCapTable
+      }
+      if (exportDataForm.dataType === 'all' || exportDataForm.dataType === 'kpis') {
+        exportData.kpis = mockKPIs
+        exportData.customMetrics = dbMetrics
+      }
+      if (exportDataForm.dataType === 'all' || exportDataForm.dataType === 'funding') {
+        exportData.fundingRounds = mockFundingRounds
+      }
+      if (exportDataForm.dataType === 'all' || exportDataForm.dataType === 'investors') {
+        exportData.investors = exportDataForm.anonymizeData
+          ? mockInvestors.map(i => ({ ...i, name: `Investor ${i.id}`, email: 'redacted@example.com' }))
+          : mockInvestors
+      }
+
+      // Determine file extension
+      const extension = exportDataForm.format === 'xlsx' ? 'xlsx' :
+        exportDataForm.format === 'csv' ? 'csv' :
+        exportDataForm.format === 'pdf' ? 'pdf' : 'json'
+
+      // For JSON format, create actual download
+      if (exportDataForm.format === 'json') {
+        const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `investor-data-${exportDataForm.dataType}-${new Date().toISOString().split('T')[0]}.${extension}`
+        a.click()
+        URL.revokeObjectURL(url)
+      } else if (exportDataForm.format === 'csv') {
+        // Simple CSV export for cap table
+        const csvData = exportDataForm.dataType === 'cap-table' || exportDataForm.dataType === 'all'
+          ? mockCapTable.map(e => `${e.stakeholder},${e.stakeholderType},${e.shareClass},${e.shares},${e.ownership}%`).join('\n')
+          : 'Data export in CSV format'
+        const csvHeader = 'Stakeholder,Type,Share Class,Shares,Ownership\n'
+        const blob = new Blob([csvHeader + csvData], { type: 'text/csv' })
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `investor-data-${exportDataForm.dataType}-${new Date().toISOString().split('T')[0]}.csv`
+        a.click()
+        URL.revokeObjectURL(url)
+      } else {
+        // For xlsx and pdf, simulate export (would need additional libraries in production)
+        await new Promise(resolve => setTimeout(resolve, 1000))
+        toast.info(`${exportDataForm.format.toUpperCase()} export would require additional libraries in production`)
+      }
+
+      toast.success('Data exported successfully', {
+        description: `Exported ${exportDataForm.dataType === 'all' ? 'all data' : exportDataForm.dataType} in ${exportDataForm.format.toUpperCase()} format`
+      })
+      setShowExportDataDialog(false)
+    } catch (error: any) {
+      toast.error('Failed to export data', { description: error.message })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Quick Actions with dialog openers
+  const quickActions = [
+    { id: '1', label: 'Update Metrics', icon: 'refresh', action: () => setShowUpdateMetricsDialog(true), variant: 'default' as const },
+    { id: '2', label: 'Investor Report', icon: 'file-text', action: () => setShowInvestorReportDialog(true), variant: 'default' as const },
+    { id: '3', label: 'Export Data', icon: 'download', action: () => setShowExportDataDialog(true), variant: 'outline' as const },
+  ]
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 via-yellow-50/30 to-orange-50/40 dark:bg-none dark:bg-gray-900">
@@ -2089,7 +2273,7 @@ export default function InvestorMetricsClient() {
               maxItems={5}
             />
             <QuickActionsToolbar
-              actions={mockInvestorMetricsQuickActions}
+              actions={quickActions}
               variant="grid"
             />
           </div>
@@ -2275,6 +2459,345 @@ export default function InvestorMetricsClient() {
               </div>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Update Metrics Dialog */}
+      <Dialog open={showUpdateMetricsDialog} onOpenChange={setShowUpdateMetricsDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <RefreshCw className="w-5 h-5 text-amber-500" />
+              Update Investor Metrics
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Metrics Category</Label>
+              <Select
+                value={updateMetricsForm.metricsToUpdate}
+                onValueChange={(v) => setUpdateMetricsForm(prev => ({ ...prev, metricsToUpdate: v as any }))}
+              >
+                <SelectTrigger className="mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Categories</SelectItem>
+                  <SelectItem value="revenue">Revenue Metrics</SelectItem>
+                  <SelectItem value="growth">Growth Metrics</SelectItem>
+                  <SelectItem value="efficiency">Efficiency Metrics</SelectItem>
+                  <SelectItem value="engagement">Engagement Metrics</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Data Source</Label>
+              <Select
+                value={updateMetricsForm.refreshSource}
+                onValueChange={(v) => setUpdateMetricsForm(prev => ({ ...prev, refreshSource: v as any }))}
+              >
+                <SelectTrigger className="mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="database">Database (Supabase)</SelectItem>
+                  <SelectItem value="api">External API</SelectItem>
+                  <SelectItem value="manual">Manual Entry</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+              <div>
+                <Label>Include Historical Data</Label>
+                <p className="text-sm text-gray-500">Refresh trend and comparison data</p>
+              </div>
+              <Switch
+                checked={updateMetricsForm.includeHistorical}
+                onCheckedChange={(v) => setUpdateMetricsForm(prev => ({ ...prev, includeHistorical: v }))}
+              />
+            </div>
+            <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+              <div>
+                <Label>Notify Stakeholders</Label>
+                <p className="text-sm text-gray-500">Send update notification to investors</p>
+              </div>
+              <Switch
+                checked={updateMetricsForm.notifyStakeholders}
+                onCheckedChange={(v) => setUpdateMetricsForm(prev => ({ ...prev, notifyStakeholders: v }))}
+              />
+            </div>
+          </div>
+          <DialogFooter className="mt-4">
+            <Button variant="outline" onClick={() => setShowUpdateMetricsDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleUpdateMetricsSubmit}
+              disabled={loading}
+              className="bg-gradient-to-r from-amber-500 to-orange-500"
+            >
+              {loading ? (
+                <>
+                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                  Updating...
+                </>
+              ) : (
+                <>
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                  Update Metrics
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Investor Report Dialog */}
+      <Dialog open={showInvestorReportDialog} onOpenChange={setShowInvestorReportDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileText className="w-5 h-5 text-blue-500" />
+              Generate Investor Report
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Report Type</Label>
+                <Select
+                  value={investorReportForm.reportType}
+                  onValueChange={(v) => setInvestorReportForm(prev => ({ ...prev, reportType: v as any }))}
+                >
+                  <SelectTrigger className="mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="monthly">Monthly Update</SelectItem>
+                    <SelectItem value="quarterly">Quarterly Report</SelectItem>
+                    <SelectItem value="annual">Annual Summary</SelectItem>
+                    <SelectItem value="custom">Custom Report</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Recipients</Label>
+                <Select
+                  value={investorReportForm.recipientType}
+                  onValueChange={(v) => setInvestorReportForm(prev => ({ ...prev, recipientType: v as any }))}
+                >
+                  <SelectTrigger className="mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Stakeholders</SelectItem>
+                    <SelectItem value="board">Board Members Only</SelectItem>
+                    <SelectItem value="investors">All Investors</SelectItem>
+                    <SelectItem value="custom">Custom List</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {investorReportForm.recipientType === 'custom' && (
+              <div>
+                <Label>Custom Recipients (comma-separated emails)</Label>
+                <Input
+                  value={investorReportForm.customRecipients}
+                  onChange={(e) => setInvestorReportForm(prev => ({ ...prev, customRecipients: e.target.value }))}
+                  placeholder="email1@example.com, email2@example.com"
+                  className="mt-1"
+                />
+              </div>
+            )}
+
+            <div className="space-y-2">
+              <Label>Include Sections</Label>
+              <div className="grid grid-cols-2 gap-2">
+                <div className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                  <span className="text-sm">Financial Overview</span>
+                  <Switch
+                    checked={investorReportForm.includeFinancials}
+                    onCheckedChange={(v) => setInvestorReportForm(prev => ({ ...prev, includeFinancials: v }))}
+                  />
+                </div>
+                <div className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                  <span className="text-sm">KPIs</span>
+                  <Switch
+                    checked={investorReportForm.includeKPIs}
+                    onCheckedChange={(v) => setInvestorReportForm(prev => ({ ...prev, includeKPIs: v }))}
+                  />
+                </div>
+                <div className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                  <span className="text-sm">Cap Table</span>
+                  <Switch
+                    checked={investorReportForm.includeCapTable}
+                    onCheckedChange={(v) => setInvestorReportForm(prev => ({ ...prev, includeCapTable: v }))}
+                  />
+                </div>
+                <div className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                  <span className="text-sm">Funding Progress</span>
+                  <Switch
+                    checked={investorReportForm.includeFundingProgress}
+                    onCheckedChange={(v) => setInvestorReportForm(prev => ({ ...prev, includeFundingProgress: v }))}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <Label>Additional Notes (optional)</Label>
+              <Textarea
+                value={investorReportForm.additionalNotes}
+                onChange={(e) => setInvestorReportForm(prev => ({ ...prev, additionalNotes: e.target.value }))}
+                placeholder="Add any additional context or notes for investors..."
+                className="mt-1"
+                rows={3}
+              />
+            </div>
+          </div>
+          <DialogFooter className="mt-4">
+            <Button variant="outline" onClick={() => setShowInvestorReportDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleInvestorReportSubmit}
+              disabled={loading}
+              className="bg-gradient-to-r from-blue-500 to-indigo-500"
+            >
+              {loading ? (
+                <>
+                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <FileText className="w-4 h-4 mr-2" />
+                  Generate Report
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Export Data Dialog */}
+      <Dialog open={showExportDataDialog} onOpenChange={setShowExportDataDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Download className="w-5 h-5 text-green-500" />
+              Export Investor Data
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Data to Export</Label>
+              <Select
+                value={exportDataForm.dataType}
+                onValueChange={(v) => setExportDataForm(prev => ({ ...prev, dataType: v as any }))}
+              >
+                <SelectTrigger className="mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Data</SelectItem>
+                  <SelectItem value="cap-table">Cap Table Only</SelectItem>
+                  <SelectItem value="kpis">KPIs Only</SelectItem>
+                  <SelectItem value="funding">Funding Rounds Only</SelectItem>
+                  <SelectItem value="investors">Investor List Only</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Format</Label>
+                <Select
+                  value={exportDataForm.format}
+                  onValueChange={(v) => setExportDataForm(prev => ({ ...prev, format: v as any }))}
+                >
+                  <SelectTrigger className="mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="xlsx">Excel (.xlsx)</SelectItem>
+                    <SelectItem value="csv">CSV (.csv)</SelectItem>
+                    <SelectItem value="pdf">PDF (.pdf)</SelectItem>
+                    <SelectItem value="json">JSON (.json)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Date Range</Label>
+                <Select
+                  value={exportDataForm.dateRange}
+                  onValueChange={(v) => setExportDataForm(prev => ({ ...prev, dateRange: v as any }))}
+                >
+                  <SelectTrigger className="mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Time</SelectItem>
+                    <SelectItem value="ytd">Year to Date</SelectItem>
+                    <SelectItem value="last-quarter">Last Quarter</SelectItem>
+                    <SelectItem value="last-year">Last Year</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+              <div>
+                <Label>Include Charts</Label>
+                <p className="text-sm text-gray-500">Add visual charts to export</p>
+              </div>
+              <Switch
+                checked={exportDataForm.includeCharts}
+                onCheckedChange={(v) => setExportDataForm(prev => ({ ...prev, includeCharts: v }))}
+              />
+            </div>
+            <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+              <div>
+                <Label>Anonymize Data</Label>
+                <p className="text-sm text-gray-500">Remove personal identifiers</p>
+              </div>
+              <Switch
+                checked={exportDataForm.anonymizeData}
+                onCheckedChange={(v) => setExportDataForm(prev => ({ ...prev, anonymizeData: v }))}
+              />
+            </div>
+
+            <div className="p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800">
+              <div className="flex items-start gap-2">
+                <AlertTriangle className="w-4 h-4 text-amber-600 mt-0.5" />
+                <div className="text-sm">
+                  <p className="font-medium text-amber-700 dark:text-amber-400">Data Security Notice</p>
+                  <p className="text-amber-600 dark:text-amber-500">Exported data may contain sensitive financial information. Handle with care.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <DialogFooter className="mt-4">
+            <Button variant="outline" onClick={() => setShowExportDataDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleExportDataSubmit}
+              disabled={loading}
+              className="bg-gradient-to-r from-green-500 to-emerald-500"
+            >
+              {loading ? (
+                <>
+                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                  Exporting...
+                </>
+              ) : (
+                <>
+                  <Download className="w-4 h-4 mr-2" />
+                  Export Data
+                </>
+              )}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

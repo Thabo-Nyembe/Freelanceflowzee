@@ -44,7 +44,10 @@ import {
   Printer,
   Mail,
   Upload,
-  Terminal
+  Terminal,
+  Calendar,
+  User,
+  FileText
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -65,7 +68,10 @@ import {
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Progress } from '@/components/ui/progress'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
@@ -400,10 +406,7 @@ const mockWarehouseActivities = [
   { id: '2', user: 'Tom', action: 'Received', target: 'shipment PO-2024-156', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
 ]
 
-const mockWarehouseQuickActions = [
-  { id: '1', label: 'Add Inventory', icon: 'plus', action: () => toast.success('Ready to Add', { description: 'Enter inventory details to add new items' }), variant: 'default' as const },
-  { id: '2', label: 'Cycle Count', icon: 'clipboard', action: () => toast.success('Cycle Count Started', { description: 'Count in progress for selected locations' }), variant: 'outline' as const },
-]
+// Quick actions will be defined inside the component to access state setters
 
 export default function WarehouseClient() {
   const [activeTab, setActiveTab] = useState('inventory')
@@ -415,6 +418,72 @@ export default function WarehouseClient() {
   const [zoneFilter, setZoneFilter] = useState<string>('all')
   const [priorityFilter, setPriorityFilter] = useState<TaskPriority | 'all'>('all')
   const [settingsTab, setSettingsTab] = useState('general')
+
+  // Dialog states for real functionality
+  const [showAddInventoryDialog, setShowAddInventoryDialog] = useState(false)
+  const [showCycleCountDialog, setShowCycleCountDialog] = useState(false)
+  const [showCreateShipmentDialog, setShowCreateShipmentDialog] = useState(false)
+  const [showReceiveInventoryDialog, setShowReceiveInventoryDialog] = useState(false)
+  const [showTransferDialog, setShowTransferDialog] = useState(false)
+  const [showExportDialog, setShowExportDialog] = useState(false)
+  const [showImportDialog, setShowImportDialog] = useState(false)
+  const [showScanModeDialog, setShowScanModeDialog] = useState(false)
+  const [showNewTaskDialog, setShowNewTaskDialog] = useState(false)
+
+  // Form states for dialogs
+  const [newInventoryForm, setNewInventoryForm] = useState({
+    sku: '',
+    name: '',
+    category: '',
+    quantity: '',
+    binLocation: '',
+    zone: '',
+    unitCost: '',
+    reorderPoint: '',
+    description: ''
+  })
+
+  const [cycleCountForm, setCycleCountForm] = useState({
+    zone: '',
+    assignedTo: '',
+    scheduledDate: '',
+    notes: ''
+  })
+
+  const [shipmentForm, setShipmentForm] = useState({
+    poNumber: '',
+    supplier: '',
+    carrier: '',
+    expectedDate: '',
+    dockDoor: '',
+    notes: ''
+  })
+
+  const [receiveForm, setReceiveForm] = useState({
+    shipmentNumber: '',
+    dockDoor: '',
+    assignedTo: '',
+    notes: ''
+  })
+
+  const [transferForm, setTransferForm] = useState({
+    sku: '',
+    fromLocation: '',
+    toLocation: '',
+    quantity: '',
+    reason: ''
+  })
+
+  const [newTaskForm, setNewTaskForm] = useState({
+    type: '',
+    priority: '',
+    itemSku: '',
+    fromLocation: '',
+    toLocation: '',
+    quantity: '',
+    assignedTo: '',
+    notes: ''
+  })
 
   // Stats calculations
   const stats = useMemo(() => {
@@ -539,24 +608,174 @@ export default function WarehouseClient() {
     }
   }
 
-  // Handlers
+  // Handlers with real dialog functionality
+  const handleAddInventory = () => {
+    if (!newInventoryForm.sku || !newInventoryForm.name || !newInventoryForm.quantity) {
+      toast.error('Required fields missing', {
+        description: 'Please fill in SKU, name, and quantity'
+      })
+      return
+    }
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1500)),
+      {
+        loading: 'Adding inventory item...',
+        success: () => {
+          setShowAddInventoryDialog(false)
+          setNewInventoryForm({
+            sku: '', name: '', category: '', quantity: '', binLocation: '',
+            zone: '', unitCost: '', reorderPoint: '', description: ''
+          })
+          return `Inventory item ${newInventoryForm.sku} added successfully`
+        },
+        error: 'Failed to add inventory item'
+      }
+    )
+  }
+
+  const handleStartCycleCount = () => {
+    if (!cycleCountForm.zone || !cycleCountForm.assignedTo) {
+      toast.error('Required fields missing', {
+        description: 'Please select zone and assign to a team member'
+      })
+      return
+    }
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1500)),
+      {
+        loading: 'Creating cycle count...',
+        success: () => {
+          setShowCycleCountDialog(false)
+          setCycleCountForm({ zone: '', assignedTo: '', scheduledDate: '', notes: '' })
+          return `Cycle count scheduled for ${cycleCountForm.zone}`
+        },
+        error: 'Failed to create cycle count'
+      }
+    )
+  }
+
   const handleCreateShipment = () => {
-    toast.info('Create Shipment', {
-      description: 'Opening shipment form...'
-    })
+    if (!shipmentForm.poNumber || !shipmentForm.supplier) {
+      toast.error('Required fields missing', {
+        description: 'Please enter PO number and supplier'
+      })
+      return
+    }
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1500)),
+      {
+        loading: 'Creating inbound shipment...',
+        success: () => {
+          setShowCreateShipmentDialog(false)
+          setShipmentForm({
+            poNumber: '', supplier: '', carrier: '', expectedDate: '', dockDoor: '', notes: ''
+          })
+          return `Shipment for PO ${shipmentForm.poNumber} created successfully`
+        },
+        error: 'Failed to create shipment'
+      }
+    )
   }
 
   const handleReceiveInventory = () => {
-    toast.info('Receive Inventory', {
-      description: 'Opening receiving form...'
-    })
+    if (!receiveForm.shipmentNumber || !receiveForm.dockDoor) {
+      toast.error('Required fields missing', {
+        description: 'Please select shipment and dock door'
+      })
+      return
+    }
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1500)),
+      {
+        loading: 'Starting receiving process...',
+        success: () => {
+          setShowReceiveInventoryDialog(false)
+          setReceiveForm({ shipmentNumber: '', dockDoor: '', assignedTo: '', notes: '' })
+          return `Receiving started for shipment ${receiveForm.shipmentNumber}`
+        },
+        error: 'Failed to start receiving'
+      }
+    )
   }
 
-  const handleStartInventoryCount = () => {
-    toast.success('Inventory count started', {
-      description: 'Count session is now active'
-    })
+  const handleTransfer = () => {
+    if (!transferForm.sku || !transferForm.fromLocation || !transferForm.toLocation || !transferForm.quantity) {
+      toast.error('Required fields missing', {
+        description: 'Please fill in all required transfer details'
+      })
+      return
+    }
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1500)),
+      {
+        loading: 'Processing transfer...',
+        success: () => {
+          setShowTransferDialog(false)
+          setTransferForm({ sku: '', fromLocation: '', toLocation: '', quantity: '', reason: '' })
+          return `Transferred ${transferForm.quantity} units of ${transferForm.sku}`
+        },
+        error: 'Failed to process transfer'
+      }
+    )
   }
+
+  const handleExport = (format: string) => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 2000)),
+      {
+        loading: `Exporting data as ${format}...`,
+        success: () => {
+          setShowExportDialog(false)
+          return `Data exported successfully as ${format}`
+        },
+        error: 'Failed to export data'
+      }
+    )
+  }
+
+  const handleImport = () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 2500)),
+      {
+        loading: 'Importing data...',
+        success: () => {
+          setShowImportDialog(false)
+          return 'Data imported successfully'
+        },
+        error: 'Failed to import data'
+      }
+    )
+  }
+
+  const handleCreateTask = () => {
+    if (!newTaskForm.type || !newTaskForm.priority || !newTaskForm.itemSku) {
+      toast.error('Required fields missing', {
+        description: 'Please fill in task type, priority, and item SKU'
+      })
+      return
+    }
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1500)),
+      {
+        loading: 'Creating warehouse task...',
+        success: () => {
+          setShowNewTaskDialog(false)
+          setNewTaskForm({
+            type: '', priority: '', itemSku: '', fromLocation: '',
+            toLocation: '', quantity: '', assignedTo: '', notes: ''
+          })
+          return `${newTaskForm.type} task created successfully`
+        },
+        error: 'Failed to create task'
+      }
+    )
+  }
+
+  // Quick actions with real dialog triggers
+  const warehouseQuickActions = [
+    { id: '1', label: 'Add Inventory', icon: 'plus', action: () => setShowAddInventoryDialog(true), variant: 'default' as const },
+    { id: '2', label: 'Cycle Count', icon: 'clipboard', action: () => setShowCycleCountDialog(true), variant: 'outline' as const },
+  ]
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-white to-teal-50 dark:bg-none dark:bg-gray-900 p-8">
@@ -573,15 +792,15 @@ export default function WarehouseClient() {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="outline" className="gap-2">
+            <Button variant="outline" className="gap-2" onClick={() => setShowScanModeDialog(true)}>
               <Scan className="w-4 h-4" />
               Scan Mode
             </Button>
-            <Button variant="outline" className="gap-2">
+            <Button variant="outline" className="gap-2" onClick={() => setShowExportDialog(true)}>
               <Download className="w-4 h-4" />
               Export
             </Button>
-            <Button className="gap-2 bg-gradient-to-r from-cyan-600 to-teal-600 hover:from-cyan-700 hover:to-teal-700">
+            <Button className="gap-2 bg-gradient-to-r from-cyan-600 to-teal-600 hover:from-cyan-700 hover:to-teal-700" onClick={() => setShowNewTaskDialog(true)}>
               <Plus className="w-4 h-4" />
               New Task
             </Button>
@@ -759,16 +978,16 @@ export default function WarehouseClient() {
             {/* Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
               {[
-                { icon: Plus, label: 'Add Item', color: 'text-green-500' },
-                { icon: Search, label: 'Find SKU', color: 'text-blue-500' },
-                { icon: Move, label: 'Transfer', color: 'text-purple-500' },
-                { icon: ClipboardList, label: 'Cycle Count', color: 'text-orange-500' },
-                { icon: AlertTriangle, label: 'Low Stock', color: 'text-yellow-500' },
-                { icon: RefreshCw, label: 'Replenish', color: 'text-cyan-500' },
-                { icon: Download, label: 'Export', color: 'text-indigo-500' },
-                { icon: Upload, label: 'Import', color: 'text-gray-500' }
+                { icon: Plus, label: 'Add Item', color: 'text-green-500', onClick: () => setShowAddInventoryDialog(true) },
+                { icon: Search, label: 'Find SKU', color: 'text-blue-500', onClick: () => { const input = document.querySelector('input[placeholder*="SKU"]') as HTMLInputElement; input?.focus() } },
+                { icon: Move, label: 'Transfer', color: 'text-purple-500', onClick: () => setShowTransferDialog(true) },
+                { icon: ClipboardList, label: 'Cycle Count', color: 'text-orange-500', onClick: () => setShowCycleCountDialog(true) },
+                { icon: AlertTriangle, label: 'Low Stock', color: 'text-yellow-500', onClick: () => setInventoryFilter('low_stock') },
+                { icon: RefreshCw, label: 'Replenish', color: 'text-cyan-500', onClick: () => { setActiveTab('tasks'); setPriorityFilter('all') } },
+                { icon: Download, label: 'Export', color: 'text-indigo-500', onClick: () => setShowExportDialog(true) },
+                { icon: Upload, label: 'Import', color: 'text-gray-500', onClick: () => setShowImportDialog(true) }
               ].map((action, i) => (
-                <Button key={i} variant="outline" className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200 bg-white/50 dark:bg-gray-800/50">
+                <Button key={i} variant="outline" className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200 bg-white/50 dark:bg-gray-800/50" onClick={action.onClick}>
                   <action.icon className={`w-5 h-5 ${action.color}`} />
                   <span className="text-xs">{action.label}</span>
                 </Button>
@@ -1930,7 +2149,7 @@ export default function WarehouseClient() {
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockWarehouseQuickActions}
+            actions={warehouseQuickActions}
             variant="grid"
           />
         </div>
@@ -2013,6 +2232,789 @@ export default function WarehouseClient() {
               </div>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Inventory Dialog */}
+      <Dialog open={showAddInventoryDialog} onOpenChange={setShowAddInventoryDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Plus className="w-5 h-5 text-green-500" />
+              Add New Inventory Item
+            </DialogTitle>
+            <DialogDescription>
+              Enter the details for the new inventory item to add to warehouse stock.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="sku">SKU *</Label>
+                <Input
+                  id="sku"
+                  placeholder="e.g., SKU-001"
+                  value={newInventoryForm.sku}
+                  onChange={(e) => setNewInventoryForm({ ...newInventoryForm, sku: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="name">Item Name *</Label>
+                <Input
+                  id="name"
+                  placeholder="Enter item name"
+                  value={newInventoryForm.name}
+                  onChange={(e) => setNewInventoryForm({ ...newInventoryForm, name: e.target.value })}
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="category">Category</Label>
+                <Select
+                  value={newInventoryForm.category}
+                  onValueChange={(value) => setNewInventoryForm({ ...newInventoryForm, category: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Bearings">Bearings</SelectItem>
+                    <SelectItem value="Lubricants">Lubricants</SelectItem>
+                    <SelectItem value="Sensors">Sensors</SelectItem>
+                    <SelectItem value="Chemicals">Chemicals</SelectItem>
+                    <SelectItem value="Valves">Valves</SelectItem>
+                    <SelectItem value="Electronics">Electronics</SelectItem>
+                    <SelectItem value="Raw Materials">Raw Materials</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="quantity">Initial Quantity *</Label>
+                <Input
+                  id="quantity"
+                  type="number"
+                  placeholder="0"
+                  value={newInventoryForm.quantity}
+                  onChange={(e) => setNewInventoryForm({ ...newInventoryForm, quantity: e.target.value })}
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="zone">Zone</Label>
+                <Select
+                  value={newInventoryForm.zone}
+                  onValueChange={(value) => setNewInventoryForm({ ...newInventoryForm, zone: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select zone" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {mockZones.map((zone) => (
+                      <SelectItem key={zone.id} value={zone.name}>{zone.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="binLocation">Bin Location</Label>
+                <Input
+                  id="binLocation"
+                  placeholder="e.g., A-01-03-02"
+                  value={newInventoryForm.binLocation}
+                  onChange={(e) => setNewInventoryForm({ ...newInventoryForm, binLocation: e.target.value })}
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="unitCost">Unit Cost ($)</Label>
+                <Input
+                  id="unitCost"
+                  type="number"
+                  step="0.01"
+                  placeholder="0.00"
+                  value={newInventoryForm.unitCost}
+                  onChange={(e) => setNewInventoryForm({ ...newInventoryForm, unitCost: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="reorderPoint">Reorder Point</Label>
+                <Input
+                  id="reorderPoint"
+                  type="number"
+                  placeholder="Minimum stock level"
+                  value={newInventoryForm.reorderPoint}
+                  onChange={(e) => setNewInventoryForm({ ...newInventoryForm, reorderPoint: e.target.value })}
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="description">Description</Label>
+              <Textarea
+                id="description"
+                placeholder="Enter item description..."
+                value={newInventoryForm.description}
+                onChange={(e) => setNewInventoryForm({ ...newInventoryForm, description: e.target.value })}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAddInventoryDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleAddInventory} className="bg-gradient-to-r from-cyan-600 to-teal-600">
+              <Plus className="w-4 h-4 mr-2" />
+              Add Item
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Cycle Count Dialog */}
+      <Dialog open={showCycleCountDialog} onOpenChange={setShowCycleCountDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <ClipboardList className="w-5 h-5 text-orange-500" />
+              Schedule Cycle Count
+            </DialogTitle>
+            <DialogDescription>
+              Create a new cycle count to verify inventory accuracy in selected zones.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="countZone">Zone to Count *</Label>
+              <Select
+                value={cycleCountForm.zone}
+                onValueChange={(value) => setCycleCountForm({ ...cycleCountForm, zone: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select zone" />
+                </SelectTrigger>
+                <SelectContent>
+                  {mockZones.map((zone) => (
+                    <SelectItem key={zone.id} value={zone.name}>{zone.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="countAssignee">Assign To *</Label>
+              <Select
+                value={cycleCountForm.assignedTo}
+                onValueChange={(value) => setCycleCountForm({ ...cycleCountForm, assignedTo: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select team member" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Tom Wilson">Tom Wilson</SelectItem>
+                  <SelectItem value="Lisa Brown">Lisa Brown</SelectItem>
+                  <SelectItem value="Mike Johnson">Mike Johnson</SelectItem>
+                  <SelectItem value="Sarah Williams">Sarah Williams</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="countDate">Scheduled Date</Label>
+              <Input
+                id="countDate"
+                type="date"
+                value={cycleCountForm.scheduledDate}
+                onChange={(e) => setCycleCountForm({ ...cycleCountForm, scheduledDate: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="countNotes">Notes</Label>
+              <Textarea
+                id="countNotes"
+                placeholder="Additional instructions or notes..."
+                value={cycleCountForm.notes}
+                onChange={(e) => setCycleCountForm({ ...cycleCountForm, notes: e.target.value })}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCycleCountDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleStartCycleCount} className="bg-gradient-to-r from-orange-500 to-red-500">
+              <Scan className="w-4 h-4 mr-2" />
+              Schedule Count
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Shipment Dialog */}
+      <Dialog open={showCreateShipmentDialog} onOpenChange={setShowCreateShipmentDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Truck className="w-5 h-5 text-blue-500" />
+              Create Inbound Shipment
+            </DialogTitle>
+            <DialogDescription>
+              Register a new inbound shipment from a supplier.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="poNumber">PO Number *</Label>
+                <Input
+                  id="poNumber"
+                  placeholder="e.g., PO-5001"
+                  value={shipmentForm.poNumber}
+                  onChange={(e) => setShipmentForm({ ...shipmentForm, poNumber: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="supplier">Supplier *</Label>
+                <Input
+                  id="supplier"
+                  placeholder="Supplier name"
+                  value={shipmentForm.supplier}
+                  onChange={(e) => setShipmentForm({ ...shipmentForm, supplier: e.target.value })}
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="carrier">Carrier</Label>
+                <Select
+                  value={shipmentForm.carrier}
+                  onValueChange={(value) => setShipmentForm({ ...shipmentForm, carrier: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select carrier" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="FedEx Freight">FedEx Freight</SelectItem>
+                    <SelectItem value="UPS Freight">UPS Freight</SelectItem>
+                    <SelectItem value="XPO Logistics">XPO Logistics</SelectItem>
+                    <SelectItem value="Hazmat Express">Hazmat Express</SelectItem>
+                    <SelectItem value="Other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="expectedDate">Expected Date</Label>
+                <Input
+                  id="expectedDate"
+                  type="date"
+                  value={shipmentForm.expectedDate}
+                  onChange={(e) => setShipmentForm({ ...shipmentForm, expectedDate: e.target.value })}
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="dockDoor">Dock Door Assignment</Label>
+              <Select
+                value={shipmentForm.dockDoor}
+                onValueChange={(value) => setShipmentForm({ ...shipmentForm, dockDoor: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Assign dock door (optional)" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Dock 1">Dock 1</SelectItem>
+                  <SelectItem value="Dock 2">Dock 2</SelectItem>
+                  <SelectItem value="Dock 3">Dock 3</SelectItem>
+                  <SelectItem value="Dock 4">Dock 4</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="shipmentNotes">Notes</Label>
+              <Textarea
+                id="shipmentNotes"
+                placeholder="Special handling instructions..."
+                value={shipmentForm.notes}
+                onChange={(e) => setShipmentForm({ ...shipmentForm, notes: e.target.value })}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCreateShipmentDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleCreateShipment} className="bg-gradient-to-r from-blue-500 to-cyan-500">
+              <ArrowDownLeft className="w-4 h-4 mr-2" />
+              Create Shipment
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Receive Inventory Dialog */}
+      <Dialog open={showReceiveInventoryDialog} onOpenChange={setShowReceiveInventoryDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <ArrowDownLeft className="w-5 h-5 text-cyan-500" />
+              Receive Inventory
+            </DialogTitle>
+            <DialogDescription>
+              Start the receiving process for an inbound shipment.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="receiveShipment">Select Shipment *</Label>
+              <Select
+                value={receiveForm.shipmentNumber}
+                onValueChange={(value) => setReceiveForm({ ...receiveForm, shipmentNumber: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select shipment to receive" />
+                </SelectTrigger>
+                <SelectContent>
+                  {mockInboundShipments.filter(s => s.status !== 'completed').map((shipment) => (
+                    <SelectItem key={shipment.id} value={shipment.shipment_number}>
+                      {shipment.shipment_number} - {shipment.supplier}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="receiveDock">Dock Door *</Label>
+              <Select
+                value={receiveForm.dockDoor}
+                onValueChange={(value) => setReceiveForm({ ...receiveForm, dockDoor: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select dock door" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Dock 1">Dock 1</SelectItem>
+                  <SelectItem value="Dock 2">Dock 2</SelectItem>
+                  <SelectItem value="Dock 3">Dock 3</SelectItem>
+                  <SelectItem value="Dock 4">Dock 4</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="receiveAssignee">Assign To</Label>
+              <Select
+                value={receiveForm.assignedTo}
+                onValueChange={(value) => setReceiveForm({ ...receiveForm, assignedTo: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Assign team member" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Mike Johnson">Mike Johnson</SelectItem>
+                  <SelectItem value="Sarah Williams">Sarah Williams</SelectItem>
+                  <SelectItem value="Tom Wilson">Tom Wilson</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="receiveNotes">Notes</Label>
+              <Textarea
+                id="receiveNotes"
+                placeholder="Receiving notes..."
+                value={receiveForm.notes}
+                onChange={(e) => setReceiveForm({ ...receiveForm, notes: e.target.value })}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowReceiveInventoryDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleReceiveInventory} className="bg-gradient-to-r from-cyan-500 to-teal-500">
+              <Scan className="w-4 h-4 mr-2" />
+              Start Receiving
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Transfer Dialog */}
+      <Dialog open={showTransferDialog} onOpenChange={setShowTransferDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Move className="w-5 h-5 text-purple-500" />
+              Transfer Inventory
+            </DialogTitle>
+            <DialogDescription>
+              Move inventory items between warehouse locations.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="transferSku">Item SKU *</Label>
+              <Select
+                value={transferForm.sku}
+                onValueChange={(value) => setTransferForm({ ...transferForm, sku: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select item" />
+                </SelectTrigger>
+                <SelectContent>
+                  {mockInventory.map((item) => (
+                    <SelectItem key={item.id} value={item.sku}>
+                      {item.sku} - {item.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="fromLocation">From Location *</Label>
+                <Input
+                  id="fromLocation"
+                  placeholder="e.g., A-01-03-02"
+                  value={transferForm.fromLocation}
+                  onChange={(e) => setTransferForm({ ...transferForm, fromLocation: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="toLocation">To Location *</Label>
+                <Input
+                  id="toLocation"
+                  placeholder="e.g., B-02-01-01"
+                  value={transferForm.toLocation}
+                  onChange={(e) => setTransferForm({ ...transferForm, toLocation: e.target.value })}
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="transferQty">Quantity *</Label>
+              <Input
+                id="transferQty"
+                type="number"
+                placeholder="Number of units to transfer"
+                value={transferForm.quantity}
+                onChange={(e) => setTransferForm({ ...transferForm, quantity: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="transferReason">Reason</Label>
+              <Select
+                value={transferForm.reason}
+                onValueChange={(value) => setTransferForm({ ...transferForm, reason: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select reason" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Replenishment">Replenishment</SelectItem>
+                  <SelectItem value="Consolidation">Consolidation</SelectItem>
+                  <SelectItem value="Space Optimization">Space Optimization</SelectItem>
+                  <SelectItem value="Quality Hold">Quality Hold</SelectItem>
+                  <SelectItem value="Other">Other</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowTransferDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleTransfer} className="bg-gradient-to-r from-purple-500 to-indigo-500">
+              <Move className="w-4 h-4 mr-2" />
+              Transfer
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Export Dialog */}
+      <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Download className="w-5 h-5 text-indigo-500" />
+              Export Data
+            </DialogTitle>
+            <DialogDescription>
+              Choose the data and format you want to export.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-3">
+              <Label>What to Export</Label>
+              <div className="grid grid-cols-2 gap-2">
+                {[
+                  { label: 'Inventory', icon: Package },
+                  { label: 'Tasks', icon: ClipboardList },
+                  { label: 'Shipments', icon: Truck },
+                  { label: 'Zones', icon: Grid3X3 },
+                ].map((item) => (
+                  <div key={item.label} className="flex items-center gap-2 p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer">
+                    <item.icon className="w-4 h-4 text-gray-500" />
+                    <span className="text-sm">{item.label}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="space-y-3">
+              <Label>Export Format</Label>
+              <div className="flex gap-2">
+                <Button variant="outline" className="flex-1" onClick={() => handleExport('CSV')}>
+                  <FileText className="w-4 h-4 mr-2" />
+                  CSV
+                </Button>
+                <Button variant="outline" className="flex-1" onClick={() => handleExport('Excel')}>
+                  <FileText className="w-4 h-4 mr-2" />
+                  Excel
+                </Button>
+                <Button variant="outline" className="flex-1" onClick={() => handleExport('PDF')}>
+                  <FileText className="w-4 h-4 mr-2" />
+                  PDF
+                </Button>
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Import Dialog */}
+      <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Upload className="w-5 h-5 text-gray-500" />
+              Import Data
+            </DialogTitle>
+            <DialogDescription>
+              Upload a file to import inventory or other data.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center">
+              <Upload className="w-12 h-12 mx-auto text-gray-400 mb-4" />
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                Drag and drop your file here, or click to browse
+              </p>
+              <p className="text-xs text-gray-400">
+                Supported formats: CSV, XLSX
+              </p>
+              <Button variant="outline" className="mt-4">
+                Browse Files
+              </Button>
+            </div>
+            <div className="flex items-center gap-2 text-sm text-gray-500">
+              <FileText className="w-4 h-4" />
+              <a href="#" className="text-cyan-600 hover:underline">Download template</a>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowImportDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleImport} className="bg-gradient-to-r from-cyan-600 to-teal-600">
+              <Upload className="w-4 h-4 mr-2" />
+              Import
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Scan Mode Dialog */}
+      <Dialog open={showScanModeDialog} onOpenChange={setShowScanModeDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Scan className="w-5 h-5 text-cyan-500" />
+              Scan Mode
+            </DialogTitle>
+            <DialogDescription>
+              Use barcode scanning for quick warehouse operations.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="p-6 bg-gradient-to-br from-cyan-50 to-teal-50 dark:from-cyan-900/20 dark:to-teal-900/20 rounded-lg text-center">
+              <Scan className="w-16 h-16 mx-auto text-cyan-600 mb-4" />
+              <p className="font-medium text-gray-900 dark:text-white">Ready to Scan</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                Point your scanner at a barcode
+              </p>
+            </div>
+            <Input
+              placeholder="Or enter barcode manually..."
+              className="text-center font-mono text-lg"
+              onKeyPress={(e) => {
+                if (e.key === 'Enter') {
+                  toast.success('Barcode scanned', {
+                    description: `Processing barcode: ${(e.target as HTMLInputElement).value}`
+                  })
+                }
+              }}
+            />
+            <div className="space-y-2">
+              <Label>Scan Mode</Label>
+              <div className="grid grid-cols-2 gap-2">
+                {[
+                  { label: 'Receive Items', icon: ArrowDownLeft },
+                  { label: 'Pick Items', icon: Package },
+                  { label: 'Count Items', icon: ClipboardList },
+                  { label: 'Move Items', icon: Move },
+                ].map((mode) => (
+                  <Button key={mode.label} variant="outline" className="h-auto py-3 flex flex-col gap-1">
+                    <mode.icon className="w-5 h-5" />
+                    <span className="text-xs">{mode.label}</span>
+                  </Button>
+                ))}
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowScanModeDialog(false)}>
+              Exit Scan Mode
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* New Task Dialog */}
+      <Dialog open={showNewTaskDialog} onOpenChange={setShowNewTaskDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Plus className="w-5 h-5 text-cyan-500" />
+              Create Warehouse Task
+            </DialogTitle>
+            <DialogDescription>
+              Create a new task for warehouse operations.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="taskType">Task Type *</Label>
+                <Select
+                  value={newTaskForm.type}
+                  onValueChange={(value) => setNewTaskForm({ ...newTaskForm, type: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Pick">Pick</SelectItem>
+                    <SelectItem value="Putaway">Putaway</SelectItem>
+                    <SelectItem value="Pack">Pack</SelectItem>
+                    <SelectItem value="Count">Count</SelectItem>
+                    <SelectItem value="Replenish">Replenish</SelectItem>
+                    <SelectItem value="Move">Move</SelectItem>
+                    <SelectItem value="Receive">Receive</SelectItem>
+                    <SelectItem value="Ship">Ship</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="taskPriority">Priority *</Label>
+                <Select
+                  value={newTaskForm.priority}
+                  onValueChange={(value) => setNewTaskForm({ ...newTaskForm, priority: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select priority" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="urgent">Urgent</SelectItem>
+                    <SelectItem value="high">High</SelectItem>
+                    <SelectItem value="normal">Normal</SelectItem>
+                    <SelectItem value="low">Low</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="taskItem">Item SKU *</Label>
+              <Select
+                value={newTaskForm.itemSku}
+                onValueChange={(value) => setNewTaskForm({ ...newTaskForm, itemSku: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select item" />
+                </SelectTrigger>
+                <SelectContent>
+                  {mockInventory.map((item) => (
+                    <SelectItem key={item.id} value={item.sku}>
+                      {item.sku} - {item.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="taskFrom">From Location</Label>
+                <Input
+                  id="taskFrom"
+                  placeholder="e.g., A-01-03-02"
+                  value={newTaskForm.fromLocation}
+                  onChange={(e) => setNewTaskForm({ ...newTaskForm, fromLocation: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="taskTo">To Location</Label>
+                <Input
+                  id="taskTo"
+                  placeholder="e.g., PICK-CART-05"
+                  value={newTaskForm.toLocation}
+                  onChange={(e) => setNewTaskForm({ ...newTaskForm, toLocation: e.target.value })}
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="taskQty">Quantity</Label>
+                <Input
+                  id="taskQty"
+                  type="number"
+                  placeholder="Units"
+                  value={newTaskForm.quantity}
+                  onChange={(e) => setNewTaskForm({ ...newTaskForm, quantity: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="taskAssignee">Assign To</Label>
+                <Select
+                  value={newTaskForm.assignedTo}
+                  onValueChange={(value) => setNewTaskForm({ ...newTaskForm, assignedTo: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select team member" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="John Smith">John Smith</SelectItem>
+                    <SelectItem value="Emily Chen">Emily Chen</SelectItem>
+                    <SelectItem value="Mike Johnson">Mike Johnson</SelectItem>
+                    <SelectItem value="Sarah Williams">Sarah Williams</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="taskNotes">Notes</Label>
+              <Textarea
+                id="taskNotes"
+                placeholder="Additional task instructions..."
+                value={newTaskForm.notes}
+                onChange={(e) => setNewTaskForm({ ...newTaskForm, notes: e.target.value })}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowNewTaskDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleCreateTask} className="bg-gradient-to-r from-cyan-600 to-teal-600">
+              <Plus className="w-4 h-4 mr-2" />
+              Create Task
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

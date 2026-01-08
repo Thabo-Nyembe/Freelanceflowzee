@@ -13,11 +13,25 @@ import {
 
 
 import * as React from 'react'
-import { useMemo } from 'react'
+import { useMemo, useState, useCallback } from 'react'
 import dynamic from 'next/dynamic'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Checkbox } from '@/components/ui/checkbox'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 
 // A+++ UTILITIES
 import { CardSkeleton, DashboardSkeleton } from '@/components/ui/loading-skeleton'
@@ -101,7 +115,14 @@ import {
   Zap,
   Star,
   Download,
-  Share2
+  Share2,
+  Plus,
+  FileText,
+  FileSpreadsheet,
+  FileJson,
+  Database,
+  Save,
+  Loader2
 } from 'lucide-react'
 
 const logger = createFeatureLogger('Advanced-Micro-Features')
@@ -134,20 +155,7 @@ const advancedMicroFeaturesActivities = [
   { id: '3', user: 'System', action: 'generated', target: 'weekly report', timestamp: '1h ago', type: 'info' as const },
 ]
 
-const advancedMicroFeaturesQuickActions = [
-  { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 800)),
-    { loading: 'Creating new item...', success: 'New item created successfully', error: 'Failed to create item' }
-  ) },
-  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1000)),
-    { loading: 'Exporting data...', success: 'Data exported successfully', error: 'Failed to export data' }
-  ) },
-  { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 500)),
-    { loading: 'Opening settings...', success: 'Settings panel opened', error: 'Failed to open settings' }
-  ) },
-]
+// Quick actions will be defined inside the component with proper dialog handlers
 
 export default function AdvancedMicroFeaturesClient() {
   // A+++ STATE MANAGEMENT
@@ -157,6 +165,160 @@ export default function AdvancedMicroFeaturesClient() {
   const [isLoading, setIsLoading] = React.useState(true)
   const [error, setError] = React.useState<string | null>(null)
   const [activeTab, setActiveTab] = React.useState('widgets')
+
+  // Dialog states for quick actions
+  const [newItemDialogOpen, setNewItemDialogOpen] = useState(false)
+  const [exportDialogOpen, setExportDialogOpen] = useState(false)
+  const [settingsDialogOpen, setSettingsDialogOpen] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // New Item form state
+  const [newItemForm, setNewItemForm] = useState({
+    name: '',
+    type: 'task',
+    description: '',
+    priority: 'medium',
+    category: '',
+    tags: ''
+  })
+
+  // Export form state
+  const [exportForm, setExportForm] = useState({
+    format: 'csv',
+    includeHeaders: true,
+    dateRange: 'all',
+    selectedColumns: ['all'],
+    filename: ''
+  })
+
+  // Settings form state
+  const [settingsForm, setSettingsForm] = useState({
+    theme: 'system',
+    language: 'en',
+    notifications: true,
+    autoSave: true,
+    compactMode: false,
+    animationsEnabled: true
+  })
+
+  // Handler for creating new item
+  const handleCreateNewItem = useCallback(async () => {
+    if (!newItemForm.name.trim()) {
+      toast.error('Please enter a name for the new item')
+      return
+    }
+
+    setIsSubmitting(true)
+    logger.info('Creating new item', newItemForm)
+
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1200))
+
+      toast.success('Item created successfully', {
+        description: `"${newItemForm.name}" has been added as a ${newItemForm.type}`
+      })
+
+      setNewItemDialogOpen(false)
+      setNewItemForm({
+        name: '',
+        type: 'task',
+        description: '',
+        priority: 'medium',
+        category: '',
+        tags: ''
+      })
+      announce('New item created successfully', 'polite')
+    } catch (err) {
+      toast.error('Failed to create item', {
+        description: 'Please try again later'
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }, [newItemForm, announce])
+
+  // Handler for exporting data
+  const handleExportData = useCallback(async () => {
+    setIsSubmitting(true)
+    logger.info('Exporting data', exportForm)
+
+    try {
+      // Simulate export process
+      await new Promise(resolve => setTimeout(resolve, 1500))
+
+      const filename = exportForm.filename || `export-${new Date().toISOString().split('T')[0]}`
+
+      toast.success('Export completed', {
+        description: `${filename}.${exportForm.format} has been downloaded`
+      })
+
+      setExportDialogOpen(false)
+      setExportForm({
+        format: 'csv',
+        includeHeaders: true,
+        dateRange: 'all',
+        selectedColumns: ['all'],
+        filename: ''
+      })
+      announce('Data exported successfully', 'polite')
+    } catch (err) {
+      toast.error('Export failed', {
+        description: 'Please try again later'
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }, [exportForm, announce])
+
+  // Handler for saving settings
+  const handleSaveSettings = useCallback(async () => {
+    setIsSubmitting(true)
+    logger.info('Saving settings', settingsForm)
+
+    try {
+      // Simulate saving settings
+      await new Promise(resolve => setTimeout(resolve, 800))
+
+      toast.success('Settings saved', {
+        description: 'Your preferences have been updated'
+      })
+
+      setSettingsDialogOpen(false)
+      announce('Settings saved successfully', 'polite')
+    } catch (err) {
+      toast.error('Failed to save settings', {
+        description: 'Please try again later'
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }, [settingsForm, announce])
+
+  // Quick actions with dialog openers
+  const advancedMicroFeaturesQuickActions = useMemo(() => [
+    {
+      id: '1',
+      label: 'New Item',
+      icon: 'Plus',
+      shortcut: 'N',
+      action: () => setNewItemDialogOpen(true)
+    },
+    {
+      id: '2',
+      label: 'Export',
+      icon: 'Download',
+      shortcut: 'E',
+      action: () => setExportDialogOpen(true)
+    },
+    {
+      id: '3',
+      label: 'Settings',
+      icon: 'Settings',
+      shortcut: 'S',
+      action: () => setSettingsDialogOpen(true)
+    },
+  ], [])
 
   // A+++ LOAD ADVANCED MICRO FEATURES DATA
   React.useEffect(() => {
@@ -747,6 +909,414 @@ export default function AdvancedMicroFeaturesClient() {
           </Tabs>
         </AnimatedElement>
       </div>
+
+      {/* New Item Dialog */}
+      <Dialog open={newItemDialogOpen} onOpenChange={setNewItemDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Plus className="h-5 w-5 text-primary" />
+              Create New Item
+            </DialogTitle>
+            <DialogDescription>
+              Add a new item to your workspace. Fill in the details below.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="item-name">Item Name *</Label>
+              <Input
+                id="item-name"
+                placeholder="Enter item name..."
+                value={newItemForm.name}
+                onChange={(e) => setNewItemForm(prev => ({ ...prev, name: e.target.value }))}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="item-type">Type</Label>
+                <Select
+                  value={newItemForm.type}
+                  onValueChange={(value) => setNewItemForm(prev => ({ ...prev, type: value }))}
+                >
+                  <SelectTrigger id="item-type">
+                    <SelectValue placeholder="Select type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="task">Task</SelectItem>
+                    <SelectItem value="project">Project</SelectItem>
+                    <SelectItem value="note">Note</SelectItem>
+                    <SelectItem value="document">Document</SelectItem>
+                    <SelectItem value="milestone">Milestone</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="item-priority">Priority</Label>
+                <Select
+                  value={newItemForm.priority}
+                  onValueChange={(value) => setNewItemForm(prev => ({ ...prev, priority: value }))}
+                >
+                  <SelectTrigger id="item-priority">
+                    <SelectValue placeholder="Select priority" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="low">Low</SelectItem>
+                    <SelectItem value="medium">Medium</SelectItem>
+                    <SelectItem value="high">High</SelectItem>
+                    <SelectItem value="urgent">Urgent</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="item-category">Category</Label>
+              <Input
+                id="item-category"
+                placeholder="e.g., Marketing, Development..."
+                value={newItemForm.category}
+                onChange={(e) => setNewItemForm(prev => ({ ...prev, category: e.target.value }))}
+              />
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="item-description">Description</Label>
+              <Textarea
+                id="item-description"
+                placeholder="Add a description..."
+                rows={3}
+                value={newItemForm.description}
+                onChange={(e) => setNewItemForm(prev => ({ ...prev, description: e.target.value }))}
+              />
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="item-tags">Tags (comma-separated)</Label>
+              <Input
+                id="item-tags"
+                placeholder="e.g., important, review, q1..."
+                value={newItemForm.tags}
+                onChange={(e) => setNewItemForm(prev => ({ ...prev, tags: e.target.value }))}
+              />
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setNewItemDialogOpen(false)}
+              disabled={isSubmitting}
+            >
+              Cancel
+            </Button>
+            <Button onClick={handleCreateNewItem} disabled={isSubmitting}>
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Creating...
+                </>
+              ) : (
+                <>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Create Item
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Export Dialog */}
+      <Dialog open={exportDialogOpen} onOpenChange={setExportDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Download className="h-5 w-5 text-primary" />
+              Export Data
+            </DialogTitle>
+            <DialogDescription>
+              Configure your export settings and download your data.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="export-format">Export Format</Label>
+              <Select
+                value={exportForm.format}
+                onValueChange={(value) => setExportForm(prev => ({ ...prev, format: value }))}
+              >
+                <SelectTrigger id="export-format">
+                  <SelectValue placeholder="Select format" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="csv">
+                    <div className="flex items-center gap-2">
+                      <FileSpreadsheet className="h-4 w-4" />
+                      CSV (Spreadsheet)
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="json">
+                    <div className="flex items-center gap-2">
+                      <FileJson className="h-4 w-4" />
+                      JSON (Structured Data)
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="pdf">
+                    <div className="flex items-center gap-2">
+                      <FileText className="h-4 w-4" />
+                      PDF (Report)
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="xlsx">
+                    <div className="flex items-center gap-2">
+                      <FileSpreadsheet className="h-4 w-4" />
+                      Excel (XLSX)
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="export-date-range">Date Range</Label>
+              <Select
+                value={exportForm.dateRange}
+                onValueChange={(value) => setExportForm(prev => ({ ...prev, dateRange: value }))}
+              >
+                <SelectTrigger id="export-date-range">
+                  <SelectValue placeholder="Select date range" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Time</SelectItem>
+                  <SelectItem value="today">Today</SelectItem>
+                  <SelectItem value="week">Last 7 Days</SelectItem>
+                  <SelectItem value="month">Last 30 Days</SelectItem>
+                  <SelectItem value="quarter">Last Quarter</SelectItem>
+                  <SelectItem value="year">Last Year</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="export-filename">Filename (optional)</Label>
+              <Input
+                id="export-filename"
+                placeholder="e.g., my-data-export"
+                value={exportForm.filename}
+                onChange={(e) => setExportForm(prev => ({ ...prev, filename: e.target.value }))}
+              />
+              <p className="text-xs text-muted-foreground">
+                Leave empty for auto-generated filename with date
+              </p>
+            </div>
+
+            <div className="space-y-3">
+              <Label>Options</Label>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="include-headers"
+                  checked={exportForm.includeHeaders}
+                  onCheckedChange={(checked) =>
+                    setExportForm(prev => ({ ...prev, includeHeaders: checked === true }))
+                  }
+                />
+                <Label htmlFor="include-headers" className="font-normal cursor-pointer">
+                  Include column headers
+                </Label>
+              </div>
+            </div>
+
+            <div className="rounded-lg bg-muted/50 p-3">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Database className="h-4 w-4" />
+                <span>Estimated export size: ~2.4 MB</span>
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setExportDialogOpen(false)}
+              disabled={isSubmitting}
+            >
+              Cancel
+            </Button>
+            <Button onClick={handleExportData} disabled={isSubmitting}>
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Exporting...
+                </>
+              ) : (
+                <>
+                  <Download className="mr-2 h-4 w-4" />
+                  Export Data
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Settings Dialog */}
+      <Dialog open={settingsDialogOpen} onOpenChange={setSettingsDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Settings className="h-5 w-5 text-primary" />
+              Quick Settings
+            </DialogTitle>
+            <DialogDescription>
+              Customize your workspace preferences.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="settings-theme">Theme</Label>
+                <Select
+                  value={settingsForm.theme}
+                  onValueChange={(value) => setSettingsForm(prev => ({ ...prev, theme: value }))}
+                >
+                  <SelectTrigger id="settings-theme">
+                    <SelectValue placeholder="Select theme" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="light">Light</SelectItem>
+                    <SelectItem value="dark">Dark</SelectItem>
+                    <SelectItem value="system">System Default</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="settings-language">Language</Label>
+                <Select
+                  value={settingsForm.language}
+                  onValueChange={(value) => setSettingsForm(prev => ({ ...prev, language: value }))}
+                >
+                  <SelectTrigger id="settings-language">
+                    <SelectValue placeholder="Select language" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="en">English</SelectItem>
+                    <SelectItem value="es">Spanish</SelectItem>
+                    <SelectItem value="fr">French</SelectItem>
+                    <SelectItem value="de">German</SelectItem>
+                    <SelectItem value="ja">Japanese</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="space-y-4 pt-2">
+              <Label className="text-base">Preferences</Label>
+
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label htmlFor="notifications" className="font-normal cursor-pointer">
+                    Enable Notifications
+                  </Label>
+                  <p className="text-xs text-muted-foreground">
+                    Receive alerts and updates
+                  </p>
+                </div>
+                <Checkbox
+                  id="notifications"
+                  checked={settingsForm.notifications}
+                  onCheckedChange={(checked) =>
+                    setSettingsForm(prev => ({ ...prev, notifications: checked === true }))
+                  }
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label htmlFor="auto-save" className="font-normal cursor-pointer">
+                    Auto-Save
+                  </Label>
+                  <p className="text-xs text-muted-foreground">
+                    Automatically save changes
+                  </p>
+                </div>
+                <Checkbox
+                  id="auto-save"
+                  checked={settingsForm.autoSave}
+                  onCheckedChange={(checked) =>
+                    setSettingsForm(prev => ({ ...prev, autoSave: checked === true }))
+                  }
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label htmlFor="compact-mode" className="font-normal cursor-pointer">
+                    Compact Mode
+                  </Label>
+                  <p className="text-xs text-muted-foreground">
+                    Reduce spacing for more content
+                  </p>
+                </div>
+                <Checkbox
+                  id="compact-mode"
+                  checked={settingsForm.compactMode}
+                  onCheckedChange={(checked) =>
+                    setSettingsForm(prev => ({ ...prev, compactMode: checked === true }))
+                  }
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label htmlFor="animations" className="font-normal cursor-pointer">
+                    Enable Animations
+                  </Label>
+                  <p className="text-xs text-muted-foreground">
+                    Show smooth transitions
+                  </p>
+                </div>
+                <Checkbox
+                  id="animations"
+                  checked={settingsForm.animationsEnabled}
+                  onCheckedChange={(checked) =>
+                    setSettingsForm(prev => ({ ...prev, animationsEnabled: checked === true }))
+                  }
+                />
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setSettingsDialogOpen(false)}
+              disabled={isSubmitting}
+            >
+              Cancel
+            </Button>
+            <Button onClick={handleSaveSettings} disabled={isSubmitting}>
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <Save className="mr-2 h-4 w-4" />
+                  Save Settings
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

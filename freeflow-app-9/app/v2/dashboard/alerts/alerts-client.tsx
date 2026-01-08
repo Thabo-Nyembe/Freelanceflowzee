@@ -346,24 +346,7 @@ const mockAlertsActivities = [
   { id: '3', user: 'Escalation Mgr', action: 'resolved', target: 'P1 incident #4521', timestamp: '1h ago', type: 'success' as const },
 ]
 
-const mockAlertsQuickActions = [
-  { id: '1', label: 'Acknowledge', icon: 'Check', shortcut: 'A', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1000)),
-    { loading: 'Acknowledging alerts...', success: 'Alerts acknowledged', error: 'Failed to acknowledge alerts' }
-  ) },
-  { id: '2', label: 'Escalate', icon: 'ArrowUp', shortcut: 'E', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1500)),
-    { loading: 'Escalating to on-call team...', success: 'Alert escalated successfully', error: 'Failed to escalate alert' }
-  ) },
-  { id: '3', label: 'Silence', icon: 'BellOff', shortcut: 'S', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 800)),
-    { loading: 'Silencing alerts...', success: 'Alerts silenced', error: 'Failed to silence alerts' }
-  ) },
-  { id: '4', label: 'Create Rule', icon: 'Plus', shortcut: 'R', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1200)),
-    { loading: 'Opening rule editor...', success: 'Rule editor ready', error: 'Failed to open rule editor' }
-  ) },
-]
+// Quick actions defined inside component to access state setters
 
 export default function AlertsClient() {
   const [activeTab, setActiveTab] = useState('alerts')
@@ -373,6 +356,20 @@ export default function AlertsClient() {
   const [selectedAlert, setSelectedAlert] = useState<Alert | null>(null)
   const [settingsTab, setSettingsTab] = useState('general')
   const [showCreateDialog, setShowCreateDialog] = useState(false)
+
+  // Quick action dialogs
+  const [showAcknowledgeDialog, setShowAcknowledgeDialog] = useState(false)
+  const [showEscalateDialog, setShowEscalateDialog] = useState(false)
+  const [showSilenceDialog, setShowSilenceDialog] = useState(false)
+  const [showCreateRuleDialog, setShowCreateRuleDialog] = useState(false)
+
+  // Quick actions with dialog triggers
+  const alertsQuickActions = [
+    { id: '1', label: 'Acknowledge', icon: 'Check', shortcut: 'A', action: () => setShowAcknowledgeDialog(true) },
+    { id: '2', label: 'Escalate', icon: 'ArrowUp', shortcut: 'E', action: () => setShowEscalateDialog(true) },
+    { id: '3', label: 'Silence', icon: 'BellOff', shortcut: 'S', action: () => setShowSilenceDialog(true) },
+    { id: '4', label: 'Create Rule', icon: 'Plus', shortcut: 'R', action: () => setShowCreateRuleDialog(true) },
+  ]
 
   // Real Supabase hook
   const {
@@ -2153,7 +2150,7 @@ export default function AlertsClient() {
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockAlertsQuickActions}
+            actions={alertsQuickActions}
             variant="grid"
           />
         </div>
@@ -2401,6 +2398,240 @@ export default function AlertsClient() {
                 onClick={handleCreateAlert}
               >
                 Create Alert
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Acknowledge Alerts Dialog */}
+        <Dialog open={showAcknowledgeDialog} onOpenChange={setShowAcknowledgeDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Acknowledge Alerts</DialogTitle>
+            </DialogHeader>
+            <div className="py-4 space-y-4">
+              <p className="text-gray-600 dark:text-gray-300">
+                Select alerts to acknowledge. This will notify the team that you are looking into these issues.
+              </p>
+              <div className="space-y-2">
+                {filteredAlerts.filter(a => a.status === 'triggered').slice(0, 5).map(alert => (
+                  <div key={alert.id} className="flex items-center gap-3 p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
+                    <input type="checkbox" className="rounded" />
+                    <div className="flex-1">
+                      <p className="font-medium text-sm">{alert.title}</p>
+                      <p className="text-xs text-gray-500">{alert.service}</p>
+                    </div>
+                    <Badge className={getSeverityColor(alert.severity)}>{alert.severity}</Badge>
+                  </div>
+                ))}
+                {filteredAlerts.filter(a => a.status === 'triggered').length === 0 && (
+                  <p className="text-center text-gray-500 py-4">No triggered alerts to acknowledge</p>
+                )}
+              </div>
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setShowAcknowledgeDialog(false)}>Cancel</Button>
+              <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => {
+                toast.success('Alerts Acknowledged', { description: 'Selected alerts have been acknowledged' })
+                setShowAcknowledgeDialog(false)
+              }}>
+                <CheckCircle2 className="h-4 w-4 mr-2" />
+                Acknowledge Selected
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Escalate Alert Dialog */}
+        <Dialog open={showEscalateDialog} onOpenChange={setShowEscalateDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Escalate Alert</DialogTitle>
+            </DialogHeader>
+            <div className="py-4 space-y-4">
+              <p className="text-gray-600 dark:text-gray-300">
+                Escalate selected alerts to the next level of on-call responders.
+              </p>
+              <div className="space-y-2">
+                <Label>Select Alert to Escalate</Label>
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select an alert..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {filteredAlerts.filter(a => a.status !== 'resolved').map(alert => (
+                      <SelectItem key={alert.id} value={alert.id}>{alert.title}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Escalation Level</Label>
+                <Select defaultValue="2">
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="2">Tier 2 - Senior Engineer</SelectItem>
+                    <SelectItem value="3">Tier 3 - Team Lead</SelectItem>
+                    <SelectItem value="4">Tier 4 - Engineering Manager</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Reason for Escalation</Label>
+                <Input placeholder="Briefly describe why you're escalating..." />
+              </div>
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setShowEscalateDialog(false)}>Cancel</Button>
+              <Button className="bg-orange-600 hover:bg-orange-700" onClick={() => {
+                toast.success('Alert Escalated', { description: 'Alert has been escalated to the next tier' })
+                setShowEscalateDialog(false)
+              }}>
+                <ArrowUp className="h-4 w-4 mr-2" />
+                Escalate
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Silence Alerts Dialog */}
+        <Dialog open={showSilenceDialog} onOpenChange={setShowSilenceDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Silence Alerts</DialogTitle>
+            </DialogHeader>
+            <div className="py-4 space-y-4">
+              <p className="text-gray-600 dark:text-gray-300">
+                Temporarily silence alerts during maintenance or investigation.
+              </p>
+              <div className="space-y-2">
+                <Label>Silence Duration</Label>
+                <Select defaultValue="30">
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="15">15 minutes</SelectItem>
+                    <SelectItem value="30">30 minutes</SelectItem>
+                    <SelectItem value="60">1 hour</SelectItem>
+                    <SelectItem value="120">2 hours</SelectItem>
+                    <SelectItem value="240">4 hours</SelectItem>
+                    <SelectItem value="480">8 hours</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Silence Scope</Label>
+                <Select defaultValue="service">
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="alert">This alert only</SelectItem>
+                    <SelectItem value="service">All alerts from this service</SelectItem>
+                    <SelectItem value="all">All alerts (emergency only)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Reason for Silencing</Label>
+                <Input placeholder="e.g., Scheduled maintenance window..." />
+              </div>
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setShowSilenceDialog(false)}>Cancel</Button>
+              <Button className="bg-gray-600 hover:bg-gray-700" onClick={() => {
+                toast.success('Alerts Silenced', { description: 'Selected alerts have been silenced' })
+                setShowSilenceDialog(false)
+              }}>
+                <VolumeX className="h-4 w-4 mr-2" />
+                Silence Alerts
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Create Rule Dialog */}
+        <Dialog open={showCreateRuleDialog} onOpenChange={setShowCreateRuleDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Create Alert Rule</DialogTitle>
+            </DialogHeader>
+            <div className="py-4 space-y-4">
+              <p className="text-gray-600 dark:text-gray-300">
+                Create a new rule to automatically handle alerts matching specific conditions.
+              </p>
+              <div className="space-y-2">
+                <Label>Rule Name</Label>
+                <Input placeholder="e.g., Auto-escalate critical database alerts" />
+              </div>
+              <div className="space-y-2">
+                <Label>Condition - When</Label>
+                <div className="grid grid-cols-3 gap-2">
+                  <Select defaultValue="severity">
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="severity">Severity</SelectItem>
+                      <SelectItem value="service">Service</SelectItem>
+                      <SelectItem value="source">Source</SelectItem>
+                      <SelectItem value="tag">Tag</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Select defaultValue="equals">
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="equals">equals</SelectItem>
+                      <SelectItem value="contains">contains</SelectItem>
+                      <SelectItem value="not_equals">not equals</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Select defaultValue="critical">
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="critical">Critical</SelectItem>
+                      <SelectItem value="high">High</SelectItem>
+                      <SelectItem value="medium">Medium</SelectItem>
+                      <SelectItem value="low">Low</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Action - Then</Label>
+                <Select defaultValue="escalate">
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="escalate">Escalate immediately</SelectItem>
+                    <SelectItem value="silence">Silence for 15 min</SelectItem>
+                    <SelectItem value="notify">Send additional notification</SelectItem>
+                    <SelectItem value="ticket">Create support ticket</SelectItem>
+                    <SelectItem value="group">Group similar alerts</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex items-center justify-between">
+                <Label>Enable Rule Immediately</Label>
+                <Switch defaultChecked />
+              </div>
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setShowCreateRuleDialog(false)}>Cancel</Button>
+              <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => {
+                toast.success('Rule Created', { description: 'New alert rule has been created and enabled' })
+                setShowCreateRuleDialog(false)
+              }}>
+                <Target className="h-4 w-4 mr-2" />
+                Create Rule
               </Button>
             </div>
           </DialogContent>

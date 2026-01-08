@@ -474,12 +474,7 @@ const mockMonitoringActivities = [
   { id: '3', user: 'SysAdmin', action: 'patched', target: '8 servers', timestamp: '3h ago', type: 'info' as const },
 ]
 
-const mockMonitoringQuickActions = [
-  { id: '1', label: 'Add Host', icon: 'Server', shortcut: 'H', action: () => toast.success('Host added successfully') },
-  { id: '2', label: 'Dashboards', icon: 'LayoutDashboard', shortcut: 'D', action: () => toast.success('Monitoring dashboards loaded successfully') },
-  { id: '3', label: 'Alerts', icon: 'Bell', shortcut: 'A', action: () => toast.success('Alert configuration loaded successfully') },
-  { id: '4', label: 'Metrics', icon: 'Activity', shortcut: 'M', action: () => toast.success('Metrics explorer loaded successfully') },
-]
+// Quick actions are defined inside the component to access state setters
 
 // ============================================================================
 // MAIN COMPONENT
@@ -781,6 +776,14 @@ export default function MonitoringClient() {
 
     return { total, healthy, warning, critical, avgCpu, avgMemory, totalContainers, activeAlerts }
   }, [])
+
+  // Quick actions with proper dialog openers
+  const monitoringQuickActions = [
+    { id: '1', label: 'Add Host', icon: 'Server', shortcut: 'H', action: () => setShowAddServerDialog(true) },
+    { id: '2', label: 'Dashboards', icon: 'LayoutDashboard', shortcut: 'D', action: () => setShowDashboardsDialog(true) },
+    { id: '3', label: 'Alerts', icon: 'Bell', shortcut: 'A', action: () => setShowAlertsConfigDialog(true) },
+    { id: '4', label: 'Metrics', icon: 'Activity', shortcut: 'M', action: () => setShowMetricsExplorerDialog(true) },
+  ]
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50/30 to-zinc-50/40 dark:bg-none dark:bg-gray-900 p-6">
@@ -2194,7 +2197,7 @@ export default function MonitoringClient() {
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockMonitoringQuickActions}
+            actions={monitoringQuickActions}
             variant="grid"
           />
         </div>
@@ -2481,6 +2484,192 @@ export default function MonitoringClient() {
               <Button variant="outline" onClick={() => setShowAddAlertDialog(false)}>Cancel</Button>
               <Button onClick={handleCreateAlert} disabled={isLoading || !alertForm.title}>
                 {isLoading ? 'Creating...' : 'Create Alert'}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Dashboards Dialog */}
+        <Dialog open={showDashboardsDialog} onOpenChange={setShowDashboardsDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <BarChart3 className="w-5 h-5" />
+                Monitoring Dashboards
+              </DialogTitle>
+              <DialogDescription>View and manage your monitoring dashboards</DialogDescription>
+            </DialogHeader>
+            <div className="py-4 space-y-4">
+              {mockDashboards.map(dashboard => (
+                <div key={dashboard.id} className="p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="font-medium text-gray-900 dark:text-white">{dashboard.name}</h4>
+                      <p className="text-sm text-gray-500">{dashboard.description}</p>
+                    </div>
+                    <div className="text-right">
+                      <Badge variant="outline">{dashboard.widgets_count} widgets</Badge>
+                      <p className="text-xs text-gray-400 mt-1">{dashboard.is_shared ? 'Shared' : 'Private'}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setShowDashboardsDialog(false)}>Close</Button>
+              <Button onClick={() => {
+                toast.success('New dashboard created')
+                setShowDashboardsDialog(false)
+              }}>
+                <Plus className="w-4 h-4 mr-2" />
+                Create Dashboard
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Alerts Configuration Dialog */}
+        <Dialog open={showAlertsConfigDialog} onOpenChange={setShowAlertsConfigDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Bell className="w-5 h-5" />
+                Alert Configuration
+              </DialogTitle>
+              <DialogDescription>Manage alert rules and notification settings</DialogDescription>
+            </DialogHeader>
+            <div className="py-4 space-y-4">
+              <div className="space-y-3">
+                <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">Notification Channels</h4>
+                <div className="space-y-2">
+                  {[
+                    { label: 'Email Notifications', enabled: true },
+                    { label: 'Slack Integration', enabled: true },
+                    { label: 'PagerDuty', enabled: false },
+                    { label: 'Webhook Alerts', enabled: false },
+                  ].map((channel, idx) => (
+                    <div key={idx} className="flex items-center justify-between p-3 border rounded-lg">
+                      <span className="text-sm">{channel.label}</span>
+                      <Switch defaultChecked={channel.enabled} />
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="space-y-3">
+                <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">Alert Thresholds</h4>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="p-3 border rounded-lg">
+                    <Label className="text-xs text-gray-500">CPU Warning</Label>
+                    <Input type="number" defaultValue={70} className="mt-1" />
+                  </div>
+                  <div className="p-3 border rounded-lg">
+                    <Label className="text-xs text-gray-500">CPU Critical</Label>
+                    <Input type="number" defaultValue={90} className="mt-1" />
+                  </div>
+                  <div className="p-3 border rounded-lg">
+                    <Label className="text-xs text-gray-500">Memory Warning</Label>
+                    <Input type="number" defaultValue={75} className="mt-1" />
+                  </div>
+                  <div className="p-3 border rounded-lg">
+                    <Label className="text-xs text-gray-500">Memory Critical</Label>
+                    <Input type="number" defaultValue={95} className="mt-1" />
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setShowAlertsConfigDialog(false)}>Cancel</Button>
+              <Button onClick={() => {
+                toast.success('Alert configuration saved')
+                setShowAlertsConfigDialog(false)
+              }}>
+                Save Configuration
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Metrics Explorer Dialog */}
+        <Dialog open={showMetricsExplorerDialog} onOpenChange={setShowMetricsExplorerDialog}>
+          <DialogContent className="max-w-3xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Activity className="w-5 h-5" />
+                Metrics Explorer
+              </DialogTitle>
+              <DialogDescription>Explore and visualize infrastructure metrics</DialogDescription>
+            </DialogHeader>
+            <div className="py-4 space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="flex-1">
+                  <Label className="text-xs text-gray-500 mb-1 block">Metric Type</Label>
+                  <Select defaultValue="cpu">
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select metric" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="cpu">CPU Usage</SelectItem>
+                      <SelectItem value="memory">Memory Usage</SelectItem>
+                      <SelectItem value="disk">Disk Usage</SelectItem>
+                      <SelectItem value="network">Network I/O</SelectItem>
+                      <SelectItem value="latency">Request Latency</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex-1">
+                  <Label className="text-xs text-gray-500 mb-1 block">Time Range</Label>
+                  <Select defaultValue="1h">
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select time range" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="15m">Last 15 minutes</SelectItem>
+                      <SelectItem value="1h">Last 1 hour</SelectItem>
+                      <SelectItem value="6h">Last 6 hours</SelectItem>
+                      <SelectItem value="24h">Last 24 hours</SelectItem>
+                      <SelectItem value="7d">Last 7 days</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex-1">
+                  <Label className="text-xs text-gray-500 mb-1 block">Host Filter</Label>
+                  <Select defaultValue="all">
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select host" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Hosts</SelectItem>
+                      {mockHosts.map(host => (
+                        <SelectItem key={host.id} value={host.id}>{host.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="border rounded-lg p-6 bg-gray-50 dark:bg-gray-800 min-h-[200px] flex items-center justify-center">
+                <div className="text-center text-gray-500">
+                  <Gauge className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                  <p className="text-sm">Select metrics and time range to visualize data</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-4 gap-3">
+                {[
+                  { label: 'Current', value: '42%', color: 'text-green-600' },
+                  { label: 'Average', value: '38%', color: 'text-blue-600' },
+                  { label: 'Peak', value: '78%', color: 'text-orange-600' },
+                  { label: 'Min', value: '12%', color: 'text-gray-600' },
+                ].map((stat, idx) => (
+                  <div key={idx} className="p-3 border rounded-lg text-center">
+                    <p className={`text-xl font-bold ${stat.color}`}>{stat.value}</p>
+                    <p className="text-xs text-gray-500">{stat.label}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setShowMetricsExplorerDialog(false)}>Close</Button>
+              <Button onClick={() => toast.success('Metrics exported to CSV')}>
+                Export Data
               </Button>
             </div>
           </DialogContent>

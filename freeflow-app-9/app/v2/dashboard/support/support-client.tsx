@@ -420,20 +420,7 @@ const mockSupportActivities = [
   { id: '3', user: 'AI Bot', action: 'Auto-resolved', target: '23 password reset requests', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
 ]
 
-const mockSupportQuickActions = [
-  { id: '1', label: 'New Ticket', icon: 'plus', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 800)),
-    { loading: 'Creating new ticket...', success: 'Ticket created successfully', error: 'Failed to create ticket' }
-  ), variant: 'default' as const },
-  { id: '2', label: 'Live Chat', icon: 'messageSquare', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 600)),
-    { loading: 'Connecting to live chat...', success: 'Connected to support agent', error: 'Connection failed' }
-  ), variant: 'default' as const },
-  { id: '3', label: 'Knowledge', icon: 'book', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 500)),
-    { loading: 'Loading knowledge base...', success: 'Knowledge base loaded', error: 'Failed to load knowledge base' }
-  ), variant: 'outline' as const },
-]
+// Quick actions will be defined inside component to access handlers
 
 export default function SupportClient({ initialTickets, initialStats }: SupportClientProps) {
   const [activeTab, setActiveTab] = useState('tickets')
@@ -494,52 +481,272 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
   const [showSettingsDialog, setShowSettingsDialog] = useState(false)
   const [showAddResponseDialog, setShowAddResponseDialog] = useState(false)
   const [showAddPolicyDialog, setShowAddPolicyDialog] = useState(false)
+  const [showLiveChatDialog, setShowLiveChatDialog] = useState(false)
+  const [showKnowledgeBaseDialog, setShowKnowledgeBaseDialog] = useState(false)
+  const [showAssignTicketDialog, setShowAssignTicketDialog] = useState(false)
+  const [showResolveTicketDialog, setShowResolveTicketDialog] = useState(false)
+  const [showExportDialog, setShowExportDialog] = useState(false)
+  const [showReplyDialog, setShowReplyDialog] = useState(false)
+  const [showNoteDialog, setShowNoteDialog] = useState(false)
+  const [showForwardDialog, setShowForwardDialog] = useState(false)
+  const [currentActionTicketId, setCurrentActionTicketId] = useState<string | null>(null)
+
+  // Form states for dialogs
+  const [newTicketForm, setNewTicketForm] = useState({
+    subject: '',
+    description: '',
+    priority: 'medium' as TicketPriority,
+    type: 'question' as TicketType,
+    customerEmail: '',
+    tags: ''
+  })
+  const [liveChatMessage, setLiveChatMessage] = useState('')
+  const [knowledgeSearchQuery, setKnowledgeSearchQuery] = useState('')
+  const [selectedAgent, setSelectedAgent] = useState('')
+  const [resolutionNote, setResolutionNote] = useState('')
+  const [exportFormat, setExportFormat] = useState('csv')
+  const [internalNote, setInternalNote] = useState('')
+  const [forwardEmail, setForwardEmail] = useState('')
+  const [forwardMessage, setForwardMessage] = useState('')
+  const [newResponseForm, setNewResponseForm] = useState({
+    title: '',
+    content: '',
+    category: 'general',
+    shortcut: ''
+  })
+  const [newPolicyForm, setNewPolicyForm] = useState({
+    name: '',
+    priority: 'medium' as TicketPriority,
+    firstResponseTime: 8,
+    resolutionTime: 24,
+    businessHours: true
+  })
 
   // Handlers
   const handleCreateTicket = () => {
+    setNewTicketForm({
+      subject: '',
+      description: '',
+      priority: 'medium',
+      type: 'question',
+      customerEmail: '',
+      tags: ''
+    })
     setShowNewTicketDialog(true)
+  }
+
+  const handleSubmitNewTicket = () => {
+    if (!newTicketForm.subject.trim() || !newTicketForm.description.trim() || !newTicketForm.customerEmail.trim()) {
+      toast.error('Missing required fields', { description: 'Please fill in subject, description, and customer email' })
+      return
+    }
     toast.promise(
-      new Promise(resolve => setTimeout(resolve, 800)),
+      new Promise(resolve => setTimeout(resolve, 1500)),
       {
-        loading: 'Preparing new ticket form...',
-        success: 'Ticket form ready',
-        error: 'Failed to open form'
+        loading: 'Creating new support ticket...',
+        success: () => {
+          setShowNewTicketDialog(false)
+          setNewTicketForm({ subject: '', description: '', priority: 'medium', type: 'question', customerEmail: '', tags: '' })
+          return `Ticket created successfully for ${newTicketForm.customerEmail}`
+        },
+        error: 'Failed to create ticket'
       }
     )
   }
 
   const handleAssignTicket = (id: string) => {
+    setCurrentActionTicketId(id)
+    setSelectedAgent('')
+    setShowAssignTicketDialog(true)
+  }
+
+  const handleSubmitAssignment = () => {
+    if (!selectedAgent) {
+      toast.error('No agent selected', { description: 'Please select an agent to assign the ticket' })
+      return
+    }
+    const agent = mockAgents.find(a => a.id === selectedAgent)
     toast.promise(
       new Promise(resolve => setTimeout(resolve, 1500)),
       {
-        loading: `Assigning ticket #${id}...`,
-        success: `Ticket #${id} assigned successfully`,
+        loading: `Assigning ticket to ${agent?.name}...`,
+        success: () => {
+          setShowAssignTicketDialog(false)
+          setCurrentActionTicketId(null)
+          return `Ticket assigned to ${agent?.name} successfully`
+        },
         error: 'Failed to assign ticket'
       }
     )
   }
 
   const handleResolveTicket = (id: string) => {
+    setCurrentActionTicketId(id)
+    setResolutionNote('')
+    setShowResolveTicketDialog(true)
+  }
+
+  const handleSubmitResolution = () => {
     toast.promise(
       new Promise(resolve => setTimeout(resolve, 1500)),
       {
-        loading: `Resolving ticket #${id}...`,
-        success: `Ticket #${id} resolved successfully`,
+        loading: 'Resolving ticket...',
+        success: () => {
+          setShowResolveTicketDialog(false)
+          setCurrentActionTicketId(null)
+          setResolutionNote('')
+          return 'Ticket resolved successfully'
+        },
         error: 'Failed to resolve ticket'
       }
     )
   }
 
   const handleExportTickets = () => {
+    setExportFormat('csv')
+    setShowExportDialog(true)
+  }
+
+  const handleSubmitExport = () => {
     toast.promise(
       new Promise(resolve => setTimeout(resolve, 2500)),
       {
-        loading: 'Preparing ticket export...',
-        success: 'Tickets exported successfully',
+        loading: `Exporting tickets as ${exportFormat.toUpperCase()}...`,
+        success: () => {
+          setShowExportDialog(false)
+          return `Tickets exported successfully as ${exportFormat.toUpperCase()}`
+        },
         error: 'Failed to export tickets'
       }
     )
   }
+
+  const handleOpenLiveChat = () => {
+    setLiveChatMessage('')
+    setShowLiveChatDialog(true)
+  }
+
+  const handleSendLiveChatMessage = () => {
+    if (!liveChatMessage.trim()) {
+      toast.error('Empty message', { description: 'Please type a message to send' })
+      return
+    }
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 1000)),
+      {
+        loading: 'Sending message...',
+        success: () => {
+          setLiveChatMessage('')
+          return 'Message sent to support agent'
+        },
+        error: 'Failed to send message'
+      }
+    )
+  }
+
+  const handleOpenKnowledgeBase = () => {
+    setKnowledgeSearchQuery('')
+    setShowKnowledgeBaseDialog(true)
+  }
+
+  const handleOpenReplyDialog = () => {
+    setShowReplyDialog(true)
+  }
+
+  const handleOpenNoteDialog = () => {
+    setInternalNote('')
+    setShowNoteDialog(true)
+  }
+
+  const handleSubmitInternalNote = () => {
+    if (!internalNote.trim()) {
+      toast.error('Empty note', { description: 'Please enter a note before saving' })
+      return
+    }
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 1000)),
+      {
+        loading: 'Adding internal note...',
+        success: () => {
+          setShowNoteDialog(false)
+          setInternalNote('')
+          return 'Internal note added successfully'
+        },
+        error: 'Failed to add note'
+      }
+    )
+  }
+
+  const handleOpenForwardDialog = () => {
+    setForwardEmail('')
+    setForwardMessage('')
+    setShowForwardDialog(true)
+  }
+
+  const handleSubmitForward = () => {
+    if (!forwardEmail.trim()) {
+      toast.error('Missing email', { description: 'Please enter an email address to forward to' })
+      return
+    }
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 1500)),
+      {
+        loading: `Forwarding ticket to ${forwardEmail}...`,
+        success: () => {
+          setShowForwardDialog(false)
+          setForwardEmail('')
+          setForwardMessage('')
+          return `Ticket forwarded to ${forwardEmail} successfully`
+        },
+        error: 'Failed to forward ticket'
+      }
+    )
+  }
+
+  const handleSubmitCannedResponse = () => {
+    if (!newResponseForm.title.trim() || !newResponseForm.content.trim()) {
+      toast.error('Missing required fields', { description: 'Please fill in title and content' })
+      return
+    }
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 1500)),
+      {
+        loading: 'Creating canned response...',
+        success: () => {
+          setShowAddResponseDialog(false)
+          setNewResponseForm({ title: '', content: '', category: 'general', shortcut: '' })
+          return 'Canned response created successfully'
+        },
+        error: 'Failed to create canned response'
+      }
+    )
+  }
+
+  const handleSubmitSLAPolicy = () => {
+    if (!newPolicyForm.name.trim()) {
+      toast.error('Missing policy name', { description: 'Please enter a name for the SLA policy' })
+      return
+    }
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 1500)),
+      {
+        loading: 'Creating SLA policy...',
+        success: () => {
+          setShowAddPolicyDialog(false)
+          setNewPolicyForm({ name: '', priority: 'medium', firstResponseTime: 8, resolutionTime: 24, businessHours: true })
+          return 'SLA policy created successfully'
+        },
+        error: 'Failed to create SLA policy'
+      }
+    )
+  }
+
+  // Quick actions with real dialog handlers
+  const supportQuickActions = [
+    { id: '1', label: 'New Ticket', icon: 'plus', action: handleCreateTicket, variant: 'default' as const },
+    { id: '2', label: 'Live Chat', icon: 'messageSquare', action: handleOpenLiveChat, variant: 'default' as const },
+    { id: '3', label: 'Knowledge', icon: 'book', action: handleOpenKnowledgeBase, variant: 'outline' as const },
+  ]
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-teal-50 via-cyan-50/30 to-blue-50/40 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900 dark:bg-none dark:bg-gray-900">
@@ -556,31 +763,11 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="outline" size="sm" onClick={() => {
-              setShowAutomationsDialog(true)
-              toast.promise(
-                new Promise(resolve => setTimeout(resolve, 800)),
-                {
-                  loading: 'Loading automation settings...',
-                  success: 'Automation settings loaded',
-                  error: 'Failed to load settings'
-                }
-              )
-            }}>
+            <Button variant="outline" size="sm" onClick={() => setShowAutomationsDialog(true)}>
               <Bot className="w-4 h-4 mr-2" />
               Automations
             </Button>
-            <Button variant="outline" size="sm" onClick={() => {
-              setShowSettingsDialog(true)
-              toast.promise(
-                new Promise(resolve => setTimeout(resolve, 800)),
-                {
-                  loading: 'Loading support settings...',
-                  success: 'Settings loaded',
-                  error: 'Failed to load settings'
-                }
-              )
-            }}>
+            <Button variant="outline" size="sm" onClick={() => setShowSettingsDialog(true)}>
               <Settings className="w-4 h-4 mr-2" />
               Settings
             </Button>
@@ -925,15 +1112,8 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
             <div className="flex justify-between items-center">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Canned Responses</h3>
               <Button variant="outline" size="sm" onClick={() => {
+                setNewResponseForm({ title: '', content: '', category: 'general', shortcut: '' })
                 setShowAddResponseDialog(true)
-                toast.promise(
-                  new Promise(resolve => setTimeout(resolve, 800)),
-                  {
-                    loading: 'Preparing canned response form...',
-                    success: 'Form ready',
-                    error: 'Failed to open form'
-                  }
-                )
               }}>
                 <Plus className="w-4 h-4 mr-2" />
                 Add Response
@@ -963,15 +1143,8 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
             <div className="flex justify-between items-center">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">SLA Policies</h3>
               <Button variant="outline" size="sm" onClick={() => {
+                setNewPolicyForm({ name: '', priority: 'medium', firstResponseTime: 8, resolutionTime: 24, businessHours: true })
                 setShowAddPolicyDialog(true)
-                toast.promise(
-                  new Promise(resolve => setTimeout(resolve, 800)),
-                  {
-                    loading: 'Preparing SLA policy form...',
-                    success: 'Form ready',
-                    error: 'Failed to open form'
-                  }
-                )
               }}>
                 <Plus className="w-4 h-4 mr-2" />
                 Add Policy
@@ -1885,10 +2058,711 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockSupportQuickActions}
+            actions={supportQuickActions}
             variant="grid"
           />
         </div>
+
+        {/* New Ticket Dialog */}
+        <Dialog open={showNewTicketDialog} onOpenChange={setShowNewTicketDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Plus className="w-5 h-5 text-teal-600" />
+                Create New Support Ticket
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Customer Email *</Label>
+                <Input
+                  type="email"
+                  placeholder="customer@example.com"
+                  value={newTicketForm.customerEmail}
+                  onChange={(e) => setNewTicketForm({ ...newTicketForm, customerEmail: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Subject *</Label>
+                <Input
+                  placeholder="Brief description of the issue"
+                  value={newTicketForm.subject}
+                  onChange={(e) => setNewTicketForm({ ...newTicketForm, subject: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Description *</Label>
+                <textarea
+                  className="w-full min-h-[100px] px-3 py-2 rounded-md border bg-background"
+                  placeholder="Detailed description of the customer's issue..."
+                  value={newTicketForm.description}
+                  onChange={(e) => setNewTicketForm({ ...newTicketForm, description: e.target.value })}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Priority</Label>
+                  <Select value={newTicketForm.priority} onValueChange={(value: TicketPriority) => setNewTicketForm({ ...newTicketForm, priority: value })}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="low">Low</SelectItem>
+                      <SelectItem value="medium">Medium</SelectItem>
+                      <SelectItem value="high">High</SelectItem>
+                      <SelectItem value="urgent">Urgent</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Type</Label>
+                  <Select value={newTicketForm.type} onValueChange={(value: TicketType) => setNewTicketForm({ ...newTicketForm, type: value })}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="question">Question</SelectItem>
+                      <SelectItem value="incident">Incident</SelectItem>
+                      <SelectItem value="problem">Problem</SelectItem>
+                      <SelectItem value="feature_request">Feature Request</SelectItem>
+                      <SelectItem value="refund">Refund</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Tags (comma separated)</Label>
+                <Input
+                  placeholder="billing, urgent, enterprise"
+                  value={newTicketForm.tags}
+                  onChange={(e) => setNewTicketForm({ ...newTicketForm, tags: e.target.value })}
+                />
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setShowNewTicketDialog(false)}>Cancel</Button>
+                <Button className="bg-gradient-to-r from-teal-500 to-cyan-600 text-white" onClick={handleSubmitNewTicket}>
+                  Create Ticket
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Live Chat Dialog */}
+        <Dialog open={showLiveChatDialog} onOpenChange={setShowLiveChatDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <MessageCircle className="w-5 h-5 text-cyan-600" />
+                Live Chat Support
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-800 space-y-3">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Support agents available</span>
+                </div>
+                <div className="text-sm text-gray-500">Average wait time: 2 minutes</div>
+              </div>
+              <div className="space-y-2">
+                <Label>Your Message</Label>
+                <textarea
+                  className="w-full min-h-[100px] px-3 py-2 rounded-md border bg-background"
+                  placeholder="Describe your issue to start the chat..."
+                  value={liveChatMessage}
+                  onChange={(e) => setLiveChatMessage(e.target.value)}
+                />
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setShowLiveChatDialog(false)}>Cancel</Button>
+                <Button className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white" onClick={handleSendLiveChatMessage}>
+                  <Send className="w-4 h-4 mr-2" />
+                  Start Chat
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Knowledge Base Dialog */}
+        <Dialog open={showKnowledgeBaseDialog} onOpenChange={setShowKnowledgeBaseDialog}>
+          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <ClipboardList className="w-5 h-5 text-purple-600" />
+                Knowledge Base
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Input
+                  placeholder="Search articles, FAQs, guides..."
+                  value={knowledgeSearchQuery}
+                  onChange={(e) => setKnowledgeSearchQuery(e.target.value)}
+                  className="pl-9"
+                />
+              </div>
+              <div className="space-y-3">
+                {[
+                  { title: 'How to reset your password', category: 'Account', views: 1245 },
+                  { title: 'Billing FAQ', category: 'Billing', views: 892 },
+                  { title: 'API Rate Limits Explained', category: 'Technical', views: 567 },
+                  { title: 'Getting Started Guide', category: 'Onboarding', views: 2341 },
+                  { title: 'Troubleshooting Integration Issues', category: 'Technical', views: 432 },
+                ].filter(article =>
+                  !knowledgeSearchQuery ||
+                  article.title.toLowerCase().includes(knowledgeSearchQuery.toLowerCase()) ||
+                  article.category.toLowerCase().includes(knowledgeSearchQuery.toLowerCase())
+                ).map((article, idx) => (
+                  <div key={idx} className="p-3 rounded-lg bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer transition-colors">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-medium text-gray-900 dark:text-white">{article.title}</h4>
+                        <div className="flex items-center gap-2 mt-1">
+                          <Badge variant="outline" className="text-xs">{article.category}</Badge>
+                          <span className="text-xs text-gray-500">{article.views} views</span>
+                        </div>
+                      </div>
+                      <Button variant="ghost" size="sm" onClick={() => {
+                        toast.success('Article opened', { description: article.title })
+                      }}>View</Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Assign Ticket Dialog */}
+        <Dialog open={showAssignTicketDialog} onOpenChange={setShowAssignTicketDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <UserCheck className="w-5 h-5 text-blue-600" />
+                Assign Ticket
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Select an agent to assign this ticket to:
+              </p>
+              <div className="space-y-2">
+                {mockAgents.map(agent => (
+                  <div
+                    key={agent.id}
+                    onClick={() => setSelectedAgent(agent.id)}
+                    className={`p-3 rounded-lg border cursor-pointer transition-colors ${
+                      selectedAgent === agent.id
+                        ? 'border-teal-500 bg-teal-50 dark:bg-teal-900/20'
+                        : 'border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <Avatar className="w-8 h-8">
+                          <AvatarFallback className="text-xs">{agent.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <div className="font-medium">{agent.name}</div>
+                          <div className="text-xs text-gray-500">{agent.openTickets} open tickets</div>
+                        </div>
+                      </div>
+                      <div className={`w-2 h-2 rounded-full ${
+                        agent.status === 'online' ? 'bg-green-500' :
+                        agent.status === 'busy' ? 'bg-yellow-500' : 'bg-gray-400'
+                      }`} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setShowAssignTicketDialog(false)}>Cancel</Button>
+                <Button className="bg-gradient-to-r from-teal-500 to-cyan-600 text-white" onClick={handleSubmitAssignment}>
+                  Assign Ticket
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Resolve Ticket Dialog */}
+        <Dialog open={showResolveTicketDialog} onOpenChange={setShowResolveTicketDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <CheckCircle2 className="w-5 h-5 text-green-600" />
+                Resolve Ticket {currentActionTicketId && `#${mockTickets.find(t => t.id === currentActionTicketId)?.code || currentActionTicketId}`}
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Mark this ticket as resolved. Optionally add a resolution note:
+              </p>
+              <div className="space-y-2">
+                <Label>Resolution Note (Optional)</Label>
+                <textarea
+                  className="w-full min-h-[100px] px-3 py-2 rounded-md border bg-background"
+                  placeholder="Summary of how the issue was resolved..."
+                  value={resolutionNote}
+                  onChange={(e) => setResolutionNote(e.target.value)}
+                />
+              </div>
+              <div className="flex items-center gap-2 p-3 rounded-lg bg-green-50 dark:bg-green-900/20">
+                <CheckCircle2 className="w-4 h-4 text-green-600" />
+                <span className="text-sm text-green-700 dark:text-green-400">Customer will be notified of the resolution</span>
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setShowResolveTicketDialog(false)}>Cancel</Button>
+                <Button className="bg-green-600 hover:bg-green-700 text-white" onClick={handleSubmitResolution}>
+                  Resolve Ticket
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Export Dialog */}
+        <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Download className="w-5 h-5 text-indigo-600" />
+                Export Tickets
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Export ticket data for reporting and analysis:
+              </p>
+              <div className="space-y-2">
+                <Label>Export Format</Label>
+                <Select value={exportFormat} onValueChange={setExportFormat}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="csv">CSV (Spreadsheet)</SelectItem>
+                    <SelectItem value="json">JSON (Data)</SelectItem>
+                    <SelectItem value="pdf">PDF (Report)</SelectItem>
+                    <SelectItem value="xlsx">Excel (XLSX)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
+                <div className="text-sm font-medium mb-2">Export includes:</div>
+                <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
+                  <li>- {filteredTickets.length} tickets (based on current filters)</li>
+                  <li>- Customer information</li>
+                  <li>- Status and priority data</li>
+                  <li>- Response times and SLA metrics</li>
+                </ul>
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setShowExportDialog(false)}>Cancel</Button>
+                <Button className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white" onClick={handleSubmitExport}>
+                  <Download className="w-4 h-4 mr-2" />
+                  Export
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Internal Note Dialog */}
+        <Dialog open={showNoteDialog} onOpenChange={setShowNoteDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <ClipboardList className="w-5 h-5 text-yellow-600" />
+                Add Internal Note
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="p-3 rounded-lg bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800">
+                <p className="text-sm text-yellow-700 dark:text-yellow-400">
+                  Internal notes are only visible to support agents and will not be sent to the customer.
+                </p>
+              </div>
+              <div className="space-y-2">
+                <Label>Note Content</Label>
+                <textarea
+                  className="w-full min-h-[120px] px-3 py-2 rounded-md border bg-background"
+                  placeholder="Add internal notes, observations, or next steps..."
+                  value={internalNote}
+                  onChange={(e) => setInternalNote(e.target.value)}
+                />
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setShowNoteDialog(false)}>Cancel</Button>
+                <Button className="bg-yellow-600 hover:bg-yellow-700 text-white" onClick={handleSubmitInternalNote}>
+                  Add Note
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Forward Ticket Dialog */}
+        <Dialog open={showForwardDialog} onOpenChange={setShowForwardDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Send className="w-5 h-5 text-blue-600" />
+                Forward Ticket
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Forward To (Email) *</Label>
+                <Input
+                  type="email"
+                  placeholder="recipient@example.com"
+                  value={forwardEmail}
+                  onChange={(e) => setForwardEmail(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Additional Message (Optional)</Label>
+                <textarea
+                  className="w-full min-h-[100px] px-3 py-2 rounded-md border bg-background"
+                  placeholder="Add context for the recipient..."
+                  value={forwardMessage}
+                  onChange={(e) => setForwardMessage(e.target.value)}
+                />
+              </div>
+              <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20">
+                <p className="text-sm text-blue-700 dark:text-blue-400">
+                  The full ticket conversation will be included in the forwarded email.
+                </p>
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setShowForwardDialog(false)}>Cancel</Button>
+                <Button className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white" onClick={handleSubmitForward}>
+                  <Send className="w-4 h-4 mr-2" />
+                  Forward
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Reply Dialog */}
+        <Dialog open={showReplyDialog} onOpenChange={setShowReplyDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <MessageSquare className="w-5 h-5 text-teal-600" />
+                Compose Reply
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              {selectedTicket && (
+                <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
+                  <div className="text-sm text-gray-500 mb-1">Replying to:</div>
+                  <div className="font-medium">{selectedTicket.customer.name}</div>
+                  <div className="text-sm text-gray-600">{selectedTicket.subject}</div>
+                </div>
+              )}
+              <div className="space-y-2">
+                <Label>Select Canned Response (Optional)</Label>
+                <Select onValueChange={(value) => {
+                  const response = mockCannedResponses.find(r => r.id === value)
+                  if (response) {
+                    setReplyContent(response.content)
+                  }
+                }}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Choose a template..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {mockCannedResponses.map(response => (
+                      <SelectItem key={response.id} value={response.id}>{response.title}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Your Reply *</Label>
+                <textarea
+                  className="w-full min-h-[150px] px-3 py-2 rounded-md border bg-background"
+                  placeholder="Type your reply to the customer..."
+                  value={replyContent}
+                  onChange={(e) => setReplyContent(e.target.value)}
+                />
+              </div>
+              <div className="flex items-center gap-2 text-sm text-gray-500">
+                <Mail className="w-4 h-4" />
+                Customer will receive this reply via email
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setShowReplyDialog(false)}>Cancel</Button>
+                <Button className="bg-gradient-to-r from-teal-500 to-cyan-600 text-white" onClick={() => {
+                  if (!replyContent.trim()) {
+                    toast.error('Empty reply', { description: 'Please enter a message before sending' })
+                    return
+                  }
+                  toast.promise(
+                    new Promise(resolve => setTimeout(resolve, 1500)),
+                    {
+                      loading: 'Sending reply...',
+                      success: () => {
+                        setShowReplyDialog(false)
+                        setReplyContent('')
+                        return 'Reply sent successfully'
+                      },
+                      error: 'Failed to send reply'
+                    }
+                  )
+                }}>
+                  <Send className="w-4 h-4 mr-2" />
+                  Send Reply
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Canned Response Dialog */}
+        <Dialog open={showAddResponseDialog} onOpenChange={setShowAddResponseDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <ClipboardList className="w-5 h-5 text-purple-600" />
+                Create Canned Response
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Title *</Label>
+                <Input
+                  placeholder="e.g., Welcome Response"
+                  value={newResponseForm.title}
+                  onChange={(e) => setNewResponseForm({ ...newResponseForm, title: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Content *</Label>
+                <textarea
+                  className="w-full min-h-[120px] px-3 py-2 rounded-md border bg-background"
+                  placeholder="Enter the response template text..."
+                  value={newResponseForm.content}
+                  onChange={(e) => setNewResponseForm({ ...newResponseForm, content: e.target.value })}
+                />
+                <p className="text-xs text-gray-500">Use variables like {'{{customer.name}}'} for personalization</p>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Category</Label>
+                  <Select value={newResponseForm.category} onValueChange={(value) => setNewResponseForm({ ...newResponseForm, category: value })}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="general">General</SelectItem>
+                      <SelectItem value="greetings">Greetings</SelectItem>
+                      <SelectItem value="billing">Billing</SelectItem>
+                      <SelectItem value="technical">Technical</SelectItem>
+                      <SelectItem value="escalation">Escalation</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Shortcut</Label>
+                  <Input
+                    placeholder="e.g., !welcome"
+                    value={newResponseForm.shortcut}
+                    onChange={(e) => setNewResponseForm({ ...newResponseForm, shortcut: e.target.value })}
+                  />
+                </div>
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setShowAddResponseDialog(false)}>Cancel</Button>
+                <Button className="bg-gradient-to-r from-purple-500 to-indigo-600 text-white" onClick={handleSubmitCannedResponse}>
+                  Create Response
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add SLA Policy Dialog */}
+        <Dialog open={showAddPolicyDialog} onOpenChange={setShowAddPolicyDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Timer className="w-5 h-5 text-orange-600" />
+                Create SLA Policy
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Policy Name *</Label>
+                <Input
+                  placeholder="e.g., Enterprise Premium SLA"
+                  value={newPolicyForm.name}
+                  onChange={(e) => setNewPolicyForm({ ...newPolicyForm, name: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Priority Level</Label>
+                <Select value={newPolicyForm.priority} onValueChange={(value: TicketPriority) => setNewPolicyForm({ ...newPolicyForm, priority: value })}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="low">Low</SelectItem>
+                    <SelectItem value="medium">Medium</SelectItem>
+                    <SelectItem value="high">High</SelectItem>
+                    <SelectItem value="urgent">Urgent</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>First Response Time (hours)</Label>
+                  <Input
+                    type="number"
+                    min={1}
+                    value={newPolicyForm.firstResponseTime}
+                    onChange={(e) => setNewPolicyForm({ ...newPolicyForm, firstResponseTime: parseInt(e.target.value) || 1 })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Resolution Time (hours)</Label>
+                  <Input
+                    type="number"
+                    min={1}
+                    value={newPolicyForm.resolutionTime}
+                    onChange={(e) => setNewPolicyForm({ ...newPolicyForm, resolutionTime: parseInt(e.target.value) || 1 })}
+                  />
+                </div>
+              </div>
+              <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-800">
+                <div>
+                  <div className="font-medium">Business Hours Only</div>
+                  <div className="text-sm text-gray-500">SLA timer pauses outside business hours</div>
+                </div>
+                <Switch
+                  checked={newPolicyForm.businessHours}
+                  onCheckedChange={(checked) => setNewPolicyForm({ ...newPolicyForm, businessHours: checked })}
+                />
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setShowAddPolicyDialog(false)}>Cancel</Button>
+                <Button className="bg-gradient-to-r from-orange-500 to-red-600 text-white" onClick={handleSubmitSLAPolicy}>
+                  Create Policy
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Automations Dialog */}
+        <Dialog open={showAutomationsDialog} onOpenChange={setShowAutomationsDialog}>
+          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Bot className="w-5 h-5 text-purple-600" />
+                Automation Rules
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Configure automatic actions based on ticket properties
+                </p>
+                <Button variant="outline" size="sm" onClick={() => toast.success('New automation rule dialog opened')}>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Rule
+                </Button>
+              </div>
+              <div className="space-y-3">
+                {[
+                  { name: 'Auto-assign billing tickets', trigger: 'Ticket created with tag "billing"', action: 'Assign to Billing team', enabled: true },
+                  { name: 'Escalate overdue tickets', trigger: 'SLA breach approaching (2 hours)', action: 'Notify supervisor', enabled: true },
+                  { name: 'Auto-close resolved tickets', trigger: 'No customer response for 7 days', action: 'Close ticket', enabled: false },
+                  { name: 'VIP customer priority', trigger: 'Enterprise customer creates ticket', action: 'Set priority to High', enabled: true },
+                ].map((rule, idx) => (
+                  <div key={idx} className="p-4 rounded-lg border bg-white dark:bg-gray-800">
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="font-medium">{rule.name}</h4>
+                      <Switch defaultChecked={rule.enabled} />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <span className="text-gray-500">Trigger:</span>
+                        <p className="text-gray-700 dark:text-gray-300">{rule.trigger}</p>
+                      </div>
+                      <div>
+                        <span className="text-gray-500">Action:</span>
+                        <p className="text-gray-700 dark:text-gray-300">{rule.action}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Settings Dialog */}
+        <Dialog open={showSettingsDialog} onOpenChange={setShowSettingsDialog}>
+          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Settings className="w-5 h-5 text-gray-600" />
+                Support Settings
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-800 space-y-4">
+                <h4 className="font-medium">Quick Settings</h4>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="font-medium text-sm">Auto-assign new tickets</div>
+                      <div className="text-xs text-gray-500">Automatically assign tickets using round-robin</div>
+                    </div>
+                    <Switch defaultChecked />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="font-medium text-sm">SLA breach notifications</div>
+                      <div className="text-xs text-gray-500">Get notified before SLA deadlines</div>
+                    </div>
+                    <Switch defaultChecked />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="font-medium text-sm">Customer satisfaction surveys</div>
+                      <div className="text-xs text-gray-500">Send CSAT survey after resolution</div>
+                    </div>
+                    <Switch defaultChecked />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="font-medium text-sm">AI response suggestions</div>
+                      <div className="text-xs text-gray-500">Show AI-powered reply suggestions</div>
+                    </div>
+                    <Switch defaultChecked />
+                  </div>
+                </div>
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setShowSettingsDialog(false)}>Close</Button>
+                <Button className="bg-gradient-to-r from-teal-500 to-cyan-600 text-white" onClick={() => {
+                  toast.success('Settings saved successfully')
+                  setShowSettingsDialog(false)
+                }}>
+                  Save Settings
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
 
         {/* Ticket Detail Dialog */}
         <Dialog open={!!selectedTicket} onOpenChange={() => setSelectedTicket(null)}>
@@ -1943,36 +2817,9 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
 
                     <div className="border-t pt-4">
                       <div className="flex gap-2 mb-2">
-                        <Button variant="outline" size="sm" onClick={() => {
-                          toast.promise(
-                            new Promise(resolve => setTimeout(resolve, 800)),
-                            {
-                              loading: 'Preparing reply composer...',
-                              success: 'Reply mode active',
-                              error: 'Failed to start reply'
-                            }
-                          )
-                        }}>Reply</Button>
-                        <Button variant="outline" size="sm" onClick={() => {
-                          toast.promise(
-                            new Promise(resolve => setTimeout(resolve, 800)),
-                            {
-                              loading: 'Preparing note editor...',
-                              success: 'Internal note mode active',
-                              error: 'Failed to open note editor'
-                            }
-                          )
-                        }}>Add Note</Button>
-                        <Button variant="outline" size="sm" onClick={() => {
-                          toast.promise(
-                            new Promise(resolve => setTimeout(resolve, 800)),
-                            {
-                              loading: 'Preparing forward options...',
-                              success: 'Forward mode active',
-                              error: 'Failed to open forward options'
-                            }
-                          )
-                        }}>Forward</Button>
+                        <Button variant="outline" size="sm" onClick={handleOpenReplyDialog}>Reply</Button>
+                        <Button variant="outline" size="sm" onClick={handleOpenNoteDialog}>Add Note</Button>
+                        <Button variant="outline" size="sm" onClick={handleOpenForwardDialog}>Forward</Button>
                         <Button variant="outline" size="sm" className="text-green-600 hover:bg-green-50" onClick={() => handleResolveTicket(selectedTicket.id)}>Resolve</Button>
                       </div>
                       <div className="flex gap-2">

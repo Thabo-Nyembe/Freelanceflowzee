@@ -104,6 +104,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
   const [currentDate, setCurrentDate] = useState(new Date())
   const [showNewBooking, setShowNewBooking] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
+  const [showBlockTimeDialog, setShowBlockTimeDialog] = useState(false)
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [settingsTab, setSettingsTab] = useState('availability')
@@ -125,6 +126,16 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
   // Reschedule state
   const [rescheduleData, setRescheduleData] = useState<{ bookingId: string; newDate: string; newTime: string } | null>(null)
   const [showRescheduleDialog, setShowRescheduleDialog] = useState(false)
+
+  // Block time form state
+  const [blockTimeForm, setBlockTimeForm] = useState({
+    date: '',
+    startTime: '09:00',
+    endTime: '17:00',
+    reason: '',
+    recurring: false,
+    recurringDays: [] as string[]
+  })
   const displayBookings = (bookings && bookings.length > 0) ? bookings : (initialBookings || [])
 
   // Service types
@@ -443,7 +454,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
   // Quick actions for toolbar
   const bookingsQuickActions = [
     { id: '1', label: 'New Booking', icon: 'plus', action: () => setShowNewBooking(true), variant: 'default' as const },
-    { id: '2', label: 'Block Time', icon: 'clock', action: () => toast.info('Time Blocker', { description: 'Select unavailable hours on your calendar to block' }), variant: 'default' as const },
+    { id: '2', label: 'Block Time', icon: 'clock', action: () => setShowBlockTimeDialog(true), variant: 'default' as const },
     { id: '3', label: 'View Calendar', icon: 'calendar', action: () => setView('calendar'), variant: 'outline' as const },
   ]
 
@@ -2299,6 +2310,175 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
             </div>
           </div>
         </div>
+
+        {/* Block Time Dialog */}
+        <Dialog open={showBlockTimeDialog} onOpenChange={setShowBlockTimeDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Clock className="h-5 w-5 text-sky-600" />
+                Block Time Slot
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-6 py-4">
+              <div className="p-4 bg-sky-50 dark:bg-sky-900/20 rounded-lg border border-sky-200 dark:border-sky-800">
+                <p className="text-sm text-sky-700 dark:text-sky-300">
+                  Block unavailable hours to prevent bookings during specific times. Blocked time will appear as unavailable on your booking page.
+                </p>
+              </div>
+
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Date</Label>
+                  <Input
+                    type="date"
+                    value={blockTimeForm.date}
+                    onChange={(e) => setBlockTimeForm({ ...blockTimeForm, date: e.target.value })}
+                    min={new Date().toISOString().split('T')[0]}
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Start Time</Label>
+                    <Select
+                      value={blockTimeForm.startTime}
+                      onValueChange={(value) => setBlockTimeForm({ ...blockTimeForm, startTime: value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Array.from({ length: 24 }, (_, i) => {
+                          const hour = i.toString().padStart(2, '0')
+                          return (
+                            <>
+                              <SelectItem key={`${hour}:00`} value={`${hour}:00`}>{hour}:00</SelectItem>
+                              <SelectItem key={`${hour}:30`} value={`${hour}:30`}>{hour}:30</SelectItem>
+                            </>
+                          )
+                        })}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>End Time</Label>
+                    <Select
+                      value={blockTimeForm.endTime}
+                      onValueChange={(value) => setBlockTimeForm({ ...blockTimeForm, endTime: value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Array.from({ length: 24 }, (_, i) => {
+                          const hour = i.toString().padStart(2, '0')
+                          return (
+                            <>
+                              <SelectItem key={`${hour}:00`} value={`${hour}:00`}>{hour}:00</SelectItem>
+                              <SelectItem key={`${hour}:30`} value={`${hour}:30`}>{hour}:30</SelectItem>
+                            </>
+                          )
+                        })}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Reason (optional)</Label>
+                  <Input
+                    placeholder="e.g., Lunch break, Personal time, Meeting..."
+                    value={blockTimeForm.reason}
+                    onChange={(e) => setBlockTimeForm({ ...blockTimeForm, reason: e.target.value })}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                  <div>
+                    <Label className="font-medium">Recurring Block</Label>
+                    <p className="text-xs text-gray-500">Block this time every week</p>
+                  </div>
+                  <Switch
+                    checked={blockTimeForm.recurring}
+                    onCheckedChange={(checked) => setBlockTimeForm({ ...blockTimeForm, recurring: checked })}
+                  />
+                </div>
+
+                {blockTimeForm.recurring && (
+                  <div className="space-y-2 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <Label>Repeat on</Label>
+                    <div className="flex flex-wrap gap-2">
+                      {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day) => (
+                        <button
+                          key={day}
+                          type="button"
+                          onClick={() => {
+                            const days = blockTimeForm.recurringDays.includes(day)
+                              ? blockTimeForm.recurringDays.filter((d) => d !== day)
+                              : [...blockTimeForm.recurringDays, day]
+                            setBlockTimeForm({ ...blockTimeForm, recurringDays: days })
+                          }}
+                          className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                            blockTimeForm.recurringDays.includes(day)
+                              ? 'bg-sky-600 text-white'
+                              : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+                          }`}
+                        >
+                          {day}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowBlockTimeDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                className="bg-sky-600 hover:bg-sky-700"
+                onClick={() => {
+                  if (!blockTimeForm.date) {
+                    toast.error('Date required', { description: 'Please select a date to block' })
+                    return
+                  }
+                  if (blockTimeForm.startTime >= blockTimeForm.endTime) {
+                    toast.error('Invalid time range', { description: 'End time must be after start time' })
+                    return
+                  }
+                  if (blockTimeForm.recurring && blockTimeForm.recurringDays.length === 0) {
+                    toast.error('Select days', { description: 'Please select at least one day for recurring block' })
+                    return
+                  }
+                  toast.promise(
+                    new Promise((resolve) => setTimeout(resolve, 1000)),
+                    {
+                      loading: 'Blocking time slot...',
+                      success: () => {
+                        setShowBlockTimeDialog(false)
+                        setBlockTimeForm({
+                          date: '',
+                          startTime: '09:00',
+                          endTime: '17:00',
+                          reason: '',
+                          recurring: false,
+                          recurringDays: []
+                        })
+                        return `Time blocked: ${blockTimeForm.date} from ${blockTimeForm.startTime} to ${blockTimeForm.endTime}${blockTimeForm.reason ? ` (${blockTimeForm.reason})` : ''}`
+                      },
+                      error: 'Failed to block time slot'
+                    }
+                  )
+                }}
+              >
+                <Timer className="h-4 w-4 mr-2" />
+                Block Time
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   )

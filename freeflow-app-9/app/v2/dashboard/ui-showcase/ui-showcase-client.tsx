@@ -16,7 +16,15 @@ export const dynamic = 'force-dynamic';
 
 import React, { useState, useEffect } from 'react'
 import { toast } from 'sonner'
-import { Plus, Heart, Star } from 'lucide-react'
+import { Plus, Heart, Star, Download, Settings, FileText, Layers } from 'lucide-react'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@/components/ui/dialog'
 
 // A+++ UTILITIES
 import { CardSkeleton, DashboardSkeleton } from '@/components/ui/loading-skeleton'
@@ -55,23 +63,10 @@ const uiShowcaseActivities = [
   { id: '3', user: 'System', action: 'generated', target: 'weekly report', timestamp: '1h ago', type: 'info' as const },
 ]
 
-const uiShowcaseQuickActions = [
-  { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1500)),
-    { loading: 'Creating new item...', success: 'Item created successfully', error: 'Failed to create item' }
-  ) },
-  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1500)),
-    { loading: 'Exporting showcase data...', success: 'Export completed', error: 'Failed to export' }
-  ) },
-  { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1500)),
-    { loading: 'Opening settings...', success: 'Settings loaded', error: 'Failed to load settings' }
-  ) },
-]
+// Quick actions will be defined inside component to access state setters
 
 export default function UiShowcaseClient() {
-  const { userId, loading: userLoading } = useCurrentUser()
+  const { userId, loading: _userLoading } = useCurrentUser()
   const { announce } = useAnnouncer()
 
   React.useEffect(() => {
@@ -88,6 +83,89 @@ export default function UiShowcaseClient() {
   const [dynamicIslandExpanded, setDynamicIslandExpanded] = useState(false)
   const [morphingLoading, setMorphingLoading] = useState(false)
   const [morphingSuccess, setMorphingSuccess] = useState(false)
+
+  // Quick Action Dialog States
+  const [showNewItemDialog, setShowNewItemDialog] = useState(false)
+  const [showExportDialog, setShowExportDialog] = useState(false)
+  const [showSettingsDialog, setShowSettingsDialog] = useState(false)
+
+  // New Item Form State
+  const [newItemForm, setNewItemForm] = useState({
+    name: '',
+    type: 'component',
+    category: 'buttons',
+    description: '',
+  })
+
+  // Export Options State
+  const [exportOptions, setExportOptions] = useState({
+    format: 'json',
+    includeStyles: true,
+    includeAnimations: true,
+    selectedComponents: [] as string[],
+  })
+
+  // Settings State
+  const [showcaseSettings, setShowcaseSettings] = useState({
+    theme: 'auto',
+    animationsEnabled: true,
+    showLabels: true,
+    gridDensity: 'comfortable',
+  })
+
+  // Quick Actions with Dialog Openers
+  const uiShowcaseQuickActions = [
+    { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => setShowNewItemDialog(true) },
+    { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => setShowExportDialog(true) },
+    { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => setShowSettingsDialog(true) },
+  ]
+
+  // Handler Functions
+  const handleCreateItem = () => {
+    if (!newItemForm.name.trim()) {
+      toast.error('Please enter an item name')
+      return
+    }
+    toast.success(`Created new ${newItemForm.type}: ${newItemForm.name}`)
+    setNewItemForm({ name: '', type: 'component', category: 'buttons', description: '' })
+    setShowNewItemDialog(false)
+    announce(`New ${newItemForm.type} ${newItemForm.name} created`, 'polite')
+  }
+
+  const handleExport = () => {
+    const exportData = {
+      format: exportOptions.format,
+      includeStyles: exportOptions.includeStyles,
+      includeAnimations: exportOptions.includeAnimations,
+      components: exportOptions.selectedComponents.length > 0
+        ? exportOptions.selectedComponents
+        : ['all'],
+      exportedAt: new Date().toISOString(),
+    }
+
+    // Simulate download
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `ui-showcase-export-${Date.now()}.${exportOptions.format}`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+
+    toast.success(`Exported UI components as ${exportOptions.format.toUpperCase()}`)
+    setShowExportDialog(false)
+    announce('UI showcase exported successfully', 'polite')
+  }
+
+  const handleSaveSettings = () => {
+    // In a real app, this would save to localStorage or backend
+    localStorage.setItem('ui-showcase-settings', JSON.stringify(showcaseSettings))
+    toast.success('Settings saved successfully')
+    setShowSettingsDialog(false)
+    announce('Settings saved', 'polite')
+  }
 
   // A+++ LOAD UI SHOWCASE DATA
   useEffect(() => {
@@ -395,6 +473,310 @@ export default function UiShowcaseClient() {
       >
         <Plus className="w-6 h-6" />
       </button>
+
+      {/* New Item Dialog */}
+      <Dialog open={showNewItemDialog} onOpenChange={setShowNewItemDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white">
+                <Plus className="w-5 h-5" />
+              </div>
+              Create New UI Component
+            </DialogTitle>
+            <DialogDescription>
+              Add a new component to the UI showcase library
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Component Name</label>
+              <input
+                type="text"
+                value={newItemForm.name}
+                onChange={(e) => setNewItemForm({ ...newItemForm, name: e.target.value })}
+                placeholder="e.g., Animated Card, Gradient Button"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Component Type</label>
+              <select
+                value={newItemForm.type}
+                onChange={(e) => setNewItemForm({ ...newItemForm, type: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="component">Component</option>
+                <option value="animation">Animation</option>
+                <option value="pattern">Pattern</option>
+                <option value="layout">Layout</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+              <select
+                value={newItemForm.category}
+                onChange={(e) => setNewItemForm({ ...newItemForm, category: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="buttons">Buttons</option>
+                <option value="cards">Cards</option>
+                <option value="inputs">Inputs</option>
+                <option value="navigation">Navigation</option>
+                <option value="feedback">Feedback</option>
+                <option value="data-display">Data Display</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+              <textarea
+                value={newItemForm.description}
+                onChange={(e) => setNewItemForm({ ...newItemForm, description: e.target.value })}
+                placeholder="Describe the component's purpose and features"
+                rows={3}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+              />
+            </div>
+          </div>
+
+          <DialogFooter>
+            <button
+              onClick={() => setShowNewItemDialog(false)}
+              className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleCreateItem}
+              className="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg hover:from-blue-600 hover:to-purple-600 transition-all"
+            >
+              Create Component
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Export Dialog */}
+      <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center text-white">
+                <Download className="w-5 h-5" />
+              </div>
+              Export UI Components
+            </DialogTitle>
+            <DialogDescription>
+              Export your UI showcase components and configurations
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Export Format</label>
+              <div className="grid grid-cols-3 gap-2">
+                {['json', 'css', 'tsx'].map((format) => (
+                  <button
+                    key={format}
+                    onClick={() => setExportOptions({ ...exportOptions, format })}
+                    className={`px-4 py-2 rounded-lg border transition-all ${
+                      exportOptions.format === format
+                        ? 'border-green-500 bg-green-50 text-green-700'
+                        : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                  >
+                    {format.toUpperCase()}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <label className="block text-sm font-medium text-gray-700">Include Options</label>
+              <label className="flex items-center gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={exportOptions.includeStyles}
+                  onChange={(e) => setExportOptions({ ...exportOptions, includeStyles: e.target.checked })}
+                  className="w-4 h-4 rounded border-gray-300 text-green-500 focus:ring-green-500"
+                />
+                <span className="text-sm text-gray-600">Include Styles</span>
+              </label>
+              <label className="flex items-center gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={exportOptions.includeAnimations}
+                  onChange={(e) => setExportOptions({ ...exportOptions, includeAnimations: e.target.checked })}
+                  className="w-4 h-4 rounded border-gray-300 text-green-500 focus:ring-green-500"
+                />
+                <span className="text-sm text-gray-600">Include Animations</span>
+              </label>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Select Components</label>
+              <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto p-2 border border-gray-200 rounded-lg">
+                {['Magnetic Button', 'Ripple Button', 'Morphing Button', 'Hover Card', '3D Shift Card', 'Texture Card', 'Spotlight Card', 'Dynamic Island', 'Bento Grid'].map((component) => (
+                  <label key={component} className="flex items-center gap-2 cursor-pointer p-1">
+                    <input
+                      type="checkbox"
+                      checked={exportOptions.selectedComponents.includes(component)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setExportOptions({
+                            ...exportOptions,
+                            selectedComponents: [...exportOptions.selectedComponents, component]
+                          })
+                        } else {
+                          setExportOptions({
+                            ...exportOptions,
+                            selectedComponents: exportOptions.selectedComponents.filter(c => c !== component)
+                          })
+                        }
+                      }}
+                      className="w-4 h-4 rounded border-gray-300 text-green-500 focus:ring-green-500"
+                    />
+                    <span className="text-xs text-gray-600">{component}</span>
+                  </label>
+                ))}
+              </div>
+              <p className="text-xs text-gray-500 mt-1">Leave unchecked to export all</p>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <button
+              onClick={() => setShowExportDialog(false)}
+              className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleExport}
+              className="px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg hover:from-green-600 hover:to-emerald-600 transition-all flex items-center gap-2"
+            >
+              <Download className="w-4 h-4" />
+              Export
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Settings Dialog */}
+      <Dialog open={showSettingsDialog} onOpenChange={setShowSettingsDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-gray-600 to-gray-800 flex items-center justify-center text-white">
+                <Settings className="w-5 h-5" />
+              </div>
+              Showcase Settings
+            </DialogTitle>
+            <DialogDescription>
+              Configure your UI showcase display preferences
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-6 py-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Theme</label>
+              <div className="grid grid-cols-3 gap-2">
+                {[
+                  { value: 'light', label: 'Light', icon: '☀️' },
+                  { value: 'dark', label: 'Dark', icon: '🌙' },
+                  { value: 'auto', label: 'Auto', icon: '🔄' },
+                ].map((theme) => (
+                  <button
+                    key={theme.value}
+                    onClick={() => setShowcaseSettings({ ...showcaseSettings, theme: theme.value })}
+                    className={`px-4 py-3 rounded-lg border transition-all flex flex-col items-center gap-1 ${
+                      showcaseSettings.theme === theme.value
+                        ? 'border-blue-500 bg-blue-50 text-blue-700'
+                        : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                  >
+                    <span className="text-lg">{theme.icon}</span>
+                    <span className="text-sm">{theme.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Grid Density</label>
+              <select
+                value={showcaseSettings.gridDensity}
+                onChange={(e) => setShowcaseSettings({ ...showcaseSettings, gridDensity: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="compact">Compact</option>
+                <option value="comfortable">Comfortable</option>
+                <option value="spacious">Spacious</option>
+              </select>
+            </div>
+
+            <div className="space-y-3">
+              <label className="block text-sm font-medium text-gray-700">Display Options</label>
+              <label className="flex items-center justify-between cursor-pointer p-3 bg-gray-50 rounded-lg">
+                <div className="flex items-center gap-3">
+                  <Layers className="w-5 h-5 text-gray-500" />
+                  <span className="text-sm text-gray-700">Enable Animations</span>
+                </div>
+                <div
+                  onClick={() => setShowcaseSettings({ ...showcaseSettings, animationsEnabled: !showcaseSettings.animationsEnabled })}
+                  className={`w-11 h-6 rounded-full transition-colors cursor-pointer ${
+                    showcaseSettings.animationsEnabled ? 'bg-blue-500' : 'bg-gray-300'
+                  }`}
+                >
+                  <div
+                    className={`w-5 h-5 bg-white rounded-full shadow transform transition-transform ${
+                      showcaseSettings.animationsEnabled ? 'translate-x-5' : 'translate-x-0.5'
+                    } mt-0.5`}
+                  />
+                </div>
+              </label>
+
+              <label className="flex items-center justify-between cursor-pointer p-3 bg-gray-50 rounded-lg">
+                <div className="flex items-center gap-3">
+                  <FileText className="w-5 h-5 text-gray-500" />
+                  <span className="text-sm text-gray-700">Show Component Labels</span>
+                </div>
+                <div
+                  onClick={() => setShowcaseSettings({ ...showcaseSettings, showLabels: !showcaseSettings.showLabels })}
+                  className={`w-11 h-6 rounded-full transition-colors cursor-pointer ${
+                    showcaseSettings.showLabels ? 'bg-blue-500' : 'bg-gray-300'
+                  }`}
+                >
+                  <div
+                    className={`w-5 h-5 bg-white rounded-full shadow transform transition-transform ${
+                      showcaseSettings.showLabels ? 'translate-x-5' : 'translate-x-0.5'
+                    } mt-0.5`}
+                  />
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <button
+              onClick={() => setShowSettingsDialog(false)}
+              className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleSaveSettings}
+              className="px-4 py-2 bg-gradient-to-r from-gray-600 to-gray-800 text-white rounded-lg hover:from-gray-700 hover:to-gray-900 transition-all"
+            >
+              Save Settings
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <style jsx>{`
         @keyframes ripple {

@@ -360,20 +360,7 @@ const mockTransactionsActivities = [
   { id: '3', user: 'Accountant', action: 'Reconciled', target: 'weekly settlement report', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
 ]
 
-const mockTransactionsQuickActions = [
-  { id: '1', label: 'New Payment', icon: 'plus', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1500)),
-    { loading: 'Opening payment form...', success: 'Payment form ready', error: 'Failed to open payment form' }
-  ), variant: 'default' as const },
-  { id: '2', label: 'Export Report', icon: 'download', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 2000)),
-    { loading: 'Generating transaction report...', success: 'Report exported successfully', error: 'Failed to export report' }
-  ), variant: 'default' as const },
-  { id: '3', label: 'Issue Refund', icon: 'undo', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1200)),
-    { loading: 'Opening refund dialog...', success: 'Refund dialog ready', error: 'Failed to open refund dialog' }
-  ), variant: 'outline' as const },
-]
+// Quick actions are now defined inside the component to use state setters
 
 export default function TransactionsClient({ initialTransactions }: { initialTransactions: Transaction[] }) {
   const supabase = createClient()
@@ -389,14 +376,61 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null)
   const [settingsTab, setSettingsTab] = useState('general')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [showNewPaymentDialog, setShowNewPaymentDialog] = useState(false)
+  const [showQuickRefundDialog, setShowQuickRefundDialog] = useState(false)
+  const [showExportDialog, setShowExportDialog] = useState(false)
 
   // Form states
   const [refundForm, setRefundForm] = useState({ amount: '', reason: 'requested_by_customer' })
+  const [newPaymentForm, setNewPaymentForm] = useState({
+    customerName: '',
+    customerEmail: '',
+    amount: '',
+    description: '',
+    paymentMethod: 'card' as 'card' | 'bank_transfer',
+    currency: 'USD'
+  })
+  const [quickRefundForm, setQuickRefundForm] = useState({
+    paymentId: '',
+    amount: '',
+    reason: 'requested_by_customer'
+  })
+  const [exportOptions, setExportOptions] = useState({
+    format: 'csv' as 'csv' | 'xlsx' | 'pdf',
+    dateRange: 'last-30-days',
+    includeMetadata: true,
+    includeCustomerDetails: true
+  })
   const [invoiceForm, setInvoiceForm] = useState({ customerId: '', description: '', amount: '', dueDate: '', sendEmail: true })
   const [customerForm, setCustomerForm] = useState({ name: '', email: '', phone: '', description: '' })
 
   const { transactions, createTransaction, deleteTransaction, refetch } = useTransactions({})
   const displayTransactions = transactions.length > 0 ? transactions : initialTransactions
+
+  // Dynamic quick actions that use state setters
+  const transactionsQuickActions = [
+    {
+      id: '1',
+      label: 'New Payment',
+      icon: 'plus',
+      action: () => setShowNewPaymentDialog(true),
+      variant: 'default' as const
+    },
+    {
+      id: '2',
+      label: 'Export Report',
+      icon: 'download',
+      action: () => setShowExportDialog(true),
+      variant: 'default' as const
+    },
+    {
+      id: '3',
+      label: 'Issue Refund',
+      icon: 'undo',
+      action: () => setShowQuickRefundDialog(true),
+      variant: 'outline' as const
+    },
+  ]
 
   // Calculate stats
   const totalVolume = mockPayments.filter(p => p.status === 'succeeded').reduce((sum, p) => sum + p.amount, 0)
@@ -555,6 +589,105 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
       toast.success('Transaction voided', { description: `Transaction ${transactionId} has been voided` })
     } catch (error) {
       toast.error('Failed to void transaction', { description: (error as Error).message })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleCreatePayment = async () => {
+    if (!newPaymentForm.customerName || !newPaymentForm.customerEmail || !newPaymentForm.amount) {
+      toast.error('Please fill in all required fields')
+      return
+    }
+    setIsSubmitting(true)
+    try {
+      const amount = parseFloat(newPaymentForm.amount.replace(/[^0-9.]/g, ''))
+      await createTransaction({
+        type: 'income',
+        category: 'Payment',
+        description: newPaymentForm.description || 'New Payment',
+        amount: amount,
+        currency: newPaymentForm.currency,
+        transaction_date: new Date().toISOString(),
+        client_name: newPaymentForm.customerName,
+        notes: `Customer email: ${newPaymentForm.customerEmail}, Payment method: ${newPaymentForm.paymentMethod}`
+      })
+      toast.success('Payment created successfully!', { description: `Charged ${formatCurrency(amount * 100)} to ${newPaymentForm.customerName}` })
+      setShowNewPaymentDialog(false)
+      setNewPaymentForm({ customerName: '', customerEmail: '', amount: '', description: '', paymentMethod: 'card', currency: 'USD' })
+    } catch (error) {
+      toast.error('Failed to create payment', { description: (error as Error).message })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleQuickRefund = async () => {
+    if (!quickRefundForm.paymentId || !quickRefundForm.amount) {
+      toast.error('Please select a payment and enter refund amount')
+      return
+    }
+    setIsSubmitting(true)
+    try {
+      const refundAmount = parseFloat(quickRefundForm.amount.replace(/[^0-9.]/g, ''))
+      const payment = mockPayments.find(p => p.id === quickRefundForm.paymentId)
+      await createTransaction({
+        type: 'expense',
+        category: 'Refund',
+        description: `Refund for ${quickRefundForm.paymentId} - ${quickRefundForm.reason}`,
+        amount: refundAmount,
+        currency: 'USD',
+        transaction_date: new Date().toISOString(),
+        client_name: payment?.customer.name || 'Unknown Customer',
+        notes: `Original payment: ${quickRefundForm.paymentId}, Reason: ${quickRefundForm.reason}`
+      })
+      toast.success('Refund issued successfully!', { description: `Refunded ${formatCurrency(refundAmount * 100)}` })
+      setShowQuickRefundDialog(false)
+      setQuickRefundForm({ paymentId: '', amount: '', reason: 'requested_by_customer' })
+    } catch (error) {
+      toast.error('Failed to issue refund', { description: (error as Error).message })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleExportReport = async () => {
+    setIsSubmitting(true)
+    try {
+      let data: string
+      const headers = ['ID', 'Type', 'Category', 'Description', 'Amount', 'Date']
+      if (exportOptions.includeCustomerDetails) {
+        headers.push('Customer')
+      }
+      if (exportOptions.includeMetadata) {
+        headers.push('Notes')
+      }
+
+      const rows = displayTransactions.map(t => {
+        const row = [t.id, t.type, t.category, t.description, t.amount, t.transaction_date]
+        if (exportOptions.includeCustomerDetails) {
+          row.push(t.client_name || '')
+        }
+        if (exportOptions.includeMetadata) {
+          row.push(t.notes || '')
+        }
+        return row.join(',')
+      })
+
+      data = [headers.join(','), ...rows].join('\n')
+
+      const blob = new Blob([data], { type: exportOptions.format === 'csv' ? 'text/csv' : 'application/octet-stream' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `transactions-report-${new Date().toISOString().split('T')[0]}.${exportOptions.format}`
+      a.click()
+      URL.revokeObjectURL(url)
+
+      toast.success('Report exported successfully!', { description: `Exported ${displayTransactions.length} transactions` })
+      setShowExportDialog(false)
+    } catch (error) {
+      toast.error('Failed to export report', { description: (error as Error).message })
     } finally {
       setIsSubmitting(false)
     }
@@ -1925,7 +2058,7 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockTransactionsQuickActions}
+            actions={transactionsQuickActions}
             variant="grid"
           />
         </div>
@@ -2187,6 +2320,236 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
               </button>
               <button onClick={handleAddCustomer} disabled={isSubmitting} className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 disabled:opacity-50">
                 {isSubmitting ? 'Adding...' : 'Add Customer'}
+              </button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* New Payment Dialog */}
+        <Dialog open={showNewPaymentDialog} onOpenChange={setShowNewPaymentDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Create New Payment</DialogTitle>
+              <DialogDescription>Process a new payment transaction</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Customer Name *</label>
+                <input
+                  type="text"
+                  value={newPaymentForm.customerName}
+                  onChange={(e) => setNewPaymentForm(prev => ({ ...prev, customerName: e.target.value }))}
+                  placeholder="John Doe"
+                  className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Customer Email *</label>
+                <input
+                  type="email"
+                  value={newPaymentForm.customerEmail}
+                  onChange={(e) => setNewPaymentForm(prev => ({ ...prev, customerEmail: e.target.value }))}
+                  placeholder="john@example.com"
+                  className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Amount *</label>
+                  <input
+                    type="text"
+                    value={newPaymentForm.amount}
+                    onChange={(e) => setNewPaymentForm(prev => ({ ...prev, amount: e.target.value }))}
+                    placeholder="$100.00"
+                    className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Currency</label>
+                  <select
+                    value={newPaymentForm.currency}
+                    onChange={(e) => setNewPaymentForm(prev => ({ ...prev, currency: e.target.value }))}
+                    className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+                  >
+                    <option value="USD">USD</option>
+                    <option value="EUR">EUR</option>
+                    <option value="GBP">GBP</option>
+                    <option value="CAD">CAD</option>
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
+                <input
+                  type="text"
+                  value={newPaymentForm.description}
+                  onChange={(e) => setNewPaymentForm(prev => ({ ...prev, description: e.target.value }))}
+                  placeholder="Professional Plan - Annual"
+                  className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Payment Method</label>
+                <select
+                  value={newPaymentForm.paymentMethod}
+                  onChange={(e) => setNewPaymentForm(prev => ({ ...prev, paymentMethod: e.target.value as 'card' | 'bank_transfer' }))}
+                  className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+                >
+                  <option value="card">Credit/Debit Card</option>
+                  <option value="bank_transfer">Bank Transfer</option>
+                </select>
+              </div>
+            </div>
+            <DialogFooter>
+              <button onClick={() => setShowNewPaymentDialog(false)} className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+                Cancel
+              </button>
+              <button onClick={handleCreatePayment} disabled={isSubmitting} className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 disabled:opacity-50">
+                {isSubmitting ? 'Processing...' : 'Create Payment'}
+              </button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Quick Refund Dialog */}
+        <Dialog open={showQuickRefundDialog} onOpenChange={setShowQuickRefundDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Issue Refund</DialogTitle>
+              <DialogDescription>Process a refund for an existing payment</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Select Payment *</label>
+                <select
+                  value={quickRefundForm.paymentId}
+                  onChange={(e) => {
+                    const payment = mockPayments.find(p => p.id === e.target.value)
+                    setQuickRefundForm(prev => ({
+                      ...prev,
+                      paymentId: e.target.value,
+                      amount: payment ? (payment.amount / 100).toFixed(2) : ''
+                    }))
+                  }}
+                  className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+                >
+                  <option value="">Select a payment...</option>
+                  {mockPayments.filter(p => p.status === 'succeeded' && !p.refunded).map(p => (
+                    <option key={p.id} value={p.id}>
+                      {p.customer.name} - {formatCurrency(p.amount)} ({p.id})
+                    </option>
+                  ))}
+                </select>
+              </div>
+              {quickRefundForm.paymentId && (
+                <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                  <p className="text-sm text-gray-500">Original Payment Amount</p>
+                  <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                    {formatCurrency((mockPayments.find(p => p.id === quickRefundForm.paymentId)?.amount || 0))}
+                  </p>
+                </div>
+              )}
+              <div>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Refund Amount *</label>
+                <input
+                  type="text"
+                  value={quickRefundForm.amount}
+                  onChange={(e) => setQuickRefundForm(prev => ({ ...prev, amount: e.target.value }))}
+                  placeholder="Enter refund amount"
+                  className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Reason</label>
+                <select
+                  value={quickRefundForm.reason}
+                  onChange={(e) => setQuickRefundForm(prev => ({ ...prev, reason: e.target.value }))}
+                  className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+                >
+                  <option value="requested_by_customer">Requested by customer</option>
+                  <option value="duplicate">Duplicate payment</option>
+                  <option value="fraudulent">Fraudulent</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+            </div>
+            <DialogFooter>
+              <button onClick={() => setShowQuickRefundDialog(false)} className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+                Cancel
+              </button>
+              <button onClick={handleQuickRefund} disabled={isSubmitting || !quickRefundForm.paymentId} className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50">
+                {isSubmitting ? 'Processing...' : 'Issue Refund'}
+              </button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Export Report Dialog */}
+        <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Export Transaction Report</DialogTitle>
+              <DialogDescription>Configure and download your transaction report</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Export Format</label>
+                <select
+                  value={exportOptions.format}
+                  onChange={(e) => setExportOptions(prev => ({ ...prev, format: e.target.value as 'csv' | 'xlsx' | 'pdf' }))}
+                  className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+                >
+                  <option value="csv">CSV (Comma Separated)</option>
+                  <option value="xlsx">Excel (XLSX)</option>
+                  <option value="pdf">PDF Document</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Date Range</label>
+                <select
+                  value={exportOptions.dateRange}
+                  onChange={(e) => setExportOptions(prev => ({ ...prev, dateRange: e.target.value }))}
+                  className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+                >
+                  <option value="today">Today</option>
+                  <option value="last-7-days">Last 7 Days</option>
+                  <option value="last-30-days">Last 30 Days</option>
+                  <option value="this-month">This Month</option>
+                  <option value="last-month">Last Month</option>
+                  <option value="all">All Time</option>
+                </select>
+              </div>
+              <div className="space-y-3 pt-2">
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Include in Export</label>
+                <div className="flex items-center justify-between py-2">
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Customer Details</span>
+                  <Switch
+                    checked={exportOptions.includeCustomerDetails}
+                    onCheckedChange={(checked) => setExportOptions(prev => ({ ...prev, includeCustomerDetails: checked }))}
+                  />
+                </div>
+                <div className="flex items-center justify-between py-2">
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Transaction Metadata</span>
+                  <Switch
+                    checked={exportOptions.includeMetadata}
+                    onCheckedChange={(checked) => setExportOptions(prev => ({ ...prev, includeMetadata: checked }))}
+                  />
+                </div>
+              </div>
+              <div className="p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg">
+                <p className="text-sm font-medium text-emerald-800 dark:text-emerald-200">Export Preview</p>
+                <p className="text-sm text-emerald-600 dark:text-emerald-400 mt-1">
+                  {displayTransactions.length} transactions will be exported
+                </p>
+              </div>
+            </div>
+            <DialogFooter>
+              <button onClick={() => setShowExportDialog(false)} className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+                Cancel
+              </button>
+              <button onClick={handleExportReport} disabled={isSubmitting} className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 disabled:opacity-50 flex items-center gap-2">
+                <Download className="w-4 h-4" />
+                {isSubmitting ? 'Exporting...' : 'Export Report'}
               </button>
             </DialogFooter>
           </DialogContent>

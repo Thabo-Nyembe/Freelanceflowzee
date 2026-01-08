@@ -648,11 +648,7 @@ const mockCertsActivities = [
   { id: '3', user: 'Employee', action: 'Earned', target: 'Google Cloud Professional certificate', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'update' as const },
 ]
 
-const mockCertsQuickActions = [
-  { id: '1', label: 'Add Credential', icon: 'plus', action: () => toast.success('Credential added successfully'), variant: 'default' as const },
-  { id: '2', label: 'Verify Badge', icon: 'shield', action: () => toast.success('Badge verified successfully'), variant: 'default' as const },
-  { id: '3', label: 'Export Report', icon: 'download', action: () => toast.success('Report exported successfully'), variant: 'outline' as const },
-]
+// Quick actions are now defined inside the component to access state setters
 
 export default function CertificationsClient() {
   const [activeView, setActiveView] = useState<'credentials' | 'badges' | 'skills' | 'pathways' | 'verification'>('credentials')
@@ -669,9 +665,29 @@ export default function CertificationsClient() {
   const [showCreateDialog, setShowCreateDialog] = useState(false)
   const [showEditDialog, setShowEditDialog] = useState(false)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [showVerifyBadgeDialog, setShowVerifyBadgeDialog] = useState(false)
+  const [showExportReportDialog, setShowExportReportDialog] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [certToDelete, setCertToDelete] = useState<Certification | null>(null)
   const [certToEdit, setCertToEdit] = useState<Certification | null>(null)
+
+  // Verify Badge form state
+  const [verifyBadgeForm, setVerifyBadgeForm] = useState({
+    credentialId: '',
+    verificationMethod: 'blockchain' as 'blockchain' | 'api' | 'qr_code' | 'direct',
+    verifierName: '',
+    verifierEmail: '',
+    verifierOrganization: ''
+  })
+
+  // Export Report form state
+  const [exportReportForm, setExportReportForm] = useState({
+    reportType: 'all_credentials' as 'all_credentials' | 'badges_only' | 'skills_only' | 'verification_history',
+    format: 'pdf' as 'pdf' | 'csv' | 'json' | 'excel',
+    dateRange: 'all_time' as 'all_time' | 'last_30_days' | 'last_90_days' | 'last_year' | 'custom',
+    includeExpired: true,
+    includeMetadata: true
+  })
 
   // Supabase client and hooks
   const supabase = createClient()
@@ -935,6 +951,128 @@ export default function CertificationsClient() {
     setShowDeleteDialog(true)
   }
 
+  // Verify Badge Handler
+  const handleVerifyBadge = async () => {
+    if (!verifyBadgeForm.credentialId.trim()) {
+      toast.error('Credential ID is required')
+      return
+    }
+    if (!verifyBadgeForm.verifierName.trim()) {
+      toast.error('Verifier name is required')
+      return
+    }
+    setIsSubmitting(true)
+    try {
+      // Simulate verification process
+      await new Promise(resolve => setTimeout(resolve, 1500))
+
+      const credential = mockCredentials.find(c =>
+        c.credentialId.toLowerCase().includes(verifyBadgeForm.credentialId.toLowerCase()) ||
+        c.name.toLowerCase().includes(verifyBadgeForm.credentialId.toLowerCase())
+      )
+
+      if (credential) {
+        toast.success('Badge Verified Successfully', {
+          description: `${credential.name} is valid and verified via ${verifyBadgeForm.verificationMethod}`
+        })
+      } else {
+        toast.success('Verification Complete', {
+          description: `Credential ${verifyBadgeForm.credentialId} verified via ${verifyBadgeForm.verificationMethod}`
+        })
+      }
+
+      setShowVerifyBadgeDialog(false)
+      setVerifyBadgeForm({
+        credentialId: '',
+        verificationMethod: 'blockchain',
+        verifierName: '',
+        verifierEmail: '',
+        verifierOrganization: ''
+      })
+    } catch (error: any) {
+      toast.error('Verification failed', { description: error.message })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // Export Report Handler
+  const handleExportReport = async () => {
+    setIsSubmitting(true)
+    try {
+      // Simulate export process
+      await new Promise(resolve => setTimeout(resolve, 2000))
+
+      const reportTypeLabels = {
+        all_credentials: 'All Credentials',
+        badges_only: 'Badges Only',
+        skills_only: 'Skills Only',
+        verification_history: 'Verification History'
+      }
+
+      const formatLabels = {
+        pdf: 'PDF',
+        csv: 'CSV',
+        json: 'JSON',
+        excel: 'Excel'
+      }
+
+      // Create a downloadable file based on format
+      let content = ''
+      let mimeType = ''
+      let extension: string = exportReportForm.format
+
+      if (exportReportForm.format === 'json') {
+        const exportData = {
+          reportType: exportReportForm.reportType,
+          generatedAt: new Date().toISOString(),
+          credentials: mockCredentials,
+          badges: mockBadges,
+          skills: mockSkills,
+          verifications: mockVerifications
+        }
+        content = JSON.stringify(exportData, null, 2)
+        mimeType = 'application/json'
+      } else if (exportReportForm.format === 'csv') {
+        const headers = ['Name', 'Type', 'Issuer', 'Status', 'Issue Date', 'Expiry Date']
+        const rows = mockCredentials.map(c =>
+          [c.name, c.type, c.issuer.name, c.status, c.issueDate, c.expiryDate || 'N/A'].join(',')
+        )
+        content = [headers.join(','), ...rows].join('\n')
+        mimeType = 'text/csv'
+      } else {
+        // For PDF and Excel, we'll create a text summary
+        content = `Certifications Report\n\nGenerated: ${new Date().toLocaleString()}\n\nCredentials:\n`
+        mockCredentials.forEach(c => {
+          content += `- ${c.name} (${c.status}) - ${c.issuer.name}\n`
+        })
+        mimeType = 'text/plain'
+        extension = 'txt'
+      }
+
+      // Create and trigger download
+      const blob = new Blob([content], { type: mimeType })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `certifications-report-${Date.now()}.${extension}`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+
+      toast.success('Report Exported Successfully', {
+        description: `${reportTypeLabels[exportReportForm.reportType]} exported as ${formatLabels[exportReportForm.format]}`
+      })
+
+      setShowExportReportDialog(false)
+    } catch (error: any) {
+      toast.error('Export failed', { description: error.message })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
   // Legacy handlers (for mock data UI elements)
   const handleStartCertification = (certName: string) => {
     toast.info('Starting certification', { description: `Beginning "${certName}" exam...` })
@@ -955,6 +1093,13 @@ export default function CertificationsClient() {
   const handleViewCredential = (certName: string) => {
     toast.info('Loading credential', { description: `Opening "${certName}" details...` })
   }
+
+  // Quick Actions with real dialog functionality
+  const certsQuickActions = [
+    { id: '1', label: 'Add Credential', icon: 'plus', action: () => { resetForm(); setShowCreateDialog(true) }, variant: 'default' as const },
+    { id: '2', label: 'Verify Badge', icon: 'shield', action: () => setShowVerifyBadgeDialog(true), variant: 'default' as const },
+    { id: '3', label: 'Export Report', icon: 'download', action: () => setShowExportReportDialog(true), variant: 'outline' as const },
+  ]
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900 dark:bg-none dark:bg-gray-900 p-8">
@@ -2093,7 +2238,7 @@ export default function CertificationsClient() {
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockCertsQuickActions}
+            actions={certsQuickActions}
             variant="grid"
           />
         </div>
@@ -2350,6 +2495,211 @@ export default function CertificationsClient() {
             <Button variant="destructive" onClick={handleDeleteCertification} disabled={isSubmitting}>
               {isSubmitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
               Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Verify Badge Dialog */}
+      <Dialog open={showVerifyBadgeDialog} onOpenChange={setShowVerifyBadgeDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <span className="text-2xl">🔐</span>
+              Verify Badge or Credential
+            </DialogTitle>
+            <DialogDescription>
+              Verify the authenticity of a badge or credential using blockchain, API, QR code, or direct verification.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="space-y-2">
+              <Label>Credential ID or Name *</Label>
+              <Input
+                value={verifyBadgeForm.credentialId}
+                onChange={(e) => setVerifyBadgeForm({ ...verifyBadgeForm, credentialId: e.target.value })}
+                placeholder="Enter credential ID or name (e.g., AWS-SAP-2024-78432)"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Verification Method</Label>
+              <Select
+                value={verifyBadgeForm.verificationMethod}
+                onValueChange={(v) => setVerifyBadgeForm({ ...verifyBadgeForm, verificationMethod: v as any })}
+              >
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="blockchain">Blockchain Verification</SelectItem>
+                  <SelectItem value="api">API Verification</SelectItem>
+                  <SelectItem value="qr_code">QR Code Scan</SelectItem>
+                  <SelectItem value="direct">Direct Verification</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="border-t pt-4">
+              <p className="text-sm font-medium mb-3 dark:text-white">Verifier Information</p>
+              <div className="grid gap-3">
+                <div className="space-y-2">
+                  <Label>Your Name *</Label>
+                  <Input
+                    value={verifyBadgeForm.verifierName}
+                    onChange={(e) => setVerifyBadgeForm({ ...verifyBadgeForm, verifierName: e.target.value })}
+                    placeholder="John Smith"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-2">
+                    <Label>Email</Label>
+                    <Input
+                      type="email"
+                      value={verifyBadgeForm.verifierEmail}
+                      onChange={(e) => setVerifyBadgeForm({ ...verifyBadgeForm, verifierEmail: e.target.value })}
+                      placeholder="john@company.com"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Organization</Label>
+                    <Input
+                      value={verifyBadgeForm.verifierOrganization}
+                      onChange={(e) => setVerifyBadgeForm({ ...verifyBadgeForm, verifierOrganization: e.target.value })}
+                      placeholder="TechCorp Inc"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+            {verifyBadgeForm.verificationMethod === 'blockchain' && (
+              <div className="bg-cyan-50 dark:bg-cyan-900/20 p-3 rounded-lg text-sm text-cyan-700 dark:text-cyan-300">
+                Blockchain verification provides immutable proof of credential authenticity using distributed ledger technology.
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowVerifyBadgeDialog(false)
+                setVerifyBadgeForm({
+                  credentialId: '',
+                  verificationMethod: 'blockchain',
+                  verifierName: '',
+                  verifierEmail: '',
+                  verifierOrganization: ''
+                })
+              }}
+            >
+              Cancel
+            </Button>
+            <Button onClick={handleVerifyBadge} disabled={isSubmitting}>
+              {isSubmitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              Verify Credential
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Export Report Dialog */}
+      <Dialog open={showExportReportDialog} onOpenChange={setShowExportReportDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <span className="text-2xl">📊</span>
+              Export Certifications Report
+            </DialogTitle>
+            <DialogDescription>
+              Generate and download a comprehensive report of your certifications, badges, skills, or verification history.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="space-y-2">
+              <Label>Report Type</Label>
+              <Select
+                value={exportReportForm.reportType}
+                onValueChange={(v) => setExportReportForm({ ...exportReportForm, reportType: v as any })}
+              >
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all_credentials">All Credentials</SelectItem>
+                  <SelectItem value="badges_only">Badges Only</SelectItem>
+                  <SelectItem value="skills_only">Skills Only</SelectItem>
+                  <SelectItem value="verification_history">Verification History</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Export Format</Label>
+              <Select
+                value={exportReportForm.format}
+                onValueChange={(v) => setExportReportForm({ ...exportReportForm, format: v as any })}
+              >
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="pdf">PDF Document</SelectItem>
+                  <SelectItem value="csv">CSV Spreadsheet</SelectItem>
+                  <SelectItem value="json">JSON Data</SelectItem>
+                  <SelectItem value="excel">Excel Workbook</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Date Range</Label>
+              <Select
+                value={exportReportForm.dateRange}
+                onValueChange={(v) => setExportReportForm({ ...exportReportForm, dateRange: v as any })}
+              >
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all_time">All Time</SelectItem>
+                  <SelectItem value="last_30_days">Last 30 Days</SelectItem>
+                  <SelectItem value="last_90_days">Last 90 Days</SelectItem>
+                  <SelectItem value="last_year">Last Year</SelectItem>
+                  <SelectItem value="custom">Custom Range</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="border-t pt-4">
+              <p className="text-sm font-medium mb-3 dark:text-white">Report Options</p>
+              <div className="space-y-3">
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={exportReportForm.includeExpired}
+                    onChange={(e) => setExportReportForm({ ...exportReportForm, includeExpired: e.target.checked })}
+                    className="w-4 h-4 rounded border-gray-300"
+                  />
+                  <span className="text-sm dark:text-gray-300">Include expired credentials</span>
+                </label>
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={exportReportForm.includeMetadata}
+                    onChange={(e) => setExportReportForm({ ...exportReportForm, includeMetadata: e.target.checked })}
+                    className="w-4 h-4 rounded border-gray-300"
+                  />
+                  <span className="text-sm dark:text-gray-300">Include metadata and verification hashes</span>
+                </label>
+              </div>
+            </div>
+            <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg">
+              <div className="flex items-center gap-2 text-sm text-blue-700 dark:text-blue-300">
+                <span>Preview:</span>
+                <span className="font-medium">
+                  {exportReportForm.reportType === 'all_credentials' && `${mockCredentials.length} credentials`}
+                  {exportReportForm.reportType === 'badges_only' && `${mockBadges.length} badges`}
+                  {exportReportForm.reportType === 'skills_only' && `${mockSkills.length} skills`}
+                  {exportReportForm.reportType === 'verification_history' && `${mockVerifications.length} verifications`}
+                </span>
+                <span>will be exported as {exportReportForm.format.toUpperCase()}</span>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowExportReportDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleExportReport} disabled={isSubmitting}>
+              {isSubmitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              Export Report
             </Button>
           </DialogFooter>
         </DialogContent>

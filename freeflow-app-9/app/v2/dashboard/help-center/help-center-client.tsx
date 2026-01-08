@@ -9,8 +9,11 @@ import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Progress } from '@/components/ui/progress'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import {
   BookOpen,
   Search,
@@ -157,7 +160,7 @@ interface Collection {
   order: number
 }
 
-interface SearchResult {
+interface _SearchResult {
   article: Article
   matchType: 'title' | 'content' | 'tag'
   relevanceScore: number
@@ -792,11 +795,7 @@ const mockHelpCenterActivities = [
   { id: '3', user: 'Support Lead', action: 'Flagged', target: '3 articles for review', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
 ]
 
-const mockHelpCenterQuickActions = [
-  { id: '1', label: 'New Article', icon: 'plus', action: () => toast.success('New Article', { description: 'Article draft created' }), variant: 'default' as const },
-  { id: '2', label: 'Preview', icon: 'eye', action: () => toast.success('Preview Ready', { description: 'Article preview generated' }), variant: 'default' as const },
-  { id: '3', label: 'Analytics', icon: 'bar-chart', action: () => toast.success('Analytics', { description: 'Help center analytics loaded' }), variant: 'outline' as const },
-]
+// Quick actions are now defined inside the component to access state setters
 
 // ============================================================================
 // MAIN COMPONENT
@@ -817,6 +816,53 @@ export default function HelpCenterClient() {
   const [statusFilter, setStatusFilter] = useState<ArticleStatus | 'all'>('all')
   const [typeFilter, setTypeFilter] = useState<ArticleType | 'all'>('all')
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set(['cat-1']))
+
+  // Dialog states for real functionality
+  const [showCreateArticleDialog, setShowCreateArticleDialog] = useState(false)
+  const [showAnalyticsDialog, setShowAnalyticsDialog] = useState(false)
+  const [showCreateCategoryDialog, setShowCreateCategoryDialog] = useState(false)
+  const [showSmartSearchDialog, setShowSmartSearchDialog] = useState(false)
+  const [showImportDialog, setShowImportDialog] = useState(false)
+  const [showManageTagsDialog, setShowManageTagsDialog] = useState(false)
+  const [showTranslateDialog, setShowTranslateDialog] = useState(false)
+  const [showArchivesDialog, setShowArchivesDialog] = useState(false)
+  const [showSettingsDialog, setShowSettingsDialog] = useState(false)
+  const [showSubcategoryDialog, setShowSubcategoryDialog] = useState(false)
+  const [showOrganizeDialog, setShowOrganizeDialog] = useState(false)
+  const [showAutoSortDialog, setShowAutoSortDialog] = useState(false)
+  const [showCrossLinkDialog, setShowCrossLinkDialog] = useState(false)
+  const [showCleanupDialog, setShowCleanupDialog] = useState(false)
+  const [showCollectionDialog, setShowCollectionDialog] = useState(false)
+  const [showNewCollectionDialog, setShowNewCollectionDialog] = useState(false)
+  const [showFeedbackFilterDialog, setShowFeedbackFilterDialog] = useState(false)
+  const [showExportDialog, setShowExportDialog] = useState(false)
+  const [showReportsDialog, setShowReportsDialog] = useState(false)
+  const [showFollowUpDialog, setShowFollowUpDialog] = useState(false)
+  const [showEditArticleDialog, setShowEditArticleDialog] = useState(false)
+  const [showShareDialog, setShowShareDialog] = useState(false)
+  const [showEditCategoryDialog, setShowEditCategoryDialog] = useState(false)
+  const [showScheduleDialog, setShowScheduleDialog] = useState(false)
+  const [showContentGapsDialog, setShowContentGapsDialog] = useState(false)
+
+  // Form states
+  const [newArticleTitle, setNewArticleTitle] = useState('')
+  const [newArticleContent, setNewArticleContent] = useState('')
+  const [newArticleType, setNewArticleType] = useState<ArticleType>('article')
+  const [newArticleCategory, setNewArticleCategory] = useState('')
+  const [newCategoryName, setNewCategoryName] = useState('')
+  const [newCategoryDescription, setNewCategoryDescription] = useState('')
+  const [newCollectionName, setNewCollectionName] = useState('')
+  const [newCollectionDescription, setNewCollectionDescription] = useState('')
+  const [selectedCollectionForView, setSelectedCollectionForView] = useState<Collection | null>(null)
+  const [selectedCategoryForEdit, setSelectedCategoryForEdit] = useState<Category | null>(null)
+  const [feedbackFilterType, setFeedbackFilterType] = useState<FeedbackType | 'all'>('all')
+  const [exportFormat, setExportFormat] = useState<'csv' | 'json' | 'pdf'>('csv')
+  const [importFile, setImportFile] = useState<File | null>(null)
+  const [shareEmail, setShareEmail] = useState('')
+  const [followUpMessage, setFollowUpMessage] = useState('')
+  const [scheduleDate, setScheduleDate] = useState('')
+  const [smartSearchQuery, setSmartSearchQuery] = useState('')
+  const [translationLanguage, setTranslationLanguage] = useState<Language>('es')
 
   // Filtered articles
   const filteredArticles = useMemo(() => {
@@ -864,125 +910,419 @@ export default function HelpCenterClient() {
     setShowArticleDialog(true)
   }
 
-  // Handlers
-  const handleCreateArticle = () => toast.info('Create', { description: 'Opening editor...' })
-  const handlePublishArticle = (n: string) => toast.success('Published', { description: `"${n}" is live` })
-  const handleCreateCategory = () => toast.info('Create Category', { description: 'Adding category...' })
-  const handleSearch = () => toast.info('Searching', { description: 'Searching articles...' })
+  // Handlers with real dialog functionality
+  const handleCreateArticle = () => {
+    setNewArticleTitle('')
+    setNewArticleContent('')
+    setNewArticleType('article')
+    setNewArticleCategory('')
+    setShowCreateArticleDialog(true)
+  }
+
+  const handleSubmitNewArticle = () => {
+    if (!newArticleTitle.trim()) {
+      toast.error('Title Required', { description: 'Please enter an article title' })
+      return
+    }
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 1500)),
+      {
+        loading: 'Creating article...',
+        success: () => {
+          setShowCreateArticleDialog(false)
+          return `Article "${newArticleTitle}" created successfully`
+        },
+        error: 'Failed to create article'
+      }
+    )
+  }
+
+  const handlePublishArticle = (n: string) => {
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 1000)),
+      {
+        loading: 'Publishing article...',
+        success: `"${n}" is now live`,
+        error: 'Failed to publish'
+      }
+    )
+  }
+
+  const handleCreateCategory = () => {
+    setNewCategoryName('')
+    setNewCategoryDescription('')
+    setShowCreateCategoryDialog(true)
+  }
+
+  const handleSubmitNewCategory = () => {
+    if (!newCategoryName.trim()) {
+      toast.error('Name Required', { description: 'Please enter a category name' })
+      return
+    }
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 1200)),
+      {
+        loading: 'Creating category...',
+        success: () => {
+          setShowCreateCategoryDialog(false)
+          return `Category "${newCategoryName}" created`
+        },
+        error: 'Failed to create category'
+      }
+    )
+  }
+
+  const handleSearch = () => setShowSmartSearchDialog(true)
+
   const handleSearchArticles = () => {
-    toast.info('Searching', { description: 'Searching help articles...' })
+    setSmartSearchQuery('')
+    setShowSmartSearchDialog(true)
   }
-  const handleAnalytics = () => {
-    toast.info('Analytics', { description: 'Loading help center analytics...' })
+
+  const handleExecuteSmartSearch = () => {
+    if (!smartSearchQuery.trim()) {
+      toast.error('Query Required', { description: 'Please enter a search term' })
+      return
+    }
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 1000)),
+      {
+        loading: 'Searching with AI...',
+        success: () => {
+          setShowSmartSearchDialog(false)
+          setSearchQuery(smartSearchQuery)
+          return `Found results for "${smartSearchQuery}"`
+        },
+        error: 'Search failed'
+      }
+    )
   }
+
+  const handleAnalytics = () => setShowAnalyticsDialog(true)
+
   const handleImport = () => {
-    toast.info('Import', { description: 'Opening import wizard...' })
+    setImportFile(null)
+    setShowImportDialog(true)
   }
-  const handleManageTags = () => {
-    toast.info('Manage Tags', { description: 'Opening tag manager...' })
+
+  const handleExecuteImport = () => {
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 2000)),
+      {
+        loading: 'Importing articles...',
+        success: () => {
+          setShowImportDialog(false)
+          return 'Articles imported successfully'
+        },
+        error: 'Import failed'
+      }
+    )
   }
+
+  const handleManageTags = () => setShowManageTagsDialog(true)
+
   const handleTranslate = () => {
-    toast.info('Translate', { description: 'Opening translation center...' })
+    setTranslationLanguage('es')
+    setShowTranslateDialog(true)
   }
-  const handleArchives = () => {
-    toast.info('Archives', { description: 'Loading archived articles...' })
+
+  const handleExecuteTranslation = () => {
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 2500)),
+      {
+        loading: 'Translating content...',
+        success: () => {
+          setShowTranslateDialog(false)
+          return `Content translated to ${translationLanguage.toUpperCase()}`
+        },
+        error: 'Translation failed'
+      }
+    )
   }
-  const handleSettings = () => {
-    toast.info('Settings', { description: 'Opening help center settings...' })
-  }
-  const handleSubcategory = () => {
-    toast.info('Subcategory', { description: 'Creating new subcategory...' })
-  }
-  const handleOrganize = () => {
-    toast.info('Organize', { description: 'Opening content organizer...' })
-  }
+
+  const handleArchives = () => setShowArchivesDialog(true)
+
+  const handleSettings = () => setShowSettingsDialog(true)
+
+  const handleSubcategory = () => setShowSubcategoryDialog(true)
+
+  const handleOrganize = () => setShowOrganizeDialog(true)
+
   const handleAutoSort = () => {
-    toast.info('Auto-Sort', { description: 'AI is sorting your content...' })
+    setShowAutoSortDialog(true)
   }
-  const handleCrossLink = () => {
-    toast.info('Cross-Link', { description: 'Opening link manager...' })
+
+  const handleExecuteAutoSort = () => {
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 2000)),
+      {
+        loading: 'AI is organizing content...',
+        success: () => {
+          setShowAutoSortDialog(false)
+          return 'Content auto-sorted successfully'
+        },
+        error: 'Auto-sort failed'
+      }
+    )
   }
-  const handleCleanup = () => {
-    toast.info('Cleanup', { description: 'Starting content cleanup...' })
+
+  const handleCrossLink = () => setShowCrossLinkDialog(true)
+
+  const handleCleanup = () => setShowCleanupDialog(true)
+
+  const handleExecuteCleanup = () => {
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 2000)),
+      {
+        loading: 'Cleaning up content...',
+        success: () => {
+          setShowCleanupDialog(false)
+          return 'Content cleanup completed'
+        },
+        error: 'Cleanup failed'
+      }
+    )
   }
+
   const handleViewCollection = (collectionName: string) => {
-    toast.info('View Collection', { description: `Opening "${collectionName}"...` })
+    const collection = collections.find(c => c.name === collectionName)
+    if (collection) {
+      setSelectedCollectionForView(collection)
+      setShowCollectionDialog(true)
+    }
   }
+
   const handleNewCollection = () => {
-    toast.info('New Collection', { description: 'Creating new collection...' })
+    setNewCollectionName('')
+    setNewCollectionDescription('')
+    setShowNewCollectionDialog(true)
   }
+
+  const handleSubmitNewCollection = () => {
+    if (!newCollectionName.trim()) {
+      toast.error('Name Required', { description: 'Please enter a collection name' })
+      return
+    }
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 1200)),
+      {
+        loading: 'Creating collection...',
+        success: () => {
+          setShowNewCollectionDialog(false)
+          return `Collection "${newCollectionName}" created`
+        },
+        error: 'Failed to create collection'
+      }
+    )
+  }
+
   const handleAllFeedback = () => {
-    toast.info('All Feedback', { description: 'Loading all feedback...' })
+    setFeedbackFilterType('all')
+    setShowFeedbackFilterDialog(true)
   }
+
   const handlePositiveFeedback = () => {
-    toast.info('Positive Feedback', { description: 'Filtering positive feedback...' })
+    setFeedbackFilterType('helpful')
+    setShowFeedbackFilterDialog(true)
   }
+
   const handleNegativeFeedback = () => {
-    toast.info('Negative Feedback', { description: 'Filtering negative feedback...' })
+    setFeedbackFilterType('not_helpful')
+    setShowFeedbackFilterDialog(true)
   }
+
   const handleIncorrectFeedback = () => {
-    toast.info('Incorrect Feedback', { description: 'Filtering incorrect reports...' })
+    setFeedbackFilterType('incorrect')
+    setShowFeedbackFilterDialog(true)
   }
+
   const handleNeedsUpdate = () => {
-    toast.info('Needs Update', { description: 'Filtering update requests...' })
+    setFeedbackFilterType('needs_update')
+    setShowFeedbackFilterDialog(true)
   }
+
   const handleExport = () => {
-    toast.info('Export', { description: 'Preparing export...' })
+    setExportFormat('csv')
+    setShowExportDialog(true)
   }
-  const handleReports = () => {
-    toast.info('Reports', { description: 'Loading reports...' })
+
+  const handleExecuteExport = () => {
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 1500)),
+      {
+        loading: `Exporting as ${exportFormat.toUpperCase()}...`,
+        success: () => {
+          setShowExportDialog(false)
+          return `Export completed (${exportFormat.toUpperCase()})`
+        },
+        error: 'Export failed'
+      }
+    )
   }
+
+  const handleReports = () => setShowReportsDialog(true)
+
   const handleReviewNegative = () => {
-    toast.info('Review Negative', { description: 'Loading negative feedback for review...' })
+    setFeedbackFilterType('not_helpful')
+    setShowFeedbackFilterDialog(true)
   }
+
   const handleUpdateRequested = () => {
-    toast.info('Update Requested', { description: 'Loading articles needing updates...' })
+    setFeedbackFilterType('needs_update')
+    setShowFeedbackFilterDialog(true)
   }
+
   const handleFollowUp = () => {
-    toast.info('Follow Up', { description: 'Opening follow-up panel...' })
+    setFollowUpMessage('')
+    setShowFollowUpDialog(true)
   }
-  const handleOverview = () => {
-    toast.info('Overview', { description: 'Loading analytics overview...' })
+
+  const handleSendFollowUp = () => {
+    if (!followUpMessage.trim()) {
+      toast.error('Message Required', { description: 'Please enter a follow-up message' })
+      return
+    }
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 1500)),
+      {
+        loading: 'Sending follow-up...',
+        success: () => {
+          setShowFollowUpDialog(false)
+          return 'Follow-up sent successfully'
+        },
+        error: 'Failed to send'
+      }
+    )
   }
-  const handleTrends = () => {
-    toast.info('Trends', { description: 'Loading trend analysis...' })
-  }
-  const handleSearchTerms = () => {
-    toast.info('Search Terms', { description: 'Loading search analytics...' })
-  }
-  const handlePageViews = () => {
-    toast.info('Page Views', { description: 'Loading view statistics...' })
-  }
-  const handleTimeOnPage = () => {
-    toast.info('Time on Page', { description: 'Loading engagement metrics...' })
-  }
-  const handleGaps = () => {
-    toast.info('Content Gaps', { description: 'Analyzing content gaps...' })
-  }
+
+  const handleOverview = () => setShowAnalyticsDialog(true)
+  const handleTrends = () => setShowAnalyticsDialog(true)
+  const handleSearchTerms = () => setShowAnalyticsDialog(true)
+  const handlePageViews = () => setShowAnalyticsDialog(true)
+  const handleTimeOnPage = () => setShowAnalyticsDialog(true)
+
+  const handleGaps = () => setShowContentGapsDialog(true)
+
   const handleSchedule = () => {
-    toast.info('Schedule', { description: 'Opening content calendar...' })
+    setScheduleDate('')
+    setShowScheduleDialog(true)
   }
-  const handleViewArticleExternal = (articleTitle: string) => {
-    toast.info('View Article', { description: `Opening "${articleTitle}"...` })
+
+  const handleSaveSchedule = () => {
+    if (!scheduleDate) {
+      toast.error('Date Required', { description: 'Please select a date' })
+      return
+    }
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 1000)),
+      {
+        loading: 'Scheduling content...',
+        success: () => {
+          setShowScheduleDialog(false)
+          return 'Content scheduled successfully'
+        },
+        error: 'Failed to schedule'
+      }
+    )
   }
-  const handleEditArticle = (articleTitle: string) => {
-    toast.info('Edit Article', { description: `Editing "${articleTitle}"...` })
+
+  const handleEditArticle = () => {
+    setShowEditArticleDialog(true)
   }
+
+  const handleSaveArticleEdit = () => {
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 1500)),
+      {
+        loading: 'Saving changes...',
+        success: () => {
+          setShowEditArticleDialog(false)
+          return 'Article updated successfully'
+        },
+        error: 'Failed to save'
+      }
+    )
+  }
+
   const handleViewLive = (articleTitle: string) => {
-    toast.info('View Live', { description: `Opening live preview of "${articleTitle}"...` })
+    window.open(`/help/${articleTitle.toLowerCase().replace(/\s+/g, '-')}`, '_blank')
   }
+
   const handleDuplicate = (articleTitle: string) => {
-    toast.success('Duplicated', { description: `"${articleTitle}" has been duplicated` })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 1000)),
+      {
+        loading: 'Duplicating article...',
+        success: `"${articleTitle}" duplicated`,
+        error: 'Failed to duplicate'
+      }
+    )
   }
-  const handleShare = (articleTitle: string) => {
-    toast.info('Share', { description: `Sharing "${articleTitle}"...` })
+
+  const handleShare = () => {
+    setShareEmail('')
+    setShowShareDialog(true)
   }
+
+  const handleSendShare = () => {
+    if (!shareEmail.trim()) {
+      toast.error('Email Required', { description: 'Please enter an email address' })
+      return
+    }
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 1000)),
+      {
+        loading: 'Sharing article...',
+        success: () => {
+          setShowShareDialog(false)
+          return `Article shared with ${shareEmail}`
+        },
+        error: 'Failed to share'
+      }
+    )
+  }
+
   const handleArchive = (articleTitle: string) => {
-    toast.success('Archived', { description: `"${articleTitle}" has been archived` })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 1000)),
+      {
+        loading: 'Archiving article...',
+        success: `"${articleTitle}" archived`,
+        error: 'Failed to archive'
+      }
+    )
   }
+
   const handleEditCategory = (categoryName: string) => {
-    toast.info('Edit Category', { description: `Editing "${categoryName}"...` })
+    const category = categories.find(c => c.name === categoryName)
+    if (category) {
+      setSelectedCategoryForEdit(category)
+      setNewCategoryName(category.name)
+      setNewCategoryDescription(category.description)
+      setShowEditCategoryDialog(true)
+    }
   }
+
+  const handleSaveCategoryEdit = () => {
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 1200)),
+      {
+        loading: 'Saving category...',
+        success: () => {
+          setShowEditCategoryDialog(false)
+          return 'Category updated successfully'
+        },
+        error: 'Failed to update category'
+      }
+    )
+  }
+
+  // Quick actions with real handlers
+  const helpCenterQuickActions = [
+    { id: '1', label: 'New Article', icon: 'plus', action: handleCreateArticle, variant: 'default' as const },
+    { id: '2', label: 'Preview', icon: 'eye', action: () => setShowAnalyticsDialog(true), variant: 'default' as const },
+    { id: '3', label: 'Analytics', icon: 'bar-chart', action: () => setShowAnalyticsDialog(true), variant: 'outline' as const },
+  ]
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50/30 to-purple-50/40 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900 dark:bg-none dark:bg-gray-900">
@@ -1712,16 +2052,16 @@ export default function HelpCenterClient() {
             {/* Analytics Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: BarChart3, label: 'Overview', color: 'text-cyan-600 dark:text-cyan-400' },
-                { icon: TrendingUp, label: 'Trends', color: 'text-green-600 dark:text-green-400' },
-                { icon: Search, label: 'Search Terms', color: 'text-blue-600 dark:text-blue-400' },
-                { icon: Eye, label: 'Page Views', color: 'text-purple-600 dark:text-purple-400' },
-                { icon: Clock, label: 'Time on Page', color: 'text-orange-600 dark:text-orange-400' },
-                { icon: Target, label: 'Gaps', color: 'text-red-600 dark:text-red-400' },
-                { icon: Download, label: 'Export', color: 'text-gray-600 dark:text-gray-400' },
-                { icon: Calendar, label: 'Schedule', color: 'text-pink-600 dark:text-pink-400' }
+                { icon: BarChart3, label: 'Overview', color: 'text-cyan-600 dark:text-cyan-400', handler: handleOverview },
+                { icon: TrendingUp, label: 'Trends', color: 'text-green-600 dark:text-green-400', handler: handleTrends },
+                { icon: Search, label: 'Search Terms', color: 'text-blue-600 dark:text-blue-400', handler: handleSearchTerms },
+                { icon: Eye, label: 'Page Views', color: 'text-purple-600 dark:text-purple-400', handler: handlePageViews },
+                { icon: Clock, label: 'Time on Page', color: 'text-orange-600 dark:text-orange-400', handler: handleTimeOnPage },
+                { icon: Target, label: 'Gaps', color: 'text-red-600 dark:text-red-400', handler: handleGaps },
+                { icon: Download, label: 'Export', color: 'text-gray-600 dark:text-gray-400', handler: handleExport },
+                { icon: Calendar, label: 'Schedule', color: 'text-pink-600 dark:text-pink-400', handler: handleSchedule }
               ].map((action, i) => (
-                <Button key={i} variant="outline" className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200">
+                <Button key={i} variant="outline" className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200" onClick={action.handler}>
                   <action.icon className={`h-5 w-5 ${action.color}`} />
                   <span className="text-xs">{action.label}</span>
                 </Button>
@@ -1877,7 +2217,7 @@ export default function HelpCenterClient() {
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockHelpCenterQuickActions}
+            actions={helpCenterQuickActions}
             variant="grid"
           />
         </div>
@@ -1987,7 +2327,7 @@ export default function HelpCenterClient() {
 
                 {/* Actions */}
                 <div className="flex items-center gap-3 pt-4 border-t">
-                  <Button className="flex-1" onClick={() => handleEditArticle(selectedArticle.title)}>
+                  <Button className="flex-1" onClick={handleEditArticle}>
                     <Edit className="w-4 h-4 mr-2" />
                     Edit Article
                   </Button>
@@ -1999,7 +2339,7 @@ export default function HelpCenterClient() {
                     <Copy className="w-4 h-4 mr-2" />
                     Duplicate
                   </Button>
-                  <Button variant="outline" onClick={() => handleShare(selectedArticle.title)}>
+                  <Button variant="outline" onClick={handleShare}>
                     <Share2 className="w-4 h-4 mr-2" />
                     Share
                   </Button>
@@ -2019,6 +2359,1063 @@ export default function HelpCenterClient() {
               </div>
             </>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Article Dialog */}
+      <Dialog open={showCreateArticleDialog} onOpenChange={setShowCreateArticleDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Create New Article</DialogTitle>
+            <DialogDescription>Write a new help center article</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="articleTitle">Title</Label>
+              <Input
+                id="articleTitle"
+                value={newArticleTitle}
+                onChange={(e) => setNewArticleTitle(e.target.value)}
+                placeholder="Enter article title..."
+              />
+            </div>
+            <div>
+              <Label htmlFor="articleType">Type</Label>
+              <Select value={newArticleType} onValueChange={(v) => setNewArticleType(v as ArticleType)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="article">Article</SelectItem>
+                  <SelectItem value="tutorial">Tutorial</SelectItem>
+                  <SelectItem value="guide">Guide</SelectItem>
+                  <SelectItem value="faq">FAQ</SelectItem>
+                  <SelectItem value="video">Video</SelectItem>
+                  <SelectItem value="troubleshooting">Troubleshooting</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="articleCategory">Category</Label>
+              <Select value={newArticleCategory} onValueChange={setNewArticleCategory}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select category" />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map(cat => (
+                    <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="articleContent">Content</Label>
+              <Textarea
+                id="articleContent"
+                value={newArticleContent}
+                onChange={(e) => setNewArticleContent(e.target.value)}
+                placeholder="Write your article content..."
+                className="min-h-[200px]"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCreateArticleDialog(false)}>Cancel</Button>
+            <Button onClick={handleSubmitNewArticle}>Create Article</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Analytics Dialog */}
+      <Dialog open={showAnalyticsDialog} onOpenChange={setShowAnalyticsDialog}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Help Center Analytics</DialogTitle>
+            <DialogDescription>Comprehensive metrics and insights</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <Card>
+                <CardContent className="p-4 text-center">
+                  <p className="text-3xl font-bold text-blue-600">{formatNumber(analytics.totalViews)}</p>
+                  <p className="text-sm text-muted-foreground">Total Views</p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-4 text-center">
+                  <p className="text-3xl font-bold text-green-600">{analytics.selfServiceRate}%</p>
+                  <p className="text-sm text-muted-foreground">Self-Service Rate</p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-4 text-center">
+                  <p className="text-3xl font-bold text-purple-600">{analytics.avgReadTime}m</p>
+                  <p className="text-sm text-muted-foreground">Avg Read Time</p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-4 text-center">
+                  <p className="text-3xl font-bold text-orange-600">{analytics.bounceRate}%</p>
+                  <p className="text-sm text-muted-foreground">Bounce Rate</p>
+                </CardContent>
+              </Card>
+            </div>
+            <Card>
+              <CardHeader><CardTitle className="text-lg">Top Performing Articles</CardTitle></CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {analytics.topArticles.slice(0, 5).map((article, i) => (
+                    <div key={article.articleId} className="flex items-center justify-between p-2 rounded bg-muted/50">
+                      <div className="flex items-center gap-3">
+                        <span className="w-6 h-6 rounded-full bg-blue-500 text-white text-xs flex items-center justify-center">{i + 1}</span>
+                        <span className="font-medium">{article.title}</span>
+                      </div>
+                      <span className="text-muted-foreground">{formatNumber(article.views)} views</span>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAnalyticsDialog(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Category Dialog */}
+      <Dialog open={showCreateCategoryDialog} onOpenChange={setShowCreateCategoryDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Create New Category</DialogTitle>
+            <DialogDescription>Add a new category to organize articles</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="categoryName">Category Name</Label>
+              <Input
+                id="categoryName"
+                value={newCategoryName}
+                onChange={(e) => setNewCategoryName(e.target.value)}
+                placeholder="e.g., Getting Started"
+              />
+            </div>
+            <div>
+              <Label htmlFor="categoryDesc">Description</Label>
+              <Textarea
+                id="categoryDesc"
+                value={newCategoryDescription}
+                onChange={(e) => setNewCategoryDescription(e.target.value)}
+                placeholder="Brief description of this category..."
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCreateCategoryDialog(false)}>Cancel</Button>
+            <Button onClick={handleSubmitNewCategory}>Create Category</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Smart Search Dialog */}
+      <Dialog open={showSmartSearchDialog} onOpenChange={setShowSmartSearchDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>AI-Powered Smart Search</DialogTitle>
+            <DialogDescription>Search articles with natural language</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                value={smartSearchQuery}
+                onChange={(e) => setSmartSearchQuery(e.target.value)}
+                placeholder="How do I reset my password?"
+                className="pl-10"
+                onKeyDown={(e) => e.key === 'Enter' && handleExecuteSmartSearch()}
+              />
+            </div>
+            <div className="text-sm text-muted-foreground">
+              <p className="font-medium mb-2">Try searching for:</p>
+              <ul className="space-y-1">
+                <li className="cursor-pointer hover:text-foreground" onClick={() => setSmartSearchQuery('billing and invoices')}>billing and invoices</li>
+                <li className="cursor-pointer hover:text-foreground" onClick={() => setSmartSearchQuery('API authentication')}>API authentication</li>
+                <li className="cursor-pointer hover:text-foreground" onClick={() => setSmartSearchQuery('getting started')}>getting started</li>
+              </ul>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowSmartSearchDialog(false)}>Cancel</Button>
+            <Button onClick={handleExecuteSmartSearch}>
+              <Sparkles className="w-4 h-4 mr-2" />
+              Search with AI
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Import Dialog */}
+      <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Import Articles</DialogTitle>
+            <DialogDescription>Import articles from external sources</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="border-2 border-dashed rounded-lg p-8 text-center">
+              <Upload className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+              <p className="font-medium">Drop files here or click to upload</p>
+              <p className="text-sm text-muted-foreground">Supports CSV, JSON, and Markdown files</p>
+              <Input
+                type="file"
+                className="mt-4"
+                accept=".csv,.json,.md"
+                onChange={(e) => setImportFile(e.target.files?.[0] || null)}
+              />
+            </div>
+            {importFile && (
+              <p className="text-sm text-green-600">Selected: {importFile.name}</p>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowImportDialog(false)}>Cancel</Button>
+            <Button onClick={handleExecuteImport} disabled={!importFile}>Import Articles</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Manage Tags Dialog */}
+      <Dialog open={showManageTagsDialog} onOpenChange={setShowManageTagsDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Manage Tags</DialogTitle>
+            <DialogDescription>Organize and manage article tags</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="flex gap-2">
+              <Input placeholder="Add new tag..." />
+              <Button>Add Tag</Button>
+            </div>
+            <div className="border rounded-lg p-4">
+              <p className="font-medium mb-3">Existing Tags</p>
+              <div className="flex flex-wrap gap-2">
+                {['getting-started', 'billing', 'api', 'authentication', 'troubleshooting', 'faq', 'tutorial', 'security', 'integration', 'webhook'].map(tag => (
+                  <Badge key={tag} variant="secondary" className="cursor-pointer hover:bg-destructive hover:text-destructive-foreground">
+                    {tag}
+                    <span className="ml-1">x</span>
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowManageTagsDialog(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Translate Dialog */}
+      <Dialog open={showTranslateDialog} onOpenChange={setShowTranslateDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Translate Content</DialogTitle>
+            <DialogDescription>Translate articles to different languages</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Target Language</Label>
+              <Select value={translationLanguage} onValueChange={(v) => setTranslationLanguage(v as Language)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select language" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="es">Spanish</SelectItem>
+                  <SelectItem value="fr">French</SelectItem>
+                  <SelectItem value="de">German</SelectItem>
+                  <SelectItem value="pt">Portuguese</SelectItem>
+                  <SelectItem value="ja">Japanese</SelectItem>
+                  <SelectItem value="zh">Chinese</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="border rounded-lg p-4">
+              <p className="font-medium mb-2">Articles to Translate</p>
+              <p className="text-sm text-muted-foreground">
+                {articles.filter(a => !a.translations.includes(translationLanguage)).length} articles pending translation
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowTranslateDialog(false)}>Cancel</Button>
+            <Button onClick={handleExecuteTranslation}>
+              <Languages className="w-4 h-4 mr-2" />
+              Start Translation
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Archives Dialog */}
+      <Dialog open={showArchivesDialog} onOpenChange={setShowArchivesDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Archived Articles</DialogTitle>
+            <DialogDescription>View and restore archived content</DialogDescription>
+          </DialogHeader>
+          <ScrollArea className="h-[400px]">
+            <div className="space-y-3">
+              {articles.filter(a => a.status === 'archived').length === 0 ? (
+                <p className="text-center text-muted-foreground py-8">No archived articles</p>
+              ) : (
+                articles.filter(a => a.status === 'archived').map(article => (
+                  <div key={article.id} className="flex items-center justify-between p-3 border rounded-lg">
+                    <div>
+                      <p className="font-medium">{article.title}</p>
+                      <p className="text-sm text-muted-foreground">Archived on {new Date(article.updatedAt).toLocaleDateString()}</p>
+                    </div>
+                    <Button size="sm" variant="outline">Restore</Button>
+                  </div>
+                ))
+              )}
+            </div>
+          </ScrollArea>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowArchivesDialog(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Settings Dialog */}
+      <Dialog open={showSettingsDialog} onOpenChange={setShowSettingsDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Help Center Settings</DialogTitle>
+            <DialogDescription>Configure your help center</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-6">
+            <div>
+              <Label>Help Center Name</Label>
+              <Input defaultValue="FreeFlow Kazi Help Center" />
+            </div>
+            <div>
+              <Label>Default Language</Label>
+              <Select defaultValue="en">
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="en">English</SelectItem>
+                  <SelectItem value="es">Spanish</SelectItem>
+                  <SelectItem value="fr">French</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-medium">Enable AI Search</p>
+                <p className="text-sm text-muted-foreground">Use AI to improve search results</p>
+              </div>
+              <input type="checkbox" defaultChecked className="h-5 w-5" />
+            </div>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-medium">Allow User Feedback</p>
+                <p className="text-sm text-muted-foreground">Let users rate articles</p>
+              </div>
+              <input type="checkbox" defaultChecked className="h-5 w-5" />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowSettingsDialog(false)}>Cancel</Button>
+            <Button onClick={() => { setShowSettingsDialog(false); toast.success('Settings saved') }}>Save Settings</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Subcategory Dialog */}
+      <Dialog open={showSubcategoryDialog} onOpenChange={setShowSubcategoryDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Create Subcategory</DialogTitle>
+            <DialogDescription>Add a subcategory to organize articles</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Parent Category</Label>
+              <Select>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select category" />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map(cat => (
+                    <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Subcategory Name</Label>
+              <Input placeholder="e.g., Advanced Topics" />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowSubcategoryDialog(false)}>Cancel</Button>
+            <Button onClick={() => { setShowSubcategoryDialog(false); toast.success('Subcategory created') }}>Create</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Organize Dialog */}
+      <Dialog open={showOrganizeDialog} onOpenChange={setShowOrganizeDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Organize Content</DialogTitle>
+            <DialogDescription>Drag and drop to reorganize articles</DialogDescription>
+          </DialogHeader>
+          <div className="border rounded-lg p-4 min-h-[300px]">
+            <p className="text-center text-muted-foreground">Drag articles between categories to reorganize</p>
+            <div className="grid grid-cols-2 gap-4 mt-4">
+              {categories.slice(0, 4).map(cat => (
+                <div key={cat.id} className="border rounded p-3">
+                  <p className="font-medium mb-2">{cat.icon} {cat.name}</p>
+                  <div className="space-y-1">
+                    {articles.filter(a => a.categoryId === cat.id).slice(0, 3).map(a => (
+                      <p key={a.id} className="text-sm p-2 bg-muted rounded cursor-move">{a.title}</p>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowOrganizeDialog(false)}>Cancel</Button>
+            <Button onClick={() => { setShowOrganizeDialog(false); toast.success('Content organized') }}>Save Changes</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Auto-Sort Dialog */}
+      <Dialog open={showAutoSortDialog} onOpenChange={setShowAutoSortDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>AI Auto-Sort</DialogTitle>
+            <DialogDescription>Let AI organize your content</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
+              <div className="flex items-center gap-2 mb-2">
+                <Sparkles className="w-5 h-5 text-blue-600" />
+                <p className="font-medium">AI Analysis</p>
+              </div>
+              <p className="text-sm text-muted-foreground">AI will analyze your articles and suggest optimal categorization based on content similarity and user behavior.</p>
+            </div>
+            <div>
+              <Label>Sort Strategy</Label>
+              <Select defaultValue="smart">
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="smart">Smart (AI-powered)</SelectItem>
+                  <SelectItem value="popularity">By Popularity</SelectItem>
+                  <SelectItem value="date">By Date</SelectItem>
+                  <SelectItem value="alpha">Alphabetical</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAutoSortDialog(false)}>Cancel</Button>
+            <Button onClick={handleExecuteAutoSort}>
+              <Sparkles className="w-4 h-4 mr-2" />
+              Start Auto-Sort
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Cross-Link Dialog */}
+      <Dialog open={showCrossLinkDialog} onOpenChange={setShowCrossLinkDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Cross-Link Articles</DialogTitle>
+            <DialogDescription>Create links between related articles</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Source Article</Label>
+              <Select>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select article" />
+                </SelectTrigger>
+                <SelectContent>
+                  {articles.map(a => (
+                    <SelectItem key={a.id} value={a.id}>{a.title}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Link To</Label>
+              <Select>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select related article" />
+                </SelectTrigger>
+                <SelectContent>
+                  {articles.map(a => (
+                    <SelectItem key={a.id} value={a.id}>{a.title}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-center gap-2">
+              <input type="checkbox" id="bidirectional" className="h-4 w-4" />
+              <Label htmlFor="bidirectional">Create bidirectional link</Label>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCrossLinkDialog(false)}>Cancel</Button>
+            <Button onClick={() => { setShowCrossLinkDialog(false); toast.success('Articles linked') }}>Create Link</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Cleanup Dialog */}
+      <Dialog open={showCleanupDialog} onOpenChange={setShowCleanupDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Content Cleanup</DialogTitle>
+            <DialogDescription>Remove outdated or duplicate content</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="border rounded-lg p-4">
+              <p className="font-medium mb-2">Cleanup Options</p>
+              <div className="space-y-2">
+                <label className="flex items-center gap-2">
+                  <input type="checkbox" defaultChecked className="h-4 w-4" />
+                  <span>Find duplicate articles</span>
+                </label>
+                <label className="flex items-center gap-2">
+                  <input type="checkbox" defaultChecked className="h-4 w-4" />
+                  <span>Identify outdated content (90+ days)</span>
+                </label>
+                <label className="flex items-center gap-2">
+                  <input type="checkbox" className="h-4 w-4" />
+                  <span>Remove broken links</span>
+                </label>
+                <label className="flex items-center gap-2">
+                  <input type="checkbox" className="h-4 w-4" />
+                  <span>Archive low-traffic articles</span>
+                </label>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCleanupDialog(false)}>Cancel</Button>
+            <Button onClick={handleExecuteCleanup} variant="destructive">
+              <Trash2 className="w-4 h-4 mr-2" />
+              Start Cleanup
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* View Collection Dialog */}
+      <Dialog open={showCollectionDialog} onOpenChange={setShowCollectionDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>{selectedCollectionForView?.name}</DialogTitle>
+            <DialogDescription>{selectedCollectionForView?.description}</DialogDescription>
+          </DialogHeader>
+          {selectedCollectionForView && (
+            <div className="space-y-4">
+              <div className="flex items-center gap-4">
+                <div className={`w-12 h-12 rounded-xl bg-gradient-to-r ${selectedCollectionForView.color} flex items-center justify-center text-xl`}>
+                  {selectedCollectionForView.icon}
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">{selectedCollectionForView.articleIds.length} articles</p>
+                  <p className="text-sm text-muted-foreground">{formatNumber(selectedCollectionForView.views)} views</p>
+                </div>
+              </div>
+              <div className="border rounded-lg p-4">
+                <p className="font-medium mb-3">Articles in this collection</p>
+                <div className="space-y-2">
+                  {articles.filter(a => selectedCollectionForView.articleIds.includes(a.id)).map(article => (
+                    <div key={article.id} className="flex items-center justify-between p-2 bg-muted/50 rounded">
+                      <span>{article.title}</span>
+                      <Button size="sm" variant="ghost" onClick={() => handleViewArticle(article)}>
+                        <Eye className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCollectionDialog(false)}>Close</Button>
+            <Button>Edit Collection</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* New Collection Dialog */}
+      <Dialog open={showNewCollectionDialog} onOpenChange={setShowNewCollectionDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Create Collection</DialogTitle>
+            <DialogDescription>Group related articles together</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Collection Name</Label>
+              <Input
+                value={newCollectionName}
+                onChange={(e) => setNewCollectionName(e.target.value)}
+                placeholder="e.g., Getting Started Guide"
+              />
+            </div>
+            <div>
+              <Label>Description</Label>
+              <Textarea
+                value={newCollectionDescription}
+                onChange={(e) => setNewCollectionDescription(e.target.value)}
+                placeholder="Brief description of this collection..."
+              />
+            </div>
+            <div>
+              <Label>Add Articles</Label>
+              <Select>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select articles to add" />
+                </SelectTrigger>
+                <SelectContent>
+                  {articles.map(a => (
+                    <SelectItem key={a.id} value={a.id}>{a.title}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowNewCollectionDialog(false)}>Cancel</Button>
+            <Button onClick={handleSubmitNewCollection}>Create Collection</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Feedback Filter Dialog */}
+      <Dialog open={showFeedbackFilterDialog} onOpenChange={setShowFeedbackFilterDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>
+              {feedbackFilterType === 'all' ? 'All Feedback' :
+               feedbackFilterType === 'helpful' ? 'Positive Feedback' :
+               feedbackFilterType === 'not_helpful' ? 'Negative Feedback' :
+               feedbackFilterType === 'incorrect' ? 'Incorrect Reports' :
+               'Update Requests'}
+            </DialogTitle>
+            <DialogDescription>Review and manage user feedback</DialogDescription>
+          </DialogHeader>
+          <ScrollArea className="h-[400px]">
+            <div className="space-y-3">
+              {feedback.filter(f => feedbackFilterType === 'all' || f.type === feedbackFilterType).map(fb => {
+                const article = articles.find(a => a.id === fb.articleId)
+                return (
+                  <div key={fb.id} className="border rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <Badge variant={fb.type === 'helpful' ? 'default' : 'destructive'}>
+                        {fb.type.replace('_', ' ')}
+                      </Badge>
+                      <span className="text-xs text-muted-foreground">
+                        {new Date(fb.createdAt).toLocaleDateString()}
+                      </span>
+                    </div>
+                    {article && <p className="font-medium">{article.title}</p>}
+                    {fb.comment && <p className="text-sm text-muted-foreground mt-2">"{fb.comment}"</p>}
+                    <div className="flex gap-2 mt-3">
+                      <Button size="sm" variant="outline">Respond</Button>
+                      <Button size="sm" variant="outline">Dismiss</Button>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </ScrollArea>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowFeedbackFilterDialog(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Export Dialog */}
+      <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Export Data</DialogTitle>
+            <DialogDescription>Export help center data</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Export Format</Label>
+              <Select value={exportFormat} onValueChange={(v) => setExportFormat(v as 'csv' | 'json' | 'pdf')}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="csv">CSV</SelectItem>
+                  <SelectItem value="json">JSON</SelectItem>
+                  <SelectItem value="pdf">PDF</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Data to Export</Label>
+              <div className="space-y-2 mt-2">
+                <label className="flex items-center gap-2">
+                  <input type="checkbox" defaultChecked className="h-4 w-4" />
+                  <span>Articles</span>
+                </label>
+                <label className="flex items-center gap-2">
+                  <input type="checkbox" defaultChecked className="h-4 w-4" />
+                  <span>Categories</span>
+                </label>
+                <label className="flex items-center gap-2">
+                  <input type="checkbox" className="h-4 w-4" />
+                  <span>Feedback</span>
+                </label>
+                <label className="flex items-center gap-2">
+                  <input type="checkbox" className="h-4 w-4" />
+                  <span>Analytics</span>
+                </label>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowExportDialog(false)}>Cancel</Button>
+            <Button onClick={handleExecuteExport}>
+              <Download className="w-4 h-4 mr-2" />
+              Export
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Reports Dialog */}
+      <Dialog open={showReportsDialog} onOpenChange={setShowReportsDialog}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>Reports</DialogTitle>
+            <DialogDescription>Generate and view reports</DialogDescription>
+          </DialogHeader>
+          <div className="grid grid-cols-2 gap-4">
+            <Card className="cursor-pointer hover:border-primary">
+              <CardContent className="p-4">
+                <BarChart3 className="w-8 h-8 mb-2 text-blue-500" />
+                <p className="font-medium">Content Performance</p>
+                <p className="text-sm text-muted-foreground">Views, engagement, and ratings</p>
+              </CardContent>
+            </Card>
+            <Card className="cursor-pointer hover:border-primary">
+              <CardContent className="p-4">
+                <Search className="w-8 h-8 mb-2 text-purple-500" />
+                <p className="font-medium">Search Analytics</p>
+                <p className="text-sm text-muted-foreground">Top queries and success rate</p>
+              </CardContent>
+            </Card>
+            <Card className="cursor-pointer hover:border-primary">
+              <CardContent className="p-4">
+                <MessageSquare className="w-8 h-8 mb-2 text-orange-500" />
+                <p className="font-medium">Feedback Summary</p>
+                <p className="text-sm text-muted-foreground">User satisfaction trends</p>
+              </CardContent>
+            </Card>
+            <Card className="cursor-pointer hover:border-primary">
+              <CardContent className="p-4">
+                <TrendingUp className="w-8 h-8 mb-2 text-green-500" />
+                <p className="font-medium">Growth Report</p>
+                <p className="text-sm text-muted-foreground">Month-over-month trends</p>
+              </CardContent>
+            </Card>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowReportsDialog(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Follow Up Dialog */}
+      <Dialog open={showFollowUpDialog} onOpenChange={setShowFollowUpDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Follow Up on Feedback</DialogTitle>
+            <DialogDescription>Send a response to users who left feedback</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Feedback to Address</Label>
+              <Select>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select feedback" />
+                </SelectTrigger>
+                <SelectContent>
+                  {feedback.filter(f => f.comment).map(fb => (
+                    <SelectItem key={fb.id} value={fb.id}>
+                      {fb.comment?.substring(0, 50)}...
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Your Response</Label>
+              <Textarea
+                value={followUpMessage}
+                onChange={(e) => setFollowUpMessage(e.target.value)}
+                placeholder="Thank you for your feedback..."
+                className="min-h-[120px]"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowFollowUpDialog(false)}>Cancel</Button>
+            <Button onClick={handleSendFollowUp}>
+              <Send className="w-4 h-4 mr-2" />
+              Send Response
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Article Dialog */}
+      <Dialog open={showEditArticleDialog} onOpenChange={setShowEditArticleDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Edit Article</DialogTitle>
+            <DialogDescription>Make changes to {selectedArticle?.title}</DialogDescription>
+          </DialogHeader>
+          {selectedArticle && (
+            <div className="space-y-4">
+              <div>
+                <Label>Title</Label>
+                <Input defaultValue={selectedArticle.title} />
+              </div>
+              <div>
+                <Label>Excerpt</Label>
+                <Textarea defaultValue={selectedArticle.excerpt} />
+              </div>
+              <div>
+                <Label>Content</Label>
+                <Textarea defaultValue={selectedArticle.content} className="min-h-[200px]" />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Status</Label>
+                  <Select defaultValue={selectedArticle.status}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="draft">Draft</SelectItem>
+                      <SelectItem value="review">In Review</SelectItem>
+                      <SelectItem value="published">Published</SelectItem>
+                      <SelectItem value="archived">Archived</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>Type</Label>
+                  <Select defaultValue={selectedArticle.type}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="article">Article</SelectItem>
+                      <SelectItem value="tutorial">Tutorial</SelectItem>
+                      <SelectItem value="guide">Guide</SelectItem>
+                      <SelectItem value="faq">FAQ</SelectItem>
+                      <SelectItem value="video">Video</SelectItem>
+                      <SelectItem value="troubleshooting">Troubleshooting</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowEditArticleDialog(false)}>Cancel</Button>
+            <Button onClick={handleSaveArticleEdit}>Save Changes</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Share Dialog */}
+      <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Share Article</DialogTitle>
+            <DialogDescription>Share {selectedArticle?.title}</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Email Address</Label>
+              <Input
+                type="email"
+                value={shareEmail}
+                onChange={(e) => setShareEmail(e.target.value)}
+                placeholder="colleague@company.com"
+              />
+            </div>
+            <div>
+              <Label>Article Link</Label>
+              <div className="flex gap-2">
+                <Input readOnly value={`https://help.freeflowkazi.com/${selectedArticle?.slug}`} />
+                <Button variant="outline" onClick={() => {
+                  navigator.clipboard.writeText(`https://help.freeflowkazi.com/${selectedArticle?.slug}`)
+                  toast.success('Link copied!')
+                }}>
+                  <Copy className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowShareDialog(false)}>Cancel</Button>
+            <Button onClick={handleSendShare}>
+              <Share2 className="w-4 h-4 mr-2" />
+              Send
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Category Dialog */}
+      <Dialog open={showEditCategoryDialog} onOpenChange={setShowEditCategoryDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Category</DialogTitle>
+            <DialogDescription>Update category details</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Category Name</Label>
+              <Input
+                value={newCategoryName}
+                onChange={(e) => setNewCategoryName(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label>Description</Label>
+              <Textarea
+                value={newCategoryDescription}
+                onChange={(e) => setNewCategoryDescription(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label>Visibility</Label>
+              <Select defaultValue={selectedCategoryForEdit?.visibility || 'public'}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="public">Public</SelectItem>
+                  <SelectItem value="private">Private</SelectItem>
+                  <SelectItem value="restricted">Restricted</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowEditCategoryDialog(false)}>Cancel</Button>
+            <Button onClick={handleSaveCategoryEdit}>Save Changes</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Schedule Dialog */}
+      <Dialog open={showScheduleDialog} onOpenChange={setShowScheduleDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Schedule Content</DialogTitle>
+            <DialogDescription>Schedule articles for publishing</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Select Article</Label>
+              <Select>
+                <SelectTrigger>
+                  <SelectValue placeholder="Choose article to schedule" />
+                </SelectTrigger>
+                <SelectContent>
+                  {articles.filter(a => a.status === 'draft' || a.status === 'review').map(a => (
+                    <SelectItem key={a.id} value={a.id}>{a.title}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Publish Date</Label>
+              <Input
+                type="datetime-local"
+                value={scheduleDate}
+                onChange={(e) => setScheduleDate(e.target.value)}
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <input type="checkbox" id="notify" className="h-4 w-4" />
+              <Label htmlFor="notify">Notify team when published</Label>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowScheduleDialog(false)}>Cancel</Button>
+            <Button onClick={handleSaveSchedule}>
+              <Calendar className="w-4 h-4 mr-2" />
+              Schedule
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Content Gaps Dialog */}
+      <Dialog open={showContentGapsDialog} onOpenChange={setShowContentGapsDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Content Gaps Analysis</DialogTitle>
+            <DialogDescription>Identify missing content based on user searches</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg">
+              <p className="font-medium text-red-700 dark:text-red-400 mb-2">Top Searches Without Results</p>
+              <div className="space-y-2">
+                {analytics.topSearchQueries.filter(q => !q.hasResults).map((query, i) => (
+                  <div key={i} className="flex items-center justify-between p-2 bg-white dark:bg-gray-800 rounded">
+                    <span>"{query.query}"</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-muted-foreground">{query.count} searches</span>
+                      <Button size="sm" onClick={() => {
+                        setNewArticleTitle(query.query)
+                        setShowContentGapsDialog(false)
+                        setShowCreateArticleDialog(true)
+                      }}>Create Article</Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-lg">
+              <p className="font-medium text-yellow-700 dark:text-yellow-400 mb-2">Suggested Topics</p>
+              <ul className="space-y-1 text-sm">
+                <li>Mobile app usage guide</li>
+                <li>Data export documentation</li>
+                <li>Enterprise SSO setup</li>
+                <li>Team collaboration best practices</li>
+              </ul>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowContentGapsDialog(false)}>Close</Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

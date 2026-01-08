@@ -435,11 +435,7 @@ const mockTicketsActivities = [
   { id: '3', user: 'Mike Johnson', action: 'Escalated', target: '#TKT-1235 to Tier 2', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'update' as const },
 ]
 
-const mockTicketsQuickActions = [
-  { id: '1', label: 'New Ticket', icon: 'plus', action: () => toast.success('Ticket Created', { description: 'New support ticket ready' }), variant: 'default' as const },
-  { id: '2', label: 'View Queue', icon: 'list', action: () => toast.success('Queue Loaded', { description: 'Showing all pending tickets' }), variant: 'default' as const },
-  { id: '3', label: 'Reports', icon: 'chart', action: () => toast.success('Reports Loaded', { description: 'Ticket analytics ready' }), variant: 'outline' as const },
-]
+// Quick actions will be defined inside the component to access state setters
 
 export default function TicketsClient() {
   const [activeTab, setActiveTab] = useState('tickets')
@@ -456,6 +452,36 @@ export default function TicketsClient() {
   const [ticketToAssign, setTicketToAssign] = useState<string | null>(null)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [ticketToDelete, setTicketToDelete] = useState<string | null>(null)
+
+  // Additional dialog states for quick actions
+  const [showViewQueueDialog, setShowViewQueueDialog] = useState(false)
+  const [showReportsDialog, setShowReportsDialog] = useState(false)
+  const [showBulkAssignDialog, setShowBulkAssignDialog] = useState(false)
+  const [showAddAgentDialog, setShowAddAgentDialog] = useState(false)
+  const [showFullReportDialog, setShowFullReportDialog] = useState(false)
+  const [showExportAllDialog, setShowExportAllDialog] = useState(false)
+  const [showExportAnalyticsDialog, setShowExportAnalyticsDialog] = useState(false)
+  const [showDeleteResolvedDialog, setShowDeleteResolvedDialog] = useState(false)
+
+  // Bulk assign state
+  const [selectedAgentForBulk, setSelectedAgentForBulk] = useState('')
+  const [bulkAssignFilter, setBulkAssignFilter] = useState<'all' | 'unassigned' | 'urgent'>('unassigned')
+
+  // Add agent form state
+  const [newAgent, setNewAgent] = useState({
+    name: '',
+    email: '',
+    team: 'Technical Support',
+    role: 'agent'
+  })
+
+  // Export options state
+  const [exportFormat, setExportFormat] = useState<'csv' | 'json' | 'xlsx'>('csv')
+  const [exportDateRange, setExportDateRange] = useState<'all' | '7days' | '30days' | '90days'>('all')
+
+  // Report options state
+  const [reportType, setReportType] = useState<'summary' | 'detailed' | 'agent-performance' | 'sla-compliance'>('summary')
+  const [reportPeriod, setReportPeriod] = useState<'week' | 'month' | 'quarter' | 'year'>('month')
 
   // Form states for new ticket
   const [newTicket, setNewTicket] = useState({
@@ -782,7 +808,44 @@ export default function TicketsClient() {
   }
 
   const handleBulkAssign = () => {
-    toast.info('Bulk Assign', { description: 'Opening bulk assignment dialog...' })
+    setShowBulkAssignDialog(true)
+  }
+
+  const handleConfirmBulkAssign = async () => {
+    if (!selectedAgentForBulk) {
+      toast.error('Error', { description: 'Please select an agent' })
+      return
+    }
+
+    const agent = mockAgents.find(a => a.id === selectedAgentForBulk)
+    if (!agent) return
+
+    // Get tickets to assign based on filter
+    const ticketsToAssign = allTickets.filter(t => {
+      if (bulkAssignFilter === 'unassigned') return !t.assignee
+      if (bulkAssignFilter === 'urgent') return t.priority === 'urgent' && !t.assignee
+      return !t.assignee
+    })
+
+    if (ticketsToAssign.length === 0) {
+      toast.info('No Tickets', { description: 'No tickets match the selected filter' })
+      return
+    }
+
+    try {
+      // In a real implementation, batch update all tickets
+      for (const ticket of ticketsToAssign) {
+        await assignTicket(ticket.id, selectedAgentForBulk, agent.name)
+      }
+      toast.success('Bulk Assign Complete', {
+        description: `${ticketsToAssign.length} tickets assigned to ${agent.name}`
+      })
+      setShowBulkAssignDialog(false)
+      setSelectedAgentForBulk('')
+      refetch()
+    } catch (error) {
+      toast.error('Error', { description: 'Failed to bulk assign tickets' })
+    }
   }
 
   const handleAssignToMe = async (ticketId: string, ticketNumber: string) => {
@@ -797,11 +860,51 @@ export default function TicketsClient() {
   }
 
   const handleAddAgent = () => {
-    toast.info('Add Agent', { description: 'Opening agent creation form...' })
+    setShowAddAgentDialog(true)
+  }
+
+  const handleConfirmAddAgent = async () => {
+    if (!newAgent.name.trim() || !newAgent.email.trim()) {
+      toast.error('Validation Error', { description: 'Name and email are required' })
+      return
+    }
+
+    // In a real implementation, this would call an API to create the agent
+    toast.success('Agent Added', {
+      description: `${newAgent.name} has been added to the ${newAgent.team} team`
+    })
+    setShowAddAgentDialog(false)
+    setNewAgent({ name: '', email: '', team: 'Technical Support', role: 'agent' })
   }
 
   const handleFullReport = () => {
-    toast.info('Full Report', { description: 'Generating full analytics report...' })
+    setShowFullReportDialog(true)
+  }
+
+  const handleGenerateReport = () => {
+    // Generate report based on selected options
+    const reportData = {
+      type: reportType,
+      period: reportPeriod,
+      generatedAt: new Date().toISOString(),
+      stats: stats,
+      tickets: allTickets
+    }
+
+    // Create downloadable report
+    const reportContent = JSON.stringify(reportData, null, 2)
+    const blob = new Blob([reportContent], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `support-report-${reportType}-${reportPeriod}-${new Date().toISOString().split('T')[0]}.json`
+    a.click()
+    URL.revokeObjectURL(url)
+
+    toast.success('Report Generated', {
+      description: `${reportType.charAt(0).toUpperCase() + reportType.slice(1).replace('-', ' ')} report for the last ${reportPeriod} downloaded`
+    })
+    setShowFullReportDialog(false)
   }
 
   const handleSendReply = async () => {
@@ -885,22 +988,164 @@ export default function TicketsClient() {
   }
 
   const handleExportAllTickets = () => {
-    toast.info('Exporting Tickets', {
-      description: 'Preparing ticket export file...'
+    setShowExportAllDialog(true)
+  }
+
+  const handleConfirmExportAll = () => {
+    // Filter tickets by date range
+    let ticketsToExport = [...allTickets]
+    const now = new Date()
+
+    if (exportDateRange === '7days') {
+      const cutoff = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
+      ticketsToExport = ticketsToExport.filter(t => new Date(t.createdAt) >= cutoff)
+    } else if (exportDateRange === '30days') {
+      const cutoff = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
+      ticketsToExport = ticketsToExport.filter(t => new Date(t.createdAt) >= cutoff)
+    } else if (exportDateRange === '90days') {
+      const cutoff = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000)
+      ticketsToExport = ticketsToExport.filter(t => new Date(t.createdAt) >= cutoff)
+    }
+
+    let content: string
+    let mimeType: string
+    let extension: string
+
+    if (exportFormat === 'csv') {
+      const headers = 'Ticket#,Subject,Status,Priority,Customer,Email,Category,Created,Updated'
+      const rows = ticketsToExport.map(t =>
+        `"${t.ticketNumber}","${t.subject}","${t.status}","${t.priority}","${t.customer.name}","${t.customer.email}","${t.category}","${t.createdAt}","${t.updatedAt}"`
+      ).join('\n')
+      content = `${headers}\n${rows}`
+      mimeType = 'text/csv'
+      extension = 'csv'
+    } else if (exportFormat === 'json') {
+      content = JSON.stringify(ticketsToExport, null, 2)
+      mimeType = 'application/json'
+      extension = 'json'
+    } else {
+      // For xlsx, fallback to CSV format
+      const headers = 'Ticket#,Subject,Status,Priority,Customer,Email,Category,Created,Updated'
+      const rows = ticketsToExport.map(t =>
+        `"${t.ticketNumber}","${t.subject}","${t.status}","${t.priority}","${t.customer.name}","${t.customer.email}","${t.category}","${t.createdAt}","${t.updatedAt}"`
+      ).join('\n')
+      content = `${headers}\n${rows}`
+      mimeType = 'text/csv'
+      extension = 'csv'
+    }
+
+    const blob = new Blob([content], { type: mimeType })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `tickets-export-${exportDateRange}-${new Date().toISOString().split('T')[0]}.${extension}`
+    a.click()
+    URL.revokeObjectURL(url)
+
+    toast.success('Export Complete', {
+      description: `${ticketsToExport.length} tickets exported as ${extension.toUpperCase()}`
     })
+    setShowExportAllDialog(false)
   }
 
   const handleExportAnalytics = () => {
-    toast.info('Exporting Analytics', {
-      description: 'Preparing analytics export file...'
+    setShowExportAnalyticsDialog(true)
+  }
+
+  const handleConfirmExportAnalytics = () => {
+    const analyticsData = {
+      generatedAt: new Date().toISOString(),
+      dateRange: exportDateRange,
+      summary: {
+        totalTickets: stats.total,
+        newTickets: stats.newTickets,
+        openTickets: stats.open,
+        pendingTickets: stats.pending,
+        solvedTickets: stats.solved,
+        urgentTickets: stats.urgent
+      },
+      performance: {
+        avgResponseTime: stats.avgResponseTime,
+        avgResolutionTime: stats.avgResolutionTime,
+        csatScore: stats.csatScore,
+        slaAtRisk: stats.slaAtRisk,
+        slaBreached: stats.slaBreached
+      },
+      agents: mockAgents.map(a => ({
+        name: a.name,
+        team: a.team,
+        openTickets: a.openTickets,
+        resolvedToday: a.resolvedToday,
+        avgResponseTime: a.avgResponseTime,
+        satisfaction: a.satisfaction
+      })),
+      channelDistribution: {
+        email: allTickets.filter(t => t.channel === 'email').length,
+        chat: allTickets.filter(t => t.channel === 'chat').length,
+        phone: allTickets.filter(t => t.channel === 'phone').length,
+        web: allTickets.filter(t => t.channel === 'web').length
+      },
+      priorityDistribution: {
+        urgent: stats.urgent,
+        high: allTickets.filter(t => t.priority === 'high').length,
+        normal: allTickets.filter(t => t.priority === 'normal').length,
+        low: allTickets.filter(t => t.priority === 'low').length
+      }
+    }
+
+    const content = exportFormat === 'json'
+      ? JSON.stringify(analyticsData, null, 2)
+      : Object.entries(analyticsData).map(([key, value]) =>
+          typeof value === 'object' ? `${key}:\n${JSON.stringify(value, null, 2)}` : `${key}: ${value}`
+        ).join('\n\n')
+
+    const blob = new Blob([content], { type: exportFormat === 'json' ? 'application/json' : 'text/plain' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `analytics-export-${new Date().toISOString().split('T')[0]}.${exportFormat === 'json' ? 'json' : 'txt'}`
+    a.click()
+    URL.revokeObjectURL(url)
+
+    toast.success('Analytics Exported', {
+      description: 'Analytics data has been downloaded'
     })
+    setShowExportAnalyticsDialog(false)
   }
 
   const handleDeleteResolvedTickets = () => {
-    toast.warning('Delete Tickets', {
-      description: 'This action would delete all resolved tickets'
-    })
+    setShowDeleteResolvedDialog(true)
   }
+
+  const handleConfirmDeleteResolved = async () => {
+    const resolvedTickets = allTickets.filter(t => t.status === 'solved' || t.status === 'closed')
+
+    if (resolvedTickets.length === 0) {
+      toast.info('No Tickets', { description: 'There are no resolved tickets to delete' })
+      return
+    }
+
+    try {
+      // In a real implementation, batch delete all resolved tickets
+      for (const ticket of resolvedTickets) {
+        await deleteTicket(ticket.id)
+      }
+      toast.success('Tickets Deleted', {
+        description: `${resolvedTickets.length} resolved tickets have been deleted`
+      })
+      setShowDeleteResolvedDialog(false)
+      refetch()
+    } catch (error) {
+      toast.error('Error', { description: 'Failed to delete resolved tickets' })
+    }
+  }
+
+  // Quick Actions for toolbar - now with dialog-based workflows
+  const ticketsQuickActions = [
+    { id: '1', label: 'New Ticket', icon: 'plus', action: () => setShowCreateDialog(true), variant: 'default' as const },
+    { id: '2', label: 'View Queue', icon: 'list', action: () => setShowViewQueueDialog(true), variant: 'default' as const },
+    { id: '3', label: 'Reports', icon: 'chart', action: () => setShowReportsDialog(true), variant: 'outline' as const },
+  ]
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-amber-50 dark:bg-none dark:bg-gray-900">
@@ -2215,7 +2460,7 @@ export default function TicketsClient() {
               maxItems={5}
             />
             <QuickActionsToolbar
-              actions={mockTicketsQuickActions}
+              actions={ticketsQuickActions}
               variant="grid"
             />
           </div>
@@ -2364,6 +2609,493 @@ export default function TicketsClient() {
             <Button variant="outline" onClick={() => setShowDeleteDialog(false)}>Cancel</Button>
             <Button variant="destructive" onClick={handleConfirmDelete} disabled={isDeleting}>
               {isDeleting ? 'Deleting...' : 'Delete Ticket'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* View Queue Dialog */}
+      <Dialog open={showViewQueueDialog} onOpenChange={setShowViewQueueDialog}>
+        <DialogContent className="sm:max-w-[700px]">
+          <DialogHeader>
+            <DialogTitle>Ticket Queue Overview</DialogTitle>
+            <DialogDescription>
+              View and manage pending tickets in the queue
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4 max-h-[60vh] overflow-y-auto">
+            <div className="grid grid-cols-3 gap-4 mb-4">
+              <Card className="bg-purple-50 dark:bg-purple-900/20">
+                <CardContent className="p-4 text-center">
+                  <p className="text-2xl font-bold text-purple-600">{stats.newTickets}</p>
+                  <p className="text-sm text-gray-500">New</p>
+                </CardContent>
+              </Card>
+              <Card className="bg-blue-50 dark:bg-blue-900/20">
+                <CardContent className="p-4 text-center">
+                  <p className="text-2xl font-bold text-blue-600">{stats.open}</p>
+                  <p className="text-sm text-gray-500">Open</p>
+                </CardContent>
+              </Card>
+              <Card className="bg-yellow-50 dark:bg-yellow-900/20">
+                <CardContent className="p-4 text-center">
+                  <p className="text-2xl font-bold text-yellow-600">{stats.pending}</p>
+                  <p className="text-sm text-gray-500">Pending</p>
+                </CardContent>
+              </Card>
+            </div>
+            <ScrollArea className="h-64">
+              <div className="space-y-2">
+                {allTickets.filter(t => ['new', 'open', 'pending'].includes(t.status)).map(ticket => (
+                  <div
+                    key={ticket.id}
+                    className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800"
+                  >
+                    <div className="flex items-center gap-3">
+                      <Badge className={getStatusColor(ticket.status)}>{ticket.status}</Badge>
+                      <div>
+                        <p className="font-medium text-sm">{ticket.ticketNumber}</p>
+                        <p className="text-xs text-gray-500 truncate max-w-[300px]">{ticket.subject}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Badge className={getPriorityColor(ticket.priority)}>{ticket.priority}</Badge>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          setSelectedTicket(ticket)
+                          setShowViewQueueDialog(false)
+                        }}
+                      >
+                        View
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowViewQueueDialog(false)}>Close</Button>
+            <Button onClick={() => {
+              setActiveTab('tickets')
+              setShowViewQueueDialog(false)
+            }} className="bg-gradient-to-r from-orange-500 to-amber-500">
+              View All Tickets
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Reports Dialog */}
+      <Dialog open={showReportsDialog} onOpenChange={setShowReportsDialog}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>Ticket Reports</DialogTitle>
+            <DialogDescription>
+              Quick analytics overview and report generation
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <Card>
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-3 mb-3">
+                    <BarChart3 className="w-5 h-5 text-orange-500" />
+                    <span className="font-medium">Volume</span>
+                  </div>
+                  <p className="text-2xl font-bold">{stats.total}</p>
+                  <p className="text-sm text-gray-500">Total tickets</p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-3 mb-3">
+                    <Timer className="w-5 h-5 text-blue-500" />
+                    <span className="font-medium">Response</span>
+                  </div>
+                  <p className="text-2xl font-bold">{stats.avgResponseTime}</p>
+                  <p className="text-sm text-gray-500">Avg response time</p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-3 mb-3">
+                    <Award className="w-5 h-5 text-yellow-500" />
+                    <span className="font-medium">CSAT</span>
+                  </div>
+                  <p className="text-2xl font-bold">{stats.csatScore}%</p>
+                  <p className="text-sm text-gray-500">Satisfaction score</p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-3 mb-3">
+                    <AlertTriangle className="w-5 h-5 text-red-500" />
+                    <span className="font-medium">SLA Risk</span>
+                  </div>
+                  <p className="text-2xl font-bold">{stats.slaAtRisk}</p>
+                  <p className="text-sm text-gray-500">Tickets at risk</p>
+                </CardContent>
+              </Card>
+            </div>
+            <div className="border-t pt-4">
+              <h4 className="font-medium mb-3">Status Distribution</h4>
+              <div className="space-y-2">
+                {[
+                  { label: 'New', count: stats.newTickets, color: 'purple' },
+                  { label: 'Open', count: stats.open, color: 'blue' },
+                  { label: 'Pending', count: stats.pending, color: 'yellow' },
+                  { label: 'Solved', count: stats.solved, color: 'green' },
+                ].map(item => (
+                  <div key={item.label} className="flex items-center gap-3">
+                    <span className="w-20 text-sm">{item.label}</span>
+                    <Progress value={stats.total > 0 ? (item.count / stats.total) * 100 : 0} className="flex-1 h-2" />
+                    <span className="w-8 text-sm text-right">{item.count}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowReportsDialog(false)}>Close</Button>
+            <Button onClick={() => {
+              setActiveTab('analytics')
+              setShowReportsDialog(false)
+            }} className="bg-gradient-to-r from-orange-500 to-amber-500">
+              Full Analytics
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Bulk Assign Dialog */}
+      <Dialog open={showBulkAssignDialog} onOpenChange={setShowBulkAssignDialog}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Bulk Assign Tickets</DialogTitle>
+            <DialogDescription>
+              Select an agent and filter to bulk assign multiple tickets at once
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="grid gap-4">
+              <div className="grid gap-2">
+                <Label>Filter Tickets</Label>
+                <Select value={bulkAssignFilter} onValueChange={(v: 'all' | 'unassigned' | 'urgent') => setBulkAssignFilter(v)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select filter" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="unassigned">Unassigned Only ({allTickets.filter(t => !t.assignee).length})</SelectItem>
+                    <SelectItem value="urgent">Urgent Unassigned ({allTickets.filter(t => t.priority === 'urgent' && !t.assignee).length})</SelectItem>
+                    <SelectItem value="all">All Unassigned ({allTickets.filter(t => !t.assignee).length})</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid gap-2">
+                <Label>Assign To Agent</Label>
+                <Select value={selectedAgentForBulk} onValueChange={setSelectedAgentForBulk}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select agent" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {mockAgents.filter(a => a.status === 'online').map(agent => (
+                      <SelectItem key={agent.id} value={agent.id}>
+                        <div className="flex items-center gap-2">
+                          <span>{agent.name}</span>
+                          <span className="text-gray-500">({agent.openTickets} open)</span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                {bulkAssignFilter === 'unassigned' && `${allTickets.filter(t => !t.assignee).length} tickets will be assigned`}
+                {bulkAssignFilter === 'urgent' && `${allTickets.filter(t => t.priority === 'urgent' && !t.assignee).length} urgent tickets will be assigned`}
+                {bulkAssignFilter === 'all' && `${allTickets.filter(t => !t.assignee).length} tickets will be assigned`}
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowBulkAssignDialog(false)}>Cancel</Button>
+            <Button onClick={handleConfirmBulkAssign} className="bg-gradient-to-r from-orange-500 to-amber-500">
+              Assign Tickets
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Agent Dialog */}
+      <Dialog open={showAddAgentDialog} onOpenChange={setShowAddAgentDialog}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Add New Agent</DialogTitle>
+            <DialogDescription>
+              Add a new support agent to your team
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="agent_name">Full Name *</Label>
+                <Input
+                  id="agent_name"
+                  value={newAgent.name}
+                  onChange={(e) => setNewAgent({ ...newAgent, name: e.target.value })}
+                  placeholder="John Doe"
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="agent_email">Email *</Label>
+                <Input
+                  id="agent_email"
+                  type="email"
+                  value={newAgent.email}
+                  onChange={(e) => setNewAgent({ ...newAgent, email: e.target.value })}
+                  placeholder="john@company.com"
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label>Team</Label>
+                <Select value={newAgent.team} onValueChange={(v) => setNewAgent({ ...newAgent, team: v })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select team" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Technical Support">Technical Support</SelectItem>
+                    <SelectItem value="Product Support">Product Support</SelectItem>
+                    <SelectItem value="Billing Support">Billing Support</SelectItem>
+                    <SelectItem value="Enterprise Support">Enterprise Support</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid gap-2">
+                <Label>Role</Label>
+                <Select value={newAgent.role} onValueChange={(v) => setNewAgent({ ...newAgent, role: v })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select role" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="agent">Support Agent</SelectItem>
+                    <SelectItem value="senior">Senior Agent</SelectItem>
+                    <SelectItem value="lead">Team Lead</SelectItem>
+                    <SelectItem value="manager">Manager</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAddAgentDialog(false)}>Cancel</Button>
+            <Button onClick={handleConfirmAddAgent} className="bg-gradient-to-r from-orange-500 to-amber-500">
+              Add Agent
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Full Report Dialog */}
+      <Dialog open={showFullReportDialog} onOpenChange={setShowFullReportDialog}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Generate Full Report</DialogTitle>
+            <DialogDescription>
+              Configure and download a comprehensive support report
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="grid gap-4">
+              <div className="grid gap-2">
+                <Label>Report Type</Label>
+                <Select value={reportType} onValueChange={(v: 'summary' | 'detailed' | 'agent-performance' | 'sla-compliance') => setReportType(v)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select report type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="summary">Summary Report</SelectItem>
+                    <SelectItem value="detailed">Detailed Report</SelectItem>
+                    <SelectItem value="agent-performance">Agent Performance</SelectItem>
+                    <SelectItem value="sla-compliance">SLA Compliance</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid gap-2">
+                <Label>Time Period</Label>
+                <Select value={reportPeriod} onValueChange={(v: 'week' | 'month' | 'quarter' | 'year') => setReportPeriod(v)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select time period" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="week">Last Week</SelectItem>
+                    <SelectItem value="month">Last Month</SelectItem>
+                    <SelectItem value="quarter">Last Quarter</SelectItem>
+                    <SelectItem value="year">Last Year</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+              <h4 className="font-medium mb-2">Report Preview</h4>
+              <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
+                <li>- Ticket volume and trends</li>
+                <li>- Response and resolution times</li>
+                <li>- Agent performance metrics</li>
+                <li>- SLA compliance statistics</li>
+                <li>- Customer satisfaction scores</li>
+              </ul>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowFullReportDialog(false)}>Cancel</Button>
+            <Button onClick={handleGenerateReport} className="bg-gradient-to-r from-orange-500 to-amber-500">
+              <Download className="w-4 h-4 mr-2" />
+              Download Report
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Export All Tickets Dialog */}
+      <Dialog open={showExportAllDialog} onOpenChange={setShowExportAllDialog}>
+        <DialogContent className="sm:max-w-[450px]">
+          <DialogHeader>
+            <DialogTitle>Export All Tickets</DialogTitle>
+            <DialogDescription>
+              Configure export options for ticket data
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="grid gap-4">
+              <div className="grid gap-2">
+                <Label>Export Format</Label>
+                <Select value={exportFormat} onValueChange={(v: 'csv' | 'json' | 'xlsx') => setExportFormat(v)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select format" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="csv">CSV (Spreadsheet)</SelectItem>
+                    <SelectItem value="json">JSON (Data)</SelectItem>
+                    <SelectItem value="xlsx">Excel (xlsx)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid gap-2">
+                <Label>Date Range</Label>
+                <Select value={exportDateRange} onValueChange={(v: 'all' | '7days' | '30days' | '90days') => setExportDateRange(v)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select date range" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Time ({allTickets.length} tickets)</SelectItem>
+                    <SelectItem value="7days">Last 7 Days</SelectItem>
+                    <SelectItem value="30days">Last 30 Days</SelectItem>
+                    <SelectItem value="90days">Last 90 Days</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Export includes: Ticket ID, Subject, Status, Priority, Customer, Category, Dates
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowExportAllDialog(false)}>Cancel</Button>
+            <Button onClick={handleConfirmExportAll} className="bg-gradient-to-r from-orange-500 to-amber-500">
+              <Download className="w-4 h-4 mr-2" />
+              Export Tickets
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Export Analytics Dialog */}
+      <Dialog open={showExportAnalyticsDialog} onOpenChange={setShowExportAnalyticsDialog}>
+        <DialogContent className="sm:max-w-[450px]">
+          <DialogHeader>
+            <DialogTitle>Export Analytics</DialogTitle>
+            <DialogDescription>
+              Export support analytics and performance data
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="grid gap-4">
+              <div className="grid gap-2">
+                <Label>Export Format</Label>
+                <Select value={exportFormat} onValueChange={(v: 'csv' | 'json' | 'xlsx') => setExportFormat(v)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select format" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="json">JSON (Structured Data)</SelectItem>
+                    <SelectItem value="csv">Plain Text (Summary)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+              <h4 className="font-medium mb-2">Analytics Data Includes:</h4>
+              <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
+                <li>- Ticket summary statistics</li>
+                <li>- Performance metrics (response/resolution times)</li>
+                <li>- Agent performance breakdown</li>
+                <li>- Channel distribution</li>
+                <li>- Priority distribution</li>
+              </ul>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowExportAnalyticsDialog(false)}>Cancel</Button>
+            <Button onClick={handleConfirmExportAnalytics} className="bg-gradient-to-r from-orange-500 to-amber-500">
+              <Download className="w-4 h-4 mr-2" />
+              Export Analytics
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Resolved Tickets Dialog */}
+      <Dialog open={showDeleteResolvedDialog} onOpenChange={setShowDeleteResolvedDialog}>
+        <DialogContent className="sm:max-w-[450px]">
+          <DialogHeader>
+            <DialogTitle className="text-red-600">Delete Resolved Tickets</DialogTitle>
+            <DialogDescription>
+              This action will permanently delete all resolved and closed tickets. This cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+              <div className="flex items-center gap-3 mb-3">
+                <AlertTriangle className="w-5 h-5 text-red-600" />
+                <span className="font-medium text-red-800 dark:text-red-200">Warning</span>
+              </div>
+              <p className="text-sm text-red-700 dark:text-red-300 mb-2">
+                You are about to delete:
+              </p>
+              <ul className="text-sm text-red-600 dark:text-red-400 space-y-1">
+                <li>- {allTickets.filter(t => t.status === 'solved').length} solved tickets</li>
+                <li>- {allTickets.filter(t => t.status === 'closed').length} closed tickets</li>
+                <li className="font-medium">- Total: {allTickets.filter(t => t.status === 'solved' || t.status === 'closed').length} tickets</li>
+              </ul>
+            </div>
+            <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Consider exporting your data before deletion for record-keeping purposes.
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowDeleteResolvedDialog(false)}>Cancel</Button>
+            <Button variant="destructive" onClick={handleConfirmDeleteResolved} disabled={isDeleting}>
+              {isDeleting ? 'Deleting...' : 'Delete All Resolved'}
             </Button>
           </DialogFooter>
         </DialogContent>

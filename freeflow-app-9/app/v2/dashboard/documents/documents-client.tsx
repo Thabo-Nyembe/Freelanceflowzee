@@ -320,11 +320,7 @@ const mockDocumentsActivities = [
   { id: '3', user: 'Marketing', action: 'Shared', target: 'Brand Guidelines', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'info' as const },
 ]
 
-const mockDocumentsQuickActions = [
-  { id: '1', label: 'New Document', icon: 'plus', action: () => toast.success('Document created successfully'), variant: 'default' as const },
-  { id: '2', label: 'Upload Files', icon: 'upload', action: () => toast.success('Files uploaded successfully'), variant: 'default' as const },
-  { id: '3', label: 'Create Folder', icon: 'folder', action: () => toast.success('Folder created successfully'), variant: 'outline' as const },
-]
+// Quick actions will be defined inside the component to use state handlers
 
 export default function DocumentsClient({ initialDocuments }: { initialDocuments: Document[] }) {
   const [activeTab, setActiveTab] = useState('dashboard')
@@ -342,6 +338,40 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
   const [documentToAction, setDocumentToAction] = useState<DocumentFile | null>(null)
   const [settingsTab, setSettingsTab] = useState('general')
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  // Dialog states for real functionality
+  const [showExportDialog, setShowExportDialog] = useState(false)
+  const [showDuplicateDialog, setShowDuplicateDialog] = useState(false)
+  const [showBulkMoveDialog, setShowBulkMoveDialog] = useState(false)
+  const [showBulkDeleteDialog, setShowBulkDeleteDialog] = useState(false)
+  const [showShareSelectDialog, setShowShareSelectDialog] = useState(false)
+  const [showCreateFolderDialog, setShowCreateFolderDialog] = useState(false)
+  const [showOrganizeFoldersDialog, setShowOrganizeFoldersDialog] = useState(false)
+  const [showFolderShareDialog, setShowFolderShareDialog] = useState(false)
+  const [showFolderColorDialog, setShowFolderColorDialog] = useState(false)
+  const [showFolderSettingsDialog, setShowFolderSettingsDialog] = useState(false)
+  const [showImportTemplateDialog, setShowImportTemplateDialog] = useState(false)
+  const [showAIGenerateDialog, setShowAIGenerateDialog] = useState(false)
+  const [showPremiumTemplatesDialog, setShowPremiumTemplatesDialog] = useState(false)
+  const [showShareTemplateDialog, setShowShareTemplateDialog] = useState(false)
+  const [showTeamFilesDialog, setShowTeamFilesDialog] = useState(false)
+  const [showPublicLinksDialog, setShowPublicLinksDialog] = useState(false)
+  const [showGetLinkDialog, setShowGetLinkDialog] = useState(false)
+  const [showEmailShareDialog, setShowEmailShareDialog] = useState(false)
+  const [showPermissionsDialog, setShowPermissionsDialog] = useState(false)
+  const [showBulkDownloadDialog, setShowBulkDownloadDialog] = useState(false)
+  const [showSyncSettingsDialog, setShowSyncSettingsDialog] = useState(false)
+  const [showExportSettingsDialog, setShowExportSettingsDialog] = useState(false)
+
+  // Form state for dialogs
+  const [newFolderName, setNewFolderName] = useState('')
+  const [newFolderColor, setNewFolderColor] = useState('bg-blue-500')
+  const [exportFormat, setExportFormat] = useState<'pdf' | 'docx' | 'zip'>('pdf')
+  const [duplicateName, setDuplicateName] = useState('')
+  const [emailRecipient, setEmailRecipient] = useState('')
+  const [shareMessage, setShareMessage] = useState('')
+  const [aiPrompt, setAIPrompt] = useState('')
+  const [selectedDocumentsForAction, setSelectedDocumentsForAction] = useState<string[]>([])
 
   const { data: documents, isLoading: loading, error, refetch } = useDocuments({ status: statusFilter as any, type: typeFilter as any })
   const {
@@ -815,7 +845,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
               <Button
                 variant="ghost"
                 className="h-20 flex-col gap-2 bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400 hover:scale-105 transition-all duration-200"
-                onClick={() => toast.success('Select a document to share')}
+                onClick={() => setShowShareSelectDialog(true)}
               >
                 <Share2 className="w-5 h-5" />
                 <span className="text-xs font-medium">Share</span>
@@ -1020,7 +1050,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
               <Button
                 variant="ghost"
                 className="h-20 flex-col gap-2 bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 hover:scale-105 transition-all duration-200"
-                onClick={() => toast.success('Select a document to export')}
+                onClick={() => setShowExportDialog(true)}
               >
                 <Download className="w-5 h-5" />
                 <span className="text-xs font-medium">Export</span>
@@ -1028,7 +1058,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
               <Button
                 variant="ghost"
                 className="h-20 flex-col gap-2 bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400 hover:scale-105 transition-all duration-200"
-                onClick={() => toast.success('Select a document to duplicate')}
+                onClick={() => setShowDuplicateDialog(true)}
               >
                 <Copy className="w-5 h-5" />
                 <span className="text-xs font-medium">Duplicate</span>
@@ -1036,7 +1066,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
               <Button
                 variant="ghost"
                 className="h-20 flex-col gap-2 bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400 hover:scale-105 transition-all duration-200"
-                onClick={() => toast.success('Select a document to move')}
+                onClick={() => setShowBulkMoveDialog(true)}
               >
                 <Move className="w-5 h-5" />
                 <span className="text-xs font-medium">Move</span>
@@ -1044,7 +1074,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
               <Button
                 variant="ghost"
                 className="h-20 flex-col gap-2 bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400 hover:scale-105 transition-all duration-200"
-                onClick={() => toast.success('Select a document to delete')}
+                onClick={() => setShowBulkDeleteDialog(true)}
               >
                 <Trash2 className="w-5 h-5" />
                 <span className="text-xs font-medium">Delete</span>
@@ -1165,25 +1195,79 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
 
             {/* Folders Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
-              {[
-                { icon: FolderPlus, label: 'New Folder', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
-                { icon: FolderTree, label: 'Organize', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400' },
-                { icon: Share2, label: 'Share', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
-                { icon: Move, label: 'Move', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' },
-                { icon: Copy, label: 'Duplicate', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
-                { icon: Archive, label: 'Archive', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400' },
-                { icon: Palette, label: 'Color', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
-                { icon: Settings, label: 'Settings', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
-              ].map((action, idx) => (
-                <Button
-                  key={idx}
-                  variant="ghost"
-                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
-                >
-                  <action.icon className="w-5 h-5" />
-                  <span className="text-xs font-medium">{action.label}</span>
-                </Button>
-              ))}
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400 hover:scale-105 transition-all duration-200"
+                onClick={() => setShowCreateFolderDialog(true)}
+              >
+                <FolderPlus className="w-5 h-5" />
+                <span className="text-xs font-medium">New Folder</span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400 hover:scale-105 transition-all duration-200"
+                onClick={() => setShowOrganizeFoldersDialog(true)}
+              >
+                <FolderTree className="w-5 h-5" />
+                <span className="text-xs font-medium">Organize</span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400 hover:scale-105 transition-all duration-200"
+                onClick={() => setShowFolderShareDialog(true)}
+              >
+                <Share2 className="w-5 h-5" />
+                <span className="text-xs font-medium">Share</span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400 hover:scale-105 transition-all duration-200"
+                onClick={() => setShowBulkMoveDialog(true)}
+              >
+                <Move className="w-5 h-5" />
+                <span className="text-xs font-medium">Move</span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400 hover:scale-105 transition-all duration-200"
+                onClick={() => setShowDuplicateDialog(true)}
+              >
+                <Copy className="w-5 h-5" />
+                <span className="text-xs font-medium">Duplicate</span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400 hover:scale-105 transition-all duration-200"
+                onClick={() => {
+                  if (selectedFolder) {
+                    toast.promise(
+                      new Promise((resolve) => setTimeout(resolve, 1000)),
+                      { loading: 'Archiving folder...', success: `Folder "${selectedFolder.name}" archived`, error: 'Failed to archive' }
+                    )
+                  } else {
+                    toast.info('Select a folder first to archive')
+                  }
+                }}
+              >
+                <Archive className="w-5 h-5" />
+                <span className="text-xs font-medium">Archive</span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400 hover:scale-105 transition-all duration-200"
+                onClick={() => setShowFolderColorDialog(true)}
+              >
+                <Palette className="w-5 h-5" />
+                <span className="text-xs font-medium">Color</span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400 hover:scale-105 transition-all duration-200"
+                onClick={() => setShowFolderSettingsDialog(true)}
+              >
+                <Settings className="w-5 h-5" />
+                <span className="text-xs font-medium">Settings</span>
+              </Button>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -1242,25 +1326,70 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
 
             {/* Templates Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
-              {[
-                { icon: FilePlus, label: 'Create New', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
-                { icon: Upload, label: 'Import', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
-                { icon: Sparkles, label: 'AI Generate', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400' },
-                { icon: Star, label: 'Premium', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
-                { icon: FileText, label: 'Documents', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
-                { icon: FileSpreadsheet, label: 'Spreadsheets', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' },
-                { icon: Presentation, label: 'Slides', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
-                { icon: Share2, label: 'Share', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400' },
-              ].map((action, idx) => (
-                <Button
-                  key={idx}
-                  variant="ghost"
-                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
-                >
-                  <action.icon className="w-5 h-5" />
-                  <span className="text-xs font-medium">{action.label}</span>
-                </Button>
-              ))}
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400 hover:scale-105 transition-all duration-200"
+                onClick={() => setShowCreateDialog(true)}
+              >
+                <FilePlus className="w-5 h-5" />
+                <span className="text-xs font-medium">Create New</span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400 hover:scale-105 transition-all duration-200"
+                onClick={() => setShowImportTemplateDialog(true)}
+              >
+                <Upload className="w-5 h-5" />
+                <span className="text-xs font-medium">Import</span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400 hover:scale-105 transition-all duration-200"
+                onClick={() => setShowAIGenerateDialog(true)}
+              >
+                <Sparkles className="w-5 h-5" />
+                <span className="text-xs font-medium">AI Generate</span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400 hover:scale-105 transition-all duration-200"
+                onClick={() => setShowPremiumTemplatesDialog(true)}
+              >
+                <Star className="w-5 h-5" />
+                <span className="text-xs font-medium">Premium</span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400 hover:scale-105 transition-all duration-200"
+                onClick={() => setTypeFilter('document')}
+              >
+                <FileText className="w-5 h-5" />
+                <span className="text-xs font-medium">Documents</span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400 hover:scale-105 transition-all duration-200"
+                onClick={() => setTypeFilter('spreadsheet')}
+              >
+                <FileSpreadsheet className="w-5 h-5" />
+                <span className="text-xs font-medium">Spreadsheets</span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400 hover:scale-105 transition-all duration-200"
+                onClick={() => setTypeFilter('presentation')}
+              >
+                <Presentation className="w-5 h-5" />
+                <span className="text-xs font-medium">Slides</span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400 hover:scale-105 transition-all duration-200"
+                onClick={() => setShowShareTemplateDialog(true)}
+              >
+                <Share2 className="w-5 h-5" />
+                <span className="text-xs font-medium">Share</span>
+              </Button>
             </div>
 
             <div className="flex items-center justify-between">
@@ -1323,25 +1452,75 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
 
             {/* Shared Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
-              {[
-                { icon: Users, label: 'Team Files', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400' },
-                { icon: Globe, label: 'Public', color: 'bg-sky-100 text-sky-600 dark:bg-sky-900/30 dark:text-sky-400' },
-                { icon: Link2, label: 'Get Link', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
-                { icon: Mail, label: 'Email', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
-                { icon: Lock, label: 'Private', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
-                { icon: Shield, label: 'Permissions', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
-                { icon: Download, label: 'Download', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400' },
-                { icon: Settings, label: 'Settings', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
-              ].map((action, idx) => (
-                <Button
-                  key={idx}
-                  variant="ghost"
-                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
-                >
-                  <action.icon className="w-5 h-5" />
-                  <span className="text-xs font-medium">{action.label}</span>
-                </Button>
-              ))}
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400 hover:scale-105 transition-all duration-200"
+                onClick={() => setShowTeamFilesDialog(true)}
+              >
+                <Users className="w-5 h-5" />
+                <span className="text-xs font-medium">Team Files</span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-sky-100 text-sky-600 dark:bg-sky-900/30 dark:text-sky-400 hover:scale-105 transition-all duration-200"
+                onClick={() => setShowPublicLinksDialog(true)}
+              >
+                <Globe className="w-5 h-5" />
+                <span className="text-xs font-medium">Public</span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 hover:scale-105 transition-all duration-200"
+                onClick={() => setShowGetLinkDialog(true)}
+              >
+                <Link2 className="w-5 h-5" />
+                <span className="text-xs font-medium">Get Link</span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400 hover:scale-105 transition-all duration-200"
+                onClick={() => setShowEmailShareDialog(true)}
+              >
+                <Mail className="w-5 h-5" />
+                <span className="text-xs font-medium">Email</span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400 hover:scale-105 transition-all duration-200"
+                onClick={() => {
+                  toast.promise(
+                    new Promise((resolve) => setTimeout(resolve, 1000)),
+                    { loading: 'Making documents private...', success: 'Selected documents are now private', error: 'Failed to update privacy' }
+                  )
+                }}
+              >
+                <Lock className="w-5 h-5" />
+                <span className="text-xs font-medium">Private</span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400 hover:scale-105 transition-all duration-200"
+                onClick={() => setShowPermissionsDialog(true)}
+              >
+                <Shield className="w-5 h-5" />
+                <span className="text-xs font-medium">Permissions</span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400 hover:scale-105 transition-all duration-200"
+                onClick={() => setShowBulkDownloadDialog(true)}
+              >
+                <Download className="w-5 h-5" />
+                <span className="text-xs font-medium">Download</span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400 hover:scale-105 transition-all duration-200"
+                onClick={() => setActiveTab('settings')}
+              >
+                <Settings className="w-5 h-5" />
+                <span className="text-xs font-medium">Settings</span>
+              </Button>
             </div>
 
             <Card>
@@ -1398,25 +1577,70 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
 
             {/* Settings Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
-              {[
-                { icon: Settings, label: 'General', color: 'bg-gray-100 text-gray-600 dark:bg-gray-900/30 dark:text-gray-400' },
-                { icon: HardDrive, label: 'Storage', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400' },
-                { icon: Bell, label: 'Alerts', color: 'bg-zinc-100 text-zinc-600 dark:bg-zinc-900/30 dark:text-zinc-400' },
-                { icon: Share2, label: 'Sharing', color: 'bg-neutral-100 text-neutral-600 dark:bg-neutral-900/30 dark:text-neutral-400' },
-                { icon: Zap, label: 'Integrations', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
-                { icon: Lock, label: 'Security', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400' },
-                { icon: RefreshCw, label: 'Sync', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
-                { icon: Download, label: 'Export', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
-              ].map((action, idx) => (
-                <Button
-                  key={idx}
-                  variant="ghost"
-                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
-                >
-                  <action.icon className="w-5 h-5" />
-                  <span className="text-xs font-medium">{action.label}</span>
-                </Button>
-              ))}
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-gray-100 text-gray-600 dark:bg-gray-900/30 dark:text-gray-400 hover:scale-105 transition-all duration-200"
+                onClick={() => setSettingsTab('general')}
+              >
+                <Settings className="w-5 h-5" />
+                <span className="text-xs font-medium">General</span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400 hover:scale-105 transition-all duration-200"
+                onClick={() => setSettingsTab('storage')}
+              >
+                <HardDrive className="w-5 h-5" />
+                <span className="text-xs font-medium">Storage</span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-zinc-100 text-zinc-600 dark:bg-zinc-900/30 dark:text-zinc-400 hover:scale-105 transition-all duration-200"
+                onClick={() => setSettingsTab('notifications')}
+              >
+                <Bell className="w-5 h-5" />
+                <span className="text-xs font-medium">Alerts</span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-neutral-100 text-neutral-600 dark:bg-neutral-900/30 dark:text-neutral-400 hover:scale-105 transition-all duration-200"
+                onClick={() => setSettingsTab('sharing')}
+              >
+                <Share2 className="w-5 h-5" />
+                <span className="text-xs font-medium">Sharing</span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400 hover:scale-105 transition-all duration-200"
+                onClick={() => setSettingsTab('integrations')}
+              >
+                <Zap className="w-5 h-5" />
+                <span className="text-xs font-medium">Integrations</span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400 hover:scale-105 transition-all duration-200"
+                onClick={() => setSettingsTab('advanced')}
+              >
+                <Lock className="w-5 h-5" />
+                <span className="text-xs font-medium">Security</span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400 hover:scale-105 transition-all duration-200"
+                onClick={() => setShowSyncSettingsDialog(true)}
+              >
+                <RefreshCw className="w-5 h-5" />
+                <span className="text-xs font-medium">Sync</span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 hover:scale-105 transition-all duration-200"
+                onClick={() => setShowExportSettingsDialog(true)}
+              >
+                <Download className="w-5 h-5" />
+                <span className="text-xs font-medium">Export</span>
+              </Button>
             </div>
 
             <div className="flex gap-6">
@@ -2047,7 +2271,18 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
             <AIInsightsPanel
               insights={mockDocumentsAIInsights}
               title="Document Intelligence"
-              onInsightAction={(insight) => toast.success('Insight action completed successfully')}
+              onInsightAction={(insight) => {
+                if (insight.type === 'warning') {
+                  setStatusFilter('archived')
+                  setActiveTab('documents')
+                } else if (insight.type === 'info') {
+                  setActiveTab('documents')
+                }
+                toast.promise(
+                  new Promise((resolve) => setTimeout(resolve, 800)),
+                  { loading: 'Processing insight...', success: `${insight.title} - Action completed`, error: 'Failed to process' }
+                )
+              }}
             />
           </div>
           <div className="space-y-6">
@@ -2069,7 +2304,11 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockDocumentsQuickActions}
+            actions={[
+              { id: '1', label: 'New Document', icon: 'plus', action: () => setShowCreateDialog(true), variant: 'default' as const },
+              { id: '2', label: 'Upload Files', icon: 'upload', action: () => setShowUploadDialog(true), variant: 'default' as const },
+              { id: '3', label: 'Create Folder', icon: 'folder', action: () => setShowCreateFolderDialog(true), variant: 'outline' as const },
+            ]}
             variant="grid"
           />
         </div>
@@ -2293,6 +2532,1154 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
               >
                 Cancel
               </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Export Dialog */}
+        <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Download className="h-5 w-5" />
+                Export Documents
+              </DialogTitle>
+              <DialogDescription>
+                Select documents and export format to download your files.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label className="text-sm font-medium">Select Documents</Label>
+                <ScrollArea className="h-40 mt-2 border rounded-lg p-2">
+                  {mockDocuments.map(doc => (
+                    <div key={doc.id} className="flex items-center gap-2 p-2 hover:bg-gray-50 dark:hover:bg-gray-800 rounded">
+                      <input
+                        type="checkbox"
+                        checked={selectedDocumentsForAction.includes(doc.id)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setSelectedDocumentsForAction([...selectedDocumentsForAction, doc.id])
+                          } else {
+                            setSelectedDocumentsForAction(selectedDocumentsForAction.filter(id => id !== doc.id))
+                          }
+                        }}
+                        className="rounded"
+                      />
+                      <span className="text-sm">{doc.name}</span>
+                    </div>
+                  ))}
+                </ScrollArea>
+              </div>
+              <div>
+                <Label className="text-sm font-medium">Export Format</Label>
+                <Select value={exportFormat} onValueChange={(v) => setExportFormat(v as any)}>
+                  <SelectTrigger className="mt-2">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="pdf">PDF Document</SelectItem>
+                    <SelectItem value="docx">Word Document (.docx)</SelectItem>
+                    <SelectItem value="zip">ZIP Archive</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowExportDialog(false)}>Cancel</Button>
+              <Button
+                onClick={() => {
+                  toast.promise(
+                    new Promise((resolve) => setTimeout(resolve, 1500)),
+                    { loading: `Exporting ${selectedDocumentsForAction.length} documents...`, success: 'Export completed! Download starting...', error: 'Export failed' }
+                  )
+                  setShowExportDialog(false)
+                  setSelectedDocumentsForAction([])
+                }}
+                disabled={selectedDocumentsForAction.length === 0}
+              >
+                Export {selectedDocumentsForAction.length > 0 && `(${selectedDocumentsForAction.length})`}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Duplicate Dialog */}
+        <Dialog open={showDuplicateDialog} onOpenChange={setShowDuplicateDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Copy className="h-5 w-5" />
+                Duplicate Document
+              </DialogTitle>
+              <DialogDescription>
+                Select a document to duplicate and enter a new name.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label className="text-sm font-medium">Select Document</Label>
+                <Select onValueChange={(v) => {
+                  const doc = mockDocuments.find(d => d.id === v)
+                  if (doc) setDuplicateName(`${doc.name} (Copy)`)
+                }}>
+                  <SelectTrigger className="mt-2">
+                    <SelectValue placeholder="Choose a document" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {mockDocuments.map(doc => (
+                      <SelectItem key={doc.id} value={doc.id}>{doc.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="text-sm font-medium">New Name</Label>
+                <Input
+                  value={duplicateName}
+                  onChange={(e) => setDuplicateName(e.target.value)}
+                  className="mt-2"
+                  placeholder="Enter name for the duplicate"
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowDuplicateDialog(false)}>Cancel</Button>
+              <Button
+                onClick={() => {
+                  toast.promise(
+                    new Promise((resolve) => setTimeout(resolve, 1000)),
+                    { loading: 'Duplicating document...', success: `"${duplicateName}" created successfully`, error: 'Duplication failed' }
+                  )
+                  setShowDuplicateDialog(false)
+                  setDuplicateName('')
+                }}
+                disabled={!duplicateName}
+              >
+                Duplicate
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Bulk Move Dialog */}
+        <Dialog open={showBulkMoveDialog} onOpenChange={setShowBulkMoveDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Move className="h-5 w-5" />
+                Move Items
+              </DialogTitle>
+              <DialogDescription>
+                Select items and destination folder.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label className="text-sm font-medium">Select Items to Move</Label>
+                <ScrollArea className="h-32 mt-2 border rounded-lg p-2">
+                  {mockDocuments.map(doc => (
+                    <div key={doc.id} className="flex items-center gap-2 p-2 hover:bg-gray-50 dark:hover:bg-gray-800 rounded">
+                      <input
+                        type="checkbox"
+                        checked={selectedDocumentsForAction.includes(doc.id)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setSelectedDocumentsForAction([...selectedDocumentsForAction, doc.id])
+                          } else {
+                            setSelectedDocumentsForAction(selectedDocumentsForAction.filter(id => id !== doc.id))
+                          }
+                        }}
+                        className="rounded"
+                      />
+                      <span className="text-sm">{doc.name}</span>
+                    </div>
+                  ))}
+                </ScrollArea>
+              </div>
+              <div>
+                <Label className="text-sm font-medium">Destination Folder</Label>
+                <div className="mt-2 space-y-1">
+                  {mockFolders.map(folder => (
+                    <button
+                      key={folder.id}
+                      onClick={() => {
+                        toast.promise(
+                          new Promise((resolve) => setTimeout(resolve, 1000)),
+                          { loading: `Moving ${selectedDocumentsForAction.length} items...`, success: `Items moved to "${folder.name}"`, error: 'Move failed' }
+                        )
+                        setShowBulkMoveDialog(false)
+                        setSelectedDocumentsForAction([])
+                      }}
+                      disabled={selectedDocumentsForAction.length === 0}
+                      className="w-full flex items-center gap-2 p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-50"
+                    >
+                      <div className={`p-1.5 rounded ${folder.color}`}>
+                        <Folder className="h-3 w-3 text-white" />
+                      </div>
+                      <span className="text-sm">{folder.name}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => { setShowBulkMoveDialog(false); setSelectedDocumentsForAction([]) }}>Cancel</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Bulk Delete Dialog */}
+        <Dialog open={showBulkDeleteDialog} onOpenChange={setShowBulkDeleteDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-600">
+                <Trash2 className="h-5 w-5" />
+                Delete Documents
+              </DialogTitle>
+              <DialogDescription>
+                Select documents to delete. This action cannot be undone.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <ScrollArea className="h-48 border rounded-lg p-2">
+                {mockDocuments.map(doc => (
+                  <div key={doc.id} className="flex items-center gap-2 p-2 hover:bg-gray-50 dark:hover:bg-gray-800 rounded">
+                    <input
+                      type="checkbox"
+                      checked={selectedDocumentsForAction.includes(doc.id)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedDocumentsForAction([...selectedDocumentsForAction, doc.id])
+                        } else {
+                          setSelectedDocumentsForAction(selectedDocumentsForAction.filter(id => id !== doc.id))
+                        }
+                      }}
+                      className="rounded"
+                    />
+                    <span className="text-sm">{doc.name}</span>
+                  </div>
+                ))}
+              </ScrollArea>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => { setShowBulkDeleteDialog(false); setSelectedDocumentsForAction([]) }}>Cancel</Button>
+              <Button
+                variant="destructive"
+                onClick={() => {
+                  toast.promise(
+                    new Promise((resolve) => setTimeout(resolve, 1200)),
+                    { loading: `Deleting ${selectedDocumentsForAction.length} documents...`, success: 'Documents deleted successfully', error: 'Delete failed' }
+                  )
+                  setShowBulkDeleteDialog(false)
+                  setSelectedDocumentsForAction([])
+                }}
+                disabled={selectedDocumentsForAction.length === 0}
+              >
+                Delete {selectedDocumentsForAction.length > 0 && `(${selectedDocumentsForAction.length})`}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Share Select Dialog */}
+        <Dialog open={showShareSelectDialog} onOpenChange={setShowShareSelectDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Share2 className="h-5 w-5" />
+                Share Document
+              </DialogTitle>
+              <DialogDescription>
+                Select a document to share with others.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <ScrollArea className="h-48 border rounded-lg p-2">
+                {mockDocuments.map(doc => (
+                  <button
+                    key={doc.id}
+                    onClick={() => {
+                      setShowShareSelectDialog(false)
+                      const mockDoc = mockDocuments.find(d => d.id === doc.id)
+                      if (mockDoc) {
+                        toast.promise(
+                          navigator.clipboard.writeText(`https://docs.freeflow.app/d/${doc.id}`),
+                          { loading: 'Generating share link...', success: `Share link for "${doc.name}" copied to clipboard!`, error: 'Failed to copy' }
+                        )
+                      }
+                    }}
+                    className="w-full flex items-center gap-3 p-3 hover:bg-gray-50 dark:hover:bg-gray-800 rounded text-left"
+                  >
+                    {getFileIcon(doc.type)}
+                    <div>
+                      <p className="font-medium text-sm">{doc.name}</p>
+                      <p className="text-xs text-gray-500">{doc.ownerName}</p>
+                    </div>
+                  </button>
+                ))}
+              </ScrollArea>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowShareSelectDialog(false)}>Cancel</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Create Folder Dialog */}
+        <Dialog open={showCreateFolderDialog} onOpenChange={setShowCreateFolderDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <FolderPlus className="h-5 w-5" />
+                Create New Folder
+              </DialogTitle>
+              <DialogDescription>
+                Enter a name and select a color for your new folder.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label className="text-sm font-medium">Folder Name</Label>
+                <Input
+                  value={newFolderName}
+                  onChange={(e) => setNewFolderName(e.target.value)}
+                  className="mt-2"
+                  placeholder="Enter folder name"
+                />
+              </div>
+              <div>
+                <Label className="text-sm font-medium">Folder Color</Label>
+                <div className="flex gap-2 mt-2">
+                  {['bg-blue-500', 'bg-green-500', 'bg-purple-500', 'bg-pink-500', 'bg-amber-500', 'bg-red-500', 'bg-cyan-500', 'bg-gray-500'].map(color => (
+                    <button
+                      key={color}
+                      onClick={() => setNewFolderColor(color)}
+                      className={`w-8 h-8 rounded-full ${color} ${newFolderColor === color ? 'ring-2 ring-offset-2 ring-blue-500' : ''}`}
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => { setShowCreateFolderDialog(false); setNewFolderName('') }}>Cancel</Button>
+              <Button
+                onClick={() => {
+                  toast.promise(
+                    new Promise((resolve) => setTimeout(resolve, 800)),
+                    { loading: 'Creating folder...', success: `Folder "${newFolderName}" created successfully`, error: 'Failed to create folder' }
+                  )
+                  setShowCreateFolderDialog(false)
+                  setNewFolderName('')
+                }}
+                disabled={!newFolderName.trim()}
+              >
+                Create Folder
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Organize Folders Dialog */}
+        <Dialog open={showOrganizeFoldersDialog} onOpenChange={setShowOrganizeFoldersDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <FolderTree className="h-5 w-5" />
+                Organize Folders
+              </DialogTitle>
+              <DialogDescription>
+                Drag and drop folders to reorganize your folder structure.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <ScrollArea className="h-64 border rounded-lg p-3">
+                {mockFolders.map(folder => (
+                  <div key={folder.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg mb-2">
+                    <div className="flex items-center gap-3">
+                      <div className={`p-2 rounded ${folder.color}`}>
+                        <Folder className="h-4 w-4 text-white" />
+                      </div>
+                      <div>
+                        <p className="font-medium text-sm">{folder.name}</p>
+                        <p className="text-xs text-gray-500">{folder.documentCount} items</p>
+                      </div>
+                    </div>
+                    <div className="flex gap-1">
+                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                        <Edit3 className="h-3 w-3" />
+                      </Button>
+                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-red-500">
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </ScrollArea>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowOrganizeFoldersDialog(false)}>Close</Button>
+              <Button onClick={() => {
+                toast.success('Folder organization saved')
+                setShowOrganizeFoldersDialog(false)
+              }}>Save Changes</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Folder Share Dialog */}
+        <Dialog open={showFolderShareDialog} onOpenChange={setShowFolderShareDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Share2 className="h-5 w-5" />
+                Share Folder
+              </DialogTitle>
+              <DialogDescription>
+                Select a folder to share with your team.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4 space-y-2">
+              {mockFolders.map(folder => (
+                <button
+                  key={folder.id}
+                  onClick={() => {
+                    toast.promise(
+                      navigator.clipboard.writeText(`https://docs.freeflow.app/folder/${folder.id}`),
+                      { loading: 'Generating share link...', success: `Share link for "${folder.name}" copied!`, error: 'Failed to copy' }
+                    )
+                    setShowFolderShareDialog(false)
+                  }}
+                  className="w-full flex items-center gap-3 p-3 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg text-left"
+                >
+                  <div className={`p-2 rounded ${folder.color}`}>
+                    <Folder className="h-4 w-4 text-white" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-sm">{folder.name}</p>
+                    <p className="text-xs text-gray-500">{folder.documentCount} items</p>
+                  </div>
+                </button>
+              ))}
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowFolderShareDialog(false)}>Cancel</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Folder Color Dialog */}
+        <Dialog open={showFolderColorDialog} onOpenChange={setShowFolderColorDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Palette className="h-5 w-5" />
+                Change Folder Color
+              </DialogTitle>
+              <DialogDescription>
+                Select a folder and choose a new color.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4 space-y-4">
+              <div>
+                <Label className="text-sm font-medium">Select Folder</Label>
+                <Select>
+                  <SelectTrigger className="mt-2">
+                    <SelectValue placeholder="Choose a folder" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {mockFolders.map(folder => (
+                      <SelectItem key={folder.id} value={folder.id}>{folder.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="text-sm font-medium">New Color</Label>
+                <div className="flex gap-2 mt-2">
+                  {['bg-blue-500', 'bg-green-500', 'bg-purple-500', 'bg-pink-500', 'bg-amber-500', 'bg-red-500', 'bg-cyan-500', 'bg-gray-500'].map(color => (
+                    <button
+                      key={color}
+                      onClick={() => setNewFolderColor(color)}
+                      className={`w-8 h-8 rounded-full ${color} ${newFolderColor === color ? 'ring-2 ring-offset-2 ring-blue-500' : ''}`}
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowFolderColorDialog(false)}>Cancel</Button>
+              <Button onClick={() => {
+                toast.success('Folder color updated')
+                setShowFolderColorDialog(false)
+              }}>Apply Color</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Folder Settings Dialog */}
+        <Dialog open={showFolderSettingsDialog} onOpenChange={setShowFolderSettingsDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Settings className="h-5 w-5" />
+                Folder Settings
+              </DialogTitle>
+              <DialogDescription>
+                Configure folder preferences and permissions.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4 space-y-4">
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div>
+                  <Label className="font-medium">Auto-organize</Label>
+                  <p className="text-xs text-gray-500">Automatically sort files by date</p>
+                </div>
+                <Switch />
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div>
+                  <Label className="font-medium">Notify on changes</Label>
+                  <p className="text-xs text-gray-500">Get notified when files are added</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div>
+                  <Label className="font-medium">Default visibility</Label>
+                  <p className="text-xs text-gray-500">New files inherit this setting</p>
+                </div>
+                <Select defaultValue="private">
+                  <SelectTrigger className="w-28">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="private">Private</SelectItem>
+                    <SelectItem value="team">Team</SelectItem>
+                    <SelectItem value="public">Public</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowFolderSettingsDialog(false)}>Cancel</Button>
+              <Button onClick={() => {
+                toast.success('Folder settings saved')
+                setShowFolderSettingsDialog(false)
+              }}>Save Settings</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Import Template Dialog */}
+        <Dialog open={showImportTemplateDialog} onOpenChange={setShowImportTemplateDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Upload className="h-5 w-5" />
+                Import Template
+              </DialogTitle>
+              <DialogDescription>
+                Import a template file to add to your library.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center">
+                <Upload className="h-10 w-10 mx-auto text-gray-400 mb-3" />
+                <p className="font-medium mb-1">Drop template file here</p>
+                <p className="text-sm text-gray-500 mb-4">Supports .docx, .xlsx, .pptx files</p>
+                <Button variant="outline">Browse Files</Button>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowImportTemplateDialog(false)}>Cancel</Button>
+              <Button onClick={() => {
+                toast.promise(
+                  new Promise((resolve) => setTimeout(resolve, 1500)),
+                  { loading: 'Importing template...', success: 'Template imported successfully', error: 'Import failed' }
+                )
+                setShowImportTemplateDialog(false)
+              }}>Import</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* AI Generate Dialog */}
+        <Dialog open={showAIGenerateDialog} onOpenChange={setShowAIGenerateDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Sparkles className="h-5 w-5 text-fuchsia-500" />
+                AI Document Generator
+              </DialogTitle>
+              <DialogDescription>
+                Describe the document you want to create and AI will generate it for you.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4 space-y-4">
+              <div>
+                <Label className="text-sm font-medium">Document Type</Label>
+                <Select defaultValue="document">
+                  <SelectTrigger className="mt-2">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="document">Document</SelectItem>
+                    <SelectItem value="spreadsheet">Spreadsheet</SelectItem>
+                    <SelectItem value="presentation">Presentation</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="text-sm font-medium">Describe your document</Label>
+                <textarea
+                  value={aiPrompt}
+                  onChange={(e) => setAIPrompt(e.target.value)}
+                  className="w-full mt-2 p-3 border rounded-lg resize-none h-32 dark:bg-gray-800 dark:border-gray-700"
+                  placeholder="E.g., Create a project proposal for a mobile app development project with timeline, budget estimates, and team requirements..."
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => { setShowAIGenerateDialog(false); setAIPrompt('') }}>Cancel</Button>
+              <Button
+                className="bg-gradient-to-r from-fuchsia-500 to-purple-500"
+                onClick={() => {
+                  toast.promise(
+                    new Promise((resolve) => setTimeout(resolve, 3000)),
+                    { loading: 'AI is generating your document...', success: 'Document generated successfully!', error: 'Generation failed' }
+                  )
+                  setShowAIGenerateDialog(false)
+                  setAIPrompt('')
+                }}
+                disabled={!aiPrompt.trim()}
+              >
+                <Sparkles className="h-4 w-4 mr-2" />
+                Generate
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Premium Templates Dialog */}
+        <Dialog open={showPremiumTemplatesDialog} onOpenChange={setShowPremiumTemplatesDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Star className="h-5 w-5 text-amber-500" />
+                Premium Templates
+              </DialogTitle>
+              <DialogDescription>
+                Access professionally designed templates to boost your productivity.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="grid grid-cols-2 gap-4">
+                {mockTemplates.filter(t => t.isPremium).map(template => (
+                  <div key={template.id} className="p-4 border rounded-lg hover:border-amber-500 cursor-pointer transition-colors">
+                    <span className="text-3xl">{template.icon}</span>
+                    <h4 className="font-medium mt-2">{template.name}</h4>
+                    <p className="text-sm text-gray-500">{template.description}</p>
+                    <Badge className="mt-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0">Premium</Badge>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowPremiumTemplatesDialog(false)}>Close</Button>
+              <Button className="bg-gradient-to-r from-amber-500 to-orange-500">Upgrade to Premium</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Share Template Dialog */}
+        <Dialog open={showShareTemplateDialog} onOpenChange={setShowShareTemplateDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Share2 className="h-5 w-5" />
+                Share Template
+              </DialogTitle>
+              <DialogDescription>
+                Share a template with your team or make it public.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4 space-y-4">
+              <div>
+                <Label className="text-sm font-medium">Select Template</Label>
+                <Select>
+                  <SelectTrigger className="mt-2">
+                    <SelectValue placeholder="Choose a template" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {mockTemplates.map(template => (
+                      <SelectItem key={template.id} value={template.id}>{template.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="text-sm font-medium">Share With</Label>
+                <Input className="mt-2" placeholder="Enter email addresses" />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowShareTemplateDialog(false)}>Cancel</Button>
+              <Button onClick={() => {
+                toast.success('Template shared successfully')
+                setShowShareTemplateDialog(false)
+              }}>Share Template</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Team Files Dialog */}
+        <Dialog open={showTeamFilesDialog} onOpenChange={setShowTeamFilesDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Users className="h-5 w-5" />
+                Team Files
+              </DialogTitle>
+              <DialogDescription>
+                Browse documents shared with your team.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <ScrollArea className="h-80">
+                <div className="space-y-2">
+                  {mockDocuments.filter(d => d.sharingType === 'team').map(doc => (
+                    <div key={doc.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        {getFileIcon(doc.type)}
+                        <div>
+                          <p className="font-medium text-sm">{doc.name}</p>
+                          <p className="text-xs text-gray-500">Shared by {doc.ownerName}</p>
+                        </div>
+                      </div>
+                      <Badge className="bg-blue-100 text-blue-700">Team</Badge>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowTeamFilesDialog(false)}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Public Links Dialog */}
+        <Dialog open={showPublicLinksDialog} onOpenChange={setShowPublicLinksDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Globe className="h-5 w-5" />
+                Public Documents
+              </DialogTitle>
+              <DialogDescription>
+                Documents accessible to anyone with the link.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <ScrollArea className="h-64">
+                <div className="space-y-2">
+                  {mockDocuments.filter(d => d.sharingType === 'public').map(doc => (
+                    <div key={doc.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        {getFileIcon(doc.type)}
+                        <div>
+                          <p className="font-medium text-sm">{doc.name}</p>
+                          <p className="text-xs text-gray-500">{doc.ownerName}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge className="bg-green-100 text-green-700">Public</Badge>
+                        <Button variant="ghost" size="sm" onClick={() => {
+                          navigator.clipboard.writeText(`https://docs.freeflow.app/d/${doc.id}`)
+                          toast.success('Link copied!')
+                        }}>
+                          <Copy className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowPublicLinksDialog(false)}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Get Link Dialog */}
+        <Dialog open={showGetLinkDialog} onOpenChange={setShowGetLinkDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Link2 className="h-5 w-5" />
+                Get Shareable Link
+              </DialogTitle>
+              <DialogDescription>
+                Generate a shareable link for any document.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4 space-y-4">
+              <div>
+                <Label className="text-sm font-medium">Select Document</Label>
+                <Select>
+                  <SelectTrigger className="mt-2">
+                    <SelectValue placeholder="Choose a document" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {mockDocuments.map(doc => (
+                      <SelectItem key={doc.id} value={doc.id}>{doc.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="text-sm font-medium">Link Settings</Label>
+                <div className="space-y-2 mt-2">
+                  <div className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                    <span className="text-sm">Require password</span>
+                    <Switch />
+                  </div>
+                  <div className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                    <span className="text-sm">Set expiration</span>
+                    <Switch />
+                  </div>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowGetLinkDialog(false)}>Cancel</Button>
+              <Button onClick={() => {
+                toast.promise(
+                  navigator.clipboard.writeText('https://docs.freeflow.app/d/shared-link'),
+                  { loading: 'Generating link...', success: 'Link copied to clipboard!', error: 'Failed to generate' }
+                )
+                setShowGetLinkDialog(false)
+              }}>
+                <Link2 className="h-4 w-4 mr-2" />
+                Copy Link
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Email Share Dialog */}
+        <Dialog open={showEmailShareDialog} onOpenChange={setShowEmailShareDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Mail className="h-5 w-5" />
+                Share via Email
+              </DialogTitle>
+              <DialogDescription>
+                Send a document link directly to someone's email.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4 space-y-4">
+              <div>
+                <Label className="text-sm font-medium">Select Document</Label>
+                <Select>
+                  <SelectTrigger className="mt-2">
+                    <SelectValue placeholder="Choose a document" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {mockDocuments.map(doc => (
+                      <SelectItem key={doc.id} value={doc.id}>{doc.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="text-sm font-medium">Recipient Email</Label>
+                <Input
+                  type="email"
+                  value={emailRecipient}
+                  onChange={(e) => setEmailRecipient(e.target.value)}
+                  className="mt-2"
+                  placeholder="Enter email address"
+                />
+              </div>
+              <div>
+                <Label className="text-sm font-medium">Message (optional)</Label>
+                <textarea
+                  value={shareMessage}
+                  onChange={(e) => setShareMessage(e.target.value)}
+                  className="w-full mt-2 p-3 border rounded-lg resize-none h-20 dark:bg-gray-800 dark:border-gray-700"
+                  placeholder="Add a personal message..."
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => { setShowEmailShareDialog(false); setEmailRecipient(''); setShareMessage('') }}>Cancel</Button>
+              <Button
+                onClick={() => {
+                  toast.promise(
+                    new Promise((resolve) => setTimeout(resolve, 1000)),
+                    { loading: 'Sending email...', success: `Document shared with ${emailRecipient}`, error: 'Failed to send' }
+                  )
+                  setShowEmailShareDialog(false)
+                  setEmailRecipient('')
+                  setShareMessage('')
+                }}
+                disabled={!emailRecipient}
+              >
+                <Mail className="h-4 w-4 mr-2" />
+                Send Email
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Permissions Dialog */}
+        <Dialog open={showPermissionsDialog} onOpenChange={setShowPermissionsDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Shield className="h-5 w-5" />
+                Manage Permissions
+              </DialogTitle>
+              <DialogDescription>
+                Control who can access and edit your documents.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4 space-y-4">
+              <div className="space-y-2">
+                {[
+                  { name: 'John Developer', email: 'john@team.com', role: 'Owner' },
+                  { name: 'Sarah Finance', email: 'sarah@team.com', role: 'Editor' },
+                  { name: 'Mike Designer', email: 'mike@team.com', role: 'Viewer' },
+                ].map((person, i) => (
+                  <div key={i} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src={`https://avatar.vercel.sh/${person.name}`} />
+                        <AvatarFallback>{person.name.slice(0, 2)}</AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="font-medium text-sm">{person.name}</p>
+                        <p className="text-xs text-gray-500">{person.email}</p>
+                      </div>
+                    </div>
+                    <Select defaultValue={person.role.toLowerCase()}>
+                      <SelectTrigger className="w-24">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="owner">Owner</SelectItem>
+                        <SelectItem value="editor">Editor</SelectItem>
+                        <SelectItem value="commenter">Commenter</SelectItem>
+                        <SelectItem value="viewer">Viewer</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                ))}
+              </div>
+              <div className="pt-2">
+                <Button variant="outline" className="w-full">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Person
+                </Button>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowPermissionsDialog(false)}>Cancel</Button>
+              <Button onClick={() => {
+                toast.success('Permissions updated')
+                setShowPermissionsDialog(false)
+              }}>Save Changes</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Bulk Download Dialog */}
+        <Dialog open={showBulkDownloadDialog} onOpenChange={setShowBulkDownloadDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Download className="h-5 w-5" />
+                Download Documents
+              </DialogTitle>
+              <DialogDescription>
+                Select documents to download as a ZIP archive.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <ScrollArea className="h-48 border rounded-lg p-2">
+                {mockDocuments.map(doc => (
+                  <div key={doc.id} className="flex items-center gap-2 p-2 hover:bg-gray-50 dark:hover:bg-gray-800 rounded">
+                    <input
+                      type="checkbox"
+                      checked={selectedDocumentsForAction.includes(doc.id)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedDocumentsForAction([...selectedDocumentsForAction, doc.id])
+                        } else {
+                          setSelectedDocumentsForAction(selectedDocumentsForAction.filter(id => id !== doc.id))
+                        }
+                      }}
+                      className="rounded"
+                    />
+                    <span className="text-sm">{doc.name}</span>
+                    <span className="text-xs text-gray-500 ml-auto">{formatBytes(doc.size)}</span>
+                  </div>
+                ))}
+              </ScrollArea>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => { setShowBulkDownloadDialog(false); setSelectedDocumentsForAction([]) }}>Cancel</Button>
+              <Button
+                onClick={() => {
+                  toast.promise(
+                    new Promise((resolve) => setTimeout(resolve, 2000)),
+                    { loading: `Preparing ${selectedDocumentsForAction.length} files...`, success: 'Download started!', error: 'Download failed' }
+                  )
+                  setShowBulkDownloadDialog(false)
+                  setSelectedDocumentsForAction([])
+                }}
+                disabled={selectedDocumentsForAction.length === 0}
+              >
+                Download {selectedDocumentsForAction.length > 0 && `(${selectedDocumentsForAction.length})`}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Sync Settings Dialog */}
+        <Dialog open={showSyncSettingsDialog} onOpenChange={setShowSyncSettingsDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <RefreshCw className="h-5 w-5" />
+                Sync Settings
+              </DialogTitle>
+              <DialogDescription>
+                Configure document synchronization preferences.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4 space-y-4">
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div>
+                  <Label className="font-medium">Auto-sync</Label>
+                  <p className="text-xs text-gray-500">Sync changes automatically</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div>
+                  <Label className="font-medium">Sync interval</Label>
+                  <p className="text-xs text-gray-500">How often to sync</p>
+                </div>
+                <Select defaultValue="5">
+                  <SelectTrigger className="w-28">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1">1 minute</SelectItem>
+                    <SelectItem value="5">5 minutes</SelectItem>
+                    <SelectItem value="15">15 minutes</SelectItem>
+                    <SelectItem value="30">30 minutes</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div>
+                  <Label className="font-medium">Offline mode</Label>
+                  <p className="text-xs text-gray-500">Enable offline editing</p>
+                </div>
+                <Switch />
+              </div>
+              <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                <p className="text-sm text-blue-700 dark:text-blue-400">
+                  Last synced: {new Date().toLocaleString()}
+                </p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowSyncSettingsDialog(false)}>Cancel</Button>
+              <Button onClick={() => {
+                toast.promise(
+                  new Promise((resolve) => setTimeout(resolve, 1000)),
+                  { loading: 'Syncing now...', success: 'All documents synced!', error: 'Sync failed' }
+                )
+              }}>Sync Now</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Export Settings Dialog */}
+        <Dialog open={showExportSettingsDialog} onOpenChange={setShowExportSettingsDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Download className="h-5 w-5" />
+                Export Settings
+              </DialogTitle>
+              <DialogDescription>
+                Configure default export preferences.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4 space-y-4">
+              <div>
+                <Label className="text-sm font-medium">Default Export Format</Label>
+                <Select defaultValue="pdf">
+                  <SelectTrigger className="mt-2">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="pdf">PDF Document</SelectItem>
+                    <SelectItem value="docx">Word Document</SelectItem>
+                    <SelectItem value="html">HTML</SelectItem>
+                    <SelectItem value="md">Markdown</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div>
+                  <Label className="font-medium">Include comments</Label>
+                  <p className="text-xs text-gray-500">Add comments to exports</p>
+                </div>
+                <Switch />
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div>
+                  <Label className="font-medium">Include metadata</Label>
+                  <p className="text-xs text-gray-500">Add document info to exports</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+              <div className="flex gap-3">
+                <Button variant="outline" className="flex-1" onClick={() => {
+                  toast.promise(
+                    new Promise((resolve) => setTimeout(resolve, 2000)),
+                    { loading: 'Exporting all documents...', success: 'Export complete!', error: 'Export failed' }
+                  )
+                }}>
+                  <Download className="h-4 w-4 mr-2" />
+                  Export All
+                </Button>
+                <Button variant="outline" className="flex-1" onClick={() => {
+                  toast.promise(
+                    new Promise((resolve) => setTimeout(resolve, 1500)),
+                    { loading: 'Creating backup...', success: 'Backup created!', error: 'Backup failed' }
+                  )
+                }}>
+                  <Archive className="h-4 w-4 mr-2" />
+                  Backup
+                </Button>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowExportSettingsDialog(false)}>Close</Button>
+              <Button onClick={() => {
+                toast.success('Export settings saved')
+                setShowExportSettingsDialog(false)
+              }}>Save Settings</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

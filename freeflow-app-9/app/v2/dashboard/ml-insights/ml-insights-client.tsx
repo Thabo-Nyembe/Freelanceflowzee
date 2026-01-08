@@ -26,7 +26,7 @@ import {
   Brain, TrendingUp, AlertTriangle, Lightbulb, Zap, Target,
   BarChart3, Users, CheckCircle, Sparkles, Activity, Eye, Download, Plus,
   Search, Trash2, MoreVertical,
-  RefreshCw, Cpu
+  RefreshCw, Cpu, Settings, Bell, Clock
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -433,20 +433,7 @@ const mlInsightsActivities = [
   { id: '3', user: 'System', action: 'generated', target: 'weekly report', timestamp: '1h ago', type: 'info' as const },
 ]
 
-const mlInsightsQuickActions = [
-  { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 800)),
-    { loading: 'Creating new insight...', success: 'New insight created successfully', error: 'Failed to create insight' }
-  ) },
-  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1000)),
-    { loading: 'Exporting ML insights...', success: 'ML insights exported successfully', error: 'Failed to export insights' }
-  ) },
-  { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 500)),
-    { loading: 'Loading settings...', success: 'Settings loaded', error: 'Failed to load settings' }
-  ) },
-]
+// QuickActions will be defined inside the component to access state setters
 
 export default function MlInsightsClient() {
   logger.debug('Component mounting')
@@ -477,7 +464,16 @@ export default function MlInsightsClient() {
   const [showConfigureModal, setShowConfigureModal] = useState(false)
   const [showExportModal, setShowExportModal] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [showSettingsModal, setShowSettingsModal] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
+
+  // SETTINGS FORM STATES
+  const [autoRefreshEnabled, setAutoRefreshEnabled] = useState(true)
+  const [refreshInterval, setRefreshInterval] = useState<'5' | '15' | '30' | '60'>('15')
+  const [notificationsEnabled, setNotificationsEnabled] = useState(true)
+  const [criticalAlertsOnly, setCriticalAlertsOnly] = useState(false)
+  const [defaultConfidenceThreshold, setDefaultConfidenceThreshold] = useState<ConfidenceLevel>('medium')
+  const [modelAutoRetrain, setModelAutoRetrain] = useState(false)
 
   // FORM STATES
   const [insightTitle, setInsightTitle] = useState('')
@@ -487,6 +483,13 @@ export default function MlInsightsClient() {
   const [insightConfidence, setInsightConfidence] = useState<ConfidenceLevel>('high')
   const [insightImpact, setInsightImpact] = useState<ImpactLevel>('medium')
   const [exportFormat, setExportFormat] = useState<'json' | 'csv' | 'pdf'>('json')
+
+  // QUICK ACTIONS - defined inside component to access state setters
+  const mlInsightsQuickActions = [
+    { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => setShowCreateModal(true) },
+    { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => setShowExportModal(true) },
+    { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => setShowSettingsModal(true) },
+  ]
 
   // ============================================================================
   // LOAD DATA
@@ -885,6 +888,48 @@ export default function MlInsightsClient() {
       toast.error('Failed to retrain model', {
         description: error.message || 'Please try again later'
       })
+    }
+  }
+
+  const handleSaveSettings = async () => {
+    logger.info('Saving ML insights settings', {
+      autoRefreshEnabled,
+      refreshInterval,
+      notificationsEnabled,
+      criticalAlertsOnly,
+      defaultConfidenceThreshold,
+      modelAutoRetrain
+    })
+
+    try {
+      setIsSaving(true)
+
+      // Simulate API call to save settings
+      await new Promise(resolve => setTimeout(resolve, 800))
+
+      logger.info('Settings saved successfully', {
+        autoRefreshEnabled,
+        refreshInterval,
+        notificationsEnabled,
+        criticalAlertsOnly,
+        defaultConfidenceThreshold,
+        modelAutoRetrain
+      })
+
+      toast.success('Settings saved', {
+        description: `Auto-refresh: ${autoRefreshEnabled ? `${refreshInterval}min` : 'Off'} | Notifications: ${notificationsEnabled ? (criticalAlertsOnly ? 'Critical only' : 'All') : 'Off'} | Confidence threshold: ${defaultConfidenceThreshold} | Auto-retrain: ${modelAutoRetrain ? 'On' : 'Off'}`
+      })
+
+      setShowSettingsModal(false)
+    } catch (error: any) {
+      logger.error('Failed to save settings', {
+        error: error.message
+      })
+      toast.error('Failed to save settings', {
+        description: error.message || 'Please try again later'
+      })
+    } finally {
+      setIsSaving(false)
     }
   }
 
@@ -1780,6 +1825,164 @@ export default function MlInsightsClient() {
                   className="bg-red-600 hover:bg-red-700"
                 >
                   {isSaving ? 'Deleting...' : 'Delete Insight'}
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+        )}
+      </AnimatePresence>
+
+      {/* SETTINGS MODAL */}
+      <AnimatePresence>
+        {showSettingsModal && (
+          <Dialog open={showSettingsModal} onOpenChange={setShowSettingsModal}>
+            <DialogContent className="max-w-2xl bg-slate-900 border-gray-700">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2 text-white">
+                  <Settings className="w-5 h-5 text-purple-400" />
+                  ML Insights Settings
+                </DialogTitle>
+                <DialogDescription>
+                  Configure your machine learning insights dashboard preferences
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="space-y-6 py-4">
+                {/* Auto Refresh Settings */}
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-cyan-400" />
+                    <h4 className="text-sm font-medium text-white">Auto Refresh</h4>
+                  </div>
+
+                  <div className="flex items-center justify-between p-4 bg-slate-800 rounded-lg">
+                    <div>
+                      <p className="text-sm text-white">Enable Auto Refresh</p>
+                      <p className="text-xs text-gray-400">Automatically refresh insights data</p>
+                    </div>
+                    <Checkbox
+                      checked={autoRefreshEnabled}
+                      onCheckedChange={(checked) => setAutoRefreshEnabled(checked as boolean)}
+                    />
+                  </div>
+
+                  {autoRefreshEnabled && (
+                    <div className="p-4 bg-slate-800 rounded-lg">
+                      <Label className="text-white text-sm">Refresh Interval</Label>
+                      <select
+                        value={refreshInterval}
+                        onChange={(e) => setRefreshInterval(e.target.value as '5' | '15' | '30' | '60')}
+                        className="w-full mt-2 px-3 py-2 bg-slate-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      >
+                        <option value="5">Every 5 minutes</option>
+                        <option value="15">Every 15 minutes</option>
+                        <option value="30">Every 30 minutes</option>
+                        <option value="60">Every hour</option>
+                      </select>
+                    </div>
+                  )}
+                </div>
+
+                {/* Notification Settings */}
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2">
+                    <Bell className="w-4 h-4 text-yellow-400" />
+                    <h4 className="text-sm font-medium text-white">Notifications</h4>
+                  </div>
+
+                  <div className="flex items-center justify-between p-4 bg-slate-800 rounded-lg">
+                    <div>
+                      <p className="text-sm text-white">Enable Notifications</p>
+                      <p className="text-xs text-gray-400">Receive alerts for new insights</p>
+                    </div>
+                    <Checkbox
+                      checked={notificationsEnabled}
+                      onCheckedChange={(checked) => setNotificationsEnabled(checked as boolean)}
+                    />
+                  </div>
+
+                  {notificationsEnabled && (
+                    <div className="flex items-center justify-between p-4 bg-slate-800 rounded-lg">
+                      <div>
+                        <p className="text-sm text-white">Critical Alerts Only</p>
+                        <p className="text-xs text-gray-400">Only notify for critical/high impact insights</p>
+                      </div>
+                      <Checkbox
+                        checked={criticalAlertsOnly}
+                        onCheckedChange={(checked) => setCriticalAlertsOnly(checked as boolean)}
+                      />
+                    </div>
+                  )}
+                </div>
+
+                {/* Model Settings */}
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2">
+                    <Brain className="w-4 h-4 text-purple-400" />
+                    <h4 className="text-sm font-medium text-white">Model Settings</h4>
+                  </div>
+
+                  <div className="p-4 bg-slate-800 rounded-lg">
+                    <Label className="text-white text-sm">Default Confidence Threshold</Label>
+                    <select
+                      value={defaultConfidenceThreshold}
+                      onChange={(e) => setDefaultConfidenceThreshold(e.target.value as ConfidenceLevel)}
+                      className="w-full mt-2 px-3 py-2 bg-slate-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    >
+                      <option value="low">Low (60%+)</option>
+                      <option value="medium">Medium (75%+)</option>
+                      <option value="high">High (90%+)</option>
+                      <option value="very-high">Very High (98%+)</option>
+                    </select>
+                    <p className="text-xs text-gray-400 mt-2">Only show insights meeting this confidence level</p>
+                  </div>
+
+                  <div className="flex items-center justify-between p-4 bg-slate-800 rounded-lg">
+                    <div>
+                      <p className="text-sm text-white">Auto-Retrain Models</p>
+                      <p className="text-xs text-gray-400">Automatically retrain models when accuracy drops below threshold</p>
+                    </div>
+                    <Checkbox
+                      checked={modelAutoRetrain}
+                      onCheckedChange={(checked) => setModelAutoRetrain(checked as boolean)}
+                    />
+                  </div>
+                </div>
+
+                {/* Current Settings Summary */}
+                <div className="p-4 bg-purple-500/10 border border-purple-500/30 rounded-lg">
+                  <h4 className="text-sm font-medium text-purple-300 mb-2">Current Configuration</h4>
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">Auto Refresh:</span>
+                      <span className="text-white">{autoRefreshEnabled ? `Every ${refreshInterval} min` : 'Disabled'}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">Notifications:</span>
+                      <span className="text-white">{notificationsEnabled ? (criticalAlertsOnly ? 'Critical only' : 'All') : 'Disabled'}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">Confidence:</span>
+                      <span className="text-white">{defaultConfidenceThreshold}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">Auto-Retrain:</span>
+                      <span className="text-white">{modelAutoRetrain ? 'Enabled' : 'Disabled'}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setShowSettingsModal(false)} className="border-gray-700">
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleSaveSettings}
+                  disabled={isSaving}
+                  className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                >
+                  {isSaving ? 'Saving...' : 'Save Settings'}
                 </Button>
               </div>
             </DialogContent>

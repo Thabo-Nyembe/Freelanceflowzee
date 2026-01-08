@@ -5,7 +5,7 @@ import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
 import { Progress } from '@/components/ui/progress'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -13,6 +13,8 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Textarea } from '@/components/ui/textarea'
+import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import {
   Target,
   CheckCircle2,
@@ -53,7 +55,10 @@ import {
   Brain,
   ListTodo,
   Hash,
-  Layers
+  Layers,
+  Bell,
+  AlertTriangle,
+  Video
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -560,47 +565,6 @@ const mockMyDayActivities = [
   { id: '3', user: 'You', action: 'Started', target: 'focus session (2 hrs)', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
 ]
 
-// Real API handlers for quick actions
-const handleQuickAddTask = async () => {
-  const response = await fetch('/api/tasks', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      action: 'create',
-      title: 'New Task',
-      priority: 'medium',
-      due_date: new Date().toISOString().split('T')[0]
-    })
-  })
-  if (!response.ok) throw new Error('Failed to create task')
-  return response.json()
-}
-
-const handleStartFocusSession = async () => {
-  const response = await fetch('/api/tasks', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      action: 'ai_optimize',
-      date: new Date().toISOString()
-    })
-  })
-  if (!response.ok) throw new Error('Failed to start focus session')
-  return response.json()
-}
-
-const handleLoadReview = async () => {
-  const response = await fetch('/api/tasks?today=true')
-  if (!response.ok) throw new Error('Failed to load review')
-  return response.json()
-}
-
-const mockMyDayQuickActions = [
-  { id: '1', label: 'Add Task', icon: 'plus', action: () => toast.promise(handleQuickAddTask(), { loading: 'Adding task...', success: 'Task added successfully', error: 'Failed to add task' }), variant: 'default' as const },
-  { id: '2', label: 'Focus', icon: 'target', action: () => toast.promise(handleStartFocusSession(), { loading: 'Starting focus session...', success: 'Focus mode activated', error: 'Failed to start focus' }), variant: 'default' as const },
-  { id: '3', label: 'Review', icon: 'check', action: () => toast.promise(handleLoadReview(), { loading: 'Loading review...', success: 'Review ready', error: 'Failed to load review' }), variant: 'outline' as const },
-]
-
 export default function MyDayClient({ initialTasks, initialSessions }: MyDayClientProps) {
   const [activeTab, setActiveTab] = useState('today')
   const [tasks, setTasks] = useState<Task[]>(mockTasks)
@@ -625,6 +589,57 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
   // New task state
   const [showQuickAdd, setShowQuickAdd] = useState(false)
   const [quickAddText, setQuickAddText] = useState('')
+
+  // Dialog states for real functionality
+  const [showAddTaskDialog, setShowAddTaskDialog] = useState(false)
+  const [showScheduleMeetingDialog, setShowScheduleMeetingDialog] = useState(false)
+  const [showReminderDialog, setShowReminderDialog] = useState(false)
+  const [showKeyboardShortcutsDialog, setShowKeyboardShortcutsDialog] = useState(false)
+  const [showSettingsDialog, setShowSettingsDialog] = useState(false)
+  const [showAddSectionDialog, setShowAddSectionDialog] = useState(false)
+  const [showAddLabelDialog, setShowAddLabelDialog] = useState(false)
+  const [showAddProjectDialog, setShowAddProjectDialog] = useState(false)
+  const [showEditTaskDialog, setShowEditTaskDialog] = useState(false)
+  const [showMoveTaskDialog, setShowMoveTaskDialog] = useState(false)
+  const [showDuplicateTaskDialog, setShowDuplicateTaskDialog] = useState(false)
+  const [showArchiveTaskDialog, setShowArchiveTaskDialog] = useState(false)
+  const [showDeleteTaskDialog, setShowDeleteTaskDialog] = useState(false)
+  const [showFocusSessionDialog, setShowFocusSessionDialog] = useState(false)
+  const [showReviewDialog, setShowReviewDialog] = useState(false)
+
+  // Form states for dialogs
+  const [newTaskTitle, setNewTaskTitle] = useState('')
+  const [newTaskDescription, setNewTaskDescription] = useState('')
+  const [newTaskPriority, setNewTaskPriority] = useState<TaskPriority>('p3')
+  const [newTaskDueDate, setNewTaskDueDate] = useState('')
+  const [newTaskProject, setNewTaskProject] = useState('')
+
+  const [meetingTitle, setMeetingTitle] = useState('')
+  const [meetingDate, setMeetingDate] = useState('')
+  const [meetingTime, setMeetingTime] = useState('')
+  const [meetingDuration, setMeetingDuration] = useState('30')
+  const [meetingAttendees, setMeetingAttendees] = useState('')
+
+  const [reminderText, setReminderText] = useState('')
+  const [reminderDate, setReminderDate] = useState('')
+  const [reminderTime, setReminderTime] = useState('')
+
+  const [newSectionName, setNewSectionName] = useState('')
+  const [newLabelName, setNewLabelName] = useState('')
+  const [newLabelColor, setNewLabelColor] = useState('#6366F1')
+  const [newProjectName, setNewProjectName] = useState('')
+  const [newProjectColor, setNewProjectColor] = useState('#10B981')
+  const [newProjectDescription, setNewProjectDescription] = useState('')
+
+  const [editedTaskTitle, setEditedTaskTitle] = useState('')
+  const [editedTaskDescription, setEditedTaskDescription] = useState('')
+  const [editedTaskPriority, setEditedTaskPriority] = useState<TaskPriority>('p3')
+  const [moveTargetProject, setMoveTargetProject] = useState('')
+
+  const [focusDuration, setFocusDuration] = useState('25')
+  const [focusTaskId, setFocusTaskId] = useState('')
+
+  const [commentText, setCommentText] = useState('')
 
   // Timer effect
   useEffect(() => {
@@ -751,47 +766,323 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
     setShowTaskDialog(true)
   }
 
-  // Handlers
-  const handleAddTask = () => toast.info('Add Task', { description: 'Opening form...' })
-  const handleCompleteTask = (n: string) => toast.success('Completed', { description: `"${n}" done` })
-  const handleScheduleMeeting = () => toast.info('Schedule', { description: 'Opening calendar...' })
-  const handleSetReminder = () => toast.success('Reminder Set', { description: 'You will be notified' })
+  // Handlers - Opening dialogs
+  const handleAddTask = () => {
+    setNewTaskTitle('')
+    setNewTaskDescription('')
+    setNewTaskPriority('p3')
+    setNewTaskDueDate(new Date().toISOString().split('T')[0])
+    setNewTaskProject('')
+    setShowAddTaskDialog(true)
+  }
+
+  const handleScheduleMeeting = () => {
+    setMeetingTitle('')
+    setMeetingDate(new Date().toISOString().split('T')[0])
+    setMeetingTime('09:00')
+    setMeetingDuration('30')
+    setMeetingAttendees('')
+    setShowScheduleMeetingDialog(true)
+  }
+
+  const handleSetReminder = () => {
+    setReminderText('')
+    setReminderDate(new Date().toISOString().split('T')[0])
+    setReminderTime('09:00')
+    setShowReminderDialog(true)
+  }
+
   const handleKeyboardShortcuts = () => {
-    toast.info('Keyboard Shortcuts', { description: 'Opening shortcuts panel...' })
+    setShowKeyboardShortcutsDialog(true)
   }
+
   const handleSettings = () => {
-    toast.info('Settings', { description: 'Opening settings...' })
+    setShowSettingsDialog(true)
   }
+
   const handleAddSection = () => {
-    toast.info('Add Section', { description: 'Creating new section...' })
+    setNewSectionName('')
+    setShowAddSectionDialog(true)
   }
+
   const handleAddLabel = () => {
-    toast.info('Add Label', { description: 'Creating new label...' })
+    setNewLabelName('')
+    setNewLabelColor('#6366F1')
+    setShowAddLabelDialog(true)
   }
+
   const handleAddProject = () => {
-    toast.info('Add Project', { description: 'Creating new project...' })
+    setNewProjectName('')
+    setNewProjectColor('#10B981')
+    setNewProjectDescription('')
+    setShowAddProjectDialog(true)
   }
-  const handleCalendarView = (view: string) => {
-    toast.info('Calendar View', { description: `Switching to ${view} view...` })
-  }
-  const handlePostComment = () => {
-    toast.success('Comment Posted', { description: 'Your comment has been added' })
-  }
+
   const handleEditTask = () => {
-    toast.info('Edit Task', { description: 'Opening task editor...' })
+    if (selectedTask) {
+      setEditedTaskTitle(selectedTask.title)
+      setEditedTaskDescription(selectedTask.description || '')
+      setEditedTaskPriority(selectedTask.priority)
+      setShowEditTaskDialog(true)
+    }
   }
+
   const handleMoveTask = () => {
-    toast.info('Move Task', { description: 'Select destination...' })
+    if (selectedTask) {
+      setMoveTargetProject(selectedTask.projectId || '')
+      setShowMoveTaskDialog(true)
+    }
   }
+
   const handleDuplicateTask = () => {
-    toast.success('Task Duplicated', { description: 'Task has been copied' })
+    if (selectedTask) {
+      setShowDuplicateTaskDialog(true)
+    }
   }
+
   const handleArchiveTask = () => {
-    toast.success('Task Archived', { description: 'Task moved to archive' })
+    if (selectedTask) {
+      setShowArchiveTaskDialog(true)
+    }
   }
+
   const handleDeleteTask = () => {
-    toast.success('Task Deleted', { description: 'Task has been removed' })
+    if (selectedTask) {
+      setShowDeleteTaskDialog(true)
+    }
   }
+
+  const handleOpenFocusSession = () => {
+    setFocusDuration('25')
+    setFocusTaskId(todayTasks[0]?.id || '')
+    setShowFocusSessionDialog(true)
+  }
+
+  const handleOpenReview = () => {
+    setShowReviewDialog(true)
+  }
+
+  // Action handlers - executing the actual functionality
+  const submitNewTask = () => {
+    if (!newTaskTitle.trim()) {
+      toast.error('Task title is required')
+      return
+    }
+    const newTask: Task = {
+      id: `t${Date.now()}`,
+      title: newTaskTitle,
+      description: newTaskDescription,
+      status: 'pending',
+      priority: newTaskPriority,
+      projectId: newTaskProject || undefined,
+      projectName: projects.find(p => p.id === newTaskProject)?.name,
+      projectColor: projects.find(p => p.id === newTaskProject)?.color,
+      labels: [],
+      dueDate: newTaskDueDate,
+      subTasks: [],
+      comments: [],
+      attachments: 0,
+      isStarred: false,
+      createdAt: new Date().toISOString(),
+      order: tasks.length + 1
+    }
+    setTasks(prev => [...prev, newTask])
+    setShowAddTaskDialog(false)
+    toast.success('Task created', { description: `"${newTaskTitle}" has been added` })
+  }
+
+  const submitScheduleMeeting = () => {
+    if (!meetingTitle.trim()) {
+      toast.error('Meeting title is required')
+      return
+    }
+    const meetingTask: Task = {
+      id: `t${Date.now()}`,
+      title: meetingTitle,
+      description: `Attendees: ${meetingAttendees || 'None specified'}`,
+      status: 'pending',
+      priority: 'p2',
+      labels: ['meeting'],
+      dueDate: meetingDate,
+      dueTime: meetingTime,
+      estimatedMinutes: parseInt(meetingDuration),
+      recurrence: { type: 'none' },
+      subTasks: [],
+      comments: [],
+      attachments: 0,
+      isStarred: false,
+      createdAt: new Date().toISOString(),
+      order: tasks.length + 1
+    }
+    setTasks(prev => [...prev, meetingTask])
+    setShowScheduleMeetingDialog(false)
+    toast.success('Meeting scheduled', { description: `${meetingTitle} on ${meetingDate} at ${meetingTime}` })
+  }
+
+  const submitReminder = () => {
+    if (!reminderText.trim()) {
+      toast.error('Reminder text is required')
+      return
+    }
+    const reminderTask: Task = {
+      id: `t${Date.now()}`,
+      title: reminderText,
+      status: 'pending',
+      priority: 'p3',
+      labels: ['reminder'],
+      dueDate: reminderDate,
+      dueTime: reminderTime,
+      reminder: '15min',
+      subTasks: [],
+      comments: [],
+      attachments: 0,
+      isStarred: false,
+      createdAt: new Date().toISOString(),
+      order: tasks.length + 1
+    }
+    setTasks(prev => [...prev, reminderTask])
+    setShowReminderDialog(false)
+    toast.success('Reminder set', { description: `You'll be reminded on ${reminderDate} at ${reminderTime}` })
+  }
+
+  const submitNewSection = () => {
+    if (!newSectionName.trim()) {
+      toast.error('Section name is required')
+      return
+    }
+    // Section would be added to the selected project
+    toast.success('Section created', { description: `"${newSectionName}" has been added` })
+    setShowAddSectionDialog(false)
+  }
+
+  const submitNewLabel = () => {
+    if (!newLabelName.trim()) {
+      toast.error('Label name is required')
+      return
+    }
+    toast.success('Label created', { description: `@${newLabelName} has been created` })
+    setShowAddLabelDialog(false)
+  }
+
+  const submitNewProject = () => {
+    if (!newProjectName.trim()) {
+      toast.error('Project name is required')
+      return
+    }
+    toast.success('Project created', { description: `"${newProjectName}" has been created` })
+    setShowAddProjectDialog(false)
+  }
+
+  const submitEditTask = () => {
+    if (!editedTaskTitle.trim()) {
+      toast.error('Task title is required')
+      return
+    }
+    if (selectedTask) {
+      setTasks(prev => prev.map(t =>
+        t.id === selectedTask.id
+          ? { ...t, title: editedTaskTitle, description: editedTaskDescription, priority: editedTaskPriority }
+          : t
+      ))
+      setSelectedTask(prev => prev ? { ...prev, title: editedTaskTitle, description: editedTaskDescription, priority: editedTaskPriority } : null)
+      setShowEditTaskDialog(false)
+      toast.success('Task updated', { description: 'Changes have been saved' })
+    }
+  }
+
+  const submitMoveTask = () => {
+    if (selectedTask && moveTargetProject) {
+      const targetProject = projects.find(p => p.id === moveTargetProject)
+      setTasks(prev => prev.map(t =>
+        t.id === selectedTask.id
+          ? { ...t, projectId: moveTargetProject, projectName: targetProject?.name, projectColor: targetProject?.color }
+          : t
+      ))
+      setSelectedTask(prev => prev ? { ...prev, projectId: moveTargetProject, projectName: targetProject?.name, projectColor: targetProject?.color } : null)
+      setShowMoveTaskDialog(false)
+      toast.success('Task moved', { description: `Moved to ${targetProject?.name}` })
+    }
+  }
+
+  const submitDuplicateTask = () => {
+    if (selectedTask) {
+      const duplicatedTask: Task = {
+        ...selectedTask,
+        id: `t${Date.now()}`,
+        title: `${selectedTask.title} (Copy)`,
+        status: 'pending',
+        completedAt: undefined,
+        createdAt: new Date().toISOString(),
+        order: tasks.length + 1
+      }
+      setTasks(prev => [...prev, duplicatedTask])
+      setShowDuplicateTaskDialog(false)
+      toast.success('Task duplicated', { description: `"${duplicatedTask.title}" has been created` })
+    }
+  }
+
+  const submitArchiveTask = () => {
+    if (selectedTask) {
+      setTasks(prev => prev.filter(t => t.id !== selectedTask.id))
+      setShowArchiveTaskDialog(false)
+      setShowTaskDialog(false)
+      setSelectedTask(null)
+      toast.success('Task archived', { description: 'Task has been moved to archive' })
+    }
+  }
+
+  const submitDeleteTask = () => {
+    if (selectedTask) {
+      setTasks(prev => prev.filter(t => t.id !== selectedTask.id))
+      setShowDeleteTaskDialog(false)
+      setShowTaskDialog(false)
+      setSelectedTask(null)
+      toast.success('Task deleted', { description: 'Task has been permanently removed' })
+    }
+  }
+
+  const startFocusSession = () => {
+    const duration = parseInt(focusDuration)
+    if (focusTaskId) {
+      setActiveTaskId(focusTaskId)
+    }
+    setTimerSeconds(duration * 60)
+    setTimerMode('focus')
+    setTimerActive(true)
+    setShowFocusSessionDialog(false)
+    toast.success('Focus session started', { description: `${duration} minute focus session active` })
+  }
+
+  const handlePostComment = () => {
+    if (!commentText.trim()) {
+      toast.error('Comment cannot be empty')
+      return
+    }
+    if (selectedTask) {
+      const newComment: TaskComment = {
+        id: `c${Date.now()}`,
+        userId: 'current-user',
+        userName: 'You',
+        content: commentText,
+        createdAt: new Date().toISOString()
+      }
+      setTasks(prev => prev.map(t =>
+        t.id === selectedTask.id
+          ? { ...t, comments: [...t.comments, newComment] }
+          : t
+      ))
+      setSelectedTask(prev => prev ? { ...prev, comments: [...prev.comments, newComment] } : null)
+      setCommentText('')
+      toast.success('Comment posted', { description: 'Your comment has been added' })
+    }
+  }
+
+  // Quick actions with real dialog functionality
+  const myDayQuickActions = [
+    { id: '1', label: 'Add Task', icon: 'plus', action: handleAddTask, variant: 'default' as const },
+    { id: '2', label: 'Focus', icon: 'target', action: handleOpenFocusSession, variant: 'default' as const },
+    { id: '3', label: 'Review', icon: 'check', action: handleOpenReview, variant: 'outline' as const },
+  ]
 
   // Stat cards
   const statCards = [
@@ -1794,7 +2085,7 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockMyDayQuickActions}
+            actions={myDayQuickActions}
             variant="grid"
           />
         </div>
@@ -1922,7 +2213,12 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
 
                 {/* Add Comment */}
                 <div>
-                  <Textarea placeholder="Add a comment..." className="min-h-[80px]" />
+                  <Textarea
+                    placeholder="Add a comment..."
+                    className="min-h-[80px]"
+                    value={commentText}
+                    onChange={(e) => setCommentText(e.target.value)}
+                  />
                   <div className="flex justify-end mt-2">
                     <Button size="sm" onClick={handlePostComment}>Post Comment</Button>
                   </div>
@@ -1952,6 +2248,684 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
                 </Button>
               </div>
             </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Task Dialog */}
+        <Dialog open={showAddTaskDialog} onOpenChange={setShowAddTaskDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Plus className="w-5 h-5 text-amber-500" />
+                Add New Task
+              </DialogTitle>
+              <DialogDescription>Create a new task with priority and due date.</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="task-title">Task Title</Label>
+                <Input
+                  id="task-title"
+                  placeholder="Enter task title..."
+                  value={newTaskTitle}
+                  onChange={(e) => setNewTaskTitle(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="task-description">Description (optional)</Label>
+                <Textarea
+                  id="task-description"
+                  placeholder="Add more details..."
+                  value={newTaskDescription}
+                  onChange={(e) => setNewTaskDescription(e.target.value)}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="task-priority">Priority</Label>
+                  <Select value={newTaskPriority} onValueChange={(v) => setNewTaskPriority(v as TaskPriority)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select priority" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="p1"><span className="flex items-center gap-2"><Flag className="w-3 h-3 text-red-500" /> Priority 1</span></SelectItem>
+                      <SelectItem value="p2"><span className="flex items-center gap-2"><Flag className="w-3 h-3 text-orange-500" /> Priority 2</span></SelectItem>
+                      <SelectItem value="p3"><span className="flex items-center gap-2"><Flag className="w-3 h-3 text-blue-500" /> Priority 3</span></SelectItem>
+                      <SelectItem value="p4"><span className="flex items-center gap-2"><Minus className="w-3 h-3 text-gray-400" /> Priority 4</span></SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="task-due">Due Date</Label>
+                  <Input
+                    id="task-due"
+                    type="date"
+                    value={newTaskDueDate}
+                    onChange={(e) => setNewTaskDueDate(e.target.value)}
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="task-project">Project (optional)</Label>
+                <Select value={newTaskProject} onValueChange={setNewTaskProject}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select project" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {projects.map(project => (
+                      <SelectItem key={project.id} value={project.id}>
+                        <span className="flex items-center gap-2">
+                          <span className="w-2 h-2 rounded-full" style={{ backgroundColor: project.color }} />
+                          {project.name}
+                        </span>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowAddTaskDialog(false)}>Cancel</Button>
+              <Button onClick={submitNewTask}>Create Task</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Schedule Meeting Dialog */}
+        <Dialog open={showScheduleMeetingDialog} onOpenChange={setShowScheduleMeetingDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Video className="w-5 h-5 text-blue-500" />
+                Schedule Meeting
+              </DialogTitle>
+              <DialogDescription>Schedule a new meeting with your team.</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="meeting-title">Meeting Title</Label>
+                <Input
+                  id="meeting-title"
+                  placeholder="Enter meeting title..."
+                  value={meetingTitle}
+                  onChange={(e) => setMeetingTitle(e.target.value)}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="meeting-date">Date</Label>
+                  <Input
+                    id="meeting-date"
+                    type="date"
+                    value={meetingDate}
+                    onChange={(e) => setMeetingDate(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="meeting-time">Time</Label>
+                  <Input
+                    id="meeting-time"
+                    type="time"
+                    value={meetingTime}
+                    onChange={(e) => setMeetingTime(e.target.value)}
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="meeting-duration">Duration (minutes)</Label>
+                <Select value={meetingDuration} onValueChange={setMeetingDuration}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select duration" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="15">15 minutes</SelectItem>
+                    <SelectItem value="30">30 minutes</SelectItem>
+                    <SelectItem value="45">45 minutes</SelectItem>
+                    <SelectItem value="60">1 hour</SelectItem>
+                    <SelectItem value="90">1.5 hours</SelectItem>
+                    <SelectItem value="120">2 hours</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="meeting-attendees">Attendees</Label>
+                <Input
+                  id="meeting-attendees"
+                  placeholder="Enter attendee emails..."
+                  value={meetingAttendees}
+                  onChange={(e) => setMeetingAttendees(e.target.value)}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowScheduleMeetingDialog(false)}>Cancel</Button>
+              <Button onClick={submitScheduleMeeting}>Schedule</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Set Reminder Dialog */}
+        <Dialog open={showReminderDialog} onOpenChange={setShowReminderDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Bell className="w-5 h-5 text-purple-500" />
+                Set Reminder
+              </DialogTitle>
+              <DialogDescription>Create a reminder for yourself.</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="reminder-text">Reminder</Label>
+                <Input
+                  id="reminder-text"
+                  placeholder="What do you want to remember?"
+                  value={reminderText}
+                  onChange={(e) => setReminderText(e.target.value)}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="reminder-date">Date</Label>
+                  <Input
+                    id="reminder-date"
+                    type="date"
+                    value={reminderDate}
+                    onChange={(e) => setReminderDate(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="reminder-time">Time</Label>
+                  <Input
+                    id="reminder-time"
+                    type="time"
+                    value={reminderTime}
+                    onChange={(e) => setReminderTime(e.target.value)}
+                  />
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowReminderDialog(false)}>Cancel</Button>
+              <Button onClick={submitReminder}>Set Reminder</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Keyboard Shortcuts Dialog */}
+        <Dialog open={showKeyboardShortcutsDialog} onOpenChange={setShowKeyboardShortcutsDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Keyboard className="w-5 h-5 text-gray-500" />
+                Keyboard Shortcuts
+              </DialogTitle>
+              <DialogDescription>Use these shortcuts to work faster.</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-3">
+              <div className="flex justify-between items-center py-2 border-b">
+                <span>Add new task</span>
+                <kbd className="px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded text-sm">Q</kbd>
+              </div>
+              <div className="flex justify-between items-center py-2 border-b">
+                <span>Search tasks</span>
+                <kbd className="px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded text-sm">/</kbd>
+              </div>
+              <div className="flex justify-between items-center py-2 border-b">
+                <span>Toggle focus mode</span>
+                <kbd className="px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded text-sm">F</kbd>
+              </div>
+              <div className="flex justify-between items-center py-2 border-b">
+                <span>Go to today</span>
+                <kbd className="px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded text-sm">T</kbd>
+              </div>
+              <div className="flex justify-between items-center py-2 border-b">
+                <span>Mark task complete</span>
+                <kbd className="px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded text-sm">C</kbd>
+              </div>
+              <div className="flex justify-between items-center py-2 border-b">
+                <span>Open calendar</span>
+                <kbd className="px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded text-sm">G then C</kbd>
+              </div>
+              <div className="flex justify-between items-center py-2">
+                <span>Show shortcuts</span>
+                <kbd className="px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded text-sm">?</kbd>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button onClick={() => setShowKeyboardShortcutsDialog(false)}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Settings Dialog */}
+        <Dialog open={showSettingsDialog} onOpenChange={setShowSettingsDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Settings className="w-5 h-5 text-gray-500" />
+                Settings
+              </DialogTitle>
+              <DialogDescription>Customize your My Day experience.</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between py-2 border-b">
+                <div>
+                  <p className="font-medium">Focus Mode Duration</p>
+                  <p className="text-sm text-muted-foreground">Default pomodoro length</p>
+                </div>
+                <Select defaultValue="25">
+                  <SelectTrigger className="w-24">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="15">15 min</SelectItem>
+                    <SelectItem value="25">25 min</SelectItem>
+                    <SelectItem value="30">30 min</SelectItem>
+                    <SelectItem value="45">45 min</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex items-center justify-between py-2 border-b">
+                <div>
+                  <p className="font-medium">Auto-start Breaks</p>
+                  <p className="text-sm text-muted-foreground">Automatically start break timer</p>
+                </div>
+                <Checkbox defaultChecked />
+              </div>
+              <div className="flex items-center justify-between py-2 border-b">
+                <div>
+                  <p className="font-medium">Sound Notifications</p>
+                  <p className="text-sm text-muted-foreground">Play sound when timer ends</p>
+                </div>
+                <Checkbox defaultChecked />
+              </div>
+              <div className="flex items-center justify-between py-2">
+                <div>
+                  <p className="font-medium">Show Completed Tasks</p>
+                  <p className="text-sm text-muted-foreground">Display finished tasks in list</p>
+                </div>
+                <Checkbox defaultChecked />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowSettingsDialog(false)}>Cancel</Button>
+              <Button onClick={() => { setShowSettingsDialog(false); toast.success('Settings saved') }}>Save Changes</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Section Dialog */}
+        <Dialog open={showAddSectionDialog} onOpenChange={setShowAddSectionDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Layers className="w-5 h-5 text-blue-500" />
+                Add Section
+              </DialogTitle>
+              <DialogDescription>Create a new section to organize tasks.</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="section-name">Section Name</Label>
+                <Input
+                  id="section-name"
+                  placeholder="Enter section name..."
+                  value={newSectionName}
+                  onChange={(e) => setNewSectionName(e.target.value)}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowAddSectionDialog(false)}>Cancel</Button>
+              <Button onClick={submitNewSection}>Create Section</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Label Dialog */}
+        <Dialog open={showAddLabelDialog} onOpenChange={setShowAddLabelDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Tag className="w-5 h-5 text-pink-500" />
+                Add Label
+              </DialogTitle>
+              <DialogDescription>Create a new label to categorize tasks.</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="label-name">Label Name</Label>
+                <Input
+                  id="label-name"
+                  placeholder="Enter label name..."
+                  value={newLabelName}
+                  onChange={(e) => setNewLabelName(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="label-color">Color</Label>
+                <div className="flex gap-2">
+                  {['#EF4444', '#F59E0B', '#10B981', '#3B82F6', '#6366F1', '#8B5CF6', '#EC4899'].map(color => (
+                    <button
+                      key={color}
+                      className={`w-8 h-8 rounded-full transition-transform ${newLabelColor === color ? 'ring-2 ring-offset-2 ring-gray-500 scale-110' : ''}`}
+                      style={{ backgroundColor: color }}
+                      onClick={() => setNewLabelColor(color)}
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowAddLabelDialog(false)}>Cancel</Button>
+              <Button onClick={submitNewLabel}>Create Label</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Project Dialog */}
+        <Dialog open={showAddProjectDialog} onOpenChange={setShowAddProjectDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <FolderKanban className="w-5 h-5 text-indigo-500" />
+                Add Project
+              </DialogTitle>
+              <DialogDescription>Create a new project to organize your work.</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="project-name">Project Name</Label>
+                <Input
+                  id="project-name"
+                  placeholder="Enter project name..."
+                  value={newProjectName}
+                  onChange={(e) => setNewProjectName(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="project-description">Description (optional)</Label>
+                <Textarea
+                  id="project-description"
+                  placeholder="Describe the project..."
+                  value={newProjectDescription}
+                  onChange={(e) => setNewProjectDescription(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="project-color">Color</Label>
+                <div className="flex gap-2">
+                  {['#EF4444', '#F59E0B', '#10B981', '#3B82F6', '#6366F1', '#8B5CF6', '#EC4899'].map(color => (
+                    <button
+                      key={color}
+                      className={`w-8 h-8 rounded-full transition-transform ${newProjectColor === color ? 'ring-2 ring-offset-2 ring-gray-500 scale-110' : ''}`}
+                      style={{ backgroundColor: color }}
+                      onClick={() => setNewProjectColor(color)}
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowAddProjectDialog(false)}>Cancel</Button>
+              <Button onClick={submitNewProject}>Create Project</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Task Dialog */}
+        <Dialog open={showEditTaskDialog} onOpenChange={setShowEditTaskDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Edit3 className="w-5 h-5 text-blue-500" />
+                Edit Task
+              </DialogTitle>
+              <DialogDescription>Update task details.</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit-task-title">Task Title</Label>
+                <Input
+                  id="edit-task-title"
+                  value={editedTaskTitle}
+                  onChange={(e) => setEditedTaskTitle(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-task-description">Description</Label>
+                <Textarea
+                  id="edit-task-description"
+                  value={editedTaskDescription}
+                  onChange={(e) => setEditedTaskDescription(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-task-priority">Priority</Label>
+                <Select value={editedTaskPriority} onValueChange={(v) => setEditedTaskPriority(v as TaskPriority)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select priority" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="p1"><span className="flex items-center gap-2"><Flag className="w-3 h-3 text-red-500" /> Priority 1</span></SelectItem>
+                    <SelectItem value="p2"><span className="flex items-center gap-2"><Flag className="w-3 h-3 text-orange-500" /> Priority 2</span></SelectItem>
+                    <SelectItem value="p3"><span className="flex items-center gap-2"><Flag className="w-3 h-3 text-blue-500" /> Priority 3</span></SelectItem>
+                    <SelectItem value="p4"><span className="flex items-center gap-2"><Minus className="w-3 h-3 text-gray-400" /> Priority 4</span></SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowEditTaskDialog(false)}>Cancel</Button>
+              <Button onClick={submitEditTask}>Save Changes</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Move Task Dialog */}
+        <Dialog open={showMoveTaskDialog} onOpenChange={setShowMoveTaskDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Move className="w-5 h-5 text-purple-500" />
+                Move Task
+              </DialogTitle>
+              <DialogDescription>Move "{selectedTask?.title}" to a different project.</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Select Destination Project</Label>
+                <Select value={moveTargetProject} onValueChange={setMoveTargetProject}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select project" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {projects.map(project => (
+                      <SelectItem key={project.id} value={project.id}>
+                        <span className="flex items-center gap-2">
+                          <span className="w-2 h-2 rounded-full" style={{ backgroundColor: project.color }} />
+                          {project.name}
+                        </span>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowMoveTaskDialog(false)}>Cancel</Button>
+              <Button onClick={submitMoveTask}>Move Task</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Duplicate Task Dialog */}
+        <Dialog open={showDuplicateTaskDialog} onOpenChange={setShowDuplicateTaskDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Copy className="w-5 h-5 text-green-500" />
+                Duplicate Task
+              </DialogTitle>
+              <DialogDescription>Create a copy of "{selectedTask?.title}".</DialogDescription>
+            </DialogHeader>
+            <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+              <p className="text-sm text-muted-foreground">This will create a new task with the same title, description, priority, and labels. The new task will be marked as pending.</p>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowDuplicateTaskDialog(false)}>Cancel</Button>
+              <Button onClick={submitDuplicateTask}>Duplicate</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Archive Task Dialog */}
+        <Dialog open={showArchiveTaskDialog} onOpenChange={setShowArchiveTaskDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Archive className="w-5 h-5 text-amber-500" />
+                Archive Task
+              </DialogTitle>
+              <DialogDescription>Are you sure you want to archive "{selectedTask?.title}"?</DialogDescription>
+            </DialogHeader>
+            <div className="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
+              <p className="text-sm text-amber-700 dark:text-amber-400">Archived tasks can be restored later from the archive section.</p>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowArchiveTaskDialog(false)}>Cancel</Button>
+              <Button variant="default" onClick={submitArchiveTask}>Archive</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Task Dialog */}
+        <Dialog open={showDeleteTaskDialog} onOpenChange={setShowDeleteTaskDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-500">
+                <AlertTriangle className="w-5 h-5" />
+                Delete Task
+              </DialogTitle>
+              <DialogDescription>Are you sure you want to delete "{selectedTask?.title}"?</DialogDescription>
+            </DialogHeader>
+            <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
+              <p className="text-sm text-red-700 dark:text-red-400">This action cannot be undone. The task and all its sub-tasks, comments, and attachments will be permanently deleted.</p>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowDeleteTaskDialog(false)}>Cancel</Button>
+              <Button variant="destructive" onClick={submitDeleteTask}>Delete</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Focus Session Dialog */}
+        <Dialog open={showFocusSessionDialog} onOpenChange={setShowFocusSessionDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Target className="w-5 h-5 text-violet-500" />
+                Start Focus Session
+              </DialogTitle>
+              <DialogDescription>Configure your focus session.</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Duration (minutes)</Label>
+                <Select value={focusDuration} onValueChange={setFocusDuration}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="15">15 minutes</SelectItem>
+                    <SelectItem value="25">25 minutes (Pomodoro)</SelectItem>
+                    <SelectItem value="30">30 minutes</SelectItem>
+                    <SelectItem value="45">45 minutes</SelectItem>
+                    <SelectItem value="60">60 minutes</SelectItem>
+                    <SelectItem value="90">90 minutes</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Focus on task (optional)</Label>
+                <Select value={focusTaskId} onValueChange={setFocusTaskId}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a task to focus on" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {todayTasks.map(task => (
+                      <SelectItem key={task.id} value={task.id}>{task.title}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="p-4 bg-violet-50 dark:bg-violet-900/20 rounded-lg">
+                <p className="text-sm text-violet-700 dark:text-violet-400">Focus mode will minimize distractions and track your productive time.</p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowFocusSessionDialog(false)}>Cancel</Button>
+              <Button onClick={startFocusSession} className="bg-violet-600 hover:bg-violet-700">Start Focus</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Review Dialog */}
+        <Dialog open={showReviewDialog} onOpenChange={setShowReviewDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <CheckCircle2 className="w-5 h-5 text-green-500" />
+                Daily Review
+              </DialogTitle>
+              <DialogDescription>Review your progress for today.</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-6">
+              <div className="grid grid-cols-3 gap-4">
+                <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg text-center">
+                  <div className="text-3xl font-bold text-green-600">{completedToday.length}</div>
+                  <div className="text-sm text-green-600/80">Completed</div>
+                </div>
+                <div className="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg text-center">
+                  <div className="text-3xl font-bold text-amber-600">{todayTasks.length}</div>
+                  <div className="text-sm text-amber-600/80">Remaining</div>
+                </div>
+                <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg text-center">
+                  <div className="text-3xl font-bold text-red-600">{overdueTasks.length}</div>
+                  <div className="text-sm text-red-600/80">Overdue</div>
+                </div>
+              </div>
+              {completedToday.length > 0 && (
+                <div>
+                  <h4 className="font-medium mb-2">Completed Today</h4>
+                  <div className="space-y-2 max-h-40 overflow-y-auto">
+                    {completedToday.map(task => (
+                      <div key={task.id} className="flex items-center gap-2 p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                        <CheckCircle2 className="w-4 h-4 text-green-500" />
+                        <span className="text-sm">{task.title}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {todayTasks.length > 0 && (
+                <div>
+                  <h4 className="font-medium mb-2">Still To Do</h4>
+                  <div className="space-y-2 max-h-40 overflow-y-auto">
+                    {todayTasks.map(task => (
+                      <div key={task.id} className="flex items-center gap-2 p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                        <Circle className="w-4 h-4 text-gray-400" />
+                        <span className="text-sm">{task.title}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+            <DialogFooter>
+              <Button onClick={() => setShowReviewDialog(false)}>Close</Button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
       </div>

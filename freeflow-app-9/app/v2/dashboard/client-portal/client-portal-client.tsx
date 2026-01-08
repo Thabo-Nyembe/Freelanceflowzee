@@ -368,11 +368,7 @@ const clientPortalActivities = [
   { id: '3', user: 'System', action: 'generated', target: 'weekly report', timestamp: '1h ago', type: 'info' as const },
 ]
 
-const clientPortalQuickActions = [
-  { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => toast.success('New Client', { description: 'Client creation form ready' }) },
-  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => toast.success('Export Started', { description: 'Client data exported to CSV' }) },
-  { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => toast.success('Settings', { description: 'Portal settings loaded' }) },
-]
+// Quick actions will be defined inside the component to access state setters
 
 export default function ClientPortalClient() {
   logger.debug('Component mounting')
@@ -405,6 +401,27 @@ export default function ClientPortalClient() {
   const [isAddProjectModalOpen, setIsAddProjectModalOpen] = useState(false)
   const [isAddCommunicationModalOpen, setIsAddCommunicationModalOpen] = useState(false)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+
+  // Quick Action Dialogs
+  const [isExportDialogOpen, setIsExportDialogOpen] = useState(false)
+  const [isSettingsDialogOpen, setIsSettingsDialogOpen] = useState(false)
+  const [exportFormat, setExportFormat] = useState<'csv' | 'json' | 'pdf'>('csv')
+  const [exportDataType, setExportDataType] = useState<'clients' | 'projects' | 'all'>('all')
+  const [isExporting, setIsExporting] = useState(false)
+  const [portalSettings, setPortalSettings] = useState({
+    notifyOnNewClient: true,
+    notifyOnProjectUpdate: true,
+    autoFollowUpReminders: true,
+    healthScoreThreshold: 70,
+    defaultClientTier: 'basic' as ClientTier
+  })
+
+  // Quick Actions with real dialog functionality
+  const clientPortalQuickActions = [
+    { id: '1', label: 'New Client', icon: 'Plus', shortcut: 'N', action: () => setIsAddClientModalOpen(true) },
+    { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => setIsExportDialogOpen(true) },
+    { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => setIsSettingsDialogOpen(true) },
+  ]
 
   // FORM STATES
   const [clientForm, setClientForm] = useState({
@@ -841,6 +858,144 @@ export default function ClientPortalClient() {
         subject: communicationForm.subject
       })
       toast.error('Failed to log communication', {
+        description: error.message || 'Please try again later'
+      })
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  const handleExportData = async () => {
+    logger.info('Exporting data', { format: exportFormat, dataType: exportDataType })
+
+    try {
+      setIsExporting(true)
+
+      // Prepare data based on selection
+      let dataToExport: any[] = []
+      let filename = 'client-portal-export'
+
+      if (exportDataType === 'clients' || exportDataType === 'all') {
+        dataToExport = [...dataToExport, ...state.clients.map(c => ({
+          type: 'client',
+          id: c.id,
+          companyName: c.companyName,
+          contactPerson: c.contactPerson,
+          email: c.email,
+          phone: c.phone,
+          status: c.status,
+          tier: c.tier,
+          activeProjects: c.activeProjects,
+          totalRevenue: c.totalRevenue,
+          healthScore: c.healthScore
+        }))]
+        filename = exportDataType === 'clients' ? 'clients-export' : 'client-portal-export'
+      }
+
+      if (exportDataType === 'projects' || exportDataType === 'all') {
+        dataToExport = [...dataToExport, ...state.projects.map(p => ({
+          type: 'project',
+          id: p.id,
+          clientId: p.clientId,
+          name: p.name,
+          description: p.description,
+          status: p.status,
+          budget: p.budget,
+          spent: p.spent,
+          progress: p.progress
+        }))]
+        if (exportDataType === 'projects') filename = 'projects-export'
+      }
+
+      // Simulate export processing
+      await new Promise(resolve => setTimeout(resolve, 1000))
+
+      let content: string
+      let mimeType: string
+      let extension: string
+
+      if (exportFormat === 'csv') {
+        // Convert to CSV
+        const headers = Object.keys(dataToExport[0] || {}).join(',')
+        const rows = dataToExport.map(row => Object.values(row).join(','))
+        content = [headers, ...rows].join('\n')
+        mimeType = 'text/csv'
+        extension = 'csv'
+      } else if (exportFormat === 'json') {
+        content = JSON.stringify(dataToExport, null, 2)
+        mimeType = 'application/json'
+        extension = 'json'
+      } else {
+        // PDF - just create a text representation for now
+        content = `Client Portal Export\n\nGenerated: ${new Date().toLocaleString()}\n\nTotal Records: ${dataToExport.length}\n\n${JSON.stringify(dataToExport, null, 2)}`
+        mimeType = 'text/plain'
+        extension = 'txt'
+      }
+
+      // Create and trigger download
+      const blob = new Blob([content], { type: mimeType })
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `${filename}-${new Date().toISOString().split('T')[0]}.${extension}`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
+
+      logger.info('Export completed', {
+        format: exportFormat,
+        dataType: exportDataType,
+        recordCount: dataToExport.length
+      })
+
+      toast.success('Export completed', {
+        description: `${dataToExport.length} records exported as ${exportFormat.toUpperCase()}`
+      })
+
+      setIsExportDialogOpen(false)
+    } catch (error: any) {
+      logger.error('Export error', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        errorObject: error
+      })
+      toast.error('Export failed', {
+        description: error.message || 'Please try again later'
+      })
+    } finally {
+      setIsExporting(false)
+    }
+  }
+
+  const handleSaveSettings = async () => {
+    logger.info('Saving portal settings', portalSettings)
+
+    try {
+      setIsSaving(true)
+
+      // Simulate API call to save settings
+      await new Promise(resolve => setTimeout(resolve, 800))
+
+      // In a real implementation, you would save to database/API
+      // await fetch('/api/portal-settings', {
+      //   method: 'POST',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify(portalSettings)
+      // })
+
+      logger.info('Settings saved successfully', portalSettings)
+
+      toast.success('Settings saved', {
+        description: `Notifications: ${portalSettings.notifyOnNewClient ? 'On' : 'Off'} | Health threshold: ${portalSettings.healthScoreThreshold}% | Default tier: ${portalSettings.defaultClientTier}`
+      })
+
+      setIsSettingsDialogOpen(false)
+    } catch (error: any) {
+      logger.error('Settings save error', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        errorObject: error
+      })
+      toast.error('Failed to save settings', {
         description: error.message || 'Please try again later'
       })
     } finally {
@@ -1716,6 +1871,188 @@ export default function ClientPortalClient() {
                 onClick={() => state.selectedClient && handleDeleteClient(state.selectedClient.id)}
               >
                 Delete Client
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Export Dialog */}
+        <Dialog open={isExportDialogOpen} onOpenChange={setIsExportDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Export Client Portal Data</DialogTitle>
+              <DialogDescription>
+                Choose what data to export and the file format
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4">
+              <div>
+                <Label>Data to Export</Label>
+                <Select value={exportDataType} onValueChange={(v) => setExportDataType(v as typeof exportDataType)}>
+                  <SelectTrigger className="mt-2">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Data (Clients & Projects)</SelectItem>
+                    <SelectItem value="clients">Clients Only</SelectItem>
+                    <SelectItem value="projects">Projects Only</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label>Export Format</Label>
+                <Select value={exportFormat} onValueChange={(v) => setExportFormat(v as typeof exportFormat)}>
+                  <SelectTrigger className="mt-2">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="csv">CSV (Spreadsheet)</SelectItem>
+                    <SelectItem value="json">JSON (Data)</SelectItem>
+                    <SelectItem value="pdf">PDF (Document)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="p-3 bg-muted rounded-lg text-sm">
+                <p className="font-medium mb-1">Export Summary</p>
+                <p className="text-muted-foreground">
+                  {exportDataType === 'all' && `${state.clients.length} clients and ${state.projects.length} projects`}
+                  {exportDataType === 'clients' && `${state.clients.length} clients`}
+                  {exportDataType === 'projects' && `${state.projects.length} projects`}
+                  {' will be exported as '}{exportFormat.toUpperCase()}
+                </p>
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsExportDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleExportData} disabled={isExporting}>
+                {isExporting ? 'Exporting...' : 'Export Data'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Settings Dialog */}
+        <Dialog open={isSettingsDialogOpen} onOpenChange={setIsSettingsDialogOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Portal Settings</DialogTitle>
+              <DialogDescription>
+                Configure your client portal preferences
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-6">
+              <div className="space-y-4">
+                <h4 className="text-sm font-medium">Notifications</h4>
+
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label className="text-sm">New Client Alerts</Label>
+                    <p className="text-xs text-muted-foreground">Get notified when new clients are added</p>
+                  </div>
+                  <Button
+                    variant={portalSettings.notifyOnNewClient ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setPortalSettings(prev => ({
+                      ...prev,
+                      notifyOnNewClient: !prev.notifyOnNewClient
+                    }))}
+                  >
+                    {portalSettings.notifyOnNewClient ? 'On' : 'Off'}
+                  </Button>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label className="text-sm">Project Updates</Label>
+                    <p className="text-xs text-muted-foreground">Get notified on project changes</p>
+                  </div>
+                  <Button
+                    variant={portalSettings.notifyOnProjectUpdate ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setPortalSettings(prev => ({
+                      ...prev,
+                      notifyOnProjectUpdate: !prev.notifyOnProjectUpdate
+                    }))}
+                  >
+                    {portalSettings.notifyOnProjectUpdate ? 'On' : 'Off'}
+                  </Button>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label className="text-sm">Follow-up Reminders</Label>
+                    <p className="text-xs text-muted-foreground">Auto-remind about client follow-ups</p>
+                  </div>
+                  <Button
+                    variant={portalSettings.autoFollowUpReminders ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setPortalSettings(prev => ({
+                      ...prev,
+                      autoFollowUpReminders: !prev.autoFollowUpReminders
+                    }))}
+                  >
+                    {portalSettings.autoFollowUpReminders ? 'On' : 'Off'}
+                  </Button>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <h4 className="text-sm font-medium">Defaults</h4>
+
+                <div>
+                  <Label>Health Score Alert Threshold</Label>
+                  <div className="flex items-center gap-2 mt-2">
+                    <Input
+                      type="number"
+                      min="0"
+                      max="100"
+                      value={portalSettings.healthScoreThreshold}
+                      onChange={(e) => setPortalSettings(prev => ({
+                        ...prev,
+                        healthScoreThreshold: parseInt(e.target.value) || 70
+                      }))}
+                      className="w-20"
+                    />
+                    <span className="text-sm text-muted-foreground">% - Alert when below this score</span>
+                  </div>
+                </div>
+
+                <div>
+                  <Label>Default Client Tier</Label>
+                  <Select
+                    value={portalSettings.defaultClientTier}
+                    onValueChange={(v) => setPortalSettings(prev => ({
+                      ...prev,
+                      defaultClientTier: v as ClientTier
+                    }))}
+                  >
+                    <SelectTrigger className="mt-2">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="basic">Basic</SelectItem>
+                      <SelectItem value="standard">Standard</SelectItem>
+                      <SelectItem value="premium">Premium</SelectItem>
+                      <SelectItem value="enterprise">Enterprise</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsSettingsDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleSaveSettings} disabled={isSaving}>
+                {isSaving ? 'Saving...' : 'Save Settings'}
               </Button>
             </DialogFooter>
           </DialogContent>

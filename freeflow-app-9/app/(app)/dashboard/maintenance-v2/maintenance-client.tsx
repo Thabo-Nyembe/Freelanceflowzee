@@ -530,11 +530,7 @@ const mockMaintenanceActivities = [
   { id: '3', user: 'Safety Officer', action: 'Inspected', target: 'fire suppression system', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
 ]
 
-const mockMaintenanceQuickActions = [
-  { id: '1', label: 'New Work Order', icon: 'plus', action: () => toast.success('Work Order Created', { description: 'Ready to assign to technician' }), variant: 'default' as const },
-  { id: '2', label: 'Schedule PM', icon: 'calendar', action: () => toast.success('PM Scheduled', { description: 'Preventive maintenance added to calendar' }), variant: 'default' as const },
-  { id: '3', label: 'Asset List', icon: 'list', action: () => toast.success('Asset List Loaded', { description: 'Viewing all registered assets' }), variant: 'outline' as const },
-]
+// Quick actions will be defined inside the component to access state setters
 
 // Database types
 interface DbMaintenanceWindow {
@@ -599,6 +595,29 @@ export default function MaintenanceClient() {
   const [selectedOrder, setSelectedOrder] = useState<WorkOrder | null>(null)
   const [statusFilter, setStatusFilter] = useState<MaintenanceStatus | 'all'>('all')
   const [settingsTab, setSettingsTab] = useState('general')
+
+  // Quick Action Dialog States
+  const [showSchedulePMDialog, setShowSchedulePMDialog] = useState(false)
+  const [showAssetListDialog, setShowAssetListDialog] = useState(false)
+
+  // Schedule PM Form State
+  const [pmFormState, setPMFormState] = useState({
+    asset: '',
+    maintenanceType: 'preventive',
+    frequency: 'monthly',
+    startDate: '',
+    duration: '60',
+    assignedTeam: '',
+    checklist: '',
+    notes: ''
+  })
+
+  // Asset Filter State for Asset List Dialog
+  const [assetFilter, setAssetFilter] = useState({
+    search: '',
+    status: 'all' as AssetStatus | 'all',
+    criticality: 'all' as Priority | 'all'
+  })
 
   // Supabase data state
   const [dbMaintenanceWindows, setDbMaintenanceWindows] = useState<DbMaintenanceWindow[]>([])
@@ -810,6 +829,107 @@ export default function MaintenanceClient() {
     URL.revokeObjectURL(url)
     toast.success('Report exported successfully')
   }
+
+  // Schedule PM Handler
+  const handleSchedulePM = async () => {
+    if (!pmFormState.asset) {
+      toast.error('Please select an asset')
+      return
+    }
+    if (!pmFormState.startDate) {
+      toast.error('Please set a start date')
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Please sign in to schedule maintenance')
+        return
+      }
+
+      const startDate = new Date(pmFormState.startDate)
+      const endDate = new Date(startDate.getTime() + parseInt(pmFormState.duration) * 60000)
+
+      const { error } = await supabase.from('maintenance_windows').insert({
+        user_id: user.id,
+        title: `Preventive Maintenance - ${pmFormState.asset}`,
+        description: `Scheduled ${pmFormState.frequency} ${pmFormState.maintenanceType} maintenance`,
+        type: pmFormState.maintenanceType,
+        status: 'scheduled',
+        priority: 'medium',
+        impact: 'low',
+        start_time: startDate.toISOString(),
+        end_time: endDate.toISOString(),
+        duration_minutes: parseInt(pmFormState.duration),
+        affected_systems: pmFormState.asset ? [pmFormState.asset] : [],
+        downtime_expected: false,
+        assigned_to: pmFormState.assignedTeam ? pmFormState.assignedTeam.split(',').map(s => s.trim()) : [],
+        notes: pmFormState.notes || null,
+        completion_rate: 0,
+      })
+
+      if (error) throw error
+
+      toast.success('Preventive maintenance scheduled successfully')
+      setShowSchedulePMDialog(false)
+      setPMFormState({
+        asset: '',
+        maintenanceType: 'preventive',
+        frequency: 'monthly',
+        startDate: '',
+        duration: '60',
+        assignedTeam: '',
+        checklist: '',
+        notes: ''
+      })
+      fetchMaintenanceWindows()
+    } catch (error) {
+      console.error('Error scheduling PM:', error)
+      toast.error('Failed to schedule preventive maintenance')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // Filtered assets for the Asset List Dialog
+  const filteredAssets = useMemo(() => {
+    return mockAssets.filter(asset => {
+      const matchesSearch = assetFilter.search === '' ||
+        asset.name.toLowerCase().includes(assetFilter.search.toLowerCase()) ||
+        asset.assetTag.toLowerCase().includes(assetFilter.search.toLowerCase()) ||
+        asset.location.toLowerCase().includes(assetFilter.search.toLowerCase())
+      const matchesStatus = assetFilter.status === 'all' || asset.status === assetFilter.status
+      const matchesCriticality = assetFilter.criticality === 'all' || asset.criticality === assetFilter.criticality
+      return matchesSearch && matchesStatus && matchesCriticality
+    })
+  }, [assetFilter])
+
+  // Quick Actions with real dialog functionality
+  const maintenanceQuickActions = [
+    {
+      id: '1',
+      label: 'New Work Order',
+      icon: 'plus',
+      action: () => setShowCreateDialog(true),
+      variant: 'default' as const
+    },
+    {
+      id: '2',
+      label: 'Schedule PM',
+      icon: 'calendar',
+      action: () => setShowSchedulePMDialog(true),
+      variant: 'default' as const
+    },
+    {
+      id: '3',
+      label: 'Asset List',
+      icon: 'list',
+      action: () => setShowAssetListDialog(true),
+      variant: 'outline' as const
+    },
+  ]
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 dark:bg-none dark:bg-gray-900">
@@ -2106,7 +2226,7 @@ export default function MaintenanceClient() {
               maxItems={5}
             />
             <QuickActionsToolbar
-              actions={mockMaintenanceQuickActions}
+              actions={maintenanceQuickActions}
               variant="grid"
             />
           </div>
@@ -2252,6 +2372,290 @@ export default function MaintenanceClient() {
             >
               {isSubmitting ? 'Creating...' : 'Create Maintenance Window'}
             </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Schedule Preventive Maintenance Dialog */}
+      <Dialog open={showSchedulePMDialog} onOpenChange={setShowSchedulePMDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Calendar className="w-5 h-5 text-orange-600" />
+              Schedule Preventive Maintenance
+            </DialogTitle>
+            <DialogDescription>Create a recurring preventive maintenance schedule for your assets</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="col-span-2">
+                <Label>Select Asset *</Label>
+                <select
+                  value={pmFormState.asset}
+                  onChange={(e) => setPMFormState(prev => ({ ...prev, asset: e.target.value }))}
+                  className="w-full mt-1.5 px-3 py-2 border rounded-lg dark:bg-gray-900 dark:border-gray-700"
+                >
+                  <option value="">Choose an asset...</option>
+                  {mockAssets.map(asset => (
+                    <option key={asset.id} value={asset.name}>
+                      {asset.name} ({asset.assetTag}) - {asset.location}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <Label>Maintenance Type</Label>
+                <select
+                  value={pmFormState.maintenanceType}
+                  onChange={(e) => setPMFormState(prev => ({ ...prev, maintenanceType: e.target.value }))}
+                  className="w-full mt-1.5 px-3 py-2 border rounded-lg dark:bg-gray-900 dark:border-gray-700"
+                >
+                  <option value="preventive">Preventive</option>
+                  <option value="inspection">Inspection</option>
+                  <option value="calibration">Calibration</option>
+                </select>
+              </div>
+              <div>
+                <Label>Frequency</Label>
+                <select
+                  value={pmFormState.frequency}
+                  onChange={(e) => setPMFormState(prev => ({ ...prev, frequency: e.target.value }))}
+                  className="w-full mt-1.5 px-3 py-2 border rounded-lg dark:bg-gray-900 dark:border-gray-700"
+                >
+                  <option value="daily">Daily</option>
+                  <option value="weekly">Weekly</option>
+                  <option value="monthly">Monthly</option>
+                  <option value="quarterly">Quarterly</option>
+                  <option value="yearly">Yearly</option>
+                </select>
+              </div>
+              <div>
+                <Label>Start Date/Time *</Label>
+                <Input
+                  type="datetime-local"
+                  value={pmFormState.startDate}
+                  onChange={(e) => setPMFormState(prev => ({ ...prev, startDate: e.target.value }))}
+                  className="mt-1.5"
+                />
+              </div>
+              <div>
+                <Label>Duration (minutes)</Label>
+                <Input
+                  type="number"
+                  value={pmFormState.duration}
+                  onChange={(e) => setPMFormState(prev => ({ ...prev, duration: e.target.value }))}
+                  placeholder="60"
+                  className="mt-1.5"
+                />
+              </div>
+              <div className="col-span-2">
+                <Label>Assigned Team</Label>
+                <select
+                  value={pmFormState.assignedTeam}
+                  onChange={(e) => setPMFormState(prev => ({ ...prev, assignedTeam: e.target.value }))}
+                  className="w-full mt-1.5 px-3 py-2 border rounded-lg dark:bg-gray-900 dark:border-gray-700"
+                >
+                  <option value="">Select team...</option>
+                  <option value="HVAC Team">HVAC Team</option>
+                  <option value="Electrical Team">Electrical Team</option>
+                  <option value="Mechanical Team">Mechanical Team</option>
+                  <option value="IT Team">IT Team</option>
+                  <option value="General Maintenance">General Maintenance</option>
+                </select>
+              </div>
+              <div className="col-span-2">
+                <Label>Checklist Items (comma-separated)</Label>
+                <Input
+                  value={pmFormState.checklist}
+                  onChange={(e) => setPMFormState(prev => ({ ...prev, checklist: e.target.value }))}
+                  placeholder="e.g., Check filters, Inspect coils, Test thermostat"
+                  className="mt-1.5"
+                />
+              </div>
+              <div className="col-span-2">
+                <Label>Notes</Label>
+                <Input
+                  value={pmFormState.notes}
+                  onChange={(e) => setPMFormState(prev => ({ ...prev, notes: e.target.value }))}
+                  placeholder="Additional instructions or notes..."
+                  className="mt-1.5"
+                />
+              </div>
+            </div>
+          </div>
+          <div className="flex justify-end gap-3">
+            <Button variant="outline" onClick={() => setShowSchedulePMDialog(false)}>Cancel</Button>
+            <Button
+              onClick={handleSchedulePM}
+              disabled={isSubmitting}
+              className="bg-gradient-to-r from-orange-600 to-amber-600 text-white"
+            >
+              {isSubmitting ? 'Scheduling...' : 'Schedule Maintenance'}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Asset List Dialog */}
+      <Dialog open={showAssetListDialog} onOpenChange={setShowAssetListDialog}>
+        <DialogContent className="max-w-4xl max-h-[80vh]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Server className="w-5 h-5 text-blue-600" />
+              Asset Inventory
+            </DialogTitle>
+            <DialogDescription>View and manage all registered assets</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            {/* Filters */}
+            <div className="flex flex-col sm:flex-row gap-3">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Input
+                  placeholder="Search assets..."
+                  value={assetFilter.search}
+                  onChange={(e) => setAssetFilter(prev => ({ ...prev, search: e.target.value }))}
+                  className="pl-10"
+                />
+              </div>
+              <select
+                value={assetFilter.status}
+                onChange={(e) => setAssetFilter(prev => ({ ...prev, status: e.target.value as AssetStatus | 'all' }))}
+                className="px-3 py-2 border rounded-lg dark:bg-gray-900 dark:border-gray-700"
+              >
+                <option value="all">All Status</option>
+                <option value="operational">Operational</option>
+                <option value="degraded">Degraded</option>
+                <option value="offline">Offline</option>
+                <option value="maintenance">Maintenance</option>
+                <option value="retired">Retired</option>
+              </select>
+              <select
+                value={assetFilter.criticality}
+                onChange={(e) => setAssetFilter(prev => ({ ...prev, criticality: e.target.value as Priority | 'all' }))}
+                className="px-3 py-2 border rounded-lg dark:bg-gray-900 dark:border-gray-700"
+              >
+                <option value="all">All Criticality</option>
+                <option value="critical">Critical</option>
+                <option value="high">High</option>
+                <option value="medium">Medium</option>
+                <option value="low">Low</option>
+              </select>
+            </div>
+
+            {/* Asset Stats */}
+            <div className="grid grid-cols-4 gap-3">
+              <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg text-center">
+                <p className="text-lg font-bold text-green-700">{mockAssets.filter(a => a.status === 'operational').length}</p>
+                <p className="text-xs text-green-600">Operational</p>
+              </div>
+              <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg text-center">
+                <p className="text-lg font-bold text-yellow-700">{mockAssets.filter(a => a.status === 'degraded').length}</p>
+                <p className="text-xs text-yellow-600">Degraded</p>
+              </div>
+              <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-center">
+                <p className="text-lg font-bold text-blue-700">{mockAssets.filter(a => a.status === 'maintenance').length}</p>
+                <p className="text-xs text-blue-600">In Maintenance</p>
+              </div>
+              <div className="p-3 bg-red-50 dark:bg-red-900/20 rounded-lg text-center">
+                <p className="text-lg font-bold text-red-700">{mockAssets.filter(a => a.criticality === 'critical').length}</p>
+                <p className="text-xs text-red-600">Critical Assets</p>
+              </div>
+            </div>
+
+            {/* Asset List */}
+            <ScrollArea className="h-[400px]">
+              <div className="space-y-3">
+                {filteredAssets.map((asset) => (
+                  <div key={asset.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors">
+                    <div className="flex items-center gap-4">
+                      <div className="p-2 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-lg">
+                        <HardDrive className="w-5 h-5 text-white" />
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <p className="font-semibold text-gray-900 dark:text-white">{asset.name}</p>
+                          <Badge className={getPriorityColor(asset.criticality)}>{asset.criticality}</Badge>
+                          <Badge className={getAssetStatusColor(asset.status)}>{asset.status}</Badge>
+                        </div>
+                        <p className="text-sm text-gray-500">{asset.assetTag} | {asset.manufacturer} {asset.model}</p>
+                        <p className="text-xs text-gray-400">{asset.location} | Owner: {asset.owner}</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="grid grid-cols-2 gap-4 text-xs">
+                        <div>
+                          <p className="text-gray-500">Uptime</p>
+                          <p className="font-semibold text-gray-900 dark:text-white">{asset.uptime}%</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-500">MTBF</p>
+                          <p className="font-semibold text-gray-900 dark:text-white">{asset.mtbf}h</p>
+                        </div>
+                      </div>
+                      <p className="text-xs text-gray-500 mt-2">Next Maintenance: {formatDate(asset.nextMaintenance)}</p>
+                      <div className="flex gap-2 mt-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            setShowAssetListDialog(false)
+                            setPMFormState(prev => ({ ...prev, asset: asset.name }))
+                            setShowSchedulePMDialog(true)
+                          }}
+                        >
+                          <Calendar className="w-3 h-3 mr-1" />
+                          Schedule PM
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            setShowAssetListDialog(false)
+                            setFormState(prev => ({ ...prev, affected_systems: asset.name }))
+                            setShowCreateDialog(true)
+                          }}
+                        >
+                          <Plus className="w-3 h-3 mr-1" />
+                          Work Order
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                {filteredAssets.length === 0 && (
+                  <div className="text-center py-8 text-gray-500">
+                    <Server className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                    <p>No assets found matching your filters</p>
+                  </div>
+                )}
+              </div>
+            </ScrollArea>
+          </div>
+          <div className="flex justify-between items-center">
+            <p className="text-sm text-gray-500">{filteredAssets.length} of {mockAssets.length} assets</p>
+            <div className="flex gap-3">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  const csv = mockAssets.map(a =>
+                    `${a.assetTag},${a.name},${a.type},${a.status},${a.criticality},${a.location},${a.uptime}%`
+                  ).join('\n')
+                  const blob = new Blob([`Tag,Name,Type,Status,Criticality,Location,Uptime\n${csv}`], { type: 'text/csv' })
+                  const url = URL.createObjectURL(blob)
+                  const link = document.createElement('a')
+                  link.href = url
+                  link.download = `assets-${new Date().toISOString().split('T')[0]}.csv`
+                  link.click()
+                  URL.revokeObjectURL(url)
+                  toast.success('Asset list exported')
+                }}
+              >
+                <Download className="w-4 h-4 mr-2" />
+                Export CSV
+              </Button>
+              <Button variant="outline" onClick={() => setShowAssetListDialog(false)}>Close</Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>

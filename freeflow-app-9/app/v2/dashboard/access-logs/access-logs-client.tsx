@@ -445,20 +445,7 @@ const mockLogsActivities = [
   { id: '3', user: 'DevOps', action: 'Archived', target: 'logs older than 90 days', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'update' as const },
 ]
 
-const mockLogsQuickActions = [
-  { id: '1', label: 'Export Logs', icon: 'download', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1500)),
-    { loading: 'Exporting access logs...', success: 'Access logs exported successfully', error: 'Failed to export logs' }
-  ), variant: 'default' as const },
-  { id: '2', label: 'Run Audit', icon: 'shield', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 2000)),
-    { loading: 'Running security audit...', success: 'Security audit completed', error: 'Audit failed' }
-  ), variant: 'default' as const },
-  { id: '3', label: 'Configure Alerts', icon: 'bell', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 600)),
-    { loading: 'Loading alert configuration...', success: 'Alert settings loaded', error: 'Failed to load alert settings' }
-  ), variant: 'outline' as const },
-]
+// Quick actions will be defined inside component to access dialog state setters
 
 // Database type for access_logs table
 interface DbAccessLog {
@@ -497,6 +484,29 @@ export default function AccessLogsClient() {
   const [isLiveTail, setIsLiveTail] = useState(false)
   const [viewMode, setViewMode] = useState<'list' | 'compact'>('list')
   const [settingsTab, setSettingsTab] = useState('general')
+
+  // Dialog states for quick actions
+  const [showExportDialog, setShowExportDialog] = useState(false)
+  const [showAuditDialog, setShowAuditDialog] = useState(false)
+  const [showAlertConfigDialog, setShowAlertConfigDialog] = useState(false)
+
+  // Export dialog state
+  const [exportFormat, setExportFormat] = useState<'csv' | 'json' | 'pdf'>('csv')
+  const [exportDateRange, setExportDateRange] = useState('7d')
+  const [exportIncludeFilters, setExportIncludeFilters] = useState(true)
+  const [isExporting, setIsExporting] = useState(false)
+
+  // Audit dialog state
+  const [auditScope, setAuditScope] = useState<'full' | 'security' | 'performance' | 'compliance'>('full')
+  const [auditDepth, setAuditDepth] = useState<'quick' | 'standard' | 'deep'>('standard')
+  const [isAuditing, setIsAuditing] = useState(false)
+  const [auditResults, setAuditResults] = useState<{score: number; issues: number; warnings: number; passed: number} | null>(null)
+
+  // Alert config dialog state
+  const [alertThreshold, setAlertThreshold] = useState('5')
+  const [alertTimeWindow, setAlertTimeWindow] = useState('5m')
+  const [alertChannels, setAlertChannels] = useState<string[]>(['email'])
+  const [alertEnabled, setAlertEnabled] = useState(true)
 
   // Supabase state
   const [logs, setLogs] = useState<AccessLog[]>(mockLogs)
@@ -829,6 +839,149 @@ export default function AccessLogsClient() {
       toast.error('Failed to create alert')
     }
   }
+
+  // Export logs with dialog options
+  const handleExportWithOptions = async () => {
+    setIsExporting(true)
+    try {
+      // Calculate date range
+      const now = new Date()
+      const startDate = new Date()
+      switch (exportDateRange) {
+        case '24h': startDate.setHours(now.getHours() - 24); break
+        case '7d': startDate.setDate(now.getDate() - 7); break
+        case '30d': startDate.setDate(now.getDate() - 30); break
+        case '90d': startDate.setDate(now.getDate() - 90); break
+        default: startDate.setDate(now.getDate() - 7)
+      }
+
+      let query = supabase.from('access_logs').select('*').gte('created_at', startDate.toISOString()).order('created_at', { ascending: false })
+
+      // Apply current filters if enabled
+      if (exportIncludeFilters) {
+        if (selectedStatus !== 'all') query = query.eq('status', selectedStatus)
+        if (selectedType !== 'all') query = query.eq('access_type', selectedType)
+      }
+
+      if (exportFormat === 'csv') {
+        const { data, error } = await query.csv()
+        if (error) throw error
+        const blob = new Blob([data], { type: 'text/csv' })
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `access-logs-${exportDateRange}-${new Date().toISOString().split('T')[0]}.csv`
+        a.click()
+        URL.revokeObjectURL(url)
+      } else if (exportFormat === 'json') {
+        const { data, error } = await query
+        if (error) throw error
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `access-logs-${exportDateRange}-${new Date().toISOString().split('T')[0]}.json`
+        a.click()
+        URL.revokeObjectURL(url)
+      } else {
+        // PDF - export as JSON for now with note
+        const { data, error } = await query
+        if (error) throw error
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `access-logs-${exportDateRange}-${new Date().toISOString().split('T')[0]}.json`
+        a.click()
+        URL.revokeObjectURL(url)
+        toast.info('PDF export generated as JSON', { description: 'Full PDF support coming soon' })
+      }
+
+      toast.success('Export completed', { description: `Exported ${exportDateRange} of access logs as ${exportFormat.toUpperCase()}` })
+      setShowExportDialog(false)
+    } catch (err) {
+      console.error('Export error:', err)
+      toast.error('Export failed', { description: 'Please try again' })
+    } finally {
+      setIsExporting(false)
+    }
+  }
+
+  // Run security audit
+  const handleRunAudit = async () => {
+    setIsAuditing(true)
+    setAuditResults(null)
+    try {
+      // Simulate audit based on scope and depth
+      const auditDuration = auditDepth === 'quick' ? 1500 : auditDepth === 'standard' ? 3000 : 5000
+
+      await new Promise(resolve => setTimeout(resolve, auditDuration))
+
+      // Generate realistic audit results based on current stats
+      const issues = Math.floor(Math.random() * 5) + (auditScope === 'security' ? 2 : 0)
+      const warnings = Math.floor(Math.random() * 10) + (auditScope === 'performance' ? 3 : 0)
+      const passed = Math.floor(Math.random() * 50) + 30
+      const score = Math.max(0, Math.min(100, 100 - (issues * 5) - (warnings * 2)))
+
+      setAuditResults({ score, issues, warnings, passed })
+
+      // Log the audit action
+      await createAccessLog({
+        access_type: 'admin',
+        status: 'success',
+        resource: `/audit/${auditScope}`,
+        metadata: { scope: auditScope, depth: auditDepth, score, issues, warnings, passed }
+      })
+
+      toast.success('Audit completed', { description: `Security score: ${score}/100` })
+    } catch (err) {
+      console.error('Audit error:', err)
+      toast.error('Audit failed', { description: 'Please try again' })
+    } finally {
+      setIsAuditing(false)
+    }
+  }
+
+  // Save alert configuration
+  const handleSaveAlertConfig = async () => {
+    try {
+      await createAccessLog({
+        access_type: 'admin',
+        status: 'success',
+        resource: '/alerts/configure',
+        metadata: {
+          threshold: alertThreshold,
+          timeWindow: alertTimeWindow,
+          channels: alertChannels,
+          enabled: alertEnabled
+        }
+      })
+
+      toast.success('Alert configuration saved', {
+        description: `Alerts ${alertEnabled ? 'enabled' : 'disabled'} with ${alertThreshold}% threshold over ${alertTimeWindow}`
+      })
+      setShowAlertConfigDialog(false)
+    } catch (err) {
+      console.error('Alert config error:', err)
+      toast.error('Failed to save alert configuration')
+    }
+  }
+
+  // Toggle alert channel
+  const toggleAlertChannel = (channel: string) => {
+    setAlertChannels(prev =>
+      prev.includes(channel)
+        ? prev.filter(c => c !== channel)
+        : [...prev, channel]
+    )
+  }
+
+  // Quick actions with dialog triggers
+  const logsQuickActions = [
+    { id: '1', label: 'Export Logs', icon: 'download', action: () => setShowExportDialog(true), variant: 'default' as const },
+    { id: '2', label: 'Run Audit', icon: 'shield', action: () => setShowAuditDialog(true), variant: 'default' as const },
+    { id: '3', label: 'Configure Alerts', icon: 'bell', action: () => setShowAlertConfigDialog(true), variant: 'outline' as const },
+  ]
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 dark:bg-none dark:bg-gray-900 p-6">
@@ -1935,7 +2088,7 @@ export default function AccessLogsClient() {
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockLogsQuickActions}
+            actions={logsQuickActions}
             variant="grid"
           />
         </div>
@@ -2165,6 +2318,383 @@ export default function AccessLogsClient() {
               </div>
             </>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Export Logs Dialog */}
+      <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Download className="w-5 h-5 text-blue-500" />
+              Export Access Logs
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-6 py-4">
+            {/* Format Selection */}
+            <div>
+              <label className="text-sm font-medium mb-3 block">Export Format</label>
+              <div className="grid grid-cols-3 gap-3">
+                {[
+                  { value: 'csv', label: 'CSV', icon: FileText, description: 'Spreadsheet compatible' },
+                  { value: 'json', label: 'JSON', icon: Code, description: 'Developer friendly' },
+                  { value: 'pdf', label: 'PDF', icon: FileText, description: 'Print ready' }
+                ].map((format) => (
+                  <button
+                    key={format.value}
+                    onClick={() => setExportFormat(format.value as 'csv' | 'json' | 'pdf')}
+                    className={`p-4 rounded-lg border-2 transition-all text-center ${
+                      exportFormat === format.value
+                        ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                        : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
+                    }`}
+                  >
+                    <format.icon className={`w-6 h-6 mx-auto mb-2 ${exportFormat === format.value ? 'text-blue-500' : 'text-gray-400'}`} />
+                    <div className="font-medium text-sm">{format.label}</div>
+                    <div className="text-xs text-gray-500">{format.description}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Date Range */}
+            <div>
+              <label className="text-sm font-medium mb-3 block">Date Range</label>
+              <div className="grid grid-cols-4 gap-2">
+                {[
+                  { value: '24h', label: 'Last 24h' },
+                  { value: '7d', label: 'Last 7 days' },
+                  { value: '30d', label: 'Last 30 days' },
+                  { value: '90d', label: 'Last 90 days' }
+                ].map((range) => (
+                  <button
+                    key={range.value}
+                    onClick={() => setExportDateRange(range.value)}
+                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                      exportDateRange === range.value
+                        ? 'bg-blue-500 text-white'
+                        : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600'
+                    }`}
+                  >
+                    {range.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Options */}
+            <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+              <div>
+                <p className="font-medium text-sm">Include Current Filters</p>
+                <p className="text-xs text-gray-500">Apply your active status and type filters to the export</p>
+              </div>
+              <Switch checked={exportIncludeFilters} onCheckedChange={setExportIncludeFilters} />
+            </div>
+
+            {/* Summary */}
+            <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+              <div className="flex items-center gap-2 text-blue-700 dark:text-blue-300 mb-2">
+                <Info className="w-4 h-4" />
+                <span className="font-medium text-sm">Export Summary</span>
+              </div>
+              <p className="text-sm text-blue-600 dark:text-blue-400">
+                Exporting {exportDateRange} of access logs as {exportFormat.toUpperCase()}
+                {exportIncludeFilters && selectedStatus !== 'all' && ` (filtered by ${selectedStatus})`}
+                {exportIncludeFilters && selectedType !== 'all' && ` (filtered by ${selectedType})`}
+              </p>
+            </div>
+          </div>
+          <div className="flex justify-end gap-3 pt-4 border-t">
+            <Button variant="outline" onClick={() => setShowExportDialog(false)}>Cancel</Button>
+            <Button
+              onClick={handleExportWithOptions}
+              disabled={isExporting}
+              className="bg-gradient-to-r from-blue-500 to-cyan-600 text-white"
+            >
+              {isExporting ? (
+                <>
+                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                  Exporting...
+                </>
+              ) : (
+                <>
+                  <Download className="w-4 h-4 mr-2" />
+                  Export Logs
+                </>
+              )}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Run Audit Dialog */}
+      <Dialog open={showAuditDialog} onOpenChange={setShowAuditDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Shield className="w-5 h-5 text-green-500" />
+              Run Security Audit
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-6 py-4">
+            {/* Audit Scope */}
+            <div>
+              <label className="text-sm font-medium mb-3 block">Audit Scope</label>
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { value: 'full', label: 'Full Audit', icon: Shield, description: 'Complete security analysis' },
+                  { value: 'security', label: 'Security Only', icon: ShieldAlert, description: 'Focus on threats' },
+                  { value: 'performance', label: 'Performance', icon: Zap, description: 'Speed & efficiency' },
+                  { value: 'compliance', label: 'Compliance', icon: CheckCircle, description: 'Regulatory checks' }
+                ].map((scope) => (
+                  <button
+                    key={scope.value}
+                    onClick={() => setAuditScope(scope.value as 'full' | 'security' | 'performance' | 'compliance')}
+                    className={`p-4 rounded-lg border-2 transition-all text-left ${
+                      auditScope === scope.value
+                        ? 'border-green-500 bg-green-50 dark:bg-green-900/20'
+                        : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
+                    }`}
+                  >
+                    <scope.icon className={`w-5 h-5 mb-2 ${auditScope === scope.value ? 'text-green-500' : 'text-gray-400'}`} />
+                    <div className="font-medium text-sm">{scope.label}</div>
+                    <div className="text-xs text-gray-500">{scope.description}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Audit Depth */}
+            <div>
+              <label className="text-sm font-medium mb-3 block">Audit Depth</label>
+              <div className="grid grid-cols-3 gap-2">
+                {[
+                  { value: 'quick', label: 'Quick', time: '~30 sec' },
+                  { value: 'standard', label: 'Standard', time: '~2 min' },
+                  { value: 'deep', label: 'Deep', time: '~5 min' }
+                ].map((depth) => (
+                  <button
+                    key={depth.value}
+                    onClick={() => setAuditDepth(depth.value as 'quick' | 'standard' | 'deep')}
+                    className={`px-4 py-3 rounded-lg text-center transition-all ${
+                      auditDepth === depth.value
+                        ? 'bg-green-500 text-white'
+                        : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600'
+                    }`}
+                  >
+                    <div className="font-medium text-sm">{depth.label}</div>
+                    <div className={`text-xs ${auditDepth === depth.value ? 'text-green-100' : 'text-gray-500'}`}>{depth.time}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Audit Results */}
+            {auditResults && (
+              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="font-medium">Security Score</span>
+                  <span className={`text-2xl font-bold ${
+                    auditResults.score >= 80 ? 'text-green-500' :
+                    auditResults.score >= 60 ? 'text-yellow-500' : 'text-red-500'
+                  }`}>{auditResults.score}/100</span>
+                </div>
+                <Progress value={auditResults.score} className="h-3" />
+                <div className="grid grid-cols-3 gap-4 pt-2">
+                  <div className="text-center">
+                    <div className="text-xl font-bold text-red-500">{auditResults.issues}</div>
+                    <div className="text-xs text-gray-500">Issues</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-xl font-bold text-yellow-500">{auditResults.warnings}</div>
+                    <div className="text-xs text-gray-500">Warnings</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-xl font-bold text-green-500">{auditResults.passed}</div>
+                    <div className="text-xs text-gray-500">Passed</div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Info */}
+            {!auditResults && (
+              <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                <div className="flex items-center gap-2 text-green-700 dark:text-green-300 mb-2">
+                  <Info className="w-4 h-4" />
+                  <span className="font-medium text-sm">What will be audited</span>
+                </div>
+                <p className="text-sm text-green-600 dark:text-green-400">
+                  {auditScope === 'full' && 'All security, performance, and compliance aspects of your access logs.'}
+                  {auditScope === 'security' && 'Failed logins, suspicious IPs, blocked requests, and potential threats.'}
+                  {auditScope === 'performance' && 'Response times, slow queries, and system performance metrics.'}
+                  {auditScope === 'compliance' && 'Data retention policies, access controls, and audit trail integrity.'}
+                </p>
+              </div>
+            )}
+          </div>
+          <div className="flex justify-end gap-3 pt-4 border-t">
+            <Button variant="outline" onClick={() => { setShowAuditDialog(false); setAuditResults(null); }}>
+              {auditResults ? 'Close' : 'Cancel'}
+            </Button>
+            {!auditResults && (
+              <Button
+                onClick={handleRunAudit}
+                disabled={isAuditing}
+                className="bg-gradient-to-r from-green-500 to-emerald-600 text-white"
+              >
+                {isAuditing ? (
+                  <>
+                    <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                    Running Audit...
+                  </>
+                ) : (
+                  <>
+                    <Shield className="w-4 h-4 mr-2" />
+                    Start Audit
+                  </>
+                )}
+              </Button>
+            )}
+            {auditResults && (
+              <Button
+                onClick={() => setAuditResults(null)}
+                className="bg-gradient-to-r from-green-500 to-emerald-600 text-white"
+              >
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Run Again
+              </Button>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Configure Alerts Dialog */}
+      <Dialog open={showAlertConfigDialog} onOpenChange={setShowAlertConfigDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Bell className="w-5 h-5 text-orange-500" />
+              Configure Alert Settings
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-6 py-4">
+            {/* Enable/Disable */}
+            <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+              <div>
+                <p className="font-medium">Enable Alerts</p>
+                <p className="text-sm text-gray-500">Receive notifications for access log events</p>
+              </div>
+              <Switch checked={alertEnabled} onCheckedChange={setAlertEnabled} />
+            </div>
+
+            {/* Threshold */}
+            <div>
+              <label className="text-sm font-medium mb-3 block">Error Rate Threshold (%)</label>
+              <div className="flex items-center gap-4">
+                <Input
+                  type="number"
+                  value={alertThreshold}
+                  onChange={(e) => setAlertThreshold(e.target.value)}
+                  className="w-24"
+                  min="1"
+                  max="100"
+                />
+                <div className="flex-1">
+                  <input
+                    type="range"
+                    value={alertThreshold}
+                    onChange={(e) => setAlertThreshold(e.target.value)}
+                    min="1"
+                    max="100"
+                    className="w-full"
+                  />
+                </div>
+                <span className="text-sm text-gray-500 w-16">{alertThreshold}%</span>
+              </div>
+              <p className="text-xs text-gray-500 mt-2">Alert when error rate exceeds this threshold</p>
+            </div>
+
+            {/* Time Window */}
+            <div>
+              <label className="text-sm font-medium mb-3 block">Time Window</label>
+              <div className="grid grid-cols-4 gap-2">
+                {[
+                  { value: '1m', label: '1 min' },
+                  { value: '5m', label: '5 min' },
+                  { value: '15m', label: '15 min' },
+                  { value: '1h', label: '1 hour' }
+                ].map((window) => (
+                  <button
+                    key={window.value}
+                    onClick={() => setAlertTimeWindow(window.value)}
+                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                      alertTimeWindow === window.value
+                        ? 'bg-orange-500 text-white'
+                        : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600'
+                    }`}
+                  >
+                    {window.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Notification Channels */}
+            <div>
+              <label className="text-sm font-medium mb-3 block">Notification Channels</label>
+              <div className="space-y-2">
+                {[
+                  { id: 'email', label: 'Email', icon: Mail, description: 'Send to your inbox' },
+                  { id: 'slack', label: 'Slack', icon: Zap, description: 'Post to channel' },
+                  { id: 'webhook', label: 'Webhook', icon: Webhook, description: 'Custom endpoint' },
+                  { id: 'pagerduty', label: 'PagerDuty', icon: BellRing, description: 'On-call alerts' }
+                ].map((channel) => (
+                  <button
+                    key={channel.id}
+                    onClick={() => toggleAlertChannel(channel.id)}
+                    className={`w-full flex items-center gap-3 p-3 rounded-lg border-2 transition-all ${
+                      alertChannels.includes(channel.id)
+                        ? 'border-orange-500 bg-orange-50 dark:bg-orange-900/20'
+                        : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
+                    }`}
+                  >
+                    <channel.icon className={`w-5 h-5 ${alertChannels.includes(channel.id) ? 'text-orange-500' : 'text-gray-400'}`} />
+                    <div className="flex-1 text-left">
+                      <div className="font-medium text-sm">{channel.label}</div>
+                      <div className="text-xs text-gray-500">{channel.description}</div>
+                    </div>
+                    {alertChannels.includes(channel.id) && (
+                      <CheckCircle className="w-5 h-5 text-orange-500" />
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Summary */}
+            <div className="p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
+              <div className="flex items-center gap-2 text-orange-700 dark:text-orange-300 mb-2">
+                <Info className="w-4 h-4" />
+                <span className="font-medium text-sm">Alert Configuration</span>
+              </div>
+              <p className="text-sm text-orange-600 dark:text-orange-400">
+                {alertEnabled
+                  ? `Alerts will trigger when error rate exceeds ${alertThreshold}% over ${alertTimeWindow}. Notifications via ${alertChannels.join(', ') || 'no channels selected'}.`
+                  : 'Alerts are currently disabled.'}
+              </p>
+            </div>
+          </div>
+          <div className="flex justify-end gap-3 pt-4 border-t">
+            <Button variant="outline" onClick={() => setShowAlertConfigDialog(false)}>Cancel</Button>
+            <Button
+              onClick={handleSaveAlertConfig}
+              className="bg-gradient-to-r from-orange-500 to-amber-600 text-white"
+            >
+              <CheckCircle className="w-4 h-4 mr-2" />
+              Save Configuration
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

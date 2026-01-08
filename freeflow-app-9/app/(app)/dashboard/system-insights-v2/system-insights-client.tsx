@@ -302,6 +302,14 @@ export default function SystemInsightsClient() {
   const [showLogsDialog, setShowLogsDialog] = useState(false)
   const [showMetricsDialog, setShowMetricsDialog] = useState(false)
 
+  // Quick actions with proper dialog handlers
+  const systemInsightsQuickActions = [
+    { id: '1', label: 'Deploy', icon: 'Rocket', shortcut: 'D', action: () => setShowDeployDialog(true) },
+    { id: '2', label: 'Restart', icon: 'RefreshCw', shortcut: 'R', action: () => setShowRestartDialog(true) },
+    { id: '3', label: 'Logs', icon: 'Terminal', shortcut: 'L', action: () => setShowLogsDialog(true) },
+    { id: '4', label: 'Metrics', icon: 'BarChart3', shortcut: 'M', action: () => setShowMetricsDialog(true) },
+  ]
+
   // Form state for creating alerts
   const [alertForm, setAlertForm] = useState({
     name: '',
@@ -2453,11 +2461,256 @@ docker run -d --name kazi-agent \\
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockSystemInsightsQuickActions}
+            actions={systemInsightsQuickActions}
             variant="grid"
           />
         </div>
       </div>
+
+      {/* Deploy Dialog */}
+      <Dialog open={showDeployDialog} onOpenChange={setShowDeployDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Deploy System</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Environment</Label>
+              <Select defaultValue="production">
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="development">Development</SelectItem>
+                  <SelectItem value="staging">Staging</SelectItem>
+                  <SelectItem value="production">Production</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Version/Tag</Label>
+              <Input placeholder="e.g., v2.4.1 or latest" defaultValue="latest" />
+            </div>
+            <div className="space-y-2">
+              <Label>Deploy Strategy</Label>
+              <Select defaultValue="rolling">
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="rolling">Rolling Update</SelectItem>
+                  <SelectItem value="bluegreen">Blue-Green</SelectItem>
+                  <SelectItem value="canary">Canary</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-center justify-between pt-2">
+              <div>
+                <Label>Run Pre-deploy Checks</Label>
+                <p className="text-sm text-gray-500">Execute health checks before deployment</p>
+              </div>
+              <Switch defaultChecked />
+            </div>
+            <div className="flex gap-2 pt-4">
+              <Button variant="outline" className="flex-1" onClick={() => setShowDeployDialog(false)}>
+                Cancel
+              </Button>
+              <Button className="flex-1" onClick={() => {
+                toast.success('Deployment initiated successfully')
+                setShowDeployDialog(false)
+              }}>
+                Deploy Now
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Restart Services Dialog */}
+      <Dialog open={showRestartDialog} onOpenChange={setShowRestartDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Restart Services</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Select Services to Restart</Label>
+              <div className="space-y-2 max-h-48 overflow-y-auto border rounded-lg p-3">
+                {mockServices.map(service => (
+                  <div key={service.id} className="flex items-center justify-between py-1">
+                    <div className="flex items-center gap-2">
+                      <input type="checkbox" id={service.id} className="rounded" defaultChecked />
+                      <label htmlFor={service.id} className="text-sm">{service.name}</label>
+                    </div>
+                    <Badge className={getStatusColor(service.status)} variant="outline">
+                      {service.status}
+                    </Badge>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Restart Mode</Label>
+              <Select defaultValue="graceful">
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="graceful">Graceful (drain connections)</SelectItem>
+                  <SelectItem value="immediate">Immediate</SelectItem>
+                  <SelectItem value="rolling">Rolling (one at a time)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex gap-2 pt-4">
+              <Button variant="outline" className="flex-1" onClick={() => setShowRestartDialog(false)}>
+                Cancel
+              </Button>
+              <Button className="flex-1" onClick={() => {
+                toast.success('Services restart initiated')
+                setShowRestartDialog(false)
+              }}>
+                Restart Selected
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* System Logs Dialog */}
+      <Dialog open={showLogsDialog} onOpenChange={setShowLogsDialog}>
+        <DialogContent className="max-w-4xl">
+          <DialogHeader>
+            <DialogTitle>System Logs</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="flex gap-3">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Input placeholder="Search logs..." className="pl-10" />
+              </div>
+              <Select defaultValue="all">
+                <SelectTrigger className="w-[150px]">
+                  <SelectValue placeholder="Level" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Levels</SelectItem>
+                  <SelectItem value="error">Error</SelectItem>
+                  <SelectItem value="warn">Warning</SelectItem>
+                  <SelectItem value="info">Info</SelectItem>
+                  <SelectItem value="debug">Debug</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select defaultValue="all">
+                <SelectTrigger className="w-[150px]">
+                  <SelectValue placeholder="Service" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Services</SelectItem>
+                  {mockServices.map(s => (
+                    <SelectItem key={s.id} value={s.name}>{s.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="bg-gray-900 rounded-lg p-4 h-80 overflow-y-auto font-mono text-sm">
+              {mockLogs.map(log => (
+                <div key={log.id} className="flex items-start gap-2 py-1 text-gray-300">
+                  <span className="text-gray-500 text-xs">{new Date(log.timestamp).toLocaleTimeString()}</span>
+                  <Badge className={`${getLogLevelColor(log.level)} text-xs`}>{log.level}</Badge>
+                  <span className="text-cyan-400">[{log.service}]</span>
+                  <span className="text-gray-300 flex-1">{log.message}</span>
+                </div>
+              ))}
+            </div>
+            <div className="flex justify-between">
+              <Button variant="outline" onClick={() => setShowLogsDialog(false)}>
+                Close
+              </Button>
+              <Button variant="outline">
+                <Download className="h-4 w-4 mr-2" />
+                Export Logs
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Metrics Dashboard Dialog */}
+      <Dialog open={showMetricsDialog} onOpenChange={setShowMetricsDialog}>
+        <DialogContent className="max-w-4xl">
+          <DialogHeader>
+            <DialogTitle>Metrics Dashboard</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="flex gap-3">
+              <Select defaultValue="1h">
+                <SelectTrigger className="w-[150px]">
+                  <SelectValue placeholder="Time Range" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="15m">Last 15 min</SelectItem>
+                  <SelectItem value="1h">Last 1 hour</SelectItem>
+                  <SelectItem value="6h">Last 6 hours</SelectItem>
+                  <SelectItem value="24h">Last 24 hours</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select defaultValue="all">
+                <SelectTrigger className="w-[150px]">
+                  <SelectValue placeholder="Host" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Hosts</SelectItem>
+                  {mockHosts.map(h => (
+                    <SelectItem key={h.id} value={h.name}>{h.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Button variant="outline" size="sm">
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Refresh
+              </Button>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              {mockMetrics.slice(0, 4).map(metric => (
+                <div key={metric.id} className={`p-4 rounded-lg ${
+                  metric.status === 'critical' ? 'bg-red-50 dark:bg-red-900/20' :
+                  metric.status === 'warning' ? 'bg-amber-50 dark:bg-amber-900/20' :
+                  'bg-gray-50 dark:bg-gray-800'
+                }`}>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm text-gray-600 dark:text-gray-400">{metric.name}</span>
+                    <Badge className={getStatusColor(metric.status)}>{metric.status}</Badge>
+                  </div>
+                  <div className="text-2xl font-bold">{metric.value}{metric.unit}</div>
+                  <div className="flex items-end gap-1 h-12 mt-2">
+                    {metric.sparkline.map((val, idx) => (
+                      <div
+                        key={idx}
+                        className={`flex-1 rounded-t ${
+                          val >= metric.thresholds.critical ? 'bg-red-500' :
+                          val >= metric.thresholds.warning ? 'bg-amber-500' :
+                          'bg-blue-500'
+                        }`}
+                        style={{ height: `${(val / Math.max(...metric.sparkline)) * 100}%` }}
+                      />
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="flex justify-between pt-2">
+              <Button variant="outline" onClick={() => setShowMetricsDialog(false)}>
+                Close
+              </Button>
+              <Button variant="outline">
+                <Download className="h-4 w-4 mr-2" />
+                Export Metrics
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

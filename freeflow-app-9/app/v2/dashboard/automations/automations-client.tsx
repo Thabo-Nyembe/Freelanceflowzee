@@ -5,7 +5,7 @@ import { toast } from 'sonner'
 import { useAutomations, type AutomationWorkflow, type WorkflowType, type WorkflowStatus } from '@/lib/hooks/use-automations'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogFooter } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Progress } from '@/components/ui/progress'
@@ -13,6 +13,8 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Switch } from '@/components/ui/switch'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Checkbox } from '@/components/ui/checkbox'
 import {
   Workflow, Play, Plus, Settings, Download, Search,
   Zap, GitBranch, Clock, CheckCircle2, XCircle, Activity,
@@ -323,11 +325,7 @@ const mockAutomationsActivities = [
   { id: '3', user: 'Engineer', action: 'Updated', target: 'CRM data sync schedule', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'update' as const },
 ]
 
-const mockAutomationsQuickActions = [
-  { id: '1', label: 'New Workflow', icon: 'plus', action: () => toast.success('Workflow created successfully'), variant: 'default' as const },
-  { id: '2', label: 'Run All', icon: 'play', action: () => toast.success('All workflows executed successfully'), variant: 'default' as const },
-  { id: '3', label: 'Export Logs', icon: 'download', action: () => toast.success('Logs exported successfully'), variant: 'outline' as const },
-]
+// QuickActions moved inside component for state access
 
 // ============================================================================
 // FORM STATE INTERFACE
@@ -367,6 +365,25 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
   const [formState, setFormState] = useState<WorkflowFormState>(initialFormState)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [dbWorkflows, setDbWorkflows] = useState<AutomationWorkflow[]>([])
+
+  // Dialog states for QuickActions
+  const [showRunAllDialog, setShowRunAllDialog] = useState(false)
+  const [showExportLogsDialog, setShowExportLogsDialog] = useState(false)
+  const [runAllConfig, setRunAllConfig] = useState({
+    includeInactive: false,
+    skipFailed: true,
+    parallelExecution: false,
+    notifyOnComplete: true
+  })
+  const [exportLogsConfig, setExportLogsConfig] = useState({
+    format: 'json' as 'json' | 'csv' | 'pdf',
+    dateRange: '7days' as '24hours' | '7days' | '30days' | 'all',
+    includeSuccessful: true,
+    includeFailed: true,
+    includeMetadata: true
+  })
+  const [isRunningAll, setIsRunningAll] = useState(false)
+  const [isExporting, setIsExporting] = useState(false)
 
   const { workflows, loading, error, refetch } = useAutomations({ workflowType: workflowTypeFilter, status: statusFilter })
   const displayWorkflows = dbWorkflows.length > 0 ? dbWorkflows : (workflows.length > 0 ? workflows : initialWorkflows)
@@ -618,6 +635,194 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
       toast.error('Failed to delete automation')
     }
   }
+
+  // Run all workflows handler
+  const handleRunAllWorkflows = async () => {
+    setIsRunningAll(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Please sign in to run workflows')
+        return
+      }
+
+      const workflowsToRun = displayWorkflows.filter(w => {
+        if (!runAllConfig.includeInactive && w.status !== 'active') return false
+        if (runAllConfig.skipFailed && w.status === 'failed') return false
+        return true
+      })
+
+      if (workflowsToRun.length === 0) {
+        toast.error('No workflows to run', {
+          description: 'Adjust your filters or enable inactive workflows'
+        })
+        return
+      }
+
+      // Update all selected workflows to running status
+      const { error } = await supabase
+        .from('automations')
+        .update({
+          status: 'running',
+          is_running: true,
+          last_execution_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        })
+        .in('id', workflowsToRun.map(w => w.id))
+
+      if (error) throw error
+
+      toast.success(`Started ${workflowsToRun.length} workflow${workflowsToRun.length > 1 ? 's' : ''}`, {
+        description: runAllConfig.parallelExecution
+          ? 'Running in parallel mode'
+          : 'Running sequentially'
+      })
+
+      setShowRunAllDialog(false)
+      fetchWorkflows()
+    } catch (err) {
+      console.error('Error running workflows:', err)
+      toast.error('Failed to start workflows')
+    } finally {
+      setIsRunningAll(false)
+    }
+  }
+
+  // Export logs handler
+  const handleExportLogs = async () => {
+    setIsExporting(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Please sign in to export logs')
+        return
+      }
+
+      // Build date filter based on selection
+      const now = new Date()
+      let startDate: Date | null = null
+      switch (exportLogsConfig.dateRange) {
+        case '24hours':
+          startDate = new Date(now.getTime() - 24 * 60 * 60 * 1000)
+          break
+        case '7days':
+          startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
+          break
+        case '30days':
+          startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
+          break
+        case 'all':
+          startDate = null
+          break
+      }
+
+      // Prepare export data
+      const exportData = {
+        exportedAt: new Date().toISOString(),
+        format: exportLogsConfig.format,
+        dateRange: exportLogsConfig.dateRange,
+        workflows: displayWorkflows.map(w => ({
+          id: w.id,
+          name: w.workflow_name,
+          status: w.status,
+          totalExecutions: w.total_executions,
+          successfulExecutions: exportLogsConfig.includeSuccessful ? w.successful_executions : undefined,
+          failedExecutions: exportLogsConfig.includeFailed ? w.failed_executions : undefined,
+          lastExecution: w.last_execution_at,
+          ...(exportLogsConfig.includeMetadata && {
+            metadata: {
+              type: w.workflow_type,
+              triggerType: w.trigger_type,
+              stepCount: w.step_count,
+              version: w.version
+            }
+          })
+        })),
+        executions: mockExecutions.filter(e => {
+          if (!exportLogsConfig.includeSuccessful && e.status === 'success') return false
+          if (!exportLogsConfig.includeFailed && e.status === 'failed') return false
+          if (startDate && e.startedAt < startDate) return false
+          return true
+        })
+      }
+
+      // Create and download file
+      let content: string
+      let mimeType: string
+      let extension: string
+
+      if (exportLogsConfig.format === 'csv') {
+        // Convert to CSV
+        const headers = ['Workflow', 'Status', 'Total Executions', 'Successful', 'Failed', 'Last Run']
+        const rows = exportData.workflows.map(w => [
+          w.name,
+          w.status,
+          w.totalExecutions,
+          w.successfulExecutions || 0,
+          w.failedExecutions || 0,
+          w.lastExecution || 'Never'
+        ])
+        content = [headers.join(','), ...rows.map(r => r.join(','))].join('\n')
+        mimeType = 'text/csv'
+        extension = 'csv'
+      } else if (exportLogsConfig.format === 'pdf') {
+        // For PDF, we'll create a simple text representation (in real app, use a PDF library)
+        content = `Automation Logs Export\n${'='.repeat(50)}\n\nExported: ${exportData.exportedAt}\nDate Range: ${exportData.dateRange}\n\nWorkflows:\n${exportData.workflows.map(w => `- ${w.name}: ${w.status} (${w.totalExecutions} executions)`).join('\n')}`
+        mimeType = 'text/plain'
+        extension = 'txt' // Would be 'pdf' with proper PDF generation
+      } else {
+        content = JSON.stringify(exportData, null, 2)
+        mimeType = 'application/json'
+        extension = 'json'
+      }
+
+      const blob = new Blob([content], { type: mimeType })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `automation-logs-${new Date().toISOString().split('T')[0]}.${extension}`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+
+      toast.success('Logs exported successfully', {
+        description: `Downloaded as ${exportLogsConfig.format.toUpperCase()} file`
+      })
+
+      setShowExportLogsDialog(false)
+    } catch (err) {
+      console.error('Error exporting logs:', err)
+      toast.error('Failed to export logs')
+    } finally {
+      setIsExporting(false)
+    }
+  }
+
+  // QuickActions with dialog triggers
+  const automationsQuickActions = [
+    {
+      id: '1',
+      label: 'New Workflow',
+      icon: 'plus',
+      action: () => setShowNewWorkflow(true),
+      variant: 'default' as const
+    },
+    {
+      id: '2',
+      label: 'Run All',
+      icon: 'play',
+      action: () => setShowRunAllDialog(true),
+      variant: 'default' as const
+    },
+    {
+      id: '3',
+      label: 'Export Logs',
+      icon: 'download',
+      action: () => setShowExportLogsDialog(true),
+      variant: 'outline' as const
+    },
+  ]
 
   if (error) return (
     <div className="p-8">
@@ -2249,7 +2454,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockAutomationsQuickActions}
+            actions={automationsQuickActions}
             variant="grid"
           />
         </div>
@@ -2489,6 +2694,207 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
             </DialogContent>
           </Dialog>
         )}
+
+        {/* Run All Workflows Dialog */}
+        <Dialog open={showRunAllDialog} onOpenChange={setShowRunAllDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Play className="h-5 w-5 text-blue-600" />
+                Run All Workflows
+              </DialogTitle>
+              <DialogDescription>
+                Configure and execute multiple workflows at once
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                <div className="flex items-center gap-2 text-blue-700 dark:text-blue-400">
+                  <Activity className="h-5 w-5" />
+                  <span className="font-medium">
+                    {displayWorkflows.filter(w => w.status === 'active').length} active workflows will be executed
+                  </span>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label htmlFor="includeInactive">Include inactive workflows</Label>
+                    <p className="text-xs text-gray-500">Run paused and draft workflows too</p>
+                  </div>
+                  <Switch
+                    id="includeInactive"
+                    checked={runAllConfig.includeInactive}
+                    onCheckedChange={(checked) => setRunAllConfig(prev => ({ ...prev, includeInactive: checked }))}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label htmlFor="skipFailed">Skip previously failed</Label>
+                    <p className="text-xs text-gray-500">Exclude workflows with error status</p>
+                  </div>
+                  <Switch
+                    id="skipFailed"
+                    checked={runAllConfig.skipFailed}
+                    onCheckedChange={(checked) => setRunAllConfig(prev => ({ ...prev, skipFailed: checked }))}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label htmlFor="parallelExecution">Parallel execution</Label>
+                    <p className="text-xs text-gray-500">Run all workflows simultaneously</p>
+                  </div>
+                  <Switch
+                    id="parallelExecution"
+                    checked={runAllConfig.parallelExecution}
+                    onCheckedChange={(checked) => setRunAllConfig(prev => ({ ...prev, parallelExecution: checked }))}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label htmlFor="notifyOnComplete">Notify on completion</Label>
+                    <p className="text-xs text-gray-500">Send notification when all finish</p>
+                  </div>
+                  <Switch
+                    id="notifyOnComplete"
+                    checked={runAllConfig.notifyOnComplete}
+                    onCheckedChange={(checked) => setRunAllConfig(prev => ({ ...prev, notifyOnComplete: checked }))}
+                  />
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowRunAllDialog(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleRunAllWorkflows} disabled={isRunningAll} className="bg-blue-600 hover:bg-blue-700">
+                {isRunningAll ? (
+                  <>
+                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                    Starting...
+                  </>
+                ) : (
+                  <>
+                    <Play className="h-4 w-4 mr-2" />
+                    Run All
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Export Logs Dialog */}
+        <Dialog open={showExportLogsDialog} onOpenChange={setShowExportLogsDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Download className="h-5 w-5 text-green-600" />
+                Export Automation Logs
+              </DialogTitle>
+              <DialogDescription>
+                Download workflow execution logs and statistics
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="exportFormat">Export Format</Label>
+                <select
+                  id="exportFormat"
+                  className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700"
+                  value={exportLogsConfig.format}
+                  onChange={(e) => setExportLogsConfig(prev => ({ ...prev, format: e.target.value as 'json' | 'csv' | 'pdf' }))}
+                >
+                  <option value="json">JSON - Full data with metadata</option>
+                  <option value="csv">CSV - Spreadsheet compatible</option>
+                  <option value="pdf">PDF - Printable report</option>
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="dateRange">Date Range</Label>
+                <select
+                  id="dateRange"
+                  className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700"
+                  value={exportLogsConfig.dateRange}
+                  onChange={(e) => setExportLogsConfig(prev => ({ ...prev, dateRange: e.target.value as '24hours' | '7days' | '30days' | 'all' }))}
+                >
+                  <option value="24hours">Last 24 hours</option>
+                  <option value="7days">Last 7 days</option>
+                  <option value="30days">Last 30 days</option>
+                  <option value="all">All time</option>
+                </select>
+              </div>
+
+              <div className="space-y-3 pt-2">
+                <Label>Include in Export</Label>
+                <div className="space-y-2">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="includeSuccessful"
+                      checked={exportLogsConfig.includeSuccessful}
+                      onCheckedChange={(checked) => setExportLogsConfig(prev => ({ ...prev, includeSuccessful: checked as boolean }))}
+                    />
+                    <label htmlFor="includeSuccessful" className="text-sm cursor-pointer">
+                      Successful executions
+                    </label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="includeFailed"
+                      checked={exportLogsConfig.includeFailed}
+                      onCheckedChange={(checked) => setExportLogsConfig(prev => ({ ...prev, includeFailed: checked as boolean }))}
+                    />
+                    <label htmlFor="includeFailed" className="text-sm cursor-pointer">
+                      Failed executions
+                    </label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="includeMetadata"
+                      checked={exportLogsConfig.includeMetadata}
+                      onCheckedChange={(checked) => setExportLogsConfig(prev => ({ ...prev, includeMetadata: checked as boolean }))}
+                    />
+                    <label htmlFor="includeMetadata" className="text-sm cursor-pointer">
+                      Workflow metadata (type, steps, version)
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg text-sm text-gray-600 dark:text-gray-400">
+                <div className="flex items-center gap-2">
+                  <FileText className="h-4 w-4" />
+                  <span>
+                    Estimated: {displayWorkflows.length} workflows, {mockExecutions.length} execution records
+                  </span>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowExportLogsDialog(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleExportLogs} disabled={isExporting} className="bg-green-600 hover:bg-green-700">
+                {isExporting ? (
+                  <>
+                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                    Exporting...
+                  </>
+                ) : (
+                  <>
+                    <Download className="h-4 w-4 mr-2" />
+                    Export Logs
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   )

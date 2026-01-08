@@ -570,20 +570,7 @@ const mockRenewalsActivities = [
   { id: '3', user: 'Mike Johnson', action: 'Sent', target: 'proposal to Acme Corporation', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'info' as const },
 ]
 
-const mockRenewalsQuickActions = [
-  { id: '1', label: 'New Renewal', icon: 'plus', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1500)),
-    { loading: 'Creating new renewal...', success: 'Renewal created successfully', error: 'Failed to create renewal' }
-  ), variant: 'default' as const },
-  { id: '2', label: 'Run Playbook', icon: 'play', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1500)),
-    { loading: 'Running playbook...', success: 'Playbook executed successfully', error: 'Failed to run playbook' }
-  ), variant: 'default' as const },
-  { id: '3', label: 'Export Pipeline', icon: 'download', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1500)),
-    { loading: 'Exporting renewal pipeline...', success: 'Pipeline exported successfully', error: 'Failed to export pipeline' }
-  ), variant: 'outline' as const },
-]
+// Quick actions will be defined inside component to access state setters
 
 export default function RenewalsClient({ initialRenewals }: RenewalsClientProps) {
   const [activeTab, setActiveTab] = useState('overview')
@@ -592,6 +579,32 @@ export default function RenewalsClient({ initialRenewals }: RenewalsClientProps)
   const [selectedStatus, setSelectedStatus] = useState<RenewalStatus | 'all'>('all')
   const [selectedRenewal, setSelectedRenewal] = useState<Renewal | null>(null)
   const [isRenewalDialogOpen, setIsRenewalDialogOpen] = useState(false)
+
+  // Dialog states for quick actions
+  const [isNewRenewalDialogOpen, setIsNewRenewalDialogOpen] = useState(false)
+  const [isRunPlaybookDialogOpen, setIsRunPlaybookDialogOpen] = useState(false)
+  const [isExportPipelineDialogOpen, setIsExportPipelineDialogOpen] = useState(false)
+
+  // Form states for new renewal dialog
+  const [newRenewalData, setNewRenewalData] = useState({
+    customerName: '',
+    currentARR: '',
+    proposedARR: '',
+    renewalDate: '',
+    contractTerm: '12',
+    priority: 'medium' as Priority,
+    csmName: '',
+    notes: ''
+  })
+
+  // Form states for playbook dialog
+  const [selectedPlaybook, setSelectedPlaybook] = useState<string>('')
+  const [playbookTargetRenewal, setPlaybookTargetRenewal] = useState<string>('')
+
+  // Form states for export dialog
+  const [exportFormat, setExportFormat] = useState<'csv' | 'excel' | 'pdf'>('csv')
+  const [exportDateRange, setExportDateRange] = useState<'all' | '30days' | '90days' | 'year'>('all')
+  const [exportIncludeChurned, setExportIncludeChurned] = useState(false)
 
   const renewals = mockRenewals
   const playbooks = mockPlaybooks
@@ -695,6 +708,88 @@ export default function RenewalsClient({ initialRenewals }: RenewalsClientProps)
       description: 'Renewal data will be downloaded shortly'
     })
   }
+
+  // Handler for creating new renewal
+  const handleCreateRenewal = () => {
+    if (!newRenewalData.customerName || !newRenewalData.currentARR || !newRenewalData.renewalDate) {
+      toast.error('Missing required fields', {
+        description: 'Please fill in customer name, current ARR, and renewal date'
+      })
+      return
+    }
+
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 1500)),
+      {
+        loading: 'Creating renewal...',
+        success: () => {
+          setIsNewRenewalDialogOpen(false)
+          setNewRenewalData({
+            customerName: '',
+            currentARR: '',
+            proposedARR: '',
+            renewalDate: '',
+            contractTerm: '12',
+            priority: 'medium',
+            csmName: '',
+            notes: ''
+          })
+          return `Renewal created for ${newRenewalData.customerName}`
+        },
+        error: 'Failed to create renewal'
+      }
+    )
+  }
+
+  // Handler for running playbook
+  const handleRunPlaybook = () => {
+    if (!selectedPlaybook || !playbookTargetRenewal) {
+      toast.error('Please select a playbook and target renewal')
+      return
+    }
+
+    const playbook = playbooks.find(p => p.id === selectedPlaybook)
+    const renewal = renewals.find(r => r.id === playbookTargetRenewal)
+
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 2000)),
+      {
+        loading: `Running ${playbook?.name} for ${renewal?.customerName}...`,
+        success: () => {
+          setIsRunPlaybookDialogOpen(false)
+          setSelectedPlaybook('')
+          setPlaybookTargetRenewal('')
+          return `${playbook?.name} successfully executed for ${renewal?.customerName}`
+        },
+        error: 'Failed to execute playbook'
+      }
+    )
+  }
+
+  // Handler for exporting pipeline
+  const handleExportPipeline = () => {
+    const formatLabels = { csv: 'CSV', excel: 'Excel', pdf: 'PDF' }
+    const rangeLabels = { all: 'all time', '30days': 'last 30 days', '90days': 'last 90 days', year: 'last year' }
+
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 2000)),
+      {
+        loading: `Generating ${formatLabels[exportFormat]} export...`,
+        success: () => {
+          setIsExportPipelineDialogOpen(false)
+          return `Pipeline exported as ${formatLabels[exportFormat]} for ${rangeLabels[exportDateRange]}`
+        },
+        error: 'Failed to export pipeline'
+      }
+    )
+  }
+
+  // Quick actions with dialog openers
+  const renewalsQuickActions = [
+    { id: '1', label: 'New Renewal', icon: 'plus', action: () => setIsNewRenewalDialogOpen(true), variant: 'default' as const },
+    { id: '2', label: 'Run Playbook', icon: 'play', action: () => setIsRunPlaybookDialogOpen(true), variant: 'default' as const },
+    { id: '3', label: 'Export Pipeline', icon: 'download', action: () => setIsExportPipelineDialogOpen(true), variant: 'outline' as const },
+  ]
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-violet-50 via-purple-50/30 to-indigo-50/40 dark:bg-none dark:bg-gray-900 p-6">
@@ -1725,7 +1820,7 @@ export default function RenewalsClient({ initialRenewals }: RenewalsClientProps)
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockRenewalsQuickActions}
+            actions={renewalsQuickActions}
             variant="grid"
           />
         </div>
@@ -1917,6 +2012,297 @@ export default function RenewalsClient({ initialRenewals }: RenewalsClientProps)
                 </ScrollArea>
               </>
             )}
+          </DialogContent>
+        </Dialog>
+
+        {/* New Renewal Dialog */}
+        <Dialog open={isNewRenewalDialogOpen} onOpenChange={setIsNewRenewalDialogOpen}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <RefreshCw className="w-5 h-5 text-violet-600" />
+                Create New Renewal
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="customerName">Customer Name *</Label>
+                  <Input
+                    id="customerName"
+                    placeholder="Enter customer name"
+                    value={newRenewalData.customerName}
+                    onChange={(e) => setNewRenewalData(prev => ({ ...prev, customerName: e.target.value }))}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="csmName">CSM Name</Label>
+                  <Input
+                    id="csmName"
+                    placeholder="Customer Success Manager"
+                    value={newRenewalData.csmName}
+                    onChange={(e) => setNewRenewalData(prev => ({ ...prev, csmName: e.target.value }))}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="currentARR">Current ARR *</Label>
+                  <Input
+                    id="currentARR"
+                    type="number"
+                    placeholder="e.g., 120000"
+                    value={newRenewalData.currentARR}
+                    onChange={(e) => setNewRenewalData(prev => ({ ...prev, currentARR: e.target.value }))}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="proposedARR">Proposed ARR</Label>
+                  <Input
+                    id="proposedARR"
+                    type="number"
+                    placeholder="e.g., 150000"
+                    value={newRenewalData.proposedARR}
+                    onChange={(e) => setNewRenewalData(prev => ({ ...prev, proposedARR: e.target.value }))}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="renewalDate">Renewal Date *</Label>
+                  <Input
+                    id="renewalDate"
+                    type="date"
+                    value={newRenewalData.renewalDate}
+                    onChange={(e) => setNewRenewalData(prev => ({ ...prev, renewalDate: e.target.value }))}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="contractTerm">Contract Term</Label>
+                  <select
+                    id="contractTerm"
+                    className="w-full h-10 px-3 rounded-md border border-input bg-background"
+                    value={newRenewalData.contractTerm}
+                    onChange={(e) => setNewRenewalData(prev => ({ ...prev, contractTerm: e.target.value }))}
+                  >
+                    <option value="12">12 Months</option>
+                    <option value="24">24 Months</option>
+                    <option value="36">36 Months</option>
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="priority">Priority</Label>
+                  <select
+                    id="priority"
+                    className="w-full h-10 px-3 rounded-md border border-input bg-background"
+                    value={newRenewalData.priority}
+                    onChange={(e) => setNewRenewalData(prev => ({ ...prev, priority: e.target.value as Priority }))}
+                  >
+                    <option value="low">Low</option>
+                    <option value="medium">Medium</option>
+                    <option value="high">High</option>
+                    <option value="critical">Critical</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="notes">Notes</Label>
+                <textarea
+                  id="notes"
+                  className="w-full min-h-[80px] px-3 py-2 rounded-md border border-input bg-background resize-none"
+                  placeholder="Add any relevant notes about this renewal..."
+                  value={newRenewalData.notes}
+                  onChange={(e) => setNewRenewalData(prev => ({ ...prev, notes: e.target.value }))}
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setIsNewRenewalDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleCreateRenewal} className="bg-gradient-to-r from-violet-500 to-purple-600">
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Create Renewal
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Run Playbook Dialog */}
+        <Dialog open={isRunPlaybookDialogOpen} onOpenChange={setIsRunPlaybookDialogOpen}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Play className="w-5 h-5 text-green-600" />
+                Run Playbook
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Select Playbook</Label>
+                <div className="grid grid-cols-2 gap-3">
+                  {playbooks.map((playbook) => (
+                    <div
+                      key={playbook.id}
+                      className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                        selectedPlaybook === playbook.id
+                          ? 'border-violet-500 bg-violet-50 dark:bg-violet-900/20'
+                          : 'border-gray-200 hover:border-gray-300 dark:border-gray-700'
+                      }`}
+                      onClick={() => setSelectedPlaybook(playbook.id)}
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="font-medium">{playbook.name}</span>
+                        <Badge className={getTypeColor(playbook.type as any)}>{playbook.type}</Badge>
+                      </div>
+                      <p className="text-sm text-muted-foreground mb-2">{playbook.description}</p>
+                      <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                        <span className="flex items-center gap-1">
+                          <Target className="w-3 h-3" />
+                          {playbook.successRate}% success
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Play className="w-3 h-3" />
+                          {playbook.timesUsed} uses
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Select Target Renewal</Label>
+                <select
+                  className="w-full h-10 px-3 rounded-md border border-input bg-background"
+                  value={playbookTargetRenewal}
+                  onChange={(e) => setPlaybookTargetRenewal(e.target.value)}
+                >
+                  <option value="">Choose a renewal...</option>
+                  {renewals
+                    .filter(r => !['won', 'lost', 'churned'].includes(r.status))
+                    .map((renewal) => (
+                      <option key={renewal.id} value={renewal.id}>
+                        {renewal.customerName} - {formatCurrency(renewal.currentARR)} ({renewal.status.replace('_', ' ')})
+                      </option>
+                    ))}
+                </select>
+              </div>
+
+              {selectedPlaybook && (
+                <div className="p-4 rounded-lg bg-muted/50">
+                  <h4 className="font-medium mb-2">Playbook Steps:</h4>
+                  <div className="space-y-2">
+                    {playbooks.find(p => p.id === selectedPlaybook)?.steps.map((step, i) => (
+                      <div key={i} className="flex items-center gap-2 text-sm">
+                        <div className="w-5 h-5 rounded-full bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center text-xs font-medium text-violet-600">
+                          {i + 1}
+                        </div>
+                        <span>{step}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setIsRunPlaybookDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button
+                onClick={handleRunPlaybook}
+                disabled={!selectedPlaybook || !playbookTargetRenewal}
+                className="bg-gradient-to-r from-green-500 to-emerald-600"
+              >
+                <Play className="w-4 h-4 mr-2" />
+                Run Playbook
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Export Pipeline Dialog */}
+        <Dialog open={isExportPipelineDialogOpen} onOpenChange={setIsExportPipelineDialogOpen}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Download className="w-5 h-5 text-blue-600" />
+                Export Pipeline
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Export Format</Label>
+                <div className="grid grid-cols-3 gap-3">
+                  {(['csv', 'excel', 'pdf'] as const).map((format) => (
+                    <div
+                      key={format}
+                      className={`p-3 rounded-lg border-2 cursor-pointer text-center transition-all ${
+                        exportFormat === format
+                          ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                          : 'border-gray-200 hover:border-gray-300 dark:border-gray-700'
+                      }`}
+                      onClick={() => setExportFormat(format)}
+                    >
+                      <FileText className={`w-6 h-6 mx-auto mb-1 ${exportFormat === format ? 'text-blue-600' : 'text-gray-400'}`} />
+                      <span className="text-sm font-medium uppercase">{format}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Date Range</Label>
+                <select
+                  className="w-full h-10 px-3 rounded-md border border-input bg-background"
+                  value={exportDateRange}
+                  onChange={(e) => setExportDateRange(e.target.value as typeof exportDateRange)}
+                >
+                  <option value="all">All Time</option>
+                  <option value="30days">Last 30 Days</option>
+                  <option value="90days">Last 90 Days</option>
+                  <option value="year">Last Year</option>
+                </select>
+              </div>
+
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                <div>
+                  <Label>Include Churned Renewals</Label>
+                  <p className="text-sm text-gray-500">Include lost and churned accounts</p>
+                </div>
+                <Switch
+                  checked={exportIncludeChurned}
+                  onCheckedChange={setExportIncludeChurned}
+                />
+              </div>
+
+              <div className="p-3 rounded-lg bg-muted/50">
+                <h4 className="text-sm font-medium mb-2">Export Summary</h4>
+                <div className="text-sm text-muted-foreground space-y-1">
+                  <p>Format: {exportFormat.toUpperCase()}</p>
+                  <p>Date Range: {exportDateRange === 'all' ? 'All Time' : exportDateRange === '30days' ? 'Last 30 Days' : exportDateRange === '90days' ? 'Last 90 Days' : 'Last Year'}</p>
+                  <p>Include Churned: {exportIncludeChurned ? 'Yes' : 'No'}</p>
+                  <p className="font-medium text-foreground mt-2">
+                    Estimated records: {exportIncludeChurned ? renewals.length : renewals.filter(r => !['lost', 'churned'].includes(r.status)).length}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setIsExportPipelineDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleExportPipeline} className="bg-gradient-to-r from-blue-500 to-indigo-600">
+                <Download className="w-4 h-4 mr-2" />
+                Export Pipeline
+              </Button>
+            </div>
           </DialogContent>
         </Dialog>
       </div>

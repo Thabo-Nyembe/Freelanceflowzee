@@ -308,20 +308,7 @@ const storageActivities = [
   { id: '3', user: 'System', action: 'generated', target: 'weekly report', timestamp: '1h ago', type: 'info' as const },
 ]
 
-const storageQuickActions = [
-  { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 800)),
-    { loading: 'Creating new storage item...', success: 'Storage item created successfully', error: 'Failed to create item' }
-  ) },
-  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1200)),
-    { loading: 'Exporting storage data...', success: 'Storage data exported successfully', error: 'Failed to export data' }
-  ) },
-  { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 500)),
-    { loading: 'Opening storage settings...', success: 'Storage settings opened', error: 'Failed to open settings' }
-  ) },
-]
+// Quick actions will be defined inside component to access state setters
 
 export default function StorageClient() {
   logger.debug('Component mounting')
@@ -353,12 +340,39 @@ export default function StorageClient() {
   const [isShareModalOpen, setIsShareModalOpen] = useState(false)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
 
+  // QUICK ACTION MODALS
+  const [isNewItemModalOpen, setIsNewItemModalOpen] = useState(false)
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false)
+  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false)
+
+  // NEW ITEM FORM STATES
+  const [newItemName, setNewItemName] = useState('')
+  const [newItemType, setNewItemType] = useState<'folder' | 'file'>('folder')
+  const [newItemProvider, setNewItemProvider] = useState<StorageProvider>('aws')
+
+  // EXPORT FORM STATES
+  const [exportFormat, setExportFormat] = useState<'csv' | 'json' | 'xlsx'>('csv')
+  const [exportScope, setExportScope] = useState<'all' | 'selected' | 'filtered'>('all')
+
+  // SETTINGS FORM STATES
+  const [storageQuota, setStorageQuota] = useState('100')
+  const [autoSync, setAutoSync] = useState(true)
+  const [compressionEnabled, setCompressionEnabled] = useState(false)
+  const [defaultProvider, setDefaultProvider] = useState<StorageProvider>('aws')
+
   // FORM STATES
   const [uploadFiles, setUploadFiles] = useState<FileList | null>(null)
   const [uploadProvider, setUploadProvider] = useState<StorageProvider>('aws')
   const [movePath, setMovePath] = useState('')
   const [shareEmail, setShareEmail] = useState('')
   const [shareEmails, setShareEmails] = useState<string[]>([])
+
+  // QUICK ACTIONS (defined inside component to access state setters)
+  const storageQuickActions = [
+    { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => setIsNewItemModalOpen(true) },
+    { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => setIsExportModalOpen(true) },
+    { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => setIsSettingsModalOpen(true) },
+  ]
 
   // ============================================================================
   // LOAD DATA
@@ -870,6 +884,247 @@ export default function StorageClient() {
       toast.error('Failed to download file', {
         description: error.message || 'Please try again later'
       })
+    }
+  }
+
+  // ============================================================================
+  // QUICK ACTION HANDLERS
+  // ============================================================================
+
+  const handleCreateNewItem = async () => {
+    if (!newItemName.trim()) {
+      toast.error('Please enter a name')
+      return
+    }
+
+    logger.info('Creating new storage item', {
+      name: newItemName,
+      type: newItemType,
+      provider: newItemProvider
+    })
+
+    try {
+      setIsSaving(true)
+
+      if (newItemType === 'folder') {
+        // Create folder
+        const response = await fetch('/api/files', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'create-folder',
+            data: {
+              name: newItemName,
+              provider: newItemProvider,
+              path: `/storage/${newItemProvider}/${newItemName}`
+            }
+          })
+        })
+
+        const result = await response.json()
+
+        if (result.success) {
+          logger.info('Folder created successfully', { name: newItemName })
+          toast.success('Folder created', {
+            description: `${newItemName} - ${newItemProvider.toUpperCase()} - Ready for files`
+          })
+        } else {
+          throw new Error(result.error || 'Failed to create folder')
+        }
+      } else {
+        // Create empty file placeholder
+        const newFile: StorageFile = {
+          id: `SF-${Date.now()}`,
+          name: newItemName,
+          type: 'other',
+          size: 0,
+          provider: newItemProvider,
+          status: 'synced',
+          path: `/storage/${newItemProvider}/${newItemName}`,
+          extension: newItemName.split('.').pop() || 'file',
+          uploadedAt: new Date().toISOString(),
+          modifiedAt: new Date().toISOString(),
+          sharedWith: [],
+          isPublic: false,
+          downloadCount: 0,
+          tags: [],
+          version: 1
+        }
+
+        dispatch({ type: 'ADD_FILE', file: newFile })
+        logger.info('File created successfully', { name: newItemName })
+        toast.success('File created', {
+          description: `${newItemName} - ${newItemProvider.toUpperCase()} - Empty file ready`
+        })
+      }
+
+      setIsNewItemModalOpen(false)
+      setNewItemName('')
+      setNewItemType('folder')
+    } catch (error: any) {
+      logger.error('Failed to create item', { error: error.message })
+      toast.error('Failed to create item', {
+        description: error.message || 'Please try again later'
+      })
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  const handleExportData = async () => {
+    logger.info('Exporting storage data', {
+      format: exportFormat,
+      scope: exportScope
+    })
+
+    try {
+      setIsSaving(true)
+
+      let filesToExport: StorageFile[] = []
+
+      switch (exportScope) {
+        case 'all':
+          filesToExport = state.files
+          break
+        case 'selected':
+          filesToExport = state.files.filter(f => state.selectedFiles.includes(f.id))
+          break
+        case 'filtered':
+          filesToExport = filteredAndSortedFiles
+          break
+      }
+
+      if (filesToExport.length === 0) {
+        toast.error('No files to export')
+        return
+      }
+
+      // Prepare export data
+      const exportData = filesToExport.map(f => ({
+        id: f.id,
+        name: f.name,
+        type: f.type,
+        size: f.size,
+        sizeFormatted: formatFileSize(f.size),
+        provider: f.provider,
+        status: f.status,
+        path: f.path,
+        extension: f.extension,
+        uploadedAt: f.uploadedAt,
+        modifiedAt: f.modifiedAt,
+        sharedWith: f.sharedWith.join(', '),
+        isPublic: f.isPublic,
+        downloadCount: f.downloadCount,
+        tags: f.tags.join(', '),
+        version: f.version
+      }))
+
+      let content: string
+      let mimeType: string
+      let fileName: string
+
+      switch (exportFormat) {
+        case 'json':
+          content = JSON.stringify(exportData, null, 2)
+          mimeType = 'application/json'
+          fileName = `storage-export-${Date.now()}.json`
+          break
+        case 'csv':
+          const headers = Object.keys(exportData[0]).join(',')
+          const rows = exportData.map(row => Object.values(row).map(v => `"${v}"`).join(','))
+          content = [headers, ...rows].join('\n')
+          mimeType = 'text/csv'
+          fileName = `storage-export-${Date.now()}.csv`
+          break
+        case 'xlsx':
+          // For xlsx, we'll export as CSV with xlsx extension (simplified)
+          const xlsxHeaders = Object.keys(exportData[0]).join('\t')
+          const xlsxRows = exportData.map(row => Object.values(row).join('\t'))
+          content = [xlsxHeaders, ...xlsxRows].join('\n')
+          mimeType = 'application/vnd.ms-excel'
+          fileName = `storage-export-${Date.now()}.xlsx`
+          break
+        default:
+          content = JSON.stringify(exportData, null, 2)
+          mimeType = 'application/json'
+          fileName = `storage-export-${Date.now()}.json`
+      }
+
+      // Create and trigger download
+      const blob = new Blob([content], { type: mimeType })
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = fileName
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
+
+      logger.info('Export completed', {
+        format: exportFormat,
+        fileCount: filesToExport.length,
+        fileName
+      })
+
+      toast.success('Export completed', {
+        description: `${filesToExport.length} files exported as ${exportFormat.toUpperCase()} - ${fileName}`
+      })
+
+      setIsExportModalOpen(false)
+    } catch (error: any) {
+      logger.error('Export failed', { error: error.message })
+      toast.error('Failed to export data', {
+        description: error.message || 'Please try again later'
+      })
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  const handleSaveSettings = async () => {
+    logger.info('Saving storage settings', {
+      storageQuota,
+      autoSync,
+      compressionEnabled,
+      defaultProvider
+    })
+
+    try {
+      setIsSaving(true)
+
+      const response = await fetch('/api/files', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'update-settings',
+          data: {
+            storageQuota: parseInt(storageQuota),
+            autoSync,
+            compressionEnabled,
+            defaultProvider
+          }
+        })
+      })
+
+      const result = await response.json()
+
+      if (result.success) {
+        logger.info('Settings saved successfully')
+        toast.success('Settings saved', {
+          description: `Quota: ${storageQuota}GB | Auto-sync: ${autoSync ? 'On' : 'Off'} | Compression: ${compressionEnabled ? 'On' : 'Off'} | Default: ${defaultProvider.toUpperCase()}`
+        })
+        setIsSettingsModalOpen(false)
+      } else {
+        throw new Error(result.error || 'Failed to save settings')
+      }
+    } catch (error: any) {
+      logger.error('Failed to save settings', { error: error.message })
+      toast.error('Failed to save settings', {
+        description: error.message || 'Please try again later'
+      })
+    } finally {
+      setIsSaving(false)
     }
   }
 
@@ -1724,6 +1979,225 @@ export default function StorageClient() {
                 onClick={() => state.selectedFile && handleDeleteFile(state.selectedFile.id)}
               >
                 Delete File
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* New Item Modal */}
+        <Dialog open={isNewItemModalOpen} onOpenChange={setIsNewItemModalOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Create New Item</DialogTitle>
+              <DialogDescription>
+                Create a new folder or file in your storage
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4">
+              <div>
+                <Label>Item Type</Label>
+                <Select value={newItemType} onValueChange={(v) => setNewItemType(v as 'folder' | 'file')}>
+                  <SelectTrigger className="mt-2">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="folder">Folder</SelectItem>
+                    <SelectItem value="file">File</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label>Name</Label>
+                <Input
+                  value={newItemName}
+                  onChange={(e) => setNewItemName(e.target.value)}
+                  placeholder={newItemType === 'folder' ? 'New Folder' : 'document.txt'}
+                  className="mt-2"
+                />
+              </div>
+
+              <div>
+                <Label>Storage Provider</Label>
+                <Select value={newItemProvider} onValueChange={(v) => setNewItemProvider(v as StorageProvider)}>
+                  <SelectTrigger className="mt-2">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="aws">AWS S3</SelectItem>
+                    <SelectItem value="google">Google Cloud</SelectItem>
+                    <SelectItem value="azure">Azure Blob</SelectItem>
+                    <SelectItem value="dropbox">Dropbox</SelectItem>
+                    <SelectItem value="local">Local Storage</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsNewItemModalOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleCreateNewItem} disabled={isSaving || !newItemName.trim()}>
+                {isSaving ? 'Creating...' : `Create ${newItemType === 'folder' ? 'Folder' : 'File'}`}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Export Modal */}
+        <Dialog open={isExportModalOpen} onOpenChange={setIsExportModalOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Export Storage Data</DialogTitle>
+              <DialogDescription>
+                Export your file inventory to various formats
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4">
+              <div>
+                <Label>Export Format</Label>
+                <Select value={exportFormat} onValueChange={(v) => setExportFormat(v as 'csv' | 'json' | 'xlsx')}>
+                  <SelectTrigger className="mt-2">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="csv">CSV (Comma Separated)</SelectItem>
+                    <SelectItem value="json">JSON</SelectItem>
+                    <SelectItem value="xlsx">Excel (XLSX)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label>Export Scope</Label>
+                <Select value={exportScope} onValueChange={(v) => setExportScope(v as 'all' | 'selected' | 'filtered')}>
+                  <SelectTrigger className="mt-2">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Files ({state.files.length})</SelectItem>
+                    <SelectItem value="selected" disabled={state.selectedFiles.length === 0}>
+                      Selected Files ({state.selectedFiles.length})
+                    </SelectItem>
+                    <SelectItem value="filtered">Filtered Results ({filteredAndSortedFiles.length})</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="p-3 bg-muted rounded-lg">
+                <p className="text-sm text-muted-foreground">
+                  Export will include: ID, Name, Type, Size, Provider, Status, Path, Extension, Upload Date, Modified Date, Shared With, Public Status, Download Count, Tags, and Version.
+                </p>
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsExportModalOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleExportData} disabled={isSaving}>
+                <Download className="h-4 w-4 mr-2" />
+                {isSaving ? 'Exporting...' : 'Export Data'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Settings Modal */}
+        <Dialog open={isSettingsModalOpen} onOpenChange={setIsSettingsModalOpen}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Storage Settings</DialogTitle>
+              <DialogDescription>
+                Configure your storage preferences and defaults
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-6">
+              <div>
+                <Label>Storage Quota (GB)</Label>
+                <Input
+                  type="number"
+                  value={storageQuota}
+                  onChange={(e) => setStorageQuota(e.target.value)}
+                  placeholder="100"
+                  min="1"
+                  max="10000"
+                  className="mt-2"
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Current usage: {formatFileSize(stats.totalSize)} / {storageQuota} GB
+                </p>
+              </div>
+
+              <div>
+                <Label>Default Storage Provider</Label>
+                <Select value={defaultProvider} onValueChange={(v) => setDefaultProvider(v as StorageProvider)}>
+                  <SelectTrigger className="mt-2">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="aws">AWS S3</SelectItem>
+                    <SelectItem value="google">Google Cloud</SelectItem>
+                    <SelectItem value="azure">Azure Blob</SelectItem>
+                    <SelectItem value="dropbox">Dropbox</SelectItem>
+                    <SelectItem value="local">Local Storage</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label>Auto-Sync</Label>
+                    <p className="text-xs text-muted-foreground">
+                      Automatically sync files across providers
+                    </p>
+                  </div>
+                  <Checkbox
+                    checked={autoSync}
+                    onCheckedChange={(checked) => setAutoSync(checked as boolean)}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label>Compression</Label>
+                    <p className="text-xs text-muted-foreground">
+                      Compress files before upload to save space
+                    </p>
+                  </div>
+                  <Checkbox
+                    checked={compressionEnabled}
+                    onCheckedChange={(checked) => setCompressionEnabled(checked as boolean)}
+                  />
+                </div>
+              </div>
+
+              <div className="p-3 bg-muted rounded-lg">
+                <h4 className="text-sm font-medium mb-2">Storage Summary</h4>
+                <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
+                  <span>Total Files:</span>
+                  <span className="text-right font-medium">{stats.totalFiles}</span>
+                  <span>Total Size:</span>
+                  <span className="text-right font-medium">{formatFileSize(stats.totalSize)}</span>
+                  <span>Synced Files:</span>
+                  <span className="text-right font-medium">{stats.syncedFiles}</span>
+                  <span>Shared Files:</span>
+                  <span className="text-right font-medium">{stats.sharedFiles}</span>
+                </div>
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsSettingsModalOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleSaveSettings} disabled={isSaving}>
+                {isSaving ? 'Saving...' : 'Save Settings'}
               </Button>
             </DialogFooter>
           </DialogContent>

@@ -177,20 +177,7 @@ const aiCodeCompletionActivities = [
   { id: '3', user: 'System', action: 'generated', target: 'weekly report', timestamp: '1h ago', type: 'info' as const },
 ]
 
-const aiCodeCompletionQuickActions = [
-  { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 500)),
-    { loading: 'Creating new code snippet...', success: 'New snippet ready', error: 'Failed to create snippet' }
-  ) },
-  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 800)),
-    { loading: 'Exporting code...', success: 'Code exported successfully', error: 'Failed to export code' }
-  ) },
-  { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 400)),
-    { loading: 'Loading AI code settings...', success: 'Settings opened', error: 'Failed to load settings' }
-  ) },
-]
+// Quick actions are defined inside the component to access state setters
 
 export default function AiCodeCompletionClient() {
   const { userId, loading: userLoading } = useCurrentUser()
@@ -212,6 +199,287 @@ export default function AiCodeCompletionClient() {
   // Save snippet dialog state
   const [showSaveSnippetDialog, setShowSaveSnippetDialog] = useState(false)
   const [snippetName, setSnippetName] = useState('')
+
+  // Quick Action Dialog States
+  const [showNewSnippetDialog, setShowNewSnippetDialog] = useState(false)
+  const [newSnippetName, setNewSnippetName] = useState('')
+  const [newSnippetLanguage, setNewSnippetLanguage] = useState('javascript')
+  const [newSnippetCode, setNewSnippetCode] = useState('')
+
+  const [showExportDialog, setShowExportDialog] = useState(false)
+  const [exportFormat, setExportFormat] = useState<'json' | 'markdown' | 'text' | 'gist'>('json')
+  const [exportFileName, setExportFileName] = useState('')
+  const [includeMetadata, setIncludeMetadata] = useState(true)
+
+  const [showSettingsDialog, setShowSettingsDialog] = useState(false)
+  const [aiModel, setAiModel] = useState('gpt-4')
+  const [autoComplete, setAutoComplete] = useState(true)
+  const [maxTokens, setMaxTokens] = useState(2048)
+  const [temperature, setTemperature] = useState(0.7)
+  const [showLineNumbers, setShowLineNumbers] = useState(true)
+  const [enableTypeInference, setEnableTypeInference] = useState(true)
+
+  // Quick Actions with real dialog handlers
+  const aiCodeCompletionQuickActions = [
+    {
+      id: '1',
+      label: 'New Item',
+      icon: 'Plus',
+      shortcut: 'N',
+      action: () => {
+        setNewSnippetName('')
+        setNewSnippetLanguage('javascript')
+        setNewSnippetCode('')
+        setShowNewSnippetDialog(true)
+      }
+    },
+    {
+      id: '2',
+      label: 'Export',
+      icon: 'Download',
+      shortcut: 'E',
+      action: () => {
+        const code = completion || codeInput
+        if (!code.trim()) {
+          toast.error('No code to export', { description: 'Write or generate some code first' })
+          return
+        }
+        setExportFileName(`code-snippet-${Date.now()}`)
+        setExportFormat('json')
+        setIncludeMetadata(true)
+        setShowExportDialog(true)
+      }
+    },
+    {
+      id: '3',
+      label: 'Settings',
+      icon: 'Settings',
+      shortcut: 'S',
+      action: () => {
+        setShowSettingsDialog(true)
+      }
+    },
+  ]
+
+  // Handler functions for dialogs
+  const handleCreateNewSnippet = async () => {
+    if (!newSnippetName.trim()) {
+      toast.error('Please enter a snippet name')
+      return
+    }
+
+    if (!userId) {
+      // Create local snippet for non-authenticated users
+      const newSnippet: CodeSnippet = {
+        id: Date.now().toString(),
+        name: newSnippetName.trim(),
+        code: newSnippetCode || '// Your code here\n',
+        language: newSnippetLanguage,
+        createdAt: new Date().toISOString()
+      }
+      setSnippets([...snippets, newSnippet])
+      setCodeInput(newSnippet.code)
+      setSelectedLanguage(newSnippetLanguage)
+
+      logger.info('New snippet created locally', {
+        snippetId: newSnippet.id,
+        name: newSnippetName.trim(),
+        language: newSnippetLanguage
+      })
+
+      toast.success('Snippet Created', {
+        description: `"${newSnippetName.trim()}" is ready to edit`
+      })
+      setShowNewSnippetDialog(false)
+      return
+    }
+
+    try {
+      const { data, error } = await createCodeSnippet(userId, {
+        name: newSnippetName.trim(),
+        code: newSnippetCode || '// Your code here\n',
+        language: newSnippetLanguage as ProgrammingLanguage,
+        category: 'utility',
+        description: `Created from AI Code Completion`
+      })
+
+      if (error) {
+        logger.error('Failed to create snippet', { error })
+        toast.error('Failed to create snippet')
+        return
+      }
+
+      const newSnippet: CodeSnippet = {
+        id: data?.id || Date.now().toString(),
+        name: newSnippetName.trim(),
+        code: newSnippetCode || '// Your code here\n',
+        language: newSnippetLanguage,
+        createdAt: data?.created_at || new Date().toISOString()
+      }
+
+      setSnippets([...snippets, newSnippet])
+      setCodeInput(newSnippet.code)
+      setSelectedLanguage(newSnippetLanguage)
+
+      logger.info('New snippet created in database', {
+        snippetId: newSnippet.id,
+        name: newSnippetName.trim(),
+        language: newSnippetLanguage
+      })
+
+      toast.success('Snippet Created', {
+        description: `"${newSnippetName.trim()}" saved and ready to edit`
+      })
+      announce('New code snippet created', 'polite')
+    } catch (err) {
+      logger.error('Exception creating snippet', { error: err })
+      toast.error('Failed to create snippet')
+    } finally {
+      setShowNewSnippetDialog(false)
+    }
+  }
+
+  const handleExportCode = () => {
+    const code = completion || codeInput
+    if (!code.trim()) {
+      toast.error('No code to export')
+      return
+    }
+
+    let content = ''
+    let mimeType = 'text/plain'
+    let extension = 'txt'
+
+    const metadata = {
+      name: exportFileName,
+      language: selectedLanguage,
+      createdAt: new Date().toISOString(),
+      linesOfCode: code.split('\n').length,
+      characters: code.length
+    }
+
+    switch (exportFormat) {
+      case 'json':
+        content = JSON.stringify(
+          includeMetadata
+            ? { ...metadata, code }
+            : { code },
+          null,
+          2
+        )
+        mimeType = 'application/json'
+        extension = 'json'
+        break
+      case 'markdown':
+        content = includeMetadata
+          ? `# ${exportFileName}\n\n**Language:** ${selectedLanguage}\n**Created:** ${new Date().toLocaleString()}\n**Lines:** ${code.split('\n').length}\n\n\`\`\`${selectedLanguage}\n${code}\n\`\`\``
+          : `\`\`\`${selectedLanguage}\n${code}\n\`\`\``
+        mimeType = 'text/markdown'
+        extension = 'md'
+        break
+      case 'text':
+        content = includeMetadata
+          ? `// File: ${exportFileName}\n// Language: ${selectedLanguage}\n// Created: ${new Date().toLocaleString()}\n// Lines: ${code.split('\n').length}\n\n${code}`
+          : code
+        mimeType = 'text/plain'
+        const langExtensions: Record<string, string> = {
+          javascript: 'js',
+          typescript: 'ts',
+          python: 'py',
+          react: 'tsx',
+          java: 'java',
+          go: 'go',
+          rust: 'rs',
+          cpp: 'cpp'
+        }
+        extension = langExtensions[selectedLanguage] || 'txt'
+        break
+      case 'gist':
+        // Copy as gist-compatible format
+        content = JSON.stringify({
+          description: exportFileName,
+          public: false,
+          files: {
+            [`${exportFileName}.${selectedLanguage === 'javascript' ? 'js' : selectedLanguage === 'typescript' ? 'ts' : 'txt'}`]: {
+              content: code
+            }
+          }
+        }, null, 2)
+        mimeType = 'application/json'
+        extension = 'gist.json'
+        break
+    }
+
+    const blob = new Blob([content], { type: mimeType })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${exportFileName}.${extension}`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+
+    logger.info('Code exported successfully', {
+      format: exportFormat,
+      fileName: exportFileName,
+      extension,
+      fileSize: blob.size,
+      includeMetadata
+    })
+
+    toast.success('Code Exported', {
+      description: `${exportFileName}.${extension} (${Math.round(blob.size / 1024)}KB)`
+    })
+    setShowExportDialog(false)
+  }
+
+  const handleSaveSettings = () => {
+    // Save settings to localStorage for persistence
+    const settings = {
+      aiModel,
+      autoComplete,
+      maxTokens,
+      temperature,
+      showLineNumbers,
+      enableTypeInference
+    }
+
+    try {
+      localStorage.setItem('ai-code-settings', JSON.stringify(settings))
+
+      logger.info('AI Code settings saved', settings)
+
+      toast.success('Settings Saved', {
+        description: `Model: ${aiModel}, Max Tokens: ${maxTokens}, Temperature: ${temperature}`
+      })
+      announce('Settings saved successfully', 'polite')
+    } catch (err) {
+      logger.error('Failed to save settings', { error: err })
+      toast.error('Failed to save settings')
+    }
+
+    setShowSettingsDialog(false)
+  }
+
+  // Load settings from localStorage on mount
+  useEffect(() => {
+    try {
+      const savedSettings = localStorage.getItem('ai-code-settings')
+      if (savedSettings) {
+        const settings = JSON.parse(savedSettings)
+        if (settings.aiModel) setAiModel(settings.aiModel)
+        if (settings.autoComplete !== undefined) setAutoComplete(settings.autoComplete)
+        if (settings.maxTokens) setMaxTokens(settings.maxTokens)
+        if (settings.temperature !== undefined) setTemperature(settings.temperature)
+        if (settings.showLineNumbers !== undefined) setShowLineNumbers(settings.showLineNumbers)
+        if (settings.enableTypeInference !== undefined) setEnableTypeInference(settings.enableTypeInference)
+        logger.info('AI Code settings loaded from localStorage', settings)
+      }
+    } catch (err) {
+      logger.error('Failed to load settings from localStorage', { error: err })
+    }
+  }, [])
 
   // Load data from Supabase
   useEffect(() => {
@@ -740,11 +1008,11 @@ export default function AiCodeCompletionClient() {
     })
   }
 
-  const handleExportCode = (format: 'gist' | 'markdown' | 'pdf') => {
+  const handleQuickExport = (format: 'gist' | 'markdown' | 'pdf') => {
     const code = completion || codeInput
     if (!code) return
 
-    logger.info('Code export initiated', {
+    logger.info('Quick export initiated', {
       language: selectedLanguage,
       format,
       codeLength: code.length
@@ -1161,6 +1429,295 @@ export default function AiCodeCompletionClient() {
                 className="px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90 rounded-md"
               >
                 Save Snippet
+              </button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* New Snippet Dialog */}
+        <Dialog open={showNewSnippetDialog} onOpenChange={setShowNewSnippetDialog}>
+          <DialogContent className="sm:max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Code className="h-5 w-5 text-primary" />
+                Create New Code Snippet
+              </DialogTitle>
+              <DialogDescription>
+                Start a new code snippet from scratch or with a template
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="newSnippetName">Snippet Name</Label>
+                <Input
+                  id="newSnippetName"
+                  value={newSnippetName}
+                  onChange={(e) => setNewSnippetName(e.target.value)}
+                  placeholder="e.g., API Handler, Utility Function"
+                  onKeyDown={(e) => e.key === 'Enter' && handleCreateNewSnippet()}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="newSnippetLanguage">Language</Label>
+                <select
+                  id="newSnippetLanguage"
+                  value={newSnippetLanguage}
+                  onChange={(e) => setNewSnippetLanguage(e.target.value)}
+                  className="w-full px-3 py-2 bg-background border border-input rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                >
+                  {PROGRAMMING_LANGUAGES.map((lang) => (
+                    <option key={lang.id} value={lang.id}>
+                      {lang.icon} {lang.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="newSnippetCode">Initial Code (Optional)</Label>
+                <Textarea
+                  id="newSnippetCode"
+                  value={newSnippetCode}
+                  onChange={(e) => setNewSnippetCode(e.target.value)}
+                  placeholder="// Paste or type initial code here..."
+                  className="min-h-32 font-mono text-sm"
+                />
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <span className="text-sm text-muted-foreground">Quick templates:</span>
+                {CODE_TEMPLATES.slice(0, 3).map((template) => (
+                  <Badge
+                    key={template.id}
+                    variant="outline"
+                    className="cursor-pointer hover:bg-primary hover:text-primary-foreground"
+                    onClick={() => {
+                      setNewSnippetCode(template.template)
+                      setNewSnippetName(template.name)
+                    }}
+                  >
+                    {template.name}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+            <DialogFooter className="gap-2">
+              <button
+                className="px-4 py-2 border border-input bg-background hover:bg-accent rounded-md"
+                onClick={() => setShowNewSnippetDialog(false)}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleCreateNewSnippet}
+                className="px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90 rounded-md flex items-center gap-2"
+              >
+                <Sparkles className="w-4 h-4" />
+                Create Snippet
+              </button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Export Code Dialog */}
+        <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Download className="h-5 w-5 text-primary" />
+                Export Code
+              </DialogTitle>
+              <DialogDescription>
+                Choose export format and options for your code
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="exportFileName">File Name</Label>
+                <Input
+                  id="exportFileName"
+                  value={exportFileName}
+                  onChange={(e) => setExportFileName(e.target.value)}
+                  placeholder="code-snippet"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="exportFormat">Export Format</Label>
+                <select
+                  id="exportFormat"
+                  value={exportFormat}
+                  onChange={(e) => setExportFormat(e.target.value as 'json' | 'markdown' | 'text' | 'gist')}
+                  className="w-full px-3 py-2 bg-background border border-input rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                >
+                  <option value="json">JSON (with metadata)</option>
+                  <option value="markdown">Markdown (documentation)</option>
+                  <option value="text">Plain Text (source file)</option>
+                  <option value="gist">GitHub Gist Format</option>
+                </select>
+              </div>
+              <div className="flex items-center gap-3">
+                <input
+                  type="checkbox"
+                  id="includeMetadata"
+                  checked={includeMetadata}
+                  onChange={(e) => setIncludeMetadata(e.target.checked)}
+                  className="w-4 h-4 rounded border-input"
+                />
+                <Label htmlFor="includeMetadata" className="cursor-pointer">
+                  Include metadata (language, timestamp, line count)
+                </Label>
+              </div>
+              <div className="p-3 bg-muted/50 rounded-lg">
+                <p className="text-sm text-muted-foreground">
+                  <strong>Preview:</strong> {exportFileName}.{exportFormat === 'json' ? 'json' : exportFormat === 'markdown' ? 'md' : exportFormat === 'gist' ? 'gist.json' : selectedLanguage === 'typescript' ? 'ts' : 'js'}
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {(completion || codeInput).split('\n').length} lines, {(completion || codeInput).length} characters
+                </p>
+              </div>
+            </div>
+            <DialogFooter className="gap-2">
+              <button
+                className="px-4 py-2 border border-input bg-background hover:bg-accent rounded-md"
+                onClick={() => setShowExportDialog(false)}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleExportCode}
+                className="px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90 rounded-md flex items-center gap-2"
+              >
+                <Download className="w-4 h-4" />
+                Export
+              </button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* AI Code Settings Dialog */}
+        <Dialog open={showSettingsDialog} onOpenChange={setShowSettingsDialog}>
+          <DialogContent className="sm:max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Zap className="h-5 w-5 text-primary" />
+                AI Code Completion Settings
+              </DialogTitle>
+              <DialogDescription>
+                Configure AI model and code completion preferences
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-6 py-4">
+              {/* AI Model Selection */}
+              <div className="space-y-2">
+                <Label htmlFor="aiModel">AI Model</Label>
+                <select
+                  id="aiModel"
+                  value={aiModel}
+                  onChange={(e) => setAiModel(e.target.value)}
+                  className="w-full px-3 py-2 bg-background border border-input rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                >
+                  <option value="gpt-4">GPT-4 (Most Capable)</option>
+                  <option value="gpt-4-turbo">GPT-4 Turbo (Faster)</option>
+                  <option value="gpt-3.5-turbo">GPT-3.5 Turbo (Economical)</option>
+                  <option value="claude-3">Claude 3 (Anthropic)</option>
+                  <option value="codellama">Code Llama (Open Source)</option>
+                </select>
+              </div>
+
+              {/* Max Tokens */}
+              <div className="space-y-2">
+                <Label htmlFor="maxTokens">Max Tokens: {maxTokens}</Label>
+                <input
+                  type="range"
+                  id="maxTokens"
+                  min="256"
+                  max="8192"
+                  step="256"
+                  value={maxTokens}
+                  onChange={(e) => setMaxTokens(Number(e.target.value))}
+                  className="w-full h-2 bg-muted rounded-lg appearance-none cursor-pointer"
+                />
+                <div className="flex justify-between text-xs text-muted-foreground">
+                  <span>256</span>
+                  <span>8192</span>
+                </div>
+              </div>
+
+              {/* Temperature */}
+              <div className="space-y-2">
+                <Label htmlFor="temperature">Temperature: {temperature.toFixed(1)}</Label>
+                <input
+                  type="range"
+                  id="temperature"
+                  min="0"
+                  max="1"
+                  step="0.1"
+                  value={temperature}
+                  onChange={(e) => setTemperature(Number(e.target.value))}
+                  className="w-full h-2 bg-muted rounded-lg appearance-none cursor-pointer"
+                />
+                <div className="flex justify-between text-xs text-muted-foreground">
+                  <span>Precise (0)</span>
+                  <span>Creative (1)</span>
+                </div>
+              </div>
+
+              {/* Toggle Options */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="autoComplete" className="cursor-pointer">Auto-complete on typing</Label>
+                  <input
+                    type="checkbox"
+                    id="autoComplete"
+                    checked={autoComplete}
+                    onChange={(e) => setAutoComplete(e.target.checked)}
+                    className="w-5 h-5 rounded border-input"
+                  />
+                </div>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="showLineNumbers" className="cursor-pointer">Show line numbers</Label>
+                  <input
+                    type="checkbox"
+                    id="showLineNumbers"
+                    checked={showLineNumbers}
+                    onChange={(e) => setShowLineNumbers(e.target.checked)}
+                    className="w-5 h-5 rounded border-input"
+                  />
+                </div>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="enableTypeInference" className="cursor-pointer">Enable TypeScript type inference</Label>
+                  <input
+                    type="checkbox"
+                    id="enableTypeInference"
+                    checked={enableTypeInference}
+                    onChange={(e) => setEnableTypeInference(e.target.checked)}
+                    className="w-5 h-5 rounded border-input"
+                  />
+                </div>
+              </div>
+
+              {/* Settings Summary */}
+              <div className="p-3 bg-muted/50 rounded-lg">
+                <p className="text-sm font-medium mb-1">Current Configuration</p>
+                <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
+                  <span>Model: {aiModel}</span>
+                  <span>Max Tokens: {maxTokens}</span>
+                  <span>Temperature: {temperature}</span>
+                  <span>Auto-complete: {autoComplete ? 'On' : 'Off'}</span>
+                </div>
+              </div>
+            </div>
+            <DialogFooter className="gap-2">
+              <button
+                className="px-4 py-2 border border-input bg-background hover:bg-accent rounded-md"
+                onClick={() => setShowSettingsDialog(false)}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSaveSettings}
+                className="px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90 rounded-md flex items-center gap-2"
+              >
+                <CheckCircle className="w-4 h-4" />
+                Save Settings
               </button>
             </DialogFooter>
           </DialogContent>

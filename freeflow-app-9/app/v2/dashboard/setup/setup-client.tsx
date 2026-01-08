@@ -27,14 +27,29 @@ import {
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Mail,
+  Mail, Plus, Download,
   Check, ChevronRight, ChevronLeft, Loader2, AlertCircle,
   CheckCircle, XCircle, Eye, EyeOff, ExternalLink,
   Zap, Shield, Clock, TrendingUp, Settings,
   Info, Sparkles, ArrowRight, PlayCircle
 } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
 import logger from '@/lib/logger';
-import { toast } from 'sonner';
 import { useToast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -127,11 +142,7 @@ const setupActivities = [
   { id: '3', user: 'System', action: 'generated', target: 'weekly report', timestamp: '1h ago', type: 'info' as const },
 ]
 
-const setupQuickActions = [
-  { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => toast.success('New Item', { description: 'Item created successfully' }) },
-  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => toast.success('Export Complete', { description: 'Configuration exported' }) },
-  { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => toast.success('Settings', { description: 'Settings opened' }) },
-]
+// Quick actions defined inside component to access state setters
 
 export default function SetupClient() {
   const { toast } = useToast();
@@ -154,6 +165,168 @@ export default function SetupClient() {
     { id: 'sms', name: 'SMS/WhatsApp', type: 'sms', provider: 'Twilio', status: 'not_configured', required: false },
     { id: 'crm', name: 'CRM', type: 'crm', provider: 'HubSpot', status: 'not_configured', required: false },
   ]);
+
+  // Dialog states for Quick Actions
+  const [newItemDialogOpen, setNewItemDialogOpen] = useState(false);
+  const [exportDialogOpen, setExportDialogOpen] = useState(false);
+  const [settingsDialogOpen, setSettingsDialogOpen] = useState(false);
+
+  // New Item form state
+  const [newItemForm, setNewItemForm] = useState({
+    name: '',
+    type: 'integration',
+    description: '',
+  });
+
+  // Export form state
+  const [exportForm, setExportForm] = useState({
+    format: 'json',
+    includeCredentials: false,
+  });
+
+  // Settings form state
+  const [settingsForm, setSettingsForm] = useState({
+    autoSave: true,
+    notifications: true,
+    theme: 'system',
+  });
+
+  // Quick Actions with dialog triggers
+  const setupQuickActions = [
+    { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => setNewItemDialogOpen(true) },
+    { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => setExportDialogOpen(true) },
+    { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => setSettingsDialogOpen(true) },
+  ];
+
+  // Dialog handlers
+  const handleCreateNewItem = async () => {
+    if (!newItemForm.name.trim()) {
+      toast({
+        title: 'Validation Error',
+        description: 'Please enter a name for the item.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    try {
+      // In a real implementation, this would call an API
+      logger.info('Creating new item', newItemForm);
+
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      toast({
+        title: 'Item Created',
+        description: `"${newItemForm.name}" has been created successfully.`,
+      });
+
+      setNewItemForm({ name: '', type: 'integration', description: '' });
+      setNewItemDialogOpen(false);
+    } catch (error: any) {
+      toast({
+        title: 'Creation Failed',
+        description: error.message || 'Failed to create item.',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleExport = async () => {
+    try {
+      logger.info('Exporting configuration', exportForm);
+
+      const exportData = {
+        config,
+        integrations: integrations.map(int => ({
+          ...int,
+          // Exclude credentials unless explicitly included
+          config: exportForm.includeCredentials ? int.config : undefined,
+        })),
+        exportedAt: new Date().toISOString(),
+        format: exportForm.format,
+      };
+
+      const blob = new Blob(
+        [exportForm.format === 'json' ? JSON.stringify(exportData, null, 2) : convertToYaml(exportData)],
+        { type: exportForm.format === 'json' ? 'application/json' : 'text/yaml' }
+      );
+
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `setup-config-${new Date().toISOString().split('T')[0]}.${exportForm.format}`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      toast({
+        title: 'Export Complete',
+        description: `Configuration exported as ${exportForm.format.toUpperCase()}.`,
+      });
+
+      setExportDialogOpen(false);
+    } catch (error: any) {
+      toast({
+        title: 'Export Failed',
+        description: error.message || 'Failed to export configuration.',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleSaveSettings = async () => {
+    try {
+      logger.info('Saving settings', settingsForm);
+
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      // In a real implementation, persist to localStorage or API
+      localStorage.setItem('setupSettings', JSON.stringify(settingsForm));
+
+      toast({
+        title: 'Settings Saved',
+        description: 'Your preferences have been updated.',
+      });
+
+      setSettingsDialogOpen(false);
+    } catch (error: any) {
+      toast({
+        title: 'Save Failed',
+        description: error.message || 'Failed to save settings.',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  // Helper function for YAML conversion
+  const convertToYaml = (obj: any, indent = 0): string => {
+    const spaces = '  '.repeat(indent);
+    let yaml = '';
+
+    for (const [key, value] of Object.entries(obj)) {
+      if (value === null || value === undefined) continue;
+
+      if (typeof value === 'object' && !Array.isArray(value)) {
+        yaml += `${spaces}${key}:\n${convertToYaml(value, indent + 1)}`;
+      } else if (Array.isArray(value)) {
+        yaml += `${spaces}${key}:\n`;
+        value.forEach(item => {
+          if (typeof item === 'object') {
+            yaml += `${spaces}- \n${convertToYaml(item, indent + 2)}`;
+          } else {
+            yaml += `${spaces}- ${item}\n`;
+          }
+        });
+      } else {
+        yaml += `${spaces}${key}: ${value}\n`;
+      }
+    }
+
+    return yaml;
+  };
 
   const steps: SetupStep[] = ['welcome', 'email', 'ai', 'calendar', 'payments', 'sms', 'crm', 'review', 'complete'];
   const currentStepIndex = steps.indexOf(currentStep);
@@ -1067,6 +1240,236 @@ export default function SetupClient() {
           {currentStep === 'complete' && <CompleteStep key="complete" />}
         </AnimatePresence>
       </div>
+
+      {/* New Item Dialog */}
+      <Dialog open={newItemDialogOpen} onOpenChange={setNewItemDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Plus className="h-5 w-5" />
+              Create New Item
+            </DialogTitle>
+            <DialogDescription>
+              Add a new integration, workflow, or configuration item to your setup.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="item-name">Item Name</Label>
+              <Input
+                id="item-name"
+                placeholder="Enter item name..."
+                value={newItemForm.name}
+                onChange={(e) => setNewItemForm({ ...newItemForm, name: e.target.value })}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="item-type">Item Type</Label>
+              <Select
+                value={newItemForm.type}
+                onValueChange={(value) => setNewItemForm({ ...newItemForm, type: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="integration">Integration</SelectItem>
+                  <SelectItem value="workflow">Workflow</SelectItem>
+                  <SelectItem value="automation">Automation Rule</SelectItem>
+                  <SelectItem value="template">Email Template</SelectItem>
+                  <SelectItem value="webhook">Webhook</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="item-description">Description (Optional)</Label>
+              <Textarea
+                id="item-description"
+                placeholder="Describe what this item does..."
+                value={newItemForm.description}
+                onChange={(e) => setNewItemForm({ ...newItemForm, description: e.target.value })}
+                rows={3}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setNewItemDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleCreateNewItem}>
+              <Plus className="mr-2 h-4 w-4" />
+              Create Item
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Export Dialog */}
+      <Dialog open={exportDialogOpen} onOpenChange={setExportDialogOpen}>
+        <DialogContent className="sm:max-w-[450px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Download className="h-5 w-5" />
+              Export Configuration
+            </DialogTitle>
+            <DialogDescription>
+              Export your setup configuration for backup or transfer to another environment.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="export-format">Export Format</Label>
+              <Select
+                value={exportForm.format}
+                onValueChange={(value) => setExportForm({ ...exportForm, format: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select format" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="json">JSON (.json)</SelectItem>
+                  <SelectItem value="yaml">YAML (.yaml)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="include-credentials"
+                checked={exportForm.includeCredentials}
+                onChange={(e) => setExportForm({ ...exportForm, includeCredentials: e.target.checked })}
+                className="h-4 w-4 rounded border-gray-300"
+              />
+              <Label htmlFor="include-credentials" className="text-sm font-normal cursor-pointer">
+                Include API credentials (not recommended for sharing)
+              </Label>
+            </div>
+
+            {exportForm.includeCredentials && (
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>Security Warning</AlertTitle>
+                <AlertDescription>
+                  Exported file will contain sensitive API keys. Keep this file secure.
+                </AlertDescription>
+              </Alert>
+            )}
+
+            <div className="bg-muted p-3 rounded-lg">
+              <p className="text-sm font-medium mb-2">Export will include:</p>
+              <ul className="text-sm text-muted-foreground space-y-1">
+                <li>- Email provider configuration</li>
+                <li>- AI provider settings</li>
+                <li>- Integration statuses</li>
+                <li>- Setup preferences</li>
+                {exportForm.includeCredentials && <li className="text-red-500">- API keys and secrets</li>}
+              </ul>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setExportDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleExport}>
+              <Download className="mr-2 h-4 w-4" />
+              Export Now
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Settings Dialog */}
+      <Dialog open={settingsDialogOpen} onOpenChange={setSettingsDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Settings className="h-5 w-5" />
+              Setup Preferences
+            </DialogTitle>
+            <DialogDescription>
+              Configure your setup wizard preferences and behavior.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-6 py-4">
+            <div className="space-y-4">
+              <h4 className="text-sm font-medium">General Settings</h4>
+
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label className="text-sm">Auto-save Progress</Label>
+                  <p className="text-xs text-muted-foreground">
+                    Automatically save your setup progress
+                  </p>
+                </div>
+                <input
+                  type="checkbox"
+                  checked={settingsForm.autoSave}
+                  onChange={(e) => setSettingsForm({ ...settingsForm, autoSave: e.target.checked })}
+                  className="h-4 w-4 rounded border-gray-300"
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label className="text-sm">Notifications</Label>
+                  <p className="text-xs text-muted-foreground">
+                    Receive notifications about setup status
+                  </p>
+                </div>
+                <input
+                  type="checkbox"
+                  checked={settingsForm.notifications}
+                  onChange={(e) => setSettingsForm({ ...settingsForm, notifications: e.target.checked })}
+                  className="h-4 w-4 rounded border-gray-300"
+                />
+              </div>
+            </div>
+
+            <Separator />
+
+            <div className="space-y-4">
+              <h4 className="text-sm font-medium">Appearance</h4>
+
+              <div className="space-y-2">
+                <Label htmlFor="theme">Theme Preference</Label>
+                <Select
+                  value={settingsForm.theme}
+                  onValueChange={(value) => setSettingsForm({ ...settingsForm, theme: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select theme" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="light">Light</SelectItem>
+                    <SelectItem value="dark">Dark</SelectItem>
+                    <SelectItem value="system">System Default</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <Separator />
+
+            <div className="space-y-2">
+              <h4 className="text-sm font-medium">Quick Actions</h4>
+              <p className="text-xs text-muted-foreground">
+                Keyboard shortcuts: N (New Item), E (Export), S (Settings)
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setSettingsDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSaveSettings}>
+              Save Preferences
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

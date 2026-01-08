@@ -235,20 +235,7 @@ const mockThemeStoreActivities = [
   { id: '3', user: 'UI Reviewer', action: 'Approved', target: 'Minimal Blog Theme submission', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
 ]
 
-const mockThemeStoreQuickActions = [
-  { id: '1', label: 'Upload', icon: 'upload', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1200)),
-    { loading: 'Preparing upload...', success: 'Ready to upload theme', error: 'Upload preparation failed' }
-  ), variant: 'default' as const },
-  { id: '2', label: 'Preview', icon: 'eye', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 800)),
-    { loading: 'Generating preview...', success: 'Preview ready', error: 'Preview generation failed' }
-  ), variant: 'default' as const },
-  { id: '3', label: 'Analytics', icon: 'barChart', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1000)),
-    { loading: 'Loading analytics...', success: 'Analytics loaded', error: 'Failed to load analytics' }
-  ), variant: 'outline' as const },
-]
+// Quick actions will use dialog openers - defined in component
 
 export default function ThemeStoreClient({ initialThemes, initialStats }: ThemeStoreClientProps) {
   const [activeTab, setActiveTab] = useState('browse')
@@ -265,6 +252,43 @@ export default function ThemeStoreClient({ initialThemes, initialStats }: ThemeS
   const [customizerOpen, setCustomizerOpen] = useState(false)
   const [customColors, setCustomColors] = useState<Partial<ColorPalette>>({})
   const [settingsTab, setSettingsTab] = useState('general')
+
+  // Dialog states for QuickActions
+  const [uploadDialogOpen, setUploadDialogOpen] = useState(false)
+  const [previewDialogOpen, setPreviewDialogOpen] = useState(false)
+  const [analyticsDialogOpen, setAnalyticsDialogOpen] = useState(false)
+
+  // Upload dialog state
+  const [uploadFile, setUploadFile] = useState<File | null>(null)
+  const [uploadName, setUploadName] = useState('')
+  const [uploadCategory, setUploadCategory] = useState<ThemeCategory>('dashboard')
+  const [uploadFramework, setUploadFramework] = useState<Framework>('nextjs')
+  const [uploadDescription, setUploadDescription] = useState('')
+  const [uploadPricing, setUploadPricing] = useState<ThemePricing>('free')
+  const [uploadPrice, setUploadPrice] = useState('')
+
+  // Preview dialog state
+  const [previewUrl, setPreviewUrl] = useState('')
+  const [previewThemeName, setPreviewThemeName] = useState('')
+
+  // Analytics data
+  const [analyticsData] = useState({
+    totalDownloads: 12500,
+    monthlyDownloads: 1850,
+    revenue: 4250,
+    avgRating: 4.7,
+    topThemes: [
+      { name: 'Aurora Dashboard', downloads: 5200, revenue: 2100 },
+      { name: 'Commerce Pro', downloads: 4100, revenue: 1650 },
+      { name: 'Minimal Portfolio', downloads: 3200, revenue: 0 },
+    ]
+  })
+
+  // AI Insights Dialog state
+  const [insightDialogOpen, setInsightDialogOpen] = useState(false)
+  const [selectedInsight, setSelectedInsight] = useState<{ id: string; type: 'success' | 'warning' | 'info'; title: string; description: string } | null>(null)
+  const [insightAction, setInsightAction] = useState('')
+  const [insightNotes, setInsightNotes] = useState('')
 
   const themes = mockThemes
   const collections = mockCollections
@@ -570,6 +594,78 @@ export default function ThemeStoreClient({ initialThemes, initialStats }: ThemeS
     // Open receipt in new tab
     window.open(`/receipts/${invoice}`, '_blank')
     toast.success(`Receipt loaded for ${invoice}`)
+  }
+
+  // Upload Theme Handler
+  const handleUploadTheme = () => {
+    if (!uploadFile || !uploadName) {
+      toast.error('Please provide a theme file and name')
+      return
+    }
+    toast.promise(
+      new Promise((resolve) => {
+        setTimeout(() => {
+          resolve({ success: true })
+        }, 1500)
+      }),
+      {
+        loading: `Uploading "${uploadName}"...`,
+        success: () => {
+          setUploadDialogOpen(false)
+          setUploadFile(null)
+          setUploadName('')
+          setUploadDescription('')
+          setUploadPrice('')
+          return `"${uploadName}" uploaded successfully!`
+        },
+        error: 'Upload failed'
+      }
+    )
+  }
+
+  // Preview Theme Handler
+  const handleOpenPreview = () => {
+    if (!previewUrl) {
+      toast.error('Please enter a preview URL')
+      return
+    }
+    window.open(previewUrl, '_blank')
+    setPreviewDialogOpen(false)
+    toast.success(`Preview opened for ${previewThemeName || 'theme'}`)
+  }
+
+  // Quick Actions for toolbar
+  const themeStoreQuickActions = [
+    { id: '1', label: 'Upload', icon: 'upload', action: () => setUploadDialogOpen(true), variant: 'default' as const },
+    { id: '2', label: 'Preview', icon: 'eye', action: () => setPreviewDialogOpen(true), variant: 'default' as const },
+    { id: '3', label: 'Analytics', icon: 'barChart', action: () => setAnalyticsDialogOpen(true), variant: 'outline' as const },
+  ]
+
+  // AI Insight action handler
+  const handleInsightAction = (insight: { id: string; type: 'success' | 'warning' | 'info'; title: string; description: string }) => {
+    setSelectedInsight(insight)
+    setInsightAction('')
+    setInsightNotes('')
+    setInsightDialogOpen(true)
+  }
+
+  // Process insight action
+  const processInsightAction = () => {
+    if (!selectedInsight) return
+    toast.promise(
+      new Promise((resolve) => {
+        setTimeout(() => resolve({ success: true }), 1000)
+      }),
+      {
+        loading: `Processing "${selectedInsight.title}"...`,
+        success: () => {
+          setInsightDialogOpen(false)
+          setSelectedInsight(null)
+          return `"${selectedInsight.title}" action completed successfully`
+        },
+        error: 'Action failed'
+      }
+    )
   }
 
   const getCategoryIcon = (cat: ThemeCategory) => {
@@ -1972,10 +2068,7 @@ export default function ThemeStoreClient({ initialThemes, initialStats }: ThemeS
             <AIInsightsPanel
               insights={mockThemeStoreAIInsights}
               title="Theme Store Intelligence"
-              onInsightAction={(insight) => toast.promise(
-                new Promise(resolve => setTimeout(resolve, 800)),
-                { loading: `Processing ${insight.title}...`, success: `${insight.title} action completed`, error: 'Action failed' }
-              )}
+              onInsightAction={handleInsightAction}
             />
           </div>
           <div className="space-y-6">
@@ -1997,11 +2090,405 @@ export default function ThemeStoreClient({ initialThemes, initialStats }: ThemeS
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockThemeStoreQuickActions}
+            actions={themeStoreQuickActions}
             variant="grid"
           />
         </div>
       </div>
+
+      {/* Upload Theme Dialog */}
+      <Dialog open={uploadDialogOpen} onOpenChange={setUploadDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Upload className="h-5 w-5 text-rose-600" />
+              Upload New Theme
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-6 py-4">
+            {/* File Upload */}
+            <div className="border-2 border-dashed border-gray-200 rounded-lg p-8 text-center">
+              {uploadFile ? (
+                <div className="flex items-center justify-center gap-3">
+                  <Package className="h-8 w-8 text-rose-600" />
+                  <div className="text-left">
+                    <p className="font-medium">{uploadFile.name}</p>
+                    <p className="text-sm text-gray-500">{(uploadFile.size / 1024 / 1024).toFixed(2)} MB</p>
+                  </div>
+                  <Button variant="ghost" size="sm" onClick={() => setUploadFile(null)}>
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              ) : (
+                <>
+                  <Upload className="h-10 w-10 text-gray-300 mx-auto mb-4" />
+                  <p className="text-gray-600 mb-2">Drag and drop your theme file here</p>
+                  <p className="text-sm text-gray-400 mb-4">Supports .zip, .tar.gz (max 100MB)</p>
+                  <Button variant="outline" onClick={() => {
+                    const input = document.createElement('input')
+                    input.type = 'file'
+                    input.accept = '.zip,.tar.gz'
+                    input.onchange = (e: any) => {
+                      const file = e.target.files?.[0]
+                      if (file) setUploadFile(file)
+                    }
+                    input.click()
+                  }}>
+                    Choose File
+                  </Button>
+                </>
+              )}
+            </div>
+
+            {/* Theme Details */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="col-span-2">
+                <Label>Theme Name *</Label>
+                <Input
+                  value={uploadName}
+                  onChange={(e) => setUploadName(e.target.value)}
+                  placeholder="e.g., Aurora Dashboard Pro"
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label>Category</Label>
+                <Select value={uploadCategory} onValueChange={(v) => setUploadCategory(v as ThemeCategory)}>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories.map(cat => (
+                      <SelectItem key={cat} value={cat}>{cat.charAt(0).toUpperCase() + cat.slice(1)}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Framework</Label>
+                <Select value={uploadFramework} onValueChange={(v) => setUploadFramework(v as Framework)}>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {frameworks.map(fw => (
+                      <SelectItem key={fw} value={fw}>{fw === 'nextjs' ? 'Next.js' : fw.charAt(0).toUpperCase() + fw.slice(1)}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="col-span-2">
+                <Label>Description</Label>
+                <Input
+                  value={uploadDescription}
+                  onChange={(e) => setUploadDescription(e.target.value)}
+                  placeholder="Brief description of your theme"
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label>Pricing</Label>
+                <Select value={uploadPricing} onValueChange={(v) => setUploadPricing(v as ThemePricing)}>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="free">Free</SelectItem>
+                    <SelectItem value="premium">Premium</SelectItem>
+                    <SelectItem value="bundle">Bundle</SelectItem>
+                    <SelectItem value="enterprise">Enterprise</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Price (USD)</Label>
+                <Input
+                  value={uploadPrice}
+                  onChange={(e) => setUploadPrice(e.target.value)}
+                  placeholder="0.00"
+                  type="number"
+                  disabled={uploadPricing === 'free'}
+                  className="mt-1"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-3 pt-4 border-t">
+              <Button className="flex-1 bg-rose-600 hover:bg-rose-700" onClick={handleUploadTheme}>
+                <Upload className="h-4 w-4 mr-2" />
+                Upload Theme
+              </Button>
+              <Button variant="outline" onClick={() => setUploadDialogOpen(false)}>
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Preview Theme Dialog */}
+      <Dialog open={previewDialogOpen} onOpenChange={setPreviewDialogOpen}>
+        <DialogContent className="max-w-xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Eye className="h-5 w-5 text-purple-600" />
+              Theme Preview
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <Label>Theme Name (Optional)</Label>
+              <Input
+                value={previewThemeName}
+                onChange={(e) => setPreviewThemeName(e.target.value)}
+                placeholder="e.g., My Custom Theme"
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label>Preview URL *</Label>
+              <Input
+                value={previewUrl}
+                onChange={(e) => setPreviewUrl(e.target.value)}
+                placeholder="https://your-theme-preview.com"
+                className="mt-1"
+              />
+              <p className="text-xs text-gray-500 mt-1">Enter a URL to preview your theme in a new tab</p>
+            </div>
+
+            <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+              <h4 className="font-medium mb-3">Quick Preview Options</h4>
+              <div className="grid grid-cols-2 gap-2">
+                {themes.slice(0, 4).map(theme => (
+                  <Button
+                    key={theme.id}
+                    variant="outline"
+                    className="justify-start"
+                    onClick={() => {
+                      setPreviewThemeName(theme.name)
+                      setPreviewUrl(theme.demoUrl)
+                    }}
+                  >
+                    <Palette className="h-4 w-4 mr-2" />
+                    {theme.name}
+                  </Button>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex gap-3 pt-4 border-t">
+              <Button className="flex-1 bg-purple-600 hover:bg-purple-700" onClick={handleOpenPreview}>
+                <Eye className="h-4 w-4 mr-2" />
+                Open Preview
+              </Button>
+              <Button variant="outline" onClick={() => setPreviewDialogOpen(false)}>
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Analytics Dialog */}
+      <Dialog open={analyticsDialogOpen} onOpenChange={setAnalyticsDialogOpen}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <TrendingUp className="h-5 w-5 text-blue-600" />
+              Theme Analytics Dashboard
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-6 py-4">
+            {/* Stats Overview */}
+            <div className="grid grid-cols-4 gap-4">
+              <Card>
+                <CardContent className="pt-4">
+                  <div className="flex items-center gap-2 text-gray-500 mb-1">
+                    <Download className="h-4 w-4" />
+                    <span className="text-xs">Total Downloads</span>
+                  </div>
+                  <p className="text-2xl font-bold">{analyticsData.totalDownloads.toLocaleString()}</p>
+                  <p className="text-xs text-green-600">+12% from last month</p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="pt-4">
+                  <div className="flex items-center gap-2 text-gray-500 mb-1">
+                    <TrendingUp className="h-4 w-4" />
+                    <span className="text-xs">This Month</span>
+                  </div>
+                  <p className="text-2xl font-bold">{analyticsData.monthlyDownloads.toLocaleString()}</p>
+                  <p className="text-xs text-green-600">+8% from last month</p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="pt-4">
+                  <div className="flex items-center gap-2 text-gray-500 mb-1">
+                    <CreditCard className="h-4 w-4" />
+                    <span className="text-xs">Revenue</span>
+                  </div>
+                  <p className="text-2xl font-bold">${analyticsData.revenue.toLocaleString()}</p>
+                  <p className="text-xs text-green-600">+15% from last month</p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="pt-4">
+                  <div className="flex items-center gap-2 text-gray-500 mb-1">
+                    <Star className="h-4 w-4" />
+                    <span className="text-xs">Avg Rating</span>
+                  </div>
+                  <p className="text-2xl font-bold">{analyticsData.avgRating}</p>
+                  <p className="text-xs text-gray-500">From 892 reviews</p>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Top Performing Themes */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Top Performing Themes</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {analyticsData.topThemes.map((theme, i) => (
+                    <div key={i} className="flex items-center gap-4">
+                      <span className="text-lg font-bold text-gray-400 w-6">#{i + 1}</span>
+                      <div className="w-10 h-10 bg-gradient-to-br from-rose-100 to-rose-200 rounded-lg flex items-center justify-center">
+                        <Palette className="h-5 w-5 text-rose-600" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-medium">{theme.name}</p>
+                        <div className="flex items-center gap-4 text-sm text-gray-500">
+                          <span className="flex items-center gap-1">
+                            <Download className="h-3 w-3" />
+                            {theme.downloads.toLocaleString()} downloads
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <CreditCard className="h-3 w-3" />
+                            ${theme.revenue.toLocaleString()} revenue
+                          </span>
+                        </div>
+                      </div>
+                      <Progress value={(theme.downloads / analyticsData.topThemes[0].downloads) * 100} className="w-24" />
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Download Trend Chart Placeholder */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Download Trends (Last 30 Days)</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="h-40 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-lg flex items-center justify-center">
+                  <div className="text-center">
+                    <TrendingUp className="h-8 w-8 text-blue-400 mx-auto mb-2" />
+                    <p className="text-gray-500">Trend data visualization</p>
+                    <p className="text-xs text-gray-400">Based on real-time download metrics</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <div className="flex gap-3 pt-4 border-t">
+              <Button variant="outline" className="flex-1" onClick={() => {
+                toast.success('Analytics report exported')
+              }}>
+                <Download className="h-4 w-4 mr-2" />
+                Export Report
+              </Button>
+              <Button variant="outline" onClick={() => setAnalyticsDialogOpen(false)}>
+                Close
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* AI Insight Action Dialog */}
+      <Dialog open={insightDialogOpen} onOpenChange={setInsightDialogOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-purple-600" />
+              AI Insight Action
+            </DialogTitle>
+          </DialogHeader>
+          {selectedInsight && (
+            <div className="space-y-4 py-4">
+              {/* Insight Summary */}
+              <div className={`p-4 rounded-lg ${
+                selectedInsight.type === 'success' ? 'bg-green-50 border border-green-200' :
+                selectedInsight.type === 'warning' ? 'bg-amber-50 border border-amber-200' :
+                'bg-blue-50 border border-blue-200'
+              }`}>
+                <h4 className="font-medium mb-1">{selectedInsight.title}</h4>
+                <p className="text-sm text-gray-600">{selectedInsight.description}</p>
+              </div>
+
+              {/* Action Selection */}
+              <div>
+                <Label>Select Action</Label>
+                <Select value={insightAction} onValueChange={setInsightAction}>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder="Choose an action..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {selectedInsight.type === 'warning' && (
+                      <>
+                        <SelectItem value="update">Update affected themes</SelectItem>
+                        <SelectItem value="dismiss">Dismiss this alert</SelectItem>
+                        <SelectItem value="schedule">Schedule update for later</SelectItem>
+                      </>
+                    )}
+                    {selectedInsight.type === 'success' && (
+                      <>
+                        <SelectItem value="share">Share achievement</SelectItem>
+                        <SelectItem value="report">Generate report</SelectItem>
+                        <SelectItem value="dismiss">Dismiss notification</SelectItem>
+                      </>
+                    )}
+                    {selectedInsight.type === 'info' && (
+                      <>
+                        <SelectItem value="apply">Apply suggestion</SelectItem>
+                        <SelectItem value="learn">Learn more</SelectItem>
+                        <SelectItem value="dismiss">Dismiss suggestion</SelectItem>
+                      </>
+                    )}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Notes */}
+              <div>
+                <Label>Notes (Optional)</Label>
+                <Input
+                  value={insightNotes}
+                  onChange={(e) => setInsightNotes(e.target.value)}
+                  placeholder="Add any notes about this action..."
+                  className="mt-1"
+                />
+              </div>
+
+              <div className="flex gap-3 pt-4 border-t">
+                <Button
+                  className="flex-1 bg-purple-600 hover:bg-purple-700"
+                  onClick={processInsightAction}
+                  disabled={!insightAction}
+                >
+                  <Sparkles className="h-4 w-4 mr-2" />
+                  Process Action
+                </Button>
+                <Button variant="outline" onClick={() => setInsightDialogOpen(false)}>
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Theme Detail Dialog */}
       <Dialog open={showThemeDialog} onOpenChange={setShowThemeDialog}>

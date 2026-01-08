@@ -60,7 +60,8 @@ import {
   Upload,
   Share2,
   Mail,
-  Loader2
+  Loader2,
+  Archive
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -313,12 +314,7 @@ const mockQAActivities = [
   { id: '3', user: 'Test Analyst', action: 'reported', target: '2 new defects', timestamp: '2h ago', type: 'warning' as const },
 ]
 
-const mockQAQuickActions = [
-  { id: '1', label: 'Run Tests', icon: 'Play', shortcut: 'R', action: () => toast.success('156 tests passed • 2 failed • 1 skipped') },
-  { id: '2', label: 'New Case', icon: 'Plus', shortcut: 'N', action: () => toast.success('Test case created! Add steps and expected results') },
-  { id: '3', label: 'Reports', icon: 'FileText', shortcut: 'P', action: () => toast.success('QA Reports: 94% pass rate - 12 open defects - 3 critical issues') },
-  { id: '4', label: 'Defects', icon: 'Bug', shortcut: 'D', action: () => toast.success('Defect Tracker: 12 open - 47 resolved this week - 3 P1 issues') },
-]
+// Mock quick actions removed - using state-driven qaQuickActions instead
 
 export default function QAClient({ initialTestCases }: QAClientProps) {
   const supabase = createClient()
@@ -335,6 +331,55 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
   const [showCreateRun, setShowCreateRun] = useState(false)
   const [showReportDefect, setShowReportDefect] = useState(false)
   const [showCreateMilestone, setShowCreateMilestone] = useState(false)
+  const [showRunTestsDialog, setShowRunTestsDialog] = useState(false)
+  const [showReportsDialog, setShowReportsDialog] = useState(false)
+  const [showCreateSuiteDialog, setShowCreateSuiteDialog] = useState(false)
+  const [showViewDefectDialog, setShowViewDefectDialog] = useState(false)
+  const [showEditDefectDialog, setShowEditDefectDialog] = useState(false)
+  const [showDefectOptionsDialog, setShowDefectOptionsDialog] = useState(false)
+  const [showGenerateReportDialog, setShowGenerateReportDialog] = useState(false)
+  const [showScheduleReportDialog, setShowScheduleReportDialog] = useState(false)
+  const [showReportOptionsDialog, setShowReportOptionsDialog] = useState(false)
+  const [showViewReportDialog, setShowViewReportDialog] = useState(false)
+  const [showImportTemplateDialog, setShowImportTemplateDialog] = useState(false)
+  const [showCustomBuilderDialog, setShowCustomBuilderDialog] = useState(false)
+  const [showEmailSettingsDialog, setShowEmailSettingsDialog] = useState(false)
+  const [showEnvironmentDialog, setShowEnvironmentDialog] = useState(false)
+  const [showIntegrationDialog, setShowIntegrationDialog] = useState(false)
+  const [showDeleteDataDialog, setShowDeleteDataDialog] = useState(false)
+  const [showResumeRunDialog, setShowResumeRunDialog] = useState(false)
+  const [showRunReportDialog, setShowRunReportDialog] = useState(false)
+  const [selectedDefect, setSelectedDefect] = useState<Defect | null>(null)
+  const [selectedReport, setSelectedReport] = useState<{ name: string; type: string; size: string } | null>(null)
+  const [selectedEnvironment, setSelectedEnvironment] = useState<{ name: string; url: string; browser: string; os: string; status: string } | null>(null)
+  const [selectedIntegration, setSelectedIntegration] = useState<{ name: string; type: string; status: string } | null>(null)
+  const [selectedScheduledReport, setSelectedScheduledReport] = useState<{ name: string; frequency: string; recipients: string; status: string } | null>(null)
+  const [reportToGenerate, setReportToGenerate] = useState('')
+  const [showTestCaseOptionsDialog, setShowTestCaseOptionsDialog] = useState(false)
+  const [selectedTestCaseForOptions, setSelectedTestCaseForOptions] = useState<typeof mockTestCases[0] | null>(null)
+
+  // Form states for create test suite
+  const [newSuiteForm, setNewSuiteForm] = useState({
+    name: '',
+    description: ''
+  })
+
+  // Form states for edit defect
+  const [editDefectForm, setEditDefectForm] = useState({
+    title: '',
+    description: '',
+    severity: 'major',
+    status: 'open',
+    assigned_to: ''
+  })
+
+  // Form states for environment
+  const [newEnvironmentForm, setNewEnvironmentForm] = useState({
+    name: '',
+    url: '',
+    browser: 'Chrome',
+    os: 'Windows'
+  })
 
   // Form states for create test case
   const [newTestForm, setNewTestForm] = useState({
@@ -380,6 +425,14 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
   const [isExecutingTest, setIsExecutingTest] = useState(false)
   const [isExporting, setIsExporting] = useState(false)
   const [isRunningAllTests, setIsRunningAllTests] = useState(false)
+  const [isCreatingSuite, setIsCreatingSuite] = useState(false)
+  const [isUpdatingDefect, setIsUpdatingDefect] = useState(false)
+  const [isGeneratingReport, setIsGeneratingReport] = useState(false)
+  const [isCreatingEnvironment, setIsCreatingEnvironment] = useState(false)
+  const [isConnectingIntegration, setIsConnectingIntegration] = useState(false)
+  const [isDeletingData, setIsDeletingData] = useState(false)
+  const [isResumingRun, setIsResumingRun] = useState(false)
+  const [isDownloadingReport, setIsDownloadingReport] = useState(false)
 
   const { testCases: hookTestCases, stats, isLoading, refetch } = useQATestCases(initialTestCases, {
     status: status === 'all' ? undefined : status,
@@ -477,6 +530,14 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
       return next
     })
   }
+
+  // Quick Actions with proper dialog handlers
+  const qaQuickActions = [
+    { id: '1', label: 'Run Tests', icon: 'Play', shortcut: 'R', action: () => setShowRunTestsDialog(true) },
+    { id: '2', label: 'New Case', icon: 'Plus', shortcut: 'N', action: () => setShowCreateTest(true) },
+    { id: '3', label: 'Reports', icon: 'FileText', shortcut: 'P', action: () => setShowReportsDialog(true) },
+    { id: '4', label: 'Defects', icon: 'Bug', shortcut: 'D', action: () => setShowReportDefect(true) },
+  ]
 
   // Handlers - Real Supabase Operations
   const handleRunTestSuite = useCallback(async (suiteName: string) => {
@@ -879,6 +940,341 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
     }
   }, [supabase, executeTest, refetch])
 
+  // Handler for creating test suite
+  const handleCreateSuite = useCallback(async () => {
+    if (!newSuiteForm.name.trim()) {
+      toast.error('Validation Error', { description: 'Suite name is required' })
+      return
+    }
+    setIsCreatingSuite(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      const { error } = await supabase
+        .from('qa_test_suites')
+        .insert({
+          user_id: user.id,
+          name: newSuiteForm.name,
+          description: newSuiteForm.description
+        })
+
+      if (error) throw error
+
+      toast.success('Test suite created', {
+        description: `Suite "${newSuiteForm.name}" has been created`
+      })
+      setShowCreateSuiteDialog(false)
+      setNewSuiteForm({ name: '', description: '' })
+      refetch()
+    } catch (error: any) {
+      toast.error('Failed to create suite', {
+        description: error.message || 'An error occurred'
+      })
+    } finally {
+      setIsCreatingSuite(false)
+    }
+  }, [newSuiteForm, supabase, refetch])
+
+  // Handler for updating defect
+  const handleUpdateDefect = useCallback(async () => {
+    if (!selectedDefect || !editDefectForm.title.trim()) {
+      toast.error('Validation Error', { description: 'Defect title is required' })
+      return
+    }
+    setIsUpdatingDefect(true)
+    try {
+      const { error } = await supabase
+        .from('qa_defects')
+        .update({
+          title: editDefectForm.title,
+          description: editDefectForm.description,
+          severity: editDefectForm.severity,
+          status: editDefectForm.status,
+          assigned_to: editDefectForm.assigned_to || null,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', selectedDefect.id)
+
+      if (error) throw error
+
+      toast.success('Defect updated', {
+        description: `Defect "${editDefectForm.title}" has been updated`
+      })
+      setShowEditDefectDialog(false)
+      setSelectedDefect(null)
+    } catch (error: any) {
+      toast.error('Failed to update defect', {
+        description: error.message || 'An error occurred'
+      })
+    } finally {
+      setIsUpdatingDefect(false)
+    }
+  }, [selectedDefect, editDefectForm, supabase])
+
+  // Handler for generating reports
+  const handleGenerateReportType = useCallback(async (reportType: string) => {
+    setIsGeneratingReport(true)
+    try {
+      const { data: testCases, error } = await supabase
+        .from('qa_test_cases')
+        .select('*')
+        .is('deleted_at', null)
+
+      if (error) throw error
+
+      // Generate appropriate report based on type
+      let csvContent = ''
+      const filename = `qa-${reportType.toLowerCase().replace(/\s+/g, '-')}-${new Date().toISOString().split('T')[0]}.csv`
+
+      if (reportType === 'Summary Report') {
+        const total = testCases?.length || 0
+        const passed = testCases?.filter(t => t.status === 'passed').length || 0
+        const failed = testCases?.filter(t => t.status === 'failed').length || 0
+        csvContent = [
+          'Metric,Value',
+          `Total Tests,${total}`,
+          `Passed,${passed}`,
+          `Failed,${failed}`,
+          `Pass Rate,${total > 0 ? ((passed / total) * 100).toFixed(1) : 0}%`
+        ].join('\n')
+      } else {
+        csvContent = [
+          ['ID', 'Name', 'Type', 'Priority', 'Status', 'Pass Rate', 'Created At'].join(','),
+          ...(testCases || []).map(tc =>
+            [tc.test_code, tc.test_name, tc.test_type, tc.priority, tc.status, tc.pass_rate, tc.created_at].join(',')
+          )
+        ].join('\n')
+      }
+
+      const blob = new Blob([csvContent], { type: 'text/csv' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = filename
+      a.click()
+      URL.revokeObjectURL(url)
+
+      toast.success(`${reportType} generated`, {
+        description: 'Report has been downloaded'
+      })
+      setShowGenerateReportDialog(false)
+    } catch (error: any) {
+      toast.error('Report generation failed', {
+        description: error.message || 'An error occurred'
+      })
+    } finally {
+      setIsGeneratingReport(false)
+    }
+  }, [supabase])
+
+  // Handler for creating environment
+  const handleCreateEnvironment = useCallback(async () => {
+    if (!newEnvironmentForm.name.trim()) {
+      toast.error('Validation Error', { description: 'Environment name is required' })
+      return
+    }
+    setIsCreatingEnvironment(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      const { error } = await supabase
+        .from('qa_environments')
+        .insert({
+          user_id: user.id,
+          name: newEnvironmentForm.name,
+          url: newEnvironmentForm.url,
+          browser: newEnvironmentForm.browser,
+          os: newEnvironmentForm.os,
+          status: 'active'
+        })
+
+      if (error) throw error
+
+      toast.success('Environment created', {
+        description: `Environment "${newEnvironmentForm.name}" has been configured`
+      })
+      setShowEnvironmentDialog(false)
+      setNewEnvironmentForm({ name: '', url: '', browser: 'Chrome', os: 'Windows' })
+    } catch (error: any) {
+      toast.error('Failed to create environment', {
+        description: error.message || 'An error occurred'
+      })
+    } finally {
+      setIsCreatingEnvironment(false)
+    }
+  }, [newEnvironmentForm, supabase])
+
+  // Handler for connecting integration
+  const handleConnectIntegration = useCallback(async (integration: { name: string; type: string; status: string }) => {
+    setIsConnectingIntegration(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      // Toggle connection status
+      const newStatus = integration.status === 'connected' ? 'disconnected' : 'connected'
+
+      const { error } = await supabase
+        .from('qa_integrations')
+        .upsert({
+          user_id: user.id,
+          name: integration.name,
+          type: integration.type,
+          status: newStatus,
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'user_id,name' })
+
+      if (error) throw error
+
+      toast.success(newStatus === 'connected' ? 'Integration connected' : 'Integration disconnected', {
+        description: `${integration.name} has been ${newStatus}`
+      })
+      setShowIntegrationDialog(false)
+      setSelectedIntegration(null)
+    } catch (error: any) {
+      toast.error('Failed to update integration', {
+        description: error.message || 'An error occurred'
+      })
+    } finally {
+      setIsConnectingIntegration(false)
+    }
+  }, [supabase])
+
+  // Handler for deleting all test data
+  const handleDeleteAllData = useCallback(async () => {
+    setIsDeletingData(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      // Delete all test-related data for this user
+      await supabase.from('qa_test_cases').update({ deleted_at: new Date().toISOString() }).eq('user_id', user.id)
+      await supabase.from('qa_defects').delete().eq('user_id', user.id)
+
+      toast.success('Data deleted', {
+        description: 'All test data has been removed'
+      })
+      setShowDeleteDataDialog(false)
+      refetch()
+    } catch (error: any) {
+      toast.error('Delete failed', {
+        description: error.message || 'An error occurred'
+      })
+    } finally {
+      setIsDeletingData(false)
+    }
+  }, [supabase, refetch])
+
+  // Handler for resuming test run
+  const handleResumeRun = useCallback(async () => {
+    if (!selectedRun) return
+    setIsResumingRun(true)
+    try {
+      // Execute remaining untested tests
+      const { data: testCases, error } = await supabase
+        .from('qa_test_cases')
+        .select('id')
+        .eq('status', 'untested')
+        .is('deleted_at', null)
+        .limit(selectedRun.untestedCount)
+
+      if (error) throw error
+
+      if (testCases && testCases.length > 0) {
+        for (const tc of testCases) {
+          await executeTest(tc.id)
+        }
+        toast.success('Test run resumed', {
+          description: `Executed ${testCases.length} remaining tests`
+        })
+        refetch()
+      }
+      setShowResumeRunDialog(false)
+      setSelectedRun(null)
+    } catch (error: any) {
+      toast.error('Resume failed', {
+        description: error.message || 'An error occurred'
+      })
+    } finally {
+      setIsResumingRun(false)
+    }
+  }, [selectedRun, supabase, executeTest, refetch])
+
+  // Handler for downloading specific report
+  const handleDownloadReport = useCallback(async (reportName: string) => {
+    setIsDownloadingReport(true)
+    try {
+      const { data: testCases, error } = await supabase
+        .from('qa_test_cases')
+        .select('*')
+        .is('deleted_at', null)
+
+      if (error) throw error
+
+      const csvContent = [
+        ['ID', 'Name', 'Type', 'Priority', 'Status', 'Pass Rate', 'Created At'].join(','),
+        ...(testCases || []).map(tc =>
+          [tc.test_code, tc.test_name, tc.test_type, tc.priority, tc.status, tc.pass_rate, tc.created_at].join(',')
+        )
+      ].join('\n')
+
+      const blob = new Blob([csvContent], { type: 'text/csv' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `${reportName.toLowerCase().replace(/\s+/g, '-')}-${new Date().toISOString().split('T')[0]}.csv`
+      a.click()
+      URL.revokeObjectURL(url)
+
+      toast.success('Report downloaded', {
+        description: `${reportName} has been saved`
+      })
+    } catch (error: any) {
+      toast.error('Download failed', {
+        description: error.message || 'An error occurred'
+      })
+    } finally {
+      setIsDownloadingReport(false)
+    }
+  }, [supabase])
+
+  // Handler for running specific suite
+  const handleRunSpecificSuite = useCallback(async (suiteName: string, testCount: number) => {
+    setShowRunTestsDialog(false)
+    setIsRunningAllTests(true)
+    toast.loading(`Running ${suiteName}...`, { id: 'run-suite' })
+    try {
+      const { data: testCases, error } = await supabase
+        .from('qa_test_cases')
+        .select('id')
+        .is('deleted_at', null)
+        .limit(Math.min(testCount, 20))
+
+      if (error) throw error
+
+      if (testCases && testCases.length > 0) {
+        for (const tc of testCases) {
+          await executeTest(tc.id)
+        }
+      }
+
+      toast.success(`${suiteName} completed`, {
+        description: `Executed ${testCases?.length || 0} tests`,
+        id: 'run-suite'
+      })
+      refetch()
+    } catch (error: any) {
+      toast.error('Test run failed', {
+        description: error.message || 'An error occurred',
+        id: 'run-suite'
+      })
+    } finally {
+      setIsRunningAllTests(false)
+    }
+  }, [supabase, executeTest, refetch])
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-teal-50/30 to-emerald-50/40 dark:bg-none dark:bg-gray-900 p-6">
       <div className="max-w-[1800px] mx-auto space-y-6">
@@ -1181,10 +1577,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
                         <FolderOpen className="w-4 h-4" />
                         Test Suites
                       </span>
-                      <Button variant="ghost" size="sm" onClick={() => toast.promise(
-                        new Promise(resolve => setTimeout(resolve, 1000)),
-                        { loading: 'Creating test suite...', success: 'Test suite created successfully', error: 'Failed to create test suite' }
-                      )}>
+                      <Button variant="ghost" size="sm" onClick={() => setShowCreateSuiteDialog(true)}>
                         <Plus className="w-4 h-4" />
                       </Button>
                     </CardTitle>
@@ -1311,10 +1704,8 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
                             </div>
                             <Button variant="ghost" size="sm" onClick={(e) => {
                               e.stopPropagation()
-                              toast.promise(
-                                new Promise(resolve => setTimeout(resolve, 500)),
-                                { loading: 'Loading options...', success: 'Test case options: Edit, Duplicate, Archive, Delete', error: 'Failed to load options' }
-                              )
+                              setSelectedTestCaseForOptions(tc)
+                              setShowTestCaseOptionsDialog(true)
                             }}>
                               <MoreHorizontal className="w-4 h-4" />
                             </Button>
@@ -1397,10 +1788,8 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
                           {run.status === 'active' && (
                             <Button size="sm" className="bg-green-600 hover:bg-green-700" onClick={(e) => {
                               e.stopPropagation()
-                              toast.promise(
-                                new Promise(resolve => setTimeout(resolve, 2000)),
-                                { loading: 'Resuming test run...', success: `Continuing test run "${run.name}" - 3 tests remaining`, error: 'Failed to resume test run' }
-                              )
+                              setSelectedRun(run)
+                              setShowResumeRunDialog(true)
                             }}>
                               <Play className="w-3 h-3 mr-1" />
                               Continue
@@ -1586,18 +1975,25 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
                           </div>
                         </div>
                         <div className="flex gap-1">
-                          <Button variant="ghost" size="sm" onClick={() => toast.promise(
-                            new Promise(resolve => setTimeout(resolve, 800)),
-                            { loading: 'Loading defect details...', success: `Viewing defect ${defect.id}: ${defect.title}`, error: 'Failed to load defect details' }
-                          )}><Eye className="w-4 h-4" /></Button>
-                          <Button variant="ghost" size="sm" onClick={() => toast.promise(
-                            new Promise(resolve => setTimeout(resolve, 600)),
-                            { loading: 'Opening editor...', success: 'Edit mode enabled for defect', error: 'Failed to open editor' }
-                          )}><Edit className="w-4 h-4" /></Button>
-                          <Button variant="ghost" size="sm" onClick={() => toast.promise(
-                            new Promise(resolve => setTimeout(resolve, 500)),
-                            { loading: 'Loading options...', success: 'Defect options: Assign, Change Status, Link to Test, Delete', error: 'Failed to load options' }
-                          )}><MoreHorizontal className="w-4 h-4" /></Button>
+                          <Button variant="ghost" size="sm" onClick={() => {
+                            setSelectedDefect(defect)
+                            setShowViewDefectDialog(true)
+                          }}><Eye className="w-4 h-4" /></Button>
+                          <Button variant="ghost" size="sm" onClick={() => {
+                            setSelectedDefect(defect)
+                            setEditDefectForm({
+                              title: defect.title,
+                              description: '',
+                              severity: defect.severity,
+                              status: defect.status,
+                              assigned_to: defect.assignedTo
+                            })
+                            setShowEditDefectDialog(true)
+                          }}><Edit className="w-4 h-4" /></Button>
+                          <Button variant="ghost" size="sm" onClick={() => {
+                            setSelectedDefect(defect)
+                            setShowDefectOptionsDialog(true)
+                          }}><MoreHorizontal className="w-4 h-4" /></Button>
                         </div>
                       </div>
                     </div>
@@ -1824,10 +2220,10 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
                   <CardContent>
                     <div className="space-y-2">
                       {['Summary Report', 'Comparison Report', 'Milestone Report', 'Defects Report', 'Coverage Report'].map((report) => (
-                        <Button key={report} variant="outline" className="w-full justify-start" onClick={() => toast.promise(
-                          new Promise(resolve => setTimeout(resolve, 1500)),
-                          { loading: `Generating ${report}...`, success: `${report} generated successfully`, error: `Failed to generate ${report}` }
-                        )}>
+                        <Button key={report} variant="outline" className="w-full justify-start" onClick={() => {
+                          setReportToGenerate(report)
+                          setShowGenerateReportDialog(true)
+                        }}>
                           <FileText className="w-4 h-4 mr-2" />
                           {report}
                         </Button>
@@ -1884,10 +2280,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
                     <CardTitle>Scheduled Reports</CardTitle>
                     <CardDescription>Automated report generation and delivery</CardDescription>
                   </div>
-                  <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => toast.promise(
-                    new Promise(resolve => setTimeout(resolve, 1000)),
-                    { loading: 'Opening scheduler...', success: 'Report scheduler opened - Configure frequency and recipients', error: 'Failed to open scheduler' }
-                  )}>
+                  <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => setShowScheduleReportDialog(true)}>
                     <Plus className="h-4 w-4 mr-2" />
                     Schedule Report
                   </Button>
@@ -1921,10 +2314,10 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
                           <p className="text-xs text-gray-500">Format</p>
                         </div>
                         <Badge className={report.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}>{report.status}</Badge>
-                        <Button variant="ghost" size="sm" onClick={() => toast.promise(
-                          new Promise(resolve => setTimeout(resolve, 500)),
-                          { loading: 'Loading options...', success: `Options for ${report.name}: Edit Schedule, Pause, View History, Delete`, error: 'Failed to load options' }
-                        )}><MoreHorizontal className="h-4 w-4" /></Button>
+                        <Button variant="ghost" size="sm" onClick={() => {
+                          setSelectedScheduledReport({ name: report.name, frequency: report.schedule, recipients: String(report.recipients), status: report.status })
+                          setShowReportOptionsDialog(true)
+                        }}><MoreHorizontal className="h-4 w-4" /></Button>
                       </div>
                     </div>
                   ))}
@@ -1972,18 +2365,15 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
                         <Badge variant="outline">{report.type}</Badge>
                         <span className="text-sm text-gray-500">{report.downloads} downloads</span>
                         <div className="flex gap-1">
-                          <Button variant="ghost" size="sm" onClick={() => toast.promise(
-                            new Promise(resolve => setTimeout(resolve, 1000)),
-                            { loading: `Opening ${report.name}...`, success: `Viewing ${report.name}`, error: 'Failed to open report' }
-                          )}><Eye className="h-4 w-4" /></Button>
-                          <Button variant="ghost" size="sm" onClick={() => toast.promise(
-                            new Promise(resolve => setTimeout(resolve, 1500)),
-                            { loading: `Downloading ${report.name}...`, success: `${report.name} downloaded (${report.size})`, error: 'Failed to download report' }
-                          )}><Download className="h-4 w-4" /></Button>
-                          <Button variant="ghost" size="sm" onClick={() => toast.promise(
-                            new Promise(resolve => setTimeout(resolve, 800)),
-                            { loading: 'Preparing share link...', success: `Share link copied for ${report.name}`, error: 'Failed to create share link' }
-                          )}><Share2 className="h-4 w-4" /></Button>
+                          <Button variant="ghost" size="sm" onClick={() => {
+                            setSelectedReport({ name: report.name, type: report.type, size: report.size })
+                            setShowViewReportDialog(true)
+                          }}><Eye className="h-4 w-4" /></Button>
+                          <Button variant="ghost" size="sm" onClick={() => handleDownloadReport(report.name)} disabled={isDownloadingReport}><Download className="h-4 w-4" /></Button>
+                          <Button variant="ghost" size="sm" onClick={() => {
+                            navigator.clipboard.writeText(`https://app.example.com/reports/${report.name.toLowerCase().replace(/\s+/g, '-')}`)
+                            toast.success('Share link copied', { description: `Link for ${report.name} copied to clipboard` })
+                          }}><Share2 className="h-4 w-4" /></Button>
                         </div>
                       </div>
                     </div>
@@ -2034,18 +2424,9 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
                 <CardHeader className="pb-2"><CardTitle className="text-sm">Report Actions</CardTitle></CardHeader>
                 <CardContent>
                   <div className="space-y-2">
-                    <Button variant="outline" className="w-full justify-start text-sm" onClick={() => toast.promise(
-                      new Promise(resolve => setTimeout(resolve, 1000)),
-                      { loading: 'Opening template importer...', success: 'Template importer ready - Select a file to upload', error: 'Failed to open importer' }
-                    )}><Upload className="h-4 w-4 mr-2" />Import Template</Button>
-                    <Button variant="outline" className="w-full justify-start text-sm" onClick={() => toast.promise(
-                      new Promise(resolve => setTimeout(resolve, 800)),
-                      { loading: 'Loading custom builder...', success: 'Custom Report Builder opened - Drag and drop widgets to create your report', error: 'Failed to load builder' }
-                    )}><PieChart className="h-4 w-4 mr-2" />Custom Builder</Button>
-                    <Button variant="outline" className="w-full justify-start text-sm" onClick={() => toast.promise(
-                      new Promise(resolve => setTimeout(resolve, 600)),
-                      { loading: 'Loading email settings...', success: 'Email settings opened - Configure SMTP and recipients', error: 'Failed to load settings' }
-                    )}><Mail className="h-4 w-4 mr-2" />Email Settings</Button>
+                    <Button variant="outline" className="w-full justify-start text-sm" onClick={() => setShowImportTemplateDialog(true)}><Upload className="h-4 w-4 mr-2" />Import Template</Button>
+                    <Button variant="outline" className="w-full justify-start text-sm" onClick={() => setShowCustomBuilderDialog(true)}><PieChart className="h-4 w-4 mr-2" />Custom Builder</Button>
+                    <Button variant="outline" className="w-full justify-start text-sm" onClick={() => setShowEmailSettingsDialog(true)}><Mail className="h-4 w-4 mr-2" />Email Settings</Button>
                   </div>
                 </CardContent>
               </Card>
@@ -2104,10 +2485,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
 
                 {settingsTab === 'environments' && (
                   <Card className="border-gray-200 dark:border-gray-700">
-                    <CardHeader><div className="flex items-center justify-between"><div><CardTitle>Test Environments</CardTitle><CardDescription>Manage testing environments and configurations</CardDescription></div><Button onClick={() => toast.promise(
-                      new Promise(resolve => setTimeout(resolve, 1000)),
-                      { loading: 'Creating environment...', success: 'New environment created - Configure URL, browser, and OS settings', error: 'Failed to create environment' }
-                    )}><Plus className="h-4 w-4 mr-2" />Add Environment</Button></div></CardHeader>
+                    <CardHeader><div className="flex items-center justify-between"><div><CardTitle>Test Environments</CardTitle><CardDescription>Manage testing environments and configurations</CardDescription></div><Button onClick={() => setShowEnvironmentDialog(true)}><Plus className="h-4 w-4 mr-2" />Add Environment</Button></div></CardHeader>
                     <CardContent className="space-y-4">
                       {[
                         { name: 'Development', url: 'https://dev.app.com', status: 'active', browser: 'Chrome 120', os: 'Windows 11' },
@@ -2123,10 +2501,11 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
                           <div className="flex items-center gap-4">
                             <div className="text-right text-sm"><p>{env.browser}</p><p className="text-gray-500">{env.os}</p></div>
                             <Badge className={env.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}>{env.status}</Badge>
-                            <Button variant="ghost" size="sm" onClick={() => toast.promise(
-                              new Promise(resolve => setTimeout(resolve, 600)),
-                              { loading: 'Loading environment settings...', success: `Editing ${env.name} environment configuration`, error: 'Failed to load settings' }
-                            )}><Edit className="h-4 w-4" /></Button>
+                            <Button variant="ghost" size="sm" onClick={() => {
+                              setSelectedEnvironment({ name: env.name, url: env.url, browser: env.browser, os: env.os, status: env.status })
+                              setNewEnvironmentForm({ name: env.name, url: env.url, browser: env.browser.split(' ')[0], os: env.os.split(' ')[0] })
+                              setShowEnvironmentDialog(true)
+                            }}><Edit className="h-4 w-4" /></Button>
                           </div>
                         </div>
                       ))}
@@ -2152,14 +2531,10 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
                           </div>
                           <div className="flex items-center gap-3">
                             <Badge className={int.status === 'connected' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}>{int.status}</Badge>
-                            <Button variant={int.status === 'connected' ? 'outline' : 'default'} size="sm" onClick={() => toast.promise(
-                              new Promise(resolve => setTimeout(resolve, 1000)),
-                              {
-                                loading: int.status === 'connected' ? `Loading ${int.name} settings...` : `Connecting to ${int.name}...`,
-                                success: int.status === 'connected' ? `${int.name} configuration opened` : `Successfully connected to ${int.name}`,
-                                error: `Failed to ${int.status === 'connected' ? 'load' : 'connect to'} ${int.name}`
-                              }
-                            )}>{int.status === 'connected' ? 'Configure' : 'Connect'}</Button>
+                            <Button variant={int.status === 'connected' ? 'outline' : 'default'} size="sm" onClick={() => {
+                              setSelectedIntegration({ name: int.name, type: int.desc, status: int.status })
+                              setShowIntegrationDialog(true)
+                            }}>{int.status === 'connected' ? 'Configure' : 'Connect'}</Button>
                           </div>
                         </div>
                       ))}
@@ -2227,10 +2602,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
                         <h4 className="font-medium text-red-700 mb-2">Danger Zone</h4>
                         <div className="flex items-center justify-between">
                           <div><p className="text-sm text-red-600">Delete all test data</p><p className="text-xs text-red-500">This action cannot be undone</p></div>
-                          <Button variant="outline" className="border-red-500 text-red-500 hover:bg-red-50" onClick={() => toast.promise(
-                            new Promise((_, reject) => setTimeout(() => reject(new Error('Operation cancelled for safety')), 2000)),
-                            { loading: 'This action requires confirmation...', success: 'Data deleted successfully', error: 'Data deletion cancelled - This is a protected action' }
-                          )}><Trash2 className="h-4 w-4 mr-2" />Delete Data</Button>
+                          <Button variant="outline" className="border-red-500 text-red-500 hover:bg-red-50" onClick={() => setShowDeleteDataDialog(true)}><Trash2 className="h-4 w-4 mr-2" />Delete Data</Button>
                         </div>
                       </div>
                     </CardContent>
@@ -2269,7 +2641,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockQAQuickActions}
+            actions={qaQuickActions}
             variant="grid"
           />
         </div>
@@ -2467,18 +2839,12 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
 
                 <div className="flex items-center gap-2 pt-4 border-t">
                   {selectedRun.status === 'active' && (
-                    <Button className="flex-1 bg-green-600 hover:bg-green-700" onClick={() => toast.promise(
-                      new Promise(resolve => setTimeout(resolve, 2000)),
-                      { loading: 'Resuming test execution...', success: `Continuing "${selectedRun.name}" - ${selectedRun.untestedCount} tests remaining`, error: 'Failed to resume test run' }
-                    )}>
-                      <Play className="w-4 h-4 mr-2" />
+                    <Button className="flex-1 bg-green-600 hover:bg-green-700" onClick={() => setShowResumeRunDialog(true)} disabled={isResumingRun}>
+                      {isResumingRun ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Play className="w-4 h-4 mr-2" />}
                       Continue Testing
                     </Button>
                   )}
-                  <Button variant="outline" className="flex-1" onClick={() => toast.promise(
-                    new Promise(resolve => setTimeout(resolve, 1500)),
-                    { loading: 'Generating test run report...', success: `Report ready for "${selectedRun.name}" - Pass rate: ${selectedRun.totalCount > 0 ? ((selectedRun.passedCount / (selectedRun.passedCount + selectedRun.failedCount)) * 100).toFixed(1) : 0}%`, error: 'Failed to generate report' }
-                  )}>
+                  <Button variant="outline" className="flex-1" onClick={() => setShowRunReportDialog(true)}>
                     <BarChart3 className="w-4 h-4 mr-2" />
                     View Report
                   </Button>
@@ -2824,6 +3190,1071 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
                 Create Milestone
               </Button>
             </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Run Tests Dialog */}
+        <Dialog open={showRunTestsDialog} onOpenChange={setShowRunTestsDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Play className="w-5 h-5 text-green-600" />
+                Run Test Suite
+              </DialogTitle>
+              <DialogDescription>
+                Select and execute test suites
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="grid gap-4">
+                <div className="p-4 border rounded-lg space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="font-medium">Full Regression Suite</h4>
+                      <p className="text-sm text-muted-foreground">340 test cases - Last run: 2 days ago</p>
+                    </div>
+                    <Button size="sm" onClick={() => handleRunSpecificSuite('Full Regression Suite', 340)} disabled={isRunningAllTests}>
+                      {isRunningAllTests ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Play className="w-4 h-4 mr-1" />}
+                      Run
+                    </Button>
+                  </div>
+                  <Progress value={0} className="h-2" />
+                </div>
+                <div className="p-4 border rounded-lg space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="font-medium">Smoke Test Suite</h4>
+                      <p className="text-sm text-muted-foreground">45 test cases - Last run: 1 hour ago</p>
+                    </div>
+                    <Button size="sm" onClick={() => handleRunSpecificSuite('Smoke Test Suite', 45)} disabled={isRunningAllTests}>
+                      {isRunningAllTests ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Play className="w-4 h-4 mr-1" />}
+                      Run
+                    </Button>
+                  </div>
+                  <Progress value={0} className="h-2" />
+                </div>
+                <div className="p-4 border rounded-lg space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="font-medium">Critical Path Tests</h4>
+                      <p className="text-sm text-muted-foreground">28 test cases - Last run: 4 hours ago</p>
+                    </div>
+                    <Button size="sm" onClick={() => handleRunSpecificSuite('Critical Path Tests', 28)} disabled={isRunningAllTests}>
+                      {isRunningAllTests ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Play className="w-4 h-4 mr-1" />}
+                      Run
+                    </Button>
+                  </div>
+                  <Progress value={0} className="h-2" />
+                </div>
+              </div>
+              <div className="flex items-center gap-2 p-3 bg-muted/50 rounded-lg">
+                <Settings className="w-4 h-4 text-muted-foreground" />
+                <span className="text-sm text-muted-foreground">Configure test environment and parallel execution in Settings</span>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowRunTestsDialog(false)}>Cancel</Button>
+              <Button
+                className="bg-green-600 hover:bg-green-700"
+                onClick={() => { setShowRunTestsDialog(false); handleRunAllTests(); }}
+                disabled={isRunningAllTests}
+              >
+                {isRunningAllTests ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Play className="w-4 h-4 mr-2" />}
+                Run All Suites
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* QA Reports Dialog */}
+        <Dialog open={showReportsDialog} onOpenChange={setShowReportsDialog}>
+          <DialogContent className="max-w-3xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <FileText className="w-5 h-5 text-blue-600" />
+                QA Reports
+              </DialogTitle>
+              <DialogDescription>
+                View and export quality assurance reports
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-3 gap-4">
+                <Card className="p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <CheckCircle2 className="w-4 h-4 text-green-500" />
+                    <span className="font-medium">Pass Rate</span>
+                  </div>
+                  <p className="text-2xl font-bold text-green-600">{overallPassRate.toFixed(1)}%</p>
+                  <p className="text-xs text-muted-foreground">{passedTests} of {totalTests} tests passed</p>
+                </Card>
+                <Card className="p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Bug className="w-4 h-4 text-red-500" />
+                    <span className="font-medium">Open Defects</span>
+                  </div>
+                  <p className="text-2xl font-bold text-red-600">{openDefects}</p>
+                  <p className="text-xs text-muted-foreground">{mockDefects.filter(d => d.severity === 'critical').length} critical issues</p>
+                </Card>
+                <Card className="p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Zap className="w-4 h-4 text-purple-500" />
+                    <span className="font-medium">Automation</span>
+                  </div>
+                  <p className="text-2xl font-bold text-purple-600">{((automatedTests / totalTests) * 100).toFixed(0)}%</p>
+                  <p className="text-xs text-muted-foreground">{automatedTests} automated tests</p>
+                </Card>
+              </div>
+              <div className="border rounded-lg p-4">
+                <h4 className="font-medium mb-3">Available Reports</h4>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between p-2 hover:bg-muted/50 rounded">
+                    <div className="flex items-center gap-2">
+                      <FileText className="w-4 h-4" />
+                      <span>Test Execution Summary</span>
+                    </div>
+                    <Button size="sm" variant="ghost" onClick={() => handleDownloadReport('Test Execution Summary')} disabled={isDownloadingReport}>
+                      {isDownloadingReport ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+                    </Button>
+                  </div>
+                  <div className="flex items-center justify-between p-2 hover:bg-muted/50 rounded">
+                    <div className="flex items-center gap-2">
+                      <FileText className="w-4 h-4" />
+                      <span>Defect Analysis Report</span>
+                    </div>
+                    <Button size="sm" variant="ghost" onClick={() => handleDownloadReport('Defect Analysis Report')} disabled={isDownloadingReport}>
+                      {isDownloadingReport ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+                    </Button>
+                  </div>
+                  <div className="flex items-center justify-between p-2 hover:bg-muted/50 rounded">
+                    <div className="flex items-center gap-2">
+                      <FileText className="w-4 h-4" />
+                      <span>Coverage Report</span>
+                    </div>
+                    <Button size="sm" variant="ghost" onClick={() => handleDownloadReport('Coverage Report')} disabled={isDownloadingReport}>
+                      {isDownloadingReport ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+                    </Button>
+                  </div>
+                  <div className="flex items-center justify-between p-2 hover:bg-muted/50 rounded">
+                    <div className="flex items-center gap-2">
+                      <FileText className="w-4 h-4" />
+                      <span>Traceability Matrix</span>
+                    </div>
+                    <Button size="sm" variant="ghost" onClick={() => handleDownloadReport('Traceability Matrix')} disabled={isDownloadingReport}>
+                      {isDownloadingReport ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowReportsDialog(false)}>Close</Button>
+              <Button
+                className="bg-blue-600 hover:bg-blue-700"
+                onClick={() => { setShowReportsDialog(false); handleExportResults(); }}
+                disabled={isExporting}
+              >
+                {isExporting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Download className="w-4 h-4 mr-2" />}
+                Export All Reports
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Create Test Suite Dialog */}
+        <Dialog open={showCreateSuiteDialog} onOpenChange={setShowCreateSuiteDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <FolderOpen className="w-5 h-5 text-yellow-600" />
+                Create Test Suite
+              </DialogTitle>
+              <DialogDescription>
+                Create a new test suite to organize your test cases
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label htmlFor="suite_name">Suite Name *</Label>
+                <Input
+                  id="suite_name"
+                  value={newSuiteForm.name}
+                  onChange={(e) => setNewSuiteForm(prev => ({ ...prev, name: e.target.value }))}
+                  placeholder="e.g., User Authentication"
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label htmlFor="suite_description">Description</Label>
+                <Textarea
+                  id="suite_description"
+                  value={newSuiteForm.description}
+                  onChange={(e) => setNewSuiteForm(prev => ({ ...prev, description: e.target.value }))}
+                  placeholder="Describe the test suite purpose"
+                  className="mt-1"
+                  rows={3}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowCreateSuiteDialog(false)}>Cancel</Button>
+              <Button
+                className="bg-yellow-600 hover:bg-yellow-700"
+                onClick={handleCreateSuite}
+                disabled={isCreatingSuite}
+              >
+                {isCreatingSuite ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <FolderOpen className="w-4 h-4 mr-2" />}
+                Create Suite
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* View Defect Dialog */}
+        <Dialog open={showViewDefectDialog} onOpenChange={setShowViewDefectDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Bug className="w-5 h-5 text-red-600" />
+                Defect Details
+              </DialogTitle>
+            </DialogHeader>
+            {selectedDefect && (
+              <div className="space-y-4 py-4">
+                <div className="flex items-center gap-2">
+                  <Badge className={getSeverityColor(selectedDefect.severity)}>{selectedDefect.severity}</Badge>
+                  <Badge variant="outline">{selectedDefect.status}</Badge>
+                  <span className="text-xs text-gray-500 font-mono">{selectedDefect.id.toUpperCase()}</span>
+                </div>
+                <div>
+                  <Label className="text-gray-500">Title</Label>
+                  <p className="font-medium">{selectedDefect.title}</p>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-gray-500">Assigned To</Label>
+                    <p>{selectedDefect.assignedTo}</p>
+                  </div>
+                  <div>
+                    <Label className="text-gray-500">Related Test Case</Label>
+                    <p>{selectedDefect.testCaseId}</p>
+                  </div>
+                </div>
+                <div>
+                  <Label className="text-gray-500">Created</Label>
+                  <p>{new Date(selectedDefect.createdAt).toLocaleString()}</p>
+                </div>
+              </div>
+            )}
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowViewDefectDialog(false)}>Close</Button>
+              <Button onClick={() => {
+                setShowViewDefectDialog(false)
+                if (selectedDefect) {
+                  setEditDefectForm({
+                    title: selectedDefect.title,
+                    description: '',
+                    severity: selectedDefect.severity,
+                    status: selectedDefect.status,
+                    assigned_to: selectedDefect.assignedTo
+                  })
+                  setShowEditDefectDialog(true)
+                }
+              }}>
+                <Edit className="w-4 h-4 mr-2" />
+                Edit Defect
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Defect Dialog */}
+        <Dialog open={showEditDefectDialog} onOpenChange={setShowEditDefectDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Edit className="w-5 h-5 text-blue-600" />
+                Edit Defect
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label htmlFor="edit_defect_title">Title *</Label>
+                <Input
+                  id="edit_defect_title"
+                  value={editDefectForm.title}
+                  onChange={(e) => setEditDefectForm(prev => ({ ...prev, title: e.target.value }))}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label htmlFor="edit_defect_description">Description</Label>
+                <Textarea
+                  id="edit_defect_description"
+                  value={editDefectForm.description}
+                  onChange={(e) => setEditDefectForm(prev => ({ ...prev, description: e.target.value }))}
+                  className="mt-1"
+                  rows={3}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Severity</Label>
+                  <Select value={editDefectForm.severity} onValueChange={(value) => setEditDefectForm(prev => ({ ...prev, severity: value }))}>
+                    <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="critical">Critical</SelectItem>
+                      <SelectItem value="major">Major</SelectItem>
+                      <SelectItem value="minor">Minor</SelectItem>
+                      <SelectItem value="trivial">Trivial</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>Status</Label>
+                  <Select value={editDefectForm.status} onValueChange={(value) => setEditDefectForm(prev => ({ ...prev, status: value }))}>
+                    <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="open">Open</SelectItem>
+                      <SelectItem value="in_progress">In Progress</SelectItem>
+                      <SelectItem value="resolved">Resolved</SelectItem>
+                      <SelectItem value="closed">Closed</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div>
+                <Label htmlFor="edit_assigned_to">Assigned To</Label>
+                <Input
+                  id="edit_assigned_to"
+                  value={editDefectForm.assigned_to}
+                  onChange={(e) => setEditDefectForm(prev => ({ ...prev, assigned_to: e.target.value }))}
+                  placeholder="email@company.com"
+                  className="mt-1"
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowEditDefectDialog(false)}>Cancel</Button>
+              <Button className="bg-blue-600 hover:bg-blue-700" onClick={handleUpdateDefect} disabled={isUpdatingDefect}>
+                {isUpdatingDefect ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Edit className="w-4 h-4 mr-2" />}
+                Save Changes
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Defect Options Dialog */}
+        <Dialog open={showDefectOptionsDialog} onOpenChange={setShowDefectOptionsDialog}>
+          <DialogContent className="max-w-sm">
+            <DialogHeader>
+              <DialogTitle>Defect Actions</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-2 py-4">
+              <Button variant="outline" className="w-full justify-start" onClick={() => {
+                setShowDefectOptionsDialog(false)
+                if (selectedDefect) {
+                  setEditDefectForm({
+                    title: selectedDefect.title,
+                    description: '',
+                    severity: selectedDefect.severity,
+                    status: selectedDefect.status,
+                    assigned_to: ''
+                  })
+                  setShowEditDefectDialog(true)
+                }
+              }}>
+                <Users className="w-4 h-4 mr-2" />
+                Assign to Team Member
+              </Button>
+              <Button variant="outline" className="w-full justify-start" onClick={() => {
+                setShowDefectOptionsDialog(false)
+                if (selectedDefect) {
+                  setEditDefectForm(prev => ({ ...prev, status: 'in_progress' }))
+                  setShowEditDefectDialog(true)
+                }
+              }}>
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Change Status
+              </Button>
+              <Button variant="outline" className="w-full justify-start" onClick={() => {
+                setShowDefectOptionsDialog(false)
+                toast.info('Link to test feature', { description: 'Select a test case to link this defect to' })
+              }}>
+                <Link2 className="w-4 h-4 mr-2" />
+                Link to Test Case
+              </Button>
+              <Button variant="outline" className="w-full justify-start text-red-600 hover:text-red-700" onClick={() => {
+                setShowDefectOptionsDialog(false)
+                toast.error('Delete defect', { description: 'This would delete the defect permanently' })
+              }}>
+                <Trash2 className="w-4 h-4 mr-2" />
+                Delete Defect
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Generate Report Dialog */}
+        <Dialog open={showGenerateReportDialog} onOpenChange={setShowGenerateReportDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <FileText className="w-5 h-5 text-purple-600" />
+                Generate {reportToGenerate}
+              </DialogTitle>
+              <DialogDescription>
+                Configure and generate your report
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="p-4 bg-muted/50 rounded-lg">
+                <h4 className="font-medium mb-2">Report Preview</h4>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="text-gray-500">Total Tests:</span>
+                    <span className="ml-2 font-medium">{totalTests}</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-500">Pass Rate:</span>
+                    <span className="ml-2 font-medium text-green-600">{overallPassRate.toFixed(1)}%</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-500">Failed:</span>
+                    <span className="ml-2 font-medium text-red-600">{failedTests}</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-500">Open Defects:</span>
+                    <span className="ml-2 font-medium">{openDefects}</span>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <Label>Export Format</Label>
+                <Select defaultValue="csv">
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="csv">CSV</SelectItem>
+                    <SelectItem value="pdf">PDF</SelectItem>
+                    <SelectItem value="excel">Excel</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowGenerateReportDialog(false)}>Cancel</Button>
+              <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => handleGenerateReportType(reportToGenerate)} disabled={isGeneratingReport}>
+                {isGeneratingReport ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Download className="w-4 h-4 mr-2" />}
+                Generate & Download
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Schedule Report Dialog */}
+        <Dialog open={showScheduleReportDialog} onOpenChange={setShowScheduleReportDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Clock className="w-5 h-5 text-purple-600" />
+                Schedule Report
+              </DialogTitle>
+              <DialogDescription>
+                Configure automated report generation and delivery
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label>Report Type</Label>
+                <Select defaultValue="summary">
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="summary">Summary Report</SelectItem>
+                    <SelectItem value="defects">Defects Report</SelectItem>
+                    <SelectItem value="coverage">Coverage Report</SelectItem>
+                    <SelectItem value="milestone">Milestone Report</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Frequency</Label>
+                <Select defaultValue="weekly">
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="daily">Daily</SelectItem>
+                    <SelectItem value="weekly">Weekly</SelectItem>
+                    <SelectItem value="biweekly">Every 2 Weeks</SelectItem>
+                    <SelectItem value="monthly">Monthly</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="recipients">Recipients (comma separated)</Label>
+                <Input id="recipients" placeholder="qa@company.com, team@company.com" className="mt-1" />
+              </div>
+              <div>
+                <Label>Format</Label>
+                <Select defaultValue="pdf">
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="pdf">PDF</SelectItem>
+                    <SelectItem value="csv">CSV</SelectItem>
+                    <SelectItem value="excel">Excel</SelectItem>
+                    <SelectItem value="email">Email Only</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowScheduleReportDialog(false)}>Cancel</Button>
+              <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => {
+                setShowScheduleReportDialog(false)
+                toast.success('Report scheduled', { description: 'Your report has been scheduled for delivery' })
+              }}>
+                <Clock className="w-4 h-4 mr-2" />
+                Schedule Report
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Report Options Dialog */}
+        <Dialog open={showReportOptionsDialog} onOpenChange={setShowReportOptionsDialog}>
+          <DialogContent className="max-w-sm">
+            <DialogHeader>
+              <DialogTitle>Report Options: {selectedScheduledReport?.name}</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-2 py-4">
+              <Button variant="outline" className="w-full justify-start" onClick={() => {
+                setShowReportOptionsDialog(false)
+                setShowScheduleReportDialog(true)
+              }}>
+                <Edit className="w-4 h-4 mr-2" />
+                Edit Schedule
+              </Button>
+              <Button variant="outline" className="w-full justify-start" onClick={() => {
+                setShowReportOptionsDialog(false)
+                toast.success(selectedScheduledReport?.status === 'active' ? 'Report paused' : 'Report resumed')
+              }}>
+                {selectedScheduledReport?.status === 'active' ? <Clock className="w-4 h-4 mr-2" /> : <Play className="w-4 h-4 mr-2" />}
+                {selectedScheduledReport?.status === 'active' ? 'Pause' : 'Resume'}
+              </Button>
+              <Button variant="outline" className="w-full justify-start" onClick={() => {
+                setShowReportOptionsDialog(false)
+                toast.info('View history', { description: 'Showing last 10 generated reports' })
+              }}>
+                <FileText className="w-4 h-4 mr-2" />
+                View History
+              </Button>
+              <Button variant="outline" className="w-full justify-start text-red-600" onClick={() => {
+                setShowReportOptionsDialog(false)
+                toast.error('Schedule deleted')
+              }}>
+                <Trash2 className="w-4 h-4 mr-2" />
+                Delete Schedule
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* View Report Dialog */}
+        <Dialog open={showViewReportDialog} onOpenChange={setShowViewReportDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <FileText className="w-5 h-5 text-purple-600" />
+                {selectedReport?.name}
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="p-4 bg-muted/50 rounded-lg">
+                <div className="grid grid-cols-3 gap-4 text-sm">
+                  <div>
+                    <span className="text-gray-500">Type:</span>
+                    <span className="ml-2 font-medium">{selectedReport?.type}</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-500">Size:</span>
+                    <span className="ml-2 font-medium">{selectedReport?.size}</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-500">Format:</span>
+                    <span className="ml-2 font-medium">PDF</span>
+                  </div>
+                </div>
+              </div>
+              <div className="border rounded-lg p-8 text-center bg-gray-50">
+                <FileText className="w-16 h-16 mx-auto text-gray-400 mb-4" />
+                <p className="text-gray-600">Report preview would display here</p>
+                <p className="text-sm text-gray-500 mt-2">Download to view full report</p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowViewReportDialog(false)}>Close</Button>
+              <Button onClick={() => {
+                if (selectedReport) handleDownloadReport(selectedReport.name)
+                setShowViewReportDialog(false)
+              }} disabled={isDownloadingReport}>
+                {isDownloadingReport ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Download className="w-4 h-4 mr-2" />}
+                Download
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Import Template Dialog */}
+        <Dialog open={showImportTemplateDialog} onOpenChange={setShowImportTemplateDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Upload className="w-5 h-5 text-blue-600" />
+                Import Report Template
+              </DialogTitle>
+              <DialogDescription>
+                Upload a custom report template
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="border-2 border-dashed rounded-lg p-8 text-center">
+                <Upload className="w-12 h-12 mx-auto text-gray-400 mb-4" />
+                <p className="text-gray-600 mb-2">Drag and drop your template file here</p>
+                <p className="text-sm text-gray-500 mb-4">Supports .json, .xml, .xlsx formats</p>
+                <Button variant="outline">
+                  <Upload className="w-4 h-4 mr-2" />
+                  Browse Files
+                </Button>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowImportTemplateDialog(false)}>Cancel</Button>
+              <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => {
+                setShowImportTemplateDialog(false)
+                toast.success('Template imported', { description: 'Your template is ready to use' })
+              }}>
+                Import Template
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Custom Builder Dialog */}
+        <Dialog open={showCustomBuilderDialog} onOpenChange={setShowCustomBuilderDialog}>
+          <DialogContent className="max-w-3xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <PieChart className="w-5 h-5 text-purple-600" />
+                Custom Report Builder
+              </DialogTitle>
+              <DialogDescription>
+                Drag and drop widgets to create your custom report
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid grid-cols-3 gap-4 py-4">
+              <div className="col-span-1 space-y-2">
+                <h4 className="font-medium text-sm">Available Widgets</h4>
+                {['Pass Rate Chart', 'Defect Summary', 'Test Coverage', 'Trend Analysis', 'Team Performance', 'Milestone Progress'].map((widget) => (
+                  <div key={widget} className="p-3 border rounded-lg cursor-move hover:bg-muted/50">
+                    <span className="text-sm">{widget}</span>
+                  </div>
+                ))}
+              </div>
+              <div className="col-span-2 border-2 border-dashed rounded-lg p-4 min-h-[300px]">
+                <p className="text-center text-gray-500 mt-20">Drop widgets here to build your report</p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowCustomBuilderDialog(false)}>Cancel</Button>
+              <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => {
+                setShowCustomBuilderDialog(false)
+                toast.success('Custom report created', { description: 'Your report template has been saved' })
+              }}>
+                Save Template
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Email Settings Dialog */}
+        <Dialog open={showEmailSettingsDialog} onOpenChange={setShowEmailSettingsDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Mail className="w-5 h-5 text-blue-600" />
+                Email Settings
+              </DialogTitle>
+              <DialogDescription>
+                Configure SMTP and email delivery settings
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label htmlFor="smtp_server">SMTP Server</Label>
+                <Input id="smtp_server" placeholder="smtp.company.com" className="mt-1" />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="smtp_port">Port</Label>
+                  <Input id="smtp_port" placeholder="587" className="mt-1" />
+                </div>
+                <div>
+                  <Label>Security</Label>
+                  <Select defaultValue="tls">
+                    <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="tls">TLS</SelectItem>
+                      <SelectItem value="ssl">SSL</SelectItem>
+                      <SelectItem value="none">None</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div>
+                <Label htmlFor="sender_email">Sender Email</Label>
+                <Input id="sender_email" placeholder="qa-reports@company.com" className="mt-1" />
+              </div>
+              <div>
+                <Label htmlFor="default_recipients">Default Recipients</Label>
+                <Textarea id="default_recipients" placeholder="One email per line" className="mt-1" rows={3} />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowEmailSettingsDialog(false)}>Cancel</Button>
+              <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => {
+                setShowEmailSettingsDialog(false)
+                toast.success('Email settings saved')
+              }}>
+                Save Settings
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Environment Dialog */}
+        <Dialog open={showEnvironmentDialog} onOpenChange={setShowEnvironmentDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Layers className="w-5 h-5 text-green-600" />
+                {selectedEnvironment ? 'Edit Environment' : 'Add Environment'}
+              </DialogTitle>
+              <DialogDescription>
+                Configure test environment settings
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label htmlFor="env_name">Environment Name *</Label>
+                <Input
+                  id="env_name"
+                  value={newEnvironmentForm.name}
+                  onChange={(e) => setNewEnvironmentForm(prev => ({ ...prev, name: e.target.value }))}
+                  placeholder="e.g., Development"
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label htmlFor="env_url">Base URL</Label>
+                <Input
+                  id="env_url"
+                  value={newEnvironmentForm.url}
+                  onChange={(e) => setNewEnvironmentForm(prev => ({ ...prev, url: e.target.value }))}
+                  placeholder="https://dev.app.com"
+                  className="mt-1"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Browser</Label>
+                  <Select value={newEnvironmentForm.browser} onValueChange={(value) => setNewEnvironmentForm(prev => ({ ...prev, browser: value }))}>
+                    <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Chrome">Chrome</SelectItem>
+                      <SelectItem value="Firefox">Firefox</SelectItem>
+                      <SelectItem value="Safari">Safari</SelectItem>
+                      <SelectItem value="Edge">Edge</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>Operating System</Label>
+                  <Select value={newEnvironmentForm.os} onValueChange={(value) => setNewEnvironmentForm(prev => ({ ...prev, os: value }))}>
+                    <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Windows">Windows</SelectItem>
+                      <SelectItem value="macOS">macOS</SelectItem>
+                      <SelectItem value="Linux">Linux</SelectItem>
+                      <SelectItem value="iOS">iOS</SelectItem>
+                      <SelectItem value="Android">Android</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => {
+                setShowEnvironmentDialog(false)
+                setSelectedEnvironment(null)
+                setNewEnvironmentForm({ name: '', url: '', browser: 'Chrome', os: 'Windows' })
+              }}>Cancel</Button>
+              <Button className="bg-green-600 hover:bg-green-700" onClick={handleCreateEnvironment} disabled={isCreatingEnvironment}>
+                {isCreatingEnvironment ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Layers className="w-4 h-4 mr-2" />}
+                {selectedEnvironment ? 'Update Environment' : 'Add Environment'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Integration Dialog */}
+        <Dialog open={showIntegrationDialog} onOpenChange={setShowIntegrationDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Link2 className="w-5 h-5 text-blue-600" />
+                {selectedIntegration?.status === 'connected' ? 'Configure' : 'Connect'} {selectedIntegration?.name}
+              </DialogTitle>
+              <DialogDescription>
+                {selectedIntegration?.type}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              {selectedIntegration?.status === 'connected' ? (
+                <>
+                  <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg flex items-center gap-3">
+                    <CheckCircle2 className="w-5 h-5 text-green-600" />
+                    <span className="text-green-700">Connected and active</span>
+                  </div>
+                  <div>
+                    <Label>API Key</Label>
+                    <Input type="password" value="••••••••••••••••" readOnly className="mt-1" />
+                  </div>
+                  <div>
+                    <Label>Webhook URL</Label>
+                    <Input value="https://api.example.com/webhook/qa" readOnly className="mt-1" />
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div>
+                    <Label htmlFor="api_key">API Key *</Label>
+                    <Input id="api_key" placeholder="Enter your API key" className="mt-1" />
+                  </div>
+                  <div>
+                    <Label htmlFor="api_secret">API Secret</Label>
+                    <Input id="api_secret" type="password" placeholder="Enter your API secret" className="mt-1" />
+                  </div>
+                </>
+              )}
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => {
+                setShowIntegrationDialog(false)
+                setSelectedIntegration(null)
+              }}>Cancel</Button>
+              {selectedIntegration && (
+                <Button
+                  className={selectedIntegration.status === 'connected' ? 'bg-red-600 hover:bg-red-700' : 'bg-blue-600 hover:bg-blue-700'}
+                  onClick={() => handleConnectIntegration(selectedIntegration)}
+                  disabled={isConnectingIntegration}
+                >
+                  {isConnectingIntegration ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Link2 className="w-4 h-4 mr-2" />}
+                  {selectedIntegration.status === 'connected' ? 'Disconnect' : 'Connect'}
+                </Button>
+              )}
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Data Dialog */}
+        <Dialog open={showDeleteDataDialog} onOpenChange={setShowDeleteDataDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-600">
+                <AlertTriangle className="w-5 h-5" />
+                Delete All Test Data
+              </DialogTitle>
+              <DialogDescription>
+                This action cannot be undone. All test cases, defects, and reports will be permanently deleted.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200">
+                <p className="text-sm text-red-700">Type <strong>DELETE</strong> to confirm:</p>
+                <Input className="mt-2" placeholder="Type DELETE to confirm" />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowDeleteDataDialog(false)}>Cancel</Button>
+              <Button variant="destructive" onClick={handleDeleteAllData} disabled={isDeletingData}>
+                {isDeletingData ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Trash2 className="w-4 h-4 mr-2" />}
+                Delete All Data
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Resume Run Dialog */}
+        <Dialog open={showResumeRunDialog} onOpenChange={setShowResumeRunDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Play className="w-5 h-5 text-green-600" />
+                Continue Test Run
+              </DialogTitle>
+              <DialogDescription>
+                Resume execution of remaining tests in this run
+              </DialogDescription>
+            </DialogHeader>
+            {selectedRun && (
+              <div className="py-4 space-y-4">
+                <div className="p-4 bg-muted/50 rounded-lg">
+                  <h4 className="font-medium mb-2">{selectedRun.name}</h4>
+                  <div className="grid grid-cols-2 gap-2 text-sm">
+                    <div>
+                      <span className="text-gray-500">Remaining:</span>
+                      <span className="ml-2 font-medium">{selectedRun.untestedCount} tests</span>
+                    </div>
+                    <div>
+                      <span className="text-gray-500">Completed:</span>
+                      <span className="ml-2 font-medium">{selectedRun.passedCount + selectedRun.failedCount} tests</span>
+                    </div>
+                  </div>
+                </div>
+                <Progress value={((selectedRun.passedCount + selectedRun.failedCount) / selectedRun.totalCount) * 100} className="h-2" />
+              </div>
+            )}
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowResumeRunDialog(false)}>Cancel</Button>
+              <Button className="bg-green-600 hover:bg-green-700" onClick={handleResumeRun} disabled={isResumingRun}>
+                {isResumingRun ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Play className="w-4 h-4 mr-2" />}
+                Continue Testing
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Run Report Dialog */}
+        <Dialog open={showRunReportDialog} onOpenChange={setShowRunReportDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <BarChart3 className="w-5 h-5 text-blue-600" />
+                Test Run Report
+              </DialogTitle>
+            </DialogHeader>
+            {selectedRun && (
+              <div className="py-4 space-y-4">
+                <div className="grid grid-cols-4 gap-4">
+                  <Card className="p-4 text-center">
+                    <p className="text-2xl font-bold text-green-600">{selectedRun.passedCount}</p>
+                    <p className="text-xs text-gray-500">Passed</p>
+                  </Card>
+                  <Card className="p-4 text-center">
+                    <p className="text-2xl font-bold text-red-600">{selectedRun.failedCount}</p>
+                    <p className="text-xs text-gray-500">Failed</p>
+                  </Card>
+                  <Card className="p-4 text-center">
+                    <p className="text-2xl font-bold text-orange-600">{selectedRun.blockedCount}</p>
+                    <p className="text-xs text-gray-500">Blocked</p>
+                  </Card>
+                  <Card className="p-4 text-center">
+                    <p className="text-2xl font-bold text-gray-600">{selectedRun.untestedCount}</p>
+                    <p className="text-xs text-gray-500">Untested</p>
+                  </Card>
+                </div>
+                <div className="p-4 bg-muted/50 rounded-lg">
+                  <h4 className="font-medium mb-2">Summary</h4>
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span>Pass Rate</span>
+                      <span className="font-medium text-green-600">
+                        {selectedRun.totalCount > 0 ? ((selectedRun.passedCount / (selectedRun.passedCount + selectedRun.failedCount)) * 100).toFixed(1) : 0}%
+                      </span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span>Configuration</span>
+                      <span className="font-medium">{selectedRun.config}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span>Assigned To</span>
+                      <span className="font-medium">{selectedRun.assignedTo}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowRunReportDialog(false)}>Close</Button>
+              <Button onClick={() => {
+                if (selectedRun) handleDownloadReport(`Test Run - ${selectedRun.name}`)
+                setShowRunReportDialog(false)
+              }} disabled={isDownloadingReport}>
+                {isDownloadingReport ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Download className="w-4 h-4 mr-2" />}
+                Export Report
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Test Case Options Dialog */}
+        <Dialog open={showTestCaseOptionsDialog} onOpenChange={setShowTestCaseOptionsDialog}>
+          <DialogContent className="max-w-sm">
+            <DialogHeader>
+              <DialogTitle>Test Case Actions</DialogTitle>
+              {selectedTestCaseForOptions && (
+                <DialogDescription>{selectedTestCaseForOptions.test_name}</DialogDescription>
+              )}
+            </DialogHeader>
+            <div className="space-y-2 py-4">
+              <Button variant="outline" className="w-full justify-start" onClick={() => {
+                setShowTestCaseOptionsDialog(false)
+                if (selectedTestCaseForOptions) {
+                  setSelectedTest(selectedTestCaseForOptions)
+                }
+              }}>
+                <Edit className="w-4 h-4 mr-2" />
+                Edit Test Case
+              </Button>
+              <Button variant="outline" className="w-full justify-start" onClick={() => {
+                setShowTestCaseOptionsDialog(false)
+                if (selectedTestCaseForOptions) {
+                  setNewTestForm({
+                    test_name: `${selectedTestCaseForOptions.test_name} (Copy)`,
+                    description: selectedTestCaseForOptions.description || '',
+                    test_type: selectedTestCaseForOptions.test_type || 'functional',
+                    priority: selectedTestCaseForOptions.priority || 'medium',
+                    is_automated: selectedTestCaseForOptions.is_automated || false,
+                    environment: selectedTestCaseForOptions.environment || '',
+                    preconditions: selectedTestCaseForOptions.preconditions || '',
+                    expected_result: selectedTestCaseForOptions.expected_result || ''
+                  })
+                  setShowCreateTest(true)
+                }
+              }}>
+                <Copy className="w-4 h-4 mr-2" />
+                Duplicate
+              </Button>
+              <Button variant="outline" className="w-full justify-start" onClick={() => {
+                setShowTestCaseOptionsDialog(false)
+                toast.success('Test case archived', {
+                  description: `"${selectedTestCaseForOptions?.test_name}" has been archived`
+                })
+              }}>
+                <Archive className="w-4 h-4 mr-2" />
+                Archive
+              </Button>
+              <Button variant="outline" className="w-full justify-start text-red-600 hover:text-red-700" onClick={() => {
+                setShowTestCaseOptionsDialog(false)
+                if (selectedTestCaseForOptions) {
+                  deleteTestCase(selectedTestCaseForOptions.id)
+                  toast.success('Test case deleted', {
+                    description: `"${selectedTestCaseForOptions.test_name}" has been deleted`
+                  })
+                }
+              }}>
+                <Trash2 className="w-4 h-4 mr-2" />
+                Delete
+              </Button>
+            </div>
           </DialogContent>
         </Dialog>
       </div>
