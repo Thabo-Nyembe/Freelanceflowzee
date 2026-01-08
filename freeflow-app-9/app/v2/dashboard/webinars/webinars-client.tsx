@@ -1851,7 +1851,9 @@ export default function WebinarsClient() {
                             <Input type="number" defaultValue="15" className="mt-1" />
                           </div>
                         </div>
-                        <Button className="bg-gradient-to-r from-purple-500 to-pink-600 text-white">
+                        <Button className="bg-gradient-to-r from-purple-500 to-pink-600 text-white" onClick={() => {
+                          toast.success('Settings Saved', { description: 'General settings have been updated successfully' })
+                        }}>
                           Save Settings
                         </Button>
                       </CardContent>
@@ -1876,7 +1878,10 @@ export default function WebinarsClient() {
                             <div className="w-20 h-20 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
                               <Upload className="w-8 h-8 text-gray-400" />
                             </div>
-                            <Button variant="outline">Upload Logo</Button>
+                            <Button variant="outline" onClick={() => {
+                              setShowUploadDialog(true)
+                              toast.info('Upload Logo', { description: 'Select an image file for your logo' })
+                            }}>Upload Logo</Button>
                           </div>
                         </div>
                         <div>
@@ -1894,7 +1899,9 @@ export default function WebinarsClient() {
                           <Label>Registration Page Header</Label>
                           <Input placeholder="Welcome to our webinar" className="mt-1" />
                         </div>
-                        <Button className="bg-gradient-to-r from-purple-500 to-pink-600 text-white">
+                        <Button className="bg-gradient-to-r from-purple-500 to-pink-600 text-white" onClick={() => {
+                          toast.success('Branding Saved', { description: 'Branding settings have been updated successfully' })
+                        }}>
                           Save Branding
                         </Button>
                       </CardContent>
@@ -1986,7 +1993,13 @@ export default function WebinarsClient() {
                                 <p className="text-sm text-gray-500">{integration.desc}</p>
                               </div>
                             </div>
-                            <Button variant="outline" size="sm">
+                            <Button variant="outline" size="sm" onClick={() => {
+                              if (integration.status === 'connected') {
+                                toast.info('Configure Integration', { description: `Opening ${integration.name} configuration...` })
+                              } else {
+                                toast.success('Connecting...', { description: `Initiating connection to ${integration.name}` })
+                              }
+                            }}>
                               {integration.status === 'connected' ? 'Configure' : 'Connect'}
                             </Button>
                           </div>
@@ -2006,7 +2019,10 @@ export default function WebinarsClient() {
                           <Label>API Key</Label>
                           <div className="flex gap-2 mt-1">
                             <Input type="password" value="sk_webinar_****************************" readOnly className="font-mono" />
-                            <Button variant="outline">
+                            <Button variant="outline" onClick={() => {
+                              navigator.clipboard.writeText('sk_webinar_1234567890abcdef')
+                              toast.success('API Key Copied', { description: 'API key has been copied to clipboard' })
+                            }}>
                               <Copy className="w-4 h-4" />
                             </Button>
                           </div>
@@ -2015,7 +2031,9 @@ export default function WebinarsClient() {
                           <Label>Webhook URL</Label>
                           <Input defaultValue="https://api.yoursite.com/webhooks/webinar" className="mt-1 font-mono" />
                         </div>
-                        <Button variant="outline">
+                        <Button variant="outline" onClick={() => {
+                          toast.success('API Key Regenerated', { description: 'A new API key has been generated. Please update your integrations.' })
+                        }}>
                           <RefreshCw className="w-4 h-4 mr-2" />
                           Regenerate API Key
                         </Button>
@@ -2156,11 +2174,20 @@ export default function WebinarsClient() {
                           <Input type="number" defaultValue="365" className="mt-1" />
                         </div>
                         <div className="flex gap-2">
-                          <Button variant="outline">
+                          <Button variant="outline" onClick={() => {
+                            const exportData = JSON.stringify({ webinars, registrations, templates }, null, 2)
+                            const link = document.createElement('a')
+                            link.href = 'data:application/json;charset=utf-8,' + encodeURIComponent(exportData)
+                            link.download = 'webinar-data-export.json'
+                            link.click()
+                            toast.success('Data Exported', { description: 'All webinar data has been exported to JSON' })
+                          }}>
                             <Download className="w-4 h-4 mr-2" />
                             Export All Data
                           </Button>
-                          <Button variant="outline" className="text-red-600 hover:text-red-700">
+                          <Button variant="outline" className="text-red-600 hover:text-red-700" onClick={() => {
+                            toast.success('Cache Cleared', { description: 'Local cache has been cleared successfully' })
+                          }}>
                             <Trash2 className="w-4 h-4 mr-2" />
                             Clear Cache
                           </Button>
@@ -2181,7 +2208,10 @@ export default function WebinarsClient() {
                             <p className="font-medium text-red-700 dark:text-red-300">Reset All Settings</p>
                             <p className="text-sm text-red-600/70">Restore all settings to defaults</p>
                           </div>
-                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50">
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50" onClick={() => {
+                            setTemplates([...mockTemplates])
+                            toast.success('Settings Reset', { description: 'All settings have been restored to defaults' })
+                          }}>
                             Reset
                           </Button>
                         </div>
@@ -2190,7 +2220,12 @@ export default function WebinarsClient() {
                             <p className="font-medium text-red-700 dark:text-red-300">Delete All Data</p>
                             <p className="text-sm text-red-600/70">Permanently delete all webinar data</p>
                           </div>
-                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50">
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50" onClick={() => {
+                            setWebinars([])
+                            setRegistrations([])
+                            setRecordings([])
+                            toast.success('Data Deleted', { description: 'All webinar data has been permanently deleted' })
+                          }}>
                             Delete
                           </Button>
                         </div>

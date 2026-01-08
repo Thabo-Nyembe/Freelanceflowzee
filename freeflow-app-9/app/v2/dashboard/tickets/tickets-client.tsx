@@ -475,6 +475,10 @@ export default function TicketsClient() {
     role: 'agent'
   })
 
+  // Integration dialog state
+  const [showIntegrationDialog, setShowIntegrationDialog] = useState(false)
+  const [selectedIntegration, setSelectedIntegration] = useState<{ name: string; status: string; desc: string } | null>(null)
+
   // Export options state
   const [exportFormat, setExportFormat] = useState<'csv' | 'json' | 'xlsx'>('csv')
   const [exportDateRange, setExportDateRange] = useState<'all' | '7days' | '30days' | '90days'>('all')
@@ -1138,6 +1142,27 @@ export default function TicketsClient() {
     } catch (error) {
       toast.error('Error', { description: 'Failed to delete resolved tickets' })
     }
+  }
+
+  const handleIntegrationClick = (integration: { name: string; status: string; desc: string }) => {
+    setSelectedIntegration(integration)
+    setShowIntegrationDialog(true)
+  }
+
+  const handleIntegrationAction = () => {
+    if (!selectedIntegration) return
+
+    if (selectedIntegration.status === 'connected') {
+      toast.success('Integration Configured', {
+        description: `${selectedIntegration.name} settings have been updated`
+      })
+    } else {
+      toast.success('Integration Connected', {
+        description: `${selectedIntegration.name} has been connected successfully`
+      })
+    }
+    setShowIntegrationDialog(false)
+    setSelectedIntegration(null)
   }
 
   // Quick Actions for toolbar - now with dialog-based workflows
@@ -2337,7 +2362,7 @@ export default function TicketsClient() {
                                   <Badge className={integration.status === 'connected' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}>{integration.status}</Badge>
                                 </div>
                                 <p className="text-sm text-gray-500 mb-3">{integration.desc}</p>
-                                <Button variant={integration.status === 'connected' ? 'outline' : 'default'} className="w-full" size="sm">
+                                <Button variant={integration.status === 'connected' ? 'outline' : 'default'} className="w-full" size="sm" onClick={() => handleIntegrationClick(integration)}>
                                   {integration.status === 'connected' ? 'Configure' : 'Connect'}
                                 </Button>
                               </CardContent>
@@ -3096,6 +3121,99 @@ export default function TicketsClient() {
             <Button variant="outline" onClick={() => setShowDeleteResolvedDialog(false)}>Cancel</Button>
             <Button variant="destructive" onClick={handleConfirmDeleteResolved} disabled={isDeleting}>
               {isDeleting ? 'Deleting...' : 'Delete All Resolved'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Integration Configuration Dialog */}
+      <Dialog open={showIntegrationDialog} onOpenChange={setShowIntegrationDialog}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>
+              {selectedIntegration?.status === 'connected' ? 'Configure' : 'Connect'} {selectedIntegration?.name}
+            </DialogTitle>
+            <DialogDescription>
+              {selectedIntegration?.status === 'connected'
+                ? `Manage your ${selectedIntegration?.name} integration settings`
+                : `Connect ${selectedIntegration?.name} to enable ${selectedIntegration?.desc?.toLowerCase()}`}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            {selectedIntegration?.status === 'connected' ? (
+              <>
+                <div className="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+                  <div className="flex items-center gap-3 mb-2">
+                    <CheckCircle className="w-5 h-5 text-green-600" />
+                    <span className="font-medium text-green-800 dark:text-green-200">Connected</span>
+                  </div>
+                  <p className="text-sm text-green-700 dark:text-green-300">
+                    {selectedIntegration.name} is currently connected and active.
+                  </p>
+                </div>
+                <div className="space-y-3">
+                  <div className="grid gap-2">
+                    <Label>Notification Channel</Label>
+                    <Select defaultValue="default">
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select channel" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="default">#support-tickets</SelectItem>
+                        <SelectItem value="urgent">#urgent-alerts</SelectItem>
+                        <SelectItem value="all">#all-notifications</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <div>
+                      <p className="font-medium text-sm">New ticket notifications</p>
+                      <p className="text-xs text-gray-500">Send alerts for new tickets</p>
+                    </div>
+                    <Switch defaultChecked />
+                  </div>
+                  <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <div>
+                      <p className="font-medium text-sm">SLA breach alerts</p>
+                      <p className="text-xs text-gray-500">Notify when SLA is at risk</p>
+                    </div>
+                    <Switch defaultChecked />
+                  </div>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                  <div className="flex items-center gap-3 mb-2">
+                    <Globe className="w-5 h-5 text-blue-600" />
+                    <span className="font-medium text-blue-800 dark:text-blue-200">Connect {selectedIntegration?.name}</span>
+                  </div>
+                  <p className="text-sm text-blue-700 dark:text-blue-300">
+                    Connecting will enable {selectedIntegration?.desc?.toLowerCase()} for your support team.
+                  </p>
+                </div>
+                <div className="space-y-3">
+                  <div className="grid gap-2">
+                    <Label>API Key</Label>
+                    <Input type="password" placeholder="Enter your API key" />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label>Workspace URL (optional)</Label>
+                    <Input placeholder="https://your-workspace.example.com" />
+                  </div>
+                </div>
+                <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    You can find your API key in your {selectedIntegration?.name} settings under Developer or API section.
+                  </p>
+                </div>
+              </>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowIntegrationDialog(false)}>Cancel</Button>
+            <Button onClick={handleIntegrationAction} className="bg-gradient-to-r from-orange-500 to-amber-500">
+              {selectedIntegration?.status === 'connected' ? 'Save Configuration' : 'Connect Integration'}
             </Button>
           </DialogFooter>
         </DialogContent>

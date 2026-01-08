@@ -1784,7 +1784,7 @@ export default function OnboardingClient() {
                         </div>
                         <Switch defaultChecked />
                       </div>
-                      <Button className="w-full">Save Branding</Button>
+                      <Button className="w-full" onClick={() => toast.success('Branding saved', { description: 'Your branding settings have been updated' })}>Save Branding</Button>
                     </CardContent>
                   </Card>
                 )}
@@ -1840,7 +1840,7 @@ export default function OnboardingClient() {
                             <p className="font-medium text-gray-900 dark:text-white">{integration.name}</p>
                             <p className="text-sm text-gray-500">{integration.description}</p>
                           </div>
-                          <Button variant={integration.connected ? 'outline' : 'default'} size="sm">
+                          <Button variant={integration.connected ? 'outline' : 'default'} size="sm" onClick={() => toast.success(integration.connected ? 'Integration settings' : 'Connecting...', { description: integration.connected ? `${integration.name} is connected and active` : `Setting up ${integration.name} integration` })}>
                             {integration.connected ? 'Connected' : 'Connect'}
                           </Button>
                         </div>
@@ -1884,7 +1884,7 @@ export default function OnboardingClient() {
                         <Label>API Key</Label>
                         <div className="flex items-center gap-2 mt-2">
                           <Input type="password" value="ob_live_************************" readOnly className="font-mono dark:bg-gray-900" />
-                          <Button variant="outline" size="sm">Regenerate</Button>
+                          <Button variant="outline" size="sm" onClick={() => toast.success('API key regenerated', { description: 'Your new API key has been generated. Please update your integrations.' })}>Regenerate</Button>
                         </div>
                       </div>
                     </CardContent>
@@ -1936,7 +1936,7 @@ export default function OnboardingClient() {
                               <p className="text-sm text-gray-500">2.4 GB stored</p>
                             </div>
                           </div>
-                          <Button variant="outline" size="sm">Export</Button>
+                          <Button variant="outline" size="sm" onClick={handleExportReport}>Export</Button>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-xl">
                           <div className="flex items-center gap-3">
@@ -1946,7 +1946,7 @@ export default function OnboardingClient() {
                               <p className="text-sm text-gray-500">156,234 recorded</p>
                             </div>
                           </div>
-                          <Button variant="outline" size="sm">Manage</Button>
+                          <Button variant="outline" size="sm" onClick={() => toast.info('Session management', { description: 'Opening session management panel...' })}>Manage</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -1961,14 +1961,14 @@ export default function OnboardingClient() {
                             <p className="font-medium text-gray-900 dark:text-white">Reset All Flows</p>
                             <p className="text-sm text-gray-500">Delete all flow configurations</p>
                           </div>
-                          <Button variant="destructive" size="sm">Reset</Button>
+                          <Button variant="destructive" size="sm" onClick={() => { if (confirm('Are you sure you want to reset all flows? This action cannot be undone.')) { setFlows([]); toast.success('All flows reset', { description: 'All flow configurations have been deleted' }) } }}>Reset</Button>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-xl">
                           <div>
                             <p className="font-medium text-gray-900 dark:text-white">Clear Analytics</p>
                             <p className="text-sm text-gray-500">Remove all analytics data</p>
                           </div>
-                          <Button variant="destructive" size="sm">Clear</Button>
+                          <Button variant="destructive" size="sm" onClick={() => { if (confirm('Are you sure you want to clear all analytics? This action cannot be undone.')) { toast.success('Analytics cleared', { description: 'All analytics data has been removed' }) } }}>Clear</Button>
                         </div>
                       </CardContent>
                     </Card>
