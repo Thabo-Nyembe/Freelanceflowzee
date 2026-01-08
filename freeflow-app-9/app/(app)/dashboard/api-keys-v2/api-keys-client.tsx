@@ -11,7 +11,11 @@ import { Switch } from '@/components/ui/switch'
 import { Progress } from '@/components/ui/progress'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog'
+import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Textarea } from '@/components/ui/textarea'
+import { Checkbox } from '@/components/ui/checkbox'
 import {
   Key, Shield, TrendingUp, AlertCircle, Plus, Copy, Eye,
   RefreshCw, Settings, CheckCircle, XCircle, Clock, Lock,
@@ -850,6 +854,49 @@ export default function ApiKeysClient() {
   const [selectedWebhook, setSelectedWebhook] = useState<WebhookEndpoint | null>(null)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('list')
 
+  // Dialog states
+  const [generateKeyDialogOpen, setGenerateKeyDialogOpen] = useState(false)
+  const [revokeKeyDialogOpen, setRevokeKeyDialogOpen] = useState(false)
+  const [rotateKeyDialogOpen, setRotateKeyDialogOpen] = useState(false)
+  const [copyKeyDialogOpen, setCopyKeyDialogOpen] = useState(false)
+  const [setExpiryDialogOpen, setSetExpiryDialogOpen] = useState(false)
+  const [permissionsDialogOpen, setPermissionsDialogOpen] = useState(false)
+  const [exportDialogOpen, setExportDialogOpen] = useState(false)
+  const [historyDialogOpen, setHistoryDialogOpen] = useState(false)
+  const [filterDialogOpen, setFilterDialogOpen] = useState(false)
+  const [createAppDialogOpen, setCreateAppDialogOpen] = useState(false)
+  const [appSettingsDialogOpen, setAppSettingsDialogOpen] = useState(false)
+  const [quickstartDialogOpen, setQuickstartDialogOpen] = useState(false)
+  const [exportLogsDialogOpen, setExportLogsDialogOpen] = useState(false)
+  const [addWebhookDialogOpen, setAddWebhookDialogOpen] = useState(false)
+  const [testWebhookDialogOpen, setTestWebhookDialogOpen] = useState(false)
+  const [webhookSettingsDialogOpen, setWebhookSettingsDialogOpen] = useState(false)
+  const [liveFeedDialogOpen, setLiveFeedDialogOpen] = useState(false)
+  const [analyticsDialogOpen, setAnalyticsDialogOpen] = useState(false)
+  const [securityDialogOpen, setSecurityDialogOpen] = useState(false)
+  const [alertsDialogOpen, setAlertsDialogOpen] = useState(false)
+  const [docsDialogOpen, setDocsDialogOpen] = useState(false)
+  const [settingsDialogOpen, setSettingsDialogOpen] = useState(false)
+  const [rotateAllDialogOpen, setRotateAllDialogOpen] = useState(false)
+
+  // Form states
+  const [newKeyName, setNewKeyName] = useState('')
+  const [newKeyDescription, setNewKeyDescription] = useState('')
+  const [newKeyEnvironment, setNewKeyEnvironment] = useState<Environment>('development')
+  const [newKeyType, setNewKeyType] = useState<KeyType>('api')
+  const [selectedScopes, setSelectedScopes] = useState<string[]>([])
+  const [keyToAction, setKeyToAction] = useState<ApiKey | null>(null)
+  const [newAppName, setNewAppName] = useState('')
+  const [newAppDescription, setNewAppDescription] = useState('')
+  const [newAppType, setNewAppType] = useState<'regular_web' | 'spa' | 'native' | 'machine_to_machine'>('regular_web')
+  const [newWebhookName, setNewWebhookName] = useState('')
+  const [newWebhookUrl, setNewWebhookUrl] = useState('')
+  const [newWebhookEvents, setNewWebhookEvents] = useState<string[]>([])
+  const [filterEnvironment, setFilterEnvironment] = useState<string>('all')
+  const [filterStatus, setFilterStatus] = useState<string>('all')
+  const [filterKeyType, setFilterKeyType] = useState<string>('all')
+  const [expiryDays, setExpiryDays] = useState('30')
+
   // Dashboard stats
   const stats = useMemo(() => ({
     totalKeys: mockApiKeys.length,
@@ -1032,11 +1079,11 @@ export default function ApiKeysClient() {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <Button variant="outline" className="bg-white/10 border-white/20 text-white hover:bg-white/20">
+              <Button variant="outline" className="bg-white/10 border-white/20 text-white hover:bg-white/20" onClick={() => setExportDialogOpen(true)}>
                 <Download className="w-4 h-4 mr-2" />
                 Export
               </Button>
-              <Button className="bg-white text-slate-700 hover:bg-gray-100">
+              <Button className="bg-white text-slate-700 hover:bg-gray-100" onClick={() => setGenerateKeyDialogOpen(true)}>
                 <Plus className="w-4 h-4 mr-2" />
                 Generate Key
               </Button>
@@ -1110,16 +1157,16 @@ export default function ApiKeysClient() {
             {/* Dashboard Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Key, label: 'New Key', color: 'text-slate-600 dark:text-slate-400' },
-                { icon: Activity, label: 'Live Feed', color: 'text-green-600 dark:text-green-400' },
-                { icon: BarChart3, label: 'Analytics', color: 'text-blue-600 dark:text-blue-400' },
-                { icon: Shield, label: 'Security', color: 'text-red-600 dark:text-red-400' },
-                { icon: AlertTriangle, label: 'Alerts', color: 'text-orange-600 dark:text-orange-400' },
-                { icon: FileText, label: 'Docs', color: 'text-purple-600 dark:text-purple-400' },
-                { icon: Download, label: 'Export', color: 'text-cyan-600 dark:text-cyan-400' },
-                { icon: Settings, label: 'Settings', color: 'text-gray-600 dark:text-gray-400' }
+                { icon: Key, label: 'New Key', color: 'text-slate-600 dark:text-slate-400', action: () => setGenerateKeyDialogOpen(true) },
+                { icon: Activity, label: 'Live Feed', color: 'text-green-600 dark:text-green-400', action: () => setLiveFeedDialogOpen(true) },
+                { icon: BarChart3, label: 'Analytics', color: 'text-blue-600 dark:text-blue-400', action: () => setAnalyticsDialogOpen(true) },
+                { icon: Shield, label: 'Security', color: 'text-red-600 dark:text-red-400', action: () => setSecurityDialogOpen(true) },
+                { icon: AlertTriangle, label: 'Alerts', color: 'text-orange-600 dark:text-orange-400', action: () => setAlertsDialogOpen(true) },
+                { icon: FileText, label: 'Docs', color: 'text-purple-600 dark:text-purple-400', action: () => setDocsDialogOpen(true) },
+                { icon: Download, label: 'Export', color: 'text-cyan-600 dark:text-cyan-400', action: () => setExportDialogOpen(true) },
+                { icon: Settings, label: 'Settings', color: 'text-gray-600 dark:text-gray-400', action: () => setActiveTab('settings') }
               ].map((action, i) => (
-                <Button key={i} variant="outline" className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200">
+                <Button key={i} variant="outline" className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200" onClick={action.action}>
                   <action.icon className={`h-5 w-5 ${action.color}`} />
                   <span className="text-xs">{action.label}</span>
                 </Button>
@@ -1252,16 +1299,16 @@ export default function ApiKeysClient() {
             {/* Keys Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Plus, label: 'Generate Key', color: 'text-amber-600 dark:text-amber-400' },
-                { icon: RefreshCw, label: 'Rotate All', color: 'text-blue-600 dark:text-blue-400' },
-                { icon: Copy, label: 'Copy Key', color: 'text-green-600 dark:text-green-400' },
-                { icon: Lock, label: 'Revoke', color: 'text-red-600 dark:text-red-400' },
-                { icon: Clock, label: 'Set Expiry', color: 'text-purple-600 dark:text-purple-400' },
-                { icon: Shield, label: 'Permissions', color: 'text-orange-600 dark:text-orange-400' },
-                { icon: Download, label: 'Export', color: 'text-cyan-600 dark:text-cyan-400' },
-                { icon: History, label: 'History', color: 'text-gray-600 dark:text-gray-400' }
+                { icon: Plus, label: 'Generate Key', color: 'text-amber-600 dark:text-amber-400', action: () => setGenerateKeyDialogOpen(true) },
+                { icon: RefreshCw, label: 'Rotate All', color: 'text-blue-600 dark:text-blue-400', action: () => setRotateAllDialogOpen(true) },
+                { icon: Copy, label: 'Copy Key', color: 'text-green-600 dark:text-green-400', action: () => setCopyKeyDialogOpen(true) },
+                { icon: Lock, label: 'Revoke', color: 'text-red-600 dark:text-red-400', action: () => setRevokeKeyDialogOpen(true) },
+                { icon: Clock, label: 'Set Expiry', color: 'text-purple-600 dark:text-purple-400', action: () => setSetExpiryDialogOpen(true) },
+                { icon: Shield, label: 'Permissions', color: 'text-orange-600 dark:text-orange-400', action: () => setPermissionsDialogOpen(true) },
+                { icon: Download, label: 'Export', color: 'text-cyan-600 dark:text-cyan-400', action: () => setExportDialogOpen(true) },
+                { icon: History, label: 'History', color: 'text-gray-600 dark:text-gray-400', action: () => setHistoryDialogOpen(true) }
               ].map((action, i) => (
-                <Button key={i} variant="outline" className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200">
+                <Button key={i} variant="outline" className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200" onClick={action.action}>
                   <action.icon className={`h-5 w-5 ${action.color}`} />
                   <span className="text-xs">{action.label}</span>
                 </Button>
@@ -1279,7 +1326,7 @@ export default function ApiKeysClient() {
                     className="pl-10 w-80"
                   />
                 </div>
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" onClick={() => setFilterDialogOpen(true)}>
                   <Filter className="w-4 h-4 mr-2" />
                   Filters
                 </Button>
@@ -1360,15 +1407,15 @@ export default function ApiKeysClient() {
                     )}
 
                     <div className="flex gap-2 mt-4 pt-4 border-t dark:border-gray-700">
-                      <Button variant="outline" size="sm" className="flex-1">
+                      <Button variant="outline" size="sm" className="flex-1" onClick={(e) => { e.stopPropagation(); handleCopyKey(`${key.key_prefix}${key.key_code}`) }}>
                         <Copy className="w-3 h-3 mr-1" />
                         Copy
                       </Button>
-                      <Button variant="outline" size="sm" className="flex-1">
+                      <Button variant="outline" size="sm" className="flex-1" onClick={(e) => { e.stopPropagation(); setKeyToAction(key); setRotateKeyDialogOpen(true) }}>
                         <RefreshCw className="w-3 h-3 mr-1" />
                         Rotate
                       </Button>
-                      <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700">
+                      <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700" onClick={(e) => { e.stopPropagation(); setKeyToAction(key); setRevokeKeyDialogOpen(true) }}>
                         <Lock className="w-3 h-3" />
                       </Button>
                     </div>
@@ -1411,7 +1458,7 @@ export default function ApiKeysClient() {
                   className="pl-10 w-80"
                 />
               </div>
-              <Button>
+              <Button onClick={() => setCreateAppDialogOpen(true)}>
                 <Plus className="w-4 h-4 mr-2" />
                 Create Application
               </Button>
@@ -1464,11 +1511,11 @@ export default function ApiKeysClient() {
                     </div>
 
                     <div className="flex gap-2 mt-4">
-                      <Button variant="outline" size="sm" className="flex-1">
+                      <Button variant="outline" size="sm" className="flex-1" onClick={(e) => { e.stopPropagation(); setSelectedApp(app); setAppSettingsDialogOpen(true) }}>
                         <Settings className="w-3 h-3 mr-1" />
                         Settings
                       </Button>
-                      <Button variant="outline" size="sm" className="flex-1">
+                      <Button variant="outline" size="sm" className="flex-1" onClick={(e) => { e.stopPropagation(); setSelectedApp(app); setQuickstartDialogOpen(true) }}>
                         <ExternalLink className="w-3 h-3 mr-1" />
                         Quickstart
                       </Button>
@@ -1517,12 +1564,12 @@ export default function ApiKeysClient() {
                     className="pl-10 w-80"
                   />
                 </div>
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" onClick={() => setFilterDialogOpen(true)}>
                   <Filter className="w-4 h-4 mr-2" />
                   Filters
                 </Button>
               </div>
-              <Button variant="outline">
+              <Button variant="outline" onClick={() => setExportLogsDialogOpen(true)}>
                 <Download className="w-4 h-4 mr-2" />
                 Export Logs
               </Button>
@@ -1603,7 +1650,7 @@ export default function ApiKeysClient() {
 
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Webhook Endpoints</h2>
-              <Button>
+              <Button onClick={() => setAddWebhookDialogOpen(true)}>
                 <Plus className="w-4 h-4 mr-2" />
                 Add Endpoint
               </Button>
@@ -1637,10 +1684,10 @@ export default function ApiKeysClient() {
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Button variant="ghost" size="sm">
+                        <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); setSelectedWebhook(webhook); setTestWebhookDialogOpen(true) }}>
                           <Play className="w-4 h-4" />
                         </Button>
-                        <Button variant="ghost" size="sm">
+                        <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); setSelectedWebhook(webhook); setWebhookSettingsDialogOpen(true) }}>
                           <Settings className="w-4 h-4" />
                         </Button>
                       </div>
@@ -1882,7 +1929,7 @@ export default function ApiKeysClient() {
                     <p className="text-xs text-gray-500 mb-1">API Key</p>
                     <div className="flex items-center gap-2">
                       <code className="text-lg font-mono">{selectedKey.key_prefix}•••••••••{selectedKey.key_code.slice(-4)}</code>
-                      <Button variant="ghost" size="sm">
+                      <Button variant="ghost" size="sm" onClick={() => handleCopyKey(`${selectedKey.key_prefix}${selectedKey.key_code}`)}>
                         <Copy className="w-4 h-4" />
                       </Button>
                     </div>
@@ -1932,11 +1979,11 @@ export default function ApiKeysClient() {
                   )}
 
                   <div className="flex gap-3">
-                    <Button variant="outline" className="flex-1">
+                    <Button variant="outline" className="flex-1" onClick={() => { setKeyToAction(selectedKey); setSelectedKey(null); setRotateKeyDialogOpen(true) }}>
                       <RefreshCw className="w-4 h-4 mr-2" />
                       Rotate Key
                     </Button>
-                    <Button variant="outline" className="flex-1 text-red-600 hover:text-red-700">
+                    <Button variant="outline" className="flex-1 text-red-600 hover:text-red-700" onClick={() => { setKeyToAction(selectedKey); setSelectedKey(null); setRevokeKeyDialogOpen(true) }}>
                       <Lock className="w-4 h-4 mr-2" />
                       Revoke
                     </Button>
@@ -2002,6 +2049,874 @@ export default function ApiKeysClient() {
                 </div>
               </div>
             )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Generate Key Dialog */}
+        <Dialog open={generateKeyDialogOpen} onOpenChange={setGenerateKeyDialogOpen}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Generate New API Key</DialogTitle>
+              <DialogDescription>Create a new API key with custom permissions and settings.</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="keyName">Key Name</Label>
+                <Input id="keyName" placeholder="e.g., Production API Key" value={newKeyName} onChange={(e) => setNewKeyName(e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="keyDescription">Description</Label>
+                <Textarea id="keyDescription" placeholder="Describe the purpose of this key" value={newKeyDescription} onChange={(e) => setNewKeyDescription(e.target.value)} />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Environment</Label>
+                  <Select value={newKeyEnvironment} onValueChange={(v) => setNewKeyEnvironment(v as Environment)}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="development">Development</SelectItem>
+                      <SelectItem value="staging">Staging</SelectItem>
+                      <SelectItem value="production">Production</SelectItem>
+                      <SelectItem value="sandbox">Sandbox</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Key Type</Label>
+                  <Select value={newKeyType} onValueChange={(v) => setNewKeyType(v as KeyType)}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="api">API Key</SelectItem>
+                      <SelectItem value="webhook">Webhook</SelectItem>
+                      <SelectItem value="oauth">OAuth</SelectItem>
+                      <SelectItem value="jwt">JWT</SelectItem>
+                      <SelectItem value="service">Service</SelectItem>
+                      <SelectItem value="machine_to_machine">Machine to Machine</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Scopes</Label>
+                <div className="grid grid-cols-2 gap-2 max-h-32 overflow-y-auto p-2 border rounded-lg">
+                  {mockScopes.map(scope => (
+                    <div key={scope.id} className="flex items-center space-x-2">
+                      <Checkbox id={scope.id} checked={selectedScopes.includes(scope.name)} onCheckedChange={(checked) => {
+                        if (checked) setSelectedScopes([...selectedScopes, scope.name])
+                        else setSelectedScopes(selectedScopes.filter(s => s !== scope.name))
+                      }} />
+                      <Label htmlFor={scope.id} className="text-xs">{scope.name}</Label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setGenerateKeyDialogOpen(false)}>Cancel</Button>
+              <Button onClick={() => { handleCreateApiKey(); setGenerateKeyDialogOpen(false); setNewKeyName(''); setNewKeyDescription(''); setSelectedScopes([]) }}>Generate Key</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Revoke Key Dialog */}
+        <Dialog open={revokeKeyDialogOpen} onOpenChange={setRevokeKeyDialogOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Revoke API Key</DialogTitle>
+              <DialogDescription>This action cannot be undone. The key will be permanently invalidated.</DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              {keyToAction ? (
+                <div className="p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+                  <p className="font-medium text-red-700 dark:text-red-400">{keyToAction.name}</p>
+                  <code className="text-sm text-red-600">{keyToAction.key_prefix}...{keyToAction.key_code.slice(-4)}</code>
+                </div>
+              ) : (
+                <p className="text-gray-500">Select a key to revoke from the list.</p>
+              )}
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => { setRevokeKeyDialogOpen(false); setKeyToAction(null) }}>Cancel</Button>
+              <Button variant="destructive" onClick={() => { if (keyToAction) handleRevokeKey(keyToAction.name); setRevokeKeyDialogOpen(false); setKeyToAction(null) }}>Revoke Key</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Rotate Key Dialog */}
+        <Dialog open={rotateKeyDialogOpen} onOpenChange={setRotateKeyDialogOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Rotate API Key</DialogTitle>
+              <DialogDescription>Generate a new key value while keeping the same settings. The old key will be invalidated.</DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              {keyToAction ? (
+                <div className="p-4 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800">
+                  <p className="font-medium text-amber-700 dark:text-amber-400">{keyToAction.name}</p>
+                  <code className="text-sm text-amber-600">{keyToAction.key_prefix}...{keyToAction.key_code.slice(-4)}</code>
+                </div>
+              ) : (
+                <p className="text-gray-500">Select a key to rotate from the list.</p>
+              )}
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => { setRotateKeyDialogOpen(false); setKeyToAction(null) }}>Cancel</Button>
+              <Button onClick={() => { if (keyToAction) handleRegenerateKey(keyToAction.name); setRotateKeyDialogOpen(false); setKeyToAction(null) }}>Rotate Key</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Rotate All Keys Dialog */}
+        <Dialog open={rotateAllDialogOpen} onOpenChange={setRotateAllDialogOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Rotate All API Keys</DialogTitle>
+              <DialogDescription>This will rotate all active API keys. Make sure to update your applications with the new keys.</DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="p-4 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800">
+                <p className="font-medium text-amber-700 dark:text-amber-400">{mockApiKeys.filter(k => k.status === 'active').length} active keys will be rotated</p>
+                <p className="text-sm text-amber-600 mt-1">All applications using these keys will need to be updated.</p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setRotateAllDialogOpen(false)}>Cancel</Button>
+              <Button onClick={() => {
+                const activeKeys = mockApiKeys.filter(k => k.status === 'active')
+                toast.promise(Promise.resolve(), { loading: `Rotating ${activeKeys.length} keys...`, success: `${activeKeys.length} keys rotated successfully`, error: 'Failed to rotate keys' })
+                setRotateAllDialogOpen(false)
+              }}>Rotate All Keys</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Copy Key Dialog */}
+        <Dialog open={copyKeyDialogOpen} onOpenChange={setCopyKeyDialogOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Copy API Key</DialogTitle>
+              <DialogDescription>Select a key to copy to your clipboard.</DialogDescription>
+            </DialogHeader>
+            <div className="py-4 space-y-2 max-h-64 overflow-y-auto">
+              {mockApiKeys.filter(k => k.status === 'active').map(key => (
+                <div key={key.id} className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer" onClick={() => { handleCopyKey(`${key.key_prefix}${key.key_code}`); setCopyKeyDialogOpen(false) }}>
+                  <div>
+                    <p className="font-medium text-sm">{key.name}</p>
+                    <code className="text-xs text-gray-500">{key.key_prefix}...{key.key_code.slice(-4)}</code>
+                  </div>
+                  <Copy className="w-4 h-4 text-gray-400" />
+                </div>
+              ))}
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Set Expiry Dialog */}
+        <Dialog open={setExpiryDialogOpen} onOpenChange={setSetExpiryDialogOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Set Key Expiration</DialogTitle>
+              <DialogDescription>Configure when the selected key should expire.</DialogDescription>
+            </DialogHeader>
+            <div className="py-4 space-y-4">
+              <div className="space-y-2">
+                <Label>Select Key</Label>
+                <Select onValueChange={(v) => setKeyToAction(mockApiKeys.find(k => k.id === v) || null)}>
+                  <SelectTrigger><SelectValue placeholder="Select a key" /></SelectTrigger>
+                  <SelectContent>
+                    {mockApiKeys.filter(k => k.status === 'active').map(key => (
+                      <SelectItem key={key.id} value={key.id}>{key.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Expiration Period</Label>
+                <Select value={expiryDays} onValueChange={setExpiryDays}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="7">7 days</SelectItem>
+                    <SelectItem value="30">30 days</SelectItem>
+                    <SelectItem value="90">90 days</SelectItem>
+                    <SelectItem value="180">180 days</SelectItem>
+                    <SelectItem value="365">1 year</SelectItem>
+                    <SelectItem value="never">Never</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setSetExpiryDialogOpen(false)}>Cancel</Button>
+              <Button onClick={() => { toast.success(`Expiration set to ${expiryDays} days for ${keyToAction?.name || 'selected key'}`); setSetExpiryDialogOpen(false); setKeyToAction(null) }}>Set Expiration</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Permissions Dialog */}
+        <Dialog open={permissionsDialogOpen} onOpenChange={setPermissionsDialogOpen}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Manage Permissions</DialogTitle>
+              <DialogDescription>Configure scopes and permissions for API keys.</DialogDescription>
+            </DialogHeader>
+            <div className="py-4 space-y-4">
+              <div className="space-y-2">
+                <Label>Select Key</Label>
+                <Select onValueChange={(v) => setKeyToAction(mockApiKeys.find(k => k.id === v) || null)}>
+                  <SelectTrigger><SelectValue placeholder="Select a key" /></SelectTrigger>
+                  <SelectContent>
+                    {mockApiKeys.map(key => (
+                      <SelectItem key={key.id} value={key.id}>{key.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Available Scopes</Label>
+                <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto p-2 border rounded-lg">
+                  {mockScopes.map(scope => (
+                    <div key={scope.id} className="flex items-center space-x-2">
+                      <Checkbox id={`perm-${scope.id}`} defaultChecked={keyToAction?.scopes.includes(scope.name)} />
+                      <Label htmlFor={`perm-${scope.id}`} className="text-xs">{scope.name}</Label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setPermissionsDialogOpen(false)}>Cancel</Button>
+              <Button onClick={() => { toast.success('Permissions updated successfully'); setPermissionsDialogOpen(false); setKeyToAction(null) }}>Save Permissions</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Export Dialog */}
+        <Dialog open={exportDialogOpen} onOpenChange={setExportDialogOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Export API Keys</DialogTitle>
+              <DialogDescription>Export your API key configuration for backup or migration.</DialogDescription>
+            </DialogHeader>
+            <div className="py-4 space-y-4">
+              <div className="space-y-2">
+                <Label>Export Format</Label>
+                <Select defaultValue="json">
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="json">JSON</SelectItem>
+                    <SelectItem value="csv">CSV</SelectItem>
+                    <SelectItem value="yaml">YAML</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Include</Label>
+                <div className="space-y-2">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox id="exp-metadata" defaultChecked />
+                    <Label htmlFor="exp-metadata" className="text-sm">Key Metadata</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox id="exp-scopes" defaultChecked />
+                    <Label htmlFor="exp-scopes" className="text-sm">Scopes & Permissions</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox id="exp-usage" />
+                    <Label htmlFor="exp-usage" className="text-sm">Usage Statistics</Label>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setExportDialogOpen(false)}>Cancel</Button>
+              <Button onClick={() => { handleExportKeys(); setExportDialogOpen(false) }}>Export</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* History Dialog */}
+        <Dialog open={historyDialogOpen} onOpenChange={setHistoryDialogOpen}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>API Key History</DialogTitle>
+              <DialogDescription>View recent changes and events for your API keys.</DialogDescription>
+            </DialogHeader>
+            <ScrollArea className="max-h-96">
+              <div className="py-4 space-y-3">
+                {[
+                  { action: 'Key Created', key: 'Production API Key', time: '2 hours ago', type: 'success' },
+                  { action: 'Key Rotated', key: 'Staging Test Key', time: '1 day ago', type: 'info' },
+                  { action: 'Key Revoked', key: 'Old Development Key', time: '3 days ago', type: 'warning' },
+                  { action: 'Permissions Updated', key: 'Mobile App Service Key', time: '5 days ago', type: 'info' },
+                  { action: 'Key Created', key: 'OAuth Client Credentials', time: '1 week ago', type: 'success' },
+                ].map((item, i) => (
+                  <div key={i} className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-2 h-2 rounded-full ${item.type === 'success' ? 'bg-green-500' : item.type === 'warning' ? 'bg-orange-500' : 'bg-blue-500'}`} />
+                      <div>
+                        <p className="font-medium text-sm">{item.action}</p>
+                        <p className="text-xs text-gray-500">{item.key}</p>
+                      </div>
+                    </div>
+                    <p className="text-xs text-gray-400">{item.time}</p>
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+          </DialogContent>
+        </Dialog>
+
+        {/* Filter Dialog */}
+        <Dialog open={filterDialogOpen} onOpenChange={setFilterDialogOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Filter Keys</DialogTitle>
+              <DialogDescription>Apply filters to narrow down the displayed keys.</DialogDescription>
+            </DialogHeader>
+            <div className="py-4 space-y-4">
+              <div className="space-y-2">
+                <Label>Environment</Label>
+                <Select value={filterEnvironment} onValueChange={setFilterEnvironment}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Environments</SelectItem>
+                    <SelectItem value="production">Production</SelectItem>
+                    <SelectItem value="staging">Staging</SelectItem>
+                    <SelectItem value="development">Development</SelectItem>
+                    <SelectItem value="sandbox">Sandbox</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Status</Label>
+                <Select value={filterStatus} onValueChange={setFilterStatus}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Statuses</SelectItem>
+                    <SelectItem value="active">Active</SelectItem>
+                    <SelectItem value="inactive">Inactive</SelectItem>
+                    <SelectItem value="expired">Expired</SelectItem>
+                    <SelectItem value="revoked">Revoked</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Key Type</Label>
+                <Select value={filterKeyType} onValueChange={setFilterKeyType}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Types</SelectItem>
+                    <SelectItem value="api">API Key</SelectItem>
+                    <SelectItem value="webhook">Webhook</SelectItem>
+                    <SelectItem value="oauth">OAuth</SelectItem>
+                    <SelectItem value="service">Service</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => { setFilterEnvironment('all'); setFilterStatus('all'); setFilterKeyType('all') }}>Reset</Button>
+              <Button onClick={() => { toast.success('Filters applied'); setFilterDialogOpen(false) }}>Apply Filters</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Create Application Dialog */}
+        <Dialog open={createAppDialogOpen} onOpenChange={setCreateAppDialogOpen}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Create Application</DialogTitle>
+              <DialogDescription>Register a new application to use your API.</DialogDescription>
+            </DialogHeader>
+            <div className="py-4 space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="appName">Application Name</Label>
+                <Input id="appName" placeholder="My Application" value={newAppName} onChange={(e) => setNewAppName(e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="appDescription">Description</Label>
+                <Textarea id="appDescription" placeholder="Describe your application" value={newAppDescription} onChange={(e) => setNewAppDescription(e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label>Application Type</Label>
+                <Select value={newAppType} onValueChange={(v) => setNewAppType(v as typeof newAppType)}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="regular_web">Regular Web Application</SelectItem>
+                    <SelectItem value="spa">Single Page Application (SPA)</SelectItem>
+                    <SelectItem value="native">Native Application</SelectItem>
+                    <SelectItem value="machine_to_machine">Machine to Machine</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setCreateAppDialogOpen(false)}>Cancel</Button>
+              <Button onClick={() => { toast.success(`Application "${newAppName}" created successfully`); setCreateAppDialogOpen(false); setNewAppName(''); setNewAppDescription('') }}>Create Application</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* App Settings Dialog */}
+        <Dialog open={appSettingsDialogOpen} onOpenChange={setAppSettingsDialogOpen}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Application Settings</DialogTitle>
+              <DialogDescription>Configure settings for {selectedApp?.name}</DialogDescription>
+            </DialogHeader>
+            {selectedApp && (
+              <ScrollArea className="max-h-96">
+                <div className="py-4 space-y-4">
+                  <div className="space-y-2">
+                    <Label>Client ID</Label>
+                    <div className="flex gap-2">
+                      <Input value={selectedApp.client_id} readOnly />
+                      <Button variant="outline" size="icon" onClick={() => handleCopyKey(selectedApp.client_id)}>
+                        <Copy className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Callback URLs</Label>
+                    <Textarea value={selectedApp.callback_urls.join('\n')} placeholder="One URL per line" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Logout URLs</Label>
+                    <Textarea value={selectedApp.logout_urls.join('\n')} placeholder="One URL per line" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Token Expiration</Label>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label className="text-xs text-gray-500">Access Token (seconds)</Label>
+                        <Input type="number" defaultValue={selectedApp.access_token_expiration} />
+                      </div>
+                      <div>
+                        <Label className="text-xs text-gray-500">Refresh Token (seconds)</Label>
+                        <Input type="number" defaultValue={selectedApp.refresh_token_expiration} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </ScrollArea>
+            )}
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setAppSettingsDialogOpen(false)}>Cancel</Button>
+              <Button onClick={() => { toast.success('Application settings saved'); setAppSettingsDialogOpen(false) }}>Save Settings</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Quickstart Dialog */}
+        <Dialog open={quickstartDialogOpen} onOpenChange={setQuickstartDialogOpen}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Quickstart Guide</DialogTitle>
+              <DialogDescription>Get started with {selectedApp?.name}</DialogDescription>
+            </DialogHeader>
+            {selectedApp && (
+              <ScrollArea className="max-h-96">
+                <div className="py-4 space-y-4">
+                  <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-800">
+                    <p className="font-medium mb-2">1. Install the SDK</p>
+                    <code className="block p-2 bg-gray-900 text-green-400 rounded text-sm">npm install @freeflow/api-sdk</code>
+                  </div>
+                  <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-800">
+                    <p className="font-medium mb-2">2. Initialize the client</p>
+                    <code className="block p-2 bg-gray-900 text-green-400 rounded text-sm whitespace-pre">{`import { FreeflowAPI } from '@freeflow/api-sdk';
+
+const api = new FreeflowAPI({
+  clientId: '${selectedApp.client_id}',
+});`}</code>
+                  </div>
+                  <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-800">
+                    <p className="font-medium mb-2">3. Make your first request</p>
+                    <code className="block p-2 bg-gray-900 text-green-400 rounded text-sm whitespace-pre">{`const user = await api.users.get();
+console.log(user);`}</code>
+                  </div>
+                </div>
+              </ScrollArea>
+            )}
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setQuickstartDialogOpen(false)}>Close</Button>
+              <Button onClick={() => { window.open('https://docs.freeflow.com', '_blank'); setQuickstartDialogOpen(false) }}>View Full Docs</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Export Logs Dialog */}
+        <Dialog open={exportLogsDialogOpen} onOpenChange={setExportLogsDialogOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Export Logs</DialogTitle>
+              <DialogDescription>Export API request logs for analysis.</DialogDescription>
+            </DialogHeader>
+            <div className="py-4 space-y-4">
+              <div className="space-y-2">
+                <Label>Date Range</Label>
+                <Select defaultValue="7">
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1">Last 24 hours</SelectItem>
+                    <SelectItem value="7">Last 7 days</SelectItem>
+                    <SelectItem value="30">Last 30 days</SelectItem>
+                    <SelectItem value="90">Last 90 days</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Format</Label>
+                <Select defaultValue="json">
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="json">JSON</SelectItem>
+                    <SelectItem value="csv">CSV</SelectItem>
+                    <SelectItem value="ndjson">NDJSON</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Include</Label>
+                <div className="space-y-2">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox id="log-success" defaultChecked />
+                    <Label htmlFor="log-success" className="text-sm">Successful requests</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox id="log-error" defaultChecked />
+                    <Label htmlFor="log-error" className="text-sm">Error requests</Label>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setExportLogsDialogOpen(false)}>Cancel</Button>
+              <Button onClick={() => { toast.success('Logs export started. You will receive an email when ready.'); setExportLogsDialogOpen(false) }}>Export Logs</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Webhook Dialog */}
+        <Dialog open={addWebhookDialogOpen} onOpenChange={setAddWebhookDialogOpen}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Add Webhook Endpoint</DialogTitle>
+              <DialogDescription>Configure a new webhook to receive event notifications.</DialogDescription>
+            </DialogHeader>
+            <div className="py-4 space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="webhookName">Endpoint Name</Label>
+                <Input id="webhookName" placeholder="e.g., Payment Events" value={newWebhookName} onChange={(e) => setNewWebhookName(e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="webhookUrl">Endpoint URL</Label>
+                <Input id="webhookUrl" placeholder="https://your-domain.com/webhook" value={newWebhookUrl} onChange={(e) => setNewWebhookUrl(e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label>Events to Listen</Label>
+                <div className="grid grid-cols-2 gap-2 max-h-32 overflow-y-auto p-2 border rounded-lg">
+                  {['payment.created', 'payment.succeeded', 'payment.failed', 'user.created', 'user.updated', 'data.sync', 'security.alert'].map(event => (
+                    <div key={event} className="flex items-center space-x-2">
+                      <Checkbox id={event} checked={newWebhookEvents.includes(event)} onCheckedChange={(checked) => {
+                        if (checked) setNewWebhookEvents([...newWebhookEvents, event])
+                        else setNewWebhookEvents(newWebhookEvents.filter(e => e !== event))
+                      }} />
+                      <Label htmlFor={event} className="text-xs">{event}</Label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setAddWebhookDialogOpen(false)}>Cancel</Button>
+              <Button onClick={() => { toast.success(`Webhook "${newWebhookName}" created successfully`); setAddWebhookDialogOpen(false); setNewWebhookName(''); setNewWebhookUrl(''); setNewWebhookEvents([]) }}>Create Webhook</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Test Webhook Dialog */}
+        <Dialog open={testWebhookDialogOpen} onOpenChange={setTestWebhookDialogOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Test Webhook</DialogTitle>
+              <DialogDescription>Send a test event to {selectedWebhook?.name}</DialogDescription>
+            </DialogHeader>
+            <div className="py-4 space-y-4">
+              <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-800">
+                <p className="text-sm font-medium">Endpoint URL</p>
+                <code className="text-xs text-gray-500">{selectedWebhook?.url}</code>
+              </div>
+              <div className="space-y-2">
+                <Label>Test Event Type</Label>
+                <Select defaultValue={selectedWebhook?.events[0]}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {selectedWebhook?.events.map(event => (
+                      <SelectItem key={event} value={event}>{event}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setTestWebhookDialogOpen(false)}>Cancel</Button>
+              <Button onClick={() => { toast.promise(new Promise(resolve => setTimeout(resolve, 1500)), { loading: 'Sending test webhook...', success: 'Test webhook sent successfully!', error: 'Failed to send webhook' }); setTestWebhookDialogOpen(false) }}>Send Test Event</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Webhook Settings Dialog */}
+        <Dialog open={webhookSettingsDialogOpen} onOpenChange={setWebhookSettingsDialogOpen}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Webhook Settings</DialogTitle>
+              <DialogDescription>Configure settings for {selectedWebhook?.name}</DialogDescription>
+            </DialogHeader>
+            {selectedWebhook && (
+              <ScrollArea className="max-h-96">
+                <div className="py-4 space-y-4">
+                  <div className="space-y-2">
+                    <Label>Endpoint URL</Label>
+                    <Input defaultValue={selectedWebhook.url} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Signing Secret</Label>
+                    <div className="flex gap-2">
+                      <Input value={selectedWebhook.secret} readOnly type="password" />
+                      <Button variant="outline" size="icon" onClick={() => handleCopyKey(selectedWebhook.secret)}>
+                        <Copy className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Retry Policy</Label>
+                      <Select defaultValue={selectedWebhook.retry_policy}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="none">None</SelectItem>
+                          <SelectItem value="linear">Linear</SelectItem>
+                          <SelectItem value="exponential">Exponential</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Max Retries</Label>
+                      <Input type="number" defaultValue={selectedWebhook.max_retries} />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Timeout (seconds)</Label>
+                    <Input type="number" defaultValue={selectedWebhook.timeout_seconds} />
+                  </div>
+                </div>
+              </ScrollArea>
+            )}
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setWebhookSettingsDialogOpen(false)}>Cancel</Button>
+              <Button onClick={() => { toast.success('Webhook settings saved'); setWebhookSettingsDialogOpen(false) }}>Save Settings</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Live Feed Dialog */}
+        <Dialog open={liveFeedDialogOpen} onOpenChange={setLiveFeedDialogOpen}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Activity className="w-5 h-5 text-green-500 animate-pulse" />
+                Live API Feed
+              </DialogTitle>
+              <DialogDescription>Real-time API request monitoring</DialogDescription>
+            </DialogHeader>
+            <ScrollArea className="max-h-96">
+              <div className="py-4 space-y-2">
+                {mockApiLogs.map((log, i) => (
+                  <div key={i} className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-800 animate-fade-in">
+                    <div className="flex items-center gap-3">
+                      <Badge className={getLogLevelColor(log.log_level)}>{log.method}</Badge>
+                      <code className="text-sm">{log.endpoint}</code>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className={`text-sm font-medium ${log.status_code < 400 ? 'text-green-600' : 'text-red-600'}`}>{log.status_code}</span>
+                      <span className="text-xs text-gray-500">{log.response_time_ms}ms</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+          </DialogContent>
+        </Dialog>
+
+        {/* Analytics Dialog */}
+        <Dialog open={analyticsDialogOpen} onOpenChange={setAnalyticsDialogOpen}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>API Analytics</DialogTitle>
+              <DialogDescription>Usage statistics and performance metrics</DialogDescription>
+            </DialogHeader>
+            <div className="py-4 space-y-6">
+              <div className="grid grid-cols-3 gap-4">
+                <div className="p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20 text-center">
+                  <p className="text-3xl font-bold text-blue-700">{formatNumber(stats.totalRequests)}</p>
+                  <p className="text-sm text-blue-600">Total Requests</p>
+                </div>
+                <div className="p-4 rounded-lg bg-green-50 dark:bg-green-900/20 text-center">
+                  <p className="text-3xl font-bold text-green-700">99.9%</p>
+                  <p className="text-sm text-green-600">Success Rate</p>
+                </div>
+                <div className="p-4 rounded-lg bg-purple-50 dark:bg-purple-900/20 text-center">
+                  <p className="text-3xl font-bold text-purple-700">45ms</p>
+                  <p className="text-sm text-purple-600">Avg Response Time</p>
+                </div>
+              </div>
+              <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-800">
+                <p className="font-medium mb-3">Top Endpoints</p>
+                {['/api/v1/users', '/api/v1/data', '/api/v1/auth/token', '/api/v1/webhooks'].map((endpoint, i) => (
+                  <div key={i} className="flex items-center justify-between py-2">
+                    <code className="text-sm">{endpoint}</code>
+                    <span className="text-sm text-gray-500">{Math.floor(Math.random() * 10000)} calls</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Security Dialog */}
+        <Dialog open={securityDialogOpen} onOpenChange={setSecurityDialogOpen}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Security Overview</DialogTitle>
+              <DialogDescription>Review your API security status</DialogDescription>
+            </DialogHeader>
+            <div className="py-4 space-y-4">
+              <div className="p-4 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200">
+                <div className="flex items-center gap-3">
+                  <ShieldCheck className="w-8 h-8 text-green-600" />
+                  <div>
+                    <p className="font-medium text-green-700">Security Score: 94/100</p>
+                    <p className="text-sm text-green-600">Your API security is excellent</p>
+                  </div>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
+                  <span className="text-sm">API Key Rotation</span>
+                  <Badge className="bg-green-100 text-green-800">Enabled</Badge>
+                </div>
+                <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
+                  <span className="text-sm">IP Whitelisting</span>
+                  <Badge className="bg-green-100 text-green-800">Active</Badge>
+                </div>
+                <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
+                  <span className="text-sm">Rate Limiting</span>
+                  <Badge className="bg-green-100 text-green-800">Configured</Badge>
+                </div>
+                <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
+                  <span className="text-sm">Webhook Signatures</span>
+                  <Badge className="bg-green-100 text-green-800">Verified</Badge>
+                </div>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Alerts Dialog */}
+        <Dialog open={alertsDialogOpen} onOpenChange={setAlertsDialogOpen}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Security Alerts</DialogTitle>
+              <DialogDescription>Recent security events and notifications</DialogDescription>
+            </DialogHeader>
+            <ScrollArea className="max-h-96">
+              <div className="py-4 space-y-3">
+                <div className="p-4 rounded-lg bg-green-50 dark:bg-green-900/20 text-center">
+                  <CheckCircle className="w-12 h-12 text-green-500 mx-auto mb-2" />
+                  <p className="font-medium text-green-700">No Active Alerts</p>
+                  <p className="text-sm text-green-600">Your API is operating normally</p>
+                </div>
+                <p className="text-sm font-medium text-gray-500 mt-4">Recent Events</p>
+                {[
+                  { event: 'Rate limit threshold reached', time: '2 hours ago', severity: 'warning' },
+                  { event: 'New API key created', time: '1 day ago', severity: 'info' },
+                  { event: 'Key rotation completed', time: '3 days ago', severity: 'info' },
+                ].map((alert, i) => (
+                  <div key={i} className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-2 h-2 rounded-full ${alert.severity === 'warning' ? 'bg-orange-500' : 'bg-blue-500'}`} />
+                      <span className="text-sm">{alert.event}</span>
+                    </div>
+                    <span className="text-xs text-gray-500">{alert.time}</span>
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+          </DialogContent>
+        </Dialog>
+
+        {/* Docs Dialog */}
+        <Dialog open={docsDialogOpen} onOpenChange={setDocsDialogOpen}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>API Documentation</DialogTitle>
+              <DialogDescription>Quick links to API documentation and resources</DialogDescription>
+            </DialogHeader>
+            <div className="py-4 space-y-3">
+              {[
+                { title: 'Getting Started', desc: 'Quick introduction to the API', icon: Play },
+                { title: 'Authentication', desc: 'Learn about API key authentication', icon: Key },
+                { title: 'API Reference', desc: 'Complete endpoint documentation', icon: FileText },
+                { title: 'Webhooks Guide', desc: 'Set up and manage webhooks', icon: Webhook },
+                { title: 'Rate Limits', desc: 'Understand usage limits', icon: Zap },
+                { title: 'Security Best Practices', desc: 'Keep your API secure', icon: Shield },
+              ].map((doc, i) => (
+                <div key={i} className="flex items-center gap-4 p-3 rounded-lg bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer" onClick={() => { toast.success(`Opening ${doc.title}...`); setDocsDialogOpen(false) }}>
+                  <doc.icon className="w-5 h-5 text-gray-600" />
+                  <div>
+                    <p className="font-medium text-sm">{doc.title}</p>
+                    <p className="text-xs text-gray-500">{doc.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Settings Quick Dialog */}
+        <Dialog open={settingsDialogOpen} onOpenChange={setSettingsDialogOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Quick Settings</DialogTitle>
+              <DialogDescription>Common API configuration options</DialogDescription>
+            </DialogHeader>
+            <div className="py-4 space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium text-sm">Auto Key Rotation</p>
+                  <p className="text-xs text-gray-500">Rotate keys automatically every 90 days</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium text-sm">Rate Limit Alerts</p>
+                  <p className="text-xs text-gray-500">Get notified when approaching limits</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium text-sm">Security Notifications</p>
+                  <p className="text-xs text-gray-500">Email alerts for suspicious activity</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setSettingsDialogOpen(false)}>Close</Button>
+              <Button onClick={() => { toast.success('Settings saved'); setSettingsDialogOpen(false) }}>Save</Button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
       </div>

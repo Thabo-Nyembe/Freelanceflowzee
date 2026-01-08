@@ -404,6 +404,19 @@ export default function SecurityAuditClient() {
   const [showComplianceReportDialog, setShowComplianceReportDialog] = useState(false)
   const [showSettingsDialog, setShowSettingsDialog] = useState(false)
 
+  // Additional dialog states for buttons
+  const [showFilterDialog, setShowFilterDialog] = useState(false)
+  const [showExportReportDialog, setShowExportReportDialog] = useState(false)
+  const [showScheduleAuditDialog, setShowScheduleAuditDialog] = useState(false)
+  const [showNewAuditDialog, setShowNewAuditDialog] = useState(false)
+  const [showDiscoverAssetsDialog, setShowDiscoverAssetsDialog] = useState(false)
+  const [showAddAssetDialog, setShowAddAssetDialog] = useState(false)
+  const [showAssetActionsDialog, setShowAssetActionsDialog] = useState<string | null>(null)
+  const [showAssessComplianceDialog, setShowAssessComplianceDialog] = useState(false)
+  const [showResetSettingsDialog, setShowResetSettingsDialog] = useState(false)
+  const [showAssignVulnDialog, setShowAssignVulnDialog] = useState(false)
+  const [showRemediationDialog, setShowRemediationDialog] = useState(false)
+
   // Quick actions with proper dialog handlers
   const securityQuickActions = [
     { id: '1', label: 'Run Scan', icon: 'Scan', shortcut: 'S', action: () => setShowRunScanDialog(true) },
@@ -543,7 +556,7 @@ export default function SecurityAuditClient() {
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            <Button variant="outline">
+            <Button variant="outline" onClick={() => setShowFilterDialog(true)}>
               <Filter className="h-4 w-4 mr-2" />
               Filters
             </Button>
@@ -620,7 +633,7 @@ export default function SecurityAuditClient() {
                   <p className="text-blue-100">Real-time security posture and vulnerability management</p>
                 </div>
                 <div className="flex gap-3">
-                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/20">
+                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/20" onClick={() => setShowExportReportDialog(true)}>
                     <Download className="w-4 h-4 mr-2" />Export Report
                   </Button>
                   <Button className="bg-white text-blue-700 hover:bg-blue-50" onClick={() => setShowScanDialog(true)}>
@@ -779,7 +792,7 @@ export default function SecurityAuditClient() {
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <CardTitle>Recent Security Audits</CardTitle>
-                    <Button variant="outline" size="sm">View All</Button>
+                    <Button variant="outline" size="sm" onClick={() => setActiveTab('audits')}>View All</Button>
                   </div>
                 </CardHeader>
                 <CardContent>
@@ -813,7 +826,7 @@ export default function SecurityAuditClient() {
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <CardTitle>High-Risk Assets</CardTitle>
-                    <Button variant="outline" size="sm">View All</Button>
+                    <Button variant="outline" size="sm" onClick={() => setActiveTab('assets')}>View All</Button>
                   </div>
                 </CardHeader>
                 <CardContent>
@@ -941,7 +954,7 @@ export default function SecurityAuditClient() {
                   <p className="text-red-100">Track, prioritize, and remediate security vulnerabilities</p>
                 </div>
                 <div className="flex gap-3">
-                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/20">
+                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/20" onClick={() => setShowExportReportDialog(true)}>
                     <Download className="w-4 h-4 mr-2" />Export
                   </Button>
                   <Button className="bg-white text-red-600 hover:bg-red-50" onClick={() => setShowScanDialog(true)}>
@@ -1013,7 +1026,7 @@ export default function SecurityAuditClient() {
                     >
                       Medium
                     </Button>
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" onClick={() => setShowExportReportDialog(true)}>
                       <Download className="h-4 w-4 mr-2" />
                       Export
                     </Button>
@@ -1087,10 +1100,10 @@ export default function SecurityAuditClient() {
                   <p className="text-purple-100">Schedule and manage comprehensive security assessments</p>
                 </div>
                 <div className="flex gap-3">
-                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/20">
+                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/20" onClick={() => setShowScheduleAuditDialog(true)}>
                     <Calendar className="w-4 h-4 mr-2" />Schedule
                   </Button>
-                  <Button className="bg-white text-purple-600 hover:bg-purple-50">
+                  <Button className="bg-white text-purple-600 hover:bg-purple-50" onClick={() => setShowNewAuditDialog(true)}>
                     <Plus className="w-4 h-4 mr-2" />New Audit
                   </Button>
                 </div>
@@ -1178,10 +1191,10 @@ export default function SecurityAuditClient() {
                   <p className="text-emerald-100">Manage and monitor your IT infrastructure assets</p>
                 </div>
                 <div className="flex gap-3">
-                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/20">
+                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/20" onClick={() => setShowDiscoverAssetsDialog(true)}>
                     <Scan className="w-4 h-4 mr-2" />Discover
                   </Button>
-                  <Button className="bg-white text-emerald-600 hover:bg-emerald-50">
+                  <Button className="bg-white text-emerald-600 hover:bg-emerald-50" onClick={() => setShowAddAssetDialog(true)}>
                     <Plus className="w-4 h-4 mr-2" />Add Asset
                   </Button>
                 </div>
@@ -1218,7 +1231,7 @@ export default function SecurityAuditClient() {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle>Asset Inventory</CardTitle>
-                  <Button className="bg-blue-600 hover:bg-blue-700">
+                  <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => setShowAddAssetDialog(true)}>
                     <Plus className="h-4 w-4 mr-2" />
                     Add Asset
                   </Button>
@@ -1271,7 +1284,7 @@ export default function SecurityAuditClient() {
                           <Progress value={asset.riskScore} className="h-2" />
                         </div>
 
-                        <Button variant="ghost" size="icon">
+                        <Button variant="ghost" size="icon" onClick={() => setShowAssetActionsDialog(asset.id)}>
                           <MoreHorizontal className="h-4 w-4" />
                         </Button>
                       </div>
@@ -1292,10 +1305,10 @@ export default function SecurityAuditClient() {
                   <p className="text-amber-100">Monitor regulatory compliance and control effectiveness</p>
                 </div>
                 <div className="flex gap-3">
-                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/20">
+                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/20" onClick={() => setShowComplianceReportDialog(true)}>
                     <Download className="w-4 h-4 mr-2" />Reports
                   </Button>
-                  <Button className="bg-white text-amber-600 hover:bg-amber-50">
+                  <Button className="bg-white text-amber-600 hover:bg-amber-50" onClick={() => setShowAssessComplianceDialog(true)}>
                     <RefreshCw className="w-4 h-4 mr-2" />Assess
                   </Button>
                 </div>
@@ -1710,7 +1723,7 @@ export default function SecurityAuditClient() {
                             <p className="font-medium text-red-700 dark:text-red-400">Reset All Settings</p>
                             <p className="text-sm text-red-600">This will reset all configurations</p>
                           </div>
-                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-100">
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-100" onClick={() => setShowResetSettingsDialog(true)}>
                             Reset
                           </Button>
                         </div>
@@ -1835,19 +1848,32 @@ export default function SecurityAuditClient() {
                   </div>
 
                   <div className="flex gap-3 pt-4 border-t">
-                    <Button className="bg-blue-600 hover:bg-blue-700">
+                    <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => {
+                      setShowRemediationDialog(true)
+                    }}>
                       <Play className="h-4 w-4 mr-2" />
                       Start Remediation
                     </Button>
-                    <Button variant="outline">
+                    <Button variant="outline" onClick={() => setShowAssignVulnDialog(true)}>
                       <Users className="h-4 w-4 mr-2" />
                       Assign
                     </Button>
-                    <Button variant="outline">
+                    <Button variant="outline" onClick={() => {
+                      if (selectedVulnerability) {
+                        handleResolveVulnerability(selectedVulnerability)
+                        setSelectedVulnerability(null)
+                      }
+                    }}>
                       <CheckCircle2 className="h-4 w-4 mr-2" />
                       Mark Resolved
                     </Button>
-                    <Button variant="ghost" className="ml-auto">
+                    <Button variant="ghost" className="ml-auto" onClick={() => {
+                      if (selectedVulnerability?.cveId && selectedVulnerability.cveId !== 'N/A') {
+                        window.open(`https://nvd.nist.gov/vuln/detail/${selectedVulnerability.cveId}`, '_blank')
+                      } else {
+                        toast.info('No CVE ID', { description: 'This vulnerability does not have an associated CVE' })
+                      }
+                    }}>
                       <ExternalLink className="h-4 w-4 mr-2" />
                       View in NVD
                     </Button>
@@ -1891,7 +1917,10 @@ export default function SecurityAuditClient() {
                 <Button variant="outline" className="flex-1" onClick={() => setShowScanDialog(false)}>
                   Cancel
                 </Button>
-                <Button className="flex-1 bg-blue-600 hover:bg-blue-700">
+                <Button className="flex-1 bg-blue-600 hover:bg-blue-700" onClick={() => {
+                  setShowScanDialog(false)
+                  toast.success('Scan initiated', { description: 'Security scan has been started' })
+                }}>
                   <Play className="h-4 w-4 mr-2" />
                   Start Scan
                 </Button>
@@ -2104,6 +2133,576 @@ export default function SecurityAuditClient() {
                 }}>
                   <Settings className="h-4 w-4 mr-2" />
                   All Settings
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Filter Dialog */}
+        <Dialog open={showFilterDialog} onOpenChange={setShowFilterDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Filter className="h-5 w-5 text-blue-600" />
+                Filter Options
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-3">
+                <div>
+                  <label className="text-sm font-medium">Severity</label>
+                  <div className="flex gap-2 mt-2">
+                    {['critical', 'high', 'medium', 'low'].map(sev => (
+                      <Button
+                        key={sev}
+                        variant="outline"
+                        size="sm"
+                        className={`capitalize ${selectedSeverity === sev ? 'bg-blue-100 border-blue-500' : ''}`}
+                        onClick={() => setSelectedSeverity(sev as Severity)}
+                      >
+                        {sev}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Status</label>
+                  <div className="flex gap-2 mt-2 flex-wrap">
+                    {['open', 'in-progress', 'resolved', 'accepted'].map(status => (
+                      <Button key={status} variant="outline" size="sm" className="capitalize">
+                        {status}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Asset Type</label>
+                  <div className="flex gap-2 mt-2 flex-wrap">
+                    {['server', 'database', 'application', 'cloud', 'network'].map(type => (
+                      <Button key={type} variant="outline" size="sm" className="capitalize">
+                        {type}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <div className="flex gap-3 pt-2">
+                <Button variant="outline" className="flex-1" onClick={() => {
+                  setSelectedSeverity('all')
+                  setShowFilterDialog(false)
+                }}>
+                  Clear All
+                </Button>
+                <Button className="flex-1 bg-blue-600 hover:bg-blue-700" onClick={() => {
+                  setShowFilterDialog(false)
+                  toast.success('Filters applied', { description: 'Vulnerability list has been filtered' })
+                }}>
+                  Apply Filters
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Export Report Dialog */}
+        <Dialog open={showExportReportDialog} onOpenChange={setShowExportReportDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Download className="h-5 w-5 text-green-600" />
+                Export Security Report
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Choose a report format to export security data.
+              </p>
+              <div className="space-y-2">
+                {[
+                  { format: 'PDF', desc: 'Full report with charts and graphs', icon: FileText },
+                  { format: 'CSV', desc: 'Raw data for spreadsheet analysis', icon: Download },
+                  { format: 'JSON', desc: 'Machine-readable format for integrations', icon: Webhook },
+                ].map((item, i) => (
+                  <div key={i} className="p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer flex items-center gap-3">
+                    <item.icon className="h-5 w-5 text-blue-600" />
+                    <div>
+                      <p className="font-medium">{item.format}</p>
+                      <p className="text-xs text-gray-500">{item.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Date Range</label>
+                <div className="flex gap-2">
+                  <Input type="date" className="flex-1" />
+                  <span className="self-center text-gray-500">to</span>
+                  <Input type="date" className="flex-1" />
+                </div>
+              </div>
+              <div className="flex gap-3 pt-2">
+                <Button variant="outline" className="flex-1" onClick={() => setShowExportReportDialog(false)}>
+                  Cancel
+                </Button>
+                <Button className="flex-1 bg-green-600 hover:bg-green-700" onClick={() => {
+                  setShowExportReportDialog(false)
+                  toast.success('Export started', { description: 'Your report is being generated and will download shortly' })
+                }}>
+                  <Download className="h-4 w-4 mr-2" />
+                  Export
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Schedule Audit Dialog */}
+        <Dialog open={showScheduleAuditDialog} onOpenChange={setShowScheduleAuditDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Calendar className="h-5 w-5 text-purple-600" />
+                Schedule Security Audit
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Audit Type</label>
+                <div className="grid grid-cols-2 gap-2">
+                  {[
+                    { type: 'Vulnerability Scan', icon: Bug },
+                    { type: 'Compliance Audit', icon: FileCheck },
+                    { type: 'Penetration Test', icon: Target },
+                    { type: 'Cloud Security', icon: Cloud },
+                  ].map((item, i) => (
+                    <div key={i} className="p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer flex items-center gap-2">
+                      <item.icon className="h-4 w-4 text-purple-600" />
+                      <span className="text-sm">{item.type}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Schedule Date & Time</label>
+                <Input type="datetime-local" />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Recurrence</label>
+                <div className="flex gap-2">
+                  {['Once', 'Weekly', 'Monthly', 'Quarterly'].map(freq => (
+                    <Button key={freq} variant="outline" size="sm">{freq}</Button>
+                  ))}
+                </div>
+              </div>
+              <div className="flex gap-3 pt-2">
+                <Button variant="outline" className="flex-1" onClick={() => setShowScheduleAuditDialog(false)}>
+                  Cancel
+                </Button>
+                <Button className="flex-1 bg-purple-600 hover:bg-purple-700" onClick={() => {
+                  setShowScheduleAuditDialog(false)
+                  toast.success('Audit scheduled', { description: 'Your security audit has been scheduled' })
+                }}>
+                  <Calendar className="h-4 w-4 mr-2" />
+                  Schedule
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* New Audit Dialog */}
+        <Dialog open={showNewAuditDialog} onOpenChange={setShowNewAuditDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Plus className="h-5 w-5 text-blue-600" />
+                Create New Audit
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Audit Name</label>
+                <Input placeholder="e.g., Q1 2024 Security Assessment" />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Audit Type</label>
+                <div className="grid grid-cols-2 gap-2">
+                  {[
+                    { type: 'Vulnerability Scan', icon: Bug, color: 'red' },
+                    { type: 'Compliance Audit', icon: FileCheck, color: 'blue' },
+                    { type: 'Penetration Test', icon: Target, color: 'purple' },
+                    { type: 'Cloud Security', icon: Cloud, color: 'cyan' },
+                  ].map((item, i) => (
+                    <div key={i} className="p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer">
+                      <item.icon className={`h-6 w-6 text-${item.color}-600 mb-2`} />
+                      <p className="text-sm font-medium">{item.type}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Scope</label>
+                <div className="flex gap-2 flex-wrap">
+                  {['Production Servers', 'Databases', 'Web Applications', 'Cloud Infrastructure', 'Network Devices'].map(scope => (
+                    <Button key={scope} variant="outline" size="sm">{scope}</Button>
+                  ))}
+                </div>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Description</label>
+                <Input placeholder="Brief description of the audit..." />
+              </div>
+              <div className="flex gap-3 pt-2">
+                <Button variant="outline" className="flex-1" onClick={() => setShowNewAuditDialog(false)}>
+                  Cancel
+                </Button>
+                <Button className="flex-1 bg-blue-600 hover:bg-blue-700" onClick={() => {
+                  setShowNewAuditDialog(false)
+                  toast.success('Audit created', { description: 'New security audit has been created' })
+                }}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create Audit
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Discover Assets Dialog */}
+        <Dialog open={showDiscoverAssetsDialog} onOpenChange={setShowDiscoverAssetsDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Radar className="h-5 w-5 text-emerald-600" />
+                Discover Assets
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Scan your network to discover new assets automatically.
+              </p>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Scan Range</label>
+                <div className="space-y-2">
+                  {[
+                    { range: 'Local Network (10.0.0.0/8)', desc: 'Internal network assets' },
+                    { range: 'Cloud Infrastructure', desc: 'AWS, Azure, GCP resources' },
+                    { range: 'External Perimeter', desc: 'Public-facing assets' },
+                    { range: 'Custom Range', desc: 'Specify IP ranges manually' },
+                  ].map((item, i) => (
+                    <div key={i} className="p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer">
+                      <p className="font-medium text-sm">{item.range}</p>
+                      <p className="text-xs text-gray-500">{item.desc}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="flex gap-3 pt-2">
+                <Button variant="outline" className="flex-1" onClick={() => setShowDiscoverAssetsDialog(false)}>
+                  Cancel
+                </Button>
+                <Button className="flex-1 bg-emerald-600 hover:bg-emerald-700" onClick={() => {
+                  setShowDiscoverAssetsDialog(false)
+                  toast.success('Discovery started', { description: 'Asset discovery scan is running...' })
+                }}>
+                  <Radar className="h-4 w-4 mr-2" />
+                  Start Discovery
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Asset Dialog */}
+        <Dialog open={showAddAssetDialog} onOpenChange={setShowAddAssetDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Plus className="h-5 w-5 text-blue-600" />
+                Add New Asset
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Asset Name</label>
+                <Input placeholder="e.g., prod-web-server-01" />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Asset Type</label>
+                <div className="grid grid-cols-3 gap-2">
+                  {[
+                    { type: 'Server', icon: Server },
+                    { type: 'Database', icon: Database },
+                    { type: 'Application', icon: Globe },
+                    { type: 'Cloud', icon: Cloud },
+                    { type: 'Container', icon: Layers },
+                    { type: 'Network', icon: Network },
+                  ].map((item, i) => (
+                    <div key={i} className="p-2 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer text-center">
+                      <item.icon className="h-5 w-5 mx-auto text-blue-600 mb-1" />
+                      <p className="text-xs">{item.type}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">IP Address</label>
+                  <Input placeholder="10.0.1.100" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Hostname</label>
+                  <Input placeholder="server.internal" />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Criticality</label>
+                <div className="flex gap-2">
+                  {['Critical', 'High', 'Medium', 'Low'].map(level => (
+                    <Button key={level} variant="outline" size="sm">{level}</Button>
+                  ))}
+                </div>
+              </div>
+              <div className="flex gap-3 pt-2">
+                <Button variant="outline" className="flex-1" onClick={() => setShowAddAssetDialog(false)}>
+                  Cancel
+                </Button>
+                <Button className="flex-1 bg-blue-600 hover:bg-blue-700" onClick={() => {
+                  setShowAddAssetDialog(false)
+                  toast.success('Asset added', { description: 'New asset has been added to inventory' })
+                }}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Asset
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Asset Actions Dialog */}
+        <Dialog open={!!showAssetActionsDialog} onOpenChange={() => setShowAssetActionsDialog(null)}>
+          <DialogContent className="max-w-sm">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <MoreHorizontal className="h-5 w-5 text-gray-600" />
+                Asset Actions
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-2">
+              {[
+                { label: 'Scan Asset', icon: Scan, action: () => toast.success('Scan started') },
+                { label: 'View Details', icon: FileText, action: () => toast.info('Asset details') },
+                { label: 'Edit Asset', icon: Settings, action: () => toast.info('Edit mode') },
+                { label: 'View Vulnerabilities', icon: Bug, action: () => setActiveTab('vulnerabilities') },
+                { label: 'Run Compliance Check', icon: FileCheck, action: () => toast.success('Compliance check initiated') },
+                { label: 'Remove Asset', icon: AlertTriangle, action: () => toast.error('Asset removal requires confirmation') },
+              ].map((item, i) => (
+                <Button
+                  key={i}
+                  variant="ghost"
+                  className="w-full justify-start"
+                  onClick={() => {
+                    setShowAssetActionsDialog(null)
+                    item.action()
+                  }}
+                >
+                  <item.icon className="h-4 w-4 mr-2" />
+                  {item.label}
+                </Button>
+              ))}
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Assess Compliance Dialog */}
+        <Dialog open={showAssessComplianceDialog} onOpenChange={setShowAssessComplianceDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <RefreshCw className="h-5 w-5 text-amber-600" />
+                Run Compliance Assessment
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Select compliance frameworks to assess against.
+              </p>
+              <div className="space-y-2">
+                {complianceFrameworks.map((framework, i) => (
+                  <div key={i} className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
+                    <div className="flex items-center gap-3">
+                      <framework.icon className="h-5 w-5 text-blue-600" />
+                      <div>
+                        <p className="font-medium text-sm">{framework.name}</p>
+                        <p className="text-xs text-gray-500">{framework.controls} controls</p>
+                      </div>
+                    </div>
+                    <Switch defaultChecked={i < 3} />
+                  </div>
+                ))}
+              </div>
+              <div className="flex gap-3 pt-2">
+                <Button variant="outline" className="flex-1" onClick={() => setShowAssessComplianceDialog(false)}>
+                  Cancel
+                </Button>
+                <Button className="flex-1 bg-amber-600 hover:bg-amber-700" onClick={() => {
+                  setShowAssessComplianceDialog(false)
+                  toast.success('Assessment started', { description: 'Compliance assessment is running...' })
+                }}>
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Run Assessment
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Reset Settings Dialog */}
+        <Dialog open={showResetSettingsDialog} onOpenChange={setShowResetSettingsDialog}>
+          <DialogContent className="max-w-sm">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-600">
+                <AlertTriangle className="h-5 w-5" />
+                Reset All Settings
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Are you sure you want to reset all security settings to their defaults? This action cannot be undone.
+              </p>
+              <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                <p className="text-sm text-red-700 dark:text-red-400">
+                  This will reset: scan schedules, notification preferences, integration settings, and all custom configurations.
+                </p>
+              </div>
+              <div className="flex gap-3 pt-2">
+                <Button variant="outline" className="flex-1" onClick={() => setShowResetSettingsDialog(false)}>
+                  Cancel
+                </Button>
+                <Button variant="destructive" className="flex-1" onClick={() => {
+                  setShowResetSettingsDialog(false)
+                  toast.success('Settings reset', { description: 'All settings have been reset to defaults' })
+                }}>
+                  Reset Settings
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Assign Vulnerability Dialog */}
+        <Dialog open={showAssignVulnDialog} onOpenChange={setShowAssignVulnDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Users className="h-5 w-5 text-blue-600" />
+                Assign Vulnerability
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Assign this vulnerability to a team member for remediation.
+              </p>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Select Assignee</label>
+                <div className="space-y-2">
+                  {[
+                    { name: 'John Smith', role: 'Security Engineer', avatar: 'JS' },
+                    { name: 'Sarah Wilson', role: 'DevOps Lead', avatar: 'SW' },
+                    { name: 'Mike Chen', role: 'Senior Developer', avatar: 'MC' },
+                    { name: 'Alex Security', role: 'Security Lead', avatar: 'AS' },
+                  ].map((person, i) => (
+                    <div key={i} className="flex items-center gap-3 p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer">
+                      <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-sm font-medium text-blue-600">
+                        {person.avatar}
+                      </div>
+                      <div>
+                        <p className="font-medium text-sm">{person.name}</p>
+                        <p className="text-xs text-gray-500">{person.role}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Due Date</label>
+                <Input type="date" />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Notes</label>
+                <Input placeholder="Add notes for the assignee..." />
+              </div>
+              <div className="flex gap-3 pt-2">
+                <Button variant="outline" className="flex-1" onClick={() => setShowAssignVulnDialog(false)}>
+                  Cancel
+                </Button>
+                <Button className="flex-1 bg-blue-600 hover:bg-blue-700" onClick={() => {
+                  setShowAssignVulnDialog(false)
+                  toast.success('Assigned', { description: 'Vulnerability has been assigned for remediation' })
+                }}>
+                  <Users className="h-4 w-4 mr-2" />
+                  Assign
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Remediation Dialog */}
+        <Dialog open={showRemediationDialog} onOpenChange={setShowRemediationDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Play className="h-5 w-5 text-green-600" />
+                Start Remediation
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              {selectedVulnerability && (
+                <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <h4 className="font-medium">{selectedVulnerability.title}</h4>
+                  <p className="text-sm text-gray-500">{selectedVulnerability.cveId} - {selectedVulnerability.affectedAsset}</p>
+                </div>
+              )}
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Remediation Action</label>
+                <div className="space-y-2">
+                  {[
+                    { action: 'Apply Patch', desc: 'Install security update from vendor', icon: CheckCircle2 },
+                    { action: 'Configure Mitigation', desc: 'Apply temporary workaround', icon: Settings },
+                    { action: 'Accept Risk', desc: 'Document and accept the risk', icon: AlertTriangle },
+                    { action: 'Mark as False Positive', desc: 'Not applicable to this system', icon: AlertCircle },
+                  ].map((item, i) => (
+                    <div key={i} className="flex items-center gap-3 p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer">
+                      <item.icon className="h-5 w-5 text-blue-600" />
+                      <div>
+                        <p className="font-medium text-sm">{item.action}</p>
+                        <p className="text-xs text-gray-500">{item.desc}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Notes / Comments</label>
+                <Input placeholder="Document remediation steps taken..." />
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch id="create-ticket" />
+                <label htmlFor="create-ticket" className="text-sm">Create Jira ticket for tracking</label>
+              </div>
+              <div className="flex gap-3 pt-2">
+                <Button variant="outline" className="flex-1" onClick={() => setShowRemediationDialog(false)}>
+                  Cancel
+                </Button>
+                <Button className="flex-1 bg-green-600 hover:bg-green-700" onClick={() => {
+                  setShowRemediationDialog(false)
+                  setSelectedVulnerability(null)
+                  toast.success('Remediation started', { description: 'Remediation process has been initiated' })
+                }}>
+                  <Play className="h-4 w-4 mr-2" />
+                  Start Remediation
                 </Button>
               </div>
             </div>

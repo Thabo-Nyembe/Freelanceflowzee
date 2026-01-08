@@ -492,6 +492,30 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
   const [selectedInstallPlan, setSelectedInstallPlan] = useState<PricingPlan | null>(null)
   const [logsFilter, setLogsFilter] = useState<'all' | 'success' | 'error' | 'warning'>('all')
 
+  // Additional dialog states for buttons
+  const [showDeveloperPortalDialog, setShowDeveloperPortalDialog] = useState(false)
+  const [showSubmitAppDialog, setShowSubmitAppDialog] = useState(false)
+  const [showConfigureAppDialog, setShowConfigureAppDialog] = useState(false)
+  const [showUninstallDialog, setShowUninstallDialog] = useState(false)
+  const [showReconnectDialog, setShowReconnectDialog] = useState(false)
+  const [showDisconnectDialog, setShowDisconnectDialog] = useState(false)
+  const [showCreateApiKeyDialog, setShowCreateApiKeyDialog] = useState(false)
+  const [showAddWebhookDialog, setShowAddWebhookDialog] = useState(false)
+  const [showUnblockAppDialog, setShowUnblockAppDialog] = useState(false)
+  const [showBlockAppDialog, setShowBlockAppDialog] = useState(false)
+  const [showExportDialog, setShowExportDialog] = useState(false)
+  const [showImportDialog, setShowImportDialog] = useState(false)
+  const [showClearCacheDialog, setShowClearCacheDialog] = useState(false)
+  const [showResetSettingsDialog, setShowResetSettingsDialog] = useState(false)
+  const [showDisconnectAllDialog, setShowDisconnectAllDialog] = useState(false)
+  const [showRegenerateKeyDialog, setShowRegenerateKeyDialog] = useState(false)
+  const [selectedAppForAction, setSelectedAppForAction] = useState<AppListing | null>(null)
+  const [keyTypeToRegenerate, setKeyTypeToRegenerate] = useState<'production' | 'test'>('production')
+  const [newApiKeyName, setNewApiKeyName] = useState('')
+  const [newWebhookUrl, setNewWebhookUrl] = useState('')
+  const [newWebhookEvents, setNewWebhookEvents] = useState<string[]>([])
+  const [appToBlock, setAppToBlock] = useState('')
+
   // Mock logs data
   const integrationLogs = [
     { id: '1', timestamp: new Date().toISOString(), type: 'success' as const, app: 'Stripe', event: 'Payment webhook received', details: 'Order #12345 payment confirmed' },
@@ -620,7 +644,21 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
                 <Badge className="bg-teal-100 text-teal-700 text-xs">Free tier</Badge>
               )}
             </div>
-            <Button size="sm" variant={app.status === 'installed' ? 'outline' : 'default'} className={app.status !== 'installed' ? 'bg-teal-600 hover:bg-teal-700' : ''}>
+            <Button
+              size="sm"
+              variant={app.status === 'installed' ? 'outline' : 'default'}
+              className={app.status !== 'installed' ? 'bg-teal-600 hover:bg-teal-700' : ''}
+              onClick={(e) => {
+                e.stopPropagation()
+                if (app.status === 'installed') {
+                  setSelectedAppForAction(app)
+                  setShowConfigureAppDialog(true)
+                } else {
+                  setSelectedApp(app)
+                  setShowInstallDialog(true)
+                }
+              }}
+            >
               {app.status === 'installed' ? 'Manage' : 'Install'}
             </Button>
           </div>
@@ -640,11 +678,11 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
               <p className="text-teal-100 mt-1">Discover and connect powerful tools to supercharge your workflow</p>
             </div>
             <div className="flex items-center gap-3">
-              <Button variant="secondary" className="bg-white/20 hover:bg-white/30 border-0">
+              <Button variant="secondary" className="bg-white/20 hover:bg-white/30 border-0" onClick={() => setShowDeveloperPortalDialog(true)}>
                 <Code className="w-4 h-4 mr-2" />
                 Developer Portal
               </Button>
-              <Button className="bg-white text-teal-600 hover:bg-teal-50">
+              <Button className="bg-white text-teal-600 hover:bg-teal-50" onClick={() => setShowSubmitAppDialog(true)}>
                 <Plus className="w-4 h-4 mr-2" />
                 Submit App
               </Button>
@@ -737,7 +775,7 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
                   <Sparkles className="w-5 h-5 text-yellow-500" />
                   <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Featured Apps</h2>
                 </div>
-                <Button variant="ghost" size="sm" className="text-teal-600">
+                <Button variant="ghost" size="sm" className="text-teal-600" onClick={() => { setSelectedCategory('all'); setActiveTab('discover') }}>
                   View all <ChevronRight className="w-4 h-4 ml-1" />
                 </Button>
               </div>
@@ -872,11 +910,11 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
-                          <Button variant="outline" size="sm">
+                          <Button variant="outline" size="sm" onClick={() => { setSelectedAppForAction(app); setShowConfigureAppDialog(true) }}>
                             <Settings className="w-4 h-4 mr-1" />
                             Configure
                           </Button>
-                          <Button variant="outline" size="sm" className="text-red-600 hover:bg-red-50">
+                          <Button variant="outline" size="sm" className="text-red-600 hover:bg-red-50" onClick={() => { setSelectedAppForAction(app); setShowUninstallDialog(true) }}>
                             Uninstall
                           </Button>
                         </div>
@@ -1185,11 +1223,11 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
                               </div>
                             </div>
                             <div className="flex items-center gap-2">
-                              <Button variant="outline" size="sm">
+                              <Button variant="outline" size="sm" onClick={() => { setSelectedAppForAction(app); setShowReconnectDialog(true) }}>
                                 <RefreshCw className="w-4 h-4 mr-1" />
                                 Reconnect
                               </Button>
-                              <Button variant="outline" size="sm" className="text-red-600 hover:bg-red-50">
+                              <Button variant="outline" size="sm" className="text-red-600 hover:bg-red-50" onClick={() => { setSelectedAppForAction(app); setShowDisconnectDialog(true) }}>
                                 Disconnect
                               </Button>
                             </div>
@@ -1426,10 +1464,10 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
                           </div>
                           <div className="flex items-center gap-2">
                             <Input type="password" value="mk_prod_xxxxxxxxxxxxxxxxxxxxxxxxx" readOnly className="font-mono" />
-                            <Button variant="outline" size="sm">
+                            <Button variant="outline" size="sm" onClick={() => { navigator.clipboard.writeText('mk_prod_xxxxxxxxxxxxxxxxxxxxxxxxx'); toast.success('Production API key copied to clipboard') }}>
                               <Copy className="w-4 h-4" />
                             </Button>
-                            <Button variant="outline" size="sm">Regenerate</Button>
+                            <Button variant="outline" size="sm" onClick={() => { setKeyTypeToRegenerate('production'); setShowRegenerateKeyDialog(true) }}>Regenerate</Button>
                           </div>
                           <div className="text-xs text-gray-500 mt-2">Created Jan 15, 2024 • Last used 2 hours ago</div>
                         </div>
@@ -1444,15 +1482,15 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
                           </div>
                           <div className="flex items-center gap-2">
                             <Input type="password" value="mk_test_xxxxxxxxxxxxxxxxxxxxxxxxx" readOnly className="font-mono" />
-                            <Button variant="outline" size="sm">
+                            <Button variant="outline" size="sm" onClick={() => { navigator.clipboard.writeText('mk_test_xxxxxxxxxxxxxxxxxxxxxxxxx'); toast.success('Test API key copied to clipboard') }}>
                               <Copy className="w-4 h-4" />
                             </Button>
-                            <Button variant="outline" size="sm">Regenerate</Button>
+                            <Button variant="outline" size="sm" onClick={() => { setKeyTypeToRegenerate('test'); setShowRegenerateKeyDialog(true) }}>Regenerate</Button>
                           </div>
                           <div className="text-xs text-gray-500 mt-2">Created Jan 15, 2024 • Last used 5 min ago</div>
                         </div>
 
-                        <Button className="w-full bg-teal-600">
+                        <Button className="w-full bg-teal-600" onClick={() => setShowCreateApiKeyDialog(true)}>
                           <Plus className="w-4 h-4 mr-2" />
                           Create New API Key
                         </Button>
@@ -1496,7 +1534,7 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
                           </div>
                         </div>
 
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => setShowAddWebhookDialog(true)}>
                           <Plus className="w-4 h-4 mr-2" />
                           Add Webhook Endpoint
                         </Button>
@@ -1643,10 +1681,10 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
                                 <div className="text-sm text-red-600">Blocked by admin on Jan 10, 2024</div>
                               </div>
                             </div>
-                            <Button variant="outline" size="sm">Unblock</Button>
+                            <Button variant="outline" size="sm" onClick={() => setShowUnblockAppDialog(true)}>Unblock</Button>
                           </div>
                         </div>
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => setShowBlockAppDialog(true)}>
                           <Plus className="w-4 h-4 mr-2" />
                           Block an App
                         </Button>
@@ -1758,21 +1796,21 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
                             <div className="font-medium">Export All Data</div>
                             <div className="text-sm text-gray-500">Download all your marketplace configuration</div>
                           </div>
-                          <Button variant="outline">Export</Button>
+                          <Button variant="outline" onClick={() => setShowExportDialog(true)}>Export</Button>
                         </div>
                         <div className="flex items-center justify-between p-4 border rounded-lg">
                           <div>
                             <div className="font-medium">Import Configuration</div>
                             <div className="text-sm text-gray-500">Import settings from another workspace</div>
                           </div>
-                          <Button variant="outline">Import</Button>
+                          <Button variant="outline" onClick={() => setShowImportDialog(true)}>Import</Button>
                         </div>
                         <div className="flex items-center justify-between p-4 border rounded-lg">
                           <div>
                             <div className="font-medium">Clear Cache</div>
                             <div className="text-sm text-gray-500">Clear all cached data and force refresh</div>
                           </div>
-                          <Button variant="outline">Clear</Button>
+                          <Button variant="outline" onClick={() => setShowClearCacheDialog(true)}>Clear</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -1788,14 +1826,14 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
                             <div className="font-medium text-red-600">Reset All Settings</div>
                             <div className="text-sm text-gray-500">Reset all marketplace settings to defaults</div>
                           </div>
-                          <Button variant="destructive">Reset</Button>
+                          <Button variant="destructive" onClick={() => setShowResetSettingsDialog(true)}>Reset</Button>
                         </div>
                         <div className="flex items-center justify-between p-4 border border-red-200 rounded-lg">
                           <div>
                             <div className="font-medium text-red-600">Disconnect All Apps</div>
                             <div className="text-sm text-gray-500">Remove all connected integrations</div>
                           </div>
-                          <Button variant="destructive">Disconnect All</Button>
+                          <Button variant="destructive" onClick={() => setShowDisconnectAllDialog(true)}>Disconnect All</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -2221,11 +2259,11 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
                   <div className="flex gap-2">
                     {selectedApp.status === 'installed' ? (
                       <>
-                        <Button variant="outline">
+                        <Button variant="outline" onClick={() => { setSelectedAppForAction(selectedApp); setShowConfigureAppDialog(true) }}>
                           <Settings className="w-4 h-4 mr-2" />
                           Configure
                         </Button>
-                        <Button variant="outline" className="text-red-600">Uninstall</Button>
+                        <Button variant="outline" className="text-red-600" onClick={() => { setSelectedAppForAction(selectedApp); setShowUninstallDialog(true) }}>Uninstall</Button>
                       </>
                     ) : (
                       <Button className="bg-teal-600 hover:bg-teal-700" onClick={() => setShowInstallDialog(true)}>
@@ -2418,6 +2456,570 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
               </ScrollArea>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Developer Portal Dialog */}
+      <Dialog open={showDeveloperPortalDialog} onOpenChange={setShowDeveloperPortalDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Code className="w-5 h-5 text-teal-600" />
+              Developer Portal
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-gray-600">Access developer resources and documentation to build integrations with FreeFlow.</p>
+            <div className="grid grid-cols-2 gap-4">
+              <Card className="cursor-pointer hover:border-teal-300" onClick={() => { toast.success('Opening API Documentation...'); setShowDeveloperPortalDialog(false) }}>
+                <CardContent className="p-4 text-center">
+                  <Code className="w-8 h-8 mx-auto mb-2 text-teal-600" />
+                  <h4 className="font-semibold">API Documentation</h4>
+                  <p className="text-sm text-gray-500">REST API reference and guides</p>
+                </CardContent>
+              </Card>
+              <Card className="cursor-pointer hover:border-teal-300" onClick={() => { toast.success('Opening SDK Downloads...'); setShowDeveloperPortalDialog(false) }}>
+                <CardContent className="p-4 text-center">
+                  <Download className="w-8 h-8 mx-auto mb-2 text-blue-600" />
+                  <h4 className="font-semibold">SDK Downloads</h4>
+                  <p className="text-sm text-gray-500">JavaScript, Python, Ruby SDKs</p>
+                </CardContent>
+              </Card>
+              <Card className="cursor-pointer hover:border-teal-300" onClick={() => { toast.success('Opening Webhook Guide...'); setShowDeveloperPortalDialog(false) }}>
+                <CardContent className="p-4 text-center">
+                  <Webhook className="w-8 h-8 mx-auto mb-2 text-purple-600" />
+                  <h4 className="font-semibold">Webhook Guide</h4>
+                  <p className="text-sm text-gray-500">Events and payload reference</p>
+                </CardContent>
+              </Card>
+              <Card className="cursor-pointer hover:border-teal-300" onClick={() => { toast.success('Opening Sample Apps...'); setShowDeveloperPortalDialog(false) }}>
+                <CardContent className="p-4 text-center">
+                  <Package className="w-8 h-8 mx-auto mb-2 text-orange-600" />
+                  <h4 className="font-semibold">Sample Apps</h4>
+                  <p className="text-sm text-gray-500">Example integrations and code</p>
+                </CardContent>
+              </Card>
+            </div>
+            <div className="flex justify-end pt-4 border-t">
+              <Button variant="outline" onClick={() => setShowDeveloperPortalDialog(false)}>Close</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Submit App Dialog */}
+      <Dialog open={showSubmitAppDialog} onOpenChange={setShowSubmitAppDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Plus className="w-5 h-5 text-teal-600" />
+              Submit Your App
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-gray-600">Submit your app to the FreeFlow Marketplace and reach thousands of users.</p>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>App Name</Label>
+                <Input placeholder="Enter your app name" />
+              </div>
+              <div className="space-y-2">
+                <Label>Description</Label>
+                <Input placeholder="Brief description of your app" />
+              </div>
+              <div className="space-y-2">
+                <Label>Category</Label>
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories.map(cat => (
+                      <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Website URL</Label>
+                <Input placeholder="https://yourapp.com" />
+              </div>
+              <div className="space-y-2">
+                <Label>Support Email</Label>
+                <Input placeholder="support@yourapp.com" type="email" />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 pt-4 border-t">
+              <Button variant="outline" onClick={() => setShowSubmitAppDialog(false)}>Cancel</Button>
+              <Button className="bg-teal-600" onClick={() => { toast.success('App submission received! We will review it within 5 business days.'); setShowSubmitAppDialog(false) }}>Submit for Review</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Configure App Dialog */}
+      <Dialog open={showConfigureAppDialog} onOpenChange={setShowConfigureAppDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Settings className="w-5 h-5 text-teal-600" />
+              Configure {selectedAppForAction?.name}
+            </DialogTitle>
+          </DialogHeader>
+          {selectedAppForAction && (
+            <div className="space-y-4">
+              <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-teal-500 to-blue-600 flex items-center justify-center text-white font-bold">
+                  {selectedAppForAction.icon}
+                </div>
+                <div>
+                  <h4 className="font-semibold">{selectedAppForAction.name}</h4>
+                  <p className="text-sm text-gray-500">v{selectedAppForAction.version} - {selectedAppForAction.currentPlan || 'Free'} Plan</p>
+                </div>
+              </div>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label>API Endpoint</Label>
+                  <Input defaultValue="https://api.freeflow.com/integrations" />
+                </div>
+                <div className="flex items-center justify-between p-4 border rounded-lg">
+                  <div>
+                    <div className="font-medium">Enable Auto-Sync</div>
+                    <div className="text-sm text-gray-500">Automatically sync data every 5 minutes</div>
+                  </div>
+                  <Switch defaultChecked />
+                </div>
+                <div className="flex items-center justify-between p-4 border rounded-lg">
+                  <div>
+                    <div className="font-medium">Debug Mode</div>
+                    <div className="text-sm text-gray-500">Log detailed API calls and responses</div>
+                  </div>
+                  <Switch />
+                </div>
+                <div className="space-y-2">
+                  <Label>Sync Frequency</Label>
+                  <Select defaultValue="5">
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="1">Every minute</SelectItem>
+                      <SelectItem value="5">Every 5 minutes</SelectItem>
+                      <SelectItem value="15">Every 15 minutes</SelectItem>
+                      <SelectItem value="60">Every hour</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="flex justify-end gap-2 pt-4 border-t">
+                <Button variant="outline" onClick={() => setShowConfigureAppDialog(false)}>Cancel</Button>
+                <Button className="bg-teal-600" onClick={() => { toast.success(`${selectedAppForAction.name} configuration saved`); setShowConfigureAppDialog(false) }}>Save Configuration</Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Uninstall App Dialog */}
+      <Dialog open={showUninstallDialog} onOpenChange={setShowUninstallDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-600">
+              <AlertOctagon className="w-5 h-5" />
+              Uninstall {selectedAppForAction?.name}?
+            </DialogTitle>
+          </DialogHeader>
+          {selectedAppForAction && (
+            <div className="space-y-4">
+              <p className="text-gray-600">Are you sure you want to uninstall this app? This action will:</p>
+              <ul className="list-disc list-inside space-y-1 text-sm text-gray-600">
+                <li>Remove all app connections and configurations</li>
+                <li>Stop all automated workflows using this app</li>
+                <li>Delete any cached data from this integration</li>
+              </ul>
+              <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-sm text-yellow-800">
+                You can reinstall this app at any time from the marketplace.
+              </div>
+              <div className="flex justify-end gap-2 pt-4 border-t">
+                <Button variant="outline" onClick={() => setShowUninstallDialog(false)}>Cancel</Button>
+                <Button variant="destructive" onClick={() => { toast.success(`${selectedAppForAction.name} has been uninstalled`); setShowUninstallDialog(false) }}>Uninstall</Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Reconnect App Dialog */}
+      <Dialog open={showReconnectDialog} onOpenChange={setShowReconnectDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <RefreshCw className="w-5 h-5 text-teal-600" />
+              Reconnect {selectedAppForAction?.name}
+            </DialogTitle>
+          </DialogHeader>
+          {selectedAppForAction && (
+            <div className="space-y-4">
+              <p className="text-gray-600">Re-establish the connection to {selectedAppForAction.name}. This will:</p>
+              <ul className="list-disc list-inside space-y-1 text-sm text-gray-600">
+                <li>Refresh your authentication tokens</li>
+                <li>Verify API access and permissions</li>
+                <li>Resume any paused sync operations</li>
+              </ul>
+              <div className="flex justify-end gap-2 pt-4 border-t">
+                <Button variant="outline" onClick={() => setShowReconnectDialog(false)}>Cancel</Button>
+                <Button className="bg-teal-600" onClick={() => { toast.success(`${selectedAppForAction.name} reconnected successfully`); setShowReconnectDialog(false) }}>Reconnect</Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Disconnect App Dialog */}
+      <Dialog open={showDisconnectDialog} onOpenChange={setShowDisconnectDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-600">
+              <AlertOctagon className="w-5 h-5" />
+              Disconnect {selectedAppForAction?.name}?
+            </DialogTitle>
+          </DialogHeader>
+          {selectedAppForAction && (
+            <div className="space-y-4">
+              <p className="text-gray-600">This will disconnect the app but keep it installed. You can reconnect at any time.</p>
+              <div className="flex justify-end gap-2 pt-4 border-t">
+                <Button variant="outline" onClick={() => setShowDisconnectDialog(false)}>Cancel</Button>
+                <Button variant="destructive" onClick={() => { toast.success(`${selectedAppForAction.name} disconnected`); setShowDisconnectDialog(false) }}>Disconnect</Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Regenerate API Key Dialog */}
+      <Dialog open={showRegenerateKeyDialog} onOpenChange={setShowRegenerateKeyDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-yellow-600">
+              <Key className="w-5 h-5" />
+              Regenerate {keyTypeToRegenerate === 'production' ? 'Production' : 'Test'} API Key?
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-gray-600">This will invalidate your current {keyTypeToRegenerate} API key immediately. Any applications using this key will stop working until updated.</p>
+            <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-sm text-yellow-800">
+              Make sure to update your applications with the new key after regenerating.
+            </div>
+            <div className="flex justify-end gap-2 pt-4 border-t">
+              <Button variant="outline" onClick={() => setShowRegenerateKeyDialog(false)}>Cancel</Button>
+              <Button className="bg-yellow-600 hover:bg-yellow-700" onClick={() => { toast.success(`${keyTypeToRegenerate === 'production' ? 'Production' : 'Test'} API key regenerated`); setShowRegenerateKeyDialog(false) }}>Regenerate Key</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create API Key Dialog */}
+      <Dialog open={showCreateApiKeyDialog} onOpenChange={setShowCreateApiKeyDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Key className="w-5 h-5 text-teal-600" />
+              Create New API Key
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Key Name</Label>
+              <Input placeholder="e.g., Mobile App Key" value={newApiKeyName} onChange={(e) => setNewApiKeyName(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label>Key Type</Label>
+              <Select defaultValue="test">
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="test">Test Key</SelectItem>
+                  <SelectItem value="production">Production Key</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Permissions</Label>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <input type="checkbox" id="read" defaultChecked className="rounded" />
+                  <Label htmlFor="read" className="font-normal">Read access</Label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <input type="checkbox" id="write" className="rounded" />
+                  <Label htmlFor="write" className="font-normal">Write access</Label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <input type="checkbox" id="admin" className="rounded" />
+                  <Label htmlFor="admin" className="font-normal">Admin access</Label>
+                </div>
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 pt-4 border-t">
+              <Button variant="outline" onClick={() => { setShowCreateApiKeyDialog(false); setNewApiKeyName('') }}>Cancel</Button>
+              <Button className="bg-teal-600" onClick={() => { toast.success('New API key created'); setShowCreateApiKeyDialog(false); setNewApiKeyName('') }}>Create Key</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Webhook Dialog */}
+      <Dialog open={showAddWebhookDialog} onOpenChange={setShowAddWebhookDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Webhook className="w-5 h-5 text-teal-600" />
+              Add Webhook Endpoint
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Endpoint URL</Label>
+              <Input placeholder="https://api.yourapp.com/webhook" value={newWebhookUrl} onChange={(e) => setNewWebhookUrl(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label>Events to Subscribe</Label>
+              <div className="grid grid-cols-2 gap-2">
+                {['app.installed', 'app.uninstalled', 'app.updated', 'sync.started', 'sync.completed', 'sync.failed'].map(event => (
+                  <div key={event} className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      id={event}
+                      checked={newWebhookEvents.includes(event)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setNewWebhookEvents([...newWebhookEvents, event])
+                        } else {
+                          setNewWebhookEvents(newWebhookEvents.filter(e => e !== event))
+                        }
+                      }}
+                      className="rounded"
+                    />
+                    <Label htmlFor={event} className="font-normal text-sm">{event}</Label>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Secret Key (optional)</Label>
+              <Input placeholder="Webhook signing secret" type="password" />
+            </div>
+            <div className="flex justify-end gap-2 pt-4 border-t">
+              <Button variant="outline" onClick={() => { setShowAddWebhookDialog(false); setNewWebhookUrl(''); setNewWebhookEvents([]) }}>Cancel</Button>
+              <Button className="bg-teal-600" onClick={() => { toast.success('Webhook endpoint added'); setShowAddWebhookDialog(false); setNewWebhookUrl(''); setNewWebhookEvents([]) }}>Add Webhook</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Unblock App Dialog */}
+      <Dialog open={showUnblockAppDialog} onOpenChange={setShowUnblockAppDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <CheckCircle className="w-5 h-5 text-green-600" />
+              Unblock UnsafeApp Pro?
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-gray-600">This will allow users to install UnsafeApp Pro again. Are you sure you want to unblock this app?</p>
+            <div className="flex justify-end gap-2 pt-4 border-t">
+              <Button variant="outline" onClick={() => setShowUnblockAppDialog(false)}>Cancel</Button>
+              <Button className="bg-green-600" onClick={() => { toast.success('App unblocked'); setShowUnblockAppDialog(false) }}>Unblock</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Block App Dialog */}
+      <Dialog open={showBlockAppDialog} onOpenChange={setShowBlockAppDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-600">
+              <AlertOctagon className="w-5 h-5" />
+              Block an App
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-gray-600">Select an app to block. Blocked apps cannot be installed by any team members.</p>
+            <div className="space-y-2">
+              <Label>App to Block</Label>
+              <Select value={appToBlock} onValueChange={setAppToBlock}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select an app" />
+                </SelectTrigger>
+                <SelectContent>
+                  {mockApps.filter(app => app.status !== 'installed').map(app => (
+                    <SelectItem key={app.id} value={app.id}>{app.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Reason (optional)</Label>
+              <Input placeholder="Why is this app being blocked?" />
+            </div>
+            <div className="flex justify-end gap-2 pt-4 border-t">
+              <Button variant="outline" onClick={() => { setShowBlockAppDialog(false); setAppToBlock('') }}>Cancel</Button>
+              <Button variant="destructive" disabled={!appToBlock} onClick={() => { toast.success('App blocked'); setShowBlockAppDialog(false); setAppToBlock('') }}>Block App</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Export Data Dialog */}
+      <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Download className="w-5 h-5 text-teal-600" />
+              Export Marketplace Data
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-gray-600">Export your marketplace configuration and settings.</p>
+            <div className="space-y-2">
+              <Label>Export Format</Label>
+              <Select defaultValue="json">
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="json">JSON</SelectItem>
+                  <SelectItem value="csv">CSV</SelectItem>
+                  <SelectItem value="yaml">YAML</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Include</Label>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <input type="checkbox" id="exp-settings" defaultChecked className="rounded" />
+                  <Label htmlFor="exp-settings" className="font-normal">Settings & Preferences</Label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <input type="checkbox" id="exp-apps" defaultChecked className="rounded" />
+                  <Label htmlFor="exp-apps" className="font-normal">Installed Apps</Label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <input type="checkbox" id="exp-api" defaultChecked className="rounded" />
+                  <Label htmlFor="exp-api" className="font-normal">API Configuration</Label>
+                </div>
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 pt-4 border-t">
+              <Button variant="outline" onClick={() => setShowExportDialog(false)}>Cancel</Button>
+              <Button className="bg-teal-600" onClick={() => { toast.success('Export started. Download will begin shortly.'); setShowExportDialog(false) }}>Export</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Import Data Dialog */}
+      <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Package className="w-5 h-5 text-teal-600" />
+              Import Configuration
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-gray-600">Import marketplace configuration from another workspace.</p>
+            <div className="border-2 border-dashed rounded-lg p-8 text-center">
+              <Package className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+              <p className="text-gray-600 mb-2">Drag and drop your configuration file here</p>
+              <p className="text-sm text-gray-400 mb-4">or</p>
+              <Button variant="outline">Browse Files</Button>
+            </div>
+            <div className="flex justify-end gap-2 pt-4 border-t">
+              <Button variant="outline" onClick={() => setShowImportDialog(false)}>Cancel</Button>
+              <Button className="bg-teal-600" onClick={() => { toast.success('Configuration imported successfully'); setShowImportDialog(false) }}>Import</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Clear Cache Dialog */}
+      <Dialog open={showClearCacheDialog} onOpenChange={setShowClearCacheDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <RefreshCw className="w-5 h-5 text-teal-600" />
+              Clear Cache
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-gray-600">This will clear all cached data and force a fresh sync with all connected apps.</p>
+            <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-800">
+              This may take a few minutes to complete and temporarily slow down the application.
+            </div>
+            <div className="flex justify-end gap-2 pt-4 border-t">
+              <Button variant="outline" onClick={() => setShowClearCacheDialog(false)}>Cancel</Button>
+              <Button className="bg-teal-600" onClick={() => { toast.success('Cache cleared successfully'); setShowClearCacheDialog(false) }}>Clear Cache</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Reset Settings Dialog */}
+      <Dialog open={showResetSettingsDialog} onOpenChange={setShowResetSettingsDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-600">
+              <AlertOctagon className="w-5 h-5" />
+              Reset All Settings?
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-gray-600">This will reset all marketplace settings to their default values. This action cannot be undone.</p>
+            <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-800">
+              Warning: This will remove all custom configurations, preferences, and API settings.
+            </div>
+            <div className="flex justify-end gap-2 pt-4 border-t">
+              <Button variant="outline" onClick={() => setShowResetSettingsDialog(false)}>Cancel</Button>
+              <Button variant="destructive" onClick={() => { toast.success('All settings have been reset to defaults'); setShowResetSettingsDialog(false) }}>Reset All Settings</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Disconnect All Apps Dialog */}
+      <Dialog open={showDisconnectAllDialog} onOpenChange={setShowDisconnectAllDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-600">
+              <AlertOctagon className="w-5 h-5" />
+              Disconnect All Apps?
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-gray-600">This will disconnect all {installedApps.length} connected apps. This action cannot be undone.</p>
+            <div className="space-y-2">
+              {installedApps.map(app => (
+                <div key={app.id} className="flex items-center gap-2 p-2 border rounded-lg">
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-teal-500 to-blue-600 flex items-center justify-center text-white font-bold text-sm">
+                    {app.icon}
+                  </div>
+                  <span className="text-sm font-medium">{app.name}</span>
+                </div>
+              ))}
+            </div>
+            <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-800">
+              Warning: All automated workflows using these apps will stop working immediately.
+            </div>
+            <div className="flex justify-end gap-2 pt-4 border-t">
+              <Button variant="outline" onClick={() => setShowDisconnectAllDialog(false)}>Cancel</Button>
+              <Button variant="destructive" onClick={() => { toast.success('All apps have been disconnected'); setShowDisconnectAllDialog(false) }}>Disconnect All</Button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

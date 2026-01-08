@@ -404,6 +404,20 @@ export default function SecurityAuditClient() {
   const [showScanDialog, setShowScanDialog] = useState(false)
   const [settingsTab, setSettingsTab] = useState('general')
 
+  // Dialog states for button handlers
+  const [showFiltersDialog, setShowFiltersDialog] = useState(false)
+  const [showExportDialog, setShowExportDialog] = useState(false)
+  const [showScheduleDialog, setShowScheduleDialog] = useState(false)
+  const [showNewAuditDialog, setShowNewAuditDialog] = useState(false)
+  const [showDiscoverDialog, setShowDiscoverDialog] = useState(false)
+  const [showAddAssetDialog, setShowAddAssetDialog] = useState(false)
+  const [showAssessDialog, setShowAssessDialog] = useState(false)
+  const [showResetDialog, setShowResetDialog] = useState(false)
+  const [showAssignDialog, setShowAssignDialog] = useState(false)
+  const [showRemediationDialog, setShowRemediationDialog] = useState(false)
+  const [showAssetMenuDialog, setShowAssetMenuDialog] = useState(false)
+  const [selectedAssetForMenu, setSelectedAssetForMenu] = useState<Asset | null>(null)
+
   // Compute stats
   const vulnerabilityStats = useMemo(() => {
     const total = mockVulnerabilities.length
@@ -535,7 +549,7 @@ export default function SecurityAuditClient() {
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            <Button variant="outline">
+            <Button variant="outline" onClick={() => setShowFiltersDialog(true)}>
               <Filter className="h-4 w-4 mr-2" />
               Filters
             </Button>
@@ -612,7 +626,7 @@ export default function SecurityAuditClient() {
                   <p className="text-blue-100">Real-time security posture and vulnerability management</p>
                 </div>
                 <div className="flex gap-3">
-                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/20">
+                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/20" onClick={() => setShowExportDialog(true)}>
                     <Download className="w-4 h-4 mr-2" />Export Report
                   </Button>
                   <Button className="bg-white text-blue-700 hover:bg-blue-50" onClick={() => setShowScanDialog(true)}>
@@ -771,7 +785,7 @@ export default function SecurityAuditClient() {
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <CardTitle>Recent Security Audits</CardTitle>
-                    <Button variant="outline" size="sm">View All</Button>
+                    <Button variant="outline" size="sm" onClick={() => setActiveTab('audits')}>View All</Button>
                   </div>
                 </CardHeader>
                 <CardContent>
@@ -805,7 +819,7 @@ export default function SecurityAuditClient() {
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <CardTitle>High-Risk Assets</CardTitle>
-                    <Button variant="outline" size="sm">View All</Button>
+                    <Button variant="outline" size="sm" onClick={() => setActiveTab('assets')}>View All</Button>
                   </div>
                 </CardHeader>
                 <CardContent>
@@ -933,7 +947,7 @@ export default function SecurityAuditClient() {
                   <p className="text-red-100">Track, prioritize, and remediate security vulnerabilities</p>
                 </div>
                 <div className="flex gap-3">
-                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/20">
+                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/20" onClick={() => setShowExportDialog(true)}>
                     <Download className="w-4 h-4 mr-2" />Export
                   </Button>
                   <Button className="bg-white text-red-600 hover:bg-red-50" onClick={() => setShowScanDialog(true)}>
@@ -1005,7 +1019,7 @@ export default function SecurityAuditClient() {
                     >
                       Medium
                     </Button>
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" onClick={() => setShowExportDialog(true)}>
                       <Download className="h-4 w-4 mr-2" />
                       Export
                     </Button>
@@ -1079,10 +1093,10 @@ export default function SecurityAuditClient() {
                   <p className="text-purple-100">Schedule and manage comprehensive security assessments</p>
                 </div>
                 <div className="flex gap-3">
-                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/20">
+                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/20" onClick={() => setShowScheduleDialog(true)}>
                     <Calendar className="w-4 h-4 mr-2" />Schedule
                   </Button>
-                  <Button className="bg-white text-purple-600 hover:bg-purple-50">
+                  <Button className="bg-white text-purple-600 hover:bg-purple-50" onClick={() => setShowNewAuditDialog(true)}>
                     <Plus className="w-4 h-4 mr-2" />New Audit
                   </Button>
                 </div>
@@ -1170,10 +1184,10 @@ export default function SecurityAuditClient() {
                   <p className="text-emerald-100">Manage and monitor your IT infrastructure assets</p>
                 </div>
                 <div className="flex gap-3">
-                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/20">
+                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/20" onClick={() => setShowDiscoverDialog(true)}>
                     <Scan className="w-4 h-4 mr-2" />Discover
                   </Button>
-                  <Button className="bg-white text-emerald-600 hover:bg-emerald-50">
+                  <Button className="bg-white text-emerald-600 hover:bg-emerald-50" onClick={() => setShowAddAssetDialog(true)}>
                     <Plus className="w-4 h-4 mr-2" />Add Asset
                   </Button>
                 </div>
@@ -1210,7 +1224,7 @@ export default function SecurityAuditClient() {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle>Asset Inventory</CardTitle>
-                  <Button className="bg-blue-600 hover:bg-blue-700">
+                  <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => setShowAddAssetDialog(true)}>
                     <Plus className="h-4 w-4 mr-2" />
                     Add Asset
                   </Button>
@@ -1263,7 +1277,7 @@ export default function SecurityAuditClient() {
                           <Progress value={asset.riskScore} className="h-2" />
                         </div>
 
-                        <Button variant="ghost" size="icon">
+                        <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); setSelectedAssetForMenu(asset); setShowAssetMenuDialog(true); }}>
                           <MoreHorizontal className="h-4 w-4" />
                         </Button>
                       </div>
@@ -1284,10 +1298,10 @@ export default function SecurityAuditClient() {
                   <p className="text-amber-100">Monitor regulatory compliance and control effectiveness</p>
                 </div>
                 <div className="flex gap-3">
-                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/20">
+                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/20" onClick={() => setShowExportDialog(true)}>
                     <Download className="w-4 h-4 mr-2" />Reports
                   </Button>
-                  <Button className="bg-white text-amber-600 hover:bg-amber-50">
+                  <Button className="bg-white text-amber-600 hover:bg-amber-50" onClick={() => setShowAssessDialog(true)}>
                     <RefreshCw className="w-4 h-4 mr-2" />Assess
                   </Button>
                 </div>
@@ -1702,7 +1716,7 @@ export default function SecurityAuditClient() {
                             <p className="font-medium text-red-700 dark:text-red-400">Reset All Settings</p>
                             <p className="text-sm text-red-600">This will reset all configurations</p>
                           </div>
-                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-100">
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-100" onClick={() => setShowResetDialog(true)}>
                             Reset
                           </Button>
                         </div>
@@ -1842,19 +1856,30 @@ export default function SecurityAuditClient() {
                   </div>
 
                   <div className="flex gap-3 pt-4 border-t">
-                    <Button className="bg-blue-600 hover:bg-blue-700">
+                    <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => setShowRemediationDialog(true)}>
                       <Play className="h-4 w-4 mr-2" />
                       Start Remediation
                     </Button>
-                    <Button variant="outline">
+                    <Button variant="outline" onClick={() => setShowAssignDialog(true)}>
                       <Users className="h-4 w-4 mr-2" />
                       Assign
                     </Button>
-                    <Button variant="outline">
+                    <Button variant="outline" onClick={() => {
+                      if (selectedVulnerability) {
+                        handleResolveVulnerability(selectedVulnerability)
+                        setSelectedVulnerability(null)
+                      }
+                    }}>
                       <CheckCircle2 className="h-4 w-4 mr-2" />
                       Mark Resolved
                     </Button>
-                    <Button variant="ghost" className="ml-auto">
+                    <Button variant="ghost" className="ml-auto" onClick={() => {
+                      if (selectedVulnerability?.cveId && selectedVulnerability.cveId !== 'N/A') {
+                        window.open(`https://nvd.nist.gov/vuln/detail/${selectedVulnerability.cveId}`, '_blank')
+                      } else {
+                        toast.info('No CVE ID available for this vulnerability')
+                      }
+                    }}>
                       <ExternalLink className="h-4 w-4 mr-2" />
                       View in NVD
                     </Button>
@@ -1898,9 +1923,571 @@ export default function SecurityAuditClient() {
                 <Button variant="outline" className="flex-1" onClick={() => setShowScanDialog(false)}>
                   Cancel
                 </Button>
-                <Button className="flex-1 bg-blue-600 hover:bg-blue-700">
+                <Button className="flex-1 bg-blue-600 hover:bg-blue-700" onClick={() => {
+                  setShowScanDialog(false)
+                  handleStartScan()
+                }}>
                   <Play className="h-4 w-4 mr-2" />
                   Start Scan
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Filters Dialog */}
+        <Dialog open={showFiltersDialog} onOpenChange={setShowFiltersDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Filter Vulnerabilities</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Severity</label>
+                <div className="flex flex-wrap gap-2">
+                  {['critical', 'high', 'medium', 'low', 'info'].map(sev => (
+                    <Button
+                      key={sev}
+                      variant={selectedSeverity === sev ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setSelectedSeverity(sev as Severity)}
+                      className="capitalize"
+                    >
+                      {sev}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Status</label>
+                <div className="flex flex-wrap gap-2">
+                  {['open', 'in-progress', 'resolved', 'accepted', 'false-positive'].map(status => (
+                    <Button key={status} variant="outline" size="sm" className="capitalize">{status}</Button>
+                  ))}
+                </div>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Asset Type</label>
+                <div className="flex flex-wrap gap-2">
+                  {['server', 'database', 'application', 'cloud', 'container', 'network'].map(type => (
+                    <Button key={type} variant="outline" size="sm" className="capitalize">{type}</Button>
+                  ))}
+                </div>
+              </div>
+              <div className="flex gap-3 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => {
+                  setSelectedSeverity('all')
+                  setShowFiltersDialog(false)
+                }}>
+                  Clear Filters
+                </Button>
+                <Button className="flex-1 bg-blue-600 hover:bg-blue-700" onClick={() => {
+                  setShowFiltersDialog(false)
+                  toast.success('Filters applied')
+                }}>
+                  Apply Filters
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Export Dialog */}
+        <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Export Report</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p className="text-sm text-gray-500">Select the format and content for your export</p>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer" onClick={() => {
+                  setShowExportDialog(false)
+                  toast.success('Exporting PDF report...', { description: 'Your report will be downloaded shortly' })
+                }}>
+                  <FileText className="h-8 w-8 text-red-600 mb-2" />
+                  <h4 className="font-medium">PDF Report</h4>
+                  <p className="text-sm text-gray-500">Comprehensive audit report</p>
+                </div>
+                <div className="p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer" onClick={() => {
+                  setShowExportDialog(false)
+                  toast.success('Exporting CSV data...', { description: 'Your data will be downloaded shortly' })
+                }}>
+                  <FileText className="h-8 w-8 text-green-600 mb-2" />
+                  <h4 className="font-medium">CSV Export</h4>
+                  <p className="text-sm text-gray-500">Raw vulnerability data</p>
+                </div>
+                <div className="p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer" onClick={() => {
+                  setShowExportDialog(false)
+                  toast.success('Exporting JSON data...', { description: 'Your data will be downloaded shortly' })
+                }}>
+                  <FileText className="h-8 w-8 text-blue-600 mb-2" />
+                  <h4 className="font-medium">JSON Export</h4>
+                  <p className="text-sm text-gray-500">Machine-readable format</p>
+                </div>
+                <div className="p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer" onClick={() => {
+                  setShowExportDialog(false)
+                  toast.success('Generating executive summary...', { description: 'Your summary will be ready shortly' })
+                }}>
+                  <BarChart3 className="h-8 w-8 text-purple-600 mb-2" />
+                  <h4 className="font-medium">Executive Summary</h4>
+                  <p className="text-sm text-gray-500">High-level overview</p>
+                </div>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Schedule Dialog */}
+        <Dialog open={showScheduleDialog} onOpenChange={setShowScheduleDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Schedule Security Audit</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Audit Type</label>
+                <select className="w-full p-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
+                  <option>Vulnerability Scan</option>
+                  <option>Compliance Audit</option>
+                  <option>Penetration Test</option>
+                  <option>Cloud Security Review</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Schedule Date</label>
+                <Input type="date" />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Schedule Time</label>
+                <Input type="time" />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Recurrence</label>
+                <select className="w-full p-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
+                  <option>One-time</option>
+                  <option>Daily</option>
+                  <option>Weekly</option>
+                  <option>Monthly</option>
+                  <option>Quarterly</option>
+                </select>
+              </div>
+              <div className="flex gap-3 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowScheduleDialog(false)}>
+                  Cancel
+                </Button>
+                <Button className="flex-1 bg-purple-600 hover:bg-purple-700" onClick={() => {
+                  setShowScheduleDialog(false)
+                  toast.success('Audit scheduled', { description: 'You will receive a notification when it starts' })
+                }}>
+                  <Calendar className="h-4 w-4 mr-2" />
+                  Schedule
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* New Audit Dialog */}
+        <Dialog open={showNewAuditDialog} onOpenChange={setShowNewAuditDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Create New Audit</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Audit Name</label>
+                <Input placeholder="e.g., Q1 2024 Security Assessment" />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Audit Type</label>
+                <select className="w-full p-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
+                  <option>Vulnerability Scan</option>
+                  <option>Compliance Audit</option>
+                  <option>Penetration Test</option>
+                  <option>Cloud Security Review</option>
+                  <option>Container Security Scan</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Scope</label>
+                <div className="flex flex-wrap gap-2">
+                  {['All Assets', 'Production Only', 'Critical Systems', 'Web Applications', 'Cloud Infrastructure'].map(scope => (
+                    <Button key={scope} variant="outline" size="sm">{scope}</Button>
+                  ))}
+                </div>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Compliance Frameworks</label>
+                <div className="flex flex-wrap gap-2">
+                  {['SOC2', 'ISO27001', 'PCI-DSS', 'HIPAA', 'GDPR', 'NIST'].map(fw => (
+                    <Button key={fw} variant="outline" size="sm">{fw}</Button>
+                  ))}
+                </div>
+              </div>
+              <div className="flex gap-3 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowNewAuditDialog(false)}>
+                  Cancel
+                </Button>
+                <Button className="flex-1 bg-purple-600 hover:bg-purple-700" onClick={() => {
+                  setShowNewAuditDialog(false)
+                  toast.success('Audit created', { description: 'Your new audit is ready to configure' })
+                }}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create Audit
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Discover Assets Dialog */}
+        <Dialog open={showDiscoverDialog} onOpenChange={setShowDiscoverDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Discover Assets</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p className="text-sm text-gray-500">Automatically discover and inventory assets in your infrastructure</p>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer" onClick={() => {
+                  setShowDiscoverDialog(false)
+                  toast.info('Network scan started', { description: 'Discovering assets on your network...' })
+                }}>
+                  <Network className="h-8 w-8 text-blue-600 mb-2" />
+                  <h4 className="font-medium">Network Scan</h4>
+                  <p className="text-sm text-gray-500">Scan IP ranges</p>
+                </div>
+                <div className="p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer" onClick={() => {
+                  setShowDiscoverDialog(false)
+                  toast.info('Cloud discovery started', { description: 'Discovering cloud resources...' })
+                }}>
+                  <Cloud className="h-8 w-8 text-cyan-600 mb-2" />
+                  <h4 className="font-medium">Cloud Discovery</h4>
+                  <p className="text-sm text-gray-500">AWS, Azure, GCP</p>
+                </div>
+                <div className="p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer" onClick={() => {
+                  setShowDiscoverDialog(false)
+                  toast.info('Container scan started', { description: 'Discovering containers and images...' })
+                }}>
+                  <Layers className="h-8 w-8 text-purple-600 mb-2" />
+                  <h4 className="font-medium">Container Scan</h4>
+                  <p className="text-sm text-gray-500">Docker, Kubernetes</p>
+                </div>
+                <div className="p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer" onClick={() => {
+                  setShowDiscoverDialog(false)
+                  toast.info('Agent-based discovery started', { description: 'Collecting data from installed agents...' })
+                }}>
+                  <Server className="h-8 w-8 text-green-600 mb-2" />
+                  <h4 className="font-medium">Agent Discovery</h4>
+                  <p className="text-sm text-gray-500">Use installed agents</p>
+                </div>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Asset Dialog */}
+        <Dialog open={showAddAssetDialog} onOpenChange={setShowAddAssetDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Add New Asset</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Asset Name</label>
+                <Input placeholder="e.g., prod-web-server-01" />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Asset Type</label>
+                <select className="w-full p-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
+                  <option>Server</option>
+                  <option>Database</option>
+                  <option>Application</option>
+                  <option>Cloud Resource</option>
+                  <option>Container</option>
+                  <option>Network Device</option>
+                  <option>Endpoint</option>
+                </select>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">IP Address</label>
+                  <Input placeholder="e.g., 192.168.1.100" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Hostname</label>
+                  <Input placeholder="e.g., server.domain.com" />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Criticality</label>
+                <select className="w-full p-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
+                  <option>Critical</option>
+                  <option>High</option>
+                  <option>Medium</option>
+                  <option>Low</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Owner</label>
+                <Input placeholder="e.g., DevOps Team" />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Tags</label>
+                <Input placeholder="e.g., production, web, critical" />
+              </div>
+              <div className="flex gap-3 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowAddAssetDialog(false)}>
+                  Cancel
+                </Button>
+                <Button className="flex-1 bg-emerald-600 hover:bg-emerald-700" onClick={() => {
+                  setShowAddAssetDialog(false)
+                  toast.success('Asset added', { description: 'The new asset has been added to inventory' })
+                }}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Asset
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Asset Menu Dialog */}
+        <Dialog open={showAssetMenuDialog} onOpenChange={setShowAssetMenuDialog}>
+          <DialogContent className="max-w-sm">
+            <DialogHeader>
+              <DialogTitle>Asset Actions</DialogTitle>
+            </DialogHeader>
+            {selectedAssetForMenu && (
+              <div className="space-y-2">
+                <p className="text-sm text-gray-500 mb-4">Actions for: {selectedAssetForMenu.name}</p>
+                <Button variant="outline" className="w-full justify-start" onClick={() => {
+                  setShowAssetMenuDialog(false)
+                  setShowScanDialog(true)
+                }}>
+                  <Scan className="h-4 w-4 mr-2" />
+                  Scan Asset
+                </Button>
+                <Button variant="outline" className="w-full justify-start" onClick={() => {
+                  setShowAssetMenuDialog(false)
+                  setActiveTab('vulnerabilities')
+                  toast.success('Filtering vulnerabilities', { description: `Showing vulnerabilities for ${selectedAssetForMenu.name}` })
+                }}>
+                  <Bug className="h-4 w-4 mr-2" />
+                  View Vulnerabilities
+                </Button>
+                <Button variant="outline" className="w-full justify-start" onClick={() => {
+                  setShowAssetMenuDialog(false)
+                  toast.info('Asset details', { description: `Viewing details for ${selectedAssetForMenu.name}` })
+                }}>
+                  <FileText className="h-4 w-4 mr-2" />
+                  View Details
+                </Button>
+                <Button variant="outline" className="w-full justify-start" onClick={() => {
+                  setShowAssetMenuDialog(false)
+                  toast.success('Edit mode', { description: `Editing ${selectedAssetForMenu.name}` })
+                }}>
+                  <Settings className="h-4 w-4 mr-2" />
+                  Edit Asset
+                </Button>
+                <Button variant="outline" className="w-full justify-start text-red-600 hover:text-red-700" onClick={() => {
+                  setShowAssetMenuDialog(false)
+                  toast.error('Asset removed', { description: `${selectedAssetForMenu.name} has been removed` })
+                }}>
+                  <AlertTriangle className="h-4 w-4 mr-2" />
+                  Remove Asset
+                </Button>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Assess Compliance Dialog */}
+        <Dialog open={showAssessDialog} onOpenChange={setShowAssessDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Run Compliance Assessment</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p className="text-sm text-gray-500">Select compliance frameworks to assess</p>
+              <div className="space-y-3">
+                {complianceFrameworks.map(framework => (
+                  <div key={framework.id} className="flex items-center justify-between p-3 border rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
+                        <framework.icon className="h-5 w-5 text-blue-600" />
+                      </div>
+                      <div>
+                        <p className="font-medium">{framework.name}</p>
+                        <p className="text-sm text-gray-500">{framework.controls} controls</p>
+                      </div>
+                    </div>
+                    <Switch defaultChecked={['SOC2', 'ISO27001', 'PCI-DSS'].includes(framework.id)} />
+                  </div>
+                ))}
+              </div>
+              <div className="flex gap-3 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowAssessDialog(false)}>
+                  Cancel
+                </Button>
+                <Button className="flex-1 bg-amber-600 hover:bg-amber-700" onClick={() => {
+                  setShowAssessDialog(false)
+                  toast.info('Assessment started', { description: 'Running compliance assessment across selected frameworks...' })
+                }}>
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Start Assessment
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Reset Settings Dialog */}
+        <Dialog open={showResetDialog} onOpenChange={setShowResetDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="text-red-600">Reset All Settings</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                <AlertTriangle className="h-8 w-8 text-red-600 mb-2" />
+                <p className="font-medium text-red-700 dark:text-red-400">Warning: This action cannot be undone</p>
+                <p className="text-sm text-red-600 mt-2">
+                  This will reset all security audit settings to their defaults, including:
+                </p>
+                <ul className="text-sm text-red-600 mt-2 list-disc list-inside space-y-1">
+                  <li>Scanning configurations</li>
+                  <li>Compliance framework settings</li>
+                  <li>Integration connections</li>
+                  <li>Notification preferences</li>
+                </ul>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Type &quot;RESET&quot; to confirm</label>
+                <Input placeholder="RESET" />
+              </div>
+              <div className="flex gap-3 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowResetDialog(false)}>
+                  Cancel
+                </Button>
+                <Button className="flex-1 bg-red-600 hover:bg-red-700" onClick={() => {
+                  setShowResetDialog(false)
+                  toast.success('Settings reset', { description: 'All settings have been reset to defaults' })
+                }}>
+                  Reset All Settings
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Assign Vulnerability Dialog */}
+        <Dialog open={showAssignDialog} onOpenChange={setShowAssignDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Assign Vulnerability</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              {selectedVulnerability && (
+                <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <p className="font-medium">{selectedVulnerability.title}</p>
+                  <p className="text-sm text-gray-500">{selectedVulnerability.cveId}</p>
+                </div>
+              )}
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Assign To</label>
+                <select className="w-full p-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
+                  <option>John Smith - Security Engineer</option>
+                  <option>Sarah Wilson - DevSecOps</option>
+                  <option>Mike Chen - Platform Team</option>
+                  <option>Emily Davis - Cloud Security</option>
+                  <option>David Kim - Application Security</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Priority</label>
+                <select className="w-full p-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
+                  <option>Critical - Fix Immediately</option>
+                  <option>High - Fix within 7 days</option>
+                  <option>Medium - Fix within 30 days</option>
+                  <option>Low - Fix as time permits</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Due Date</label>
+                <Input type="date" />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Notes</label>
+                <textarea className="w-full p-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700 h-20" placeholder="Add any notes for the assignee..." />
+              </div>
+              <div className="flex gap-3 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowAssignDialog(false)}>
+                  Cancel
+                </Button>
+                <Button className="flex-1 bg-blue-600 hover:bg-blue-700" onClick={() => {
+                  setShowAssignDialog(false)
+                  toast.success('Vulnerability assigned', { description: 'The team member has been notified' })
+                }}>
+                  <Users className="h-4 w-4 mr-2" />
+                  Assign
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Remediation Dialog */}
+        <Dialog open={showRemediationDialog} onOpenChange={setShowRemediationDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Start Remediation</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              {selectedVulnerability && (
+                <>
+                  <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <p className="font-medium">{selectedVulnerability.title}</p>
+                    <p className="text-sm text-gray-500">{selectedVulnerability.cveId} - {selectedVulnerability.affectedAsset}</p>
+                  </div>
+                  <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                    <h4 className="font-medium text-blue-700 dark:text-blue-400 mb-2">Recommended Remediation</h4>
+                    <p className="text-sm text-blue-600 dark:text-blue-300">{selectedVulnerability.remediation}</p>
+                  </div>
+                </>
+              )}
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Remediation Method</label>
+                <select className="w-full p-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
+                  <option>Apply Patch</option>
+                  <option>Configuration Change</option>
+                  <option>Code Fix</option>
+                  <option>Compensating Control</option>
+                  <option>Accept Risk</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Implementation Notes</label>
+                <textarea className="w-full p-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700 h-20" placeholder="Document the remediation steps taken..." />
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch id="create-ticket" />
+                <label htmlFor="create-ticket" className="text-sm">Create Jira ticket for tracking</label>
+              </div>
+              <div className="flex gap-3 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowRemediationDialog(false)}>
+                  Cancel
+                </Button>
+                <Button className="flex-1 bg-blue-600 hover:bg-blue-700" onClick={() => {
+                  setShowRemediationDialog(false)
+                  if (selectedVulnerability) {
+                    handleCreateTicket(selectedVulnerability)
+                  }
+                  toast.success('Remediation started', { description: 'Tracking ticket has been created' })
+                }}>
+                  <Play className="h-4 w-4 mr-2" />
+                  Start Remediation
                 </Button>
               </div>
             </div>

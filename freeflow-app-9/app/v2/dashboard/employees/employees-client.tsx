@@ -327,6 +327,27 @@ export default function EmployeesClient() {
   const [compensationTab, setCompensationTab] = useState('salary')
   const [performanceTab, setPerformanceTab] = useState('reviews')
 
+  // Additional dialog states for buttons without onClick
+  const [showExportDialog, setShowExportDialog] = useState(false)
+  const [showTimeOffRequestDialog, setShowTimeOffRequestDialog] = useState(false)
+  const [showExportReportDialog, setShowExportReportDialog] = useState(false)
+  const [showCourseDialog, setShowCourseDialog] = useState(false)
+  const [selectedCourse, setSelectedCourse] = useState<TrainingCourse | null>(null)
+  const [showAddIntegrationDialog, setShowAddIntegrationDialog] = useState(false)
+  const [showConfigureIntegrationDialog, setShowConfigureIntegrationDialog] = useState(false)
+  const [selectedIntegration, setSelectedIntegration] = useState<HRIntegration | null>(null)
+  const [showRegenerateKeyDialog, setShowRegenerateKeyDialog] = useState(false)
+  const [showExportDataDialog, setShowExportDataDialog] = useState(false)
+  const [showImportDataDialog, setShowImportDataDialog] = useState(false)
+  const [showComplianceReportDialog, setShowComplianceReportDialog] = useState(false)
+  const [showArchiveDialog, setShowArchiveDialog] = useState(false)
+  const [showDeleteAllDialog, setShowDeleteAllDialog] = useState(false)
+  const [showResetSettingsDialog, setShowResetSettingsDialog] = useState(false)
+  const [showEditProfileDialog, setShowEditProfileDialog] = useState(false)
+  const [showDownloadDocDialog, setShowDownloadDocDialog] = useState(false)
+  const [showDeleteDocDialog, setShowDeleteDocDialog] = useState(false)
+  const [selectedDocument, setSelectedDocument] = useState<EmployeeDocument | null>(null)
+
   // Database integration
   const { data: dbEmployees, loading: employeesLoading, refetch } = useEmployees({ status: 'active' })
   const { mutate: createEmployee, loading: creating } = useCreateEmployee()
@@ -579,7 +600,7 @@ export default function EmployeesClient() {
           </div>
           <div className="flex items-center gap-3">
             <div className="relative"><Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" /><Input placeholder="Search employees..." className="w-72 pl-10" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} /></div>
-            <Button variant="outline"><Download className="h-4 w-4 mr-2" />Export</Button>
+            <Button variant="outline" onClick={() => setShowExportDialog(true)}><Download className="h-4 w-4 mr-2" />Export</Button>
             <Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={() => setShowAddDialog(true)}><UserPlus className="h-4 w-4 mr-2" />Add Employee</Button>
           </div>
         </div>
@@ -818,7 +839,7 @@ export default function EmployeesClient() {
               ))}
             </div>
             <Card className="border-gray-200 dark:border-gray-700">
-              <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Time Off Requests</CardTitle><Button><Plus className="h-4 w-4 mr-2" />Request Time Off</Button></CardHeader>
+              <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Time Off Requests</CardTitle><Button onClick={() => setShowTimeOffRequestDialog(true)}><Plus className="h-4 w-4 mr-2" />Request Time Off</Button></CardHeader>
               <CardContent className="p-0 divide-y divide-gray-100 dark:divide-gray-800">
                 {mockTimeOffRequests.map(request => (
                   <div key={request.id} className="flex items-center gap-4 p-4 hover:bg-gray-50 dark:hover:bg-gray-800">
@@ -1039,7 +1060,7 @@ export default function EmployeesClient() {
                   </Button>
                 ))}
               </div>
-              <Button variant="outline"><Download className="h-4 w-4 mr-2" />Export Report</Button>
+              <Button variant="outline" onClick={() => setShowExportReportDialog(true)}><Download className="h-4 w-4 mr-2" />Export Report</Button>
             </div>
 
             {compensationTab === 'salary' && (
@@ -1198,7 +1219,7 @@ export default function EmployeesClient() {
                       <Progress value={course.progress} className="h-2" />
                     </div>
                     <Badge className={getStatusColor(course.status)}>{course.status.replace('_', ' ')}</Badge>
-                    <Button variant="outline" size="sm">{course.status === 'completed' ? 'View' : course.status === 'in_progress' ? 'Continue' : 'Start'}</Button>
+                    <Button variant="outline" size="sm" onClick={() => { setSelectedCourse(course); setShowCourseDialog(true) }}>{course.status === 'completed' ? 'View' : course.status === 'in_progress' ? 'Continue' : 'Start'}</Button>
                   </div>
                 ))}
               </CardContent>
@@ -1714,7 +1735,7 @@ export default function EmployeesClient() {
                           <Zap className="h-5 w-5" />
                           Connected Integrations
                         </CardTitle>
-                        <Button size="sm">
+                        <Button size="sm" onClick={() => setShowAddIntegrationDialog(true)}>
                           <Plus className="h-4 w-4 mr-2" />
                           Add Integration
                         </Button>
@@ -1738,7 +1759,7 @@ export default function EmployeesClient() {
                             </div>
                             <div className="flex items-center gap-3">
                               <Badge className={getStatusColor(integration.status)}>{integration.status}</Badge>
-                              <Button variant="ghost" size="sm">Configure</Button>
+                              <Button variant="ghost" size="sm" onClick={() => { setSelectedIntegration(integration); setShowConfigureIntegrationDialog(true) }}>Configure</Button>
                             </div>
                           </div>
                         ))}
@@ -1756,7 +1777,7 @@ export default function EmployeesClient() {
                         <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <div className="flex items-center justify-between mb-3">
                             <div className="font-medium">API Key</div>
-                            <Button variant="outline" size="sm">
+                            <Button variant="outline" size="sm" onClick={() => setShowRegenerateKeyDialog(true)}>
                               <Activity className="h-4 w-4 mr-2" />
                               Regenerate
                             </Button>
@@ -1765,7 +1786,7 @@ export default function EmployeesClient() {
                             <code className="flex-1 bg-white dark:bg-gray-900 px-3 py-2 rounded border text-sm">
                               hr_live_•••••••••••••••••••••••
                             </code>
-                            <Button variant="outline" size="sm">Copy</Button>
+                            <Button variant="outline" size="sm" onClick={() => { navigator.clipboard.writeText('hr_live_sample_api_key_12345'); toast.success('API key copied to clipboard') }}>Copy</Button>
                           </div>
                         </div>
                         <div className="grid grid-cols-2 gap-4">
@@ -1811,10 +1832,10 @@ export default function EmployeesClient() {
                             </div>
                             <div className="flex items-center gap-3">
                               <Badge className={getStatusColor(doc.status)}>{doc.status.replace('_', ' ')}</Badge>
-                              <Button variant="ghost" size="icon">
+                              <Button variant="ghost" size="icon" onClick={() => { setSelectedDocument(doc); setShowDownloadDocDialog(true) }}>
                                 <Download className="h-4 w-4" />
                               </Button>
-                              <Button variant="ghost" size="icon" className="text-red-500">
+                              <Button variant="ghost" size="icon" className="text-red-500" onClick={() => { setSelectedDocument(doc); setShowDeleteDocDialog(true) }}>
                                 <Trash2 className="h-4 w-4" />
                               </Button>
                             </div>
@@ -1897,11 +1918,11 @@ export default function EmployeesClient() {
                           </div>
                         </div>
                         <div className="flex gap-3">
-                          <Button variant="outline" className="flex-1">
+                          <Button variant="outline" className="flex-1" onClick={() => setShowExportDataDialog(true)}>
                             <Download className="h-4 w-4 mr-2" />
                             Export All Data
                           </Button>
-                          <Button variant="outline" className="flex-1">
+                          <Button variant="outline" className="flex-1" onClick={() => setShowImportDataDialog(true)}>
                             <Upload className="h-4 w-4 mr-2" />
                             Import Data
                           </Button>
@@ -1938,7 +1959,7 @@ export default function EmployeesClient() {
                           </div>
                           <Switch defaultChecked />
                         </div>
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => setShowComplianceReportDialog(true)}>
                           <FileCheck className="h-4 w-4 mr-2" />
                           Generate Compliance Report
                         </Button>
@@ -1958,7 +1979,7 @@ export default function EmployeesClient() {
                             <div className="font-medium text-red-600">Archive All Terminated</div>
                             <div className="text-sm text-gray-500">Archive all terminated employee records</div>
                           </div>
-                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50" onClick={() => setShowArchiveDialog(true)}>
                             Archive
                           </Button>
                         </div>
@@ -1967,7 +1988,7 @@ export default function EmployeesClient() {
                             <div className="font-medium text-red-600">Delete All Data</div>
                             <div className="text-sm text-gray-500">Permanently delete all HR data</div>
                           </div>
-                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50" onClick={() => setShowDeleteAllDialog(true)}>
                             Delete
                           </Button>
                         </div>
@@ -1976,7 +1997,7 @@ export default function EmployeesClient() {
                             <div className="font-medium text-red-600">Reset to Defaults</div>
                             <div className="text-sm text-gray-500">Reset all HR settings to defaults</div>
                           </div>
-                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50" onClick={() => setShowResetSettingsDialog(true)}>
                             Reset
                           </Button>
                         </div>
@@ -2046,7 +2067,7 @@ export default function EmployeesClient() {
                   </div>
                   <div><h4 className="font-medium mb-2">Skills</h4><div className="flex flex-wrap gap-2">{selectedEmployee.skills.map(skill => <Badge key={skill} variant="outline">{skill}</Badge>)}</div></div>
                 </div>
-                <DialogFooter><Button variant="outline" onClick={() => setShowProfileDialog(false)}>Close</Button><Button><Edit3 className="h-4 w-4 mr-2" />Edit Profile</Button></DialogFooter>
+                <DialogFooter><Button variant="outline" onClick={() => setShowProfileDialog(false)}>Close</Button><Button onClick={() => { setShowProfileDialog(false); setShowEditProfileDialog(true) }}><Edit3 className="h-4 w-4 mr-2" />Edit Profile</Button></DialogFooter>
               </>
             )}
           </DialogContent>
@@ -2074,7 +2095,7 @@ export default function EmployeesClient() {
               <div className="p-8 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg text-center"><Upload className="h-8 w-8 mx-auto mb-2 text-gray-400" /><p className="text-sm text-gray-500">Drag and drop or click to upload</p><p className="text-xs text-gray-400 mt-1">PDF, DOC, DOCX up to 10MB</p></div>
               <div><Label>Expiration Date (Optional)</Label><Input type="date" className="mt-1" /></div>
             </div>
-            <DialogFooter><Button variant="outline" onClick={() => setShowDocumentDialog(false)}>Cancel</Button><Button className="bg-gradient-to-r from-blue-600 to-indigo-600">Upload Document</Button></DialogFooter>
+            <DialogFooter><Button variant="outline" onClick={() => setShowDocumentDialog(false)}>Cancel</Button><Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={() => { toast.success('Document uploaded successfully'); setShowDocumentDialog(false) }}>Upload Document</Button></DialogFooter>
           </DialogContent>
         </Dialog>
 
@@ -2090,11 +2111,11 @@ export default function EmployeesClient() {
                 <div className="space-y-2 mt-2">
                   <Input placeholder="Key Result 1" />
                   <Input placeholder="Key Result 2" />
-                  <Button variant="outline" size="sm" className="w-full"><Plus className="h-4 w-4 mr-2" />Add Key Result</Button>
+                  <Button variant="outline" size="sm" className="w-full" onClick={() => toast.info('Add additional key result fields above')}><Plus className="h-4 w-4 mr-2" />Add Key Result</Button>
                 </div>
               </div>
             </div>
-            <DialogFooter><Button variant="outline" onClick={() => setShowGoalDialog(false)}>Cancel</Button><Button className="bg-gradient-to-r from-blue-600 to-indigo-600">Create Goal</Button></DialogFooter>
+            <DialogFooter><Button variant="outline" onClick={() => setShowGoalDialog(false)}>Cancel</Button><Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={() => { toast.success('Goal created successfully'); setShowGoalDialog(false) }}>Create Goal</Button></DialogFooter>
           </DialogContent>
         </Dialog>
 
@@ -2108,7 +2129,7 @@ export default function EmployeesClient() {
               <div><Label>Recipients</Label><Select><SelectTrigger className="mt-1"><SelectValue placeholder="Select recipients" /></SelectTrigger><SelectContent><SelectItem value="all">All Employees</SelectItem><SelectItem value="engineering">Engineering Only</SelectItem><SelectItem value="managers">Managers Only</SelectItem><SelectItem value="custom">Custom Selection</SelectItem></SelectContent></Select></div>
               <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"><div><p className="font-medium">Anonymous Responses</p><p className="text-sm text-gray-500">Protect respondent identity</p></div><Switch defaultChecked /></div>
             </div>
-            <DialogFooter><Button variant="outline" onClick={() => setShowSurveyDialog(false)}>Cancel</Button><Button className="bg-gradient-to-r from-blue-600 to-indigo-600">Create Survey</Button></DialogFooter>
+            <DialogFooter><Button variant="outline" onClick={() => setShowSurveyDialog(false)}>Cancel</Button><Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={() => { toast.success('Survey created successfully'); setShowSurveyDialog(false) }}>Create Survey</Button></DialogFooter>
           </DialogContent>
         </Dialog>
 
@@ -2122,7 +2143,7 @@ export default function EmployeesClient() {
               <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"><div><p className="font-medium">Include Self-Review</p><p className="text-sm text-gray-500">Allow employee to self-assess</p></div><Switch defaultChecked /></div>
               <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"><div><p className="font-medium">360 Feedback</p><p className="text-sm text-gray-500">Collect peer feedback</p></div><Switch /></div>
             </div>
-            <DialogFooter><Button variant="outline" onClick={() => setShowReviewDialog(false)}>Cancel</Button><Button className="bg-gradient-to-r from-blue-600 to-indigo-600">Start Review</Button></DialogFooter>
+            <DialogFooter><Button variant="outline" onClick={() => setShowReviewDialog(false)}>Cancel</Button><Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={() => { toast.success('Performance review started'); setShowReviewDialog(false) }}>Start Review</Button></DialogFooter>
           </DialogContent>
         </Dialog>
 
@@ -2240,6 +2261,708 @@ export default function EmployeesClient() {
                 disabled={deleting}
               >
                 {deleting ? 'Deleting...' : 'Delete Employee'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Export Employees Dialog */}
+        <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Export Employee Data</DialogTitle>
+              <DialogDescription>Choose the format and data to export</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label>Export Format</Label>
+                <Select defaultValue="csv">
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder="Select format" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="csv">CSV (.csv)</SelectItem>
+                    <SelectItem value="xlsx">Excel (.xlsx)</SelectItem>
+                    <SelectItem value="pdf">PDF (.pdf)</SelectItem>
+                    <SelectItem value="json">JSON (.json)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Data to Include</Label>
+                <div className="space-y-2 mt-2">
+                  <div className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                    <span className="text-sm">Employee Profiles</span>
+                    <Switch defaultChecked />
+                  </div>
+                  <div className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                    <span className="text-sm">Compensation Data</span>
+                    <Switch defaultChecked />
+                  </div>
+                  <div className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                    <span className="text-sm">Performance Reviews</span>
+                    <Switch />
+                  </div>
+                  <div className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                    <span className="text-sm">Time Off History</span>
+                    <Switch />
+                  </div>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowExportDialog(false)}>Cancel</Button>
+              <Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={() => { toast.success('Export started. File will download shortly.'); setShowExportDialog(false) }}>
+                <Download className="h-4 w-4 mr-2" />
+                Export
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Time Off Request Dialog */}
+        <Dialog open={showTimeOffRequestDialog} onOpenChange={setShowTimeOffRequestDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Request Time Off</DialogTitle>
+              <DialogDescription>Submit a new time off request</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label>Employee</Label>
+                <Select>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder="Select employee" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {mockEmployees.map(e => (
+                      <SelectItem key={e.id} value={e.id}>{e.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Type of Leave</Label>
+                <Select>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder="Select type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="vacation">Vacation</SelectItem>
+                    <SelectItem value="sick">Sick Leave</SelectItem>
+                    <SelectItem value="personal">Personal</SelectItem>
+                    <SelectItem value="parental">Parental Leave</SelectItem>
+                    <SelectItem value="bereavement">Bereavement</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Start Date</Label>
+                  <Input type="date" className="mt-1" />
+                </div>
+                <div>
+                  <Label>End Date</Label>
+                  <Input type="date" className="mt-1" />
+                </div>
+              </div>
+              <div>
+                <Label>Reason (Optional)</Label>
+                <Input placeholder="Briefly describe your reason..." className="mt-1" />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowTimeOffRequestDialog(false)}>Cancel</Button>
+              <Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={() => { toast.success('Time off request submitted'); setShowTimeOffRequestDialog(false) }}>
+                Submit Request
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Export Compensation Report Dialog */}
+        <Dialog open={showExportReportDialog} onOpenChange={setShowExportReportDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Export Compensation Report</DialogTitle>
+              <DialogDescription>Generate a compensation report</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label>Report Type</Label>
+                <Select defaultValue="summary">
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder="Select report type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="summary">Compensation Summary</SelectItem>
+                    <SelectItem value="detailed">Detailed Breakdown</SelectItem>
+                    <SelectItem value="comparison">Market Comparison</SelectItem>
+                    <SelectItem value="equity">Equity Report</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Department</Label>
+                <Select defaultValue="all">
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder="Select department" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Departments</SelectItem>
+                    <SelectItem value="engineering">Engineering</SelectItem>
+                    <SelectItem value="design">Design</SelectItem>
+                    <SelectItem value="product">Product</SelectItem>
+                    <SelectItem value="marketing">Marketing</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Format</Label>
+                <Select defaultValue="pdf">
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder="Select format" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="pdf">PDF</SelectItem>
+                    <SelectItem value="xlsx">Excel</SelectItem>
+                    <SelectItem value="csv">CSV</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowExportReportDialog(false)}>Cancel</Button>
+              <Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={() => { toast.success('Report generated successfully'); setShowExportReportDialog(false) }}>
+                <Download className="h-4 w-4 mr-2" />
+                Generate Report
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Course Dialog */}
+        <Dialog open={showCourseDialog} onOpenChange={setShowCourseDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>{selectedCourse?.title || 'Course'}</DialogTitle>
+              <DialogDescription>{selectedCourse?.description}</DialogDescription>
+            </DialogHeader>
+            {selectedCourse && (
+              <div className="space-y-4 py-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <p className="text-sm text-gray-500">Category</p>
+                    <p className="font-medium">{selectedCourse.category}</p>
+                  </div>
+                  <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <p className="text-sm text-gray-500">Duration</p>
+                    <p className="font-medium">{selectedCourse.duration}</p>
+                  </div>
+                </div>
+                <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-sm text-gray-500">Progress</p>
+                    <p className="font-medium">{selectedCourse.progress}%</p>
+                  </div>
+                  <Progress value={selectedCourse.progress} className="h-2" />
+                </div>
+                {selectedCourse.mandatory && (
+                  <div className="p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200">
+                    <p className="text-sm font-medium text-amber-700">This is a mandatory course</p>
+                    {selectedCourse.dueDate && <p className="text-xs text-amber-600">Due: {selectedCourse.dueDate}</p>}
+                  </div>
+                )}
+              </div>
+            )}
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowCourseDialog(false)}>Close</Button>
+              <Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={() => {
+                toast.success(selectedCourse?.status === 'completed' ? 'Opening course materials...' : selectedCourse?.status === 'in_progress' ? 'Resuming course...' : 'Starting course...');
+                setShowCourseDialog(false)
+              }}>
+                {selectedCourse?.status === 'completed' ? 'View Materials' : selectedCourse?.status === 'in_progress' ? 'Continue' : 'Start Course'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Integration Dialog */}
+        <Dialog open={showAddIntegrationDialog} onOpenChange={setShowAddIntegrationDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Add Integration</DialogTitle>
+              <DialogDescription>Connect a new HR service integration</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label>Integration Type</Label>
+                <Select>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder="Select type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="payroll">Payroll System</SelectItem>
+                    <SelectItem value="benefits">Benefits Provider</SelectItem>
+                    <SelectItem value="ats">Applicant Tracking (ATS)</SelectItem>
+                    <SelectItem value="background">Background Check</SelectItem>
+                    <SelectItem value="identity">Identity Provider</SelectItem>
+                    <SelectItem value="communication">Communication Tool</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Provider</Label>
+                <Select>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder="Select provider" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="adp">ADP</SelectItem>
+                    <SelectItem value="gusto">Gusto</SelectItem>
+                    <SelectItem value="greenhouse">Greenhouse</SelectItem>
+                    <SelectItem value="lever">Lever</SelectItem>
+                    <SelectItem value="okta">Okta</SelectItem>
+                    <SelectItem value="slack">Slack</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>API Key / Credentials</Label>
+                <Input type="password" placeholder="Enter API key..." className="mt-1" />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowAddIntegrationDialog(false)}>Cancel</Button>
+              <Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={() => { toast.success('Integration connected successfully'); setShowAddIntegrationDialog(false) }}>
+                <Zap className="h-4 w-4 mr-2" />
+                Connect
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Configure Integration Dialog */}
+        <Dialog open={showConfigureIntegrationDialog} onOpenChange={setShowConfigureIntegrationDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Configure {selectedIntegration?.name}</DialogTitle>
+              <DialogDescription>Manage integration settings</DialogDescription>
+            </DialogHeader>
+            {selectedIntegration && (
+              <div className="space-y-4 py-4">
+                <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-500">Status</span>
+                    <Badge className={getStatusColor(selectedIntegration.status)}>{selectedIntegration.status}</Badge>
+                  </div>
+                </div>
+                <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <p className="text-sm text-gray-500">Last Sync</p>
+                  <p className="font-medium">{selectedIntegration.lastSync}</p>
+                </div>
+                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div>
+                    <p className="font-medium">Auto-sync</p>
+                    <p className="text-sm text-gray-500">Automatically sync data</p>
+                  </div>
+                  <Switch defaultChecked />
+                </div>
+                <div>
+                  <Label>Sync Frequency</Label>
+                  <Select defaultValue="hourly">
+                    <SelectTrigger className="mt-1">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="realtime">Real-time</SelectItem>
+                      <SelectItem value="hourly">Hourly</SelectItem>
+                      <SelectItem value="daily">Daily</SelectItem>
+                      <SelectItem value="weekly">Weekly</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            )}
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowConfigureIntegrationDialog(false)}>Cancel</Button>
+              <Button variant="outline" className="text-red-600" onClick={() => { toast.success('Integration disconnected'); setShowConfigureIntegrationDialog(false) }}>Disconnect</Button>
+              <Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={() => { toast.success('Integration settings saved'); setShowConfigureIntegrationDialog(false) }}>Save Changes</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Regenerate API Key Dialog */}
+        <Dialog open={showRegenerateKeyDialog} onOpenChange={setShowRegenerateKeyDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Regenerate API Key</DialogTitle>
+              <DialogDescription>This will invalidate your current API key. All applications using this key will need to be updated.</DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200">
+                <p className="text-sm font-medium text-amber-700">Warning</p>
+                <p className="text-sm text-amber-600 mt-1">Regenerating the API key will immediately revoke the current key. Make sure to update all applications using this key.</p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowRegenerateKeyDialog(false)}>Cancel</Button>
+              <Button variant="destructive" onClick={() => { toast.success('New API key generated'); setShowRegenerateKeyDialog(false) }}>
+                Regenerate Key
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Export All Data Dialog */}
+        <Dialog open={showExportDataDialog} onOpenChange={setShowExportDataDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Export All HR Data</DialogTitle>
+              <DialogDescription>Create a complete backup of all HR system data</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <p className="font-medium">Data to export:</p>
+                <ul className="text-sm text-gray-500 mt-2 space-y-1">
+                  <li>- {mockEmployees.length} Employee records</li>
+                  <li>- {mockDocuments.length} Documents</li>
+                  <li>- {mockReviews.length} Performance reviews</li>
+                  <li>- {mockTimeOffRequests.length} Time off requests</li>
+                  <li>- All settings and configurations</li>
+                </ul>
+              </div>
+              <div>
+                <Label>Export Format</Label>
+                <Select defaultValue="json">
+                  <SelectTrigger className="mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="json">JSON (Full backup)</SelectItem>
+                    <SelectItem value="csv">CSV (Spreadsheet compatible)</SelectItem>
+                    <SelectItem value="xlsx">Excel Workbook</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowExportDataDialog(false)}>Cancel</Button>
+              <Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={() => { toast.success('Export started. Download will begin shortly.'); setShowExportDataDialog(false) }}>
+                <Download className="h-4 w-4 mr-2" />
+                Export All
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Import Data Dialog */}
+        <Dialog open={showImportDataDialog} onOpenChange={setShowImportDataDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Import HR Data</DialogTitle>
+              <DialogDescription>Import employee data from an external file</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label>Import Type</Label>
+                <Select>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder="Select import type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="employees">Employee Records</SelectItem>
+                    <SelectItem value="compensation">Compensation Data</SelectItem>
+                    <SelectItem value="full">Full System Restore</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="p-8 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg text-center">
+                <Upload className="h-8 w-8 mx-auto mb-2 text-gray-400" />
+                <p className="text-sm text-gray-500">Drag and drop or click to upload</p>
+                <p className="text-xs text-gray-400 mt-1">CSV, XLSX, or JSON up to 50MB</p>
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div>
+                  <p className="font-medium">Overwrite existing records</p>
+                  <p className="text-sm text-gray-500">Replace matching records</p>
+                </div>
+                <Switch />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowImportDataDialog(false)}>Cancel</Button>
+              <Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={() => { toast.success('Data imported successfully'); setShowImportDataDialog(false) }}>
+                <Upload className="h-4 w-4 mr-2" />
+                Import
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Compliance Report Dialog */}
+        <Dialog open={showComplianceReportDialog} onOpenChange={setShowComplianceReportDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Generate Compliance Report</DialogTitle>
+              <DialogDescription>Create a compliance audit report</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label>Report Type</Label>
+                <Select defaultValue="gdpr">
+                  <SelectTrigger className="mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="gdpr">GDPR Compliance</SelectItem>
+                    <SelectItem value="soc2">SOC 2 Audit</SelectItem>
+                    <SelectItem value="hipaa">HIPAA Compliance</SelectItem>
+                    <SelectItem value="full">Full Compliance Audit</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Date Range</Label>
+                <div className="grid grid-cols-2 gap-4 mt-1">
+                  <Input type="date" />
+                  <Input type="date" />
+                </div>
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div>
+                  <p className="font-medium">Include audit trail</p>
+                  <p className="text-sm text-gray-500">All system changes and access logs</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowComplianceReportDialog(false)}>Cancel</Button>
+              <Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={() => { toast.success('Compliance report generated'); setShowComplianceReportDialog(false) }}>
+                <FileCheck className="h-4 w-4 mr-2" />
+                Generate
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Archive Terminated Dialog */}
+        <Dialog open={showArchiveDialog} onOpenChange={setShowArchiveDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Archive Terminated Employees</DialogTitle>
+              <DialogDescription>This will archive all terminated employee records</DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200">
+                <p className="text-sm font-medium text-amber-700">This action will:</p>
+                <ul className="text-sm text-amber-600 mt-2 space-y-1">
+                  <li>- Move all terminated employee records to archive</li>
+                  <li>- Remove them from active directory</li>
+                  <li>- Retain data for compliance purposes</li>
+                </ul>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowArchiveDialog(false)}>Cancel</Button>
+              <Button variant="destructive" onClick={() => { toast.success('Terminated employees archived'); setShowArchiveDialog(false) }}>
+                Archive All
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete All Data Dialog */}
+        <Dialog open={showDeleteAllDialog} onOpenChange={setShowDeleteAllDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Delete All HR Data</DialogTitle>
+              <DialogDescription>This action is permanent and cannot be undone</DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200">
+                <p className="text-sm font-medium text-red-700">Warning: This will permanently delete:</p>
+                <ul className="text-sm text-red-600 mt-2 space-y-1">
+                  <li>- All employee records</li>
+                  <li>- All documents and files</li>
+                  <li>- All performance reviews</li>
+                  <li>- All time off records</li>
+                  <li>- All system configurations</li>
+                </ul>
+              </div>
+              <div className="mt-4">
+                <Label>Type "DELETE" to confirm</Label>
+                <Input placeholder="DELETE" className="mt-1" />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowDeleteAllDialog(false)}>Cancel</Button>
+              <Button variant="destructive" onClick={() => { toast.error('Action blocked for safety. Contact admin.'); setShowDeleteAllDialog(false) }}>
+                Delete All Data
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Reset Settings Dialog */}
+        <Dialog open={showResetSettingsDialog} onOpenChange={setShowResetSettingsDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Reset to Defaults</DialogTitle>
+              <DialogDescription>Reset all HR settings to their default values</DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200">
+                <p className="text-sm font-medium text-amber-700">This will reset:</p>
+                <ul className="text-sm text-amber-600 mt-2 space-y-1">
+                  <li>- Notification preferences</li>
+                  <li>- Permission settings</li>
+                  <li>- Time off policies</li>
+                  <li>- Performance review settings</li>
+                  <li>- Integration configurations</li>
+                </ul>
+                <p className="text-sm text-amber-600 mt-2">Employee data will not be affected.</p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowResetSettingsDialog(false)}>Cancel</Button>
+              <Button variant="destructive" onClick={() => { toast.success('Settings reset to defaults'); setShowResetSettingsDialog(false) }}>
+                Reset Settings
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Profile Dialog (for mock employees) */}
+        <Dialog open={showEditProfileDialog} onOpenChange={setShowEditProfileDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Edit Employee Profile</DialogTitle>
+              <DialogDescription>Update {selectedEmployee?.name}'s profile information</DialogDescription>
+            </DialogHeader>
+            {selectedEmployee && (
+              <div className="space-y-4 py-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label>Full Name</Label>
+                    <Input defaultValue={selectedEmployee.name} className="mt-1" />
+                  </div>
+                  <div>
+                    <Label>Email</Label>
+                    <Input defaultValue={selectedEmployee.email} className="mt-1" />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label>Position</Label>
+                    <Input defaultValue={selectedEmployee.position} className="mt-1" />
+                  </div>
+                  <div>
+                    <Label>Department</Label>
+                    <Select defaultValue={selectedEmployee.department.toLowerCase()}>
+                      <SelectTrigger className="mt-1">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="engineering">Engineering</SelectItem>
+                        <SelectItem value="design">Design</SelectItem>
+                        <SelectItem value="product">Product</SelectItem>
+                        <SelectItem value="marketing">Marketing</SelectItem>
+                        <SelectItem value="sales">Sales</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label>Location</Label>
+                    <Input defaultValue={selectedEmployee.location} className="mt-1" />
+                  </div>
+                  <div>
+                    <Label>Manager</Label>
+                    <Select defaultValue={selectedEmployee.managerId}>
+                      <SelectTrigger className="mt-1">
+                        <SelectValue placeholder="Select manager" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {mockEmployees.filter(e => e.directReports > 0).map(e => (
+                          <SelectItem key={e.id} value={e.id}>{e.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div>
+                  <Label>Skills (comma separated)</Label>
+                  <Input defaultValue={selectedEmployee.skills.join(', ')} className="mt-1" />
+                </div>
+              </div>
+            )}
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowEditProfileDialog(false)}>Cancel</Button>
+              <Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={() => { toast.success('Profile updated successfully'); setShowEditProfileDialog(false) }}>
+                Save Changes
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Download Document Dialog */}
+        <Dialog open={showDownloadDocDialog} onOpenChange={setShowDownloadDocDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Download Document</DialogTitle>
+              <DialogDescription>Download {selectedDocument?.name}</DialogDescription>
+            </DialogHeader>
+            {selectedDocument && (
+              <div className="py-4">
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-500">File name</span>
+                    <span className="font-medium">{selectedDocument.name}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-500">Size</span>
+                    <span className="font-medium">{selectedDocument.size}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-500">Type</span>
+                    <span className="font-medium">{selectedDocument.type}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-500">Uploaded</span>
+                    <span className="font-medium">{selectedDocument.uploadedAt}</span>
+                  </div>
+                </div>
+              </div>
+            )}
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowDownloadDocDialog(false)}>Cancel</Button>
+              <Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={() => { toast.success('Download started'); setShowDownloadDocDialog(false) }}>
+                <Download className="h-4 w-4 mr-2" />
+                Download
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Document Dialog */}
+        <Dialog open={showDeleteDocDialog} onOpenChange={setShowDeleteDocDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Delete Document</DialogTitle>
+              <DialogDescription>Are you sure you want to delete "{selectedDocument?.name}"?</DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200">
+                <p className="text-sm text-red-700">This action cannot be undone. The document will be permanently deleted from the system.</p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowDeleteDocDialog(false)}>Cancel</Button>
+              <Button variant="destructive" onClick={() => { toast.success('Document deleted'); setShowDeleteDocDialog(false) }}>
+                Delete Document
               </Button>
             </DialogFooter>
           </DialogContent>

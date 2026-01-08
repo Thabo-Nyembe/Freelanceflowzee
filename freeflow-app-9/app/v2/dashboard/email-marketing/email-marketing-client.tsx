@@ -771,6 +771,38 @@ export default function EmailMarketingClient({
   const [selectedAutomation, setSelectedAutomation] = useState<Automation | null>(null)
   const [campaignFilter, setCampaignFilter] = useState<'all' | CampaignStatus>('all')
 
+  // Dialog states for buttons
+  const [settingsDialogOpen, setSettingsDialogOpen] = useState(false)
+  const [createCampaignDialogOpen, setCreateCampaignDialogOpen] = useState(false)
+  const [createListDialogOpen, setCreateListDialogOpen] = useState(false)
+  const [viewAllSubscribersDialogOpen, setViewAllSubscribersDialogOpen] = useState(false)
+  const [createSegmentDialogOpen, setCreateSegmentDialogOpen] = useState(false)
+  const [createAutomationDialogOpen, setCreateAutomationDialogOpen] = useState(false)
+  const [createTemplateDialogOpen, setCreateTemplateDialogOpen] = useState(false)
+  const [editCampaignDialogOpen, setEditCampaignDialogOpen] = useState(false)
+  const [scheduleCampaignDialogOpen, setScheduleCampaignDialogOpen] = useState(false)
+  const [sendCampaignDialogOpen, setSendCampaignDialogOpen] = useState(false)
+  const [duplicateCampaignDialogOpen, setDuplicateCampaignDialogOpen] = useState(false)
+  const [fullReportDialogOpen, setFullReportDialogOpen] = useState(false)
+  const [editAutomationDialogOpen, setEditAutomationDialogOpen] = useState(false)
+  const [automationAnalyticsDialogOpen, setAutomationAnalyticsDialogOpen] = useState(false)
+  const [integrationDialogOpen, setIntegrationDialogOpen] = useState(false)
+  const [selectedIntegration, setSelectedIntegration] = useState<string | null>(null)
+
+  // Form states
+  const [newCampaignName, setNewCampaignName] = useState('')
+  const [newCampaignSubject, setNewCampaignSubject] = useState('')
+  const [newCampaignType, setNewCampaignType] = useState<CampaignType>('newsletter')
+  const [newListName, setNewListName] = useState('')
+  const [newListDescription, setNewListDescription] = useState('')
+  const [newSegmentName, setNewSegmentName] = useState('')
+  const [newAutomationName, setNewAutomationName] = useState('')
+  const [newAutomationTrigger, setNewAutomationTrigger] = useState<AutomationTrigger>('signup')
+  const [newTemplateName, setNewTemplateName] = useState('')
+  const [newTemplateCategory, setNewTemplateCategory] = useState<TemplateCategory>('newsletter')
+  const [scheduleDate, setScheduleDate] = useState('')
+  const [scheduleTime, setScheduleTime] = useState('')
+
   // Calculate stats
   const stats = useMemo(() => {
     const sentCampaigns = initialCampaigns.filter(c => c.status === 'sent')
@@ -822,12 +854,6 @@ export default function EmailMarketingClient({
   ]
 
   // Handlers
-  const handleCreateCampaign = () => {
-    toast.info('Create Campaign', {
-      description: 'Opening email campaign builder...'
-    })
-  }
-
   const handleSendCampaign = (campaignName: string) => {
     toast.success('Sending campaign', {
       description: `"${campaignName}" is being sent...`
@@ -867,11 +893,11 @@ export default function EmailMarketingClient({
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={() => setSettingsDialogOpen(true)}>
               <Settings className="w-4 h-4 mr-2" />
               Settings
             </Button>
-            <Button className="bg-gradient-to-r from-rose-500 to-pink-600 text-white">
+            <Button className="bg-gradient-to-r from-rose-500 to-pink-600 text-white" onClick={() => setCreateCampaignDialogOpen(true)}>
               <Plus className="w-4 h-4 mr-2" />
               New Campaign
             </Button>
@@ -1083,7 +1109,7 @@ export default function EmailMarketingClient({
                   <CardHeader>
                     <div className="flex items-center justify-between">
                       <CardTitle>Subscriber Lists</CardTitle>
-                      <Button size="sm">
+                      <Button size="sm" onClick={() => setCreateListDialogOpen(true)}>
                         <Plus className="w-4 h-4 mr-2" />
                         Create List
                       </Button>
@@ -1128,7 +1154,7 @@ export default function EmailMarketingClient({
                   <CardHeader>
                     <div className="flex items-center justify-between">
                       <CardTitle>Recent Subscribers</CardTitle>
-                      <Button variant="outline" size="sm">View All</Button>
+                      <Button variant="outline" size="sm" onClick={() => setViewAllSubscribersDialogOpen(true)}>View All</Button>
                     </div>
                   </CardHeader>
                   <CardContent>
@@ -1187,7 +1213,7 @@ export default function EmailMarketingClient({
                         </div>
                       ))}
                     </div>
-                    <Button variant="outline" className="w-full mt-4">
+                    <Button variant="outline" className="w-full mt-4" onClick={() => setCreateSegmentDialogOpen(true)}>
                       <Plus className="w-4 h-4 mr-2" />
                       Create Segment
                     </Button>
@@ -1250,7 +1276,7 @@ export default function EmailMarketingClient({
                 <h2 className="text-xl font-semibold">Email Automations</h2>
                 <p className="text-gray-500">Create automated email sequences triggered by user actions</p>
               </div>
-              <Button className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white">
+              <Button className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white" onClick={() => setCreateAutomationDialogOpen(true)}>
                 <Plus className="w-4 h-4 mr-2" />
                 Create Automation
               </Button>
@@ -1331,7 +1357,7 @@ export default function EmailMarketingClient({
                 <h2 className="text-xl font-semibold">Email Templates</h2>
                 <p className="text-gray-500">Design beautiful email templates for your campaigns</p>
               </div>
-              <Button className="bg-gradient-to-r from-purple-500 to-pink-600 text-white">
+              <Button className="bg-gradient-to-r from-purple-500 to-pink-600 text-white" onClick={() => setCreateTemplateDialogOpen(true)}>
                 <Plus className="w-4 h-4 mr-2" />
                 Create Template
               </Button>
@@ -1647,7 +1673,14 @@ export default function EmailMarketingClient({
                   ].map((integration) => (
                     <div key={integration.name} className="flex items-center justify-between p-3 rounded-lg border">
                       <span className="font-medium">{integration.name}</span>
-                      <Button variant={integration.connected ? 'outline' : 'default'} size="sm">
+                      <Button
+                        variant={integration.connected ? 'outline' : 'default'}
+                        size="sm"
+                        onClick={() => {
+                          setSelectedIntegration(integration.name)
+                          setIntegrationDialogOpen(true)
+                        }}
+                      >
                         {integration.connected ? 'Connected' : 'Connect'}
                       </Button>
                     </div>
@@ -1767,15 +1800,15 @@ export default function EmailMarketingClient({
                   <div className="flex gap-3">
                     {selectedCampaign.status === 'draft' && (
                       <>
-                        <Button><Edit className="w-4 h-4 mr-2" />Edit</Button>
-                        <Button variant="outline"><Clock className="w-4 h-4 mr-2" />Schedule</Button>
-                        <Button className="bg-gradient-to-r from-rose-500 to-pink-600"><Send className="w-4 h-4 mr-2" />Send Now</Button>
+                        <Button onClick={() => setEditCampaignDialogOpen(true)}><Edit className="w-4 h-4 mr-2" />Edit</Button>
+                        <Button variant="outline" onClick={() => setScheduleCampaignDialogOpen(true)}><Clock className="w-4 h-4 mr-2" />Schedule</Button>
+                        <Button className="bg-gradient-to-r from-rose-500 to-pink-600" onClick={() => setSendCampaignDialogOpen(true)}><Send className="w-4 h-4 mr-2" />Send Now</Button>
                       </>
                     )}
                     {selectedCampaign.status === 'sent' && (
                       <>
-                        <Button variant="outline"><Copy className="w-4 h-4 mr-2" />Duplicate</Button>
-                        <Button variant="outline"><BarChart3 className="w-4 h-4 mr-2" />Full Report</Button>
+                        <Button variant="outline" onClick={() => setDuplicateCampaignDialogOpen(true)}><Copy className="w-4 h-4 mr-2" />Duplicate</Button>
+                        <Button variant="outline" onClick={() => setFullReportDialogOpen(true)}><BarChart3 className="w-4 h-4 mr-2" />Full Report</Button>
                       </>
                     )}
                   </div>
@@ -1923,15 +1956,825 @@ export default function EmailMarketingClient({
 
                 <div className="flex gap-3">
                   {selectedAutomation.status === 'active' ? (
-                    <Button variant="outline"><Pause className="w-4 h-4 mr-2" />Pause Automation</Button>
+                    <Button variant="outline" onClick={() => {
+                      toast.success('Automation paused', {
+                        description: `"${selectedAutomation.name}" has been paused`
+                      })
+                    }}><Pause className="w-4 h-4 mr-2" />Pause Automation</Button>
                   ) : (
-                    <Button className="bg-gradient-to-r from-green-500 to-emerald-600"><Play className="w-4 h-4 mr-2" />Activate</Button>
+                    <Button className="bg-gradient-to-r from-green-500 to-emerald-600" onClick={() => {
+                      toast.success('Automation activated', {
+                        description: `"${selectedAutomation.name}" is now active`
+                      })
+                    }}><Play className="w-4 h-4 mr-2" />Activate</Button>
                   )}
-                  <Button variant="outline"><Edit className="w-4 h-4 mr-2" />Edit Steps</Button>
-                  <Button variant="outline"><BarChart3 className="w-4 h-4 mr-2" />View Analytics</Button>
+                  <Button variant="outline" onClick={() => setEditAutomationDialogOpen(true)}><Edit className="w-4 h-4 mr-2" />Edit Steps</Button>
+                  <Button variant="outline" onClick={() => setAutomationAnalyticsDialogOpen(true)}><BarChart3 className="w-4 h-4 mr-2" />View Analytics</Button>
                 </div>
               </div>
             )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Settings Dialog */}
+        <Dialog open={settingsDialogOpen} onOpenChange={setSettingsDialogOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Email Marketing Settings</DialogTitle>
+              <DialogDescription>Configure your email marketing preferences</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium">Default Sender Name</label>
+                <Input defaultValue="FreeFlow Team" className="mt-1" />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Default Sender Email</label>
+                <Input defaultValue="hello@freeflow.com" className="mt-1" />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Reply-To Email</label>
+                <Input defaultValue="support@freeflow.com" className="mt-1" />
+              </div>
+              <div className="flex gap-3 pt-4">
+                <Button variant="outline" onClick={() => setSettingsDialogOpen(false)} className="flex-1">Cancel</Button>
+                <Button onClick={() => {
+                  toast.success('Settings saved', { description: 'Your email marketing settings have been updated' })
+                  setSettingsDialogOpen(false)
+                }} className="flex-1">Save Settings</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Create Campaign Dialog */}
+        <Dialog open={createCampaignDialogOpen} onOpenChange={setCreateCampaignDialogOpen}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Create New Campaign</DialogTitle>
+              <DialogDescription>Set up a new email marketing campaign</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium">Campaign Name</label>
+                <Input
+                  placeholder="e.g., January Newsletter"
+                  value={newCampaignName}
+                  onChange={(e) => setNewCampaignName(e.target.value)}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Email Subject</label>
+                <Input
+                  placeholder="e.g., Check out our latest updates!"
+                  value={newCampaignSubject}
+                  onChange={(e) => setNewCampaignSubject(e.target.value)}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Campaign Type</label>
+                <div className="grid grid-cols-3 gap-2 mt-1">
+                  {(['newsletter', 'promotional', 'announcement'] as const).map((type) => (
+                    <Button
+                      key={type}
+                      variant={newCampaignType === type ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setNewCampaignType(type)}
+                      className="capitalize"
+                    >
+                      {type}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+              <div className="flex gap-3 pt-4">
+                <Button variant="outline" onClick={() => {
+                  setCreateCampaignDialogOpen(false)
+                  setNewCampaignName('')
+                  setNewCampaignSubject('')
+                }} className="flex-1">Cancel</Button>
+                <Button onClick={() => {
+                  if (newCampaignName && newCampaignSubject) {
+                    toast.success('Campaign created', { description: `"${newCampaignName}" has been created as a draft` })
+                    setCreateCampaignDialogOpen(false)
+                    setNewCampaignName('')
+                    setNewCampaignSubject('')
+                  } else {
+                    toast.error('Please fill in all fields')
+                  }
+                }} className="flex-1 bg-gradient-to-r from-rose-500 to-pink-600">Create Campaign</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Create List Dialog */}
+        <Dialog open={createListDialogOpen} onOpenChange={setCreateListDialogOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Create Subscriber List</DialogTitle>
+              <DialogDescription>Create a new list to organize your subscribers</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium">List Name</label>
+                <Input
+                  placeholder="e.g., VIP Customers"
+                  value={newListName}
+                  onChange={(e) => setNewListName(e.target.value)}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Description</label>
+                <Input
+                  placeholder="Describe this list..."
+                  value={newListDescription}
+                  onChange={(e) => setNewListDescription(e.target.value)}
+                  className="mt-1"
+                />
+              </div>
+              <div className="flex gap-3 pt-4">
+                <Button variant="outline" onClick={() => {
+                  setCreateListDialogOpen(false)
+                  setNewListName('')
+                  setNewListDescription('')
+                }} className="flex-1">Cancel</Button>
+                <Button onClick={() => {
+                  if (newListName) {
+                    toast.success('List created', { description: `"${newListName}" has been created` })
+                    setCreateListDialogOpen(false)
+                    setNewListName('')
+                    setNewListDescription('')
+                  } else {
+                    toast.error('Please enter a list name')
+                  }
+                }} className="flex-1">Create List</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* View All Subscribers Dialog */}
+        <Dialog open={viewAllSubscribersDialogOpen} onOpenChange={setViewAllSubscribersDialogOpen}>
+          <DialogContent className="max-w-4xl max-h-[80vh]">
+            <DialogHeader>
+              <DialogTitle>All Subscribers</DialogTitle>
+              <DialogDescription>View and manage all your email subscribers</DialogDescription>
+            </DialogHeader>
+            <div className="flex items-center gap-4 mb-4">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Input placeholder="Search subscribers..." className="pl-9" />
+              </div>
+              <Button variant="outline" onClick={handleExportSubscribers}>
+                <Download className="w-4 h-4 mr-2" />
+                Export
+              </Button>
+            </div>
+            <ScrollArea className="h-[400px]">
+              <div className="space-y-3">
+                {initialSubscribers.map((subscriber) => (
+                  <div
+                    key={subscriber.id}
+                    className="p-3 rounded-xl border hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer"
+                    onClick={() => {
+                      setViewAllSubscribersDialogOpen(false)
+                      setSelectedSubscriber(subscriber)
+                    }}
+                  >
+                    <div className="flex items-center gap-3">
+                      <Avatar>
+                        <AvatarImage src={subscriber.avatar} />
+                        <AvatarFallback>{subscriber.firstName[0]}{subscriber.lastName[0]}</AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <p className="font-medium">{subscriber.firstName} {subscriber.lastName}</p>
+                          <Badge className={getSubscriberStatusColor(subscriber.status)} variant="secondary">
+                            {subscriber.status}
+                          </Badge>
+                        </div>
+                        <p className="text-sm text-gray-500">{subscriber.email}</p>
+                      </div>
+                      <div className="text-right text-sm">
+                        <p className="text-gray-500">{subscriber.openRate}% opens</p>
+                        <p className="text-gray-500">{subscriber.clickRate}% clicks</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+          </DialogContent>
+        </Dialog>
+
+        {/* Create Segment Dialog */}
+        <Dialog open={createSegmentDialogOpen} onOpenChange={setCreateSegmentDialogOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Create Segment</DialogTitle>
+              <DialogDescription>Create a segment to target specific subscribers</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium">Segment Name</label>
+                <Input
+                  placeholder="e.g., Highly Engaged Users"
+                  value={newSegmentName}
+                  onChange={(e) => setNewSegmentName(e.target.value)}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Condition Type</label>
+                <div className="grid grid-cols-3 gap-2 mt-1">
+                  <Button variant="outline" size="sm">All Rules</Button>
+                  <Button variant="outline" size="sm">Any Rule</Button>
+                  <Button variant="outline" size="sm">None</Button>
+                </div>
+              </div>
+              <div className="p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+                <p className="text-sm text-gray-500">Add rules to define your segment criteria</p>
+                <Button variant="outline" size="sm" className="mt-2">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Rule
+                </Button>
+              </div>
+              <div className="flex gap-3 pt-4">
+                <Button variant="outline" onClick={() => {
+                  setCreateSegmentDialogOpen(false)
+                  setNewSegmentName('')
+                }} className="flex-1">Cancel</Button>
+                <Button onClick={() => {
+                  if (newSegmentName) {
+                    toast.success('Segment created', { description: `"${newSegmentName}" has been created` })
+                    setCreateSegmentDialogOpen(false)
+                    setNewSegmentName('')
+                  } else {
+                    toast.error('Please enter a segment name')
+                  }
+                }} className="flex-1">Create Segment</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Create Automation Dialog */}
+        <Dialog open={createAutomationDialogOpen} onOpenChange={setCreateAutomationDialogOpen}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Create Automation</DialogTitle>
+              <DialogDescription>Set up an automated email sequence</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium">Automation Name</label>
+                <Input
+                  placeholder="e.g., Welcome Series"
+                  value={newAutomationName}
+                  onChange={(e) => setNewAutomationName(e.target.value)}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Trigger Type</label>
+                <div className="grid grid-cols-2 gap-2 mt-2">
+                  {([
+                    { value: 'signup', label: 'New Signup', icon: <UserPlus className="w-4 h-4" /> },
+                    { value: 'purchase', label: 'Purchase', icon: <Target className="w-4 h-4" /> },
+                    { value: 'abandoned_cart', label: 'Abandoned Cart', icon: <Inbox className="w-4 h-4" /> },
+                    { value: 'birthday', label: 'Birthday', icon: <Heart className="w-4 h-4" /> },
+                    { value: 'inactivity', label: 'Inactivity', icon: <Clock className="w-4 h-4" /> },
+                    { value: 'tag_added', label: 'Tag Added', icon: <Tag className="w-4 h-4" /> }
+                  ] as const).map((trigger) => (
+                    <Button
+                      key={trigger.value}
+                      variant={newAutomationTrigger === trigger.value ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setNewAutomationTrigger(trigger.value)}
+                      className="justify-start"
+                    >
+                      {trigger.icon}
+                      <span className="ml-2">{trigger.label}</span>
+                    </Button>
+                  ))}
+                </div>
+              </div>
+              <div className="flex gap-3 pt-4">
+                <Button variant="outline" onClick={() => {
+                  setCreateAutomationDialogOpen(false)
+                  setNewAutomationName('')
+                }} className="flex-1">Cancel</Button>
+                <Button onClick={() => {
+                  if (newAutomationName) {
+                    toast.success('Automation created', { description: `"${newAutomationName}" has been created. Add steps to complete setup.` })
+                    setCreateAutomationDialogOpen(false)
+                    setNewAutomationName('')
+                  } else {
+                    toast.error('Please enter an automation name')
+                  }
+                }} className="flex-1 bg-gradient-to-r from-cyan-500 to-blue-600">Create Automation</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Create Template Dialog */}
+        <Dialog open={createTemplateDialogOpen} onOpenChange={setCreateTemplateDialogOpen}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Create Email Template</DialogTitle>
+              <DialogDescription>Design a new email template for your campaigns</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium">Template Name</label>
+                <Input
+                  placeholder="e.g., Monthly Newsletter"
+                  value={newTemplateName}
+                  onChange={(e) => setNewTemplateName(e.target.value)}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Category</label>
+                <div className="grid grid-cols-3 gap-2 mt-2">
+                  {(['newsletter', 'promotional', 'welcome', 'transactional', 'event', 'holiday'] as const).map((category) => (
+                    <Button
+                      key={category}
+                      variant={newTemplateCategory === category ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setNewTemplateCategory(category)}
+                      className="capitalize"
+                    >
+                      {category}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+              <div className="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg text-center">
+                <LayoutTemplate className="w-12 h-12 mx-auto text-gray-400 mb-2" />
+                <p className="text-sm text-gray-500">Template editor will open after creation</p>
+              </div>
+              <div className="flex gap-3 pt-4">
+                <Button variant="outline" onClick={() => {
+                  setCreateTemplateDialogOpen(false)
+                  setNewTemplateName('')
+                }} className="flex-1">Cancel</Button>
+                <Button onClick={() => {
+                  if (newTemplateName) {
+                    toast.success('Template created', { description: `"${newTemplateName}" has been created. Opening editor...` })
+                    setCreateTemplateDialogOpen(false)
+                    setNewTemplateName('')
+                  } else {
+                    toast.error('Please enter a template name')
+                  }
+                }} className="flex-1 bg-gradient-to-r from-purple-500 to-pink-600">Create Template</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Campaign Dialog */}
+        <Dialog open={editCampaignDialogOpen} onOpenChange={setEditCampaignDialogOpen}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Edit Campaign</DialogTitle>
+              <DialogDescription>Update your campaign details</DialogDescription>
+            </DialogHeader>
+            {selectedCampaign && (
+              <div className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium">Campaign Name</label>
+                  <Input defaultValue={selectedCampaign.name} className="mt-1" />
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Email Subject</label>
+                  <Input defaultValue={selectedCampaign.subject} className="mt-1" />
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Preview Text</label>
+                  <Input defaultValue={selectedCampaign.previewText} className="mt-1" />
+                </div>
+                <div>
+                  <label className="text-sm font-medium">From Name</label>
+                  <Input defaultValue={selectedCampaign.fromName} className="mt-1" />
+                </div>
+                <div className="flex gap-3 pt-4">
+                  <Button variant="outline" onClick={() => setEditCampaignDialogOpen(false)} className="flex-1">Cancel</Button>
+                  <Button onClick={() => {
+                    toast.success('Campaign updated', { description: 'Your changes have been saved' })
+                    setEditCampaignDialogOpen(false)
+                  }} className="flex-1">Save Changes</Button>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Schedule Campaign Dialog */}
+        <Dialog open={scheduleCampaignDialogOpen} onOpenChange={setScheduleCampaignDialogOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Schedule Campaign</DialogTitle>
+              <DialogDescription>Choose when to send this campaign</DialogDescription>
+            </DialogHeader>
+            {selectedCampaign && (
+              <div className="space-y-4">
+                <div className="p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+                  <p className="font-medium">{selectedCampaign.name}</p>
+                  <p className="text-sm text-gray-500">{selectedCampaign.subject}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Date</label>
+                  <Input
+                    type="date"
+                    value={scheduleDate}
+                    onChange={(e) => setScheduleDate(e.target.value)}
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Time</label>
+                  <Input
+                    type="time"
+                    value={scheduleTime}
+                    onChange={(e) => setScheduleTime(e.target.value)}
+                    className="mt-1"
+                  />
+                </div>
+                <div className="flex gap-3 pt-4">
+                  <Button variant="outline" onClick={() => {
+                    setScheduleCampaignDialogOpen(false)
+                    setScheduleDate('')
+                    setScheduleTime('')
+                  }} className="flex-1">Cancel</Button>
+                  <Button onClick={() => {
+                    if (scheduleDate && scheduleTime) {
+                      handleScheduleCampaign(selectedCampaign.name)
+                      setScheduleCampaignDialogOpen(false)
+                      setScheduleDate('')
+                      setScheduleTime('')
+                    } else {
+                      toast.error('Please select date and time')
+                    }
+                  }} className="flex-1">
+                    <Calendar className="w-4 h-4 mr-2" />
+                    Schedule
+                  </Button>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Send Campaign Now Dialog */}
+        <Dialog open={sendCampaignDialogOpen} onOpenChange={setSendCampaignDialogOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Send Campaign Now</DialogTitle>
+              <DialogDescription>Are you sure you want to send this campaign immediately?</DialogDescription>
+            </DialogHeader>
+            {selectedCampaign && (
+              <div className="space-y-4">
+                <div className="p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+                  <div className="flex items-center gap-2 text-amber-700 dark:text-amber-400">
+                    <AlertCircle className="w-5 h-5" />
+                    <span className="font-medium">This action cannot be undone</span>
+                  </div>
+                  <p className="text-sm text-amber-600 dark:text-amber-500 mt-1">
+                    The campaign will be sent to all subscribers in the selected list.
+                  </p>
+                </div>
+                <div className="p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+                  <p className="font-medium">{selectedCampaign.name}</p>
+                  <p className="text-sm text-gray-500">{selectedCampaign.subject}</p>
+                  <p className="text-sm text-gray-400 mt-1">To: {mockLists.find(l => l.id === selectedCampaign.listId)?.name}</p>
+                </div>
+                <div className="flex gap-3 pt-4">
+                  <Button variant="outline" onClick={() => setSendCampaignDialogOpen(false)} className="flex-1">Cancel</Button>
+                  <Button onClick={() => {
+                    handleSendCampaign(selectedCampaign.name)
+                    setSendCampaignDialogOpen(false)
+                    setSelectedCampaign(null)
+                  }} className="flex-1 bg-gradient-to-r from-rose-500 to-pink-600">
+                    <Send className="w-4 h-4 mr-2" />
+                    Send Now
+                  </Button>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Duplicate Campaign Dialog */}
+        <Dialog open={duplicateCampaignDialogOpen} onOpenChange={setDuplicateCampaignDialogOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Duplicate Campaign</DialogTitle>
+              <DialogDescription>Create a copy of this campaign</DialogDescription>
+            </DialogHeader>
+            {selectedCampaign && (
+              <div className="space-y-4">
+                <div className="p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+                  <p className="text-sm text-gray-500">Original Campaign</p>
+                  <p className="font-medium">{selectedCampaign.name}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium">New Campaign Name</label>
+                  <Input defaultValue={`Copy of ${selectedCampaign.name}`} className="mt-1" />
+                </div>
+                <div className="flex gap-3 pt-4">
+                  <Button variant="outline" onClick={() => setDuplicateCampaignDialogOpen(false)} className="flex-1">Cancel</Button>
+                  <Button onClick={() => {
+                    handleDuplicateCampaign(selectedCampaign.name)
+                    setDuplicateCampaignDialogOpen(false)
+                  }} className="flex-1">
+                    <Copy className="w-4 h-4 mr-2" />
+                    Duplicate
+                  </Button>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Full Report Dialog */}
+        <Dialog open={fullReportDialogOpen} onOpenChange={setFullReportDialogOpen}>
+          <DialogContent className="max-w-4xl max-h-[80vh]">
+            <DialogHeader>
+              <DialogTitle>Campaign Report</DialogTitle>
+              <DialogDescription>{selectedCampaign?.name}</DialogDescription>
+            </DialogHeader>
+            {selectedCampaign && selectedCampaign.status === 'sent' && (
+              <ScrollArea className="h-[500px]">
+                <div className="space-y-6 p-2">
+                  <div className="grid grid-cols-4 gap-4">
+                    <Card className="border-0 bg-blue-50 dark:bg-blue-900/20">
+                      <CardContent className="p-4 text-center">
+                        <p className="text-3xl font-bold text-blue-600">{selectedCampaign.stats.sent.toLocaleString()}</p>
+                        <p className="text-sm text-blue-600">Sent</p>
+                      </CardContent>
+                    </Card>
+                    <Card className="border-0 bg-green-50 dark:bg-green-900/20">
+                      <CardContent className="p-4 text-center">
+                        <p className="text-3xl font-bold text-green-600">{selectedCampaign.stats.delivered.toLocaleString()}</p>
+                        <p className="text-sm text-green-600">Delivered</p>
+                      </CardContent>
+                    </Card>
+                    <Card className="border-0 bg-purple-50 dark:bg-purple-900/20">
+                      <CardContent className="p-4 text-center">
+                        <p className="text-3xl font-bold text-purple-600">{selectedCampaign.stats.uniqueOpens.toLocaleString()}</p>
+                        <p className="text-sm text-purple-600">Unique Opens</p>
+                      </CardContent>
+                    </Card>
+                    <Card className="border-0 bg-pink-50 dark:bg-pink-900/20">
+                      <CardContent className="p-4 text-center">
+                        <p className="text-3xl font-bold text-pink-600">{selectedCampaign.stats.uniqueClicks.toLocaleString()}</p>
+                        <p className="text-sm text-pink-600">Unique Clicks</p>
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  <Card className="border-0 shadow-sm">
+                    <CardHeader>
+                      <CardTitle>Performance Metrics</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-3">
+                          <div className="flex justify-between">
+                            <span>Open Rate</span>
+                            <span className="font-semibold">{((selectedCampaign.stats.uniqueOpens / selectedCampaign.stats.delivered) * 100).toFixed(1)}%</span>
+                          </div>
+                          <Progress value={(selectedCampaign.stats.uniqueOpens / selectedCampaign.stats.delivered) * 100} className="h-2" />
+                        </div>
+                        <div className="space-y-3">
+                          <div className="flex justify-between">
+                            <span>Click Rate</span>
+                            <span className="font-semibold">{((selectedCampaign.stats.uniqueClicks / selectedCampaign.stats.delivered) * 100).toFixed(1)}%</span>
+                          </div>
+                          <Progress value={(selectedCampaign.stats.uniqueClicks / selectedCampaign.stats.delivered) * 100} className="h-2" />
+                        </div>
+                        <div className="space-y-3">
+                          <div className="flex justify-between">
+                            <span>Bounce Rate</span>
+                            <span className="font-semibold">{((selectedCampaign.stats.bounces / selectedCampaign.stats.sent) * 100).toFixed(2)}%</span>
+                          </div>
+                          <Progress value={(selectedCampaign.stats.bounces / selectedCampaign.stats.sent) * 100} className="h-2" />
+                        </div>
+                        <div className="space-y-3">
+                          <div className="flex justify-between">
+                            <span>Unsubscribe Rate</span>
+                            <span className="font-semibold">{((selectedCampaign.stats.unsubscribes / selectedCampaign.stats.delivered) * 100).toFixed(2)}%</span>
+                          </div>
+                          <Progress value={(selectedCampaign.stats.unsubscribes / selectedCampaign.stats.delivered) * 100} className="h-2" />
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <div className="flex gap-3">
+                    <Button variant="outline" onClick={() => {
+                      toast.success('Report exported', { description: 'Campaign report has been downloaded' })
+                    }}>
+                      <Download className="w-4 h-4 mr-2" />
+                      Export Report
+                    </Button>
+                    <Button variant="outline" onClick={() => setFullReportDialogOpen(false)}>Close</Button>
+                  </div>
+                </div>
+              </ScrollArea>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Automation Dialog */}
+        <Dialog open={editAutomationDialogOpen} onOpenChange={setEditAutomationDialogOpen}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Edit Automation Steps</DialogTitle>
+              <DialogDescription>Modify your automation workflow</DialogDescription>
+            </DialogHeader>
+            {selectedAutomation && (
+              <div className="space-y-4">
+                <div className="p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+                  <p className="font-medium">{selectedAutomation.name}</p>
+                  <p className="text-sm text-gray-500 capitalize">{selectedAutomation.trigger.replace('_', ' ')} trigger</p>
+                </div>
+                <div className="space-y-2">
+                  {selectedAutomation.steps.map((step, idx) => (
+                    <div key={idx} className="flex items-center gap-3 p-3 rounded-lg border">
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                        step.type === 'email' ? 'bg-blue-100 text-blue-600' :
+                        step.type === 'delay' ? 'bg-gray-200 text-gray-600' :
+                        step.type === 'condition' ? 'bg-purple-100 text-purple-600' :
+                        'bg-green-100 text-green-600'
+                      }`}>
+                        {step.type === 'email' ? <Mail className="w-4 h-4" /> :
+                         step.type === 'delay' ? <Clock className="w-4 h-4" /> :
+                         step.type === 'condition' ? <Target className="w-4 h-4" /> :
+                         <Zap className="w-4 h-4" />}
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-medium capitalize">{step.type}</p>
+                      </div>
+                      <Button variant="ghost" size="sm">
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+                <Button variant="outline" className="w-full">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Step
+                </Button>
+                <div className="flex gap-3 pt-4">
+                  <Button variant="outline" onClick={() => setEditAutomationDialogOpen(false)} className="flex-1">Cancel</Button>
+                  <Button onClick={() => {
+                    toast.success('Automation updated', { description: 'Your changes have been saved' })
+                    setEditAutomationDialogOpen(false)
+                  }} className="flex-1">Save Changes</Button>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Automation Analytics Dialog */}
+        <Dialog open={automationAnalyticsDialogOpen} onOpenChange={setAutomationAnalyticsDialogOpen}>
+          <DialogContent className="max-w-3xl">
+            <DialogHeader>
+              <DialogTitle>Automation Analytics</DialogTitle>
+              <DialogDescription>{selectedAutomation?.name}</DialogDescription>
+            </DialogHeader>
+            {selectedAutomation && (
+              <div className="space-y-6">
+                <div className="grid grid-cols-4 gap-4">
+                  <Card className="border-0 bg-blue-50 dark:bg-blue-900/20">
+                    <CardContent className="p-4 text-center">
+                      <p className="text-2xl font-bold text-blue-600">{selectedAutomation.stats.enrolled.toLocaleString()}</p>
+                      <p className="text-sm text-blue-600">Enrolled</p>
+                    </CardContent>
+                  </Card>
+                  <Card className="border-0 bg-amber-50 dark:bg-amber-900/20">
+                    <CardContent className="p-4 text-center">
+                      <p className="text-2xl font-bold text-amber-600">{selectedAutomation.stats.inProgress.toLocaleString()}</p>
+                      <p className="text-sm text-amber-600">In Progress</p>
+                    </CardContent>
+                  </Card>
+                  <Card className="border-0 bg-green-50 dark:bg-green-900/20">
+                    <CardContent className="p-4 text-center">
+                      <p className="text-2xl font-bold text-green-600">{selectedAutomation.stats.completed.toLocaleString()}</p>
+                      <p className="text-sm text-green-600">Completed</p>
+                    </CardContent>
+                  </Card>
+                  <Card className="border-0 bg-purple-50 dark:bg-purple-900/20">
+                    <CardContent className="p-4 text-center">
+                      <p className="text-2xl font-bold text-purple-600">{((selectedAutomation.stats.converted / selectedAutomation.stats.enrolled) * 100).toFixed(1)}%</p>
+                      <p className="text-sm text-purple-600">Conversion</p>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                <Card className="border-0 shadow-sm">
+                  <CardHeader>
+                    <CardTitle>Step Performance</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      {selectedAutomation.steps.map((step, idx) => (
+                        <div key={idx} className="flex items-center gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50">
+                          <span className="w-6 h-6 rounded-full bg-gray-200 text-gray-600 flex items-center justify-center text-sm">{idx + 1}</span>
+                          <div className="flex-1">
+                            <p className="font-medium capitalize">{step.type}</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="font-medium">{Math.floor(Math.random() * 1000 + 500)}</p>
+                            <p className="text-xs text-gray-500">completed</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <div className="flex gap-3">
+                  <Button variant="outline" onClick={() => {
+                    toast.success('Report exported', { description: 'Automation analytics report has been downloaded' })
+                  }}>
+                    <Download className="w-4 h-4 mr-2" />
+                    Export Report
+                  </Button>
+                  <Button variant="outline" onClick={() => setAutomationAnalyticsDialogOpen(false)}>Close</Button>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Integration Dialog */}
+        <Dialog open={integrationDialogOpen} onOpenChange={setIntegrationDialogOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>{selectedIntegration} Integration</DialogTitle>
+              <DialogDescription>Manage your {selectedIntegration} connection</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              {['Shopify', 'Zapier'].includes(selectedIntegration || '') ? (
+                <>
+                  <div className="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+                    <div className="flex items-center gap-2 text-green-700 dark:text-green-400">
+                      <CheckCircle2 className="w-5 h-5" />
+                      <span className="font-medium">Connected</span>
+                    </div>
+                    <p className="text-sm text-green-600 dark:text-green-500 mt-1">
+                      Your {selectedIntegration} account is linked and syncing data.
+                    </p>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-500">Last Sync</span>
+                      <span>2 minutes ago</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-500">Records Synced</span>
+                      <span>12,450</span>
+                    </div>
+                  </div>
+                  <div className="flex gap-3 pt-4">
+                    <Button variant="outline" onClick={() => {
+                      toast.success('Syncing...', { description: `Syncing data with ${selectedIntegration}` })
+                    }} className="flex-1">
+                      <RefreshCw className="w-4 h-4 mr-2" />
+                      Sync Now
+                    </Button>
+                    <Button variant="destructive" onClick={() => {
+                      toast.success('Disconnected', { description: `${selectedIntegration} has been disconnected` })
+                      setIntegrationDialogOpen(false)
+                    }} className="flex-1">Disconnect</Button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg text-center">
+                    <Zap className="w-12 h-12 mx-auto text-gray-400 mb-2" />
+                    <p className="font-medium">{selectedIntegration}</p>
+                    <p className="text-sm text-gray-500">Connect to sync your data automatically</p>
+                  </div>
+                  <div className="flex gap-3 pt-4">
+                    <Button variant="outline" onClick={() => setIntegrationDialogOpen(false)} className="flex-1">Cancel</Button>
+                    <Button onClick={() => {
+                      toast.success('Connected', { description: `${selectedIntegration} has been connected successfully` })
+                      setIntegrationDialogOpen(false)
+                    }} className="flex-1">Connect {selectedIntegration}</Button>
+                  </div>
+                </>
+              )}
+            </div>
           </DialogContent>
         </Dialog>
       </div>

@@ -788,6 +788,65 @@ export default function BuildsClient() {
   const [showRetryBuildDialog, setShowRetryBuildDialog] = useState(false)
   const [showLogsDialog, setShowLogsDialog] = useState(false)
 
+  // Additional dialog states for all button actions
+  const [showRunWorkflowDialog, setShowRunWorkflowDialog] = useState(false)
+  const [showBranchesDialog, setShowBranchesDialog] = useState(false)
+  const [showArtifactsDialog, setShowArtifactsDialog] = useState(false)
+  const [showAnalyticsDialog, setShowAnalyticsDialog] = useState(false)
+  const [showSearchBuildsDialog, setShowSearchBuildsDialog] = useState(false)
+  const [showBuildSettingsDialog, setShowBuildSettingsDialog] = useState(false)
+
+  // Workflow dialog states
+  const [showNewWorkflowDialog, setShowNewWorkflowDialog] = useState(false)
+  const [showRunAllWorkflowsDialog, setShowRunAllWorkflowsDialog] = useState(false)
+  const [showTemplatesDialog, setShowTemplatesDialog] = useState(false)
+  const [showTriggersDialog, setShowTriggersDialog] = useState(false)
+  const [showSchedulesDialog, setShowSchedulesDialog] = useState(false)
+  const [showSecretsDialog, setShowSecretsDialog] = useState(false)
+  const [showArchiveDialog, setShowArchiveDialog] = useState(false)
+  const [showWorkflowSettingsDialog, setShowWorkflowSettingsDialog] = useState(false)
+
+  // Environment dialog states
+  const [showNewEnvDialog, setShowNewEnvDialog] = useState(false)
+  const [showDeployDialog, setShowDeployDialog] = useState(false)
+  const [showProtectionDialog, setShowProtectionDialog] = useState(false)
+  const [showEnvSecretsDialog, setShowEnvSecretsDialog] = useState(false)
+  const [showVariablesDialog, setShowVariablesDialog] = useState(false)
+  const [showReviewersDialog, setShowReviewersDialog] = useState(false)
+  const [showHistoryDialog, setShowHistoryDialog] = useState(false)
+  const [showEnvSettingsDialog, setShowEnvSettingsDialog] = useState(false)
+  const [showConfigureEnvDialog, setShowConfigureEnvDialog] = useState(false)
+  const [showViewEnvDialog, setShowViewEnvDialog] = useState(false)
+  const [selectedEnvironment, setSelectedEnvironment] = useState<Environment | null>(null)
+
+  // Artifacts dialog states
+  const [showDownloadDialog, setShowDownloadDialog] = useState(false)
+  const [showBrowseArtifactsDialog, setShowBrowseArtifactsDialog] = useState(false)
+  const [showReportsDialog, setShowReportsDialog] = useState(false)
+  const [showArchivesDialog, setShowArchivesDialog] = useState(false)
+  const [showStorageDialog, setShowStorageDialog] = useState(false)
+  const [showCleanupDialog, setShowCleanupDialog] = useState(false)
+  const [showSearchArtifactsDialog, setShowSearchArtifactsDialog] = useState(false)
+  const [showArtifactSettingsDialog, setShowArtifactSettingsDialog] = useState(false)
+  const [selectedArtifact, setSelectedArtifact] = useState<Artifact | null>(null)
+
+  // Settings dialog states
+  const [showAddSecretDialog, setShowAddSecretDialog] = useState(false)
+  const [showDeleteSecretDialog, setShowDeleteSecretDialog] = useState(false)
+  const [showCopySecretDialog, setShowCopySecretDialog] = useState(false)
+  const [showDeleteCacheDialog, setShowDeleteCacheDialog] = useState(false)
+  const [selectedSecret, setSelectedSecret] = useState<string | null>(null)
+  const [selectedCache, setSelectedCache] = useState<string | null>(null)
+
+  // Build detail dialog states
+  const [showBuildLogsDialog, setShowBuildLogsDialog] = useState(false)
+  const [showBuildArtifactsDialog, setShowBuildArtifactsDialog] = useState(false)
+  const [showRerunBuildDialog, setShowRerunBuildDialog] = useState(false)
+
+  // Workflow detail dialog states
+  const [showViewFileDialog, setShowViewFileDialog] = useState(false)
+  const [showRunSingleWorkflowDialog, setShowRunSingleWorkflowDialog] = useState(false)
+
   // Quick actions with proper dialog handlers
   const buildsQuickActions = [
     { id: '1', label: 'New Build', icon: 'plus', action: () => setShowNewBuildDialog(true), variant: 'default' as const },
@@ -873,11 +932,13 @@ export default function BuildsClient() {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={() => {
+              toast.info('Refreshing...', { description: 'Fetching latest build data' })
+            }}>
               <RefreshCw className="w-4 h-4 mr-2" />
               Refresh
             </Button>
-            <Button className="bg-gradient-to-r from-teal-500 to-cyan-600 text-white">
+            <Button className="bg-gradient-to-r from-teal-500 to-cyan-600 text-white" onClick={() => setShowRunWorkflowDialog(true)}>
               <Play className="w-4 h-4 mr-2" />
               Run Workflow
             </Button>
@@ -974,19 +1035,20 @@ export default function BuildsClient() {
             {/* Builds Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Play, label: 'Run Build', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' },
-                { icon: RefreshCw, label: 'Rebuild', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
-                { icon: GitBranch, label: 'Branches', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400' },
-                { icon: Terminal, label: 'Logs', color: 'bg-sky-100 text-sky-600 dark:bg-sky-900/30 dark:text-sky-400' },
-                { icon: Download, label: 'Artifacts', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
-                { icon: BarChart3, label: 'Analytics', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
-                { icon: Search, label: 'Search', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
-                { icon: Settings, label: 'Settings', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
+                { icon: Play, label: 'Run Build', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', onClick: () => setShowNewBuildDialog(true) },
+                { icon: RefreshCw, label: 'Rebuild', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', onClick: () => setShowRetryBuildDialog(true) },
+                { icon: GitBranch, label: 'Branches', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', onClick: () => setShowBranchesDialog(true) },
+                { icon: Terminal, label: 'Logs', color: 'bg-sky-100 text-sky-600 dark:bg-sky-900/30 dark:text-sky-400', onClick: () => setShowLogsDialog(true) },
+                { icon: Download, label: 'Artifacts', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => setShowArtifactsDialog(true) },
+                { icon: BarChart3, label: 'Analytics', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => setShowAnalyticsDialog(true) },
+                { icon: Search, label: 'Search', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', onClick: () => setShowSearchBuildsDialog(true) },
+                { icon: Settings, label: 'Settings', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => setShowBuildSettingsDialog(true) },
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={action.onClick}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1139,19 +1201,20 @@ export default function BuildsClient() {
             {/* Workflows Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Workflow, label: 'New Workflow', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
-                { icon: Play, label: 'Run All', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
-                { icon: FileText, label: 'Templates', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
-                { icon: GitBranch, label: 'Triggers', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
-                { icon: Timer, label: 'Schedules', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400' },
-                { icon: Lock, label: 'Secrets', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
-                { icon: Archive, label: 'Archive', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' },
-                { icon: Settings, label: 'Settings', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
+                { icon: Workflow, label: 'New Workflow', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => setShowNewWorkflowDialog(true) },
+                { icon: Play, label: 'Run All', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', onClick: () => setShowRunAllWorkflowsDialog(true) },
+                { icon: FileText, label: 'Templates', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => setShowTemplatesDialog(true) },
+                { icon: GitBranch, label: 'Triggers', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => setShowTriggersDialog(true) },
+                { icon: Timer, label: 'Schedules', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', onClick: () => setShowSchedulesDialog(true) },
+                { icon: Lock, label: 'Secrets', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', onClick: () => setShowSecretsDialog(true) },
+                { icon: Archive, label: 'Archive', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', onClick: () => setShowArchiveDialog(true) },
+                { icon: Settings, label: 'Settings', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', onClick: () => setShowWorkflowSettingsDialog(true) },
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={action.onClick}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1246,19 +1309,20 @@ export default function BuildsClient() {
             {/* Environments Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Globe, label: 'New Env', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
-                { icon: Cloud, label: 'Deploy', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400' },
-                { icon: Shield, label: 'Protection', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
-                { icon: Key, label: 'Secrets', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' },
-                { icon: Database, label: 'Variables', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
-                { icon: Users, label: 'Reviewers', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400' },
-                { icon: Activity, label: 'History', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
-                { icon: Settings, label: 'Settings', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
+                { icon: Globe, label: 'New Env', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', onClick: () => setShowNewEnvDialog(true) },
+                { icon: Cloud, label: 'Deploy', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', onClick: () => setShowDeployDialog(true) },
+                { icon: Shield, label: 'Protection', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', onClick: () => setShowProtectionDialog(true) },
+                { icon: Key, label: 'Secrets', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', onClick: () => setShowEnvSecretsDialog(true) },
+                { icon: Database, label: 'Variables', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', onClick: () => setShowVariablesDialog(true) },
+                { icon: Users, label: 'Reviewers', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400', onClick: () => setShowReviewersDialog(true) },
+                { icon: Activity, label: 'History', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => setShowHistoryDialog(true) },
+                { icon: Settings, label: 'Settings', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', onClick: () => setShowEnvSettingsDialog(true) },
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={action.onClick}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1330,11 +1394,19 @@ export default function BuildsClient() {
                           )}
                         </div>
                         <div className="flex items-center gap-2">
-                          <Button variant="outline" size="sm">
+                          <Button variant="outline" size="sm" onClick={(e) => {
+                            e.stopPropagation()
+                            setSelectedEnvironment(env)
+                            setShowConfigureEnvDialog(true)
+                          }}>
                             <Settings className="w-3 h-3 mr-1" />
                             Configure
                           </Button>
-                          <Button variant="outline" size="sm">
+                          <Button variant="outline" size="sm" onClick={(e) => {
+                            e.stopPropagation()
+                            setSelectedEnvironment(env)
+                            setShowViewEnvDialog(true)
+                          }}>
                             <Eye className="w-3 h-3 mr-1" />
                             View
                           </Button>
@@ -1372,19 +1444,20 @@ export default function BuildsClient() {
             {/* Artifacts Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Download, label: 'Download', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
-                { icon: Box, label: 'Browse', color: 'bg-sky-100 text-sky-600 dark:bg-sky-900/30 dark:text-sky-400' },
-                { icon: FileText, label: 'Reports', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400' },
-                { icon: Archive, label: 'Archives', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
-                { icon: Database, label: 'Storage', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' },
-                { icon: Trash2, label: 'Cleanup', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
-                { icon: Search, label: 'Search', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400' },
-                { icon: Settings, label: 'Settings', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400' },
+                { icon: Download, label: 'Download', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => setShowDownloadDialog(true) },
+                { icon: Box, label: 'Browse', color: 'bg-sky-100 text-sky-600 dark:bg-sky-900/30 dark:text-sky-400', onClick: () => setShowBrowseArtifactsDialog(true) },
+                { icon: FileText, label: 'Reports', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', onClick: () => setShowReportsDialog(true) },
+                { icon: Archive, label: 'Archives', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', onClick: () => setShowArchivesDialog(true) },
+                { icon: Database, label: 'Storage', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', onClick: () => setShowStorageDialog(true) },
+                { icon: Trash2, label: 'Cleanup', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', onClick: () => setShowCleanupDialog(true) },
+                { icon: Search, label: 'Search', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400', onClick: () => setShowSearchArtifactsDialog(true) },
+                { icon: Settings, label: 'Settings', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400', onClick: () => setShowArtifactSettingsDialog(true) },
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={action.onClick}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1399,7 +1472,7 @@ export default function BuildsClient() {
                     <CardTitle>Build Artifacts</CardTitle>
                     <CardDescription>Download build outputs and reports</CardDescription>
                   </div>
-                  <Button variant="outline" size="sm">
+                  <Button variant="outline" size="sm" onClick={() => setShowCleanupDialog(true)}>
                     <Trash2 className="w-4 h-4 mr-2" />
                     Clean Expired
                   </Button>
@@ -1439,7 +1512,10 @@ export default function BuildsClient() {
                           Expires {new Date(artifact.expires_at).toLocaleDateString()}
                         </p>
                       </div>
-                      <Button variant="outline" size="sm">
+                      <Button variant="outline" size="sm" onClick={() => {
+                        setSelectedArtifact(artifact)
+                        setShowDownloadDialog(true)
+                      }}>
                         <Download className="w-4 h-4" />
                       </Button>
                     </div>
@@ -1558,16 +1634,22 @@ export default function BuildsClient() {
                           <span className="font-mono text-sm">{secret}</span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <Button variant="ghost" size="sm">
+                          <Button variant="ghost" size="sm" onClick={() => {
+                            setSelectedSecret(secret)
+                            setShowCopySecretDialog(true)
+                          }}>
                             <Copy className="w-3 h-3" />
                           </Button>
-                          <Button variant="ghost" size="sm" className="text-red-600">
+                          <Button variant="ghost" size="sm" className="text-red-600" onClick={() => {
+                            setSelectedSecret(secret)
+                            setShowDeleteSecretDialog(true)
+                          }}>
                             <Trash2 className="w-3 h-3" />
                           </Button>
                         </div>
                       </div>
                     ))}
-                    <Button variant="outline" className="w-full mt-3">
+                    <Button variant="outline" className="w-full mt-3" onClick={() => setShowAddSecretDialog(true)}>
                       <Key className="w-4 h-4 mr-2" />
                       Add Secret
                     </Button>
@@ -1595,7 +1677,10 @@ export default function BuildsClient() {
                           <p className="font-mono text-sm">{cache.key}</p>
                           <p className="text-xs text-gray-500">{cache.size} • {cache.hits} hits</p>
                         </div>
-                        <Button variant="ghost" size="sm" className="text-red-600">
+                        <Button variant="ghost" size="sm" className="text-red-600" onClick={() => {
+                          setSelectedCache(cache.key)
+                          setShowDeleteCacheDialog(true)
+                        }}>
                           <Trash2 className="w-3 h-3" />
                         </Button>
                       </div>
@@ -1626,21 +1711,21 @@ export default function BuildsClient() {
                         <p className="font-medium">Max concurrent jobs</p>
                         <p className="text-sm text-gray-500">Limit parallel workflow runs</p>
                       </div>
-                      <Input type="number" defaultValue={5} className="w-20 text-center" />
+                      <Input type="number" defaultValue={5} className="w-20 text-center" onChange={() => toast.success('Setting updated')} />
                     </div>
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="font-medium">Queue pending jobs</p>
                         <p className="text-sm text-gray-500">Hold jobs when limit reached</p>
                       </div>
-                      <Button variant="outline" size="sm">Enabled</Button>
+                      <Button variant="outline" size="sm" onClick={() => toast.success('Queue pending jobs toggled')}>Enabled</Button>
                     </div>
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="font-medium">Cancel in-progress on new push</p>
                         <p className="text-sm text-gray-500">Stop old runs when new commits arrive</p>
                       </div>
-                      <Button variant="outline" size="sm">Disabled</Button>
+                      <Button variant="outline" size="sm" onClick={() => toast.success('Cancel in-progress toggled')}>Disabled</Button>
                     </div>
                   </div>
                 </CardContent>
@@ -1815,15 +1900,21 @@ export default function BuildsClient() {
                   )}
 
                   <div className="flex items-center gap-3 pt-4 border-t">
-                    <Button variant="outline" className="flex-1">
+                    <Button variant="outline" className="flex-1" onClick={() => {
+                      setShowBuildLogsDialog(true)
+                    }}>
                       <Eye className="w-4 h-4 mr-2" />
                       View Logs
                     </Button>
-                    <Button variant="outline" className="flex-1">
+                    <Button variant="outline" className="flex-1" onClick={() => {
+                      setShowBuildArtifactsDialog(true)
+                    }}>
                       <Download className="w-4 h-4 mr-2" />
                       Artifacts
                     </Button>
-                    <Button className="flex-1 bg-gradient-to-r from-teal-500 to-cyan-600 text-white">
+                    <Button className="flex-1 bg-gradient-to-r from-teal-500 to-cyan-600 text-white" onClick={() => {
+                      setShowRerunBuildDialog(true)
+                    }}>
                       <RotateCcw className="w-4 h-4 mr-2" />
                       Re-run
                     </Button>
@@ -1890,11 +1981,15 @@ export default function BuildsClient() {
                 </div>
 
                 <div className="flex items-center gap-3 pt-4 border-t">
-                  <Button variant="outline" className="flex-1">
+                  <Button variant="outline" className="flex-1" onClick={() => {
+                    setShowViewFileDialog(true)
+                  }}>
                     <Eye className="w-4 h-4 mr-2" />
                     View File
                   </Button>
-                  <Button className="flex-1 bg-gradient-to-r from-teal-500 to-cyan-600 text-white">
+                  <Button className="flex-1 bg-gradient-to-r from-teal-500 to-cyan-600 text-white" onClick={() => {
+                    setShowRunSingleWorkflowDialog(true)
+                  }}>
                     <Play className="w-4 h-4 mr-2" />
                     Run Workflow
                   </Button>
@@ -2023,7 +2118,9 @@ export default function BuildsClient() {
                     </option>
                   ))}
                 </select>
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" onClick={() => {
+                  toast.success('Download started', { description: 'Build logs are being downloaded...' })
+                }}>
                   <Download className="w-4 h-4 mr-2" />
                   Download
                 </Button>
@@ -2054,6 +2151,1705 @@ export default function BuildsClient() {
             <div className="flex justify-end">
               <Button variant="outline" onClick={() => setShowLogsDialog(false)}>
                 Close
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Run Workflow Dialog (Header) */}
+        <Dialog open={showRunWorkflowDialog} onOpenChange={setShowRunWorkflowDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Play className="w-5 h-5 text-teal-600" />
+                Run Workflow
+              </DialogTitle>
+              <DialogDescription>
+                Select and run a workflow manually
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Workflow</label>
+                <select className="w-full p-2 border rounded-lg bg-background">
+                  {mockWorkflows.map(w => (
+                    <option key={w.id} value={w.id}>{w.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Branch</label>
+                <Input placeholder="main" defaultValue="main" />
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <Button variant="outline" className="flex-1" onClick={() => setShowRunWorkflowDialog(false)}>
+                Cancel
+              </Button>
+              <Button className="flex-1 bg-gradient-to-r from-teal-500 to-cyan-600 text-white" onClick={() => {
+                toast.success('Workflow started', { description: 'The workflow has been triggered' })
+                setShowRunWorkflowDialog(false)
+              }}>
+                <Play className="w-4 h-4 mr-2" />
+                Run
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Branches Dialog */}
+        <Dialog open={showBranchesDialog} onOpenChange={setShowBranchesDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <GitBranch className="w-5 h-5 text-cyan-600" />
+                Branches
+              </DialogTitle>
+              <DialogDescription>
+                View branches with recent builds
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-3 py-4 max-h-[400px] overflow-auto">
+              {['main', 'develop', 'feature/new-dashboard', 'feature/api-updates', 'hotfix/security-patch'].map(branch => (
+                <div key={branch} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <GitBranch className="w-4 h-4 text-gray-500" />
+                    <span className="font-mono text-sm">{branch}</span>
+                  </div>
+                  <Button size="sm" variant="outline" onClick={() => {
+                    toast.info('Branch selected', { description: `Selected branch: ${branch}` })
+                    setShowBranchesDialog(false)
+                  }}>
+                    Select
+                  </Button>
+                </div>
+              ))}
+            </div>
+            <div className="flex justify-end">
+              <Button variant="outline" onClick={() => setShowBranchesDialog(false)}>
+                Close
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Artifacts Dialog (from Builds Quick Actions) */}
+        <Dialog open={showArtifactsDialog} onOpenChange={setShowArtifactsDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Download className="w-5 h-5 text-blue-600" />
+                Recent Artifacts
+              </DialogTitle>
+              <DialogDescription>
+                Download artifacts from recent builds
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-3 py-4 max-h-[400px] overflow-auto">
+              {mockArtifacts.slice(0, 5).map(artifact => (
+                <div key={artifact.id} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div>
+                    <p className="font-medium text-sm">{artifact.name}</p>
+                    <p className="text-xs text-gray-500">Build #{artifact.build_number} - {formatBytes(artifact.size_bytes)}</p>
+                  </div>
+                  <Button size="sm" variant="outline" onClick={() => {
+                    toast.success('Download started', { description: `Downloading ${artifact.name}...` })
+                  }}>
+                    <Download className="w-4 h-4" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+            <div className="flex justify-end">
+              <Button variant="outline" onClick={() => setShowArtifactsDialog(false)}>
+                Close
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Analytics Dialog */}
+        <Dialog open={showAnalyticsDialog} onOpenChange={setShowAnalyticsDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <BarChart3 className="w-5 h-5 text-indigo-600" />
+                Build Analytics
+              </DialogTitle>
+              <DialogDescription>
+                View build performance metrics and trends
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-6 py-4">
+              <div className="grid grid-cols-3 gap-4">
+                <div className="text-center p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <p className="text-2xl font-bold text-green-600">{stats.successRate}%</p>
+                  <p className="text-sm text-gray-500">Success Rate</p>
+                </div>
+                <div className="text-center p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <p className="text-2xl font-bold">{formatDuration(stats.avgDuration)}</p>
+                  <p className="text-sm text-gray-500">Avg Duration</p>
+                </div>
+                <div className="text-center p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <p className="text-2xl font-bold">{stats.avgCoverage.toFixed(1)}%</p>
+                  <p className="text-sm text-gray-500">Avg Coverage</p>
+                </div>
+              </div>
+              <div className="p-4 border rounded-lg">
+                <h4 className="font-semibold mb-3">Build Trend (Last 7 Days)</h4>
+                <div className="flex items-end gap-2 h-32">
+                  {[65, 72, 68, 85, 90, 78, 95].map((val, i) => (
+                    <div key={i} className="flex-1 bg-gradient-to-t from-teal-500 to-cyan-400 rounded-t" style={{ height: `${val}%` }} />
+                  ))}
+                </div>
+              </div>
+            </div>
+            <div className="flex justify-end">
+              <Button variant="outline" onClick={() => setShowAnalyticsDialog(false)}>
+                Close
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Search Builds Dialog */}
+        <Dialog open={showSearchBuildsDialog} onOpenChange={setShowSearchBuildsDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Search className="w-5 h-5 text-violet-600" />
+                Search Builds
+              </DialogTitle>
+              <DialogDescription>
+                Search through build history
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <Input placeholder="Search by workflow, branch, commit..." />
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Status Filter</label>
+                <div className="flex gap-2 flex-wrap">
+                  {['All', 'Success', 'Failed', 'Running'].map(status => (
+                    <Badge key={status} variant="outline" className="cursor-pointer hover:bg-gray-100">
+                      {status}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Date Range</label>
+                <div className="flex gap-2">
+                  <Input type="date" className="flex-1" />
+                  <Input type="date" className="flex-1" />
+                </div>
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <Button variant="outline" className="flex-1" onClick={() => setShowSearchBuildsDialog(false)}>
+                Cancel
+              </Button>
+              <Button className="flex-1" onClick={() => {
+                toast.info('Search applied')
+                setShowSearchBuildsDialog(false)
+              }}>
+                Search
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Build Settings Dialog */}
+        <Dialog open={showBuildSettingsDialog} onOpenChange={setShowBuildSettingsDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Settings className="w-5 h-5 text-purple-600" />
+                Build Settings
+              </DialogTitle>
+              <DialogDescription>
+                Configure build preferences
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium">Auto-retry failed builds</p>
+                  <p className="text-sm text-gray-500">Automatically retry on failure</p>
+                </div>
+                <Button variant="outline" size="sm">Disabled</Button>
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium">Build timeout</p>
+                  <p className="text-sm text-gray-500">Maximum build duration</p>
+                </div>
+                <Input type="number" defaultValue={60} className="w-20 text-center" />
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium">Notifications</p>
+                  <p className="text-sm text-gray-500">Email on build failure</p>
+                </div>
+                <Button variant="outline" size="sm">Enabled</Button>
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <Button variant="outline" className="flex-1" onClick={() => setShowBuildSettingsDialog(false)}>
+                Cancel
+              </Button>
+              <Button className="flex-1" onClick={() => {
+                toast.success('Settings saved')
+                setShowBuildSettingsDialog(false)
+              }}>
+                Save
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* New Workflow Dialog */}
+        <Dialog open={showNewWorkflowDialog} onOpenChange={setShowNewWorkflowDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Workflow className="w-5 h-5 text-purple-600" />
+                Create Workflow
+              </DialogTitle>
+              <DialogDescription>
+                Create a new CI/CD workflow
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Workflow Name</label>
+                <Input placeholder="e.g., CI Pipeline" />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">File Path</label>
+                <Input placeholder=".github/workflows/ci.yml" />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Template</label>
+                <select className="w-full p-2 border rounded-lg bg-background">
+                  <option>Node.js CI</option>
+                  <option>Python CI</option>
+                  <option>Docker Build</option>
+                  <option>Deploy to Production</option>
+                </select>
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <Button variant="outline" className="flex-1" onClick={() => setShowNewWorkflowDialog(false)}>
+                Cancel
+              </Button>
+              <Button className="flex-1" onClick={() => {
+                toast.success('Workflow created')
+                setShowNewWorkflowDialog(false)
+              }}>
+                Create
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Run All Workflows Dialog */}
+        <Dialog open={showRunAllWorkflowsDialog} onOpenChange={setShowRunAllWorkflowsDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Play className="w-5 h-5 text-violet-600" />
+                Run All Workflows
+              </DialogTitle>
+              <DialogDescription>
+                Trigger all active workflows
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 text-amber-600" />
+                  <p className="text-sm text-amber-700 dark:text-amber-400">
+                    This will trigger {mockWorkflows.filter(w => w.is_active).length} workflows
+                  </p>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Branch</label>
+                <Input placeholder="main" defaultValue="main" />
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <Button variant="outline" className="flex-1" onClick={() => setShowRunAllWorkflowsDialog(false)}>
+                Cancel
+              </Button>
+              <Button className="flex-1" onClick={() => {
+                toast.success('All workflows triggered')
+                setShowRunAllWorkflowsDialog(false)
+              }}>
+                Run All
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Templates Dialog */}
+        <Dialog open={showTemplatesDialog} onOpenChange={setShowTemplatesDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <FileText className="w-5 h-5 text-indigo-600" />
+                Workflow Templates
+              </DialogTitle>
+              <DialogDescription>
+                Start from a pre-built template
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-3 py-4 max-h-[400px] overflow-auto">
+              {[
+                { name: 'Node.js CI', desc: 'Build and test Node.js projects' },
+                { name: 'Python CI', desc: 'Build and test Python projects' },
+                { name: 'Docker Build', desc: 'Build and push Docker images' },
+                { name: 'Deploy to AWS', desc: 'Deploy to AWS infrastructure' },
+                { name: 'Security Scan', desc: 'Run security vulnerability scans' },
+              ].map(template => (
+                <div key={template.name} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div>
+                    <p className="font-medium">{template.name}</p>
+                    <p className="text-sm text-gray-500">{template.desc}</p>
+                  </div>
+                  <Button size="sm" variant="outline" onClick={() => {
+                    toast.success('Template selected', { description: template.name })
+                    setShowTemplatesDialog(false)
+                  }}>
+                    Use
+                  </Button>
+                </div>
+              ))}
+            </div>
+            <div className="flex justify-end">
+              <Button variant="outline" onClick={() => setShowTemplatesDialog(false)}>
+                Close
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Triggers Dialog */}
+        <Dialog open={showTriggersDialog} onOpenChange={setShowTriggersDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <GitBranch className="w-5 h-5 text-blue-600" />
+                Workflow Triggers
+              </DialogTitle>
+              <DialogDescription>
+                Configure workflow triggers
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              {['push', 'pull_request', 'schedule', 'workflow_dispatch'].map(trigger => (
+                <div key={trigger} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div className="flex items-center gap-2">
+                    {getTriggerIcon(trigger as WorkflowTrigger)}
+                    <span className="capitalize">{trigger.replace('_', ' ')}</span>
+                  </div>
+                  <Button variant="outline" size="sm" onClick={() => toast.success(`${trigger} toggled`)}>
+                    Enabled
+                  </Button>
+                </div>
+              ))}
+            </div>
+            <div className="flex justify-end">
+              <Button variant="outline" onClick={() => setShowTriggersDialog(false)}>
+                Close
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Schedules Dialog */}
+        <Dialog open={showSchedulesDialog} onOpenChange={setShowSchedulesDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Timer className="w-5 h-5 text-cyan-600" />
+                Scheduled Builds
+              </DialogTitle>
+              <DialogDescription>
+                Manage scheduled workflow runs
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="p-3 border rounded-lg">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="font-medium">Nightly Build</span>
+                  <Badge variant="outline">Active</Badge>
+                </div>
+                <p className="text-sm text-gray-500">Every day at 3:00 AM UTC</p>
+              </div>
+              <div className="p-3 border rounded-lg">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="font-medium">Weekly Security Scan</span>
+                  <Badge variant="outline">Active</Badge>
+                </div>
+                <p className="text-sm text-gray-500">Every Sunday at 12:00 PM UTC</p>
+              </div>
+              <Button variant="outline" className="w-full" onClick={() => toast.success('Add schedule dialog')}>
+                <Calendar className="w-4 h-4 mr-2" />
+                Add Schedule
+              </Button>
+            </div>
+            <div className="flex justify-end">
+              <Button variant="outline" onClick={() => setShowSchedulesDialog(false)}>
+                Close
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Secrets Dialog (Workflow Tab) */}
+        <Dialog open={showSecretsDialog} onOpenChange={setShowSecretsDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Lock className="w-5 h-5 text-teal-600" />
+                Workflow Secrets
+              </DialogTitle>
+              <DialogDescription>
+                Manage secrets used in workflows
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-3 py-4">
+              {['GITHUB_TOKEN', 'NPM_TOKEN', 'DOCKER_USERNAME', 'AWS_SECRET'].map(secret => (
+                <div key={secret} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <Lock className="w-4 h-4 text-gray-400" />
+                    <span className="font-mono text-sm">{secret}</span>
+                  </div>
+                  <Badge variant="secondary">Encrypted</Badge>
+                </div>
+              ))}
+              <Button variant="outline" className="w-full" onClick={() => toast.success('Add secret dialog')}>
+                <Key className="w-4 h-4 mr-2" />
+                Add Secret
+              </Button>
+            </div>
+            <div className="flex justify-end">
+              <Button variant="outline" onClick={() => setShowSecretsDialog(false)}>
+                Close
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Archive Dialog */}
+        <Dialog open={showArchiveDialog} onOpenChange={setShowArchiveDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Archive className="w-5 h-5 text-emerald-600" />
+                Archived Workflows
+              </DialogTitle>
+              <DialogDescription>
+                View and restore archived workflows
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-3 py-4">
+              <div className="p-3 border rounded-lg">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium">Legacy Deploy</p>
+                    <p className="text-sm text-gray-500">Archived 30 days ago</p>
+                  </div>
+                  <Button size="sm" variant="outline" onClick={() => toast.success('Workflow restored')}>
+                    Restore
+                  </Button>
+                </div>
+              </div>
+              <div className="text-center py-4 text-gray-500">
+                No other archived workflows
+              </div>
+            </div>
+            <div className="flex justify-end">
+              <Button variant="outline" onClick={() => setShowArchiveDialog(false)}>
+                Close
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Workflow Settings Dialog */}
+        <Dialog open={showWorkflowSettingsDialog} onOpenChange={setShowWorkflowSettingsDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Settings className="w-5 h-5 text-green-600" />
+                Workflow Settings
+              </DialogTitle>
+              <DialogDescription>
+                Configure workflow preferences
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium">Allow fork PRs</p>
+                  <p className="text-sm text-gray-500">Run workflows from forks</p>
+                </div>
+                <Button variant="outline" size="sm" onClick={() => toast.success('Setting toggled')}>Disabled</Button>
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium">Required approvals</p>
+                  <p className="text-sm text-gray-500">For production deploys</p>
+                </div>
+                <Input type="number" defaultValue={1} className="w-16 text-center" />
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <Button variant="outline" className="flex-1" onClick={() => setShowWorkflowSettingsDialog(false)}>
+                Cancel
+              </Button>
+              <Button className="flex-1" onClick={() => {
+                toast.success('Settings saved')
+                setShowWorkflowSettingsDialog(false)
+              }}>
+                Save
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* New Environment Dialog */}
+        <Dialog open={showNewEnvDialog} onOpenChange={setShowNewEnvDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Globe className="w-5 h-5 text-amber-600" />
+                Create Environment
+              </DialogTitle>
+              <DialogDescription>
+                Create a new deployment environment
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Environment Name</label>
+                <Input placeholder="e.g., staging" />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Type</label>
+                <select className="w-full p-2 border rounded-lg bg-background">
+                  <option>Development</option>
+                  <option>Staging</option>
+                  <option>Production</option>
+                  <option>Testing</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">URL (optional)</label>
+                <Input placeholder="https://staging.example.com" />
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <Button variant="outline" className="flex-1" onClick={() => setShowNewEnvDialog(false)}>
+                Cancel
+              </Button>
+              <Button className="flex-1" onClick={() => {
+                toast.success('Environment created')
+                setShowNewEnvDialog(false)
+              }}>
+                Create
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Deploy Dialog */}
+        <Dialog open={showDeployDialog} onOpenChange={setShowDeployDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Cloud className="w-5 h-5 text-orange-600" />
+                Deploy
+              </DialogTitle>
+              <DialogDescription>
+                Deploy to an environment
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Environment</label>
+                <select className="w-full p-2 border rounded-lg bg-background">
+                  {mockEnvironments.map(env => (
+                    <option key={env.id} value={env.id}>{env.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Build</label>
+                <select className="w-full p-2 border rounded-lg bg-background">
+                  {mockBuilds.filter(b => b.status === 'success').slice(0, 5).map(build => (
+                    <option key={build.id} value={build.id}>#{build.build_number} - {build.workflow_name}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <Button variant="outline" className="flex-1" onClick={() => setShowDeployDialog(false)}>
+                Cancel
+              </Button>
+              <Button className="flex-1" onClick={() => {
+                toast.success('Deployment started')
+                setShowDeployDialog(false)
+              }}>
+                Deploy
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Protection Rules Dialog */}
+        <Dialog open={showProtectionDialog} onOpenChange={setShowProtectionDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Shield className="w-5 h-5 text-red-600" />
+                Protection Rules
+              </DialogTitle>
+              <DialogDescription>
+                Configure environment protection
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium">Required reviewers</p>
+                  <p className="text-sm text-gray-500">Approval before deploy</p>
+                </div>
+                <Button variant="outline" size="sm" onClick={() => toast.success('Toggle reviewers')}>Enabled</Button>
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium">Wait timer</p>
+                  <p className="text-sm text-gray-500">Delay before deploy</p>
+                </div>
+                <Input type="number" defaultValue={15} className="w-20 text-center" />
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium">Branch restrictions</p>
+                  <p className="text-sm text-gray-500">Only from specific branches</p>
+                </div>
+                <Button variant="outline" size="sm" onClick={() => toast.success('Toggle restrictions')}>Disabled</Button>
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <Button variant="outline" className="flex-1" onClick={() => setShowProtectionDialog(false)}>
+                Cancel
+              </Button>
+              <Button className="flex-1" onClick={() => {
+                toast.success('Protection rules saved')
+                setShowProtectionDialog(false)
+              }}>
+                Save
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Environment Secrets Dialog */}
+        <Dialog open={showEnvSecretsDialog} onOpenChange={setShowEnvSecretsDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Key className="w-5 h-5 text-rose-600" />
+                Environment Secrets
+              </DialogTitle>
+              <DialogDescription>
+                Manage environment-specific secrets
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-3 py-4">
+              {['DATABASE_URL', 'API_KEY', 'JWT_SECRET'].map(secret => (
+                <div key={secret} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <Lock className="w-4 h-4 text-gray-400" />
+                    <span className="font-mono text-sm">{secret}</span>
+                  </div>
+                  <Button variant="ghost" size="sm" className="text-red-600" onClick={() => toast.success('Secret deleted')}>
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </div>
+              ))}
+              <Button variant="outline" className="w-full" onClick={() => toast.success('Add secret dialog')}>
+                <Key className="w-4 h-4 mr-2" />
+                Add Secret
+              </Button>
+            </div>
+            <div className="flex justify-end">
+              <Button variant="outline" onClick={() => setShowEnvSecretsDialog(false)}>
+                Close
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Variables Dialog */}
+        <Dialog open={showVariablesDialog} onOpenChange={setShowVariablesDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Database className="w-5 h-5 text-pink-600" />
+                Environment Variables
+              </DialogTitle>
+              <DialogDescription>
+                Manage environment variables
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-3 py-4">
+              {[
+                { key: 'NODE_ENV', value: 'production' },
+                { key: 'LOG_LEVEL', value: 'info' },
+                { key: 'CACHE_TTL', value: '3600' },
+              ].map(variable => (
+                <div key={variable.key} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div>
+                    <span className="font-mono text-sm">{variable.key}</span>
+                    <span className="text-gray-400 mx-2">=</span>
+                    <span className="text-sm text-gray-600">{variable.value}</span>
+                  </div>
+                  <Button variant="ghost" size="sm" onClick={() => toast.success('Edit variable')}>
+                    <Settings className="w-4 h-4" />
+                  </Button>
+                </div>
+              ))}
+              <Button variant="outline" className="w-full" onClick={() => toast.success('Add variable dialog')}>
+                <Database className="w-4 h-4 mr-2" />
+                Add Variable
+              </Button>
+            </div>
+            <div className="flex justify-end">
+              <Button variant="outline" onClick={() => setShowVariablesDialog(false)}>
+                Close
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Reviewers Dialog */}
+        <Dialog open={showReviewersDialog} onOpenChange={setShowReviewersDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Users className="w-5 h-5 text-fuchsia-600" />
+                Required Reviewers
+              </DialogTitle>
+              <DialogDescription>
+                Manage deployment reviewers
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-3 py-4">
+              {['Sarah Chen', 'Mike Wilson', 'Team Lead'].map(reviewer => (
+                <div key={reviewer} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <Avatar className="w-8 h-8">
+                      <AvatarFallback>{reviewer.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                    </Avatar>
+                    <span>{reviewer}</span>
+                  </div>
+                  <Button variant="ghost" size="sm" className="text-red-600" onClick={() => toast.success('Reviewer removed')}>
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </div>
+              ))}
+              <Button variant="outline" className="w-full" onClick={() => toast.success('Add reviewer dialog')}>
+                <Users className="w-4 h-4 mr-2" />
+                Add Reviewer
+              </Button>
+            </div>
+            <div className="flex justify-end">
+              <Button variant="outline" onClick={() => setShowReviewersDialog(false)}>
+                Close
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Deployment History Dialog */}
+        <Dialog open={showHistoryDialog} onOpenChange={setShowHistoryDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Activity className="w-5 h-5 text-purple-600" />
+                Deployment History
+              </DialogTitle>
+              <DialogDescription>
+                View recent deployments
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-3 py-4 max-h-[400px] overflow-auto">
+              {mockBuilds.filter(b => b.status === 'success').slice(0, 5).map((build, i) => (
+                <div key={build.id} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <Badge className={getStatusColor('success')}>
+                        <CheckCircle className="w-3 h-3 mr-1" />
+                        Success
+                      </Badge>
+                      <span className="font-medium">#{build.build_number}</span>
+                    </div>
+                    <p className="text-sm text-gray-500 mt-1">{new Date(build.created_at).toLocaleString()}</p>
+                  </div>
+                  <Button size="sm" variant="outline" onClick={() => toast.info('View deployment details')}>
+                    View
+                  </Button>
+                </div>
+              ))}
+            </div>
+            <div className="flex justify-end">
+              <Button variant="outline" onClick={() => setShowHistoryDialog(false)}>
+                Close
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Environment Settings Dialog */}
+        <Dialog open={showEnvSettingsDialog} onOpenChange={setShowEnvSettingsDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Settings className="w-5 h-5 text-violet-600" />
+                Environment Settings
+              </DialogTitle>
+              <DialogDescription>
+                Configure environment preferences
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium">Auto-deploy</p>
+                  <p className="text-sm text-gray-500">Deploy on successful build</p>
+                </div>
+                <Button variant="outline" size="sm" onClick={() => toast.success('Auto-deploy toggled')}>Disabled</Button>
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium">Rollback on failure</p>
+                  <p className="text-sm text-gray-500">Auto-rollback if deploy fails</p>
+                </div>
+                <Button variant="outline" size="sm" onClick={() => toast.success('Rollback toggled')}>Enabled</Button>
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <Button variant="outline" className="flex-1" onClick={() => setShowEnvSettingsDialog(false)}>
+                Cancel
+              </Button>
+              <Button className="flex-1" onClick={() => {
+                toast.success('Settings saved')
+                setShowEnvSettingsDialog(false)
+              }}>
+                Save
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Configure Environment Dialog */}
+        <Dialog open={showConfigureEnvDialog} onOpenChange={setShowConfigureEnvDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Settings className="w-5 h-5 text-gray-600" />
+                Configure {selectedEnvironment?.name}
+              </DialogTitle>
+              <DialogDescription>
+                Update environment configuration
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Environment URL</label>
+                <Input placeholder="https://..." defaultValue={selectedEnvironment?.url || ''} />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Wait Timer (minutes)</label>
+                <Input type="number" defaultValue={selectedEnvironment?.wait_timer_minutes || 0} />
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <Button variant="outline" className="flex-1" onClick={() => setShowConfigureEnvDialog(false)}>
+                Cancel
+              </Button>
+              <Button className="flex-1" onClick={() => {
+                toast.success('Environment updated')
+                setShowConfigureEnvDialog(false)
+              }}>
+                Save
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* View Environment Dialog */}
+        <Dialog open={showViewEnvDialog} onOpenChange={setShowViewEnvDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Eye className="w-5 h-5 text-gray-600" />
+                {selectedEnvironment?.name}
+              </DialogTitle>
+              <DialogDescription>
+                Environment details
+              </DialogDescription>
+            </DialogHeader>
+            {selectedEnvironment && (
+              <div className="space-y-4 py-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <p className="text-sm text-gray-500">Type</p>
+                    <p className="font-medium capitalize">{selectedEnvironment.type}</p>
+                  </div>
+                  <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <p className="text-sm text-gray-500">Deployments</p>
+                    <p className="font-medium">{selectedEnvironment.total_deployments}</p>
+                  </div>
+                  <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <p className="text-sm text-gray-500">Secrets</p>
+                    <p className="font-medium">{selectedEnvironment.secrets_count}</p>
+                  </div>
+                  <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <p className="text-sm text-gray-500">Variables</p>
+                    <p className="font-medium">{selectedEnvironment.variables_count}</p>
+                  </div>
+                </div>
+                {selectedEnvironment.url && (
+                  <div className="p-3 border rounded-lg">
+                    <p className="text-sm text-gray-500 mb-1">URL</p>
+                    <a href={selectedEnvironment.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                      {selectedEnvironment.url}
+                    </a>
+                  </div>
+                )}
+              </div>
+            )}
+            <div className="flex justify-end">
+              <Button variant="outline" onClick={() => setShowViewEnvDialog(false)}>
+                Close
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Download Artifacts Dialog */}
+        <Dialog open={showDownloadDialog} onOpenChange={setShowDownloadDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Download className="w-5 h-5 text-blue-600" />
+                Download Artifact
+              </DialogTitle>
+              <DialogDescription>
+                {selectedArtifact ? `Download ${selectedArtifact.name}` : 'Select an artifact to download'}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              {selectedArtifact ? (
+                <div className="p-4 border rounded-lg">
+                  <p className="font-medium">{selectedArtifact.name}</p>
+                  <p className="text-sm text-gray-500">Size: {formatBytes(selectedArtifact.size_bytes)}</p>
+                  <p className="text-sm text-gray-500">Build #{selectedArtifact.build_number}</p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Select Artifact</label>
+                  <select className="w-full p-2 border rounded-lg bg-background">
+                    {mockArtifacts.map(a => (
+                      <option key={a.id} value={a.id}>{a.name} ({formatBytes(a.size_bytes)})</option>
+                    ))}
+                  </select>
+                </div>
+              )}
+            </div>
+            <div className="flex gap-3">
+              <Button variant="outline" className="flex-1" onClick={() => {
+                setShowDownloadDialog(false)
+                setSelectedArtifact(null)
+              }}>
+                Cancel
+              </Button>
+              <Button className="flex-1" onClick={() => {
+                toast.success('Download started', { description: selectedArtifact ? selectedArtifact.name : 'Artifact download started' })
+                setShowDownloadDialog(false)
+                setSelectedArtifact(null)
+              }}>
+                <Download className="w-4 h-4 mr-2" />
+                Download
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Browse Artifacts Dialog */}
+        <Dialog open={showBrowseArtifactsDialog} onOpenChange={setShowBrowseArtifactsDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Box className="w-5 h-5 text-sky-600" />
+                Browse Artifacts
+              </DialogTitle>
+              <DialogDescription>
+                Browse all build artifacts
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-3 py-4 max-h-[400px] overflow-auto">
+              {mockArtifacts.map(artifact => (
+                <div key={artifact.id} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div className="flex items-center gap-3">
+                    {getArtifactIcon(artifact.type)}
+                    <div>
+                      <p className="font-medium text-sm">{artifact.name}</p>
+                      <p className="text-xs text-gray-500">{formatBytes(artifact.size_bytes)}</p>
+                    </div>
+                  </div>
+                  <Button size="sm" variant="outline" onClick={() => {
+                    setSelectedArtifact(artifact)
+                    setShowBrowseArtifactsDialog(false)
+                    setShowDownloadDialog(true)
+                  }}>
+                    <Download className="w-4 h-4" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+            <div className="flex justify-end">
+              <Button variant="outline" onClick={() => setShowBrowseArtifactsDialog(false)}>
+                Close
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Reports Dialog */}
+        <Dialog open={showReportsDialog} onOpenChange={setShowReportsDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <FileText className="w-5 h-5 text-cyan-600" />
+                Build Reports
+              </DialogTitle>
+              <DialogDescription>
+                View test and coverage reports
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-3 py-4">
+              {mockArtifacts.filter(a => a.type === 'report' || a.type === 'coverage').map(artifact => (
+                <div key={artifact.id} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div className="flex items-center gap-3">
+                    {getArtifactIcon(artifact.type)}
+                    <div>
+                      <p className="font-medium text-sm">{artifact.name}</p>
+                      <p className="text-xs text-gray-500">Build #{artifact.build_number}</p>
+                    </div>
+                  </div>
+                  <Button size="sm" variant="outline" onClick={() => toast.success('Opening report...')}>
+                    <Eye className="w-4 h-4" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+            <div className="flex justify-end">
+              <Button variant="outline" onClick={() => setShowReportsDialog(false)}>
+                Close
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Archives Dialog */}
+        <Dialog open={showArchivesDialog} onOpenChange={setShowArchivesDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Archive className="w-5 h-5 text-teal-600" />
+                Build Archives
+              </DialogTitle>
+              <DialogDescription>
+                View archived build outputs
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-3 py-4">
+              {mockArtifacts.filter(a => a.type === 'archive').map(artifact => (
+                <div key={artifact.id} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div className="flex items-center gap-3">
+                    {getArtifactIcon(artifact.type)}
+                    <div>
+                      <p className="font-medium text-sm">{artifact.name}</p>
+                      <p className="text-xs text-gray-500">{formatBytes(artifact.size_bytes)}</p>
+                    </div>
+                  </div>
+                  <Button size="sm" variant="outline" onClick={() => toast.success('Download started')}>
+                    <Download className="w-4 h-4" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+            <div className="flex justify-end">
+              <Button variant="outline" onClick={() => setShowArchivesDialog(false)}>
+                Close
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Storage Dialog */}
+        <Dialog open={showStorageDialog} onOpenChange={setShowStorageDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Database className="w-5 h-5 text-emerald-600" />
+                Artifact Storage
+              </DialogTitle>
+              <DialogDescription>
+                View storage usage and limits
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="p-4 border rounded-lg">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm text-gray-500">Storage Used</span>
+                  <span className="font-medium">2.4 GB / 10 GB</span>
+                </div>
+                <Progress value={24} className="h-2" />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                  <p className="text-2xl font-bold">{mockArtifacts.length}</p>
+                  <p className="text-sm text-gray-500">Total Artifacts</p>
+                </div>
+                <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                  <p className="text-2xl font-bold">7 days</p>
+                  <p className="text-sm text-gray-500">Retention</p>
+                </div>
+              </div>
+            </div>
+            <div className="flex justify-end">
+              <Button variant="outline" onClick={() => setShowStorageDialog(false)}>
+                Close
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Cleanup Dialog */}
+        <Dialog open={showCleanupDialog} onOpenChange={setShowCleanupDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Trash2 className="w-5 h-5 text-red-600" />
+                Cleanup Artifacts
+              </DialogTitle>
+              <DialogDescription>
+                Remove expired or old artifacts
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 text-amber-600" />
+                  <p className="text-sm text-amber-700 dark:text-amber-400">
+                    This action cannot be undone
+                  </p>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Cleanup Options</label>
+                <div className="space-y-2">
+                  <label className="flex items-center gap-2">
+                    <input type="checkbox" defaultChecked className="rounded" />
+                    <span className="text-sm">Remove expired artifacts</span>
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <input type="checkbox" className="rounded" />
+                    <span className="text-sm">Remove artifacts older than 30 days</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <Button variant="outline" className="flex-1" onClick={() => setShowCleanupDialog(false)}>
+                Cancel
+              </Button>
+              <Button variant="destructive" className="flex-1" onClick={() => {
+                toast.success('Cleanup completed', { description: 'Expired artifacts have been removed' })
+                setShowCleanupDialog(false)
+              }}>
+                <Trash2 className="w-4 h-4 mr-2" />
+                Cleanup
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Search Artifacts Dialog */}
+        <Dialog open={showSearchArtifactsDialog} onOpenChange={setShowSearchArtifactsDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Search className="w-5 h-5 text-lime-600" />
+                Search Artifacts
+              </DialogTitle>
+              <DialogDescription>
+                Search through build artifacts
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <Input placeholder="Search by name, build number..." />
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Type Filter</label>
+                <div className="flex gap-2 flex-wrap">
+                  {['All', 'Binary', 'Report', 'Logs', 'Docker'].map(type => (
+                    <Badge key={type} variant="outline" className="cursor-pointer hover:bg-gray-100">
+                      {type}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <Button variant="outline" className="flex-1" onClick={() => setShowSearchArtifactsDialog(false)}>
+                Cancel
+              </Button>
+              <Button className="flex-1" onClick={() => {
+                toast.info('Search applied')
+                setShowSearchArtifactsDialog(false)
+              }}>
+                Search
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Artifact Settings Dialog */}
+        <Dialog open={showArtifactSettingsDialog} onOpenChange={setShowArtifactSettingsDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Settings className="w-5 h-5 text-yellow-600" />
+                Artifact Settings
+              </DialogTitle>
+              <DialogDescription>
+                Configure artifact preferences
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium">Retention Period</p>
+                  <p className="text-sm text-gray-500">Days to keep artifacts</p>
+                </div>
+                <Input type="number" defaultValue={7} className="w-20 text-center" />
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium">Auto-cleanup</p>
+                  <p className="text-sm text-gray-500">Remove expired automatically</p>
+                </div>
+                <Button variant="outline" size="sm" onClick={() => toast.success('Auto-cleanup toggled')}>Enabled</Button>
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <Button variant="outline" className="flex-1" onClick={() => setShowArtifactSettingsDialog(false)}>
+                Cancel
+              </Button>
+              <Button className="flex-1" onClick={() => {
+                toast.success('Settings saved')
+                setShowArtifactSettingsDialog(false)
+              }}>
+                Save
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Secret Dialog */}
+        <Dialog open={showAddSecretDialog} onOpenChange={setShowAddSecretDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Key className="w-5 h-5 text-teal-600" />
+                Add Secret
+              </DialogTitle>
+              <DialogDescription>
+                Create a new repository secret
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Secret Name</label>
+                <Input placeholder="e.g., API_KEY" />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Secret Value</label>
+                <Input type="password" placeholder="Enter secret value" />
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <Button variant="outline" className="flex-1" onClick={() => setShowAddSecretDialog(false)}>
+                Cancel
+              </Button>
+              <Button className="flex-1" onClick={() => {
+                toast.success('Secret added')
+                setShowAddSecretDialog(false)
+              }}>
+                Add Secret
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Secret Dialog */}
+        <Dialog open={showDeleteSecretDialog} onOpenChange={setShowDeleteSecretDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Trash2 className="w-5 h-5 text-red-600" />
+                Delete Secret
+              </DialogTitle>
+              <DialogDescription>
+                Are you sure you want to delete {selectedSecret}?
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 text-red-600" />
+                  <p className="text-sm text-red-700 dark:text-red-400">
+                    This action cannot be undone. Workflows using this secret will fail.
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <Button variant="outline" className="flex-1" onClick={() => {
+                setShowDeleteSecretDialog(false)
+                setSelectedSecret(null)
+              }}>
+                Cancel
+              </Button>
+              <Button variant="destructive" className="flex-1" onClick={() => {
+                toast.success('Secret deleted', { description: `${selectedSecret} has been removed` })
+                setShowDeleteSecretDialog(false)
+                setSelectedSecret(null)
+              }}>
+                Delete
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Copy Secret Dialog */}
+        <Dialog open={showCopySecretDialog} onOpenChange={setShowCopySecretDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Copy className="w-5 h-5 text-blue-600" />
+                Copy Secret Reference
+              </DialogTitle>
+              <DialogDescription>
+                Copy the secret reference for use in workflows
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="p-3 bg-gray-100 dark:bg-gray-800 rounded-lg font-mono text-sm">
+                {`$\{{ secrets.${selectedSecret} }}`}
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <Button variant="outline" className="flex-1" onClick={() => {
+                setShowCopySecretDialog(false)
+                setSelectedSecret(null)
+              }}>
+                Close
+              </Button>
+              <Button className="flex-1" onClick={() => {
+                toast.success('Copied to clipboard')
+                setShowCopySecretDialog(false)
+                setSelectedSecret(null)
+              }}>
+                <Copy className="w-4 h-4 mr-2" />
+                Copy
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Cache Dialog */}
+        <Dialog open={showDeleteCacheDialog} onOpenChange={setShowDeleteCacheDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Trash2 className="w-5 h-5 text-red-600" />
+                Delete Cache
+              </DialogTitle>
+              <DialogDescription>
+                Are you sure you want to delete cache {selectedCache}?
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 text-amber-600" />
+                  <p className="text-sm text-amber-700 dark:text-amber-400">
+                    Next build will need to rebuild this cache, which may increase build time.
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <Button variant="outline" className="flex-1" onClick={() => {
+                setShowDeleteCacheDialog(false)
+                setSelectedCache(null)
+              }}>
+                Cancel
+              </Button>
+              <Button variant="destructive" className="flex-1" onClick={() => {
+                toast.success('Cache deleted', { description: `${selectedCache} has been removed` })
+                setShowDeleteCacheDialog(false)
+                setSelectedCache(null)
+              }}>
+                Delete
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Build Logs Dialog (from Build Detail) */}
+        <Dialog open={showBuildLogsDialog} onOpenChange={setShowBuildLogsDialog}>
+          <DialogContent className="max-w-3xl max-h-[80vh]">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Terminal className="w-5 h-5 text-gray-600" />
+                Build #{selectedBuild?.build_number} Logs
+              </DialogTitle>
+              <DialogDescription>
+                View detailed build logs
+              </DialogDescription>
+            </DialogHeader>
+            <ScrollArea className="h-[400px] border rounded-lg bg-gray-950 p-4">
+              <pre className="text-xs text-green-400 font-mono whitespace-pre-wrap">
+{`[${new Date().toISOString()}] Starting job: build
+[${new Date().toISOString()}] Checking out repository...
+[${new Date().toISOString()}] > git checkout ${selectedBuild?.branch || 'main'}
+[${new Date().toISOString()}] Already on '${selectedBuild?.branch || 'main'}'
+[${new Date().toISOString()}] Setting up Node.js 18.x...
+[${new Date().toISOString()}] Node.js 18.19.0 installed
+[${new Date().toISOString()}] Installing dependencies...
+[${new Date().toISOString()}] > npm ci
+[${new Date().toISOString()}] added 1247 packages in 45s
+[${new Date().toISOString()}] Running build...
+[${new Date().toISOString()}] > npm run build
+[${new Date().toISOString()}] Build completed successfully
+[${new Date().toISOString()}] Job completed with status: ${selectedBuild?.status || 'success'}`}
+              </pre>
+            </ScrollArea>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => {
+                toast.success('Logs downloaded')
+              }}>
+                <Download className="w-4 h-4 mr-2" />
+                Download
+              </Button>
+              <Button variant="outline" onClick={() => setShowBuildLogsDialog(false)}>
+                Close
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Build Artifacts Dialog (from Build Detail) */}
+        <Dialog open={showBuildArtifactsDialog} onOpenChange={setShowBuildArtifactsDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Download className="w-5 h-5 text-blue-600" />
+                Build #{selectedBuild?.build_number} Artifacts
+              </DialogTitle>
+              <DialogDescription>
+                Download artifacts from this build
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-3 py-4 max-h-[300px] overflow-auto">
+              {mockArtifacts.filter(a => a.build_id === selectedBuild?.id || a.build_number === selectedBuild?.build_number).length > 0 ? (
+                mockArtifacts.filter(a => a.build_id === selectedBuild?.id || a.build_number === selectedBuild?.build_number).map(artifact => (
+                  <div key={artifact.id} className="flex items-center justify-between p-3 border rounded-lg">
+                    <div className="flex items-center gap-3">
+                      {getArtifactIcon(artifact.type)}
+                      <div>
+                        <p className="font-medium text-sm">{artifact.name}</p>
+                        <p className="text-xs text-gray-500">{formatBytes(artifact.size_bytes)}</p>
+                      </div>
+                    </div>
+                    <Button size="sm" variant="outline" onClick={() => toast.success(`Downloading ${artifact.name}...`)}>
+                      <Download className="w-4 h-4" />
+                    </Button>
+                  </div>
+                ))
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  <Archive className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                  <p>No artifacts for this build</p>
+                </div>
+              )}
+            </div>
+            <div className="flex justify-end">
+              <Button variant="outline" onClick={() => setShowBuildArtifactsDialog(false)}>
+                Close
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Re-run Build Dialog */}
+        <Dialog open={showRerunBuildDialog} onOpenChange={setShowRerunBuildDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <RotateCcw className="w-5 h-5 text-teal-600" />
+                Re-run Build #{selectedBuild?.build_number}
+              </DialogTitle>
+              <DialogDescription>
+                Re-run this build with the same configuration
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="p-3 border rounded-lg">
+                <div className="flex items-center gap-2 mb-2">
+                  <Workflow className="w-4 h-4 text-gray-500" />
+                  <span className="font-medium">{selectedBuild?.workflow_name}</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-gray-500">
+                  <GitBranch className="w-3 h-3" />
+                  <span>{selectedBuild?.branch}</span>
+                  <span>•</span>
+                  <GitCommit className="w-3 h-3" />
+                  <span>{selectedBuild?.commit_hash.substring(0, 7)}</span>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                <AlertCircle className="w-4 h-4 text-blue-600" />
+                <p className="text-sm text-blue-700 dark:text-blue-400">
+                  This will create a new build run with attempt #{(selectedBuild?.run_attempt || 1) + 1}
+                </p>
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <Button variant="outline" className="flex-1" onClick={() => setShowRerunBuildDialog(false)}>
+                Cancel
+              </Button>
+              <Button className="flex-1 bg-gradient-to-r from-teal-500 to-cyan-600 text-white" onClick={() => {
+                toast.success('Build re-run started', { description: `Build #${selectedBuild?.build_number} is running again` })
+                setShowRerunBuildDialog(false)
+              }}>
+                <RotateCcw className="w-4 h-4 mr-2" />
+                Re-run
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* View Workflow File Dialog */}
+        <Dialog open={showViewFileDialog} onOpenChange={setShowViewFileDialog}>
+          <DialogContent className="max-w-3xl max-h-[80vh]">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <FileText className="w-5 h-5 text-gray-600" />
+                {selectedWorkflow?.file_path}
+              </DialogTitle>
+              <DialogDescription>
+                View workflow configuration file
+              </DialogDescription>
+            </DialogHeader>
+            <ScrollArea className="h-[400px] border rounded-lg bg-gray-950 p-4">
+              <pre className="text-xs text-cyan-400 font-mono whitespace-pre-wrap">
+{`name: ${selectedWorkflow?.name || 'CI Pipeline'}
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+      - name: Install dependencies
+        run: npm ci
+      - name: Build
+        run: npm run build
+      - name: Run tests
+        run: npm test
+      - name: Upload coverage
+        uses: codecov/codecov-action@v3`}
+              </pre>
+            </ScrollArea>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => toast.success('File copied to clipboard')}>
+                <Copy className="w-4 h-4 mr-2" />
+                Copy
+              </Button>
+              <Button variant="outline" onClick={() => setShowViewFileDialog(false)}>
+                Close
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Run Single Workflow Dialog */}
+        <Dialog open={showRunSingleWorkflowDialog} onOpenChange={setShowRunSingleWorkflowDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Play className="w-5 h-5 text-teal-600" />
+                Run {selectedWorkflow?.name}
+              </DialogTitle>
+              <DialogDescription>
+                Trigger this workflow manually
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Branch</label>
+                <select className="w-full p-2 border rounded-lg bg-background">
+                  {selectedWorkflow?.branches.map(branch => (
+                    <option key={branch} value={branch}>{branch}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Input Parameters (optional)</label>
+                <Input placeholder="key=value" />
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <Button variant="outline" className="flex-1" onClick={() => setShowRunSingleWorkflowDialog(false)}>
+                Cancel
+              </Button>
+              <Button className="flex-1 bg-gradient-to-r from-teal-500 to-cyan-600 text-white" onClick={() => {
+                toast.success('Workflow triggered', { description: `${selectedWorkflow?.name} is now running` })
+                setShowRunSingleWorkflowDialog(false)
+              }}>
+                <Play className="w-4 h-4 mr-2" />
+                Run
               </Button>
             </div>
           </DialogContent>

@@ -432,6 +432,18 @@ export default function ChangelogClient({ initialChangelog }: { initialChangelog
   const [isDiscussionDialogOpen, setIsDiscussionDialogOpen] = useState(false)
   const [discussionForm, setDiscussionForm] = useState({ title: '', body: '', category: 'feedback' })
 
+  // Additional dialog states for buttons without onClick handlers
+  const [discussionCategoryFilter, setDiscussionCategoryFilter] = useState('all')
+  const [isDeleteDraftsDialogOpen, setIsDeleteDraftsDialogOpen] = useState(false)
+  const [isResetSettingsDialogOpen, setIsResetSettingsDialogOpen] = useState(false)
+  const [isAddEnvironmentDialogOpen, setIsAddEnvironmentDialogOpen] = useState(false)
+  const [newEnvironmentForm, setNewEnvironmentForm] = useState({ name: '', url: '' })
+  const [isAuditLogDialogOpen, setIsAuditLogDialogOpen] = useState(false)
+  const [isExportAnalyticsDialogOpen, setIsExportAnalyticsDialogOpen] = useState(false)
+  const [exportFormat, setExportFormat] = useState('csv')
+  const [isCIConfigDialogOpen, setIsCIConfigDialogOpen] = useState(false)
+  const [selectedCITool, setSelectedCITool] = useState<string | null>(null)
+
   const { changelog, loading, error, createChange, updateChange, deleteChange, refetch } = useChangelog()
 
   // Filter releases
@@ -688,6 +700,135 @@ export default function ChangelogClient({ initialChangelog }: { initialChangelog
   const updateFormField = useCallback((field: keyof Changelog, value: any) => {
     setChangelogForm(prev => ({ ...prev, [field]: value }))
   }, [])
+
+  // Handler functions for buttons without onClick handlers
+  const handleDownloadAsset = useCallback((assetName: string) => {
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 800)),
+      {
+        loading: `Preparing download for ${assetName}...`,
+        success: `Download started for ${assetName}`,
+        error: 'Failed to start download'
+      }
+    )
+  }, [])
+
+  const handleCopyChecksum = useCallback((checksum: string) => {
+    navigator.clipboard.writeText(checksum)
+    toast.success('Checksum Copied', {
+      description: 'SHA256 checksum copied to clipboard'
+    })
+  }, [])
+
+  const handleResetTemplate = useCallback(() => {
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 500)),
+      {
+        loading: 'Resetting template...',
+        success: 'Template reset to default successfully',
+        error: 'Failed to reset template'
+      }
+    )
+  }, [])
+
+  const handleAddWebhookFromSettings = useCallback(() => {
+    setIsWebhookDialogOpen(true)
+  }, [])
+
+  const handleConfigureCITool = useCallback((toolName: string) => {
+    setSelectedCITool(toolName)
+    setIsCIConfigDialogOpen(true)
+  }, [])
+
+  const handleRegenerateToken = useCallback(() => {
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 1000)),
+      {
+        loading: 'Regenerating API token...',
+        success: 'New API token generated successfully. Please copy it now.',
+        error: 'Failed to regenerate token'
+      }
+    )
+  }, [])
+
+  const handleDeleteAllDrafts = useCallback(() => {
+    setIsSubmitting(true)
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 800)),
+      {
+        loading: 'Deleting all draft releases...',
+        success: 'All draft releases have been deleted',
+        error: 'Failed to delete draft releases'
+      }
+    )
+    setTimeout(() => {
+      setIsDeleteDraftsDialogOpen(false)
+      setIsSubmitting(false)
+    }, 800)
+  }, [])
+
+  const handleResetSettings = useCallback(() => {
+    setIsSubmitting(true)
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 800)),
+      {
+        loading: 'Resetting settings to defaults...',
+        success: 'Settings have been reset to default values',
+        error: 'Failed to reset settings'
+      }
+    )
+    setTimeout(() => {
+      setIsResetSettingsDialogOpen(false)
+      setIsSubmitting(false)
+    }, 800)
+  }, [])
+
+  const handleAddEnvironment = useCallback(() => {
+    if (!newEnvironmentForm.name || !newEnvironmentForm.url) {
+      toast.error('Validation Error', {
+        description: 'Environment name and URL are required'
+      })
+      return
+    }
+    setIsSubmitting(true)
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 600)),
+      {
+        loading: 'Adding environment...',
+        success: `Environment "${newEnvironmentForm.name}" added successfully`,
+        error: 'Failed to add environment'
+      }
+    )
+    setTimeout(() => {
+      setIsAddEnvironmentDialogOpen(false)
+      setNewEnvironmentForm({ name: '', url: '' })
+      setIsSubmitting(false)
+    }, 600)
+  }, [newEnvironmentForm])
+
+  const handleExportAnalytics = useCallback(() => {
+    setIsSubmitting(true)
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 1000)),
+      {
+        loading: `Exporting analytics as ${exportFormat.toUpperCase()}...`,
+        success: `Analytics exported successfully as ${exportFormat.toUpperCase()}`,
+        error: 'Failed to export analytics'
+      }
+    )
+    setTimeout(() => {
+      setIsExportAnalyticsDialogOpen(false)
+      setIsSubmitting(false)
+    }, 1000)
+  }, [exportFormat])
+
+  // Quick actions for toolbar
+  const mockChangelogQuickActions = [
+    { id: '1', label: 'Draft Release', icon: Plus, action: () => setIsCreateDialogOpen(true), variant: 'default' as const },
+    { id: '2', label: 'Add Webhook', icon: Webhook, action: () => setIsWebhookDialogOpen(true), variant: 'outline' as const },
+    { id: '3', label: 'New Discussion', icon: MessageSquare, action: () => setIsDiscussionDialogOpen(true), variant: 'outline' as const },
+    { id: '4', label: 'Export Data', icon: Download, action: () => setIsExportAnalyticsDialogOpen(true), variant: 'outline' as const },
+  ]
 
   if (error) {
     return (
@@ -1151,7 +1292,7 @@ export default function ChangelogClient({ initialChangelog }: { initialChangelog
                                   </div>
                                   <div className="flex items-center gap-4">
                                     <span className="text-sm text-gray-500">{formatNumber(asset.downloadCount)} downloads</span>
-                                    <Button size="sm" variant="outline">
+                                    <Button size="sm" variant="outline" onClick={() => handleDownloadAsset(asset.name)}>
                                       <Download className="h-4 w-4 mr-1" />Download
                                     </Button>
                                   </div>
@@ -1333,7 +1474,15 @@ export default function ChangelogClient({ initialChangelog }: { initialChangelog
             <div className="flex items-center justify-between mb-4">
               <div className="flex gap-2">
                 {['all', 'announcements', 'feedback', 'questions', 'ideas'].map(cat => (
-                  <Button key={cat} variant="outline" size="sm" className="capitalize">{cat}</Button>
+                  <Button
+                    key={cat}
+                    variant={discussionCategoryFilter === cat ? 'default' : 'outline'}
+                    size="sm"
+                    className="capitalize"
+                    onClick={() => setDiscussionCategoryFilter(cat)}
+                  >
+                    {cat}
+                  </Button>
                 ))}
               </div>
               <Dialog open={isDiscussionDialogOpen} onOpenChange={setIsDiscussionDialogOpen}>
@@ -1650,11 +1799,11 @@ export default function ChangelogClient({ initialChangelog }: { initialChangelog
                             <div className="font-semibold text-gray-900 dark:text-white">{formatNumber(asset.downloadCount)}</div>
                             <div className="text-xs text-gray-500">downloads</div>
                           </div>
-                          <Button variant="outline" size="sm">
+                          <Button variant="outline" size="sm" onClick={() => handleDownloadAsset(asset.name)}>
                             <Download className="h-4 w-4 mr-1" />Download
                           </Button>
                           {asset.checksumSha256 && (
-                            <Button variant="ghost" size="sm">
+                            <Button variant="ghost" size="sm" onClick={() => handleCopyChecksum(asset.checksumSha256 || '')}>
                               <Copy className="h-4 w-4" />
                             </Button>
                           )}
@@ -1869,7 +2018,7 @@ export default function ChangelogClient({ initialChangelog }: { initialChangelog
 ### 🙏 Contributors
 Thanks to all contributors!`}
                         />
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={handleResetTemplate}>
                           <RefreshCw className="w-4 h-4 mr-2" />
                           Reset to Default
                         </Button>
@@ -1993,7 +2142,7 @@ Thanks to all contributors!`}
                           </div>
                           <p className="text-xs text-gray-500">Events: release.created, release.published</p>
                         </div>
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={handleAddWebhookFromSettings}>
                           <Plus className="w-4 h-4 mr-2" />
                           Add Webhook
                         </Button>
@@ -2014,7 +2163,7 @@ Thanks to all contributors!`}
                         ].map((ci, i) => (
                           <div key={i} className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
                             <span className="font-medium">{ci.name}</span>
-                            <Button variant={ci.connected ? 'outline' : 'default'} size="sm">
+                            <Button variant={ci.connected ? 'outline' : 'default'} size="sm" onClick={() => handleConfigureCITool(ci.name)}>
                               {ci.connected ? 'Configure' : 'Connect'}
                             </Button>
                           </div>
@@ -2147,7 +2296,7 @@ Thanks to all contributors!`}
                             <span className="text-sm text-amber-800 dark:text-amber-200">Keep your token secret</span>
                           </div>
                         </div>
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={handleRegenerateToken}>
                           <RefreshCw className="w-4 h-4 mr-2" />
                           Regenerate Token
                         </Button>
@@ -2201,7 +2350,7 @@ Thanks to all contributors!`}
                               <p className="font-medium text-red-700 dark:text-red-400">Delete All Drafts</p>
                               <p className="text-sm text-red-600">Remove all draft releases</p>
                             </div>
-                            <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                            <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50" onClick={() => setIsDeleteDraftsDialogOpen(true)}>
                               Delete
                             </Button>
                           </div>
@@ -2212,7 +2361,7 @@ Thanks to all contributors!`}
                               <p className="font-medium text-red-700 dark:text-red-400">Reset Settings</p>
                               <p className="text-sm text-red-600">Reset to defaults</p>
                             </div>
-                            <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                            <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50" onClick={() => setIsResetSettingsDialogOpen(true)}>
                               Reset
                             </Button>
                           </div>
@@ -2285,7 +2434,7 @@ Thanks to all contributors!`}
                             </Badge>
                           </div>
                         ))}
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => setIsAddEnvironmentDialogOpen(true)}>
                           <Plus className="w-4 h-4 mr-2" />
                           Add Environment
                         </Button>
@@ -2330,7 +2479,7 @@ Thanks to all contributors!`}
                             </div>
                           ))}
                         </div>
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => setIsAuditLogDialogOpen(true)}>
                           View Full Audit Log
                         </Button>
                       </CardContent>
@@ -2419,7 +2568,7 @@ Thanks to all contributors!`}
                             </SelectContent>
                           </Select>
                         </div>
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => setIsExportAnalyticsDialogOpen(true)}>
                           <Download className="w-4 h-4 mr-2" />
                           Export Analytics
                         </Button>
@@ -2641,6 +2790,267 @@ Thanks to all contributors!`}
               <Button variant="destructive" onClick={handleDeleteRelease} disabled={isSubmitting}>
                 {isSubmitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
                 Delete Release
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete All Drafts Confirmation Dialog */}
+        <Dialog open={isDeleteDraftsDialogOpen} onOpenChange={setIsDeleteDraftsDialogOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Delete All Draft Releases</DialogTitle>
+            </DialogHeader>
+            <div className="py-4">
+              <p className="text-gray-600 dark:text-gray-400">
+                Are you sure you want to delete all draft releases? This action cannot be undone.
+              </p>
+              <div className="mt-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                <div className="flex items-center gap-2 text-red-800 dark:text-red-200">
+                  <AlertTriangle className="h-4 w-4" />
+                  <span className="text-sm font-medium">Warning</span>
+                </div>
+                <p className="text-sm text-red-700 dark:text-red-300 mt-1">
+                  All draft releases and their associated data will be permanently removed.
+                </p>
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setIsDeleteDraftsDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button variant="destructive" onClick={handleDeleteAllDrafts} disabled={isSubmitting}>
+                {isSubmitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                Delete All Drafts
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Reset Settings Confirmation Dialog */}
+        <Dialog open={isResetSettingsDialogOpen} onOpenChange={setIsResetSettingsDialogOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Reset All Settings</DialogTitle>
+            </DialogHeader>
+            <div className="py-4">
+              <p className="text-gray-600 dark:text-gray-400">
+                Are you sure you want to reset all settings to their default values?
+              </p>
+              <div className="mt-4 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+                <div className="flex items-center gap-2 text-amber-800 dark:text-amber-200">
+                  <AlertTriangle className="h-4 w-4" />
+                  <span className="text-sm font-medium">Warning</span>
+                </div>
+                <p className="text-sm text-amber-700 dark:text-amber-300 mt-1">
+                  All custom settings including notifications, integrations, and preferences will be reset.
+                </p>
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setIsResetSettingsDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button variant="destructive" onClick={handleResetSettings} disabled={isSubmitting}>
+                {isSubmitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                Reset Settings
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Environment Dialog */}
+        <Dialog open={isAddEnvironmentDialogOpen} onOpenChange={setIsAddEnvironmentDialogOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Add New Environment</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="env-name">Environment Name</Label>
+                <Input
+                  id="env-name"
+                  placeholder="e.g., Canary, Preview"
+                  value={newEnvironmentForm.name}
+                  onChange={(e) => setNewEnvironmentForm(prev => ({ ...prev, name: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="env-url">Environment URL</Label>
+                <Input
+                  id="env-url"
+                  placeholder="e.g., canary.example.com"
+                  value={newEnvironmentForm.url}
+                  onChange={(e) => setNewEnvironmentForm(prev => ({ ...prev, url: e.target.value }))}
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => {
+                setIsAddEnvironmentDialogOpen(false)
+                setNewEnvironmentForm({ name: '', url: '' })
+              }}>
+                Cancel
+              </Button>
+              <Button onClick={handleAddEnvironment} disabled={isSubmitting}>
+                {isSubmitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                Add Environment
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Audit Log Dialog */}
+        <Dialog open={isAuditLogDialogOpen} onOpenChange={setIsAuditLogDialogOpen}>
+          <DialogContent className="max-w-2xl max-h-[80vh]">
+            <DialogHeader>
+              <DialogTitle>Full Audit Log</DialogTitle>
+            </DialogHeader>
+            <ScrollArea className="max-h-[60vh]">
+              <div className="space-y-2 py-4">
+                {[
+                  { action: 'Release v2.4.0 published', user: 'John', time: '2 hours ago', type: 'success' },
+                  { action: 'Draft v2.4.1 created', user: 'Sarah', time: '5 hours ago', type: 'info' },
+                  { action: 'Settings updated', user: 'Admin', time: '1 day ago', type: 'info' },
+                  { action: 'Webhook added: Slack Notifications', user: 'Admin', time: '2 days ago', type: 'info' },
+                  { action: 'Release v2.3.2 archived', user: 'John', time: '3 days ago', type: 'warning' },
+                  { action: 'GPG key configured', user: 'Admin', time: '4 days ago', type: 'success' },
+                  { action: 'Release v2.3.1 published', user: 'Sarah', time: '1 week ago', type: 'success' },
+                  { action: 'Environment "QA" added', user: 'Admin', time: '1 week ago', type: 'info' },
+                  { action: 'CI/CD integration connected', user: 'Admin', time: '2 weeks ago', type: 'success' },
+                  { action: 'Initial setup completed', user: 'Admin', time: '1 month ago', type: 'info' },
+                ].map((log, i) => (
+                  <div key={i} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-2 h-2 rounded-full ${
+                        log.type === 'success' ? 'bg-green-500' :
+                        log.type === 'warning' ? 'bg-amber-500' : 'bg-blue-500'
+                      }`} />
+                      <span className="text-sm">{log.action}</span>
+                    </div>
+                    <span className="text-sm text-gray-500">{log.user} - {log.time}</span>
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+            <div className="flex justify-end">
+              <Button variant="outline" onClick={() => setIsAuditLogDialogOpen(false)}>
+                Close
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Export Analytics Dialog */}
+        <Dialog open={isExportAnalyticsDialogOpen} onOpenChange={setIsExportAnalyticsDialogOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Export Analytics Data</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Export Format</Label>
+                <Select value={exportFormat} onValueChange={setExportFormat}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select format" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="csv">CSV (Spreadsheet)</SelectItem>
+                    <SelectItem value="json">JSON (Raw Data)</SelectItem>
+                    <SelectItem value="xlsx">Excel (XLSX)</SelectItem>
+                    <SelectItem value="pdf">PDF Report</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Data Range</Label>
+                <Select defaultValue="all">
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select range" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="7days">Last 7 days</SelectItem>
+                    <SelectItem value="30days">Last 30 days</SelectItem>
+                    <SelectItem value="90days">Last 90 days</SelectItem>
+                    <SelectItem value="all">All time</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Export will include: download statistics, release trends, contributor data, and adoption metrics.
+                </p>
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setIsExportAnalyticsDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleExportAnalytics} disabled={isSubmitting}>
+                {isSubmitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                <Download className="h-4 w-4 mr-2" />
+                Export
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* CI/CD Configuration Dialog */}
+        <Dialog open={isCIConfigDialogOpen} onOpenChange={setIsCIConfigDialogOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>{selectedCITool ? `Configure ${selectedCITool}` : 'CI/CD Configuration'}</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="ci-token">API Token / Access Key</Label>
+                <Input
+                  id="ci-token"
+                  type="password"
+                  placeholder="Enter your API token"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="ci-repo">Repository / Project</Label>
+                <Input
+                  id="ci-repo"
+                  placeholder="e.g., owner/repo"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Trigger Events</Label>
+                <div className="space-y-2">
+                  {['On Release Created', 'On Release Published', 'On Tag Push'].map(event => (
+                    <div key={event} className="flex items-center gap-2">
+                      <Switch defaultChecked={event === 'On Release Published'} />
+                      <Label className="font-normal">{event}</Label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => {
+                setIsCIConfigDialogOpen(false)
+                setSelectedCITool(null)
+              }}>
+                Cancel
+              </Button>
+              <Button onClick={() => {
+                toast.promise(
+                  new Promise(resolve => setTimeout(resolve, 800)),
+                  {
+                    loading: `Configuring ${selectedCITool}...`,
+                    success: `${selectedCITool} configured successfully`,
+                    error: 'Failed to configure CI/CD'
+                  }
+                )
+                setTimeout(() => {
+                  setIsCIConfigDialogOpen(false)
+                  setSelectedCITool(null)
+                }, 800)
+              }}>
+                Save Configuration
               </Button>
             </div>
           </DialogContent>

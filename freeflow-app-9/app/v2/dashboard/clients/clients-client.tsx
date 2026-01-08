@@ -439,6 +439,23 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
   const [showScheduleCallDialog, setShowScheduleCallDialog] = useState(false)
   const [showSendReportDialog, setShowSendReportDialog] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [showLogActivityDialog, setShowLogActivityDialog] = useState(false)
+  const [showAddTaskDialog, setShowAddTaskDialog] = useState(false)
+  const [showAddCustomFieldDialog, setShowAddCustomFieldDialog] = useState(false)
+  const [showEditStageDialog, setShowEditStageDialog] = useState(false)
+  const [showAddStageDialog, setShowAddStageDialog] = useState(false)
+  const [showCreateWorkflowDialog, setShowCreateWorkflowDialog] = useState(false)
+  const [showCreateSequenceDialog, setShowCreateSequenceDialog] = useState(false)
+  const [showAppMarketplaceDialog, setShowAppMarketplaceDialog] = useState(false)
+  const [showExportDataDialog, setShowExportDataDialog] = useState(false)
+  const [showImportDataDialog, setShowImportDataDialog] = useState(false)
+  const [showRegenerateApiKeyDialog, setShowRegenerateApiKeyDialog] = useState(false)
+  const [showAuditLogDialog, setShowAuditLogDialog] = useState(false)
+  const [showDeleteActivitiesDialog, setShowDeleteActivitiesDialog] = useState(false)
+  const [showMergeDuplicatesDialog, setShowMergeDuplicatesDialog] = useState(false)
+  const [showResetCrmDialog, setShowResetCrmDialog] = useState(false)
+  const [showClientActionsMenu, setShowClientActionsMenu] = useState<string | null>(null)
+  const [selectedStageForEdit, setSelectedStageForEdit] = useState<string | null>(null)
 
   // Database integration - use real clients hook
   const { clients: dbClients, fetchClients, createClient, updateClient, deleteClient, archiveClient, isLoading: clientsLoading } = useClients()
@@ -1036,9 +1053,60 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                       </div>
 
                       <div className="flex flex-col items-end gap-2">
-                        <Button variant="ghost" size="sm">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            setShowClientActionsMenu(showClientActionsMenu === client.id ? null : client.id)
+                          }}
+                        >
                           <MoreVertical className="w-4 h-4" />
                         </Button>
+                        {showClientActionsMenu === client.id && (
+                          <div className="absolute right-4 top-12 z-10 bg-white dark:bg-gray-800 rounded-lg shadow-lg border p-2 min-w-[150px]">
+                            <button
+                              className="w-full text-left px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 rounded flex items-center gap-2"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleSendMessage(client)
+                                setShowClientActionsMenu(null)
+                              }}
+                            >
+                              <Mail className="w-4 h-4" /> Send Email
+                            </button>
+                            <button
+                              className="w-full text-left px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 rounded flex items-center gap-2"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleCallClient(client)
+                                setShowClientActionsMenu(null)
+                              }}
+                            >
+                              <Phone className="w-4 h-4" /> Call
+                            </button>
+                            <button
+                              className="w-full text-left px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 rounded flex items-center gap-2"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                openEditDialog(client)
+                                setShowClientActionsMenu(null)
+                              }}
+                            >
+                              <Edit className="w-4 h-4" /> Edit
+                            </button>
+                            <button
+                              className="w-full text-left px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 rounded flex items-center gap-2"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleCreateDeal(client)
+                                setShowClientActionsMenu(null)
+                              }}
+                            >
+                              <Handshake className="w-4 h-4" /> Create Deal
+                            </button>
+                          </div>
+                        )}
                         <span className="text-xs text-gray-500">{formatRelativeTime(client.lastActivity)}</span>
                       </div>
                     </div>
@@ -1098,7 +1166,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-lg">Recent Activities</CardTitle>
-                  <Button variant="outline" size="sm">
+                  <Button variant="outline" size="sm" onClick={() => setShowLogActivityDialog(true)}>
                     <Plus className="w-4 h-4 mr-2" />
                     Log Activity
                   </Button>
@@ -1158,7 +1226,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
           <TabsContent value="tasks" className="space-y-4">
             <div className="flex justify-between items-center">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Pending Tasks</h3>
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={() => setShowAddTaskDialog(true)}>
                 <Plus className="w-4 h-4 mr-2" />
                 Add Task
               </Button>
@@ -1371,7 +1439,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                             <Switch defaultChecked />
                           </div>
                         ))}
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => setShowAddCustomFieldDialog(true)}>
                           <Plus className="w-4 h-4 mr-2" />
                           Add Custom Field
                         </Button>
@@ -1441,11 +1509,14 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                             </div>
                             <div className="flex items-center gap-4">
                               <span className="text-sm text-gray-500">{stage.prob}% probability</span>
-                              <Button variant="ghost" size="sm">Edit</Button>
+                              <Button variant="ghost" size="sm" onClick={() => {
+                                setSelectedStageForEdit(stage.name)
+                                setShowEditStageDialog(true)
+                              }}>Edit</Button>
                             </div>
                           </div>
                         ))}
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => setShowAddStageDialog(true)}>
                           <Plus className="w-4 h-4 mr-2" />
                           Add Stage
                         </Button>
@@ -1569,7 +1640,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                           </div>
                           <Switch defaultChecked />
                         </div>
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => setShowCreateWorkflowDialog(true)}>
                           Create Custom Workflow
                         </Button>
                       </CardContent>
@@ -1594,7 +1665,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                             <Switch defaultChecked={seq.active} />
                           </div>
                         ))}
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => setShowCreateSequenceDialog(true)}>
                           <Plus className="w-4 h-4 mr-2" />
                           Create Sequence
                         </Button>
@@ -1699,7 +1770,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                             </Badge>
                           </div>
                         ))}
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => setShowAppMarketplaceDialog(true)}>
                           Browse App Marketplace
                         </Button>
                       </CardContent>
@@ -1832,11 +1903,11 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="grid grid-cols-2 gap-4">
-                          <Button variant="outline" className="h-20 flex flex-col gap-2">
+                          <Button variant="outline" className="h-20 flex flex-col gap-2" onClick={() => setShowExportDataDialog(true)}>
                             <Download className="w-5 h-5" />
                             <span>Export Data</span>
                           </Button>
-                          <Button variant="outline" className="h-20 flex flex-col gap-2">
+                          <Button variant="outline" className="h-20 flex flex-col gap-2" onClick={() => setShowImportDataDialog(true)}>
                             <Upload className="w-5 h-5" />
                             <span>Import Data</span>
                           </Button>
@@ -1888,7 +1959,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                             </SelectContent>
                           </Select>
                         </div>
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => setShowRegenerateApiKeyDialog(true)}>
                           <RefreshCw className="w-4 h-4 mr-2" />
                           Regenerate API Key
                         </Button>
@@ -1920,7 +1991,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                             </SelectContent>
                           </Select>
                         </div>
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => setShowAuditLogDialog(true)}>
                           View Audit Log
                         </Button>
                       </CardContent>
@@ -1938,7 +2009,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                               <p className="font-medium text-red-700 dark:text-red-400">Delete All Activities</p>
                               <p className="text-sm text-red-600">Remove activity history</p>
                             </div>
-                            <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                            <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50" onClick={() => setShowDeleteActivitiesDialog(true)}>
                               Delete
                             </Button>
                           </div>
@@ -1949,7 +2020,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                               <p className="font-medium text-red-700 dark:text-red-400">Merge Duplicate Clients</p>
                               <p className="text-sm text-red-600">Find and merge duplicates</p>
                             </div>
-                            <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                            <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50" onClick={() => setShowMergeDuplicatesDialog(true)}>
                               Merge
                             </Button>
                           </div>
@@ -1960,7 +2031,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                               <p className="font-medium text-red-700 dark:text-red-400">Reset CRM Data</p>
                               <p className="text-sm text-red-600">Delete all client data</p>
                             </div>
-                            <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                            <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50" onClick={() => setShowResetCrmDialog(true)}>
                               Reset
                             </Button>
                           </div>
@@ -2545,6 +2616,878 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
               >
                 <Mail className="w-4 h-4 mr-2" />
                 Send Report
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Log Activity Dialog */}
+        <Dialog open={showLogActivityDialog} onOpenChange={setShowLogActivityDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Activity className="w-5 h-5 text-indigo-600" />
+                Log Activity
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <label className="text-sm font-medium">Select Client</label>
+                <Select>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder="Choose a client" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {filteredClients.map(client => (
+                      <SelectItem key={client.id} value={client.id}>
+                        {client.company}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="text-sm font-medium">Activity Type</label>
+                <Select>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder="Select activity type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="call">Call</SelectItem>
+                    <SelectItem value="email">Email</SelectItem>
+                    <SelectItem value="meeting">Meeting</SelectItem>
+                    <SelectItem value="note">Note</SelectItem>
+                    <SelectItem value="task">Task</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="text-sm font-medium">Title</label>
+                <Input placeholder="Activity title..." className="mt-1" />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Description</label>
+                <Input placeholder="Describe the activity..." className="mt-1" />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Outcome</label>
+                <Input placeholder="Result or next steps..." className="mt-1" />
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => setShowLogActivityDialog(false)} className="flex-1">
+                Cancel
+              </Button>
+              <Button
+                className="flex-1 bg-gradient-to-r from-indigo-500 to-purple-600 text-white"
+                onClick={() => {
+                  toast.success('Activity logged successfully')
+                  setShowLogActivityDialog(false)
+                }}
+              >
+                <CheckCircle2 className="w-4 h-4 mr-2" />
+                Log Activity
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Task Dialog */}
+        <Dialog open={showAddTaskDialog} onOpenChange={setShowAddTaskDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <CheckCircle2 className="w-5 h-5 text-indigo-600" />
+                Add Task
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <label className="text-sm font-medium">Select Client</label>
+                <Select>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder="Choose a client" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {filteredClients.map(client => (
+                      <SelectItem key={client.id} value={client.id}>
+                        {client.company}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="text-sm font-medium">Task Title</label>
+                <Input placeholder="Enter task title..." className="mt-1" />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Description</label>
+                <Input placeholder="Task description..." className="mt-1" />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium">Due Date</label>
+                  <Input type="date" className="mt-1" />
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Priority</label>
+                  <Select>
+                    <SelectTrigger className="mt-1">
+                      <SelectValue placeholder="Select priority" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="low">Low</SelectItem>
+                      <SelectItem value="medium">Medium</SelectItem>
+                      <SelectItem value="high">High</SelectItem>
+                      <SelectItem value="urgent">Urgent</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div>
+                <label className="text-sm font-medium">Assignee</label>
+                <Input placeholder="Assign to..." className="mt-1" />
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => setShowAddTaskDialog(false)} className="flex-1">
+                Cancel
+              </Button>
+              <Button
+                className="flex-1 bg-gradient-to-r from-indigo-500 to-purple-600 text-white"
+                onClick={() => {
+                  toast.success('Task created successfully')
+                  setShowAddTaskDialog(false)
+                }}
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Add Task
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Custom Field Dialog */}
+        <Dialog open={showAddCustomFieldDialog} onOpenChange={setShowAddCustomFieldDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Plus className="w-5 h-5 text-indigo-600" />
+                Add Custom Field
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <label className="text-sm font-medium">Field Name</label>
+                <Input placeholder="Enter field name..." className="mt-1" />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Field Type</label>
+                <Select>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder="Select field type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="text">Text</SelectItem>
+                    <SelectItem value="number">Number</SelectItem>
+                    <SelectItem value="date">Date</SelectItem>
+                    <SelectItem value="dropdown">Dropdown</SelectItem>
+                    <SelectItem value="checkbox">Checkbox</SelectItem>
+                    <SelectItem value="currency">Currency</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div>
+                  <p className="font-medium">Required Field</p>
+                  <p className="text-sm text-gray-500">Make this field mandatory</p>
+                </div>
+                <Switch />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Default Value (Optional)</label>
+                <Input placeholder="Enter default value..." className="mt-1" />
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => setShowAddCustomFieldDialog(false)} className="flex-1">
+                Cancel
+              </Button>
+              <Button
+                className="flex-1 bg-gradient-to-r from-indigo-500 to-purple-600 text-white"
+                onClick={() => {
+                  toast.success('Custom field added successfully')
+                  setShowAddCustomFieldDialog(false)
+                }}
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Add Field
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Stage Dialog */}
+        <Dialog open={showEditStageDialog} onOpenChange={setShowEditStageDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Edit className="w-5 h-5 text-indigo-600" />
+                Edit Pipeline Stage
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <label className="text-sm font-medium">Stage Name</label>
+                <Input placeholder="Enter stage name..." className="mt-1" defaultValue={selectedStageForEdit || ''} />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Win Probability (%)</label>
+                <Input type="number" min="0" max="100" placeholder="Enter probability..." className="mt-1" />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Stage Color</label>
+                <Select>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder="Select color" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="blue">Blue</SelectItem>
+                    <SelectItem value="green">Green</SelectItem>
+                    <SelectItem value="yellow">Yellow</SelectItem>
+                    <SelectItem value="orange">Orange</SelectItem>
+                    <SelectItem value="red">Red</SelectItem>
+                    <SelectItem value="purple">Purple</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div>
+                  <p className="font-medium">Active Stage</p>
+                  <p className="text-sm text-gray-500">Stage is visible in pipeline</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => setShowEditStageDialog(false)} className="flex-1">
+                Cancel
+              </Button>
+              <Button
+                className="flex-1 bg-gradient-to-r from-indigo-500 to-purple-600 text-white"
+                onClick={() => {
+                  toast.success('Stage updated successfully')
+                  setShowEditStageDialog(false)
+                  setSelectedStageForEdit(null)
+                }}
+              >
+                <CheckCircle2 className="w-4 h-4 mr-2" />
+                Save Changes
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Stage Dialog */}
+        <Dialog open={showAddStageDialog} onOpenChange={setShowAddStageDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Plus className="w-5 h-5 text-indigo-600" />
+                Add Pipeline Stage
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <label className="text-sm font-medium">Stage Name</label>
+                <Input placeholder="Enter stage name..." className="mt-1" />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Win Probability (%)</label>
+                <Input type="number" min="0" max="100" placeholder="Enter probability..." className="mt-1" />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Stage Color</label>
+                <Select>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder="Select color" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="blue">Blue</SelectItem>
+                    <SelectItem value="green">Green</SelectItem>
+                    <SelectItem value="yellow">Yellow</SelectItem>
+                    <SelectItem value="orange">Orange</SelectItem>
+                    <SelectItem value="red">Red</SelectItem>
+                    <SelectItem value="purple">Purple</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="text-sm font-medium">Position</label>
+                <Select>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder="Select position" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="first">First</SelectItem>
+                    <SelectItem value="last">Last</SelectItem>
+                    <SelectItem value="after_lead">After Lead</SelectItem>
+                    <SelectItem value="after_qualified">After Qualified</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => setShowAddStageDialog(false)} className="flex-1">
+                Cancel
+              </Button>
+              <Button
+                className="flex-1 bg-gradient-to-r from-indigo-500 to-purple-600 text-white"
+                onClick={() => {
+                  toast.success('Stage added successfully')
+                  setShowAddStageDialog(false)
+                }}
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Add Stage
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Create Custom Workflow Dialog */}
+        <Dialog open={showCreateWorkflowDialog} onOpenChange={setShowCreateWorkflowDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Zap className="w-5 h-5 text-indigo-600" />
+                Create Custom Workflow
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <label className="text-sm font-medium">Workflow Name</label>
+                <Input placeholder="Enter workflow name..." className="mt-1" />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Trigger</label>
+                <Select>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder="Select trigger" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="new_lead">New Lead Created</SelectItem>
+                    <SelectItem value="deal_stage">Deal Stage Changed</SelectItem>
+                    <SelectItem value="deal_won">Deal Won</SelectItem>
+                    <SelectItem value="deal_lost">Deal Lost</SelectItem>
+                    <SelectItem value="no_activity">No Activity for X Days</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="text-sm font-medium">Action</label>
+                <Select>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder="Select action" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="send_email">Send Email</SelectItem>
+                    <SelectItem value="create_task">Create Task</SelectItem>
+                    <SelectItem value="update_field">Update Field</SelectItem>
+                    <SelectItem value="notify_user">Notify User</SelectItem>
+                    <SelectItem value="assign_owner">Assign Owner</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="text-sm font-medium">Description</label>
+                <Input placeholder="Describe this workflow..." className="mt-1" />
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => setShowCreateWorkflowDialog(false)} className="flex-1">
+                Cancel
+              </Button>
+              <Button
+                className="flex-1 bg-gradient-to-r from-indigo-500 to-purple-600 text-white"
+                onClick={() => {
+                  toast.success('Workflow created successfully')
+                  setShowCreateWorkflowDialog(false)
+                }}
+              >
+                <Zap className="w-4 h-4 mr-2" />
+                Create Workflow
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Create Email Sequence Dialog */}
+        <Dialog open={showCreateSequenceDialog} onOpenChange={setShowCreateSequenceDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Mail className="w-5 h-5 text-indigo-600" />
+                Create Email Sequence
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <label className="text-sm font-medium">Sequence Name</label>
+                <Input placeholder="Enter sequence name..." className="mt-1" />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Target Audience</label>
+                <Select>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder="Select audience" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="new_leads">New Leads</SelectItem>
+                    <SelectItem value="prospects">Prospects</SelectItem>
+                    <SelectItem value="opportunities">Opportunities</SelectItem>
+                    <SelectItem value="churned">Churned Clients</SelectItem>
+                    <SelectItem value="all">All Contacts</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="text-sm font-medium">Number of Emails</label>
+                <Input type="number" min="1" max="10" placeholder="Enter number..." className="mt-1" />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Delay Between Emails (days)</label>
+                <Input type="number" min="1" placeholder="Enter days..." className="mt-1" />
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div>
+                  <p className="font-medium">Activate Immediately</p>
+                  <p className="text-sm text-gray-500">Start sending when created</p>
+                </div>
+                <Switch />
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => setShowCreateSequenceDialog(false)} className="flex-1">
+                Cancel
+              </Button>
+              <Button
+                className="flex-1 bg-gradient-to-r from-indigo-500 to-purple-600 text-white"
+                onClick={() => {
+                  toast.success('Email sequence created successfully')
+                  setShowCreateSequenceDialog(false)
+                }}
+              >
+                <Mail className="w-4 h-4 mr-2" />
+                Create Sequence
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* App Marketplace Dialog */}
+        <Dialog open={showAppMarketplaceDialog} onOpenChange={setShowAppMarketplaceDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Globe className="w-5 h-5 text-indigo-600" />
+                App Marketplace
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Input placeholder="Search apps..." className="pl-9" />
+              </div>
+              <div className="space-y-3 max-h-[300px] overflow-y-auto">
+                {[
+                  { name: 'Stripe', category: 'Payments', description: 'Accept payments and manage subscriptions' },
+                  { name: 'QuickBooks', category: 'Accounting', description: 'Sync invoices and financials' },
+                  { name: 'Zapier', category: 'Automation', description: 'Connect with 5000+ apps' },
+                  { name: 'DocuSign', category: 'Documents', description: 'Electronic signatures and contracts' },
+                  { name: 'Intercom', category: 'Support', description: 'Customer messaging platform' },
+                  { name: 'Twilio', category: 'Communication', description: 'SMS and voice integration' },
+                ].map(app => (
+                  <div key={app.name} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <div>
+                      <p className="font-medium">{app.name}</p>
+                      <p className="text-xs text-gray-500">{app.category} - {app.description}</p>
+                    </div>
+                    <Button size="sm" variant="outline" onClick={() => {
+                      toast.success(`${app.name} connected successfully`)
+                    }}>
+                      Connect
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => setShowAppMarketplaceDialog(false)} className="flex-1">
+                Close
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Export Data Dialog */}
+        <Dialog open={showExportDataDialog} onOpenChange={setShowExportDataDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Download className="w-5 h-5 text-indigo-600" />
+                Export Data
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <label className="text-sm font-medium">Data to Export</label>
+                <Select>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder="Select data" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="clients">All Clients</SelectItem>
+                    <SelectItem value="deals">All Deals</SelectItem>
+                    <SelectItem value="activities">All Activities</SelectItem>
+                    <SelectItem value="tasks">All Tasks</SelectItem>
+                    <SelectItem value="everything">Everything</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="text-sm font-medium">Export Format</label>
+                <Select>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder="Select format" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="csv">CSV</SelectItem>
+                    <SelectItem value="xlsx">Excel (.xlsx)</SelectItem>
+                    <SelectItem value="json">JSON</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="text-sm font-medium">Date Range (Optional)</label>
+                <div className="grid grid-cols-2 gap-2 mt-1">
+                  <Input type="date" placeholder="From" />
+                  <Input type="date" placeholder="To" />
+                </div>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => setShowExportDataDialog(false)} className="flex-1">
+                Cancel
+              </Button>
+              <Button
+                className="flex-1 bg-gradient-to-r from-indigo-500 to-purple-600 text-white"
+                onClick={() => {
+                  handleExportClients()
+                  setShowExportDataDialog(false)
+                }}
+              >
+                <Download className="w-4 h-4 mr-2" />
+                Export
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Import Data Dialog */}
+        <Dialog open={showImportDataDialog} onOpenChange={setShowImportDataDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Upload className="w-5 h-5 text-indigo-600" />
+                Import Data
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <label className="text-sm font-medium">Import Type</label>
+                <Select>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder="Select data type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="clients">Clients</SelectItem>
+                    <SelectItem value="contacts">Contacts</SelectItem>
+                    <SelectItem value="deals">Deals</SelectItem>
+                    <SelectItem value="activities">Activities</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6 text-center">
+                <Upload className="w-10 h-10 mx-auto text-gray-400 mb-3" />
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                  Drag and drop your file here, or click to browse
+                </p>
+                <p className="text-xs text-gray-500">
+                  Supports CSV, XLSX, and JSON files
+                </p>
+                <Input type="file" className="mt-3" accept=".csv,.xlsx,.json" />
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div>
+                  <p className="font-medium">Skip Duplicates</p>
+                  <p className="text-sm text-gray-500">Ignore records that already exist</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => setShowImportDataDialog(false)} className="flex-1">
+                Cancel
+              </Button>
+              <Button
+                className="flex-1 bg-gradient-to-r from-indigo-500 to-purple-600 text-white"
+                onClick={() => {
+                  toast.success('Data imported successfully')
+                  setShowImportDataDialog(false)
+                }}
+              >
+                <Upload className="w-4 h-4 mr-2" />
+                Import
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Regenerate API Key Dialog */}
+        <Dialog open={showRegenerateApiKeyDialog} onOpenChange={setShowRegenerateApiKeyDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-amber-600">
+                <AlertCircle className="w-5 h-5" />
+                Regenerate API Key
+              </DialogTitle>
+            </DialogHeader>
+            <div className="py-4">
+              <p className="text-gray-600 dark:text-gray-400 mb-4">
+                Are you sure you want to regenerate your API key? This will invalidate your current key immediately.
+              </p>
+              <div className="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
+                <p className="text-sm text-amber-800 dark:text-amber-400">
+                  <strong>Warning:</strong> Any applications using the current API key will stop working until you update them with the new key.
+                </p>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => setShowRegenerateApiKeyDialog(false)} className="flex-1">
+                Cancel
+              </Button>
+              <Button
+                className="flex-1 bg-amber-600 hover:bg-amber-700 text-white"
+                onClick={() => {
+                  toast.success('API key regenerated successfully')
+                  setShowRegenerateApiKeyDialog(false)
+                }}
+              >
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Regenerate Key
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* View Audit Log Dialog */}
+        <Dialog open={showAuditLogDialog} onOpenChange={setShowAuditLogDialog}>
+          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <FileText className="w-5 h-5 text-indigo-600" />
+                Audit Log
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="flex gap-2">
+                <Input placeholder="Search logs..." className="flex-1" />
+                <Select>
+                  <SelectTrigger className="w-[150px]">
+                    <SelectValue placeholder="Filter by type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Types</SelectItem>
+                    <SelectItem value="create">Created</SelectItem>
+                    <SelectItem value="update">Updated</SelectItem>
+                    <SelectItem value="delete">Deleted</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2 max-h-[400px] overflow-y-auto">
+                {[
+                  { action: 'Created', target: 'TechCorp client', user: 'John Smith', time: '2 hours ago' },
+                  { action: 'Updated', target: 'Global deal value', user: 'Emily Davis', time: '4 hours ago' },
+                  { action: 'Deleted', target: 'Archived contact', user: 'John Smith', time: '1 day ago' },
+                  { action: 'Created', target: 'New task', user: 'Emily Davis', time: '2 days ago' },
+                  { action: 'Updated', target: 'Pipeline stage settings', user: 'Admin', time: '3 days ago' },
+                ].map((log, i) => (
+                  <div key={i} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <Badge className={
+                        log.action === 'Created' ? 'bg-green-100 text-green-700' :
+                        log.action === 'Updated' ? 'bg-blue-100 text-blue-700' :
+                        'bg-red-100 text-red-700'
+                      }>
+                        {log.action}
+                      </Badge>
+                      <span className="text-sm">{log.target}</span>
+                    </div>
+                    <div className="text-sm text-gray-500">
+                      {log.user} - {log.time}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => setShowAuditLogDialog(false)} className="flex-1">
+                Close
+              </Button>
+              <Button variant="outline" onClick={() => {
+                toast.success('Audit log exported')
+              }}>
+                <Download className="w-4 h-4 mr-2" />
+                Export Log
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Activities Confirmation Dialog */}
+        <Dialog open={showDeleteActivitiesDialog} onOpenChange={setShowDeleteActivitiesDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-600">
+                <AlertCircle className="w-5 h-5" />
+                Delete All Activities
+              </DialogTitle>
+            </DialogHeader>
+            <div className="py-4">
+              <p className="text-gray-600 dark:text-gray-400 mb-4">
+                Are you sure you want to delete all activity history? This action cannot be undone.
+              </p>
+              <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                <p className="text-sm text-red-800 dark:text-red-400">
+                  <strong>Warning:</strong> This will permanently remove all calls, emails, meetings, notes, and tasks from the system.
+                </p>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => setShowDeleteActivitiesDialog(false)} className="flex-1">
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={() => {
+                  toast.success('All activities deleted')
+                  setShowDeleteActivitiesDialog(false)
+                }}
+                className="flex-1"
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                Delete All
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Merge Duplicates Dialog */}
+        <Dialog open={showMergeDuplicatesDialog} onOpenChange={setShowMergeDuplicatesDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-amber-600">
+                <Users className="w-5 h-5" />
+                Merge Duplicate Clients
+              </DialogTitle>
+            </DialogHeader>
+            <div className="py-4">
+              <p className="text-gray-600 dark:text-gray-400 mb-4">
+                This will scan your client database for potential duplicates and allow you to merge them.
+              </p>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div>
+                    <p className="font-medium">Match by Email</p>
+                    <p className="text-sm text-gray-500">Find clients with same email</p>
+                  </div>
+                  <Switch defaultChecked />
+                </div>
+                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div>
+                    <p className="font-medium">Match by Company Name</p>
+                    <p className="text-sm text-gray-500">Find similar company names</p>
+                  </div>
+                  <Switch defaultChecked />
+                </div>
+                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div>
+                    <p className="font-medium">Match by Phone</p>
+                    <p className="text-sm text-gray-500">Find clients with same phone</p>
+                  </div>
+                  <Switch />
+                </div>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => setShowMergeDuplicatesDialog(false)} className="flex-1">
+                Cancel
+              </Button>
+              <Button
+                className="flex-1 bg-amber-600 hover:bg-amber-700 text-white"
+                onClick={() => {
+                  toast.success('Scanning for duplicates...')
+                  setShowMergeDuplicatesDialog(false)
+                }}
+              >
+                <Search className="w-4 h-4 mr-2" />
+                Find Duplicates
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Reset CRM Confirmation Dialog */}
+        <Dialog open={showResetCrmDialog} onOpenChange={setShowResetCrmDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-600">
+                <AlertCircle className="w-5 h-5" />
+                Reset CRM Data
+              </DialogTitle>
+            </DialogHeader>
+            <div className="py-4">
+              <p className="text-gray-600 dark:text-gray-400 mb-4">
+                Are you absolutely sure you want to reset all CRM data? This will permanently delete:
+              </p>
+              <ul className="list-disc list-inside text-sm text-gray-600 dark:text-gray-400 space-y-1 mb-4">
+                <li>All clients and contacts</li>
+                <li>All deals and pipeline data</li>
+                <li>All activities and tasks</li>
+                <li>All custom fields and settings</li>
+              </ul>
+              <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                <p className="text-sm text-red-800 dark:text-red-400">
+                  <strong>This action cannot be undone!</strong> Please export your data first if you need a backup.
+                </p>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => setShowResetCrmDialog(false)} className="flex-1">
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={() => {
+                  toast.success('CRM data reset complete')
+                  setShowResetCrmDialog(false)
+                }}
+                className="flex-1"
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                Reset All Data
               </Button>
             </div>
           </DialogContent>

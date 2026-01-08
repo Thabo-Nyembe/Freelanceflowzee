@@ -7,8 +7,10 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { Progress } from '@/components/ui/progress'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
 import {
   Package,
   TrendingDown,
@@ -334,6 +336,38 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
   const [showQuickUpdatePricing, setShowQuickUpdatePricing] = useState(false)
   const [showQuickAnalytics, setShowQuickAnalytics] = useState(false)
 
+  // Additional Dialog States
+  const [showExportDialog, setShowExportDialog] = useState(false)
+  const [showImportDialog, setShowImportDialog] = useState(false)
+  const [showAddTaxRateDialog, setShowAddTaxRateDialog] = useState(false)
+  const [showEditTaxRateDialog, setShowEditTaxRateDialog] = useState(false)
+  const [showEditPriceDialog, setShowEditPriceDialog] = useState(false)
+  const [showProductActionsDialog, setShowProductActionsDialog] = useState(false)
+  const [showEditProductDialog, setShowEditProductDialog] = useState(false)
+  const [showDuplicateProductDialog, setShowDuplicateProductDialog] = useState(false)
+  const [showArchiveProductDialog, setShowArchiveProductDialog] = useState(false)
+  const [showDeleteCouponDialog, setShowDeleteCouponDialog] = useState(false)
+  const [showEditCouponDialog, setShowEditCouponDialog] = useState(false)
+  const [showManageZonesDialog, setShowManageZonesDialog] = useState(false)
+  const [showCarrierConfigDialog, setShowCarrierConfigDialog] = useState(false)
+  const [showConnectShopifyDialog, setShowConnectShopifyDialog] = useState(false)
+  const [showConnectAmazonDialog, setShowConnectAmazonDialog] = useState(false)
+  const [showConnectQuickBooksDialog, setShowConnectQuickBooksDialog] = useState(false)
+  const [showWebhookConfigDialog, setShowWebhookConfigDialog] = useState(false)
+  const [showBackupDialog, setShowBackupDialog] = useState(false)
+  const [showSyncDialog, setShowSyncDialog] = useState(false)
+  const [selectedActionProduct, setSelectedActionProduct] = useState<StripeProduct | null>(null)
+  const [selectedPrice, setSelectedPrice] = useState<{ price: any, productName: string } | null>(null)
+  const [selectedTaxRate, setSelectedTaxRate] = useState<TaxRate | null>(null)
+
+  // Form States
+  const [exportFormat, setExportFormat] = useState('csv')
+  const [importFile, setImportFile] = useState<File | null>(null)
+  const [newTaxRate, setNewTaxRate] = useState({ displayName: '', description: '', percentage: '', country: '', inclusive: false })
+  const [editedProduct, setEditedProduct] = useState({ name: '', description: '', category: '' })
+  const [editedCoupon, setEditedCoupon] = useState({ name: '', percentOff: '', duration: 'once' })
+  const [editedPrice, setEditedPrice] = useState({ nickname: '', unitAmount: '', billingInterval: 'month' })
+
   // QuickAction Form States
   const [quickProductName, setQuickProductName] = useState('')
   const [quickProductDescription, setQuickProductDescription] = useState('')
@@ -461,7 +495,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
             <p className="text-gray-600 dark:text-gray-400">Stripe-Level Product & Pricing Management</p>
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="outline" className="gap-2">
+            <Button variant="outline" className="gap-2" onClick={() => setShowExportDialog(true)}>
               <Download className="w-4 h-4" />
               Export
             </Button>
@@ -660,7 +694,11 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                               <Badge className={getStatusColor(product.status)}>{product.status}</Badge>
                             </div>
                           </div>
-                          <Button variant="ghost" size="sm">
+                          <Button variant="ghost" size="sm" onClick={(e) => {
+                            e.stopPropagation()
+                            setSelectedActionProduct(product)
+                            setShowProductActionsDialog(true)
+                          }}>
                             <MoreHorizontal className="w-4 h-4" />
                           </Button>
                         </div>
@@ -733,7 +771,11 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                               <p className="font-semibold">{formatCurrency(product.mrr * 100)}</p>
                               <p className="text-xs text-gray-500">MRR</p>
                             </div>
-                            <Button variant="ghost" size="sm">
+                            <Button variant="ghost" size="sm" onClick={(e) => {
+                              e.stopPropagation()
+                              setSelectedActionProduct(product)
+                              setShowProductActionsDialog(true)
+                            }}>
                               <MoreHorizontal className="w-4 h-4" />
                             </Button>
                           </div>
@@ -822,7 +864,15 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                                   <p className="text-sm text-gray-500">per {price.billingInterval}</p>
                                 )}
                               </div>
-                              <Button variant="ghost" size="sm">
+                              <Button variant="ghost" size="sm" onClick={() => {
+                                setSelectedPrice({ price, productName: price.productName })
+                                setEditedPrice({
+                                  nickname: price.nickname,
+                                  unitAmount: (price.unitAmount / 100).toString(),
+                                  billingInterval: price.billingInterval || 'month'
+                                })
+                                setShowEditPriceDialog(true)
+                              }}>
                                 <Edit className="w-4 h-4" />
                               </Button>
                             </div>
@@ -1012,7 +1062,10 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
               <div className="lg:col-span-2 space-y-4">
                 <div className="flex items-center justify-between">
                   <h3 className="text-lg font-semibold">Tax Rates</h3>
-                  <Button className="bg-violet-600 hover:bg-violet-700 gap-2">
+                  <Button className="bg-violet-600 hover:bg-violet-700 gap-2" onClick={() => {
+                    setNewTaxRate({ displayName: '', description: '', percentage: '', country: '', inclusive: false })
+                    setShowAddTaxRateDialog(true)
+                  }}>
                     <Plus className="w-4 h-4" />
                     Add Tax Rate
                   </Button>
@@ -1045,7 +1098,17 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                                 <p className="text-sm text-gray-500">{tax.inclusive ? 'Inclusive' : 'Exclusive'}</p>
                               </div>
                               <Badge variant="outline">{tax.country}</Badge>
-                              <Button variant="ghost" size="sm">
+                              <Button variant="ghost" size="sm" onClick={() => {
+                                setSelectedTaxRate(tax)
+                                setNewTaxRate({
+                                  displayName: tax.displayName,
+                                  description: tax.description,
+                                  percentage: tax.percentage.toString(),
+                                  country: tax.country,
+                                  inclusive: tax.inclusive
+                                })
+                                setShowEditTaxRateDialog(true)
+                              }}>
                                 <Edit className="w-4 h-4" />
                               </Button>
                             </div>
@@ -1486,14 +1549,14 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                           <div className="font-medium">Shipping Zones</div>
                           <div className="text-sm text-muted-foreground">Configure regional shipping rates</div>
                         </div>
-                        <Button variant="outline" size="sm">Manage Zones</Button>
+                        <Button variant="outline" size="sm" onClick={() => setShowManageZonesDialog(true)}>Manage Zones</Button>
                       </div>
                       <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
                         <div>
                           <div className="font-medium">Carrier Integration</div>
                           <div className="text-sm text-muted-foreground">Connect shipping carriers for real-time rates</div>
                         </div>
-                        <Button variant="outline" size="sm">Configure</Button>
+                        <Button variant="outline" size="sm" onClick={() => setShowCarrierConfigDialog(true)}>Configure</Button>
                       </div>
                     </CardContent>
                   </Card>
@@ -1531,7 +1594,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                             <div className="text-sm text-muted-foreground">E-commerce platform sync</div>
                           </div>
                         </div>
-                        <Button variant="outline" size="sm">Connect</Button>
+                        <Button variant="outline" size="sm" onClick={() => setShowConnectShopifyDialog(true)}>Connect</Button>
                       </div>
                       <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
                         <div className="flex items-center gap-3">
@@ -1543,7 +1606,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                             <div className="text-sm text-muted-foreground">Product listing sync</div>
                           </div>
                         </div>
-                        <Button variant="outline" size="sm">Connect</Button>
+                        <Button variant="outline" size="sm" onClick={() => setShowConnectAmazonDialog(true)}>Connect</Button>
                       </div>
                       <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
                         <div className="flex items-center gap-3">
@@ -1555,7 +1618,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                             <div className="text-sm text-muted-foreground">Accounting integration</div>
                           </div>
                         </div>
-                        <Button variant="outline" size="sm">Connect</Button>
+                        <Button variant="outline" size="sm" onClick={() => setShowConnectQuickBooksDialog(true)}>Connect</Button>
                       </div>
                       <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
                         <div className="flex items-center gap-3">
@@ -1651,7 +1714,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                           <div className="font-medium">Webhook Events</div>
                           <div className="text-sm text-muted-foreground">Send product events to external services</div>
                         </div>
-                        <Button variant="outline" size="sm">Configure</Button>
+                        <Button variant="outline" size="sm" onClick={() => setShowWebhookConfigDialog(true)}>Configure</Button>
                       </div>
                       <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
                         <div>
@@ -1668,19 +1731,19 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                         <ToggleLeft className="w-6 h-6 text-gray-400 cursor-pointer" />
                       </div>
                       <div className="grid grid-cols-2 gap-4 pt-4 border-t dark:border-gray-700">
-                        <Button variant="outline" className="h-auto py-4 flex-col gap-2">
+                        <Button variant="outline" className="h-auto py-4 flex-col gap-2" onClick={() => setShowExportDialog(true)}>
                           <Download className="w-6 h-6" />
                           <span>Export Catalog</span>
                         </Button>
-                        <Button variant="outline" className="h-auto py-4 flex-col gap-2">
+                        <Button variant="outline" className="h-auto py-4 flex-col gap-2" onClick={() => setShowImportDialog(true)}>
                           <Upload className="w-6 h-6" />
                           <span>Import Products</span>
                         </Button>
-                        <Button variant="outline" className="h-auto py-4 flex-col gap-2">
+                        <Button variant="outline" className="h-auto py-4 flex-col gap-2" onClick={() => setShowBackupDialog(true)}>
                           <Archive className="w-6 h-6" />
                           <span>Backup Data</span>
                         </Button>
-                        <Button variant="outline" className="h-auto py-4 flex-col gap-2">
+                        <Button variant="outline" className="h-auto py-4 flex-col gap-2" onClick={() => setShowSyncDialog(true)}>
                           <RefreshCw className="w-6 h-6" />
                           <span>Sync All</span>
                         </Button>
@@ -1694,16 +1757,16 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
             {/* Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
-                { icon: Package, label: 'New Product', desc: 'Create', color: 'from-violet-500 to-purple-600' },
-                { icon: DollarSign, label: 'Add Price', desc: 'Pricing', color: 'from-green-500 to-emerald-600' },
-                { icon: Tag, label: 'Coupon', desc: 'Discount', color: 'from-orange-500 to-red-600' },
-                { icon: Percent, label: 'Tax Rate', desc: 'Configure', color: 'from-blue-500 to-cyan-600' },
-                { icon: Box, label: 'Inventory', desc: 'Stock', color: 'from-amber-500 to-yellow-600' },
-                { icon: BarChart3, label: 'Analytics', desc: 'Reports', color: 'from-pink-500 to-rose-600' },
-                { icon: Download, label: 'Export', desc: 'Download', color: 'from-teal-500 to-green-600' },
-                { icon: RefreshCw, label: 'Sync', desc: 'Update', color: 'from-indigo-500 to-blue-600' }
+                { icon: Package, label: 'New Product', desc: 'Create', color: 'from-violet-500 to-purple-600', action: () => setShowCreateProduct(true) },
+                { icon: DollarSign, label: 'Add Price', desc: 'Pricing', color: 'from-green-500 to-emerald-600', action: () => setShowCreatePrice(true) },
+                { icon: Tag, label: 'Coupon', desc: 'Discount', color: 'from-orange-500 to-red-600', action: () => setShowCreateCoupon(true) },
+                { icon: Percent, label: 'Tax Rate', desc: 'Configure', color: 'from-blue-500 to-cyan-600', action: () => setShowAddTaxRateDialog(true) },
+                { icon: Box, label: 'Inventory', desc: 'Stock', color: 'from-amber-500 to-yellow-600', action: () => { setSettingsTab('inventory'); toast.info('Navigated to Inventory Settings') } },
+                { icon: BarChart3, label: 'Analytics', desc: 'Reports', color: 'from-pink-500 to-rose-600', action: () => setShowQuickAnalytics(true) },
+                { icon: Download, label: 'Export', desc: 'Download', color: 'from-teal-500 to-green-600', action: () => setShowExportDialog(true) },
+                { icon: RefreshCw, label: 'Sync', desc: 'Update', color: 'from-indigo-500 to-blue-600', action: () => setShowSyncDialog(true) }
               ].map((action, idx) => (
-                <Card key={idx} className="cursor-pointer hover:shadow-lg transition-all hover:-translate-y-0.5 group border-0 shadow-sm">
+                <Card key={idx} className="cursor-pointer hover:shadow-lg transition-all hover:-translate-y-0.5 group border-0 shadow-sm" onClick={action.action}>
                   <CardContent className="p-4 text-center">
                     <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${action.color} flex items-center justify-center mx-auto mb-2 group-hover:scale-110 transition-transform`}>
                       <action.icon className="w-5 h-5 text-white" />
@@ -1834,15 +1897,24 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                 </div>
 
                 <div className="flex items-center gap-2 pt-4 border-t">
-                  <Button className="flex-1 bg-violet-600 hover:bg-violet-700">
+                  <Button className="flex-1 bg-violet-600 hover:bg-violet-700" onClick={() => {
+                    if (selectedProduct) {
+                      setEditedProduct({
+                        name: selectedProduct.name,
+                        description: selectedProduct.description,
+                        category: selectedProduct.category
+                      })
+                      setShowEditProductDialog(true)
+                    }
+                  }}>
                     <Edit className="w-4 h-4 mr-2" />
                     Edit Product
                   </Button>
-                  <Button variant="outline" className="flex-1">
+                  <Button variant="outline" className="flex-1" onClick={() => setShowDuplicateProductDialog(true)}>
                     <Copy className="w-4 h-4 mr-2" />
                     Duplicate
                   </Button>
-                  <Button variant="outline">
+                  <Button variant="outline" onClick={() => setShowArchiveProductDialog(true)}>
                     <Archive className="w-4 h-4" />
                   </Button>
                 </div>
@@ -1899,15 +1971,31 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                 )}
 
                 <div className="flex items-center gap-2 pt-4">
-                  <Button className="flex-1 bg-violet-600 hover:bg-violet-700">
+                  <Button className="flex-1 bg-violet-600 hover:bg-violet-700" onClick={() => {
+                    if (selectedCoupon) {
+                      setEditedCoupon({
+                        name: selectedCoupon.name,
+                        percentOff: selectedCoupon.percentOff?.toString() || '',
+                        duration: selectedCoupon.duration
+                      })
+                      setShowEditCouponDialog(true)
+                    }
+                  }}>
                     <Edit className="w-4 h-4 mr-2" />
                     Edit
                   </Button>
-                  <Button variant="outline" className="flex-1">
+                  <Button variant="outline" className="flex-1" onClick={() => {
+                    if (selectedCoupon) {
+                      navigator.clipboard.writeText(selectedCoupon.name)
+                      toast.success('Coupon code copied!', {
+                        description: `${selectedCoupon.name} has been copied to clipboard`
+                      })
+                    }
+                  }}>
                     <Copy className="w-4 h-4 mr-2" />
                     Copy Code
                   </Button>
-                  <Button variant="destructive">
+                  <Button variant="destructive" onClick={() => setShowDeleteCouponDialog(true)}>
                     <Trash2 className="w-4 h-4" />
                   </Button>
                 </div>
@@ -2235,6 +2323,981 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                 View Full Analytics
               </Button>
             </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Export Dialog */}
+        <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Download className="w-5 h-5 text-violet-600" />
+                Export Products
+              </DialogTitle>
+              <DialogDescription>
+                Export your product catalog in your preferred format.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Export Format</Label>
+                <select
+                  className="w-full p-2 border rounded-md bg-white dark:bg-gray-800"
+                  value={exportFormat}
+                  onChange={(e) => setExportFormat(e.target.value)}
+                >
+                  <option value="csv">CSV (Comma Separated)</option>
+                  <option value="json">JSON</option>
+                  <option value="xlsx">Excel (XLSX)</option>
+                  <option value="pdf">PDF Report</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label>Include Data</Label>
+                <div className="space-y-2">
+                  <label className="flex items-center gap-2">
+                    <input type="checkbox" defaultChecked className="rounded" />
+                    <span className="text-sm">Product Details</span>
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <input type="checkbox" defaultChecked className="rounded" />
+                    <span className="text-sm">Pricing Information</span>
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <input type="checkbox" className="rounded" />
+                    <span className="text-sm">Analytics Data</span>
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <input type="checkbox" className="rounded" />
+                    <span className="text-sm">Subscriber Counts</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowExportDialog(false)}>
+                Cancel
+              </Button>
+              <Button className="bg-violet-600 hover:bg-violet-700" onClick={() => {
+                toast.success('Export started', {
+                  description: `Exporting catalog as ${exportFormat.toUpperCase()}...`
+                })
+                setShowExportDialog(false)
+              }}>
+                <Download className="w-4 h-4 mr-2" />
+                Export
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Import Dialog */}
+        <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Upload className="w-5 h-5 text-violet-600" />
+                Import Products
+              </DialogTitle>
+              <DialogDescription>
+                Import products from a file. Supported formats: CSV, JSON, XLSX.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="border-2 border-dashed rounded-lg p-8 text-center">
+                <Upload className="w-10 h-10 text-gray-400 mx-auto mb-4" />
+                <p className="text-sm text-gray-500 mb-2">Drag and drop your file here, or</p>
+                <label className="cursor-pointer">
+                  <span className="text-violet-600 hover:underline">browse to upload</span>
+                  <input
+                    type="file"
+                    className="hidden"
+                    accept=".csv,.json,.xlsx"
+                    onChange={(e) => setImportFile(e.target.files?.[0] || null)}
+                  />
+                </label>
+                {importFile && (
+                  <p className="mt-4 text-sm text-green-600">Selected: {importFile.name}</p>
+                )}
+              </div>
+              <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
+                <p className="text-sm text-yellow-700 dark:text-yellow-400">
+                  Products will be imported as drafts for review before publishing.
+                </p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => {
+                setShowImportDialog(false)
+                setImportFile(null)
+              }}>
+                Cancel
+              </Button>
+              <Button className="bg-violet-600 hover:bg-violet-700" disabled={!importFile} onClick={() => {
+                toast.success('Import started', {
+                  description: `Importing products from ${importFile?.name}...`
+                })
+                setShowImportDialog(false)
+                setImportFile(null)
+              }}>
+                <Upload className="w-4 h-4 mr-2" />
+                Import
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Tax Rate Dialog */}
+        <Dialog open={showAddTaxRateDialog} onOpenChange={setShowAddTaxRateDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Percent className="w-5 h-5 text-blue-600" />
+                Add Tax Rate
+              </DialogTitle>
+              <DialogDescription>
+                Create a new tax rate for your products.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Display Name</Label>
+                <Input
+                  placeholder="e.g., US Sales Tax"
+                  value={newTaxRate.displayName}
+                  onChange={(e) => setNewTaxRate({ ...newTaxRate, displayName: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Description</Label>
+                <Input
+                  placeholder="Brief description"
+                  value={newTaxRate.description}
+                  onChange={(e) => setNewTaxRate({ ...newTaxRate, description: e.target.value })}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Percentage (%)</Label>
+                  <Input
+                    type="number"
+                    placeholder="8.25"
+                    value={newTaxRate.percentage}
+                    onChange={(e) => setNewTaxRate({ ...newTaxRate, percentage: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Country Code</Label>
+                  <Input
+                    placeholder="US, EU, GB"
+                    value={newTaxRate.country}
+                    onChange={(e) => setNewTaxRate({ ...newTaxRate, country: e.target.value })}
+                  />
+                </div>
+              </div>
+              <label className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  className="rounded"
+                  checked={newTaxRate.inclusive}
+                  onChange={(e) => setNewTaxRate({ ...newTaxRate, inclusive: e.target.checked })}
+                />
+                <span className="text-sm">Tax Inclusive (included in displayed prices)</span>
+              </label>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowAddTaxRateDialog(false)}>
+                Cancel
+              </Button>
+              <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => {
+                toast.success('Tax rate created', {
+                  description: `${newTaxRate.displayName} (${newTaxRate.percentage}%) has been created`
+                })
+                setShowAddTaxRateDialog(false)
+                setNewTaxRate({ displayName: '', description: '', percentage: '', country: '', inclusive: false })
+              }}>
+                <Plus className="w-4 h-4 mr-2" />
+                Add Tax Rate
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Tax Rate Dialog */}
+        <Dialog open={showEditTaxRateDialog} onOpenChange={setShowEditTaxRateDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Percent className="w-5 h-5 text-blue-600" />
+                Edit Tax Rate
+              </DialogTitle>
+              <DialogDescription>
+                Update tax rate settings.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Display Name</Label>
+                <Input
+                  value={newTaxRate.displayName}
+                  onChange={(e) => setNewTaxRate({ ...newTaxRate, displayName: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Description</Label>
+                <Input
+                  value={newTaxRate.description}
+                  onChange={(e) => setNewTaxRate({ ...newTaxRate, description: e.target.value })}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Percentage (%)</Label>
+                  <Input
+                    type="number"
+                    value={newTaxRate.percentage}
+                    onChange={(e) => setNewTaxRate({ ...newTaxRate, percentage: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Country Code</Label>
+                  <Input
+                    value={newTaxRate.country}
+                    onChange={(e) => setNewTaxRate({ ...newTaxRate, country: e.target.value })}
+                  />
+                </div>
+              </div>
+              <label className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  className="rounded"
+                  checked={newTaxRate.inclusive}
+                  onChange={(e) => setNewTaxRate({ ...newTaxRate, inclusive: e.target.checked })}
+                />
+                <span className="text-sm">Tax Inclusive</span>
+              </label>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowEditTaxRateDialog(false)}>
+                Cancel
+              </Button>
+              <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => {
+                toast.success('Tax rate updated', {
+                  description: `${newTaxRate.displayName} has been updated`
+                })
+                setShowEditTaxRateDialog(false)
+              }}>
+                Save Changes
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Price Dialog */}
+        <Dialog open={showEditPriceDialog} onOpenChange={setShowEditPriceDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <DollarSign className="w-5 h-5 text-green-600" />
+                Edit Price
+              </DialogTitle>
+              <DialogDescription>
+                Update price for {selectedPrice?.productName}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Price Nickname</Label>
+                <Input
+                  value={editedPrice.nickname}
+                  onChange={(e) => setEditedPrice({ ...editedPrice, nickname: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Amount (USD)</Label>
+                <Input
+                  type="number"
+                  value={editedPrice.unitAmount}
+                  onChange={(e) => setEditedPrice({ ...editedPrice, unitAmount: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Billing Interval</Label>
+                <select
+                  className="w-full p-2 border rounded-md bg-white dark:bg-gray-800"
+                  value={editedPrice.billingInterval}
+                  onChange={(e) => setEditedPrice({ ...editedPrice, billingInterval: e.target.value })}
+                >
+                  <option value="month">Monthly</option>
+                  <option value="year">Yearly</option>
+                  <option value="week">Weekly</option>
+                  <option value="day">Daily</option>
+                </select>
+              </div>
+              <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg text-sm text-yellow-700 dark:text-yellow-400">
+                Price changes will apply to new subscriptions only. Existing subscriptions are not affected.
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowEditPriceDialog(false)}>
+                Cancel
+              </Button>
+              <Button className="bg-green-600 hover:bg-green-700" onClick={() => {
+                toast.success('Price updated', {
+                  description: `${editedPrice.nickname} price updated to $${editedPrice.unitAmount}`
+                })
+                setShowEditPriceDialog(false)
+              }}>
+                Save Changes
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Product Actions Dialog */}
+        <Dialog open={showProductActionsDialog} onOpenChange={setShowProductActionsDialog}>
+          <DialogContent className="max-w-sm">
+            <DialogHeader>
+              <DialogTitle>Product Actions</DialogTitle>
+              <DialogDescription>
+                {selectedActionProduct?.name}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-2 py-4">
+              <Button className="w-full justify-start gap-2" variant="outline" onClick={() => {
+                if (selectedActionProduct) {
+                  setSelectedProduct(selectedActionProduct)
+                  setShowProductActionsDialog(false)
+                }
+              }}>
+                <Package className="w-4 h-4" />
+                View Details
+              </Button>
+              <Button className="w-full justify-start gap-2" variant="outline" onClick={() => {
+                if (selectedActionProduct) {
+                  setEditedProduct({
+                    name: selectedActionProduct.name,
+                    description: selectedActionProduct.description,
+                    category: selectedActionProduct.category
+                  })
+                  setShowProductActionsDialog(false)
+                  setShowEditProductDialog(true)
+                }
+              }}>
+                <Edit className="w-4 h-4" />
+                Edit Product
+              </Button>
+              <Button className="w-full justify-start gap-2" variant="outline" onClick={() => {
+                setShowProductActionsDialog(false)
+                setShowDuplicateProductDialog(true)
+              }}>
+                <Copy className="w-4 h-4" />
+                Duplicate
+              </Button>
+              <Button className="w-full justify-start gap-2" variant="outline" onClick={() => {
+                setShowProductActionsDialog(false)
+                setShowArchiveProductDialog(true)
+              }}>
+                <Archive className="w-4 h-4" />
+                Archive
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Product Dialog */}
+        <Dialog open={showEditProductDialog} onOpenChange={setShowEditProductDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Edit className="w-5 h-5 text-violet-600" />
+                Edit Product
+              </DialogTitle>
+              <DialogDescription>
+                Update product details.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Product Name</Label>
+                <Input
+                  value={editedProduct.name}
+                  onChange={(e) => setEditedProduct({ ...editedProduct, name: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Description</Label>
+                <Textarea
+                  value={editedProduct.description}
+                  onChange={(e) => setEditedProduct({ ...editedProduct, description: e.target.value })}
+                  rows={3}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Category</Label>
+                <select
+                  className="w-full p-2 border rounded-md bg-white dark:bg-gray-800"
+                  value={editedProduct.category}
+                  onChange={(e) => setEditedProduct({ ...editedProduct, category: e.target.value })}
+                >
+                  <option value="subscription">Subscription</option>
+                  <option value="credits">Credits</option>
+                  <option value="add-on">Add-on</option>
+                  <option value="one_time">One-time Purchase</option>
+                </select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowEditProductDialog(false)}>
+                Cancel
+              </Button>
+              <Button className="bg-violet-600 hover:bg-violet-700" onClick={() => {
+                toast.success('Product updated', {
+                  description: `${editedProduct.name} has been updated`
+                })
+                setShowEditProductDialog(false)
+              }}>
+                Save Changes
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Duplicate Product Dialog */}
+        <Dialog open={showDuplicateProductDialog} onOpenChange={setShowDuplicateProductDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Copy className="w-5 h-5 text-violet-600" />
+                Duplicate Product
+              </DialogTitle>
+              <DialogDescription>
+                Create a copy of {selectedProduct?.name || selectedActionProduct?.name}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  This will create a duplicate of the product including all pricing tiers. The new product will be created as a draft.
+                </p>
+              </div>
+              <div className="space-y-2">
+                <Label>New Product Name</Label>
+                <Input defaultValue={`${selectedProduct?.name || selectedActionProduct?.name} (Copy)`} />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowDuplicateProductDialog(false)}>
+                Cancel
+              </Button>
+              <Button className="bg-violet-600 hover:bg-violet-700" onClick={() => {
+                toast.success('Product duplicated', {
+                  description: 'A copy has been created as a draft'
+                })
+                setShowDuplicateProductDialog(false)
+              }}>
+                <Copy className="w-4 h-4 mr-2" />
+                Duplicate
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Archive Product Dialog */}
+        <Dialog open={showArchiveProductDialog} onOpenChange={setShowArchiveProductDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Archive className="w-5 h-5 text-orange-600" />
+                Archive Product
+              </DialogTitle>
+              <DialogDescription>
+                Archive {selectedProduct?.name || selectedActionProduct?.name}?
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
+                <p className="text-sm text-yellow-700 dark:text-yellow-400">
+                  Archiving a product will:
+                </p>
+                <ul className="mt-2 text-sm text-yellow-600 dark:text-yellow-300 list-disc pl-4 space-y-1">
+                  <li>Hide it from new purchases</li>
+                  <li>Keep existing subscriptions active</li>
+                  <li>Preserve all historical data</li>
+                </ul>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowArchiveProductDialog(false)}>
+                Cancel
+              </Button>
+              <Button variant="destructive" onClick={() => {
+                toast.success('Product archived', {
+                  description: `${selectedProduct?.name || selectedActionProduct?.name} has been archived`
+                })
+                setShowArchiveProductDialog(false)
+                setSelectedProduct(null)
+              }}>
+                <Archive className="w-4 h-4 mr-2" />
+                Archive
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Coupon Dialog */}
+        <Dialog open={showDeleteCouponDialog} onOpenChange={setShowDeleteCouponDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Trash2 className="w-5 h-5 text-red-600" />
+                Delete Coupon
+              </DialogTitle>
+              <DialogDescription>
+                Are you sure you want to delete {selectedCoupon?.name}?
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                <p className="text-sm text-red-700 dark:text-red-400">
+                  This action cannot be undone. The coupon will be permanently deleted and can no longer be used.
+                </p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowDeleteCouponDialog(false)}>
+                Cancel
+              </Button>
+              <Button variant="destructive" onClick={() => {
+                toast.success('Coupon deleted', {
+                  description: `${selectedCoupon?.name} has been deleted`
+                })
+                setShowDeleteCouponDialog(false)
+                setSelectedCoupon(null)
+              }}>
+                <Trash2 className="w-4 h-4 mr-2" />
+                Delete
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Coupon Dialog */}
+        <Dialog open={showEditCouponDialog} onOpenChange={setShowEditCouponDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Tag className="w-5 h-5 text-orange-600" />
+                Edit Coupon
+              </DialogTitle>
+              <DialogDescription>
+                Update coupon settings.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Coupon Code</Label>
+                <Input
+                  value={editedCoupon.name}
+                  onChange={(e) => setEditedCoupon({ ...editedCoupon, name: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Discount (%)</Label>
+                <Input
+                  type="number"
+                  value={editedCoupon.percentOff}
+                  onChange={(e) => setEditedCoupon({ ...editedCoupon, percentOff: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Duration</Label>
+                <select
+                  className="w-full p-2 border rounded-md bg-white dark:bg-gray-800"
+                  value={editedCoupon.duration}
+                  onChange={(e) => setEditedCoupon({ ...editedCoupon, duration: e.target.value })}
+                >
+                  <option value="once">Once</option>
+                  <option value="repeating">Repeating</option>
+                  <option value="forever">Forever</option>
+                </select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowEditCouponDialog(false)}>
+                Cancel
+              </Button>
+              <Button className="bg-orange-600 hover:bg-orange-700" onClick={() => {
+                toast.success('Coupon updated', {
+                  description: `${editedCoupon.name} has been updated`
+                })
+                setShowEditCouponDialog(false)
+              }}>
+                Save Changes
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Manage Zones Dialog */}
+        <Dialog open={showManageZonesDialog} onOpenChange={setShowManageZonesDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Truck className="w-5 h-5 text-blue-600" />
+                Shipping Zones
+              </DialogTitle>
+              <DialogDescription>
+                Configure shipping zones and rates.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-3">
+                {['United States', 'Canada', 'Europe', 'Rest of World'].map((zone) => (
+                  <div key={zone} className="flex items-center justify-between p-3 border rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <Globe className="w-4 h-4 text-gray-500" />
+                      <span className="font-medium">{zone}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline">$9.99</Badge>
+                      <Button variant="ghost" size="sm">
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <Button variant="outline" className="w-full gap-2">
+                <Plus className="w-4 h-4" />
+                Add Shipping Zone
+              </Button>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowManageZonesDialog(false)}>
+                Close
+              </Button>
+              <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => {
+                toast.success('Shipping zones saved')
+                setShowManageZonesDialog(false)
+              }}>
+                Save Changes
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Carrier Config Dialog */}
+        <Dialog open={showCarrierConfigDialog} onOpenChange={setShowCarrierConfigDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Truck className="w-5 h-5 text-blue-600" />
+                Carrier Integration
+              </DialogTitle>
+              <DialogDescription>
+                Connect shipping carriers for real-time rates.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-3">
+                {['UPS', 'FedEx', 'USPS', 'DHL'].map((carrier) => (
+                  <div key={carrier} className="flex items-center justify-between p-3 border rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <Package className="w-4 h-4 text-gray-500" />
+                      <span className="font-medium">{carrier}</span>
+                    </div>
+                    <Button variant="outline" size="sm">Connect</Button>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowCarrierConfigDialog(false)}>
+                Close
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Connect Shopify Dialog */}
+        <Dialog open={showConnectShopifyDialog} onOpenChange={setShowConnectShopifyDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Globe className="w-5 h-5 text-blue-600" />
+                Connect Shopify
+              </DialogTitle>
+              <DialogDescription>
+                Sync your products with Shopify.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Shopify Store URL</Label>
+                <Input placeholder="your-store.myshopify.com" />
+              </div>
+              <div className="space-y-2">
+                <Label>API Key</Label>
+                <Input placeholder="Enter your Shopify API key" type="password" />
+              </div>
+              <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-sm text-blue-700 dark:text-blue-400">
+                You can find your API credentials in Shopify Admin under Apps and Sales Channels.
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowConnectShopifyDialog(false)}>
+                Cancel
+              </Button>
+              <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => {
+                toast.success('Connecting to Shopify...', {
+                  description: 'Please wait while we verify your credentials'
+                })
+                setShowConnectShopifyDialog(false)
+              }}>
+                Connect
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Connect Amazon Dialog */}
+        <Dialog open={showConnectAmazonDialog} onOpenChange={setShowConnectAmazonDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Package className="w-5 h-5 text-orange-600" />
+                Connect Amazon
+              </DialogTitle>
+              <DialogDescription>
+                Sync your products with Amazon marketplace.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Amazon Seller ID</Label>
+                <Input placeholder="Enter your Seller ID" />
+              </div>
+              <div className="space-y-2">
+                <Label>MWS Auth Token</Label>
+                <Input placeholder="Enter your MWS Auth Token" type="password" />
+              </div>
+              <div className="p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg text-sm text-orange-700 dark:text-orange-400">
+                You need an Amazon Seller Central account to connect.
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowConnectAmazonDialog(false)}>
+                Cancel
+              </Button>
+              <Button className="bg-orange-600 hover:bg-orange-700" onClick={() => {
+                toast.success('Connecting to Amazon...', {
+                  description: 'Please wait while we verify your credentials'
+                })
+                setShowConnectAmazonDialog(false)
+              }}>
+                Connect
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Connect QuickBooks Dialog */}
+        <Dialog open={showConnectQuickBooksDialog} onOpenChange={setShowConnectQuickBooksDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <DollarSign className="w-5 h-5 text-green-600" />
+                Connect QuickBooks
+              </DialogTitle>
+              <DialogDescription>
+                Sync your products with QuickBooks for accounting.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="text-center py-6">
+                <DollarSign className="w-12 h-12 text-green-600 mx-auto mb-4" />
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                  Click the button below to sign in with your QuickBooks account and authorize the connection.
+                </p>
+                <Button className="bg-green-600 hover:bg-green-700">
+                  Sign in with QuickBooks
+                </Button>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowConnectQuickBooksDialog(false)}>
+                Cancel
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Webhook Config Dialog */}
+        <Dialog open={showWebhookConfigDialog} onOpenChange={setShowWebhookConfigDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Zap className="w-5 h-5 text-violet-600" />
+                Webhook Configuration
+              </DialogTitle>
+              <DialogDescription>
+                Configure webhook endpoints for product events.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Webhook URL</Label>
+                <Input placeholder="https://your-server.com/webhooks" />
+              </div>
+              <div className="space-y-2">
+                <Label>Events to Send</Label>
+                <div className="space-y-2">
+                  <label className="flex items-center gap-2">
+                    <input type="checkbox" defaultChecked className="rounded" />
+                    <span className="text-sm">product.created</span>
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <input type="checkbox" defaultChecked className="rounded" />
+                    <span className="text-sm">product.updated</span>
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <input type="checkbox" className="rounded" />
+                    <span className="text-sm">product.deleted</span>
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <input type="checkbox" defaultChecked className="rounded" />
+                    <span className="text-sm">price.created</span>
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <input type="checkbox" defaultChecked className="rounded" />
+                    <span className="text-sm">price.updated</span>
+                  </label>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Secret Key</Label>
+                <Input placeholder="whsec_..." type="password" />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowWebhookConfigDialog(false)}>
+                Cancel
+              </Button>
+              <Button className="bg-violet-600 hover:bg-violet-700" onClick={() => {
+                toast.success('Webhook configured', {
+                  description: 'Your webhook endpoint has been saved'
+                })
+                setShowWebhookConfigDialog(false)
+              }}>
+                Save Configuration
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Backup Dialog */}
+        <Dialog open={showBackupDialog} onOpenChange={setShowBackupDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Archive className="w-5 h-5 text-amber-600" />
+                Backup Data
+              </DialogTitle>
+              <DialogDescription>
+                Create a backup of your product catalog.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Backup Name</Label>
+                <Input defaultValue={`backup-${new Date().toISOString().split('T')[0]}`} />
+              </div>
+              <div className="space-y-2">
+                <Label>Include Data</Label>
+                <div className="space-y-2">
+                  <label className="flex items-center gap-2">
+                    <input type="checkbox" defaultChecked className="rounded" />
+                    <span className="text-sm">Products</span>
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <input type="checkbox" defaultChecked className="rounded" />
+                    <span className="text-sm">Prices</span>
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <input type="checkbox" defaultChecked className="rounded" />
+                    <span className="text-sm">Coupons</span>
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <input type="checkbox" defaultChecked className="rounded" />
+                    <span className="text-sm">Tax Rates</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowBackupDialog(false)}>
+                Cancel
+              </Button>
+              <Button className="bg-amber-600 hover:bg-amber-700" onClick={() => {
+                toast.success('Backup created', {
+                  description: 'Your catalog backup has been created successfully'
+                })
+                setShowBackupDialog(false)
+              }}>
+                <Archive className="w-4 h-4 mr-2" />
+                Create Backup
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Sync Dialog */}
+        <Dialog open={showSyncDialog} onOpenChange={setShowSyncDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <RefreshCw className="w-5 h-5 text-indigo-600" />
+                Sync All Data
+              </DialogTitle>
+              <DialogDescription>
+                Synchronize your product catalog with connected services.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-3">
+                {[
+                  { name: 'Stripe', status: 'connected', lastSync: '2 min ago' },
+                  { name: 'Zapier', status: 'connected', lastSync: '5 min ago' },
+                  { name: 'Shopify', status: 'disconnected', lastSync: 'Never' },
+                  { name: 'QuickBooks', status: 'disconnected', lastSync: 'Never' },
+                ].map((service) => (
+                  <div key={service.name} className="flex items-center justify-between p-3 border rounded-lg">
+                    <div>
+                      <p className="font-medium">{service.name}</p>
+                      <p className="text-xs text-gray-500">Last sync: {service.lastSync}</p>
+                    </div>
+                    <Badge className={service.status === 'connected' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}>
+                      {service.status}
+                    </Badge>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowSyncDialog(false)}>
+                Cancel
+              </Button>
+              <Button className="bg-indigo-600 hover:bg-indigo-700" onClick={() => {
+                toast.success('Sync started', {
+                  description: 'Synchronizing with connected services...'
+                })
+                setShowSyncDialog(false)
+              }}>
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Sync Now
+              </Button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
       </div>

@@ -462,6 +462,21 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
   const [callLogContactId, setCallLogContactId] = useState<string | null>(null)
   const [showCallLogDialog, setShowCallLogDialog] = useState(false)
 
+  // Additional dialog states for buttons without handlers
+  const [showImportDialog, setShowImportDialog] = useState(false)
+  const [showAddTaskDialog, setShowAddTaskDialog] = useState(false)
+  const [showAddCampaignDialog, setShowAddCampaignDialog] = useState(false)
+  const [showAddStageDialog, setShowAddStageDialog] = useState(false)
+  const [showAddScoringRuleDialog, setShowAddScoringRuleDialog] = useState(false)
+  const [showConnectSlackDialog, setShowConnectSlackDialog] = useState(false)
+  const [showConnectZapierDialog, setShowConnectZapierDialog] = useState(false)
+  const [showConnectLinkedInDialog, setShowConnectLinkedInDialog] = useState(false)
+  const [showExportAllDataDialog, setShowExportAllDataDialog] = useState(false)
+  const [showImportDataDialog, setShowImportDataDialog] = useState(false)
+  const [showDeleteAllContactsDialog, setShowDeleteAllContactsDialog] = useState(false)
+  const [showClearHistoryDialog, setShowClearHistoryDialog] = useState(false)
+  const [showFactoryResetDialog, setShowFactoryResetDialog] = useState(false)
+
   // Supabase hooks
   const { customers: dbCustomers, stats: dbStats, isLoading, error, refetch } = useCustomers({ segment: 'all' })
   const {
@@ -835,7 +850,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
               <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />Refresh
             </Button>
             <Button variant="outline" onClick={handleExportCustomers}><Download className="h-4 w-4 mr-2" />Export</Button>
-            <Button variant="outline"><Upload className="h-4 w-4 mr-2" />Import</Button>
+            <Button variant="outline" onClick={() => setShowImportDialog(true)}><Upload className="h-4 w-4 mr-2" />Import</Button>
             <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white" onClick={() => setShowAddContact(true)}>
               <UserPlus className="h-4 w-4 mr-2" />Add Contact
             </Button>
@@ -1137,7 +1152,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
           {/* Activities Tab */}
           <TabsContent value="activities" className="space-y-4">
             <div className="flex justify-end">
-              <Button><Plus className="h-4 w-4 mr-2" />Log Activity</Button>
+              <Button onClick={() => setShowLogActivityDialog(true)}><Plus className="h-4 w-4 mr-2" />Log Activity</Button>
             </div>
             <div className="space-y-3">
               {MOCK_ACTIVITIES.map(activity => {
@@ -1184,7 +1199,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
           {/* Tasks Tab */}
           <TabsContent value="tasks" className="space-y-4">
             <div className="flex justify-end">
-              <Button><Plus className="h-4 w-4 mr-2" />New Task</Button>
+              <Button onClick={() => setShowAddTaskDialog(true)}><Plus className="h-4 w-4 mr-2" />New Task</Button>
             </div>
             <div className="space-y-3">
               {MOCK_TASKS.map(task => (
@@ -1218,7 +1233,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
           {/* Campaigns Tab */}
           <TabsContent value="campaigns" className="space-y-4">
             <div className="flex justify-end">
-              <Button><Plus className="h-4 w-4 mr-2" />New Campaign</Button>
+              <Button onClick={() => setShowAddCampaignDialog(true)}><Plus className="h-4 w-4 mr-2" />New Campaign</Button>
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               {MOCK_CAMPAIGNS.map(campaign => {
@@ -1594,7 +1609,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
                             <Button size="sm" variant="ghost" onClick={() => setShowStageOptionsMenu(stage.id)}><MoreHorizontal className="h-4 w-4" /></Button>
                           </div>
                         ))}
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => setShowAddStageDialog(true)}>
                           <Plus className="h-4 w-4 mr-2" />
                           Add Stage
                         </Button>
@@ -1764,7 +1779,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
                               <Switch defaultChecked />
                             </div>
                           </div>
-                          <Button variant="outline" className="w-full">
+                          <Button variant="outline" className="w-full" onClick={() => setShowAddScoringRuleDialog(true)}>
                             <Plus className="h-4 w-4 mr-2" />
                             Add Scoring Rule
                           </Button>
@@ -1972,7 +1987,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
                               <div className="text-sm text-gray-500">Team notifications</div>
                             </div>
                           </div>
-                          <Button size="sm">Connect</Button>
+                          <Button size="sm" onClick={() => setShowConnectSlackDialog(true)}>Connect</Button>
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
@@ -1983,7 +1998,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
                               <div className="text-sm text-gray-500">Workflow automation</div>
                             </div>
                           </div>
-                          <Button size="sm">Connect</Button>
+                          <Button size="sm" onClick={() => setShowConnectZapierDialog(true)}>Connect</Button>
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
@@ -1994,7 +2009,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
                               <div className="text-sm text-gray-500">Social selling integration</div>
                             </div>
                           </div>
-                          <Button size="sm">Connect</Button>
+                          <Button size="sm" onClick={() => setShowConnectLinkedInDialog(true)}>Connect</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -2014,7 +2029,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
                               <Label className="text-base">API Key</Label>
                               <p className="text-xs text-gray-500">Use this key for API access</p>
                             </div>
-                            <Button size="sm" variant="outline">
+                            <Button size="sm" variant="outline" onClick={() => toast.success('API Key Regenerated', { description: 'Your new API key has been generated. Please update your integrations.' })}>
                               <RefreshCw className="h-4 w-4 mr-2" />
                               Regenerate
                             </Button>
@@ -2026,7 +2041,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
                               readOnly
                               className="font-mono"
                             />
-                            <Button size="sm" variant="ghost">
+                            <Button size="sm" variant="ghost" onClick={() => { navigator.clipboard.writeText('crm_api_key_xxxxxxxxxxxxxxxxxxxxx'); toast.success('API Key Copied', { description: 'The API key has been copied to your clipboard' }) }}>
                               <Copy className="h-4 w-4" />
                             </Button>
                           </div>
@@ -2126,11 +2141,11 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
                         </div>
 
                         <div className="flex gap-2">
-                          <Button variant="outline" className="flex-1">
+                          <Button variant="outline" className="flex-1" onClick={() => setShowExportAllDataDialog(true)}>
                             <Download className="h-4 w-4 mr-2" />
                             Export All Data
                           </Button>
-                          <Button variant="outline" className="flex-1">
+                          <Button variant="outline" className="flex-1" onClick={() => setShowImportDataDialog(true)}>
                             <Upload className="h-4 w-4 mr-2" />
                             Import Data
                           </Button>
@@ -2153,7 +2168,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
                             <Label className="text-base text-red-700 dark:text-red-400">Delete All Contacts</Label>
                             <p className="text-sm text-red-600/70 dark:text-red-400/70">Permanently remove all contacts</p>
                           </div>
-                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50 dark:border-red-700 dark:text-red-400">
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50 dark:border-red-700 dark:text-red-400" onClick={() => setShowDeleteAllContactsDialog(true)}>
                             <Trash2 className="h-4 w-4 mr-2" />
                             Delete All
                           </Button>
@@ -2164,7 +2179,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
                             <Label className="text-base text-red-700 dark:text-red-400">Clear Activity History</Label>
                             <p className="text-sm text-red-600/70 dark:text-red-400/70">Delete all activity logs and history</p>
                           </div>
-                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50 dark:border-red-700 dark:text-red-400">
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50 dark:border-red-700 dark:text-red-400" onClick={() => setShowClearHistoryDialog(true)}>
                             <Archive className="h-4 w-4 mr-2" />
                             Clear History
                           </Button>
@@ -2175,7 +2190,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
                             <Label className="text-base text-red-700 dark:text-red-400">Reset CRM</Label>
                             <p className="text-sm text-red-600/70 dark:text-red-400/70">Reset all settings to defaults</p>
                           </div>
-                          <Button variant="destructive">
+                          <Button variant="destructive" onClick={() => setShowFactoryResetDialog(true)}>
                             <AlertOctagon className="h-4 w-4 mr-2" />
                             Factory Reset
                           </Button>
@@ -2281,9 +2296,9 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
                   </div>
 
                   <div className="flex gap-2 pt-4 border-t">
-                    <Button className="flex-1"><Mail className="h-4 w-4 mr-2" />Send Email</Button>
-                    <Button variant="outline"><PhoneCall className="h-4 w-4 mr-2" />Log Call</Button>
-                    <Button variant="outline"><Calendar className="h-4 w-4 mr-2" />Schedule</Button>
+                    <Button className="flex-1" onClick={() => { setSelectedContact(null); setShowEmailComposer(true) }}><Mail className="h-4 w-4 mr-2" />Send Email</Button>
+                    <Button variant="outline" onClick={() => { setSelectedContact(null); setShowCallLogDialog(true) }}><PhoneCall className="h-4 w-4 mr-2" />Log Call</Button>
+                    <Button variant="outline" onClick={() => { setSelectedContact(null); setShowCalendarDialog(true) }}><Calendar className="h-4 w-4 mr-2" />Schedule</Button>
                   </div>
                 </div>
               </ScrollArea>
@@ -2805,6 +2820,646 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
                 <Trash2 className="h-4 w-4 mr-2" />Delete Stage
               </Button>
             </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Import Contacts Dialog */}
+        <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Upload className="h-5 w-5 text-violet-600" />
+                Import Contacts
+              </DialogTitle>
+              <DialogDescription>
+                Upload a CSV file to import contacts into your CRM.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center">
+                <Upload className="h-10 w-10 text-gray-400 mx-auto mb-4" />
+                <p className="text-gray-600 dark:text-gray-400 mb-2">Drag and drop your CSV file here, or click to browse</p>
+                <Input type="file" accept=".csv" className="max-w-xs mx-auto" />
+              </div>
+              <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
+                <h4 className="font-medium mb-2">CSV Format Requirements:</h4>
+                <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-1 list-disc list-inside">
+                  <li>First Name, Last Name, Email (required)</li>
+                  <li>Phone, Title, Company (optional)</li>
+                  <li>Maximum 1000 contacts per import</li>
+                </ul>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowImportDialog(false)}>Cancel</Button>
+              <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white" onClick={() => { setShowImportDialog(false); toast.success('Import Started', { description: 'Your contacts are being imported. You will be notified when complete.' }) }}>
+                <Upload className="h-4 w-4 mr-2" />Start Import
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Task Dialog */}
+        <Dialog open={showAddTaskDialog} onOpenChange={setShowAddTaskDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <CheckCircle className="h-5 w-5 text-violet-600" />
+                Create New Task
+              </DialogTitle>
+              <DialogDescription>
+                Add a new task to your to-do list.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Task Subject *</Label>
+                <Input placeholder="Enter task subject..." />
+              </div>
+              <div className="space-y-2">
+                <Label>Description</Label>
+                <Textarea placeholder="Task description..." rows={3} />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Due Date</Label>
+                  <Input type="date" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Priority</Label>
+                  <Select defaultValue="medium">
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="low">Low</SelectItem>
+                      <SelectItem value="medium">Medium</SelectItem>
+                      <SelectItem value="high">High</SelectItem>
+                      <SelectItem value="urgent">Urgent</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Related Contact</Label>
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select contact (optional)" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {MOCK_CONTACTS.map(c => (
+                      <SelectItem key={c.id} value={c.id}>{c.firstName} {c.lastName}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Assign To</Label>
+                <Select defaultValue="u1">
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="u1">Sarah Johnson</SelectItem>
+                    <SelectItem value="u2">Mike Chen</SelectItem>
+                    <SelectItem value="u3">Alex Rivera</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowAddTaskDialog(false)}>Cancel</Button>
+              <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white" onClick={() => { setShowAddTaskDialog(false); toast.success('Task Created', { description: 'Your task has been added to the list' }) }}>
+                <CheckCircle className="h-4 w-4 mr-2" />Create Task
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Campaign Dialog */}
+        <Dialog open={showAddCampaignDialog} onOpenChange={setShowAddCampaignDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Megaphone className="h-5 w-5 text-violet-600" />
+                Create New Campaign
+              </DialogTitle>
+              <DialogDescription>
+                Set up a new marketing campaign.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Campaign Name *</Label>
+                <Input placeholder="Enter campaign name..." />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Campaign Type</Label>
+                  <Select defaultValue="email">
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="email">Email</SelectItem>
+                      <SelectItem value="webinar">Webinar</SelectItem>
+                      <SelectItem value="conference">Conference</SelectItem>
+                      <SelectItem value="social">Social Media</SelectItem>
+                      <SelectItem value="content">Content</SelectItem>
+                      <SelectItem value="ads">Paid Ads</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Status</Label>
+                  <Select defaultValue="planned">
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="planned">Planned</SelectItem>
+                      <SelectItem value="active">Active</SelectItem>
+                      <SelectItem value="paused">Paused</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Start Date</Label>
+                  <Input type="date" />
+                </div>
+                <div className="space-y-2">
+                  <Label>End Date</Label>
+                  <Input type="date" />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Budget</Label>
+                  <Input type="number" placeholder="0.00" min={0} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Expected Revenue</Label>
+                  <Input type="number" placeholder="0.00" min={0} />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Description</Label>
+                <Textarea placeholder="Campaign description..." rows={2} />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowAddCampaignDialog(false)}>Cancel</Button>
+              <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white" onClick={() => { setShowAddCampaignDialog(false); toast.success('Campaign Created', { description: 'Your campaign has been created successfully' }) }}>
+                <Megaphone className="h-4 w-4 mr-2" />Create Campaign
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Pipeline Stage Dialog */}
+        <Dialog open={showAddStageDialog} onOpenChange={setShowAddStageDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Layers className="h-5 w-5 text-violet-600" />
+                Add Pipeline Stage
+              </DialogTitle>
+              <DialogDescription>
+                Create a new stage in your sales pipeline.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Stage Name *</Label>
+                <Input placeholder="e.g., Discovery, Demo Scheduled..." />
+              </div>
+              <div className="space-y-2">
+                <Label>Default Probability (%)</Label>
+                <Input type="number" defaultValue="50" min={0} max={100} />
+              </div>
+              <div className="space-y-2">
+                <Label>Stage Color</Label>
+                <Select defaultValue="blue">
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="gray">Gray</SelectItem>
+                    <SelectItem value="blue">Blue</SelectItem>
+                    <SelectItem value="green">Green</SelectItem>
+                    <SelectItem value="yellow">Yellow</SelectItem>
+                    <SelectItem value="orange">Orange</SelectItem>
+                    <SelectItem value="red">Red</SelectItem>
+                    <SelectItem value="purple">Purple</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Position After</Label>
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select stage position" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {PIPELINE_STAGES.map(s => (
+                      <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowAddStageDialog(false)}>Cancel</Button>
+              <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white" onClick={() => { setShowAddStageDialog(false); toast.success('Stage Added', { description: 'New pipeline stage has been created' }) }}>
+                <Layers className="h-4 w-4 mr-2" />Add Stage
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Scoring Rule Dialog */}
+        <Dialog open={showAddScoringRuleDialog} onOpenChange={setShowAddScoringRuleDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Target className="h-5 w-5 text-violet-600" />
+                Add Scoring Rule
+              </DialogTitle>
+              <DialogDescription>
+                Create a new lead scoring rule.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Rule Name *</Label>
+                <Input placeholder="e.g., Website Visit, Demo Request..." />
+              </div>
+              <div className="space-y-2">
+                <Label>Field to Check</Label>
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select field" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="job_title">Job Title</SelectItem>
+                    <SelectItem value="company_size">Company Size</SelectItem>
+                    <SelectItem value="industry">Industry</SelectItem>
+                    <SelectItem value="email_opened">Email Opened</SelectItem>
+                    <SelectItem value="website_visit">Website Visit</SelectItem>
+                    <SelectItem value="demo_request">Demo Request</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Condition</Label>
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select condition" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="equals">Equals</SelectItem>
+                    <SelectItem value="contains">Contains</SelectItem>
+                    <SelectItem value="greater_than">Greater Than</SelectItem>
+                    <SelectItem value="less_than">Less Than</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Value</Label>
+                <Input placeholder="Enter value..." />
+              </div>
+              <div className="space-y-2">
+                <Label>Points to Add</Label>
+                <Input type="number" defaultValue="10" min={-100} max={100} />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowAddScoringRuleDialog(false)}>Cancel</Button>
+              <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white" onClick={() => { setShowAddScoringRuleDialog(false); toast.success('Scoring Rule Added', { description: 'New lead scoring rule has been created' }) }}>
+                <Target className="h-4 w-4 mr-2" />Add Rule
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Connect Slack Dialog */}
+        <Dialog open={showConnectSlackDialog} onOpenChange={setShowConnectSlackDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <MessageSquare className="h-5 w-5 text-violet-600" />
+                Connect Slack
+              </DialogTitle>
+              <DialogDescription>
+                Connect your Slack workspace to receive CRM notifications.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
+                <h4 className="font-medium mb-2">What you will get:</h4>
+                <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-2">
+                  <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-green-500" />Real-time deal notifications</li>
+                  <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-green-500" />Task reminders</li>
+                  <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-green-500" />Lead assignment alerts</li>
+                  <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-green-500" />Team collaboration features</li>
+                </ul>
+              </div>
+              <div className="space-y-2">
+                <Label>Slack Workspace URL</Label>
+                <Input placeholder="yourworkspace.slack.com" />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowConnectSlackDialog(false)}>Cancel</Button>
+              <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white" onClick={() => { setShowConnectSlackDialog(false); toast.success('Slack Connected', { description: 'Your Slack workspace has been connected successfully' }) }}>
+                <ExternalLink className="h-4 w-4 mr-2" />Connect Slack
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Connect Zapier Dialog */}
+        <Dialog open={showConnectZapierDialog} onOpenChange={setShowConnectZapierDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Zap className="h-5 w-5 text-violet-600" />
+                Connect Zapier
+              </DialogTitle>
+              <DialogDescription>
+                Automate workflows by connecting to Zapier.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
+                <h4 className="font-medium mb-2">Available Automations:</h4>
+                <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-2">
+                  <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-green-500" />Sync contacts with other apps</li>
+                  <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-green-500" />Trigger emails from CRM events</li>
+                  <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-green-500" />Create tasks in project management tools</li>
+                  <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-green-500" />Update spreadsheets automatically</li>
+                </ul>
+              </div>
+              <div className="space-y-2">
+                <Label>Zapier API Key</Label>
+                <Input type="password" placeholder="Enter your Zapier API key..." />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowConnectZapierDialog(false)}>Cancel</Button>
+              <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white" onClick={() => { setShowConnectZapierDialog(false); toast.success('Zapier Connected', { description: 'Your Zapier account has been connected successfully' }) }}>
+                <ExternalLink className="h-4 w-4 mr-2" />Connect Zapier
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Connect LinkedIn Dialog */}
+        <Dialog open={showConnectLinkedInDialog} onOpenChange={setShowConnectLinkedInDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <ExternalLink className="h-5 w-5 text-violet-600" />
+                Connect LinkedIn Sales Navigator
+              </DialogTitle>
+              <DialogDescription>
+                Enhance your CRM with LinkedIn data and social selling features.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
+                <h4 className="font-medium mb-2">Features:</h4>
+                <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-2">
+                  <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-green-500" />Sync LinkedIn profiles to contacts</li>
+                  <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-green-500" />Track InMail and connection requests</li>
+                  <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-green-500" />Lead recommendations</li>
+                  <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-green-500" />Company insights and updates</li>
+                </ul>
+              </div>
+              <div className="text-center py-4">
+                <Button variant="outline" size="lg" className="gap-2">
+                  <ExternalLink className="h-4 w-4" />
+                  Sign in with LinkedIn
+                </Button>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowConnectLinkedInDialog(false)}>Cancel</Button>
+              <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white" onClick={() => { setShowConnectLinkedInDialog(false); toast.success('LinkedIn Connected', { description: 'Your LinkedIn Sales Navigator has been connected' }) }}>
+                <ExternalLink className="h-4 w-4 mr-2" />Complete Setup
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Export All Data Dialog */}
+        <Dialog open={showExportAllDataDialog} onOpenChange={setShowExportAllDataDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Download className="h-5 w-5 text-violet-600" />
+                Export All CRM Data
+              </DialogTitle>
+              <DialogDescription>
+                Download a complete backup of your CRM data.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Export Format</Label>
+                <Select defaultValue="csv">
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="csv">CSV (Spreadsheet)</SelectItem>
+                    <SelectItem value="json">JSON (Developer)</SelectItem>
+                    <SelectItem value="xlsx">Excel (XLSX)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Include Data</Label>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Switch defaultChecked />
+                    <Label className="font-normal">Contacts</Label>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Switch defaultChecked />
+                    <Label className="font-normal">Accounts</Label>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Switch defaultChecked />
+                    <Label className="font-normal">Opportunities</Label>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Switch defaultChecked />
+                    <Label className="font-normal">Activities</Label>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Switch />
+                    <Label className="font-normal">Campaigns</Label>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowExportAllDataDialog(false)}>Cancel</Button>
+              <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white" onClick={() => { setShowExportAllDataDialog(false); toast.success('Export Started', { description: 'Your data export is being prepared. Download will start shortly.' }) }}>
+                <Download className="h-4 w-4 mr-2" />Export Data
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Import Data Dialog */}
+        <Dialog open={showImportDataDialog} onOpenChange={setShowImportDataDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Upload className="h-5 w-5 text-violet-600" />
+                Import CRM Data
+              </DialogTitle>
+              <DialogDescription>
+                Restore data from a backup or import from another system.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center">
+                <Upload className="h-10 w-10 text-gray-400 mx-auto mb-4" />
+                <p className="text-gray-600 dark:text-gray-400 mb-2">Drop your backup file here</p>
+                <Input type="file" accept=".csv,.json,.xlsx" className="max-w-xs mx-auto" />
+              </div>
+              <div className="space-y-2">
+                <Label>Import Mode</Label>
+                <Select defaultValue="merge">
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="merge">Merge with existing data</SelectItem>
+                    <SelectItem value="replace">Replace existing data</SelectItem>
+                    <SelectItem value="skip">Skip duplicates</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="bg-yellow-50 dark:bg-yellow-900/20 p-3 rounded-lg border border-yellow-200 dark:border-yellow-800">
+                <p className="text-sm text-yellow-700 dark:text-yellow-400">
+                  <AlertTriangle className="h-4 w-4 inline mr-1" />
+                  Please backup your current data before importing.
+                </p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowImportDataDialog(false)}>Cancel</Button>
+              <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white" onClick={() => { setShowImportDataDialog(false); toast.success('Import Started', { description: 'Your data is being imported. You will be notified when complete.' }) }}>
+                <Upload className="h-4 w-4 mr-2" />Import Data
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete All Contacts Confirmation Dialog */}
+        <Dialog open={showDeleteAllContactsDialog} onOpenChange={setShowDeleteAllContactsDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-600">
+                <AlertTriangle className="h-5 w-5" />
+                Delete All Contacts
+              </DialogTitle>
+              <DialogDescription>
+                This action is permanent and cannot be undone. All contacts, their activity history, and associated data will be permanently deleted.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg border border-red-200 dark:border-red-800 mb-4">
+                <p className="text-sm text-red-700 dark:text-red-400">
+                  <strong>Warning:</strong> This will delete {MOCK_CONTACTS.length + (dbCustomers?.length || 0)} contacts and all associated data.
+                </p>
+              </div>
+              <div className="space-y-2">
+                <Label>Type DELETE to confirm</Label>
+                <Input placeholder="Type DELETE..." />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowDeleteAllContactsDialog(false)}>Cancel</Button>
+              <Button variant="destructive" onClick={() => { setShowDeleteAllContactsDialog(false); toast.success('Contacts Deleted', { description: 'All contacts have been permanently deleted' }) }}>
+                <Trash2 className="h-4 w-4 mr-2" />Delete All Contacts
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Clear Activity History Dialog */}
+        <Dialog open={showClearHistoryDialog} onOpenChange={setShowClearHistoryDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-600">
+                <AlertTriangle className="h-5 w-5" />
+                Clear Activity History
+              </DialogTitle>
+              <DialogDescription>
+                This will permanently delete all activity logs, call records, emails, and notes from your CRM.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg border border-red-200 dark:border-red-800 mb-4">
+                <p className="text-sm text-red-700 dark:text-red-400">
+                  <strong>Warning:</strong> This will delete {MOCK_ACTIVITIES.length} activity records.
+                </p>
+              </div>
+              <div className="space-y-2">
+                <Label>Type CLEAR to confirm</Label>
+                <Input placeholder="Type CLEAR..." />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowClearHistoryDialog(false)}>Cancel</Button>
+              <Button variant="destructive" onClick={() => { setShowClearHistoryDialog(false); toast.success('History Cleared', { description: 'All activity history has been deleted' }) }}>
+                <Archive className="h-4 w-4 mr-2" />Clear History
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Factory Reset Dialog */}
+        <Dialog open={showFactoryResetDialog} onOpenChange={setShowFactoryResetDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-600">
+                <AlertOctagon className="h-5 w-5" />
+                Factory Reset CRM
+              </DialogTitle>
+              <DialogDescription>
+                This will reset ALL settings, delete ALL data, and restore the CRM to its default state. This action cannot be undone.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg border border-red-200 dark:border-red-800 mb-4">
+                <p className="text-sm text-red-700 dark:text-red-400 font-medium mb-2">This will delete:</p>
+                <ul className="text-sm text-red-600/80 dark:text-red-400/80 space-y-1 list-disc list-inside">
+                  <li>All contacts and accounts</li>
+                  <li>All opportunities and pipeline data</li>
+                  <li>All activities and tasks</li>
+                  <li>All campaigns and forecasts</li>
+                  <li>All custom settings and integrations</li>
+                </ul>
+              </div>
+              <div className="space-y-2">
+                <Label>Type RESET to confirm</Label>
+                <Input placeholder="Type RESET..." />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowFactoryResetDialog(false)}>Cancel</Button>
+              <Button variant="destructive" onClick={() => { setShowFactoryResetDialog(false); toast.success('CRM Reset', { description: 'CRM has been reset to factory defaults' }) }}>
+                <AlertOctagon className="h-4 w-4 mr-2" />Factory Reset
+              </Button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
       </div>

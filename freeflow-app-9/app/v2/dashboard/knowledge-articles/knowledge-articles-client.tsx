@@ -532,6 +532,51 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
   const [showTemplatesDialog, setShowTemplatesDialog] = useState(false)
   const [showAnalyticsDialog, setShowAnalyticsDialog] = useState(false)
 
+  // Additional dialog states
+  const [showCreateSpaceDialog, setShowCreateSpaceDialog] = useState(false)
+  const [showCreateTemplateDialog, setShowCreateTemplateDialog] = useState(false)
+  const [showVersionsDialog, setShowVersionsDialog] = useState(false)
+  const [showContributorsDialog, setShowContributorsDialog] = useState(false)
+  const [showSearchDialog, setShowSearchDialog] = useState(false)
+  const [showFavoritesDialog, setShowFavoritesDialog] = useState(false)
+  const [showMembersDialog, setShowMembersDialog] = useState(false)
+  const [showPermissionsDialog, setShowPermissionsDialog] = useState(false)
+  const [showArchivedDialog, setShowArchivedDialog] = useState(false)
+  const [showDeletedDialog, setShowDeletedDialog] = useState(false)
+  const [showImportDialog, setShowImportDialog] = useState(false)
+  const [showShareDialog, setShowShareDialog] = useState(false)
+  const [showDuplicateDialog, setShowDuplicateDialog] = useState(false)
+  const [showCustomizeDialog, setShowCustomizeDialog] = useState(false)
+  const [showCategoriesDialog, setShowCategoriesDialog] = useState(false)
+  const [showUsageStatsDialog, setShowUsageStatsDialog] = useState(false)
+  const [showConnectIntegrationDialog, setShowConnectIntegrationDialog] = useState(false)
+  const [showExportDataDialog, setShowExportDataDialog] = useState(false)
+  const [showClearCacheDialog, setShowClearCacheDialog] = useState(false)
+  const [showDeleteKnowledgeBaseDialog, setShowDeleteKnowledgeBaseDialog] = useState(false)
+  const [showEditArticleDialog, setShowEditArticleDialog] = useState(false)
+  const [showShareArticleDialog, setShowShareArticleDialog] = useState(false)
+  const [showArchiveArticleDialog, setShowArchiveArticleDialog] = useState(false)
+  const [showDeleteArticleDialog, setShowDeleteArticleDialog] = useState(false)
+  const [showSortDialog, setShowSortDialog] = useState(false)
+  const [showExportReportDialog, setShowExportReportDialog] = useState(false)
+
+  // Form states for new space
+  const [newSpaceName, setNewSpaceName] = useState('')
+  const [newSpaceKey, setNewSpaceKey] = useState('')
+  const [newSpaceDescription, setNewSpaceDescription] = useState('')
+  const [newSpaceIsPublic, setNewSpaceIsPublic] = useState(false)
+
+  // Form states for new template
+  const [newTemplateName, setNewTemplateName] = useState('')
+  const [newTemplateDescription, setNewTemplateDescription] = useState('')
+  const [newTemplateType, setNewTemplateType] = useState<ArticleType>('page')
+  const [newTemplateCategory, setNewTemplateCategory] = useState('')
+
+  // Edit article form state
+  const [editArticleTitle, setEditArticleTitle] = useState('')
+  const [editArticleExcerpt, setEditArticleExcerpt] = useState('')
+  const [editArticleContent, setEditArticleContent] = useState('')
+
   // New Article form state
   const [newArticleTitle, setNewArticleTitle] = useState('')
   const [newArticleExcerpt, setNewArticleExcerpt] = useState('')
@@ -703,6 +748,158 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
     })
   }
 
+  // Handler for creating a new space
+  const handleCreateSpace = () => {
+    if (!newSpaceName.trim()) {
+      toast.error('Name required', { description: 'Please enter a space name' })
+      return
+    }
+    if (!newSpaceKey.trim()) {
+      toast.error('Key required', { description: 'Please enter a space key' })
+      return
+    }
+    toast.success('Space created', { description: `"${newSpaceName}" has been created successfully` })
+    setShowCreateSpaceDialog(false)
+    setNewSpaceName('')
+    setNewSpaceKey('')
+    setNewSpaceDescription('')
+    setNewSpaceIsPublic(false)
+  }
+
+  // Handler for creating a new template
+  const handleCreateTemplate = () => {
+    if (!newTemplateName.trim()) {
+      toast.error('Name required', { description: 'Please enter a template name' })
+      return
+    }
+    toast.success('Template created', { description: `"${newTemplateName}" template has been created` })
+    setShowCreateTemplateDialog(false)
+    setNewTemplateName('')
+    setNewTemplateDescription('')
+    setNewTemplateType('page')
+    setNewTemplateCategory('')
+  }
+
+  // Handler for editing article
+  const handleEditArticle = () => {
+    if (!editArticleTitle.trim()) {
+      toast.error('Title required', { description: 'Please enter an article title' })
+      return
+    }
+    if (selectedArticle) {
+      setArticles(prev => prev.map(a =>
+        a.id === selectedArticle.id
+          ? { ...a, title: editArticleTitle, excerpt: editArticleExcerpt, content: editArticleContent, updatedAt: new Date().toISOString() }
+          : a
+      ))
+      toast.success('Article updated', { description: `"${editArticleTitle}" has been updated` })
+    }
+    setShowEditArticleDialog(false)
+  }
+
+  // Handler for archiving article
+  const handleArchiveArticle = () => {
+    if (selectedArticle) {
+      setArticles(prev => prev.map(a =>
+        a.id === selectedArticle.id ? { ...a, status: 'archived' as ArticleStatus, updatedAt: new Date().toISOString() } : a
+      ))
+      toast.success('Article archived', { description: `"${selectedArticle.title}" has been archived` })
+    }
+    setShowArchiveArticleDialog(false)
+    setShowArticleDialog(false)
+  }
+
+  // Handler for deleting article
+  const handleDeleteArticle = () => {
+    if (selectedArticle) {
+      setArticles(prev => prev.filter(a => a.id !== selectedArticle.id))
+      toast.success('Article deleted', { description: `"${selectedArticle.title}" has been deleted` })
+    }
+    setShowDeleteArticleDialog(false)
+    setShowArticleDialog(false)
+    setSelectedArticle(null)
+  }
+
+  // Handler for copying article link
+  const handleCopyArticleLink = () => {
+    if (selectedArticle) {
+      navigator.clipboard.writeText(`https://docs.company.com/${selectedArticle.slug}`)
+      toast.success('Link copied', { description: 'Article link has been copied to clipboard' })
+    }
+  }
+
+  // Handler for sharing article
+  const handleShareArticle = () => {
+    toast.success('Article shared', { description: 'Share link has been generated' })
+    setShowShareArticleDialog(false)
+  }
+
+  // Handler for exporting data
+  const handleExportData = () => {
+    toast.success('Export started', { description: 'Your data export is being prepared' })
+    setShowExportDataDialog(false)
+  }
+
+  // Handler for clearing cache
+  const handleClearCache = () => {
+    toast.success('Cache cleared', { description: 'All cached content has been refreshed' })
+    setShowClearCacheDialog(false)
+  }
+
+  // Handler for deleting knowledge base
+  const handleDeleteKnowledgeBase = () => {
+    toast.error('Knowledge base deleted', { description: 'All content has been permanently deleted' })
+    setShowDeleteKnowledgeBaseDialog(false)
+  }
+
+  // Handler for connecting integration
+  const handleConnectIntegration = () => {
+    toast.success('Integration connected', { description: 'Google Analytics has been connected' })
+    setShowConnectIntegrationDialog(false)
+  }
+
+  // Handler for export report
+  const handleExportReport = () => {
+    toast.success('Report exported', { description: 'Analytics report has been downloaded' })
+    setShowExportReportDialog(false)
+  }
+
+  // Open edit dialog with current article data
+  const openEditArticleDialog = () => {
+    if (selectedArticle) {
+      setEditArticleTitle(selectedArticle.title)
+      setEditArticleExcerpt(selectedArticle.excerpt)
+      setEditArticleContent(selectedArticle.content)
+      setShowEditArticleDialog(true)
+    }
+  }
+
+  // Quick action handlers mapped to labels
+  const quickActionHandlers: Record<string, () => void> = {
+    'New Article': () => setShowNewArticleDialog(true),
+    'Templates': () => setShowTemplatesDialog(true),
+    'New Space': () => setShowCreateSpaceDialog(true),
+    'Search': () => setShowSearchDialog(true),
+    'Versions': () => setShowVersionsDialog(true),
+    'Contributors': () => setShowContributorsDialog(true),
+    'Analytics': () => setShowAnalyticsDialog(true),
+    'Settings': () => setActiveTab('settings'),
+    'Create Space': () => setShowCreateSpaceDialog(true),
+    'Browse All': () => setSelectedSpace(null),
+    'Favorites': () => setShowFavoritesDialog(true),
+    'Members': () => setShowMembersDialog(true),
+    'Permissions': () => setShowPermissionsDialog(true),
+    'Archived': () => setShowArchivedDialog(true),
+    'Deleted': () => setShowDeletedDialog(true),
+    'Create Template': () => setShowCreateTemplateDialog(true),
+    'Import': () => setShowImportDialog(true),
+    'Share': () => setShowShareDialog(true),
+    'Duplicate': () => setShowDuplicateDialog(true),
+    'Customize': () => setShowCustomizeDialog(true),
+    'Categories': () => setShowCategoriesDialog(true),
+    'Usage Stats': () => setShowUsageStatsDialog(true),
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50/30 to-purple-50/40 dark:bg-none dark:bg-gray-900 p-6">
       <div className="max-w-[1800px] mx-auto space-y-6">
@@ -728,11 +925,11 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
                 className="pl-9 w-64"
               />
             </div>
-            <Button variant="outline" className="gap-2">
+            <Button variant="outline" className="gap-2" onClick={() => setShowTemplatesDialog(true)}>
               <LayoutTemplate className="w-4 h-4" />
               Templates
             </Button>
-            <Button className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 gap-2">
+            <Button className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 gap-2" onClick={() => setShowNewArticleDialog(true)}>
               <Plus className="w-4 h-4" />
               Create Article
             </Button>
@@ -841,6 +1038,7 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
                   key={i}
                   variant="outline"
                   className="h-auto py-4 flex flex-col gap-2 hover:scale-105 transition-all duration-200 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm"
+                  onClick={quickActionHandlers[action.label]}
                 >
                   <div className={`p-2 rounded-lg bg-gradient-to-br ${action.color}`}>
                     <action.icon className="w-4 h-4 text-white" />
@@ -959,7 +1157,7 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
                 <div className="flex items-center justify-between">
                   <h3 className="font-medium">{filteredArticles.length} Articles</h3>
                   <div className="flex items-center gap-2">
-                    <Button variant="outline" size="sm">Sort by</Button>
+                    <Button variant="outline" size="sm" onClick={() => setShowSortDialog(true)}>Sort by</Button>
                   </div>
                 </div>
 
@@ -1105,6 +1303,7 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
                   key={i}
                   variant="outline"
                   className="h-auto py-4 flex flex-col gap-2 hover:scale-105 transition-all duration-200 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm"
+                  onClick={quickActionHandlers[action.label]}
                 >
                   <div className={`p-2 rounded-lg bg-gradient-to-br ${action.color}`}>
                     <action.icon className="w-4 h-4 text-white" />
@@ -1116,7 +1315,7 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
 
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-medium">All Spaces ({spaces.length})</h3>
-              <Button className="gap-2">
+              <Button className="gap-2" onClick={() => setShowCreateSpaceDialog(true)}>
                 <Plus className="w-4 h-4" /> Create Space
               </Button>
             </div>
@@ -1217,6 +1416,7 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
                   key={i}
                   variant="outline"
                   className="h-auto py-4 flex flex-col gap-2 hover:scale-105 transition-all duration-200 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm"
+                  onClick={quickActionHandlers[action.label]}
                 >
                   <div className={`p-2 rounded-lg bg-gradient-to-br ${action.color}`}>
                     <action.icon className="w-4 h-4 text-white" />
@@ -1228,7 +1428,7 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
 
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-medium">Article Templates ({templates.length})</h3>
-              <Button className="gap-2">
+              <Button className="gap-2" onClick={() => setShowCreateTemplateDialog(true)}>
                 <Plus className="w-4 h-4" /> Create Template
               </Button>
             </div>
@@ -1255,7 +1455,7 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
                     <span className="text-xs text-muted-foreground">
                       Used {template.usageCount} times
                     </span>
-                    <Button size="sm" variant="outline">Use Template</Button>
+                    <Button size="sm" variant="outline" onClick={() => handleUseTemplate(template)}>Use Template</Button>
                   </div>
                 </Card>
               ))}
@@ -1276,15 +1476,17 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
                     <Input
                       placeholder="Search for articles, keywords, or phrases..."
                       className="pl-10 h-12 text-lg"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
                     />
                   </div>
 
                   <div className="flex flex-wrap gap-2">
-                    <Badge variant="outline" className="cursor-pointer hover:bg-gray-100">space:engineering</Badge>
-                    <Badge variant="outline" className="cursor-pointer hover:bg-gray-100">author:sarah</Badge>
-                    <Badge variant="outline" className="cursor-pointer hover:bg-gray-100">label:tutorial</Badge>
-                    <Badge variant="outline" className="cursor-pointer hover:bg-gray-100">status:published</Badge>
-                    <Badge variant="outline" className="cursor-pointer hover:bg-gray-100">updated:7d</Badge>
+                    <Badge variant="outline" className="cursor-pointer hover:bg-gray-100" onClick={() => setSearchQuery('space:engineering')}>space:engineering</Badge>
+                    <Badge variant="outline" className="cursor-pointer hover:bg-gray-100" onClick={() => setSearchQuery('author:sarah')}>author:sarah</Badge>
+                    <Badge variant="outline" className="cursor-pointer hover:bg-gray-100" onClick={() => setSearchQuery('label:tutorial')}>label:tutorial</Badge>
+                    <Badge variant="outline" className="cursor-pointer hover:bg-gray-100" onClick={() => setSearchQuery('status:published')}>status:published</Badge>
+                    <Badge variant="outline" className="cursor-pointer hover:bg-gray-100" onClick={() => setSearchQuery('updated:7d')}>updated:7d</Badge>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -1325,7 +1527,7 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
                     </div>
                   </div>
 
-                  <Button className="w-full">
+                  <Button className="w-full" onClick={() => { setActiveTab('articles'); toast.success('Search applied', { description: `Searching for "${searchQuery}"` }) }}>
                     <Search className="w-4 h-4 mr-2" /> Search
                   </Button>
                 </div>
@@ -1752,7 +1954,7 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
                               <p className="text-sm text-gray-500">Track content performance</p>
                             </div>
                           </div>
-                          <Button variant="outline" size="sm">Connect</Button>
+                          <Button variant="outline" size="sm" onClick={() => setShowConnectIntegrationDialog(true)}>Connect</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -1802,21 +2004,21 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
                             <p className="font-medium">Export All Data</p>
                             <p className="text-sm text-gray-500">Download all articles and settings</p>
                           </div>
-                          <Button variant="outline" size="sm"><Download className="w-4 h-4 mr-2" />Export</Button>
+                          <Button variant="outline" size="sm" onClick={() => setShowExportDataDialog(true)}><Download className="w-4 h-4 mr-2" />Export</Button>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                           <div>
                             <p className="font-medium">Clear Cache</p>
                             <p className="text-sm text-gray-500">Refresh cached content</p>
                           </div>
-                          <Button variant="outline" size="sm"><RefreshCw className="w-4 h-4 mr-2" />Clear</Button>
+                          <Button variant="outline" size="sm" onClick={() => setShowClearCacheDialog(true)}><RefreshCw className="w-4 h-4 mr-2" />Clear</Button>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
                           <div>
                             <p className="font-medium text-red-700 dark:text-red-400">Delete Knowledge Base</p>
                             <p className="text-sm text-red-600 dark:text-red-400">Permanently delete all content</p>
                           </div>
-                          <Button variant="outline" size="sm" className="text-red-600 border-red-300 hover:bg-red-50"><Trash2 className="w-4 h-4 mr-2" />Delete</Button>
+                          <Button variant="outline" size="sm" className="text-red-600 border-red-300 hover:bg-red-50" onClick={() => setShowDeleteKnowledgeBaseDialog(true)}><Trash2 className="w-4 h-4 mr-2" />Delete</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -1978,21 +2180,21 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
 
             <div className="flex items-center justify-between pt-4 border-t">
               <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" className="gap-1">
+                <Button variant="outline" size="sm" className="gap-1" onClick={openEditArticleDialog}>
                   <Edit3 className="w-4 h-4" /> Edit
                 </Button>
-                <Button variant="outline" size="sm" className="gap-1">
+                <Button variant="outline" size="sm" className="gap-1" onClick={() => setShowShareArticleDialog(true)}>
                   <Share2 className="w-4 h-4" /> Share
                 </Button>
-                <Button variant="outline" size="sm" className="gap-1">
+                <Button variant="outline" size="sm" className="gap-1" onClick={handleCopyArticleLink}>
                   <Copy className="w-4 h-4" /> Copy Link
                 </Button>
               </div>
               <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" className="gap-1">
+                <Button variant="outline" size="sm" className="gap-1" onClick={() => setShowArchiveArticleDialog(true)}>
                   <Archive className="w-4 h-4" /> Archive
                 </Button>
-                <Button variant="outline" size="sm" className="gap-1 text-red-500">
+                <Button variant="outline" size="sm" className="gap-1 text-red-500" onClick={() => setShowDeleteArticleDialog(true)}>
                   <Trash2 className="w-4 h-4" /> Delete
                 </Button>
               </div>
@@ -2360,8 +2562,1061 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
               <Button variant="outline" onClick={() => setShowAnalyticsDialog(false)}>
                 Close
               </Button>
-              <Button variant="outline" className="gap-2">
+              <Button variant="outline" className="gap-2" onClick={() => setShowExportReportDialog(true)}>
                 <Download className="w-4 h-4" />
+                Export Report
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Create Space Dialog */}
+        <Dialog open={showCreateSpaceDialog} onOpenChange={setShowCreateSpaceDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <FolderTree className="w-5 h-5 text-purple-600" />
+                Create New Space
+              </DialogTitle>
+              <DialogDescription>
+                Create a new space to organize your articles
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="space-name">Space Name *</Label>
+                <Input
+                  id="space-name"
+                  placeholder="Enter space name"
+                  value={newSpaceName}
+                  onChange={(e) => setNewSpaceName(e.target.value)}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label htmlFor="space-key">Space Key *</Label>
+                <Input
+                  id="space-key"
+                  placeholder="e.g., ENG, PROD"
+                  value={newSpaceKey}
+                  onChange={(e) => setNewSpaceKey(e.target.value.toUpperCase())}
+                  className="mt-1"
+                  maxLength={6}
+                />
+              </div>
+              <div>
+                <Label htmlFor="space-description">Description</Label>
+                <Textarea
+                  id="space-description"
+                  placeholder="Brief description of this space"
+                  value={newSpaceDescription}
+                  onChange={(e) => setNewSpaceDescription(e.target.value)}
+                  className="mt-1"
+                  rows={3}
+                />
+              </div>
+              <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div>
+                  <p className="font-medium">Public Space</p>
+                  <p className="text-sm text-muted-foreground">Allow anyone to view articles in this space</p>
+                </div>
+                <Switch checked={newSpaceIsPublic} onCheckedChange={setNewSpaceIsPublic} />
+              </div>
+            </div>
+            <div className="flex items-center justify-between pt-4 border-t">
+              <Button variant="outline" onClick={() => setShowCreateSpaceDialog(false)}>Cancel</Button>
+              <Button onClick={handleCreateSpace} className="bg-gradient-to-r from-purple-500 to-indigo-600">
+                <FolderTree className="w-4 h-4 mr-2" />
+                Create Space
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Create Template Dialog */}
+        <Dialog open={showCreateTemplateDialog} onOpenChange={setShowCreateTemplateDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <LayoutTemplate className="w-5 h-5 text-green-600" />
+                Create New Template
+              </DialogTitle>
+              <DialogDescription>
+                Create a reusable template for articles
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="template-name">Template Name *</Label>
+                <Input
+                  id="template-name"
+                  placeholder="Enter template name"
+                  value={newTemplateName}
+                  onChange={(e) => setNewTemplateName(e.target.value)}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label htmlFor="template-type">Type</Label>
+                <select
+                  id="template-type"
+                  value={newTemplateType}
+                  onChange={(e) => setNewTemplateType(e.target.value as ArticleType)}
+                  className="w-full mt-1 border rounded-md p-2 bg-background"
+                >
+                  <option value="page">Page</option>
+                  <option value="how-to">How-To</option>
+                  <option value="tutorial">Tutorial</option>
+                  <option value="reference">Reference</option>
+                  <option value="faq">FAQ</option>
+                </select>
+              </div>
+              <div>
+                <Label htmlFor="template-category">Category</Label>
+                <Input
+                  id="template-category"
+                  placeholder="e.g., Documentation, Technical"
+                  value={newTemplateCategory}
+                  onChange={(e) => setNewTemplateCategory(e.target.value)}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label htmlFor="template-description">Description</Label>
+                <Textarea
+                  id="template-description"
+                  placeholder="Brief description of this template"
+                  value={newTemplateDescription}
+                  onChange={(e) => setNewTemplateDescription(e.target.value)}
+                  className="mt-1"
+                  rows={3}
+                />
+              </div>
+            </div>
+            <div className="flex items-center justify-between pt-4 border-t">
+              <Button variant="outline" onClick={() => setShowCreateTemplateDialog(false)}>Cancel</Button>
+              <Button onClick={handleCreateTemplate} className="bg-gradient-to-r from-green-500 to-emerald-600">
+                <LayoutTemplate className="w-4 h-4 mr-2" />
+                Create Template
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Article Dialog */}
+        <Dialog open={showEditArticleDialog} onOpenChange={setShowEditArticleDialog}>
+          <DialogContent className="max-w-2xl max-h-[90vh]">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Edit3 className="w-5 h-5 text-blue-600" />
+                Edit Article
+              </DialogTitle>
+              <DialogDescription>
+                Make changes to the article
+              </DialogDescription>
+            </DialogHeader>
+            <ScrollArea className="max-h-[60vh] pr-4">
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="edit-title">Title *</Label>
+                  <Input
+                    id="edit-title"
+                    value={editArticleTitle}
+                    onChange={(e) => setEditArticleTitle(e.target.value)}
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="edit-excerpt">Excerpt / Summary</Label>
+                  <Textarea
+                    id="edit-excerpt"
+                    value={editArticleExcerpt}
+                    onChange={(e) => setEditArticleExcerpt(e.target.value)}
+                    className="mt-1"
+                    rows={2}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="edit-content">Content</Label>
+                  <Textarea
+                    id="edit-content"
+                    value={editArticleContent}
+                    onChange={(e) => setEditArticleContent(e.target.value)}
+                    className="mt-1 min-h-[200px] font-mono"
+                    rows={8}
+                  />
+                </div>
+              </div>
+            </ScrollArea>
+            <div className="flex items-center justify-between pt-4 border-t">
+              <Button variant="outline" onClick={() => setShowEditArticleDialog(false)}>Cancel</Button>
+              <Button onClick={handleEditArticle} className="bg-gradient-to-r from-blue-500 to-indigo-600">
+                <Edit3 className="w-4 h-4 mr-2" />
+                Save Changes
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Share Article Dialog */}
+        <Dialog open={showShareArticleDialog} onOpenChange={setShowShareArticleDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Share2 className="w-5 h-5 text-blue-600" />
+                Share Article
+              </DialogTitle>
+              <DialogDescription>
+                Share "{selectedArticle?.title}" with others
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label>Share Link</Label>
+                <div className="flex items-center gap-2 mt-1">
+                  <Input
+                    readOnly
+                    value={`https://docs.company.com/${selectedArticle?.slug || ''}`}
+                    className="flex-1"
+                  />
+                  <Button variant="outline" onClick={handleCopyArticleLink}>
+                    <Copy className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+              <div>
+                <Label>Email Share</Label>
+                <Input
+                  placeholder="Enter email addresses"
+                  className="mt-1"
+                />
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div>
+                  <p className="text-sm font-medium">Allow public access</p>
+                  <p className="text-xs text-muted-foreground">Anyone with the link can view</p>
+                </div>
+                <Switch />
+              </div>
+            </div>
+            <div className="flex items-center justify-between pt-4 border-t">
+              <Button variant="outline" onClick={() => setShowShareArticleDialog(false)}>Cancel</Button>
+              <Button onClick={handleShareArticle} className="bg-gradient-to-r from-blue-500 to-indigo-600">
+                <Share2 className="w-4 h-4 mr-2" />
+                Share
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Archive Article Dialog */}
+        <Dialog open={showArchiveArticleDialog} onOpenChange={setShowArchiveArticleDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Archive className="w-5 h-5 text-yellow-600" />
+                Archive Article
+              </DialogTitle>
+              <DialogDescription>
+                Are you sure you want to archive "{selectedArticle?.title}"?
+              </DialogDescription>
+            </DialogHeader>
+            <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
+              <p className="text-sm text-yellow-800 dark:text-yellow-200">
+                Archived articles are hidden from search results but can be restored later.
+              </p>
+            </div>
+            <div className="flex items-center justify-between pt-4 border-t">
+              <Button variant="outline" onClick={() => setShowArchiveArticleDialog(false)}>Cancel</Button>
+              <Button onClick={handleArchiveArticle} className="bg-yellow-600 hover:bg-yellow-700">
+                <Archive className="w-4 h-4 mr-2" />
+                Archive Article
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Article Dialog */}
+        <Dialog open={showDeleteArticleDialog} onOpenChange={setShowDeleteArticleDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-600">
+                <Trash2 className="w-5 h-5" />
+                Delete Article
+              </DialogTitle>
+              <DialogDescription>
+                Are you sure you want to delete "{selectedArticle?.title}"?
+              </DialogDescription>
+            </DialogHeader>
+            <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
+              <p className="text-sm text-red-800 dark:text-red-200">
+                This action cannot be undone. The article and all its versions will be permanently deleted.
+              </p>
+            </div>
+            <div className="flex items-center justify-between pt-4 border-t">
+              <Button variant="outline" onClick={() => setShowDeleteArticleDialog(false)}>Cancel</Button>
+              <Button onClick={handleDeleteArticle} className="bg-red-600 hover:bg-red-700">
+                <Trash2 className="w-4 h-4 mr-2" />
+                Delete Article
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Versions Dialog */}
+        <Dialog open={showVersionsDialog} onOpenChange={setShowVersionsDialog}>
+          <DialogContent className="max-w-2xl max-h-[90vh]">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <GitBranch className="w-5 h-5 text-cyan-600" />
+                Version History
+              </DialogTitle>
+              <DialogDescription>
+                View and manage article versions across all content
+              </DialogDescription>
+            </DialogHeader>
+            <ScrollArea className="max-h-[60vh] pr-4">
+              <div className="space-y-3">
+                {articles.flatMap(article =>
+                  article.versions.map(version => (
+                    <div key={`${article.id}-${version.id}`} className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                      <div className="flex items-center justify-between mb-2">
+                        <p className="font-medium">{article.title}</p>
+                        <Badge variant="outline">v{version.version}</Badge>
+                      </div>
+                      <p className="text-sm text-muted-foreground mb-2">{version.changes}</p>
+                      <div className="flex items-center justify-between text-xs text-muted-foreground">
+                        <span>by {version.author.name}</span>
+                        <span>{formatTimeAgo(version.createdAt)}</span>
+                      </div>
+                    </div>
+                  ))
+                )}
+                {articles.flatMap(a => a.versions).length === 0 && (
+                  <p className="text-center text-muted-foreground py-8">No version history available</p>
+                )}
+              </div>
+            </ScrollArea>
+            <div className="flex justify-end pt-4 border-t">
+              <Button variant="outline" onClick={() => setShowVersionsDialog(false)}>Close</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Contributors Dialog */}
+        <Dialog open={showContributorsDialog} onOpenChange={setShowContributorsDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Users className="w-5 h-5 text-pink-600" />
+                Contributors
+              </DialogTitle>
+              <DialogDescription>
+                All contributors to the knowledge base
+              </DialogDescription>
+            </DialogHeader>
+            <ScrollArea className="max-h-[60vh] pr-4">
+              <div className="space-y-3">
+                {mockAuthors.map((author, i) => (
+                  <div key={author.id} className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <Avatar>
+                      <AvatarImage src={author.avatar} />
+                      <AvatarFallback>{author.name.charAt(0)}</AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1">
+                      <p className="font-medium">{author.name}</p>
+                      <p className="text-sm text-muted-foreground">{author.role}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-lg font-bold">{[45, 38, 27, 19][i]}</p>
+                      <p className="text-xs text-muted-foreground">articles</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+            <div className="flex justify-end pt-4 border-t">
+              <Button variant="outline" onClick={() => setShowContributorsDialog(false)}>Close</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Search Dialog */}
+        <Dialog open={showSearchDialog} onOpenChange={setShowSearchDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Search className="w-5 h-5 text-orange-600" />
+                Quick Search
+              </DialogTitle>
+              <DialogDescription>
+                Search for articles, spaces, and templates
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                <Input
+                  placeholder="Type to search..."
+                  className="pl-10 h-12"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  autoFocus
+                />
+              </div>
+              <ScrollArea className="max-h-[400px]">
+                <div className="space-y-2">
+                  {filteredArticles.slice(0, 10).map(article => (
+                    <div
+                      key={article.id}
+                      className="p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer"
+                      onClick={() => { openArticleDetail(article); setShowSearchDialog(false) }}
+                    >
+                      <p className="font-medium">{article.title}</p>
+                      <p className="text-sm text-muted-foreground truncate">{article.excerpt}</p>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+            </div>
+            <div className="flex justify-between pt-4 border-t">
+              <Button variant="outline" onClick={() => { setActiveTab('search'); setShowSearchDialog(false) }}>
+                Advanced Search
+              </Button>
+              <Button variant="outline" onClick={() => setShowSearchDialog(false)}>Close</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Favorites Dialog */}
+        <Dialog open={showFavoritesDialog} onOpenChange={setShowFavoritesDialog}>
+          <DialogContent className="max-w-2xl max-h-[90vh]">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Star className="w-5 h-5 text-yellow-500" />
+                Favorite Spaces
+              </DialogTitle>
+              <DialogDescription>
+                Your favorite spaces for quick access
+              </DialogDescription>
+            </DialogHeader>
+            <ScrollArea className="max-h-[60vh] pr-4">
+              <div className="space-y-3">
+                {spaces.filter(s => s.isFavorite).map(space => (
+                  <div key={space.id} className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${space.color}20` }}>
+                        <FolderTree className="w-5 h-5" style={{ color: space.color }} />
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-medium">{space.name}</p>
+                        <p className="text-sm text-muted-foreground">{space.description}</p>
+                      </div>
+                      <Badge variant="outline">{space.articlesCount} articles</Badge>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+            <div className="flex justify-end pt-4 border-t">
+              <Button variant="outline" onClick={() => setShowFavoritesDialog(false)}>Close</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Members Dialog */}
+        <Dialog open={showMembersDialog} onOpenChange={setShowMembersDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Users className="w-5 h-5 text-green-600" />
+                Space Members
+              </DialogTitle>
+              <DialogDescription>
+                Manage members across all spaces
+              </DialogDescription>
+            </DialogHeader>
+            <ScrollArea className="max-h-[60vh] pr-4">
+              <div className="space-y-3">
+                {mockAuthors.map(author => (
+                  <div key={author.id} className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <Avatar>
+                      <AvatarImage src={author.avatar} />
+                      <AvatarFallback>{author.name.charAt(0)}</AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1">
+                      <p className="font-medium">{author.name}</p>
+                      <p className="text-sm text-muted-foreground">{author.role}</p>
+                    </div>
+                    <Badge variant="outline">Member</Badge>
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+            <div className="flex justify-between pt-4 border-t">
+              <Button variant="outline" onClick={() => toast.success('Invite sent', { description: 'Invitation email has been sent' })}>
+                <Plus className="w-4 h-4 mr-2" />
+                Invite Member
+              </Button>
+              <Button variant="outline" onClick={() => setShowMembersDialog(false)}>Close</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Permissions Dialog */}
+        <Dialog open={showPermissionsDialog} onOpenChange={setShowPermissionsDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Lock className="w-5 h-5 text-red-500" />
+                Permissions
+              </DialogTitle>
+              <DialogDescription>
+                Manage access permissions for spaces
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              {spaces.slice(0, 4).map(space => (
+                <div key={space.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${space.color}20` }}>
+                      <FolderTree className="w-4 h-4" style={{ color: space.color }} />
+                    </div>
+                    <div>
+                      <p className="font-medium">{space.name}</p>
+                      <p className="text-xs text-muted-foreground">{space.membersCount} members</p>
+                    </div>
+                  </div>
+                  <Badge variant={space.isPublic ? 'secondary' : 'outline'}>
+                    {space.isPublic ? 'Public' : 'Private'}
+                  </Badge>
+                </div>
+              ))}
+            </div>
+            <div className="flex justify-end pt-4 border-t">
+              <Button variant="outline" onClick={() => setShowPermissionsDialog(false)}>Close</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Archived Dialog */}
+        <Dialog open={showArchivedDialog} onOpenChange={setShowArchivedDialog}>
+          <DialogContent className="max-w-2xl max-h-[90vh]">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Archive className="w-5 h-5 text-gray-500" />
+                Archived Content
+              </DialogTitle>
+              <DialogDescription>
+                View and restore archived articles and spaces
+              </DialogDescription>
+            </DialogHeader>
+            <ScrollArea className="max-h-[60vh] pr-4">
+              <div className="space-y-3">
+                {articles.filter(a => a.status === 'archived').map(article => (
+                  <div key={article.id} className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium">{article.title}</p>
+                        <p className="text-sm text-muted-foreground">{article.spaceName}</p>
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setArticles(prev => prev.map(a => a.id === article.id ? { ...a, status: 'draft' as ArticleStatus } : a))
+                          toast.success('Article restored', { description: `"${article.title}" has been restored` })
+                        }}
+                      >
+                        Restore
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+                {articles.filter(a => a.status === 'archived').length === 0 && (
+                  <p className="text-center text-muted-foreground py-8">No archived content</p>
+                )}
+              </div>
+            </ScrollArea>
+            <div className="flex justify-end pt-4 border-t">
+              <Button variant="outline" onClick={() => setShowArchivedDialog(false)}>Close</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Deleted Dialog */}
+        <Dialog open={showDeletedDialog} onOpenChange={setShowDeletedDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-600">
+                <Trash2 className="w-5 h-5" />
+                Deleted Content
+              </DialogTitle>
+              <DialogDescription>
+                Permanently deleted content cannot be recovered
+              </DialogDescription>
+            </DialogHeader>
+            <div className="p-8 text-center text-muted-foreground">
+              <Trash2 className="w-12 h-12 mx-auto mb-4 opacity-50" />
+              <p>No recently deleted content</p>
+              <p className="text-sm mt-2">Deleted items are permanently removed after 30 days</p>
+            </div>
+            <div className="flex justify-end pt-4 border-t">
+              <Button variant="outline" onClick={() => setShowDeletedDialog(false)}>Close</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Import Dialog */}
+        <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <FileCode className="w-5 h-5 text-blue-600" />
+                Import Templates
+              </DialogTitle>
+              <DialogDescription>
+                Import templates from a file or URL
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="border-2 border-dashed rounded-lg p-8 text-center">
+                <FileCode className="w-10 h-10 mx-auto mb-3 text-muted-foreground" />
+                <p className="font-medium">Drop files here or click to browse</p>
+                <p className="text-sm text-muted-foreground mt-1">Supports JSON, YAML, and Markdown files</p>
+              </div>
+              <div>
+                <Label>Import from URL</Label>
+                <Input placeholder="https://example.com/template.json" className="mt-1" />
+              </div>
+            </div>
+            <div className="flex items-center justify-between pt-4 border-t">
+              <Button variant="outline" onClick={() => setShowImportDialog(false)}>Cancel</Button>
+              <Button onClick={() => { toast.success('Import complete', { description: 'Templates have been imported' }); setShowImportDialog(false) }}>
+                <FileCode className="w-4 h-4 mr-2" />
+                Import
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Share Dialog */}
+        <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Share2 className="w-5 h-5 text-purple-600" />
+                Share Templates
+              </DialogTitle>
+              <DialogDescription>
+                Share your templates with others
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label>Share Link</Label>
+                <div className="flex items-center gap-2 mt-1">
+                  <Input readOnly value="https://docs.company.com/templates/shared" className="flex-1" />
+                  <Button variant="outline" onClick={() => toast.success('Link copied')}>
+                    <Copy className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div>
+                  <p className="text-sm font-medium">Make templates public</p>
+                  <p className="text-xs text-muted-foreground">Anyone can use your shared templates</p>
+                </div>
+                <Switch />
+              </div>
+            </div>
+            <div className="flex justify-end pt-4 border-t">
+              <Button variant="outline" onClick={() => setShowShareDialog(false)}>Close</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Duplicate Dialog */}
+        <Dialog open={showDuplicateDialog} onOpenChange={setShowDuplicateDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Copy className="w-5 h-5 text-orange-600" />
+                Duplicate Template
+              </DialogTitle>
+              <DialogDescription>
+                Select a template to duplicate
+              </DialogDescription>
+            </DialogHeader>
+            <ScrollArea className="max-h-[60vh] pr-4">
+              <div className="space-y-2">
+                {templates.map(template => (
+                  <div
+                    key={template.id}
+                    className="p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer border"
+                    onClick={() => { toast.success('Template duplicated', { description: `"${template.name} (Copy)" has been created` }); setShowDuplicateDialog(false) }}
+                  >
+                    <p className="font-medium">{template.name}</p>
+                    <p className="text-sm text-muted-foreground">{template.description}</p>
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+            <div className="flex justify-end pt-4 border-t">
+              <Button variant="outline" onClick={() => setShowDuplicateDialog(false)}>Cancel</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Customize Dialog */}
+        <Dialog open={showCustomizeDialog} onOpenChange={setShowCustomizeDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Palette className="w-5 h-5 text-cyan-600" />
+                Customize Templates
+              </DialogTitle>
+              <DialogDescription>
+                Customize the appearance of your templates
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label>Primary Color</Label>
+                <div className="flex gap-2 mt-2">
+                  {['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'].map(color => (
+                    <div
+                      key={color}
+                      className="w-8 h-8 rounded-full cursor-pointer border-2 border-transparent hover:border-gray-400"
+                      style={{ backgroundColor: color }}
+                      onClick={() => toast.success('Color updated')}
+                    />
+                  ))}
+                </div>
+              </div>
+              <div>
+                <Label>Font Family</Label>
+                <select className="w-full mt-1 border rounded-md p-2 bg-background">
+                  <option>Inter</option>
+                  <option>Roboto</option>
+                  <option>Open Sans</option>
+                  <option>Lato</option>
+                </select>
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div>
+                  <p className="text-sm font-medium">Dark mode support</p>
+                  <p className="text-xs text-muted-foreground">Enable dark mode for templates</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+            </div>
+            <div className="flex items-center justify-between pt-4 border-t">
+              <Button variant="outline" onClick={() => setShowCustomizeDialog(false)}>Cancel</Button>
+              <Button onClick={() => { toast.success('Customizations saved'); setShowCustomizeDialog(false) }}>
+                Save Changes
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Categories Dialog */}
+        <Dialog open={showCategoriesDialog} onOpenChange={setShowCategoriesDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Folder className="w-5 h-5 text-pink-600" />
+                Template Categories
+              </DialogTitle>
+              <DialogDescription>
+                Manage template categories
+              </DialogDescription>
+            </DialogHeader>
+            <ScrollArea className="max-h-[60vh] pr-4">
+              <div className="space-y-2">
+                {[...new Set(templates.map(t => t.category))].map(category => (
+                  <div key={category} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <Folder className="w-5 h-5 text-muted-foreground" />
+                      <div>
+                        <p className="font-medium">{category}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {templates.filter(t => t.category === category).length} templates
+                        </p>
+                      </div>
+                    </div>
+                    <Button variant="ghost" size="sm">
+                      <Edit3 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+            <div className="flex items-center justify-between pt-4 border-t">
+              <Button variant="outline" onClick={() => toast.success('Category created')}>
+                <Plus className="w-4 h-4 mr-2" />
+                Add Category
+              </Button>
+              <Button variant="outline" onClick={() => setShowCategoriesDialog(false)}>Close</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Usage Stats Dialog */}
+        <Dialog open={showUsageStatsDialog} onOpenChange={setShowUsageStatsDialog}>
+          <DialogContent className="max-w-2xl max-h-[90vh]">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <BarChart3 className="w-5 h-5 text-indigo-600" />
+                Template Usage Stats
+              </DialogTitle>
+              <DialogDescription>
+                View usage statistics for your templates
+              </DialogDescription>
+            </DialogHeader>
+            <ScrollArea className="max-h-[60vh] pr-4">
+              <div className="space-y-4">
+                {templates.sort((a, b) => b.usageCount - a.usageCount).map((template, i) => (
+                  <div key={template.id} className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <div className="flex items-center justify-between mb-2">
+                      <p className="font-medium">{template.name}</p>
+                      <Badge variant="outline">{template.usageCount} uses</Badge>
+                    </div>
+                    <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                      <div
+                        className="h-2 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500"
+                        style={{ width: `${(template.usageCount / templates[0].usageCount) * 100}%` }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+            <div className="flex justify-end pt-4 border-t">
+              <Button variant="outline" onClick={() => setShowUsageStatsDialog(false)}>Close</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Connect Integration Dialog */}
+        <Dialog open={showConnectIntegrationDialog} onOpenChange={setShowConnectIntegrationDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <BarChart3 className="w-5 h-5 text-blue-600" />
+                Connect Google Analytics
+              </DialogTitle>
+              <DialogDescription>
+                Connect your Google Analytics account to track content performance
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label>Tracking ID</Label>
+                <Input placeholder="UA-XXXXXXXXX-X or G-XXXXXXXXXX" className="mt-1" />
+              </div>
+              <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                <p className="text-sm text-blue-800 dark:text-blue-200">
+                  You can find your tracking ID in your Google Analytics dashboard under Admin &gt; Property Settings.
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center justify-between pt-4 border-t">
+              <Button variant="outline" onClick={() => setShowConnectIntegrationDialog(false)}>Cancel</Button>
+              <Button onClick={handleConnectIntegration}>
+                Connect
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Export Data Dialog */}
+        <Dialog open={showExportDataDialog} onOpenChange={setShowExportDataDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Download className="w-5 h-5 text-blue-600" />
+                Export All Data
+              </DialogTitle>
+              <DialogDescription>
+                Download all your knowledge base content
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div>
+                  <p className="font-medium">Include articles</p>
+                  <p className="text-xs text-muted-foreground">{stats.totalArticles} articles</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div>
+                  <p className="font-medium">Include templates</p>
+                  <p className="text-xs text-muted-foreground">{templates.length} templates</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div>
+                  <p className="font-medium">Include settings</p>
+                  <p className="text-xs text-muted-foreground">All configurations</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+              <div>
+                <Label>Export format</Label>
+                <select className="w-full mt-1 border rounded-md p-2 bg-background">
+                  <option>JSON</option>
+                  <option>CSV</option>
+                  <option>Markdown (ZIP)</option>
+                </select>
+              </div>
+            </div>
+            <div className="flex items-center justify-between pt-4 border-t">
+              <Button variant="outline" onClick={() => setShowExportDataDialog(false)}>Cancel</Button>
+              <Button onClick={handleExportData}>
+                <Download className="w-4 h-4 mr-2" />
+                Export
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Clear Cache Dialog */}
+        <Dialog open={showClearCacheDialog} onOpenChange={setShowClearCacheDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <RefreshCw className="w-5 h-5 text-blue-600" />
+                Clear Cache
+              </DialogTitle>
+              <DialogDescription>
+                Refresh all cached content in your knowledge base
+              </DialogDescription>
+            </DialogHeader>
+            <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+              <p className="text-sm text-blue-800 dark:text-blue-200">
+                This will clear all cached data and may temporarily slow down page loads while the cache rebuilds.
+              </p>
+            </div>
+            <div className="flex items-center justify-between pt-4 border-t">
+              <Button variant="outline" onClick={() => setShowClearCacheDialog(false)}>Cancel</Button>
+              <Button onClick={handleClearCache}>
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Clear Cache
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Knowledge Base Dialog */}
+        <Dialog open={showDeleteKnowledgeBaseDialog} onOpenChange={setShowDeleteKnowledgeBaseDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-600">
+                <Trash2 className="w-5 h-5" />
+                Delete Knowledge Base
+              </DialogTitle>
+              <DialogDescription>
+                This action is permanent and cannot be undone
+              </DialogDescription>
+            </DialogHeader>
+            <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
+              <p className="text-sm text-red-800 dark:text-red-200">
+                Warning: This will permanently delete all {stats.totalArticles} articles, {spaces.length} spaces, and {templates.length} templates. This action cannot be reversed.
+              </p>
+            </div>
+            <div>
+              <Label>Type "DELETE" to confirm</Label>
+              <Input placeholder="DELETE" className="mt-1" />
+            </div>
+            <div className="flex items-center justify-between pt-4 border-t">
+              <Button variant="outline" onClick={() => setShowDeleteKnowledgeBaseDialog(false)}>Cancel</Button>
+              <Button onClick={handleDeleteKnowledgeBase} className="bg-red-600 hover:bg-red-700">
+                <Trash2 className="w-4 h-4 mr-2" />
+                Delete Everything
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Sort Dialog */}
+        <Dialog open={showSortDialog} onOpenChange={setShowSortDialog}>
+          <DialogContent className="max-w-sm">
+            <DialogHeader>
+              <DialogTitle>Sort Articles</DialogTitle>
+              <DialogDescription>
+                Choose how to sort articles
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-2">
+              {[
+                { label: 'Recently Updated', value: 'updated' },
+                { label: 'Recently Created', value: 'created' },
+                { label: 'Most Views', value: 'views' },
+                { label: 'Most Likes', value: 'likes' },
+                { label: 'Alphabetical', value: 'alpha' },
+              ].map(option => (
+                <Button
+                  key={option.value}
+                  variant="outline"
+                  className="w-full justify-start"
+                  onClick={() => {
+                    toast.success('Sort applied', { description: `Sorting by ${option.label}` })
+                    setShowSortDialog(false)
+                  }}
+                >
+                  {option.label}
+                </Button>
+              ))}
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Export Report Dialog */}
+        <Dialog open={showExportReportDialog} onOpenChange={setShowExportReportDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Download className="w-5 h-5 text-green-600" />
+                Export Analytics Report
+              </DialogTitle>
+              <DialogDescription>
+                Download a detailed analytics report
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label>Report Period</Label>
+                <select className="w-full mt-1 border rounded-md p-2 bg-background">
+                  <option>Last 7 Days</option>
+                  <option>Last 30 Days</option>
+                  <option>Last 90 Days</option>
+                  <option>Last Year</option>
+                  <option>All Time</option>
+                </select>
+              </div>
+              <div>
+                <Label>Report Format</Label>
+                <select className="w-full mt-1 border rounded-md p-2 bg-background">
+                  <option>PDF</option>
+                  <option>Excel</option>
+                  <option>CSV</option>
+                </select>
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div>
+                  <p className="text-sm font-medium">Include charts</p>
+                  <p className="text-xs text-muted-foreground">Visual representations</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+            </div>
+            <div className="flex items-center justify-between pt-4 border-t">
+              <Button variant="outline" onClick={() => setShowExportReportDialog(false)}>Cancel</Button>
+              <Button onClick={handleExportReport}>
+                <Download className="w-4 h-4 mr-2" />
                 Export Report
               </Button>
             </div>

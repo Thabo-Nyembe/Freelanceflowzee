@@ -8,7 +8,9 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Progress } from '@/components/ui/progress'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
 import {
   Package,
   TrendingUp,
@@ -717,6 +719,59 @@ export default function StockClient() {
   const [showTransferDialog, setShowTransferDialog] = useState(false)
   const [showCountDialog, setShowCountDialog] = useState(false)
 
+  // Additional dialog states for all buttons
+  const [showExportDialog, setShowExportDialog] = useState(false)
+  const [showAddProductDialog, setShowAddProductDialog] = useState(false)
+  const [showReceiveDialog, setShowReceiveDialog] = useState(false)
+  const [showReportsDialog, setShowReportsDialog] = useState(false)
+  const [showImportDialog, setShowImportDialog] = useState(false)
+  const [showSettingsDialog, setShowSettingsDialog] = useState(false)
+  const [showScanDialog, setShowScanDialog] = useState(false)
+  const [showEditProductDialog, setShowEditProductDialog] = useState(false)
+  const [showMoreOptionsDialog, setShowMoreOptionsDialog] = useState(false)
+  const [showShipDialog, setShowShipDialog] = useState(false)
+  const [showReturnDialog, setShowReturnDialog] = useState(false)
+  const [showSearchDialog, setShowSearchDialog] = useState(false)
+  const [showFilterDialog, setShowFilterDialog] = useState(false)
+  const [showAddLocationDialog, setShowAddLocationDialog] = useState(false)
+  const [showZonesDialog, setShowZonesDialog] = useState(false)
+  const [showLocationsDialog, setShowLocationsDialog] = useState(false)
+  const [showShippingDialog, setShowShippingDialog] = useState(false)
+  const [showCapacityDialog, setShowCapacityDialog] = useState(false)
+  const [showStaffDialog, setShowStaffDialog] = useState(false)
+  const [showWarehouseDetailsDialog, setShowWarehouseDetailsDialog] = useState(false)
+  const [selectedWarehouse, setSelectedWarehouse] = useState<Warehouse | null>(null)
+  const [showNewCountDialog, setShowNewCountDialog] = useState(false)
+  const [showScheduleDialog, setShowScheduleDialog] = useState(false)
+  const [showAssignTeamDialog, setShowAssignTeamDialog] = useState(false)
+  const [showStartCountDialog, setShowStartCountDialog] = useState(false)
+  const [showVerifyDialog, setShowVerifyDialog] = useState(false)
+  const [showCountReportsDialog, setShowCountReportsDialog] = useState(false)
+  const [showCountHistoryDialog, setShowCountHistoryDialog] = useState(false)
+  const [showCountSettingsDialog, setShowCountSettingsDialog] = useState(false)
+  const [showViewCriticalDialog, setShowViewCriticalDialog] = useState(false)
+  const [showNotificationsDialog, setShowNotificationsDialog] = useState(false)
+  const [showAcknowledgeAllDialog, setShowAcknowledgeAllDialog] = useState(false)
+  const [showThresholdsDialog, setShowThresholdsDialog] = useState(false)
+  const [showEmailRulesDialog, setShowEmailRulesDialog] = useState(false)
+  const [showAlertSchedulesDialog, setShowAlertSchedulesDialog] = useState(false)
+  const [showAlertReportsDialog, setShowAlertReportsDialog] = useState(false)
+  const [showAutomationsDialog, setShowAutomationsDialog] = useState(false)
+  const [selectedAlert, setSelectedAlert] = useState<Alert | null>(null)
+  const [showAcknowledgeAlertDialog, setShowAcknowledgeAlertDialog] = useState(false)
+  const [showAnalyticsDashboardDialog, setShowAnalyticsDashboardDialog] = useState(false)
+  const [showTrendsDialog, setShowTrendsDialog] = useState(false)
+  const [showBreakdownDialog, setShowBreakdownDialog] = useState(false)
+  const [showForecastsDialog, setShowForecastsDialog] = useState(false)
+  const [showAnalyticsReportsDialog, setShowAnalyticsReportsDialog] = useState(false)
+  const [showAnalyticsExportDialog, setShowAnalyticsExportDialog] = useState(false)
+  const [showAnalyticsScheduleDialog, setShowAnalyticsScheduleDialog] = useState(false)
+  const [showConfigureDialog, setShowConfigureDialog] = useState(false)
+  const [showProductHistoryDialog, setShowProductHistoryDialog] = useState(false)
+  const [showEditSelectedProductDialog, setShowEditSelectedProductDialog] = useState(false)
+  const [showAddStockToProductDialog, setShowAddStockToProductDialog] = useState(false)
+  const [showTransferProductDialog, setShowTransferProductDialog] = useState(false)
+
   // Add Stock form state
   const [addStockForm, setAddStockForm] = useState({
     productId: '',
@@ -884,11 +939,11 @@ export default function StockClient() {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <Button variant="outline" className="border-white/30 text-white hover:bg-white/10">
+              <Button variant="outline" className="border-white/30 text-white hover:bg-white/10" onClick={() => setShowExportDialog(true)}>
                 <Download className="w-4 h-4 mr-2" />
                 Export
               </Button>
-              <Button className="bg-white text-indigo-600 hover:bg-indigo-50">
+              <Button className="bg-white text-indigo-600 hover:bg-indigo-50" onClick={() => setShowAddProductDialog(true)}>
                 <Plus className="w-4 h-4 mr-2" />
                 Add Product
               </Button>
@@ -1049,19 +1104,20 @@ export default function StockClient() {
             {/* Inventory Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Plus, label: 'Add Product', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' },
-                { icon: Package, label: 'Receive', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
-                { icon: ArrowRightLeft, label: 'Transfer', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
-                { icon: ClipboardCheck, label: 'Count', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400' },
-                { icon: BarChart3, label: 'Reports', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
-                { icon: Download, label: 'Export', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
-                { icon: Upload, label: 'Import', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
-                { icon: Settings, label: 'Settings', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400' }
+                { icon: Plus, label: 'Add Product', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', onClick: () => setShowAddProductDialog(true) },
+                { icon: Package, label: 'Receive', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', onClick: () => setShowReceiveDialog(true) },
+                { icon: ArrowRightLeft, label: 'Transfer', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', onClick: () => setShowTransferDialog(true) },
+                { icon: ClipboardCheck, label: 'Count', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', onClick: () => setShowCountDialog(true) },
+                { icon: BarChart3, label: 'Reports', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => setShowReportsDialog(true) },
+                { icon: Download, label: 'Export', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => setShowExportDialog(true) },
+                { icon: Upload, label: 'Import', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', onClick: () => setShowImportDialog(true) },
+                { icon: Settings, label: 'Settings', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400', onClick: () => setShowSettingsDialog(true) }
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={action.onClick}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1156,13 +1212,13 @@ export default function StockClient() {
                           <p className="text-xs text-muted-foreground">Cost: {formatCurrency(product.unitCost)}</p>
                         </div>
                         <div className="flex items-center gap-2">
-                          <Button variant="ghost" size="sm">
+                          <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); setSelectedProduct(product); setShowScanDialog(true); }}>
                             <ScanLine className="w-4 h-4" />
                           </Button>
-                          <Button variant="ghost" size="sm">
+                          <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); setSelectedProduct(product); setShowEditProductDialog(true); }}>
                             <Edit className="w-4 h-4" />
                           </Button>
-                          <Button variant="ghost" size="sm">
+                          <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); setSelectedProduct(product); setShowMoreOptionsDialog(true); }}>
                             <MoreHorizontal className="w-4 h-4" />
                           </Button>
                         </div>
@@ -1215,19 +1271,20 @@ export default function StockClient() {
             {/* Movements Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: ArrowDownToLine, label: 'Receive', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
-                { icon: ArrowUpFromLine, label: 'Ship', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
-                { icon: ArrowRightLeft, label: 'Transfer', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
-                { icon: RotateCcw, label: 'Return', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
-                { icon: Search, label: 'Search', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400' },
-                { icon: Filter, label: 'Filter', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
-                { icon: Download, label: 'Export', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' },
-                { icon: Settings, label: 'Settings', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400' }
+                { icon: ArrowDownToLine, label: 'Receive', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => setShowReceiveDialog(true) },
+                { icon: ArrowUpFromLine, label: 'Ship', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => setShowShipDialog(true) },
+                { icon: ArrowRightLeft, label: 'Transfer', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', onClick: () => setShowTransferDialog(true) },
+                { icon: RotateCcw, label: 'Return', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => setShowReturnDialog(true) },
+                { icon: Search, label: 'Search', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400', onClick: () => setShowSearchDialog(true) },
+                { icon: Filter, label: 'Filter', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', onClick: () => setShowFilterDialog(true) },
+                { icon: Download, label: 'Export', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', onClick: () => setShowExportDialog(true) },
+                { icon: Settings, label: 'Settings', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400', onClick: () => setShowSettingsDialog(true) }
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={action.onClick}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1338,19 +1395,20 @@ export default function StockClient() {
             {/* Warehouses Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Plus, label: 'Add Location', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
-                { icon: Warehouse, label: 'Zones', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400' },
-                { icon: MapPin, label: 'Locations', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
-                { icon: Truck, label: 'Shipping', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' },
-                { icon: BarChart3, label: 'Capacity', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400' },
-                { icon: Users, label: 'Staff', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400' },
-                { icon: Download, label: 'Export', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
-                { icon: Settings, label: 'Settings', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400' }
+                { icon: Plus, label: 'Add Location', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', onClick: () => setShowAddLocationDialog(true) },
+                { icon: Warehouse, label: 'Zones', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', onClick: () => setShowZonesDialog(true) },
+                { icon: MapPin, label: 'Locations', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', onClick: () => setShowLocationsDialog(true) },
+                { icon: Truck, label: 'Shipping', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', onClick: () => setShowShippingDialog(true) },
+                { icon: BarChart3, label: 'Capacity', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400', onClick: () => setShowCapacityDialog(true) },
+                { icon: Users, label: 'Staff', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400', onClick: () => setShowStaffDialog(true) },
+                { icon: Download, label: 'Export', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', onClick: () => setShowExportDialog(true) },
+                { icon: Settings, label: 'Settings', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400', onClick: () => setShowSettingsDialog(true) }
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={action.onClick}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1413,7 +1471,7 @@ export default function StockClient() {
                       </div>
                     </div>
 
-                    <Button variant="outline" size="sm" className="w-full mt-4">
+                    <Button variant="outline" size="sm" className="w-full mt-4" onClick={() => { setSelectedWarehouse(warehouse); setShowWarehouseDetailsDialog(true); }}>
                       <Eye className="w-4 h-4 mr-2" />
                       View Details
                     </Button>
@@ -1452,19 +1510,20 @@ export default function StockClient() {
             {/* Counts Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Plus, label: 'New Count', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
-                { icon: Calendar, label: 'Schedule', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
-                { icon: Users, label: 'Assign Team', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400' },
-                { icon: ClipboardCheck, label: 'Start Count', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
-                { icon: CheckCircle2, label: 'Verify', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' },
-                { icon: FileText, label: 'Reports', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
-                { icon: History, label: 'History', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400' },
-                { icon: Settings, label: 'Settings', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
+                { icon: Plus, label: 'New Count', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', onClick: () => setShowNewCountDialog(true) },
+                { icon: Calendar, label: 'Schedule', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => setShowScheduleDialog(true) },
+                { icon: Users, label: 'Assign Team', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400', onClick: () => setShowAssignTeamDialog(true) },
+                { icon: ClipboardCheck, label: 'Start Count', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', onClick: () => setShowStartCountDialog(true) },
+                { icon: CheckCircle2, label: 'Verify', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', onClick: () => setShowVerifyDialog(true) },
+                { icon: FileText, label: 'Reports', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', onClick: () => setShowCountReportsDialog(true) },
+                { icon: History, label: 'History', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', onClick: () => setShowCountHistoryDialog(true) },
+                { icon: Settings, label: 'Settings', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', onClick: () => setShowCountSettingsDialog(true) },
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={action.onClick}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1474,7 +1533,7 @@ export default function StockClient() {
 
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold">Stock Counts</h2>
-              <Button>
+              <Button onClick={() => setShowCountDialog(true)}>
                 <Plus className="w-4 h-4 mr-2" />
                 Schedule Count
               </Button>
@@ -1562,19 +1621,20 @@ export default function StockClient() {
             {/* Alerts Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: AlertTriangle, label: 'View Critical', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
-                { icon: Bell, label: 'Notifications', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' },
-                { icon: CheckCircle2, label: 'Acknowledge', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
-                { icon: Settings, label: 'Thresholds', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400' },
-                { icon: Mail, label: 'Email Rules', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
-                { icon: Clock, label: 'Schedules', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
-                { icon: FileText, label: 'Reports', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
-                { icon: Zap, label: 'Automations', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
+                { icon: AlertTriangle, label: 'View Critical', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', onClick: () => setShowViewCriticalDialog(true) },
+                { icon: Bell, label: 'Notifications', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', onClick: () => setShowNotificationsDialog(true) },
+                { icon: CheckCircle2, label: 'Acknowledge', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', onClick: () => setShowAcknowledgeAllDialog(true) },
+                { icon: Settings, label: 'Thresholds', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400', onClick: () => setShowThresholdsDialog(true) },
+                { icon: Mail, label: 'Email Rules', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => setShowEmailRulesDialog(true) },
+                { icon: Clock, label: 'Schedules', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', onClick: () => setShowAlertSchedulesDialog(true) },
+                { icon: FileText, label: 'Reports', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => setShowAlertReportsDialog(true) },
+                { icon: Zap, label: 'Automations', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => setShowAutomationsDialog(true) },
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={action.onClick}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1624,7 +1684,7 @@ export default function StockClient() {
                         <div className="flex items-center gap-2">
                           <span className="text-xs text-muted-foreground">{formatDate(alert.createdAt)}</span>
                           {!alert.acknowledged && (
-                            <Button size="sm" variant="outline">
+                            <Button size="sm" variant="outline" onClick={() => { setSelectedAlert(alert); setShowAcknowledgeAlertDialog(true); }}>
                               <CheckCircle2 className="w-4 h-4 mr-1" />
                               Acknowledge
                             </Button>
@@ -1667,19 +1727,20 @@ export default function StockClient() {
             {/* Analytics Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: BarChart3, label: 'Dashboard', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400' },
-                { icon: TrendingUp, label: 'Trends', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
-                { icon: PieChart, label: 'Breakdown', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
-                { icon: Target, label: 'Forecasts', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
-                { icon: FileText, label: 'Reports', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
-                { icon: Download, label: 'Export', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400' },
-                { icon: Calendar, label: 'Schedule', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
-                { icon: Settings, label: 'Configure', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' },
+                { icon: BarChart3, label: 'Dashboard', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', onClick: () => setShowAnalyticsDashboardDialog(true) },
+                { icon: TrendingUp, label: 'Trends', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => setShowTrendsDialog(true) },
+                { icon: PieChart, label: 'Breakdown', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => setShowBreakdownDialog(true) },
+                { icon: Target, label: 'Forecasts', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', onClick: () => setShowForecastsDialog(true) },
+                { icon: FileText, label: 'Reports', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => setShowAnalyticsReportsDialog(true) },
+                { icon: Download, label: 'Export', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400', onClick: () => setShowAnalyticsExportDialog(true) },
+                { icon: Calendar, label: 'Schedule', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', onClick: () => setShowAnalyticsScheduleDialog(true) },
+                { icon: Settings, label: 'Configure', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', onClick: () => setShowConfigureDialog(true) },
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={action.onClick}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -2003,19 +2064,19 @@ export default function StockClient() {
 
                 {/* Actions */}
                 <div className="flex items-center gap-3 pt-4 border-t">
-                  <Button className="flex-1 bg-indigo-600 hover:bg-indigo-700">
+                  <Button className="flex-1 bg-indigo-600 hover:bg-indigo-700" onClick={() => { setShowProductDialog(false); setShowAddStockToProductDialog(true); }}>
                     <Plus className="w-4 h-4 mr-2" />
                     Add Stock
                   </Button>
-                  <Button variant="outline">
+                  <Button variant="outline" onClick={() => { setShowProductDialog(false); setShowTransferProductDialog(true); }}>
                     <RefreshCw className="w-4 h-4 mr-2" />
                     Transfer
                   </Button>
-                  <Button variant="outline">
+                  <Button variant="outline" onClick={() => { setShowProductDialog(false); setShowProductHistoryDialog(true); }}>
                     <History className="w-4 h-4 mr-2" />
                     History
                   </Button>
-                  <Button variant="outline">
+                  <Button variant="outline" onClick={() => { setShowProductDialog(false); setShowEditSelectedProductDialog(true); }}>
                     <Edit className="w-4 h-4 mr-2" />
                     Edit
                   </Button>
@@ -2265,6 +2326,2105 @@ export default function StockClient() {
               </Button>
             </div>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Export Dialog */}
+      <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Download className="w-5 h-5 text-indigo-600" />
+              Export Inventory Data
+            </DialogTitle>
+            <DialogDescription>Choose your export format and options</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label className="text-sm font-medium mb-2 block">Export Format</Label>
+              <select className="w-full px-3 py-2 rounded-lg border bg-white dark:bg-gray-800 text-sm">
+                <option value="csv">CSV (Comma Separated)</option>
+                <option value="xlsx">Excel (XLSX)</option>
+                <option value="pdf">PDF Report</option>
+                <option value="json">JSON</option>
+              </select>
+            </div>
+            <div>
+              <Label className="text-sm font-medium mb-2 block">Include Data</Label>
+              <div className="space-y-2">
+                <label className="flex items-center gap-2">
+                  <input type="checkbox" defaultChecked className="rounded" />
+                  <span className="text-sm">Product Details</span>
+                </label>
+                <label className="flex items-center gap-2">
+                  <input type="checkbox" defaultChecked className="rounded" />
+                  <span className="text-sm">Stock Levels</span>
+                </label>
+                <label className="flex items-center gap-2">
+                  <input type="checkbox" className="rounded" />
+                  <span className="text-sm">Location Information</span>
+                </label>
+                <label className="flex items-center gap-2">
+                  <input type="checkbox" className="rounded" />
+                  <span className="text-sm">Supplier Details</span>
+                </label>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowExportDialog(false)}>Cancel</Button>
+              <Button className="bg-indigo-600 hover:bg-indigo-700" onClick={() => { toast.success('Export started', { description: 'Your inventory data is being exported' }); setShowExportDialog(false); }}>
+                <Download className="w-4 h-4 mr-2" />
+                Export
+              </Button>
+            </DialogFooter>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Product Dialog */}
+      <Dialog open={showAddProductDialog} onOpenChange={setShowAddProductDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Plus className="w-5 h-5 text-emerald-600" />
+              Add New Product
+            </DialogTitle>
+            <DialogDescription>Enter the details for the new product</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label className="text-sm font-medium mb-2 block">SKU *</Label>
+                <Input placeholder="e.g., ELEC-001" />
+              </div>
+              <div>
+                <Label className="text-sm font-medium mb-2 block">Category *</Label>
+                <select className="w-full px-3 py-2 rounded-lg border bg-white dark:bg-gray-800 text-sm">
+                  <option value="">Select category</option>
+                  <option value="electronics">Electronics</option>
+                  <option value="apparel">Apparel</option>
+                  <option value="food">Food</option>
+                  <option value="raw_materials">Raw Materials</option>
+                  <option value="packaging">Packaging</option>
+                </select>
+              </div>
+            </div>
+            <div>
+              <Label className="text-sm font-medium mb-2 block">Product Name *</Label>
+              <Input placeholder="Enter product name" />
+            </div>
+            <div>
+              <Label className="text-sm font-medium mb-2 block">Description</Label>
+              <Textarea placeholder="Product description..." rows={3} />
+            </div>
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <Label className="text-sm font-medium mb-2 block">Unit Cost *</Label>
+                <Input type="number" placeholder="0.00" step="0.01" />
+              </div>
+              <div>
+                <Label className="text-sm font-medium mb-2 block">Selling Price *</Label>
+                <Input type="number" placeholder="0.00" step="0.01" />
+              </div>
+              <div>
+                <Label className="text-sm font-medium mb-2 block">Reorder Point</Label>
+                <Input type="number" placeholder="0" />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowAddProductDialog(false)}>Cancel</Button>
+              <Button className="bg-emerald-600 hover:bg-emerald-700" onClick={() => { toast.success('Product added', { description: 'New product has been added to inventory' }); setShowAddProductDialog(false); }}>
+                <Plus className="w-4 h-4 mr-2" />
+                Add Product
+              </Button>
+            </DialogFooter>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Receive Stock Dialog */}
+      <Dialog open={showReceiveDialog} onOpenChange={setShowReceiveDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Package className="w-5 h-5 text-green-600" />
+              Receive Stock
+            </DialogTitle>
+            <DialogDescription>Record incoming stock receipt</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label className="text-sm font-medium mb-2 block">Purchase Order #</Label>
+              <Input placeholder="e.g., PO-2024-001" />
+            </div>
+            <div>
+              <Label className="text-sm font-medium mb-2 block">Product *</Label>
+              <select className="w-full px-3 py-2 rounded-lg border bg-white dark:bg-gray-800 text-sm">
+                <option value="">Select product</option>
+                {products.map(p => (
+                  <option key={p.id} value={p.id}>{p.sku} - {p.name}</option>
+                ))}
+              </select>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label className="text-sm font-medium mb-2 block">Quantity Received *</Label>
+                <Input type="number" placeholder="0" min="1" />
+              </div>
+              <div>
+                <Label className="text-sm font-medium mb-2 block">Destination Warehouse</Label>
+                <select className="w-full px-3 py-2 rounded-lg border bg-white dark:bg-gray-800 text-sm">
+                  {warehouses.map(w => (
+                    <option key={w.id} value={w.id}>{w.code} - {w.name}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <div>
+              <Label className="text-sm font-medium mb-2 block">Notes</Label>
+              <Textarea placeholder="Any notes about this receipt..." rows={2} />
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowReceiveDialog(false)}>Cancel</Button>
+              <Button className="bg-green-600 hover:bg-green-700" onClick={() => { toast.success('Stock received', { description: 'Stock has been recorded in inventory' }); setShowReceiveDialog(false); }}>
+                <Package className="w-4 h-4 mr-2" />
+                Receive Stock
+              </Button>
+            </DialogFooter>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Reports Dialog */}
+      <Dialog open={showReportsDialog} onOpenChange={setShowReportsDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <BarChart3 className="w-5 h-5 text-blue-600" />
+              Generate Report
+            </DialogTitle>
+            <DialogDescription>Select a report type to generate</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            {[
+              { name: 'Inventory Valuation', desc: 'Current value of all stock', icon: DollarSign },
+              { name: 'Stock Movement', desc: 'All movements over a period', icon: Activity },
+              { name: 'Low Stock Alert', desc: 'Items below reorder point', icon: AlertTriangle },
+              { name: 'Turnover Analysis', desc: 'Product velocity metrics', icon: RefreshCw },
+              { name: 'Warehouse Utilization', desc: 'Capacity and space usage', icon: Warehouse },
+            ].map((report, idx) => (
+              <Button
+                key={idx}
+                variant="outline"
+                className="w-full justify-start h-auto py-3"
+                onClick={() => { toast.success('Generating report', { description: `${report.name} report is being generated` }); setShowReportsDialog(false); }}
+              >
+                <report.icon className="w-5 h-5 mr-3 text-blue-600" />
+                <div className="text-left">
+                  <p className="font-medium">{report.name}</p>
+                  <p className="text-xs text-muted-foreground">{report.desc}</p>
+                </div>
+              </Button>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Import Dialog */}
+      <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Upload className="w-5 h-5 text-violet-600" />
+              Import Inventory Data
+            </DialogTitle>
+            <DialogDescription>Upload a file to import inventory data</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="border-2 border-dashed rounded-lg p-8 text-center">
+              <Upload className="w-10 h-10 mx-auto text-muted-foreground mb-3" />
+              <p className="text-sm text-muted-foreground mb-2">Drag and drop your file here, or click to browse</p>
+              <Button variant="outline" size="sm">Choose File</Button>
+            </div>
+            <div>
+              <Label className="text-sm font-medium mb-2 block">Supported Formats</Label>
+              <p className="text-sm text-muted-foreground">CSV, XLSX, JSON</p>
+            </div>
+            <div className="bg-muted/50 p-3 rounded-lg">
+              <p className="text-sm font-medium mb-1">Import Options</p>
+              <label className="flex items-center gap-2">
+                <input type="checkbox" className="rounded" />
+                <span className="text-sm">Update existing products</span>
+              </label>
+              <label className="flex items-center gap-2">
+                <input type="checkbox" className="rounded" />
+                <span className="text-sm">Create new products if not found</span>
+              </label>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowImportDialog(false)}>Cancel</Button>
+              <Button className="bg-violet-600 hover:bg-violet-700" onClick={() => { toast.success('Import started', { description: 'Processing your import file' }); setShowImportDialog(false); }}>
+                <Upload className="w-4 h-4 mr-2" />
+                Import
+              </Button>
+            </DialogFooter>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Settings Dialog */}
+      <Dialog open={showSettingsDialog} onOpenChange={setShowSettingsDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Settings className="w-5 h-5 text-gray-600" />
+              Inventory Settings
+            </DialogTitle>
+            <DialogDescription>Configure inventory management settings</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label className="text-sm font-medium mb-2 block">Default Valuation Method</Label>
+              <select className="w-full px-3 py-2 rounded-lg border bg-white dark:bg-gray-800 text-sm">
+                <option value="fifo">FIFO (First In, First Out)</option>
+                <option value="lifo">LIFO (Last In, First Out)</option>
+                <option value="average">Weighted Average</option>
+              </select>
+            </div>
+            <div>
+              <Label className="text-sm font-medium mb-2 block">Low Stock Threshold (%)</Label>
+              <Input type="number" placeholder="20" min="1" max="100" />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Notifications</Label>
+              <label className="flex items-center gap-2">
+                <input type="checkbox" defaultChecked className="rounded" />
+                <span className="text-sm">Low stock alerts</span>
+              </label>
+              <label className="flex items-center gap-2">
+                <input type="checkbox" defaultChecked className="rounded" />
+                <span className="text-sm">Out of stock alerts</span>
+              </label>
+              <label className="flex items-center gap-2">
+                <input type="checkbox" className="rounded" />
+                <span className="text-sm">Reorder reminders</span>
+              </label>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowSettingsDialog(false)}>Cancel</Button>
+              <Button onClick={() => { toast.success('Settings saved', { description: 'Inventory settings have been updated' }); setShowSettingsDialog(false); }}>
+                Save Settings
+              </Button>
+            </DialogFooter>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Scan Product Dialog */}
+      <Dialog open={showScanDialog} onOpenChange={setShowScanDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <ScanLine className="w-5 h-5 text-indigo-600" />
+              Scan Product
+            </DialogTitle>
+            <DialogDescription>Scan barcode or enter SKU manually</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="border-2 border-dashed rounded-lg p-8 text-center bg-muted/30">
+              <ScanLine className="w-12 h-12 mx-auto text-muted-foreground mb-3" />
+              <p className="text-sm text-muted-foreground mb-2">Position barcode in front of camera</p>
+              <Button variant="outline" size="sm">Activate Scanner</Button>
+            </div>
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">Or enter manually</span>
+              </div>
+            </div>
+            <div>
+              <Label className="text-sm font-medium mb-2 block">SKU / Barcode</Label>
+              <Input placeholder="Enter SKU or barcode" />
+            </div>
+            {selectedProduct && (
+              <div className="p-3 bg-muted/50 rounded-lg">
+                <p className="font-medium">{selectedProduct.name}</p>
+                <p className="text-sm text-muted-foreground">SKU: {selectedProduct.sku}</p>
+                <p className="text-sm">Stock: {selectedProduct.availableQuantity} available</p>
+              </div>
+            )}
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowScanDialog(false)}>Close</Button>
+              <Button onClick={() => { toast.success('Product found', { description: selectedProduct?.name || 'Product located' }); setShowScanDialog(false); }}>
+                Look Up
+              </Button>
+            </DialogFooter>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Product Dialog */}
+      <Dialog open={showEditProductDialog} onOpenChange={setShowEditProductDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Edit className="w-5 h-5 text-blue-600" />
+              Edit Product
+            </DialogTitle>
+            <DialogDescription>Update product information</DialogDescription>
+          </DialogHeader>
+          {selectedProduct && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-sm font-medium mb-2 block">SKU</Label>
+                  <Input defaultValue={selectedProduct.sku} />
+                </div>
+                <div>
+                  <Label className="text-sm font-medium mb-2 block">Category</Label>
+                  <select className="w-full px-3 py-2 rounded-lg border bg-white dark:bg-gray-800 text-sm" defaultValue={selectedProduct.category}>
+                    <option value="electronics">Electronics</option>
+                    <option value="apparel">Apparel</option>
+                    <option value="food">Food</option>
+                    <option value="raw_materials">Raw Materials</option>
+                    <option value="packaging">Packaging</option>
+                  </select>
+                </div>
+              </div>
+              <div>
+                <Label className="text-sm font-medium mb-2 block">Product Name</Label>
+                <Input defaultValue={selectedProduct.name} />
+              </div>
+              <div className="grid grid-cols-3 gap-4">
+                <div>
+                  <Label className="text-sm font-medium mb-2 block">Unit Cost</Label>
+                  <Input type="number" defaultValue={selectedProduct.unitCost} step="0.01" />
+                </div>
+                <div>
+                  <Label className="text-sm font-medium mb-2 block">Selling Price</Label>
+                  <Input type="number" defaultValue={selectedProduct.sellingPrice} step="0.01" />
+                </div>
+                <div>
+                  <Label className="text-sm font-medium mb-2 block">Reorder Point</Label>
+                  <Input type="number" defaultValue={selectedProduct.reorderPoint} />
+                </div>
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setShowEditProductDialog(false)}>Cancel</Button>
+                <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => { toast.success('Product updated', { description: 'Product information has been saved' }); setShowEditProductDialog(false); }}>
+                  Save Changes
+                </Button>
+              </DialogFooter>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* More Options Dialog */}
+      <Dialog open={showMoreOptionsDialog} onOpenChange={setShowMoreOptionsDialog}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <MoreHorizontal className="w-5 h-5" />
+              Product Actions
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-2">
+            {[
+              { label: 'View Details', icon: Eye, action: () => { setShowMoreOptionsDialog(false); setShowProductDialog(true); } },
+              { label: 'Add Stock', icon: Plus, action: () => { setShowMoreOptionsDialog(false); setShowAddStockDialog(true); } },
+              { label: 'Transfer Stock', icon: ArrowRightLeft, action: () => { setShowMoreOptionsDialog(false); setShowTransferDialog(true); } },
+              { label: 'View History', icon: History, action: () => { setShowMoreOptionsDialog(false); setShowProductHistoryDialog(true); } },
+              { label: 'Print Label', icon: Tag, action: () => { toast.success('Printing label', { description: 'Product label sent to printer' }); setShowMoreOptionsDialog(false); } },
+              { label: 'Delete Product', icon: Trash2, action: () => { toast.error('Delete product', { description: 'This action cannot be undone' }); setShowMoreOptionsDialog(false); } },
+            ].map((item, idx) => (
+              <Button key={idx} variant="ghost" className="w-full justify-start" onClick={item.action}>
+                <item.icon className="w-4 h-4 mr-3" />
+                {item.label}
+              </Button>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Ship Stock Dialog */}
+      <Dialog open={showShipDialog} onOpenChange={setShowShipDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <ArrowUpFromLine className="w-5 h-5 text-indigo-600" />
+              Ship Stock
+            </DialogTitle>
+            <DialogDescription>Record outgoing shipment</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label className="text-sm font-medium mb-2 block">Sales Order #</Label>
+              <Input placeholder="e.g., SO-2024-001" />
+            </div>
+            <div>
+              <Label className="text-sm font-medium mb-2 block">Product *</Label>
+              <select className="w-full px-3 py-2 rounded-lg border bg-white dark:bg-gray-800 text-sm">
+                <option value="">Select product</option>
+                {products.filter(p => p.availableQuantity > 0).map(p => (
+                  <option key={p.id} value={p.id}>{p.sku} - {p.name} ({p.availableQuantity} available)</option>
+                ))}
+              </select>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label className="text-sm font-medium mb-2 block">Quantity to Ship *</Label>
+                <Input type="number" placeholder="0" min="1" />
+              </div>
+              <div>
+                <Label className="text-sm font-medium mb-2 block">Source Warehouse</Label>
+                <select className="w-full px-3 py-2 rounded-lg border bg-white dark:bg-gray-800 text-sm">
+                  {warehouses.map(w => (
+                    <option key={w.id} value={w.id}>{w.code} - {w.name}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <div>
+              <Label className="text-sm font-medium mb-2 block">Shipping Notes</Label>
+              <Textarea placeholder="Special handling instructions..." rows={2} />
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowShipDialog(false)}>Cancel</Button>
+              <Button className="bg-indigo-600 hover:bg-indigo-700" onClick={() => { toast.success('Shipment created', { description: 'Stock has been allocated for shipping' }); setShowShipDialog(false); }}>
+                <Truck className="w-4 h-4 mr-2" />
+                Create Shipment
+              </Button>
+            </DialogFooter>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Return Stock Dialog */}
+      <Dialog open={showReturnDialog} onOpenChange={setShowReturnDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <RotateCcw className="w-5 h-5 text-purple-600" />
+              Process Return
+            </DialogTitle>
+            <DialogDescription>Record a product return to inventory</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label className="text-sm font-medium mb-2 block">Return Authorization #</Label>
+              <Input placeholder="e.g., RA-2024-001" />
+            </div>
+            <div>
+              <Label className="text-sm font-medium mb-2 block">Product *</Label>
+              <select className="w-full px-3 py-2 rounded-lg border bg-white dark:bg-gray-800 text-sm">
+                <option value="">Select product</option>
+                {products.map(p => (
+                  <option key={p.id} value={p.id}>{p.sku} - {p.name}</option>
+                ))}
+              </select>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label className="text-sm font-medium mb-2 block">Return Quantity *</Label>
+                <Input type="number" placeholder="0" min="1" />
+              </div>
+              <div>
+                <Label className="text-sm font-medium mb-2 block">Condition</Label>
+                <select className="w-full px-3 py-2 rounded-lg border bg-white dark:bg-gray-800 text-sm">
+                  <option value="good">Good - Resellable</option>
+                  <option value="damaged">Damaged</option>
+                  <option value="defective">Defective</option>
+                </select>
+              </div>
+            </div>
+            <div>
+              <Label className="text-sm font-medium mb-2 block">Return Reason</Label>
+              <Textarea placeholder="Reason for return..." rows={2} />
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowReturnDialog(false)}>Cancel</Button>
+              <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => { toast.success('Return processed', { description: 'Stock has been returned to inventory' }); setShowReturnDialog(false); }}>
+                <RotateCcw className="w-4 h-4 mr-2" />
+                Process Return
+              </Button>
+            </DialogFooter>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Search Movements Dialog */}
+      <Dialog open={showSearchDialog} onOpenChange={setShowSearchDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Search className="w-5 h-5 text-fuchsia-600" />
+              Search Movements
+            </DialogTitle>
+            <DialogDescription>Find specific stock movements</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label className="text-sm font-medium mb-2 block">Movement Number</Label>
+              <Input placeholder="e.g., MOV-2024-001" />
+            </div>
+            <div>
+              <Label className="text-sm font-medium mb-2 block">Date Range</Label>
+              <div className="grid grid-cols-2 gap-2">
+                <Input type="date" />
+                <Input type="date" />
+              </div>
+            </div>
+            <div>
+              <Label className="text-sm font-medium mb-2 block">Movement Type</Label>
+              <select className="w-full px-3 py-2 rounded-lg border bg-white dark:bg-gray-800 text-sm">
+                <option value="">All Types</option>
+                <option value="inbound">Inbound</option>
+                <option value="outbound">Outbound</option>
+                <option value="transfer">Transfer</option>
+                <option value="adjustment">Adjustment</option>
+              </select>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowSearchDialog(false)}>Cancel</Button>
+              <Button className="bg-fuchsia-600 hover:bg-fuchsia-700" onClick={() => { toast.success('Search complete', { description: 'Found 5 matching movements' }); setShowSearchDialog(false); }}>
+                <Search className="w-4 h-4 mr-2" />
+                Search
+              </Button>
+            </DialogFooter>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Filter Movements Dialog */}
+      <Dialog open={showFilterDialog} onOpenChange={setShowFilterDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Filter className="w-5 h-5 text-pink-600" />
+              Filter Movements
+            </DialogTitle>
+            <DialogDescription>Apply filters to movement list</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label className="text-sm font-medium mb-2 block">Status</Label>
+              <div className="space-y-2">
+                {['Completed', 'Pending', 'In Transit', 'Cancelled'].map(status => (
+                  <label key={status} className="flex items-center gap-2">
+                    <input type="checkbox" className="rounded" />
+                    <span className="text-sm">{status}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+            <div>
+              <Label className="text-sm font-medium mb-2 block">Warehouse</Label>
+              <select className="w-full px-3 py-2 rounded-lg border bg-white dark:bg-gray-800 text-sm">
+                <option value="">All Warehouses</option>
+                {warehouses.map(w => (
+                  <option key={w.id} value={w.id}>{w.name}</option>
+                ))}
+              </select>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowFilterDialog(false)}>Clear Filters</Button>
+              <Button className="bg-pink-600 hover:bg-pink-700" onClick={() => { toast.success('Filters applied'); setShowFilterDialog(false); }}>
+                Apply Filters
+              </Button>
+            </DialogFooter>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Location Dialog */}
+      <Dialog open={showAddLocationDialog} onOpenChange={setShowAddLocationDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Plus className="w-5 h-5 text-amber-600" />
+              Add Warehouse Location
+            </DialogTitle>
+            <DialogDescription>Create a new warehouse or storage location</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label className="text-sm font-medium mb-2 block">Location Code *</Label>
+                <Input placeholder="e.g., WH-004" />
+              </div>
+              <div>
+                <Label className="text-sm font-medium mb-2 block">Location Type</Label>
+                <select className="w-full px-3 py-2 rounded-lg border bg-white dark:bg-gray-800 text-sm">
+                  <option value="main">Main Warehouse</option>
+                  <option value="distribution">Distribution Center</option>
+                  <option value="retail">Retail Backroom</option>
+                  <option value="fulfillment">Fulfillment Center</option>
+                </select>
+              </div>
+            </div>
+            <div>
+              <Label className="text-sm font-medium mb-2 block">Location Name *</Label>
+              <Input placeholder="Enter location name" />
+            </div>
+            <div>
+              <Label className="text-sm font-medium mb-2 block">Address</Label>
+              <Textarea placeholder="Full address..." rows={2} />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label className="text-sm font-medium mb-2 block">Capacity (units)</Label>
+                <Input type="number" placeholder="0" />
+              </div>
+              <div>
+                <Label className="text-sm font-medium mb-2 block">Manager</Label>
+                <Input placeholder="Manager name" />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowAddLocationDialog(false)}>Cancel</Button>
+              <Button className="bg-amber-600 hover:bg-amber-700" onClick={() => { toast.success('Location added', { description: 'New warehouse location created' }); setShowAddLocationDialog(false); }}>
+                <Plus className="w-4 h-4 mr-2" />
+                Add Location
+              </Button>
+            </DialogFooter>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Zones Dialog */}
+      <Dialog open={showZonesDialog} onOpenChange={setShowZonesDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Warehouse className="w-5 h-5 text-orange-600" />
+              Manage Zones
+            </DialogTitle>
+            <DialogDescription>Configure warehouse zones</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label className="text-sm font-medium mb-2 block">Select Warehouse</Label>
+              <select className="w-full px-3 py-2 rounded-lg border bg-white dark:bg-gray-800 text-sm">
+                {warehouses.map(w => (
+                  <option key={w.id} value={w.id}>{w.name} ({w.zones} zones)</option>
+                ))}
+              </select>
+            </div>
+            <div className="space-y-2">
+              {['Zone A - Receiving', 'Zone B - Storage', 'Zone C - Picking', 'Zone D - Shipping'].map((zone, idx) => (
+                <div key={idx} className="flex items-center justify-between p-2 bg-muted/50 rounded-lg">
+                  <span className="text-sm">{zone}</span>
+                  <Button variant="ghost" size="sm"><Edit className="w-4 h-4" /></Button>
+                </div>
+              ))}
+            </div>
+            <Button variant="outline" className="w-full">
+              <Plus className="w-4 h-4 mr-2" />
+              Add New Zone
+            </Button>
+            <DialogFooter>
+              <Button onClick={() => setShowZonesDialog(false)}>Done</Button>
+            </DialogFooter>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Locations Dialog */}
+      <Dialog open={showLocationsDialog} onOpenChange={setShowLocationsDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <MapPin className="w-5 h-5 text-red-600" />
+              Bin Locations
+            </DialogTitle>
+            <DialogDescription>View and manage bin locations</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label className="text-sm font-medium mb-2 block">Warehouse</Label>
+              <select className="w-full px-3 py-2 rounded-lg border bg-white dark:bg-gray-800 text-sm">
+                {warehouses.map(w => (
+                  <option key={w.id} value={w.id}>{w.name}</option>
+                ))}
+              </select>
+            </div>
+            <div className="max-h-60 overflow-y-auto space-y-2">
+              {['A-01-1', 'A-01-2', 'A-02-1', 'B-01-1', 'B-01-2', 'C-01-1'].map((bin, idx) => (
+                <div key={idx} className="flex items-center justify-between p-2 bg-muted/50 rounded-lg">
+                  <div>
+                    <span className="text-sm font-medium">{bin}</span>
+                    <p className="text-xs text-muted-foreground">Capacity: 100 units</p>
+                  </div>
+                  <Badge variant="outline">Active</Badge>
+                </div>
+              ))}
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowLocationsDialog(false)}>Close</Button>
+              <Button onClick={() => { toast.success('Location added'); }}>
+                <Plus className="w-4 h-4 mr-2" />
+                Add Bin
+              </Button>
+            </DialogFooter>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Shipping Settings Dialog */}
+      <Dialog open={showShippingDialog} onOpenChange={setShowShippingDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Truck className="w-5 h-5 text-rose-600" />
+              Shipping Settings
+            </DialogTitle>
+            <DialogDescription>Configure shipping options and carriers</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label className="text-sm font-medium mb-2 block">Default Carrier</Label>
+              <select className="w-full px-3 py-2 rounded-lg border bg-white dark:bg-gray-800 text-sm">
+                <option>FedEx</option>
+                <option>UPS</option>
+                <option>USPS</option>
+                <option>DHL</option>
+              </select>
+            </div>
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Active Carriers</Label>
+              {['FedEx', 'UPS', 'USPS', 'DHL'].map(carrier => (
+                <label key={carrier} className="flex items-center gap-2">
+                  <input type="checkbox" defaultChecked className="rounded" />
+                  <span className="text-sm">{carrier}</span>
+                </label>
+              ))}
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowShippingDialog(false)}>Cancel</Button>
+              <Button onClick={() => { toast.success('Shipping settings saved'); setShowShippingDialog(false); }}>
+                Save Settings
+              </Button>
+            </DialogFooter>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Capacity Dialog */}
+      <Dialog open={showCapacityDialog} onOpenChange={setShowCapacityDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <BarChart3 className="w-5 h-5 text-yellow-600" />
+              Capacity Overview
+            </DialogTitle>
+            <DialogDescription>View warehouse capacity utilization</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            {warehouses.map(w => (
+              <div key={w.id} className="p-4 bg-muted/50 rounded-lg">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="font-medium">{w.name}</span>
+                  <span className="text-sm">{w.utilization}% Used</span>
+                </div>
+                <Progress value={w.utilization} className="h-2" />
+                <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                  <span>{(w.capacity * w.utilization / 100).toLocaleString()} units</span>
+                  <span>{w.capacity.toLocaleString()} total capacity</span>
+                </div>
+              </div>
+            ))}
+            <DialogFooter>
+              <Button onClick={() => setShowCapacityDialog(false)}>Close</Button>
+            </DialogFooter>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Staff Dialog */}
+      <Dialog open={showStaffDialog} onOpenChange={setShowStaffDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Users className="w-5 h-5 text-lime-600" />
+              Warehouse Staff
+            </DialogTitle>
+            <DialogDescription>Manage warehouse personnel</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label className="text-sm font-medium mb-2 block">Warehouse</Label>
+              <select className="w-full px-3 py-2 rounded-lg border bg-white dark:bg-gray-800 text-sm">
+                {warehouses.map(w => (
+                  <option key={w.id} value={w.id}>{w.name}</option>
+                ))}
+              </select>
+            </div>
+            <div className="space-y-2">
+              {[
+                { name: 'John Smith', role: 'Manager', status: 'Active' },
+                { name: 'Sarah Chen', role: 'Supervisor', status: 'Active' },
+                { name: 'Mike Johnson', role: 'Picker', status: 'Active' },
+              ].map((staff, idx) => (
+                <div key={idx} className="flex items-center justify-between p-2 bg-muted/50 rounded-lg">
+                  <div>
+                    <p className="font-medium text-sm">{staff.name}</p>
+                    <p className="text-xs text-muted-foreground">{staff.role}</p>
+                  </div>
+                  <Badge variant="outline" className="bg-green-100 text-green-700">{staff.status}</Badge>
+                </div>
+              ))}
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowStaffDialog(false)}>Close</Button>
+              <Button onClick={() => { toast.success('Staff member added'); }}>
+                <Plus className="w-4 h-4 mr-2" />
+                Add Staff
+              </Button>
+            </DialogFooter>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Warehouse Details Dialog */}
+      <Dialog open={showWarehouseDetailsDialog} onOpenChange={setShowWarehouseDetailsDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Warehouse className="w-5 h-5 text-indigo-600" />
+              {selectedWarehouse?.name || 'Warehouse Details'}
+            </DialogTitle>
+            <DialogDescription>Complete warehouse information and statistics</DialogDescription>
+          </DialogHeader>
+          {selectedWarehouse && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-4 bg-muted/50 rounded-lg">
+                  <p className="text-sm text-muted-foreground">Code</p>
+                  <p className="font-medium">{selectedWarehouse.code}</p>
+                </div>
+                <div className="p-4 bg-muted/50 rounded-lg">
+                  <p className="text-sm text-muted-foreground">Type</p>
+                  <p className="font-medium capitalize">{selectedWarehouse.type}</p>
+                </div>
+                <div className="p-4 bg-muted/50 rounded-lg">
+                  <p className="text-sm text-muted-foreground">Location</p>
+                  <p className="font-medium">{selectedWarehouse.city}, {selectedWarehouse.state}</p>
+                </div>
+                <div className="p-4 bg-muted/50 rounded-lg">
+                  <p className="text-sm text-muted-foreground">Manager</p>
+                  <p className="font-medium">{selectedWarehouse.manager}</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-4 gap-4">
+                <div className="text-center p-3 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg">
+                  <p className="text-2xl font-bold text-indigo-600">{selectedWarehouse.productCount}</p>
+                  <p className="text-xs text-muted-foreground">Products</p>
+                </div>
+                <div className="text-center p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                  <p className="text-2xl font-bold text-green-600">{formatNumber(selectedWarehouse.totalValue)}</p>
+                  <p className="text-xs text-muted-foreground">Value</p>
+                </div>
+                <div className="text-center p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                  <p className="text-2xl font-bold text-purple-600">{selectedWarehouse.zones}</p>
+                  <p className="text-xs text-muted-foreground">Zones</p>
+                </div>
+                <div className="text-center p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
+                  <p className="text-2xl font-bold text-orange-600">{selectedWarehouse.bins}</p>
+                  <p className="text-xs text-muted-foreground">Bins</p>
+                </div>
+              </div>
+              <div>
+                <p className="text-sm font-medium mb-2">Capacity Utilization</p>
+                <Progress value={selectedWarehouse.utilization} className="h-3" />
+                <p className="text-xs text-muted-foreground mt-1">{selectedWarehouse.utilization}% of {selectedWarehouse.capacity.toLocaleString()} units</p>
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setShowWarehouseDetailsDialog(false)}>Close</Button>
+                <Button onClick={() => { setShowWarehouseDetailsDialog(false); setShowSettingsDialog(true); }}>
+                  <Settings className="w-4 h-4 mr-2" />
+                  Edit Settings
+                </Button>
+              </DialogFooter>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* New Count Dialog */}
+      <Dialog open={showNewCountDialog} onOpenChange={setShowNewCountDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Plus className="w-5 h-5 text-violet-600" />
+              Create New Stock Count
+            </DialogTitle>
+            <DialogDescription>Start a new inventory count session</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label className="text-sm font-medium mb-2 block">Warehouse *</Label>
+              <select className="w-full px-3 py-2 rounded-lg border bg-white dark:bg-gray-800 text-sm">
+                <option value="">Select warehouse</option>
+                {warehouses.map(w => (
+                  <option key={w.id} value={w.id}>{w.name}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <Label className="text-sm font-medium mb-2 block">Count Type</Label>
+              <select className="w-full px-3 py-2 rounded-lg border bg-white dark:bg-gray-800 text-sm">
+                <option value="cycle">Cycle Count</option>
+                <option value="full">Full Inventory</option>
+                <option value="spot">Spot Check</option>
+              </select>
+            </div>
+            <div>
+              <Label className="text-sm font-medium mb-2 block">Zone (Optional)</Label>
+              <select className="w-full px-3 py-2 rounded-lg border bg-white dark:bg-gray-800 text-sm">
+                <option value="">All Zones</option>
+                <option value="A">Zone A</option>
+                <option value="B">Zone B</option>
+                <option value="C">Zone C</option>
+              </select>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowNewCountDialog(false)}>Cancel</Button>
+              <Button className="bg-violet-600 hover:bg-violet-700" onClick={() => { toast.success('Count created', { description: 'New stock count has been initiated' }); setShowNewCountDialog(false); }}>
+                Start Count
+              </Button>
+            </DialogFooter>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Schedule Count Dialog */}
+      <Dialog open={showScheduleDialog} onOpenChange={setShowScheduleDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Calendar className="w-5 h-5 text-purple-600" />
+              Schedule Count
+            </DialogTitle>
+            <DialogDescription>Schedule a future inventory count</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label className="text-sm font-medium mb-2 block">Warehouse</Label>
+              <select className="w-full px-3 py-2 rounded-lg border bg-white dark:bg-gray-800 text-sm">
+                {warehouses.map(w => (
+                  <option key={w.id} value={w.id}>{w.name}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <Label className="text-sm font-medium mb-2 block">Scheduled Date</Label>
+              <Input type="date" min={new Date().toISOString().split('T')[0]} />
+            </div>
+            <div>
+              <Label className="text-sm font-medium mb-2 block">Scheduled Time</Label>
+              <Input type="time" />
+            </div>
+            <div>
+              <Label className="text-sm font-medium mb-2 block">Repeat</Label>
+              <select className="w-full px-3 py-2 rounded-lg border bg-white dark:bg-gray-800 text-sm">
+                <option value="none">No Repeat</option>
+                <option value="weekly">Weekly</option>
+                <option value="monthly">Monthly</option>
+                <option value="quarterly">Quarterly</option>
+              </select>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowScheduleDialog(false)}>Cancel</Button>
+              <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => { toast.success('Count scheduled'); setShowScheduleDialog(false); }}>
+                Schedule
+              </Button>
+            </DialogFooter>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Assign Team Dialog */}
+      <Dialog open={showAssignTeamDialog} onOpenChange={setShowAssignTeamDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Users className="w-5 h-5 text-fuchsia-600" />
+              Assign Team
+            </DialogTitle>
+            <DialogDescription>Assign team members to stock count</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label className="text-sm font-medium mb-2 block">Select Count</Label>
+              <select className="w-full px-3 py-2 rounded-lg border bg-white dark:bg-gray-800 text-sm">
+                {stockCounts.map(c => (
+                  <option key={c.id} value={c.id}>{c.countNumber} - {c.warehouseName}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <Label className="text-sm font-medium mb-2 block">Team Members</Label>
+              <div className="space-y-2">
+                {['John Smith', 'Sarah Chen', 'Mike Johnson', 'Lisa Wong'].map(name => (
+                  <label key={name} className="flex items-center gap-2">
+                    <input type="checkbox" className="rounded" />
+                    <span className="text-sm">{name}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowAssignTeamDialog(false)}>Cancel</Button>
+              <Button className="bg-fuchsia-600 hover:bg-fuchsia-700" onClick={() => { toast.success('Team assigned'); setShowAssignTeamDialog(false); }}>
+                Assign Team
+              </Button>
+            </DialogFooter>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Start Count Dialog */}
+      <Dialog open={showStartCountDialog} onOpenChange={setShowStartCountDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <ClipboardCheck className="w-5 h-5 text-pink-600" />
+              Start Count Session
+            </DialogTitle>
+            <DialogDescription>Begin counting inventory</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label className="text-sm font-medium mb-2 block">Select Scheduled Count</Label>
+              <select className="w-full px-3 py-2 rounded-lg border bg-white dark:bg-gray-800 text-sm">
+                {stockCounts.filter(c => c.status === 'scheduled').map(c => (
+                  <option key={c.id} value={c.id}>{c.countNumber} - {c.warehouseName}</option>
+                ))}
+              </select>
+            </div>
+            <div className="bg-muted/50 p-4 rounded-lg">
+              <p className="text-sm font-medium mb-2">Count Instructions:</p>
+              <ul className="text-sm text-muted-foreground space-y-1">
+                <li>1. Scan each product barcode</li>
+                <li>2. Enter physical count quantity</li>
+                <li>3. Note any discrepancies</li>
+                <li>4. Submit when zone complete</li>
+              </ul>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowStartCountDialog(false)}>Cancel</Button>
+              <Button className="bg-pink-600 hover:bg-pink-700" onClick={() => { toast.success('Count started', { description: 'Counting session is now active' }); setShowStartCountDialog(false); }}>
+                <ClipboardCheck className="w-4 h-4 mr-2" />
+                Start Counting
+              </Button>
+            </DialogFooter>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Verify Count Dialog */}
+      <Dialog open={showVerifyDialog} onOpenChange={setShowVerifyDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <CheckCircle2 className="w-5 h-5 text-rose-600" />
+              Verify Count
+            </DialogTitle>
+            <DialogDescription>Review and verify count results</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label className="text-sm font-medium mb-2 block">Select Completed Count</Label>
+              <select className="w-full px-3 py-2 rounded-lg border bg-white dark:bg-gray-800 text-sm">
+                {stockCounts.filter(c => c.status === 'completed').map(c => (
+                  <option key={c.id} value={c.id}>{c.countNumber} - Variance: {formatCurrency(c.varianceValue)}</option>
+                ))}
+              </select>
+            </div>
+            <div className="bg-muted/50 p-4 rounded-lg space-y-2">
+              <div className="flex justify-between">
+                <span className="text-sm">Products Counted</span>
+                <span className="font-medium">1,247</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-sm">Variance Items</span>
+                <span className="font-medium text-red-600">12</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-sm">Variance Value</span>
+                <span className="font-medium text-red-600">-$2,340</span>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowVerifyDialog(false)}>Review Later</Button>
+              <Button className="bg-rose-600 hover:bg-rose-700" onClick={() => { toast.success('Count verified', { description: 'Inventory has been updated' }); setShowVerifyDialog(false); }}>
+                <CheckCircle2 className="w-4 h-4 mr-2" />
+                Verify & Apply
+              </Button>
+            </DialogFooter>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Count Reports Dialog */}
+      <Dialog open={showCountReportsDialog} onOpenChange={setShowCountReportsDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileText className="w-5 h-5 text-red-600" />
+              Count Reports
+            </DialogTitle>
+            <DialogDescription>Generate stock count reports</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            {[
+              { name: 'Variance Report', desc: 'Discrepancies between system and physical count' },
+              { name: 'Count Summary', desc: 'Overview of all count activities' },
+              { name: 'Accuracy Report', desc: 'Count accuracy by zone and product' },
+              { name: 'Adjustment Log', desc: 'All inventory adjustments made' },
+            ].map((report, idx) => (
+              <Button
+                key={idx}
+                variant="outline"
+                className="w-full justify-start h-auto py-3"
+                onClick={() => { toast.success('Generating report', { description: `${report.name} is being generated` }); setShowCountReportsDialog(false); }}
+              >
+                <FileText className="w-5 h-5 mr-3 text-red-600" />
+                <div className="text-left">
+                  <p className="font-medium">{report.name}</p>
+                  <p className="text-xs text-muted-foreground">{report.desc}</p>
+                </div>
+              </Button>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Count History Dialog */}
+      <Dialog open={showCountHistoryDialog} onOpenChange={setShowCountHistoryDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <History className="w-5 h-5 text-orange-600" />
+              Count History
+            </DialogTitle>
+            <DialogDescription>View past stock counts</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 max-h-80 overflow-y-auto">
+            {stockCounts.map(count => (
+              <div key={count.id} className="p-3 bg-muted/50 rounded-lg">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="font-medium">{count.countNumber}</span>
+                  <Badge className={count.status === 'completed' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}>
+                    {count.status}
+                  </Badge>
+                </div>
+                <p className="text-sm text-muted-foreground">{count.warehouseName}</p>
+                <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                  <span>{count.scheduledDate}</span>
+                  <span>Variance: {formatCurrency(count.varianceValue)}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setShowCountHistoryDialog(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Count Settings Dialog */}
+      <Dialog open={showCountSettingsDialog} onOpenChange={setShowCountSettingsDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Settings className="w-5 h-5 text-amber-600" />
+              Count Settings
+            </DialogTitle>
+            <DialogDescription>Configure stock count preferences</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label className="text-sm font-medium mb-2 block">Default Count Method</Label>
+              <select className="w-full px-3 py-2 rounded-lg border bg-white dark:bg-gray-800 text-sm">
+                <option>Blind Count</option>
+                <option>Guided Count</option>
+                <option>Cycle Count</option>
+              </select>
+            </div>
+            <div>
+              <Label className="text-sm font-medium mb-2 block">Variance Threshold (%)</Label>
+              <Input type="number" placeholder="5" min="1" max="100" />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Options</Label>
+              <label className="flex items-center gap-2">
+                <input type="checkbox" defaultChecked className="rounded" />
+                <span className="text-sm">Require supervisor approval for adjustments</span>
+              </label>
+              <label className="flex items-center gap-2">
+                <input type="checkbox" className="rounded" />
+                <span className="text-sm">Auto-recount items with high variance</span>
+              </label>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowCountSettingsDialog(false)}>Cancel</Button>
+              <Button onClick={() => { toast.success('Settings saved'); setShowCountSettingsDialog(false); }}>
+                Save Settings
+              </Button>
+            </DialogFooter>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* View Critical Alerts Dialog */}
+      <Dialog open={showViewCriticalDialog} onOpenChange={setShowViewCriticalDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="w-5 h-5 text-red-600" />
+              Critical Alerts
+            </DialogTitle>
+            <DialogDescription>Items requiring immediate attention</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 max-h-80 overflow-y-auto">
+            {alerts.filter(a => a.severity === 'critical').map(alert => (
+              <div key={alert.id} className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 rounded-lg">
+                <div className="flex items-start gap-3">
+                  <AlertCircle className="w-5 h-5 text-red-600 mt-0.5" />
+                  <div className="flex-1">
+                    <p className="font-medium">{alert.productName}</p>
+                    <p className="text-sm text-muted-foreground">{alert.message}</p>
+                    <p className="text-xs text-muted-foreground mt-1">Current: {alert.currentQuantity}</p>
+                  </div>
+                  <Button size="sm" variant="outline" onClick={() => { toast.success('Alert acknowledged'); }}>
+                    Acknowledge
+                  </Button>
+                </div>
+              </div>
+            ))}
+            {alerts.filter(a => a.severity === 'critical').length === 0 && (
+              <p className="text-center text-muted-foreground py-8">No critical alerts</p>
+            )}
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setShowViewCriticalDialog(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Notifications Dialog */}
+      <Dialog open={showNotificationsDialog} onOpenChange={setShowNotificationsDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Bell className="w-5 h-5 text-rose-600" />
+              Notification Settings
+            </DialogTitle>
+            <DialogDescription>Configure alert notifications</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Email Notifications</Label>
+              <label className="flex items-center gap-2">
+                <input type="checkbox" defaultChecked className="rounded" />
+                <span className="text-sm">Critical alerts</span>
+              </label>
+              <label className="flex items-center gap-2">
+                <input type="checkbox" defaultChecked className="rounded" />
+                <span className="text-sm">Low stock warnings</span>
+              </label>
+              <label className="flex items-center gap-2">
+                <input type="checkbox" className="rounded" />
+                <span className="text-sm">Daily summary</span>
+              </label>
+            </div>
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Push Notifications</Label>
+              <label className="flex items-center gap-2">
+                <input type="checkbox" defaultChecked className="rounded" />
+                <span className="text-sm">Out of stock alerts</span>
+              </label>
+              <label className="flex items-center gap-2">
+                <input type="checkbox" className="rounded" />
+                <span className="text-sm">Reorder reminders</span>
+              </label>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowNotificationsDialog(false)}>Cancel</Button>
+              <Button onClick={() => { toast.success('Notification settings saved'); setShowNotificationsDialog(false); }}>
+                Save Settings
+              </Button>
+            </DialogFooter>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Acknowledge All Dialog */}
+      <Dialog open={showAcknowledgeAllDialog} onOpenChange={setShowAcknowledgeAllDialog}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <CheckCircle2 className="w-5 h-5 text-pink-600" />
+              Acknowledge All
+            </DialogTitle>
+            <DialogDescription>Mark all alerts as acknowledged</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm">
+              This will acknowledge {alerts.filter(a => !a.acknowledged).length} unread alerts. Are you sure?
+            </p>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowAcknowledgeAllDialog(false)}>Cancel</Button>
+              <Button className="bg-pink-600 hover:bg-pink-700" onClick={() => { toast.success('All alerts acknowledged'); setShowAcknowledgeAllDialog(false); }}>
+                Acknowledge All
+              </Button>
+            </DialogFooter>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Thresholds Dialog */}
+      <Dialog open={showThresholdsDialog} onOpenChange={setShowThresholdsDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Settings className="w-5 h-5 text-fuchsia-600" />
+              Alert Thresholds
+            </DialogTitle>
+            <DialogDescription>Configure stock level thresholds</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label className="text-sm font-medium mb-2 block">Low Stock Warning (%)</Label>
+              <Input type="number" placeholder="20" min="1" max="100" />
+              <p className="text-xs text-muted-foreground mt-1">Alert when stock falls below this % of reorder point</p>
+            </div>
+            <div>
+              <Label className="text-sm font-medium mb-2 block">Critical Stock (%)</Label>
+              <Input type="number" placeholder="10" min="1" max="100" />
+              <p className="text-xs text-muted-foreground mt-1">Critical alert threshold</p>
+            </div>
+            <div>
+              <Label className="text-sm font-medium mb-2 block">Overstock Threshold (%)</Label>
+              <Input type="number" placeholder="150" min="100" max="300" />
+              <p className="text-xs text-muted-foreground mt-1">Alert when stock exceeds this % of target</p>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowThresholdsDialog(false)}>Cancel</Button>
+              <Button onClick={() => { toast.success('Thresholds updated'); setShowThresholdsDialog(false); }}>
+                Save Thresholds
+              </Button>
+            </DialogFooter>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Email Rules Dialog */}
+      <Dialog open={showEmailRulesDialog} onOpenChange={setShowEmailRulesDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Mail className="w-5 h-5 text-purple-600" />
+              Email Alert Rules
+            </DialogTitle>
+            <DialogDescription>Configure email notification rules</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label className="text-sm font-medium mb-2 block">Recipients</Label>
+              <Textarea placeholder="Enter email addresses (one per line)" rows={3} />
+            </div>
+            <div>
+              <Label className="text-sm font-medium mb-2 block">Alert Types to Email</Label>
+              <div className="space-y-2">
+                <label className="flex items-center gap-2">
+                  <input type="checkbox" defaultChecked className="rounded" />
+                  <span className="text-sm">Out of stock</span>
+                </label>
+                <label className="flex items-center gap-2">
+                  <input type="checkbox" defaultChecked className="rounded" />
+                  <span className="text-sm">Low stock</span>
+                </label>
+                <label className="flex items-center gap-2">
+                  <input type="checkbox" className="rounded" />
+                  <span className="text-sm">Overstock</span>
+                </label>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowEmailRulesDialog(false)}>Cancel</Button>
+              <Button onClick={() => { toast.success('Email rules saved'); setShowEmailRulesDialog(false); }}>
+                Save Rules
+              </Button>
+            </DialogFooter>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Alert Schedules Dialog */}
+      <Dialog open={showAlertSchedulesDialog} onOpenChange={setShowAlertSchedulesDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Clock className="w-5 h-5 text-violet-600" />
+              Alert Schedules
+            </DialogTitle>
+            <DialogDescription>Configure when alerts are sent</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label className="text-sm font-medium mb-2 block">Summary Report Schedule</Label>
+              <select className="w-full px-3 py-2 rounded-lg border bg-white dark:bg-gray-800 text-sm">
+                <option>Daily at 8:00 AM</option>
+                <option>Weekly on Monday</option>
+                <option>Bi-weekly</option>
+                <option>Monthly</option>
+              </select>
+            </div>
+            <div>
+              <Label className="text-sm font-medium mb-2 block">Quiet Hours</Label>
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <p className="text-xs text-muted-foreground mb-1">From</p>
+                  <Input type="time" defaultValue="22:00" />
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground mb-1">To</p>
+                  <Input type="time" defaultValue="07:00" />
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">Critical alerts will still be sent during quiet hours</p>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowAlertSchedulesDialog(false)}>Cancel</Button>
+              <Button onClick={() => { toast.success('Schedule saved'); setShowAlertSchedulesDialog(false); }}>
+                Save Schedule
+              </Button>
+            </DialogFooter>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Alert Reports Dialog */}
+      <Dialog open={showAlertReportsDialog} onOpenChange={setShowAlertReportsDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileText className="w-5 h-5 text-indigo-600" />
+              Alert Reports
+            </DialogTitle>
+            <DialogDescription>Generate alert and exception reports</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            {[
+              { name: 'Alert History', desc: 'All alerts over selected period' },
+              { name: 'Exception Report', desc: 'Stock level exceptions' },
+              { name: 'Response Time Report', desc: 'Time to acknowledge alerts' },
+              { name: 'Trend Analysis', desc: 'Alert frequency trends' },
+            ].map((report, idx) => (
+              <Button
+                key={idx}
+                variant="outline"
+                className="w-full justify-start h-auto py-3"
+                onClick={() => { toast.success('Generating report'); setShowAlertReportsDialog(false); }}
+              >
+                <FileText className="w-5 h-5 mr-3 text-indigo-600" />
+                <div className="text-left">
+                  <p className="font-medium">{report.name}</p>
+                  <p className="text-xs text-muted-foreground">{report.desc}</p>
+                </div>
+              </Button>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Automations Dialog */}
+      <Dialog open={showAutomationsDialog} onOpenChange={setShowAutomationsDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Zap className="w-5 h-5 text-blue-600" />
+              Alert Automations
+            </DialogTitle>
+            <DialogDescription>Configure automated responses to alerts</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-3">
+              {[
+                { name: 'Auto-reorder', desc: 'Automatically create PO when stock is low', enabled: true },
+                { name: 'Escalation', desc: 'Escalate unacknowledged critical alerts', enabled: true },
+                { name: 'Supplier notification', desc: 'Notify supplier of upcoming orders', enabled: false },
+              ].map((auto, idx) => (
+                <div key={idx} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                  <div>
+                    <p className="font-medium text-sm">{auto.name}</p>
+                    <p className="text-xs text-muted-foreground">{auto.desc}</p>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" defaultChecked={auto.enabled} className="sr-only peer" />
+                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                  </label>
+                </div>
+              ))}
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowAutomationsDialog(false)}>Cancel</Button>
+              <Button onClick={() => { toast.success('Automations saved'); setShowAutomationsDialog(false); }}>
+                Save Settings
+              </Button>
+            </DialogFooter>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Acknowledge Single Alert Dialog */}
+      <Dialog open={showAcknowledgeAlertDialog} onOpenChange={setShowAcknowledgeAlertDialog}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <CheckCircle2 className="w-5 h-5 text-green-600" />
+              Acknowledge Alert
+            </DialogTitle>
+          </DialogHeader>
+          {selectedAlert && (
+            <div className="space-y-4">
+              <div className="p-3 bg-muted/50 rounded-lg">
+                <p className="font-medium">{selectedAlert.productName}</p>
+                <p className="text-sm text-muted-foreground">{selectedAlert.message}</p>
+              </div>
+              <div>
+                <Label className="text-sm font-medium mb-2 block">Add Note (Optional)</Label>
+                <Textarea placeholder="Action taken or notes..." rows={2} />
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setShowAcknowledgeAlertDialog(false)}>Cancel</Button>
+                <Button className="bg-green-600 hover:bg-green-700" onClick={() => { toast.success('Alert acknowledged', { description: selectedAlert.productName }); setShowAcknowledgeAlertDialog(false); }}>
+                  Acknowledge
+                </Button>
+              </DialogFooter>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Analytics Dashboard Dialog */}
+      <Dialog open={showAnalyticsDashboardDialog} onOpenChange={setShowAnalyticsDashboardDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <BarChart3 className="w-5 h-5 text-cyan-600" />
+              Analytics Dashboard
+            </DialogTitle>
+            <DialogDescription>Key inventory metrics at a glance</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="p-4 bg-cyan-50 dark:bg-cyan-900/20 rounded-lg text-center">
+                <p className="text-2xl font-bold text-cyan-600">{formatNumber(analytics.totalValue)}</p>
+                <p className="text-xs text-muted-foreground">Total Inventory Value</p>
+              </div>
+              <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-center">
+                <p className="text-2xl font-bold text-blue-600">{analytics.avgTurnoverRate}x</p>
+                <p className="text-xs text-muted-foreground">Turnover Rate</p>
+              </div>
+              <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg text-center">
+                <p className="text-2xl font-bold text-green-600">{analytics.totalProducts}</p>
+                <p className="text-xs text-muted-foreground">Total Products</p>
+              </div>
+              <div className="p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg text-center">
+                <p className="text-2xl font-bold text-orange-600">{analytics.lowStockCount + analytics.outOfStockCount}</p>
+                <p className="text-xs text-muted-foreground">Needs Attention</p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button onClick={() => setShowAnalyticsDashboardDialog(false)}>Close</Button>
+            </DialogFooter>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Trends Dialog */}
+      <Dialog open={showTrendsDialog} onOpenChange={setShowTrendsDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <TrendingUp className="w-5 h-5 text-blue-600" />
+              Inventory Trends
+            </DialogTitle>
+            <DialogDescription>Analyze inventory movement patterns</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label className="text-sm font-medium mb-2 block">Time Period</Label>
+              <select className="w-full px-3 py-2 rounded-lg border bg-white dark:bg-gray-800 text-sm">
+                <option>Last 7 days</option>
+                <option>Last 30 days</option>
+                <option>Last 90 days</option>
+                <option>Last year</option>
+              </select>
+            </div>
+            <div className="h-40 bg-muted/50 rounded-lg flex items-center justify-center">
+              <p className="text-muted-foreground text-sm">Trend chart visualization</p>
+            </div>
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div className="p-2 bg-green-50 dark:bg-green-900/20 rounded">
+                <p className="text-green-600 font-medium">+12.5%</p>
+                <p className="text-xs text-muted-foreground">Inbound Growth</p>
+              </div>
+              <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded">
+                <p className="text-blue-600 font-medium">+8.3%</p>
+                <p className="text-xs text-muted-foreground">Outbound Growth</p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowTrendsDialog(false)}>Close</Button>
+              <Button onClick={() => { toast.success('Exporting trend data'); setShowTrendsDialog(false); }}>
+                Export Data
+              </Button>
+            </DialogFooter>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Breakdown Dialog */}
+      <Dialog open={showBreakdownDialog} onOpenChange={setShowBreakdownDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <PieChart className="w-5 h-5 text-indigo-600" />
+              Inventory Breakdown
+            </DialogTitle>
+            <DialogDescription>Breakdown by category, location, and value</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <p className="text-sm font-medium mb-2">By Category</p>
+              {analytics.valueByCategory.filter(c => c.value > 0).map((cat, idx) => (
+                <div key={idx} className="flex items-center gap-2 mb-2">
+                  <div className="flex-1">
+                    <div className="flex justify-between text-sm mb-1">
+                      <span className="capitalize">{cat.category.replace('_', ' ')}</span>
+                      <span>{cat.percentage}%</span>
+                    </div>
+                    <Progress value={cat.percentage} className="h-2" />
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div>
+              <p className="text-sm font-medium mb-2">By Warehouse</p>
+              {warehouses.map((w, idx) => (
+                <div key={idx} className="flex justify-between text-sm p-2 bg-muted/50 rounded mb-1">
+                  <span>{w.name}</span>
+                  <span className="font-medium">{formatNumber(w.totalValue)}</span>
+                </div>
+              ))}
+            </div>
+            <DialogFooter>
+              <Button onClick={() => setShowBreakdownDialog(false)}>Close</Button>
+            </DialogFooter>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Forecasts Dialog */}
+      <Dialog open={showForecastsDialog} onOpenChange={setShowForecastsDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Target className="w-5 h-5 text-violet-600" />
+              Demand Forecasts
+            </DialogTitle>
+            <DialogDescription>AI-powered demand predictions</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="p-4 bg-violet-50 dark:bg-violet-900/20 rounded-lg">
+              <p className="font-medium mb-2">30-Day Forecast</p>
+              <p className="text-sm text-muted-foreground">Based on historical trends and seasonal patterns</p>
+            </div>
+            <div className="space-y-2">
+              {[
+                { product: 'Wireless Earbuds Pro', forecast: '+250 units', confidence: 'High' },
+                { product: 'Smart Watch Series X', forecast: '+180 units', confidence: 'Medium' },
+                { product: 'Premium Cotton T-Shirt', forecast: '+450 units', confidence: 'High' },
+              ].map((item, idx) => (
+                <div key={idx} className="flex items-center justify-between p-2 bg-muted/50 rounded-lg">
+                  <div>
+                    <p className="font-medium text-sm">{item.product}</p>
+                    <p className="text-xs text-muted-foreground">Forecast: {item.forecast}</p>
+                  </div>
+                  <Badge variant="outline">{item.confidence}</Badge>
+                </div>
+              ))}
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowForecastsDialog(false)}>Close</Button>
+              <Button onClick={() => { toast.success('Generating detailed forecast'); setShowForecastsDialog(false); }}>
+                Full Report
+              </Button>
+            </DialogFooter>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Analytics Reports Dialog */}
+      <Dialog open={showAnalyticsReportsDialog} onOpenChange={setShowAnalyticsReportsDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileText className="w-5 h-5 text-purple-600" />
+              Analytics Reports
+            </DialogTitle>
+            <DialogDescription>Generate detailed analytics reports</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            {[
+              { name: 'Inventory Valuation', desc: 'Complete valuation by method' },
+              { name: 'Turnover Analysis', desc: 'Product velocity and aging' },
+              { name: 'ABC Analysis', desc: 'Classify products by value/volume' },
+              { name: 'Seasonal Trends', desc: 'Year-over-year comparisons' },
+              { name: 'Dead Stock Report', desc: 'Non-moving inventory' },
+            ].map((report, idx) => (
+              <Button
+                key={idx}
+                variant="outline"
+                className="w-full justify-start h-auto py-3"
+                onClick={() => { toast.success('Generating ' + report.name); setShowAnalyticsReportsDialog(false); }}
+              >
+                <FileText className="w-5 h-5 mr-3 text-purple-600" />
+                <div className="text-left">
+                  <p className="font-medium">{report.name}</p>
+                  <p className="text-xs text-muted-foreground">{report.desc}</p>
+                </div>
+              </Button>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Analytics Export Dialog */}
+      <Dialog open={showAnalyticsExportDialog} onOpenChange={setShowAnalyticsExportDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Download className="w-5 h-5 text-fuchsia-600" />
+              Export Analytics
+            </DialogTitle>
+            <DialogDescription>Export analytics data</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label className="text-sm font-medium mb-2 block">Data to Export</Label>
+              <div className="space-y-2">
+                <label className="flex items-center gap-2">
+                  <input type="checkbox" defaultChecked className="rounded" />
+                  <span className="text-sm">Inventory summary</span>
+                </label>
+                <label className="flex items-center gap-2">
+                  <input type="checkbox" defaultChecked className="rounded" />
+                  <span className="text-sm">Movement data</span>
+                </label>
+                <label className="flex items-center gap-2">
+                  <input type="checkbox" className="rounded" />
+                  <span className="text-sm">Forecast data</span>
+                </label>
+                <label className="flex items-center gap-2">
+                  <input type="checkbox" className="rounded" />
+                  <span className="text-sm">Historical trends</span>
+                </label>
+              </div>
+            </div>
+            <div>
+              <Label className="text-sm font-medium mb-2 block">Format</Label>
+              <select className="w-full px-3 py-2 rounded-lg border bg-white dark:bg-gray-800 text-sm">
+                <option>Excel (XLSX)</option>
+                <option>CSV</option>
+                <option>PDF</option>
+              </select>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowAnalyticsExportDialog(false)}>Cancel</Button>
+              <Button className="bg-fuchsia-600 hover:bg-fuchsia-700" onClick={() => { toast.success('Export started'); setShowAnalyticsExportDialog(false); }}>
+                Export
+              </Button>
+            </DialogFooter>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Analytics Schedule Dialog */}
+      <Dialog open={showAnalyticsScheduleDialog} onOpenChange={setShowAnalyticsScheduleDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Calendar className="w-5 h-5 text-pink-600" />
+              Schedule Reports
+            </DialogTitle>
+            <DialogDescription>Set up automated report delivery</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label className="text-sm font-medium mb-2 block">Report Type</Label>
+              <select className="w-full px-3 py-2 rounded-lg border bg-white dark:bg-gray-800 text-sm">
+                <option>Daily Summary</option>
+                <option>Weekly Inventory Report</option>
+                <option>Monthly Analytics</option>
+                <option>Quarterly Review</option>
+              </select>
+            </div>
+            <div>
+              <Label className="text-sm font-medium mb-2 block">Delivery Time</Label>
+              <Input type="time" defaultValue="08:00" />
+            </div>
+            <div>
+              <Label className="text-sm font-medium mb-2 block">Recipients</Label>
+              <Input placeholder="email@example.com" />
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowAnalyticsScheduleDialog(false)}>Cancel</Button>
+              <Button className="bg-pink-600 hover:bg-pink-700" onClick={() => { toast.success('Report scheduled'); setShowAnalyticsScheduleDialog(false); }}>
+                Schedule
+              </Button>
+            </DialogFooter>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Configure Analytics Dialog */}
+      <Dialog open={showConfigureDialog} onOpenChange={setShowConfigureDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Settings className="w-5 h-5 text-rose-600" />
+              Configure Analytics
+            </DialogTitle>
+            <DialogDescription>Customize analytics settings</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label className="text-sm font-medium mb-2 block">Default Time Range</Label>
+              <select className="w-full px-3 py-2 rounded-lg border bg-white dark:bg-gray-800 text-sm">
+                <option>Last 30 days</option>
+                <option>Last 90 days</option>
+                <option>Year to date</option>
+                <option>Last 12 months</option>
+              </select>
+            </div>
+            <div>
+              <Label className="text-sm font-medium mb-2 block">Currency</Label>
+              <select className="w-full px-3 py-2 rounded-lg border bg-white dark:bg-gray-800 text-sm">
+                <option>USD ($)</option>
+                <option>EUR (E)</option>
+                <option>GBP (P)</option>
+              </select>
+            </div>
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Display Options</Label>
+              <label className="flex items-center gap-2">
+                <input type="checkbox" defaultChecked className="rounded" />
+                <span className="text-sm">Show comparison to previous period</span>
+              </label>
+              <label className="flex items-center gap-2">
+                <input type="checkbox" defaultChecked className="rounded" />
+                <span className="text-sm">Include forecasts</span>
+              </label>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowConfigureDialog(false)}>Cancel</Button>
+              <Button onClick={() => { toast.success('Configuration saved'); setShowConfigureDialog(false); }}>
+                Save Settings
+              </Button>
+            </DialogFooter>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Product History Dialog */}
+      <Dialog open={showProductHistoryDialog} onOpenChange={setShowProductHistoryDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <History className="w-5 h-5 text-indigo-600" />
+              Product History
+            </DialogTitle>
+            <DialogDescription>{selectedProduct?.name || 'Product'} movement history</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 max-h-80 overflow-y-auto">
+            {movements.filter(m => selectedProduct && m.product.id === selectedProduct.id).length > 0 ? (
+              movements.filter(m => selectedProduct && m.product.id === selectedProduct.id).map(mov => (
+                <div key={mov.id} className="p-3 bg-muted/50 rounded-lg">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="font-medium text-sm">{mov.movementNumber}</span>
+                    {getMovementTypeBadge(mov.type)}
+                  </div>
+                  <p className="text-sm">Quantity: {mov.quantity > 0 ? '+' : ''}{mov.quantity}</p>
+                  <p className="text-xs text-muted-foreground">{formatDate(mov.movementDate)}</p>
+                </div>
+              ))
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                <History className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                <p>No movement history found</p>
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setShowProductHistoryDialog(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Selected Product Dialog */}
+      <Dialog open={showEditSelectedProductDialog} onOpenChange={setShowEditSelectedProductDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Edit className="w-5 h-5 text-blue-600" />
+              Edit Product
+            </DialogTitle>
+            <DialogDescription>Update {selectedProduct?.name}</DialogDescription>
+          </DialogHeader>
+          {selectedProduct && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-sm font-medium mb-2 block">SKU</Label>
+                  <Input defaultValue={selectedProduct.sku} />
+                </div>
+                <div>
+                  <Label className="text-sm font-medium mb-2 block">Category</Label>
+                  <select className="w-full px-3 py-2 rounded-lg border bg-white dark:bg-gray-800 text-sm" defaultValue={selectedProduct.category}>
+                    <option value="electronics">Electronics</option>
+                    <option value="apparel">Apparel</option>
+                    <option value="food">Food</option>
+                    <option value="raw_materials">Raw Materials</option>
+                    <option value="packaging">Packaging</option>
+                  </select>
+                </div>
+              </div>
+              <div>
+                <Label className="text-sm font-medium mb-2 block">Product Name</Label>
+                <Input defaultValue={selectedProduct.name} />
+              </div>
+              <div className="grid grid-cols-3 gap-4">
+                <div>
+                  <Label className="text-sm font-medium mb-2 block">Unit Cost</Label>
+                  <Input type="number" defaultValue={selectedProduct.unitCost} step="0.01" />
+                </div>
+                <div>
+                  <Label className="text-sm font-medium mb-2 block">Selling Price</Label>
+                  <Input type="number" defaultValue={selectedProduct.sellingPrice} step="0.01" />
+                </div>
+                <div>
+                  <Label className="text-sm font-medium mb-2 block">Reorder Point</Label>
+                  <Input type="number" defaultValue={selectedProduct.reorderPoint} />
+                </div>
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setShowEditSelectedProductDialog(false)}>Cancel</Button>
+                <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => { toast.success('Product updated'); setShowEditSelectedProductDialog(false); }}>
+                  Save Changes
+                </Button>
+              </DialogFooter>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Stock to Product Dialog */}
+      <Dialog open={showAddStockToProductDialog} onOpenChange={setShowAddStockToProductDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Plus className="w-5 h-5 text-green-600" />
+              Add Stock
+            </DialogTitle>
+            <DialogDescription>Add stock to {selectedProduct?.name}</DialogDescription>
+          </DialogHeader>
+          {selectedProduct && (
+            <div className="space-y-4">
+              <div className="p-3 bg-muted/50 rounded-lg">
+                <p className="font-medium">{selectedProduct.name}</p>
+                <p className="text-sm text-muted-foreground">Current stock: {selectedProduct.quantity}</p>
+              </div>
+              <div>
+                <Label className="text-sm font-medium mb-2 block">Warehouse</Label>
+                <select className="w-full px-3 py-2 rounded-lg border bg-white dark:bg-gray-800 text-sm">
+                  {warehouses.map(w => (
+                    <option key={w.id} value={w.id}>{w.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <Label className="text-sm font-medium mb-2 block">Quantity to Add</Label>
+                <Input type="number" placeholder="0" min="1" />
+              </div>
+              <div>
+                <Label className="text-sm font-medium mb-2 block">Batch Number (Optional)</Label>
+                <Input placeholder="e.g., BATCH-2024-001" />
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setShowAddStockToProductDialog(false)}>Cancel</Button>
+                <Button className="bg-green-600 hover:bg-green-700" onClick={() => { toast.success('Stock added', { description: `Stock added to ${selectedProduct.name}` }); setShowAddStockToProductDialog(false); }}>
+                  Add Stock
+                </Button>
+              </DialogFooter>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Transfer Product Stock Dialog */}
+      <Dialog open={showTransferProductDialog} onOpenChange={setShowTransferProductDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <ArrowRightLeft className="w-5 h-5 text-blue-600" />
+              Transfer Stock
+            </DialogTitle>
+            <DialogDescription>Transfer {selectedProduct?.name}</DialogDescription>
+          </DialogHeader>
+          {selectedProduct && (
+            <div className="space-y-4">
+              <div className="p-3 bg-muted/50 rounded-lg">
+                <p className="font-medium">{selectedProduct.name}</p>
+                <p className="text-sm text-muted-foreground">Available: {selectedProduct.availableQuantity}</p>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-sm font-medium mb-2 block">From</Label>
+                  <select className="w-full px-3 py-2 rounded-lg border bg-white dark:bg-gray-800 text-sm">
+                    {selectedProduct.locations.map(loc => (
+                      <option key={loc.warehouseId} value={loc.warehouseId}>{loc.warehouseName} ({loc.quantity})</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium mb-2 block">To</Label>
+                  <select className="w-full px-3 py-2 rounded-lg border bg-white dark:bg-gray-800 text-sm">
+                    {warehouses.map(w => (
+                      <option key={w.id} value={w.id}>{w.name}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              <div>
+                <Label className="text-sm font-medium mb-2 block">Transfer Quantity</Label>
+                <Input type="number" placeholder="0" min="1" />
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setShowTransferProductDialog(false)}>Cancel</Button>
+                <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => { toast.success('Transfer initiated', { description: `Transferring ${selectedProduct.name}` }); setShowTransferProductDialog(false); }}>
+                  Transfer
+                </Button>
+              </DialogFooter>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>

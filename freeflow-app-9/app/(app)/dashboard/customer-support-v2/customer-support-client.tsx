@@ -281,6 +281,57 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
   const [showAgentDialog, setShowAgentDialog] = useState(false)
   const [settingsTab, setSettingsTab] = useState('general')
 
+  // Dialog states for quick actions
+  const [showAssignDialog, setShowAssignDialog] = useState(false)
+  const [showTagsDialog, setShowTagsDialog] = useState(false)
+  const [showArchiveDialog, setShowArchiveDialog] = useState(false)
+  const [showReportsDialog, setShowReportsDialog] = useState(false)
+  const [showAddAgentDialog, setShowAddAgentDialog] = useState(false)
+  const [showTeamsDialog, setShowTeamsDialog] = useState(false)
+  const [showScheduleDialog, setShowScheduleDialog] = useState(false)
+  const [showGoalsDialog, setShowGoalsDialog] = useState(false)
+  const [showRatingsDialog, setShowRatingsDialog] = useState(false)
+  const [showTrainingDialog, setShowTrainingDialog] = useState(false)
+  const [showAddCustomerDialog, setShowAddCustomerDialog] = useState(false)
+  const [showEmailAllDialog, setShowEmailAllDialog] = useState(false)
+  const [showSegmentsDialog, setShowSegmentsDialog] = useState(false)
+  const [showVIPDialog, setShowVIPDialog] = useState(false)
+  const [showInsightsDialog, setShowInsightsDialog] = useState(false)
+  const [showImportDialog, setShowImportDialog] = useState(false)
+  const [showCustomerProfileDialog, setShowCustomerProfileDialog] = useState(false)
+  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null)
+  const [showFilterDialog, setShowFilterDialog] = useState(false)
+  const [showAddSLADialog, setShowAddSLADialog] = useState(false)
+  const [showEditSLADialog, setShowEditSLADialog] = useState(false)
+  const [selectedSLA, setSelectedSLA] = useState<SLA | null>(null)
+  const [showEditAutomationDialog, setShowEditAutomationDialog] = useState(false)
+  const [showCreateAutomationDialog, setShowCreateAutomationDialog] = useState(false)
+  const [showPreviewResponseDialog, setShowPreviewResponseDialog] = useState(false)
+  const [showEditResponseDialog, setShowEditResponseDialog] = useState(false)
+  const [showAddResponseDialog, setShowAddResponseDialog] = useState(false)
+  const [selectedResponse, setSelectedResponse] = useState<CannedResponse | null>(null)
+  const [showDeleteTicketsDialog, setShowDeleteTicketsDialog] = useState(false)
+  const [showResetSettingsDialog, setShowResetSettingsDialog] = useState(false)
+  const [showAddTagDialog, setShowAddTagDialog] = useState(false)
+  const [showAssignAgentDialog, setShowAssignAgentDialog] = useState(false)
+  const [showAttachmentDialog, setShowAttachmentDialog] = useState(false)
+  const [showEmojiDialog, setShowEmojiDialog] = useState(false)
+  const [showAgentScheduleDialog, setShowAgentScheduleDialog] = useState(false)
+  const [showAgentReportDialog, setShowAgentReportDialog] = useState(false)
+  const [showAgentMessageDialog, setShowAgentMessageDialog] = useState(false)
+  const [showWebhooksDialog, setShowWebhooksDialog] = useState(false)
+  const [showApiDocsDialog, setShowApiDocsDialog] = useState(false)
+
+  // Form states for dialogs
+  const [newAgentForm, setNewAgentForm] = useState({ name: '', email: '', role: 'agent' })
+  const [newCustomerForm, setNewCustomerForm] = useState({ name: '', email: '', company: '', tier: 'basic' })
+  const [emailAllForm, setEmailAllForm] = useState({ subject: '', message: '' })
+  const [newSLAForm, setNewSLAForm] = useState({ name: '', priority: 'normal', firstResponseTarget: 60, resolutionTarget: 240 })
+  const [newAutomationForm, setNewAutomationForm] = useState({ name: '', trigger: '', actions: '' })
+  const [newResponseForm, setNewResponseForm] = useState({ title: '', content: '', category: 'General' })
+  const [newTagForm, setNewTagForm] = useState('')
+  const [agentMessageForm, setAgentMessageForm] = useState('')
+
   // Supabase state
   const [dbTickets, setDbTickets] = useState<DbTicket[]>([])
   const [isLoading, setIsLoading] = useState(false)
@@ -767,19 +818,20 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
             {/* Tickets Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: MessageSquare, label: 'New Ticket', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
-                { icon: Inbox, label: 'Inbox', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
-                { icon: Clock, label: 'Pending', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
-                { icon: CheckCircle, label: 'Resolved', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
-                { icon: Users, label: 'Assign', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
-                { icon: Tag, label: 'Tags', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
-                { icon: Archive, label: 'Archive', color: 'bg-gray-100 text-gray-600 dark:bg-gray-900/30 dark:text-gray-400' },
-                { icon: BarChart3, label: 'Reports', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
+                { icon: MessageSquare, label: 'New Ticket', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: () => setShowCreateDialog(true) },
+                { icon: Inbox, label: 'Inbox', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', action: () => { setStatusFilter('all'); toast.success('Showing all inbox tickets') } },
+                { icon: Clock, label: 'Pending', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', action: () => { setStatusFilter('pending'); toast.success('Filtering pending tickets') } },
+                { icon: CheckCircle, label: 'Resolved', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', action: () => { setStatusFilter('solved'); toast.success('Filtering resolved tickets') } },
+                { icon: Users, label: 'Assign', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => setShowAssignDialog(true) },
+                { icon: Tag, label: 'Tags', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', action: () => setShowTagsDialog(true) },
+                { icon: Archive, label: 'Archive', color: 'bg-gray-100 text-gray-600 dark:bg-gray-900/30 dark:text-gray-400', action: () => setShowArchiveDialog(true) },
+                { icon: BarChart3, label: 'Reports', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', action: () => setShowReportsDialog(true) },
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={action.action}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -828,12 +880,16 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
                 {/* Quick Filters */}
                 <div className="flex gap-2 mb-4">
                   {[
-                    { label: 'My Tickets', count: 5 },
-                    { label: 'Unassigned', count: 3 },
-                    { label: 'SLA Breached', count: 1 },
-                    { label: 'Awaiting Reply', count: 2 },
+                    { label: 'My Tickets', count: 5, action: () => { setStatusFilter('all'); toast.success('Showing your assigned tickets') } },
+                    { label: 'Unassigned', count: 3, action: () => { setStatusFilter('new'); toast.success('Showing unassigned tickets') } },
+                    { label: 'SLA Breached', count: 1, action: () => toast.info('Showing SLA breached tickets', { description: '1 ticket requires immediate attention' }) },
+                    { label: 'Awaiting Reply', count: 2, action: () => { setStatusFilter('pending'); toast.success('Showing tickets awaiting reply') } },
                   ].map((filter, i) => (
-                    <button key={i} className="px-3 py-1.5 bg-white border rounded-lg text-sm hover:bg-gray-50 flex items-center gap-2">
+                    <button
+                      key={i}
+                      className="px-3 py-1.5 bg-white border rounded-lg text-sm hover:bg-gray-50 flex items-center gap-2"
+                      onClick={filter.action}
+                    >
                       {filter.label}
                       <Badge variant="secondary" className="text-xs">{filter.count}</Badge>
                     </button>
@@ -999,19 +1055,20 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
             {/* Agents Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: User, label: 'Add Agent', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
-                { icon: Users, label: 'Teams', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' },
-                { icon: Calendar, label: 'Schedule', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
-                { icon: Target, label: 'Goals', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400' },
-                { icon: BarChart3, label: 'Reports', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
-                { icon: Star, label: 'Ratings', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
-                { icon: Headphones, label: 'Training', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
-                { icon: Settings, label: 'Settings', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400' },
+                { icon: User, label: 'Add Agent', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', action: () => setShowAddAgentDialog(true) },
+                { icon: Users, label: 'Teams', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', action: () => setShowTeamsDialog(true) },
+                { icon: Calendar, label: 'Schedule', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', action: () => setShowScheduleDialog(true) },
+                { icon: Target, label: 'Goals', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', action: () => setShowGoalsDialog(true) },
+                { icon: BarChart3, label: 'Reports', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: () => setShowReportsDialog(true) },
+                { icon: Star, label: 'Ratings', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', action: () => setShowRatingsDialog(true) },
+                { icon: Headphones, label: 'Training', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => setShowTrainingDialog(true) },
+                { icon: Settings, label: 'Settings', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400', action: () => setActiveTab('settings') },
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={action.action}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1099,19 +1156,20 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
             {/* Customers Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: User, label: 'Add', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
-                { icon: Mail, label: 'Email All', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
-                { icon: Tag, label: 'Segments', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
-                { icon: Star, label: 'VIP', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
-                { icon: TrendingUp, label: 'Insights', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
-                { icon: FileText, label: 'Export', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
-                { icon: Globe, label: 'Import', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
-                { icon: Settings, label: 'Settings', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400' },
+                { icon: User, label: 'Add', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => setShowAddCustomerDialog(true) },
+                { icon: Mail, label: 'Email All', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', action: () => setShowEmailAllDialog(true) },
+                { icon: Tag, label: 'Segments', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', action: () => setShowSegmentsDialog(true) },
+                { icon: Star, label: 'VIP', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', action: () => setShowVIPDialog(true) },
+                { icon: TrendingUp, label: 'Insights', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: () => setShowInsightsDialog(true) },
+                { icon: FileText, label: 'Export', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', action: handleExportTickets },
+                { icon: Globe, label: 'Import', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', action: () => setShowImportDialog(true) },
+                { icon: Settings, label: 'Settings', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400', action: () => setActiveTab('settings') },
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={action.action}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1125,7 +1183,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
                   <CardTitle>Customer Directory</CardTitle>
                   <div className="flex items-center gap-2">
                     <Input placeholder="Search customers..." className="w-64" />
-                    <Button variant="outline">
+                    <Button variant="outline" onClick={() => setShowFilterDialog(true)}>
                       <Filter className="h-4 w-4 mr-2" />
                       Filter
                     </Button>
@@ -1156,7 +1214,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
                         </div>
                         <p className="text-sm text-gray-500">{customer.totalTickets} tickets</p>
                       </div>
-                      <Button variant="outline" size="sm">View Profile</Button>
+                      <Button variant="outline" size="sm" onClick={() => { setSelectedCustomer(customer); setShowCustomerProfileDialog(true) }}>View Profile</Button>
                     </div>
                   ))}
                 </div>
@@ -1189,19 +1247,20 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
             {/* Analytics Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: BarChart3, label: 'Overview', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
-                { icon: TrendingUp, label: 'Trends', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400' },
-                { icon: Timer, label: 'Response', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
-                { icon: Star, label: 'CSAT', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400' },
-                { icon: Users, label: 'Agents', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
-                { icon: Tag, label: 'Topics', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
-                { icon: FileText, label: 'Export', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
-                { icon: Calendar, label: 'Schedule', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
+                { icon: BarChart3, label: 'Overview', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', action: () => toast.success('Showing analytics overview') },
+                { icon: TrendingUp, label: 'Trends', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', action: () => setShowInsightsDialog(true) },
+                { icon: Timer, label: 'Response', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', action: () => toast.info('Response time analytics', { description: 'Average: 2.4 hours' }) },
+                { icon: Star, label: 'CSAT', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400', action: () => setShowRatingsDialog(true) },
+                { icon: Users, label: 'Agents', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', action: () => setActiveTab('agents') },
+                { icon: Tag, label: 'Topics', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: () => setShowTagsDialog(true) },
+                { icon: FileText, label: 'Export', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: handleExportTickets },
+                { icon: Calendar, label: 'Schedule', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', action: () => setShowScheduleDialog(true) },
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={action.action}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1329,19 +1388,20 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
             {/* Settings Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
-                { icon: Settings, label: 'General', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400' },
-                { icon: Headphones, label: 'Channels', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
-                { icon: Timer, label: 'SLA', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
-                { icon: Zap, label: 'Automation', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
-                { icon: Link2, label: 'Integrations', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
-                { icon: Shield, label: 'Security', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
-                { icon: Bell, label: 'Notifications', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
-                { icon: RefreshCw, label: 'Reset', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' },
+                { icon: Settings, label: 'General', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400', action: () => setSettingsTab('general') },
+                { icon: Headphones, label: 'Channels', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: () => setSettingsTab('channels') },
+                { icon: Timer, label: 'SLA', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', action: () => setSettingsTab('sla') },
+                { icon: Zap, label: 'Automation', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => setSettingsTab('automations') },
+                { icon: Link2, label: 'Integrations', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', action: () => setSettingsTab('integrations') },
+                { icon: Shield, label: 'Security', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', action: () => setSettingsTab('advanced') },
+                { icon: Bell, label: 'Notifications', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', action: () => setSettingsTab('advanced') },
+                { icon: RefreshCw, label: 'Reset', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', action: () => setShowResetSettingsDialog(true) },
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={action.action}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1594,12 +1654,12 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
                                 <Badge className={sla.complianceRate >= 95 ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}>
                                   {sla.complianceRate}% compliance
                                 </Badge>
-                                <Button variant="outline" size="sm">Edit</Button>
+                                <Button variant="outline" size="sm" onClick={() => { setSelectedSLA(sla); setShowEditSLADialog(true) }}>Edit</Button>
                               </div>
                             </div>
                           ))}
                         </div>
-                        <Button variant="outline" className="mt-4 w-full">
+                        <Button variant="outline" className="mt-4 w-full" onClick={() => setShowAddSLADialog(true)}>
                           <Target className="w-4 h-4 mr-2" />
                           Add SLA Policy
                         </Button>
@@ -1708,7 +1768,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
                                 </div>
                                 <div className="flex items-center gap-2">
                                   <Badge variant={rule.status === 'active' ? 'default' : 'secondary'}>{rule.status}</Badge>
-                                  <Button variant="ghost" size="sm">Edit</Button>
+                                  <Button variant="ghost" size="sm" onClick={() => { setNewAutomationForm({ name: rule.name, trigger: rule.trigger, actions: rule.actions.join(', ') }); setShowEditAutomationDialog(true) }}>Edit</Button>
                                 </div>
                               </div>
                               <p className="text-sm text-gray-500 ml-7">
@@ -1720,7 +1780,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
                             </div>
                           ))}
                         </div>
-                        <Button variant="outline" className="mt-4 w-full">
+                        <Button variant="outline" className="mt-4 w-full" onClick={() => setShowCreateAutomationDialog(true)}>
                           <Zap className="w-4 h-4 mr-2" />
                           Create Automation
                         </Button>
@@ -1743,13 +1803,13 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
                                 <p className="text-xs text-gray-500">{response.category} • Used {response.usageCount} times</p>
                               </div>
                               <div className="flex items-center gap-2">
-                                <Button variant="ghost" size="sm">Preview</Button>
-                                <Button variant="ghost" size="sm">Edit</Button>
+                                <Button variant="ghost" size="sm" onClick={() => { setSelectedResponse(response); setShowPreviewResponseDialog(true) }}>Preview</Button>
+                                <Button variant="ghost" size="sm" onClick={() => { setSelectedResponse(response); setNewResponseForm({ title: response.title, content: response.content, category: response.category }); setShowEditResponseDialog(true) }}>Edit</Button>
                               </div>
                             </div>
                           ))}
                         </div>
-                        <Button variant="outline" className="mt-4 w-full">
+                        <Button variant="outline" className="mt-4 w-full" onClick={() => setShowAddResponseDialog(true)}>
                           <FileText className="w-4 h-4 mr-2" />
                           Add Canned Response
                         </Button>
@@ -1787,7 +1847,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
                               {integration.connected ? (
                                 <Badge className="bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400">Connected</Badge>
                               ) : (
-                                <Button size="sm" variant="outline">Connect</Button>
+                                <Button size="sm" variant="outline" onClick={() => toast.success(`Connecting to ${integration.name}...`, { description: 'Redirecting to authorization page' })}>Connect</Button>
                               )}
                             </div>
                             {integration.connected && (
@@ -1812,16 +1872,16 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
                         <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                           <div className="flex items-center justify-between mb-2">
                             <Label>API Key</Label>
-                            <Button variant="ghost" size="sm">Regenerate</Button>
+                            <Button variant="ghost" size="sm" onClick={() => toast.success('API key regenerated', { description: 'New key will be shown below' })}>Regenerate</Button>
                           </div>
                           <Input type="password" value="cs_live_••••••••••••••••" readOnly className="font-mono" />
                         </div>
                         <div className="flex items-center gap-4">
-                          <Button variant="outline" className="flex items-center gap-2">
+                          <Button variant="outline" className="flex items-center gap-2" onClick={() => setShowApiDocsDialog(true)}>
                             <FileText className="w-4 h-4" />
                             API Docs
                           </Button>
-                          <Button variant="outline" className="flex items-center gap-2">
+                          <Button variant="outline" className="flex items-center gap-2" onClick={() => setShowWebhooksDialog(true)}>
                             <Globe className="w-4 h-4" />
                             Webhooks
                           </Button>
@@ -1923,14 +1983,14 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
                             <Label className="text-red-700 dark:text-red-400">Delete All Closed Tickets</Label>
                             <p className="text-sm text-red-600 dark:text-red-500">Permanently remove closed tickets</p>
                           </div>
-                          <Button variant="destructive" size="sm">Delete</Button>
+                          <Button variant="destructive" size="sm" onClick={() => setShowDeleteTicketsDialog(true)}>Delete</Button>
                         </div>
                         <div className="flex items-center justify-between p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
                           <div>
                             <Label className="text-red-700 dark:text-red-400">Reset All Settings</Label>
                             <p className="text-sm text-red-600 dark:text-red-500">Reset to factory defaults</p>
                           </div>
-                          <Button variant="destructive" size="sm">Reset</Button>
+                          <Button variant="destructive" size="sm" onClick={() => setShowResetSettingsDialog(true)}>Reset</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -1999,10 +2059,10 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
                         onChange={(e) => setMessageInput(e.target.value)}
                         className="flex-1"
                       />
-                      <Button variant="ghost" size="icon">
+                      <Button variant="ghost" size="icon" onClick={() => setShowAttachmentDialog(true)}>
                         <Paperclip className="h-4 w-4" />
                       </Button>
-                      <Button variant="ghost" size="icon">
+                      <Button variant="ghost" size="icon" onClick={() => setShowEmojiDialog(true)}>
                         <Smile className="h-4 w-4" />
                       </Button>
                       <Button
@@ -2070,7 +2130,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
                           </div>
                         </div>
                       ) : (
-                        <Button className="w-full" variant="outline">Assign Agent</Button>
+                        <Button className="w-full" variant="outline" onClick={() => setShowAssignAgentDialog(true)}>Assign Agent</Button>
                       )}
                     </CardContent>
                   </Card>
@@ -2107,7 +2167,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
                         {selectedTicket.tags.map((tag, i) => (
                           <Badge key={i} variant="secondary" className="text-xs">{tag}</Badge>
                         ))}
-                        <Button variant="ghost" size="sm" className="h-6 px-2 text-xs">+ Add</Button>
+                        <Button variant="ghost" size="sm" className="h-6 px-2 text-xs" onClick={() => setShowAddTagDialog(true)}>+ Add</Button>
                       </div>
                     </CardContent>
                   </Card>
@@ -2279,15 +2339,15 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
 
               <DialogFooter className="mt-4">
                 <div className="flex items-center gap-3 w-full">
-                  <Button variant="outline" className="flex-1">
+                  <Button variant="outline" className="flex-1" onClick={() => setShowAgentScheduleDialog(true)}>
                     <Calendar className="h-4 w-4 mr-2" />
                     View Schedule
                   </Button>
-                  <Button variant="outline" className="flex-1">
+                  <Button variant="outline" className="flex-1" onClick={() => setShowAgentReportDialog(true)}>
                     <BarChart3 className="h-4 w-4 mr-2" />
                     Full Report
                   </Button>
-                  <Button className="flex-1 bg-gradient-to-r from-emerald-500 to-teal-500 text-white">
+                  <Button className="flex-1 bg-gradient-to-r from-emerald-500 to-teal-500 text-white" onClick={() => setShowAgentMessageDialog(true)}>
                     <MessageSquare className="h-4 w-4 mr-2" />
                     Send Message
                   </Button>
@@ -2417,6 +2477,1305 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
             <Button onClick={handleCreateTicket} disabled={isSubmitting} className="bg-emerald-600 hover:bg-emerald-700">
               {isSubmitting ? 'Creating...' : 'Create Ticket'}
             </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Assign Tickets Dialog */}
+      <Dialog open={showAssignDialog} onOpenChange={setShowAssignDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Assign Tickets</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-gray-500">Select tickets and assign them to an agent.</p>
+            <div>
+              <Label>Select Agent</Label>
+              <Select>
+                <SelectTrigger className="mt-1">
+                  <SelectValue placeholder="Choose an agent" />
+                </SelectTrigger>
+                <SelectContent>
+                  {agents.map(agent => (
+                    <SelectItem key={agent.id} value={agent.id}>{agent.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Tickets to Assign</Label>
+              <div className="mt-2 space-y-2 max-h-40 overflow-y-auto">
+                {filteredTickets.filter(t => !t.assignee).map(ticket => (
+                  <div key={ticket.id} className="flex items-center gap-2 p-2 border rounded">
+                    <input type="checkbox" className="rounded" />
+                    <span className="text-sm">{ticket.subject}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAssignDialog(false)}>Cancel</Button>
+            <Button onClick={() => { toast.success('Tickets assigned successfully'); setShowAssignDialog(false) }}>Assign</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Tags Management Dialog */}
+      <Dialog open={showTagsDialog} onOpenChange={setShowTagsDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Manage Tags</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Available Tags</Label>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {['bug', 'feature', 'billing', 'urgent', 'technical', 'api', 'vip', 'new'].map(tag => (
+                  <Badge key={tag} variant="secondary" className="cursor-pointer hover:bg-gray-200">{tag}</Badge>
+                ))}
+              </div>
+            </div>
+            <div>
+              <Label>Create New Tag</Label>
+              <div className="flex gap-2 mt-1">
+                <Input placeholder="Enter tag name" />
+                <Button onClick={() => toast.success('Tag created')}>Add</Button>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowTagsDialog(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Archive Dialog */}
+      <Dialog open={showArchiveDialog} onOpenChange={setShowArchiveDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Archive Tickets</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-gray-500">Archive resolved tickets to clean up your inbox.</p>
+            <div>
+              <Label>Archive Criteria</Label>
+              <Select defaultValue="30">
+                <SelectTrigger className="mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="7">Resolved more than 7 days ago</SelectItem>
+                  <SelectItem value="30">Resolved more than 30 days ago</SelectItem>
+                  <SelectItem value="90">Resolved more than 90 days ago</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="p-3 bg-gray-50 rounded-lg">
+              <p className="text-sm font-medium">Tickets to archive: {filteredTickets.filter(t => t.status === 'solved').length}</p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowArchiveDialog(false)}>Cancel</Button>
+            <Button onClick={() => { toast.success('Tickets archived successfully'); setShowArchiveDialog(false) }}>Archive</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Reports Dialog */}
+      <Dialog open={showReportsDialog} onOpenChange={setShowReportsDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Support Reports</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <Card>
+                <CardContent className="pt-4">
+                  <h4 className="font-medium mb-2">Ticket Summary</h4>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between"><span>Total Tickets</span><span>{tickets.length}</span></div>
+                    <div className="flex justify-between"><span>Open</span><span>{tickets.filter(t => t.status === 'open').length}</span></div>
+                    <div className="flex justify-between"><span>Resolved</span><span>{tickets.filter(t => t.status === 'solved').length}</span></div>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="pt-4">
+                  <h4 className="font-medium mb-2">Response Metrics</h4>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between"><span>Avg Response Time</span><span>{stats.avgResponseTime}m</span></div>
+                    <div className="flex justify-between"><span>CSAT Score</span><span>{stats.satisfactionScore}</span></div>
+                    <div className="flex justify-between"><span>SLA Compliance</span><span>{stats.slaCompliance}%</span></div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+            <Button variant="outline" className="w-full" onClick={handleExportTickets}>
+              <FileText className="h-4 w-4 mr-2" />
+              Export Report
+            </Button>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowReportsDialog(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Agent Dialog */}
+      <Dialog open={showAddAgentDialog} onOpenChange={setShowAddAgentDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Add New Agent</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Full Name *</Label>
+              <Input
+                value={newAgentForm.name}
+                onChange={(e) => setNewAgentForm({ ...newAgentForm, name: e.target.value })}
+                placeholder="Enter agent name"
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label>Email *</Label>
+              <Input
+                type="email"
+                value={newAgentForm.email}
+                onChange={(e) => setNewAgentForm({ ...newAgentForm, email: e.target.value })}
+                placeholder="agent@company.com"
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label>Role</Label>
+              <Select value={newAgentForm.role} onValueChange={(v) => setNewAgentForm({ ...newAgentForm, role: v })}>
+                <SelectTrigger className="mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="agent">Agent</SelectItem>
+                  <SelectItem value="supervisor">Supervisor</SelectItem>
+                  <SelectItem value="admin">Admin</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAddAgentDialog(false)}>Cancel</Button>
+            <Button onClick={() => { toast.success('Agent added successfully'); setShowAddAgentDialog(false); setNewAgentForm({ name: '', email: '', role: 'agent' }) }}>Add Agent</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Teams Dialog */}
+      <Dialog open={showTeamsDialog} onOpenChange={setShowTeamsDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Support Teams</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            {['Technical Support', 'Billing Support', 'VIP Support', 'General Support'].map(team => (
+              <div key={team} className="flex items-center justify-between p-3 border rounded-lg">
+                <div>
+                  <h4 className="font-medium">{team}</h4>
+                  <p className="text-sm text-gray-500">{Math.floor(Math.random() * 5) + 2} members</p>
+                </div>
+                <Button variant="outline" size="sm">Manage</Button>
+              </div>
+            ))}
+            <Button variant="outline" className="w-full" onClick={() => toast.success('Create team dialog opened')}>+ Create New Team</Button>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowTeamsDialog(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Schedule Dialog */}
+      <Dialog open={showScheduleDialog} onOpenChange={setShowScheduleDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Agent Schedule</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="grid grid-cols-7 gap-2 text-center text-sm">
+              {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(day => (
+                <div key={day} className="font-medium">{day}</div>
+              ))}
+              {['9-5', '9-5', '9-5', '9-5', '9-5', 'Off', 'Off'].map((shift, i) => (
+                <div key={i} className={`p-2 rounded ${shift === 'Off' ? 'bg-gray-100' : 'bg-emerald-100'}`}>{shift}</div>
+              ))}
+            </div>
+            <div>
+              <Label>Quick Actions</Label>
+              <div className="flex gap-2 mt-2">
+                <Button variant="outline" size="sm" onClick={() => toast.success('PTO request submitted')}>Request PTO</Button>
+                <Button variant="outline" size="sm" onClick={() => toast.success('Shift swap requested')}>Swap Shift</Button>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowScheduleDialog(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Goals Dialog */}
+      <Dialog open={showGoalsDialog} onOpenChange={setShowGoalsDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Performance Goals</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            {[
+              { name: 'Response Time', current: 45, target: 60, unit: 'minutes' },
+              { name: 'Resolution Rate', current: 92, target: 90, unit: '%' },
+              { name: 'CSAT Score', current: 4.7, target: 4.5, unit: '/5' },
+              { name: 'Tickets/Day', current: 25, target: 20, unit: 'tickets' },
+            ].map(goal => (
+              <div key={goal.name} className="p-3 border rounded-lg">
+                <div className="flex justify-between mb-2">
+                  <span className="font-medium">{goal.name}</span>
+                  <span className={goal.current >= goal.target ? 'text-green-600' : 'text-amber-600'}>
+                    {goal.current}{goal.unit} / {goal.target}{goal.unit}
+                  </span>
+                </div>
+                <Progress value={(goal.current / goal.target) * 100} className="h-2" />
+              </div>
+            ))}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowGoalsDialog(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Ratings Dialog */}
+      <Dialog open={showRatingsDialog} onOpenChange={setShowRatingsDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>CSAT Ratings</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="text-center p-4 bg-gradient-to-r from-yellow-50 to-amber-50 rounded-lg">
+              <p className="text-4xl font-bold text-amber-600">4.7</p>
+              <div className="flex justify-center gap-1 mt-2">
+                {[1,2,3,4,5].map(star => (
+                  <Star key={star} className={`h-6 w-6 ${star <= 4 ? 'text-yellow-500 fill-yellow-500' : 'text-yellow-500'}`} />
+                ))}
+              </div>
+              <p className="text-sm text-gray-500 mt-2">Based on 156 responses</p>
+            </div>
+            <div className="space-y-2">
+              {[5,4,3,2,1].map(rating => (
+                <div key={rating} className="flex items-center gap-3">
+                  <span className="w-8">{rating} star</span>
+                  <Progress value={rating === 5 ? 65 : rating === 4 ? 25 : rating === 3 ? 7 : rating === 2 ? 2 : 1} className="flex-1 h-2" />
+                  <span className="w-12 text-right text-sm">{rating === 5 ? '65%' : rating === 4 ? '25%' : rating === 3 ? '7%' : rating === 2 ? '2%' : '1%'}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowRatingsDialog(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Training Dialog */}
+      <Dialog open={showTrainingDialog} onOpenChange={setShowTrainingDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Agent Training</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            {[
+              { name: 'Customer Communication', progress: 100, status: 'Completed' },
+              { name: 'Product Knowledge', progress: 75, status: 'In Progress' },
+              { name: 'Technical Troubleshooting', progress: 50, status: 'In Progress' },
+              { name: 'Advanced Support', progress: 0, status: 'Not Started' },
+            ].map(course => (
+              <div key={course.name} className="p-3 border rounded-lg">
+                <div className="flex justify-between mb-2">
+                  <span className="font-medium">{course.name}</span>
+                  <Badge variant={course.status === 'Completed' ? 'default' : 'secondary'}>{course.status}</Badge>
+                </div>
+                <Progress value={course.progress} className="h-2" />
+              </div>
+            ))}
+            <Button className="w-full" onClick={() => toast.success('Opening training portal...')}>
+              <Headphones className="h-4 w-4 mr-2" />
+              Open Training Portal
+            </Button>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowTrainingDialog(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Customer Dialog */}
+      <Dialog open={showAddCustomerDialog} onOpenChange={setShowAddCustomerDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Add New Customer</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Full Name *</Label>
+              <Input
+                value={newCustomerForm.name}
+                onChange={(e) => setNewCustomerForm({ ...newCustomerForm, name: e.target.value })}
+                placeholder="Enter customer name"
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label>Email *</Label>
+              <Input
+                type="email"
+                value={newCustomerForm.email}
+                onChange={(e) => setNewCustomerForm({ ...newCustomerForm, email: e.target.value })}
+                placeholder="customer@company.com"
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label>Company</Label>
+              <Input
+                value={newCustomerForm.company}
+                onChange={(e) => setNewCustomerForm({ ...newCustomerForm, company: e.target.value })}
+                placeholder="Company name"
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label>Tier</Label>
+              <Select value={newCustomerForm.tier} onValueChange={(v) => setNewCustomerForm({ ...newCustomerForm, tier: v })}>
+                <SelectTrigger className="mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="basic">Basic</SelectItem>
+                  <SelectItem value="pro">Pro</SelectItem>
+                  <SelectItem value="enterprise">Enterprise</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAddCustomerDialog(false)}>Cancel</Button>
+            <Button onClick={() => { toast.success('Customer added successfully'); setShowAddCustomerDialog(false); setNewCustomerForm({ name: '', email: '', company: '', tier: 'basic' }) }}>Add Customer</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Email All Dialog */}
+      <Dialog open={showEmailAllDialog} onOpenChange={setShowEmailAllDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Email All Customers</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="p-3 bg-blue-50 rounded-lg">
+              <p className="text-sm text-blue-700">This will send an email to {customers.length} customers.</p>
+            </div>
+            <div>
+              <Label>Subject *</Label>
+              <Input
+                value={emailAllForm.subject}
+                onChange={(e) => setEmailAllForm({ ...emailAllForm, subject: e.target.value })}
+                placeholder="Email subject"
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label>Message *</Label>
+              <textarea
+                value={emailAllForm.message}
+                onChange={(e) => setEmailAllForm({ ...emailAllForm, message: e.target.value })}
+                placeholder="Type your message..."
+                className="w-full mt-1 p-3 border rounded-lg text-sm resize-none h-32"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowEmailAllDialog(false)}>Cancel</Button>
+            <Button onClick={() => { toast.success('Emails sent successfully'); setShowEmailAllDialog(false); setEmailAllForm({ subject: '', message: '' }) }}>Send Emails</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Segments Dialog */}
+      <Dialog open={showSegmentsDialog} onOpenChange={setShowSegmentsDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Customer Segments</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            {[
+              { name: 'VIP Customers', count: 12, color: 'bg-yellow-100 text-yellow-700' },
+              { name: 'Enterprise Tier', count: 8, color: 'bg-purple-100 text-purple-700' },
+              { name: 'At Risk', count: 5, color: 'bg-red-100 text-red-700' },
+              { name: 'New Customers', count: 23, color: 'bg-green-100 text-green-700' },
+            ].map(segment => (
+              <div key={segment.name} className="flex items-center justify-between p-3 border rounded-lg">
+                <div className="flex items-center gap-3">
+                  <Badge className={segment.color}>{segment.count}</Badge>
+                  <span className="font-medium">{segment.name}</span>
+                </div>
+                <Button variant="outline" size="sm">View</Button>
+              </div>
+            ))}
+            <Button variant="outline" className="w-full" onClick={() => toast.success('Create segment dialog opened')}>+ Create New Segment</Button>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowSegmentsDialog(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* VIP Dialog */}
+      <Dialog open={showVIPDialog} onOpenChange={setShowVIPDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>VIP Customers</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="p-3 bg-gradient-to-r from-yellow-50 to-amber-50 rounded-lg">
+              <p className="text-sm text-amber-700">VIP customers receive priority support and dedicated account management.</p>
+            </div>
+            {customers.filter(c => c.tags.includes('vip')).map(customer => (
+              <div key={customer.id} className="flex items-center gap-3 p-3 border rounded-lg">
+                <Avatar>
+                  <AvatarImage src={customer.avatar} />
+                  <AvatarFallback>{customer.name[0]}</AvatarFallback>
+                </Avatar>
+                <div className="flex-1">
+                  <h4 className="font-medium">{customer.name}</h4>
+                  <p className="text-sm text-gray-500">{customer.company || customer.email}</p>
+                </div>
+                <Badge className="bg-yellow-500">VIP</Badge>
+              </div>
+            ))}
+            <Button variant="outline" className="w-full" onClick={() => toast.info('Select a customer to add to VIP')}>+ Add VIP Customer</Button>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowVIPDialog(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Insights Dialog */}
+      <Dialog open={showInsightsDialog} onOpenChange={setShowInsightsDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Customer Insights</DialogTitle>
+          </DialogHeader>
+          <div className="grid grid-cols-2 gap-4">
+            <Card>
+              <CardContent className="pt-4">
+                <h4 className="font-medium mb-2">Satisfaction Trends</h4>
+                <div className="h-32 flex items-center justify-center bg-gray-50 rounded">
+                  <TrendingUp className="h-12 w-12 text-gray-300" />
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="pt-4">
+                <h4 className="font-medium mb-2">Ticket Volume</h4>
+                <div className="h-32 flex items-center justify-center bg-gray-50 rounded">
+                  <BarChart3 className="h-12 w-12 text-gray-300" />
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="col-span-2">
+              <CardContent className="pt-4">
+                <h4 className="font-medium mb-2">Key Insights</h4>
+                <ul className="space-y-2 text-sm">
+                  <li>Enterprise customers have 23% higher satisfaction scores</li>
+                  <li>Most tickets are submitted via email (45%)</li>
+                  <li>Peak support hours are 9-11 AM</li>
+                </ul>
+              </CardContent>
+            </Card>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowInsightsDialog(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Import Dialog */}
+      <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Import Customers</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="border-2 border-dashed rounded-lg p-8 text-center">
+              <Globe className="h-12 w-12 mx-auto text-gray-400 mb-3" />
+              <p className="text-sm text-gray-500">Drag and drop a CSV file here, or click to browse</p>
+              <Button variant="outline" className="mt-3">Browse Files</Button>
+            </div>
+            <div>
+              <Label>Import Source</Label>
+              <Select defaultValue="csv">
+                <SelectTrigger className="mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="csv">CSV File</SelectItem>
+                  <SelectItem value="zendesk">Zendesk</SelectItem>
+                  <SelectItem value="intercom">Intercom</SelectItem>
+                  <SelectItem value="freshdesk">Freshdesk</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowImportDialog(false)}>Cancel</Button>
+            <Button onClick={() => { toast.success('Import started'); setShowImportDialog(false) }}>Import</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Customer Profile Dialog */}
+      <Dialog open={showCustomerProfileDialog} onOpenChange={setShowCustomerProfileDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Customer Profile</DialogTitle>
+          </DialogHeader>
+          {selectedCustomer && (
+            <div className="space-y-4">
+              <div className="flex items-center gap-4">
+                <Avatar className="h-16 w-16">
+                  <AvatarImage src={selectedCustomer.avatar} />
+                  <AvatarFallback>{selectedCustomer.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                </Avatar>
+                <div>
+                  <h3 className="text-xl font-semibold">{selectedCustomer.name}</h3>
+                  <p className="text-gray-500">{selectedCustomer.email}</p>
+                  <div className="flex gap-2 mt-1">
+                    <Badge variant="outline" className="capitalize">{selectedCustomer.tier}</Badge>
+                    {selectedCustomer.tags.map(tag => (
+                      <Badge key={tag} variant="secondary">{tag}</Badge>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <div className="grid grid-cols-3 gap-4">
+                <Card>
+                  <CardContent className="pt-4 text-center">
+                    <p className="text-2xl font-bold">{selectedCustomer.totalTickets}</p>
+                    <p className="text-sm text-gray-500">Total Tickets</p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="pt-4 text-center">
+                    <p className="text-2xl font-bold flex items-center justify-center gap-1">
+                      <Star className="h-5 w-5 text-yellow-500 fill-yellow-500" />
+                      {selectedCustomer.satisfactionScore}
+                    </p>
+                    <p className="text-sm text-gray-500">CSAT Score</p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="pt-4 text-center">
+                    <p className="text-2xl font-bold">{selectedCustomer.lastContact}</p>
+                    <p className="text-sm text-gray-500">Last Contact</p>
+                  </CardContent>
+                </Card>
+              </div>
+              {selectedCustomer.notes && (
+                <div>
+                  <Label>Notes</Label>
+                  <p className="mt-1 text-sm text-gray-600">{selectedCustomer.notes}</p>
+                </div>
+              )}
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCustomerProfileDialog(false)}>Close</Button>
+            <Button onClick={() => { setShowCreateDialog(true); setShowCustomerProfileDialog(false) }}>Create Ticket</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Filter Dialog */}
+      <Dialog open={showFilterDialog} onOpenChange={setShowFilterDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Filter Customers</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Tier</Label>
+              <Select defaultValue="all">
+                <SelectTrigger className="mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Tiers</SelectItem>
+                  <SelectItem value="basic">Basic</SelectItem>
+                  <SelectItem value="pro">Pro</SelectItem>
+                  <SelectItem value="enterprise">Enterprise</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Tags</Label>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {['vip', 'technical', 'billing', 'new'].map(tag => (
+                  <Badge key={tag} variant="outline" className="cursor-pointer hover:bg-gray-100">{tag}</Badge>
+                ))}
+              </div>
+            </div>
+            <div>
+              <Label>Last Contact</Label>
+              <Select defaultValue="all">
+                <SelectTrigger className="mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Any Time</SelectItem>
+                  <SelectItem value="7">Last 7 days</SelectItem>
+                  <SelectItem value="30">Last 30 days</SelectItem>
+                  <SelectItem value="90">Last 90 days</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowFilterDialog(false)}>Reset</Button>
+            <Button onClick={() => { toast.success('Filters applied'); setShowFilterDialog(false) }}>Apply Filters</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add SLA Dialog */}
+      <Dialog open={showAddSLADialog} onOpenChange={setShowAddSLADialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Add SLA Policy</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Policy Name *</Label>
+              <Input
+                value={newSLAForm.name}
+                onChange={(e) => setNewSLAForm({ ...newSLAForm, name: e.target.value })}
+                placeholder="e.g., Premium Support"
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label>Priority</Label>
+              <Select value={newSLAForm.priority} onValueChange={(v) => setNewSLAForm({ ...newSLAForm, priority: v })}>
+                <SelectTrigger className="mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="low">Low</SelectItem>
+                  <SelectItem value="normal">Normal</SelectItem>
+                  <SelectItem value="high">High</SelectItem>
+                  <SelectItem value="urgent">Urgent</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>First Response (min)</Label>
+                <Input
+                  type="number"
+                  value={newSLAForm.firstResponseTarget}
+                  onChange={(e) => setNewSLAForm({ ...newSLAForm, firstResponseTarget: parseInt(e.target.value) })}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label>Resolution (min)</Label>
+                <Input
+                  type="number"
+                  value={newSLAForm.resolutionTarget}
+                  onChange={(e) => setNewSLAForm({ ...newSLAForm, resolutionTarget: parseInt(e.target.value) })}
+                  className="mt-1"
+                />
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAddSLADialog(false)}>Cancel</Button>
+            <Button onClick={() => { toast.success('SLA policy created'); setShowAddSLADialog(false) }}>Create Policy</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit SLA Dialog */}
+      <Dialog open={showEditSLADialog} onOpenChange={setShowEditSLADialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Edit SLA Policy</DialogTitle>
+          </DialogHeader>
+          {selectedSLA && (
+            <div className="space-y-4">
+              <div>
+                <Label>Policy Name</Label>
+                <Input defaultValue={selectedSLA.name} className="mt-1" />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>First Response (min)</Label>
+                  <Input type="number" defaultValue={selectedSLA.firstResponseTarget} className="mt-1" />
+                </div>
+                <div>
+                  <Label>Resolution (min)</Label>
+                  <Input type="number" defaultValue={selectedSLA.resolutionTarget} className="mt-1" />
+                </div>
+              </div>
+              <div className="p-3 bg-gray-50 rounded-lg">
+                <p className="text-sm text-gray-600">Current compliance: {selectedSLA.complianceRate}%</p>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowEditSLADialog(false)}>Cancel</Button>
+            <Button onClick={() => { toast.success('SLA policy updated'); setShowEditSLADialog(false) }}>Save Changes</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Automation Dialog */}
+      <Dialog open={showEditAutomationDialog} onOpenChange={setShowEditAutomationDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Edit Automation</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Automation Name</Label>
+              <Input
+                value={newAutomationForm.name}
+                onChange={(e) => setNewAutomationForm({ ...newAutomationForm, name: e.target.value })}
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label>Trigger</Label>
+              <Input
+                value={newAutomationForm.trigger}
+                onChange={(e) => setNewAutomationForm({ ...newAutomationForm, trigger: e.target.value })}
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label>Actions</Label>
+              <Input
+                value={newAutomationForm.actions}
+                onChange={(e) => setNewAutomationForm({ ...newAutomationForm, actions: e.target.value })}
+                className="mt-1"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowEditAutomationDialog(false)}>Cancel</Button>
+            <Button onClick={() => { toast.success('Automation updated'); setShowEditAutomationDialog(false) }}>Save Changes</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Automation Dialog */}
+      <Dialog open={showCreateAutomationDialog} onOpenChange={setShowCreateAutomationDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Create Automation</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Automation Name *</Label>
+              <Input placeholder="e.g., Auto-escalate VIP tickets" className="mt-1" />
+            </div>
+            <div>
+              <Label>Trigger Condition</Label>
+              <Select defaultValue="priority">
+                <SelectTrigger className="mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="priority">When priority is</SelectItem>
+                  <SelectItem value="status">When status changes to</SelectItem>
+                  <SelectItem value="customer">When customer tier is</SelectItem>
+                  <SelectItem value="time">After time elapsed</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Action</Label>
+              <Select defaultValue="assign">
+                <SelectTrigger className="mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="assign">Assign to agent</SelectItem>
+                  <SelectItem value="notify">Send notification</SelectItem>
+                  <SelectItem value="escalate">Escalate ticket</SelectItem>
+                  <SelectItem value="tag">Add tag</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCreateAutomationDialog(false)}>Cancel</Button>
+            <Button onClick={() => { toast.success('Automation created'); setShowCreateAutomationDialog(false) }}>Create</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Preview Response Dialog */}
+      <Dialog open={showPreviewResponseDialog} onOpenChange={setShowPreviewResponseDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Preview Response</DialogTitle>
+          </DialogHeader>
+          {selectedResponse && (
+            <div className="space-y-4">
+              <div className="p-4 bg-gray-50 rounded-lg">
+                <h4 className="font-medium mb-2">{selectedResponse.title}</h4>
+                <p className="text-sm whitespace-pre-wrap">{selectedResponse.content}</p>
+              </div>
+              <div className="flex items-center gap-4 text-sm text-gray-500">
+                <span>Category: {selectedResponse.category}</span>
+                <span>Used {selectedResponse.usageCount} times</span>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowPreviewResponseDialog(false)}>Close</Button>
+            <Button onClick={() => { setMessageInput(selectedResponse?.content || ''); setShowPreviewResponseDialog(false); toast.success('Response inserted') }}>Use Response</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Response Dialog */}
+      <Dialog open={showEditResponseDialog} onOpenChange={setShowEditResponseDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Edit Response</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Title</Label>
+              <Input
+                value={newResponseForm.title}
+                onChange={(e) => setNewResponseForm({ ...newResponseForm, title: e.target.value })}
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label>Category</Label>
+              <Select value={newResponseForm.category} onValueChange={(v) => setNewResponseForm({ ...newResponseForm, category: v })}>
+                <SelectTrigger className="mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="General">General</SelectItem>
+                  <SelectItem value="Account">Account</SelectItem>
+                  <SelectItem value="Billing">Billing</SelectItem>
+                  <SelectItem value="Technical">Technical</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Content</Label>
+              <textarea
+                value={newResponseForm.content}
+                onChange={(e) => setNewResponseForm({ ...newResponseForm, content: e.target.value })}
+                className="w-full mt-1 p-3 border rounded-lg text-sm resize-none h-32"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowEditResponseDialog(false)}>Cancel</Button>
+            <Button onClick={() => { toast.success('Response updated'); setShowEditResponseDialog(false) }}>Save Changes</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Response Dialog */}
+      <Dialog open={showAddResponseDialog} onOpenChange={setShowAddResponseDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Add Canned Response</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Title *</Label>
+              <Input placeholder="e.g., Welcome Message" className="mt-1" />
+            </div>
+            <div>
+              <Label>Category</Label>
+              <Select defaultValue="General">
+                <SelectTrigger className="mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="General">General</SelectItem>
+                  <SelectItem value="Account">Account</SelectItem>
+                  <SelectItem value="Billing">Billing</SelectItem>
+                  <SelectItem value="Technical">Technical</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Content *</Label>
+              <textarea
+                placeholder="Enter response content..."
+                className="w-full mt-1 p-3 border rounded-lg text-sm resize-none h-32"
+              />
+            </div>
+            <p className="text-xs text-gray-500">Use {'{{customer_name}}'} to insert customer name</p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAddResponseDialog(false)}>Cancel</Button>
+            <Button onClick={() => { toast.success('Response created'); setShowAddResponseDialog(false) }}>Create Response</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Tickets Dialog */}
+      <Dialog open={showDeleteTicketsDialog} onOpenChange={setShowDeleteTicketsDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-red-600">Delete Closed Tickets</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="p-4 bg-red-50 rounded-lg">
+              <AlertTriangle className="h-8 w-8 text-red-500 mx-auto mb-2" />
+              <p className="text-sm text-red-700 text-center">
+                This action cannot be undone. All closed tickets will be permanently deleted.
+              </p>
+            </div>
+            <div className="p-3 bg-gray-50 rounded-lg">
+              <p className="text-sm">Tickets to be deleted: {tickets.filter(t => t.status === 'closed' || t.status === 'solved').length}</p>
+            </div>
+            <div>
+              <Label>Type DELETE to confirm</Label>
+              <Input placeholder="DELETE" className="mt-1" />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowDeleteTicketsDialog(false)}>Cancel</Button>
+            <Button variant="destructive" onClick={() => { toast.success('Closed tickets deleted'); setShowDeleteTicketsDialog(false) }}>Delete</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Reset Settings Dialog */}
+      <Dialog open={showResetSettingsDialog} onOpenChange={setShowResetSettingsDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-red-600">Reset All Settings</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="p-4 bg-red-50 rounded-lg">
+              <AlertTriangle className="h-8 w-8 text-red-500 mx-auto mb-2" />
+              <p className="text-sm text-red-700 text-center">
+                This will reset all support settings to their default values. This action cannot be undone.
+              </p>
+            </div>
+            <div>
+              <Label>Type RESET to confirm</Label>
+              <Input placeholder="RESET" className="mt-1" />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowResetSettingsDialog(false)}>Cancel</Button>
+            <Button variant="destructive" onClick={() => { toast.success('Settings reset to defaults'); setShowResetSettingsDialog(false) }}>Reset</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Tag Dialog */}
+      <Dialog open={showAddTagDialog} onOpenChange={setShowAddTagDialog}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Add Tag</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Tag Name</Label>
+              <Input
+                value={newTagForm}
+                onChange={(e) => setNewTagForm(e.target.value)}
+                placeholder="Enter tag name"
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label>Or select existing</Label>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {['bug', 'feature', 'urgent', 'billing', 'technical'].map(tag => (
+                  <Badge
+                    key={tag}
+                    variant="outline"
+                    className="cursor-pointer hover:bg-gray-100"
+                    onClick={() => { setNewTagForm(tag) }}
+                  >
+                    {tag}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAddTagDialog(false)}>Cancel</Button>
+            <Button onClick={() => { toast.success(`Tag "${newTagForm}" added`); setShowAddTagDialog(false); setNewTagForm('') }}>Add Tag</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Assign Agent Dialog */}
+      <Dialog open={showAssignAgentDialog} onOpenChange={setShowAssignAgentDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Assign Agent</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-gray-500">Select an agent to assign to this ticket.</p>
+            {agents.map(agent => (
+              <div
+                key={agent.id}
+                className="flex items-center gap-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50"
+                onClick={() => {
+                  if (selectedTicket) {
+                    handleAssignAgent(selectedTicket.id, agent.id)
+                  }
+                  setShowAssignAgentDialog(false)
+                }}
+              >
+                <div className="relative">
+                  <Avatar>
+                    <AvatarImage src={agent.avatar} />
+                    <AvatarFallback>{agent.name[0]}</AvatarFallback>
+                  </Avatar>
+                  <div className={`absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-white ${getAgentStatusColor(agent.status)}`} />
+                </div>
+                <div className="flex-1">
+                  <p className="font-medium">{agent.name}</p>
+                  <p className="text-sm text-gray-500">{agent.activeTickets} active tickets</p>
+                </div>
+              </div>
+            ))}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAssignAgentDialog(false)}>Cancel</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Attachment Dialog */}
+      <Dialog open={showAttachmentDialog} onOpenChange={setShowAttachmentDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Add Attachment</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="border-2 border-dashed rounded-lg p-8 text-center">
+              <Paperclip className="h-12 w-12 mx-auto text-gray-400 mb-3" />
+              <p className="text-sm text-gray-500">Drag and drop files here, or click to browse</p>
+              <Button variant="outline" className="mt-3">Browse Files</Button>
+            </div>
+            <p className="text-xs text-gray-500">Supported: Images, PDFs, Documents (max 10MB)</p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAttachmentDialog(false)}>Cancel</Button>
+            <Button onClick={() => { toast.success('Attachment added'); setShowAttachmentDialog(false) }}>Upload</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Emoji Dialog */}
+      <Dialog open={showEmojiDialog} onOpenChange={setShowEmojiDialog}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Insert Emoji</DialogTitle>
+          </DialogHeader>
+          <div className="grid grid-cols-8 gap-2 py-4">
+            {['thumbsup', 'heart', 'smile', 'fire', 'star', 'check', 'clap', 'rocket', 'party', 'wave', 'pray', 'eyes', 'thinking', 'muscle', 'ok', 'wink'].map(emoji => (
+              <button
+                key={emoji}
+                className="w-8 h-8 flex items-center justify-center text-xl hover:bg-gray-100 rounded"
+                onClick={() => {
+                  setMessageInput(prev => prev + ' :' + emoji + ':')
+                  setShowEmojiDialog(false)
+                }}
+              >
+                {emoji === 'thumbsup' ? '\u{1F44D}' : emoji === 'heart' ? '\u{2764}' : emoji === 'smile' ? '\u{1F60A}' : emoji === 'fire' ? '\u{1F525}' : emoji === 'star' ? '\u{2B50}' : emoji === 'check' ? '\u{2705}' : emoji === 'clap' ? '\u{1F44F}' : emoji === 'rocket' ? '\u{1F680}' : emoji === 'party' ? '\u{1F389}' : emoji === 'wave' ? '\u{1F44B}' : emoji === 'pray' ? '\u{1F64F}' : emoji === 'eyes' ? '\u{1F440}' : emoji === 'thinking' ? '\u{1F914}' : emoji === 'muscle' ? '\u{1F4AA}' : emoji === 'ok' ? '\u{1F44C}' : '\u{1F609}'}
+              </button>
+            ))}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowEmojiDialog(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Agent Schedule Dialog */}
+      <Dialog open={showAgentScheduleDialog} onOpenChange={setShowAgentScheduleDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Agent Schedule - {selectedAgent?.name}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="grid grid-cols-7 gap-2 text-center text-sm">
+              {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(day => (
+                <div key={day} className="font-medium">{day}</div>
+              ))}
+              {['9-5', '9-5', '9-5', '9-5', '9-5', 'Off', 'Off'].map((shift, i) => (
+                <div key={i} className={`p-2 rounded ${shift === 'Off' ? 'bg-gray-100' : 'bg-emerald-100'}`}>{shift}</div>
+              ))}
+            </div>
+            <div className="p-3 bg-gray-50 rounded-lg">
+              <h4 className="font-medium mb-2">Upcoming Time Off</h4>
+              <p className="text-sm text-gray-500">No scheduled time off</p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAgentScheduleDialog(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Agent Report Dialog */}
+      <Dialog open={showAgentReportDialog} onOpenChange={setShowAgentReportDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Performance Report - {selectedAgent?.name}</DialogTitle>
+          </DialogHeader>
+          {selectedAgent && (
+            <div className="grid grid-cols-2 gap-4">
+              <Card>
+                <CardContent className="pt-4">
+                  <h4 className="font-medium mb-2">Weekly Stats</h4>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between"><span>Tickets Resolved</span><span>{selectedAgent.resolvedToday * 5}</span></div>
+                    <div className="flex justify-between"><span>Avg Response Time</span><span>{selectedAgent.avgResponseTime}m</span></div>
+                    <div className="flex justify-between"><span>CSAT Score</span><span>{selectedAgent.satisfactionScore}</span></div>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="pt-4">
+                  <h4 className="font-medium mb-2">Performance Trend</h4>
+                  <div className="h-24 flex items-center justify-center bg-gray-50 rounded">
+                    <TrendingUp className="h-8 w-8 text-gray-300" />
+                  </div>
+                </CardContent>
+              </Card>
+              <Card className="col-span-2">
+                <CardContent className="pt-4">
+                  <h4 className="font-medium mb-2">Skills & Specializations</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedAgent.skills.map((skill, i) => (
+                      <Badge key={i} className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white">{skill}</Badge>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAgentReportDialog(false)}>Close</Button>
+            <Button onClick={handleExportTickets}>Export Report</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Agent Message Dialog */}
+      <Dialog open={showAgentMessageDialog} onOpenChange={setShowAgentMessageDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Send Message to {selectedAgent?.name}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Message</Label>
+              <textarea
+                value={agentMessageForm}
+                onChange={(e) => setAgentMessageForm(e.target.value)}
+                placeholder="Type your message..."
+                className="w-full mt-1 p-3 border rounded-lg text-sm resize-none h-32"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAgentMessageDialog(false)}>Cancel</Button>
+            <Button onClick={() => { toast.success(`Message sent to ${selectedAgent?.name}`); setShowAgentMessageDialog(false); setAgentMessageForm('') }}>Send Message</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* API Docs Dialog */}
+      <Dialog open={showApiDocsDialog} onOpenChange={setShowApiDocsDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>API Documentation</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="p-4 bg-gray-900 text-gray-100 rounded-lg font-mono text-sm">
+              <p className="text-green-400"># Create a new ticket</p>
+              <p>POST /api/v1/tickets</p>
+              <p className="mt-2 text-green-400"># Get ticket by ID</p>
+              <p>GET /api/v1/tickets/:id</p>
+              <p className="mt-2 text-green-400"># Update ticket status</p>
+              <p>PATCH /api/v1/tickets/:id</p>
+            </div>
+            <div>
+              <h4 className="font-medium mb-2">Quick Links</h4>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" onClick={() => toast.info('Opening full documentation...')}>Full Docs</Button>
+                <Button variant="outline" size="sm" onClick={() => toast.info('Opening API reference...')}>API Reference</Button>
+                <Button variant="outline" size="sm" onClick={() => toast.info('Opening examples...')}>Examples</Button>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowApiDocsDialog(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Webhooks Dialog */}
+      <Dialog open={showWebhooksDialog} onOpenChange={setShowWebhooksDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Webhook Configuration</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Webhook URL</Label>
+              <Input placeholder="https://your-server.com/webhook" className="mt-1" />
+            </div>
+            <div>
+              <Label>Events</Label>
+              <div className="mt-2 space-y-2">
+                {['ticket.created', 'ticket.updated', 'ticket.resolved', 'message.received'].map(event => (
+                  <div key={event} className="flex items-center gap-2">
+                    <input type="checkbox" className="rounded" defaultChecked />
+                    <span className="text-sm">{event}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="p-3 bg-gray-50 rounded-lg">
+              <p className="text-sm text-gray-600">Webhooks allow you to receive real-time updates about events in your support system.</p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowWebhooksDialog(false)}>Cancel</Button>
+            <Button onClick={() => { toast.success('Webhook configured'); setShowWebhooksDialog(false) }}>Save Webhook</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

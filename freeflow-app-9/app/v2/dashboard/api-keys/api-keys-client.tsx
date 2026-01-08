@@ -876,6 +876,47 @@ export default function ApiKeysClient() {
   const [selectedWebhook, setSelectedWebhook] = useState<WebhookEndpoint | null>(null)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('list')
 
+  // Dialog states for button actions
+  const [generateKeyDialogOpen, setGenerateKeyDialogOpen] = useState(false)
+  const [exportDialogOpen, setExportDialogOpen] = useState(false)
+  const [revokeKeyDialogOpen, setRevokeKeyDialogOpen] = useState(false)
+  const [rotateKeysDialogOpen, setRotateKeysDialogOpen] = useState(false)
+  const [setExpiryDialogOpen, setSetExpiryDialogOpen] = useState(false)
+  const [permissionsDialogOpen, setPermissionsDialogOpen] = useState(false)
+  const [historyDialogOpen, setHistoryDialogOpen] = useState(false)
+  const [filtersDialogOpen, setFiltersDialogOpen] = useState(false)
+  const [moreOptionsDialogOpen, setMoreOptionsDialogOpen] = useState(false)
+  const [liveFeedDialogOpen, setLiveFeedDialogOpen] = useState(false)
+  const [analyticsDialogOpen, setAnalyticsDialogOpen] = useState(false)
+  const [securityDialogOpen, setSecurityDialogOpen] = useState(false)
+  const [alertsDialogOpen, setAlertsDialogOpen] = useState(false)
+  const [docsDialogOpen, setDocsDialogOpen] = useState(false)
+  const [settingsDialogOpen, setSettingsDialogOpen] = useState(false)
+  const [createAppDialogOpen, setCreateAppDialogOpen] = useState(false)
+  const [appSettingsDialogOpen, setAppSettingsDialogOpen] = useState(false)
+  const [quickstartDialogOpen, setQuickstartDialogOpen] = useState(false)
+  const [addWebhookDialogOpen, setAddWebhookDialogOpen] = useState(false)
+  const [testWebhookDialogOpen, setTestWebhookDialogOpen] = useState(false)
+  const [webhookSettingsDialogOpen, setWebhookSettingsDialogOpen] = useState(false)
+  const [keyToCopy, setKeyToCopy] = useState<ApiKey | null>(null)
+  const [keyToRotate, setKeyToRotate] = useState<ApiKey | null>(null)
+  const [keyToRevoke, setKeyToRevoke] = useState<ApiKey | null>(null)
+  const [appToManage, setAppToManage] = useState<Application | null>(null)
+  const [webhookToManage, setWebhookToManage] = useState<WebhookEndpoint | null>(null)
+
+  // Form states
+  const [newKeyName, setNewKeyName] = useState('')
+  const [newKeyType, setNewKeyType] = useState<KeyType>('api')
+  const [newKeyEnvironment, setNewKeyEnvironment] = useState<Environment>('development')
+  const [newKeyScopes, setNewKeyScopes] = useState<string[]>([])
+  const [exportFormat, setExportFormat] = useState<'json' | 'csv'>('json')
+  const [expiryDays, setExpiryDays] = useState(90)
+  const [newAppName, setNewAppName] = useState('')
+  const [newAppType, setNewAppType] = useState<'regular_web' | 'spa' | 'native' | 'machine_to_machine'>('regular_web')
+  const [newWebhookUrl, setNewWebhookUrl] = useState('')
+  const [newWebhookName, setNewWebhookName] = useState('')
+  const [newWebhookEvents, setNewWebhookEvents] = useState<string[]>([])
+
   // Dashboard stats
   const stats = useMemo(() => ({
     totalKeys: mockApiKeys.length,
@@ -964,11 +1005,18 @@ export default function ApiKeysClient() {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <Button variant="outline" className="bg-white/10 border-white/20 text-white hover:bg-white/20">
+              <Button
+                variant="outline"
+                className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+                onClick={() => setExportDialogOpen(true)}
+              >
                 <Download className="w-4 h-4 mr-2" />
                 Export
               </Button>
-              <Button className="bg-white text-slate-700 hover:bg-gray-100">
+              <Button
+                className="bg-white text-slate-700 hover:bg-gray-100"
+                onClick={() => setGenerateKeyDialogOpen(true)}
+              >
                 <Plus className="w-4 h-4 mr-2" />
                 Generate Key
               </Button>
@@ -1042,16 +1090,16 @@ export default function ApiKeysClient() {
             {/* Dashboard Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Key, label: 'New Key', color: 'text-slate-600 dark:text-slate-400' },
-                { icon: Activity, label: 'Live Feed', color: 'text-green-600 dark:text-green-400' },
-                { icon: BarChart3, label: 'Analytics', color: 'text-blue-600 dark:text-blue-400' },
-                { icon: Shield, label: 'Security', color: 'text-red-600 dark:text-red-400' },
-                { icon: AlertTriangle, label: 'Alerts', color: 'text-orange-600 dark:text-orange-400' },
-                { icon: FileText, label: 'Docs', color: 'text-purple-600 dark:text-purple-400' },
-                { icon: Download, label: 'Export', color: 'text-cyan-600 dark:text-cyan-400' },
-                { icon: Settings, label: 'Settings', color: 'text-gray-600 dark:text-gray-400' }
+                { icon: Key, label: 'New Key', color: 'text-slate-600 dark:text-slate-400', action: () => setGenerateKeyDialogOpen(true) },
+                { icon: Activity, label: 'Live Feed', color: 'text-green-600 dark:text-green-400', action: () => setLiveFeedDialogOpen(true) },
+                { icon: BarChart3, label: 'Analytics', color: 'text-blue-600 dark:text-blue-400', action: () => setAnalyticsDialogOpen(true) },
+                { icon: Shield, label: 'Security', color: 'text-red-600 dark:text-red-400', action: () => setSecurityDialogOpen(true) },
+                { icon: AlertTriangle, label: 'Alerts', color: 'text-orange-600 dark:text-orange-400', action: () => setAlertsDialogOpen(true) },
+                { icon: FileText, label: 'Docs', color: 'text-purple-600 dark:text-purple-400', action: () => setDocsDialogOpen(true) },
+                { icon: Download, label: 'Export', color: 'text-cyan-600 dark:text-cyan-400', action: () => setExportDialogOpen(true) },
+                { icon: Settings, label: 'Settings', color: 'text-gray-600 dark:text-gray-400', action: () => setSettingsDialogOpen(true) }
               ].map((action, i) => (
-                <Button key={i} variant="outline" className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200">
+                <Button key={i} variant="outline" className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200" onClick={action.action}>
                   <action.icon className={`h-5 w-5 ${action.color}`} />
                   <span className="text-xs">{action.label}</span>
                 </Button>
@@ -1184,16 +1232,16 @@ export default function ApiKeysClient() {
             {/* Keys Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Plus, label: 'Generate Key', color: 'text-amber-600 dark:text-amber-400' },
-                { icon: RefreshCw, label: 'Rotate All', color: 'text-blue-600 dark:text-blue-400' },
-                { icon: Copy, label: 'Copy Key', color: 'text-green-600 dark:text-green-400' },
-                { icon: Lock, label: 'Revoke', color: 'text-red-600 dark:text-red-400' },
-                { icon: Clock, label: 'Set Expiry', color: 'text-purple-600 dark:text-purple-400' },
-                { icon: Shield, label: 'Permissions', color: 'text-orange-600 dark:text-orange-400' },
-                { icon: Download, label: 'Export', color: 'text-cyan-600 dark:text-cyan-400' },
-                { icon: History, label: 'History', color: 'text-gray-600 dark:text-gray-400' }
+                { icon: Plus, label: 'Generate Key', color: 'text-amber-600 dark:text-amber-400', action: () => setGenerateKeyDialogOpen(true) },
+                { icon: RefreshCw, label: 'Rotate All', color: 'text-blue-600 dark:text-blue-400', action: () => setRotateKeysDialogOpen(true) },
+                { icon: Copy, label: 'Copy Key', color: 'text-green-600 dark:text-green-400', action: () => { setKeyToCopy(mockApiKeys[0]); } },
+                { icon: Lock, label: 'Revoke', color: 'text-red-600 dark:text-red-400', action: () => setRevokeKeyDialogOpen(true) },
+                { icon: Clock, label: 'Set Expiry', color: 'text-purple-600 dark:text-purple-400', action: () => setSetExpiryDialogOpen(true) },
+                { icon: Shield, label: 'Permissions', color: 'text-orange-600 dark:text-orange-400', action: () => setPermissionsDialogOpen(true) },
+                { icon: Download, label: 'Export', color: 'text-cyan-600 dark:text-cyan-400', action: () => setExportDialogOpen(true) },
+                { icon: History, label: 'History', color: 'text-gray-600 dark:text-gray-400', action: () => setHistoryDialogOpen(true) }
               ].map((action, i) => (
-                <Button key={i} variant="outline" className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200">
+                <Button key={i} variant="outline" className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200" onClick={action.action}>
                   <action.icon className={`h-5 w-5 ${action.color}`} />
                   <span className="text-xs">{action.label}</span>
                 </Button>
@@ -1211,7 +1259,7 @@ export default function ApiKeysClient() {
                     className="pl-10 w-80"
                   />
                 </div>
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" onClick={() => setFiltersDialogOpen(true)}>
                   <Filter className="w-4 h-4 mr-2" />
                   Filters
                 </Button>
@@ -1254,7 +1302,7 @@ export default function ApiKeysClient() {
                           {key.key_prefix}...{key.key_code.slice(-4)}
                         </code>
                       </div>
-                      <Button variant="ghost" size="sm">
+                      <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); setSelectedKey(key); setMoreOptionsDialogOpen(true); }}>
                         <MoreHorizontal className="w-4 h-4" />
                       </Button>
                     </div>
@@ -1292,15 +1340,15 @@ export default function ApiKeysClient() {
                     )}
 
                     <div className="flex gap-2 mt-4 pt-4 border-t dark:border-gray-700">
-                      <Button variant="outline" size="sm" className="flex-1">
+                      <Button variant="outline" size="sm" className="flex-1" onClick={(e) => { e.stopPropagation(); setKeyToCopy(key); }}>
                         <Copy className="w-3 h-3 mr-1" />
                         Copy
                       </Button>
-                      <Button variant="outline" size="sm" className="flex-1">
+                      <Button variant="outline" size="sm" className="flex-1" onClick={(e) => { e.stopPropagation(); setKeyToRotate(key); }}>
                         <RefreshCw className="w-3 h-3 mr-1" />
                         Rotate
                       </Button>
-                      <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700">
+                      <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700" onClick={(e) => { e.stopPropagation(); setKeyToRevoke(key); }}>
                         <Lock className="w-3 h-3" />
                       </Button>
                     </div>
@@ -1343,7 +1391,7 @@ export default function ApiKeysClient() {
                   className="pl-10 w-80"
                 />
               </div>
-              <Button>
+              <Button onClick={() => setCreateAppDialogOpen(true)}>
                 <Plus className="w-4 h-4 mr-2" />
                 Create Application
               </Button>
@@ -1396,11 +1444,11 @@ export default function ApiKeysClient() {
                     </div>
 
                     <div className="flex gap-2 mt-4">
-                      <Button variant="outline" size="sm" className="flex-1">
+                      <Button variant="outline" size="sm" className="flex-1" onClick={(e) => { e.stopPropagation(); setAppToManage(app); setAppSettingsDialogOpen(true); }}>
                         <Settings className="w-3 h-3 mr-1" />
                         Settings
                       </Button>
-                      <Button variant="outline" size="sm" className="flex-1">
+                      <Button variant="outline" size="sm" className="flex-1" onClick={(e) => { e.stopPropagation(); setAppToManage(app); setQuickstartDialogOpen(true); }}>
                         <ExternalLink className="w-3 h-3 mr-1" />
                         Quickstart
                       </Button>
@@ -1449,12 +1497,12 @@ export default function ApiKeysClient() {
                     className="pl-10 w-80"
                   />
                 </div>
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" onClick={() => setFiltersDialogOpen(true)}>
                   <Filter className="w-4 h-4 mr-2" />
                   Filters
                 </Button>
               </div>
-              <Button variant="outline">
+              <Button variant="outline" onClick={() => setExportDialogOpen(true)}>
                 <Download className="w-4 h-4 mr-2" />
                 Export Logs
               </Button>
@@ -1535,7 +1583,7 @@ export default function ApiKeysClient() {
 
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Webhook Endpoints</h2>
-              <Button>
+              <Button onClick={() => setAddWebhookDialogOpen(true)}>
                 <Plus className="w-4 h-4 mr-2" />
                 Add Endpoint
               </Button>
@@ -1569,10 +1617,10 @@ export default function ApiKeysClient() {
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Button variant="ghost" size="sm">
+                        <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); setWebhookToManage(webhook); setTestWebhookDialogOpen(true); }}>
                           <Play className="w-4 h-4" />
                         </Button>
-                        <Button variant="ghost" size="sm">
+                        <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); setWebhookToManage(webhook); setWebhookSettingsDialogOpen(true); }}>
                           <Settings className="w-4 h-4" />
                         </Button>
                       </div>
@@ -1814,7 +1862,7 @@ export default function ApiKeysClient() {
                     <p className="text-xs text-gray-500 mb-1">API Key</p>
                     <div className="flex items-center gap-2">
                       <code className="text-lg font-mono">{selectedKey.key_prefix}•••••••••{selectedKey.key_code.slice(-4)}</code>
-                      <Button variant="ghost" size="sm">
+                      <Button variant="ghost" size="sm" onClick={() => { navigator.clipboard.writeText(`${selectedKey.key_prefix}${selectedKey.key_code}`); toast.success('API key copied to clipboard'); }}>
                         <Copy className="w-4 h-4" />
                       </Button>
                     </div>
@@ -1864,11 +1912,11 @@ export default function ApiKeysClient() {
                   )}
 
                   <div className="flex gap-3">
-                    <Button variant="outline" className="flex-1">
+                    <Button variant="outline" className="flex-1" onClick={() => { setKeyToRotate(selectedKey); setSelectedKey(null); }}>
                       <RefreshCw className="w-4 h-4 mr-2" />
                       Rotate Key
                     </Button>
-                    <Button variant="outline" className="flex-1 text-red-600 hover:text-red-700">
+                    <Button variant="outline" className="flex-1 text-red-600 hover:text-red-700" onClick={() => { setKeyToRevoke(selectedKey); setSelectedKey(null); }}>
                       <Lock className="w-4 h-4 mr-2" />
                       Revoke
                     </Button>
@@ -1934,6 +1982,1099 @@ export default function ApiKeysClient() {
                 </div>
               </div>
             )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Generate Key Dialog */}
+        <Dialog open={generateKeyDialogOpen} onOpenChange={setGenerateKeyDialogOpen}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Key className="w-5 h-5" />
+                Generate New API Key
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 pt-4">
+              <div>
+                <label className="text-sm font-medium">Key Name</label>
+                <Input
+                  placeholder="e.g., Production API Key"
+                  value={newKeyName}
+                  onChange={(e) => setNewKeyName(e.target.value)}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Key Type</label>
+                <select
+                  className="w-full mt-1 p-2 border rounded-md"
+                  value={newKeyType}
+                  onChange={(e) => setNewKeyType(e.target.value as KeyType)}
+                >
+                  <option value="api">API Key</option>
+                  <option value="webhook">Webhook</option>
+                  <option value="oauth">OAuth</option>
+                  <option value="jwt">JWT</option>
+                  <option value="service">Service</option>
+                  <option value="machine_to_machine">Machine to Machine</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-sm font-medium">Environment</label>
+                <select
+                  className="w-full mt-1 p-2 border rounded-md"
+                  value={newKeyEnvironment}
+                  onChange={(e) => setNewKeyEnvironment(e.target.value as Environment)}
+                >
+                  <option value="development">Development</option>
+                  <option value="staging">Staging</option>
+                  <option value="production">Production</option>
+                  <option value="sandbox">Sandbox</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-sm font-medium">Scopes</label>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {mockScopes.slice(0, 6).map(scope => (
+                    <label key={scope.id} className="flex items-center gap-2 text-sm">
+                      <input
+                        type="checkbox"
+                        checked={newKeyScopes.includes(scope.name)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setNewKeyScopes([...newKeyScopes, scope.name])
+                          } else {
+                            setNewKeyScopes(newKeyScopes.filter(s => s !== scope.name))
+                          }
+                        }}
+                      />
+                      {scope.name}
+                    </label>
+                  ))}
+                </div>
+              </div>
+              <div className="flex gap-3 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setGenerateKeyDialogOpen(false)}>
+                  Cancel
+                </Button>
+                <Button className="flex-1" onClick={() => {
+                  toast.success('API key generated successfully', { description: 'Your new key has been created. Copy it now - it won\'t be shown again.' })
+                  setGenerateKeyDialogOpen(false)
+                  setNewKeyName('')
+                  setNewKeyScopes([])
+                }}>
+                  Generate Key
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Export Dialog */}
+        <Dialog open={exportDialogOpen} onOpenChange={setExportDialogOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Download className="w-5 h-5" />
+                Export Data
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 pt-4">
+              <div>
+                <label className="text-sm font-medium">Export Format</label>
+                <div className="mt-2 space-y-2">
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="radio"
+                      name="format"
+                      checked={exportFormat === 'json'}
+                      onChange={() => setExportFormat('json')}
+                    />
+                    <span>JSON</span>
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="radio"
+                      name="format"
+                      checked={exportFormat === 'csv'}
+                      onChange={() => setExportFormat('csv')}
+                    />
+                    <span>CSV</span>
+                  </label>
+                </div>
+              </div>
+              <div>
+                <label className="text-sm font-medium">Include</label>
+                <div className="mt-2 space-y-2">
+                  <label className="flex items-center gap-2">
+                    <input type="checkbox" defaultChecked />
+                    <span>API Keys metadata</span>
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <input type="checkbox" defaultChecked />
+                    <span>Usage statistics</span>
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <input type="checkbox" />
+                    <span>Request logs</span>
+                  </label>
+                </div>
+              </div>
+              <div className="flex gap-3 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setExportDialogOpen(false)}>
+                  Cancel
+                </Button>
+                <Button className="flex-1" onClick={() => {
+                  toast.success('Export started', { description: `Your ${exportFormat.toUpperCase()} file will download shortly.` })
+                  setExportDialogOpen(false)
+                }}>
+                  Export
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Rotate Keys Dialog */}
+        <Dialog open={rotateKeysDialogOpen} onOpenChange={setRotateKeysDialogOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <RefreshCw className="w-5 h-5" />
+                Rotate All Keys
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 pt-4">
+              <div className="p-4 rounded-lg bg-yellow-50 border border-yellow-200">
+                <div className="flex items-start gap-3">
+                  <AlertTriangle className="w-5 h-5 text-yellow-600 mt-0.5" />
+                  <div>
+                    <p className="font-medium text-yellow-800">Warning</p>
+                    <p className="text-sm text-yellow-700">This will rotate all active API keys. Applications using these keys will need to be updated.</p>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <label className="text-sm font-medium">Keys to rotate</label>
+                <div className="mt-2 space-y-2">
+                  {mockApiKeys.filter(k => k.status === 'active').map(key => (
+                    <label key={key.id} className="flex items-center gap-2 text-sm">
+                      <input type="checkbox" defaultChecked />
+                      {key.name}
+                    </label>
+                  ))}
+                </div>
+              </div>
+              <div className="flex gap-3 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setRotateKeysDialogOpen(false)}>
+                  Cancel
+                </Button>
+                <Button className="flex-1" onClick={() => {
+                  toast.success('Keys rotated', { description: 'All selected keys have been rotated. Update your applications.' })
+                  setRotateKeysDialogOpen(false)
+                }}>
+                  Rotate Keys
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Key Rotate Dialog */}
+        <Dialog open={!!keyToRotate} onOpenChange={() => setKeyToRotate(null)}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <RefreshCw className="w-5 h-5" />
+                Rotate API Key
+              </DialogTitle>
+            </DialogHeader>
+            {keyToRotate && (
+              <div className="space-y-4 pt-4">
+                <div className="p-4 rounded-lg bg-blue-50 border border-blue-200">
+                  <p className="font-medium text-blue-800">{keyToRotate.name}</p>
+                  <code className="text-sm text-blue-600">{keyToRotate.key_prefix}...{keyToRotate.key_code.slice(-4)}</code>
+                </div>
+                <p className="text-sm text-gray-600">
+                  This will generate a new key and invalidate the current one. Make sure to update your applications.
+                </p>
+                <div className="flex gap-3 pt-4">
+                  <Button variant="outline" className="flex-1" onClick={() => setKeyToRotate(null)}>
+                    Cancel
+                  </Button>
+                  <Button className="flex-1" onClick={() => {
+                    toast.success('Key rotated', { description: `${keyToRotate.name} has been rotated successfully.` })
+                    setKeyToRotate(null)
+                  }}>
+                    Rotate Key
+                  </Button>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Key Revoke Dialog */}
+        <Dialog open={!!keyToRevoke} onOpenChange={() => setKeyToRevoke(null)}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-600">
+                <Lock className="w-5 h-5" />
+                Revoke API Key
+              </DialogTitle>
+            </DialogHeader>
+            {keyToRevoke && (
+              <div className="space-y-4 pt-4">
+                <div className="p-4 rounded-lg bg-red-50 border border-red-200">
+                  <p className="font-medium text-red-800">{keyToRevoke.name}</p>
+                  <code className="text-sm text-red-600">{keyToRevoke.key_prefix}...{keyToRevoke.key_code.slice(-4)}</code>
+                </div>
+                <div className="p-4 rounded-lg bg-yellow-50 border border-yellow-200">
+                  <div className="flex items-start gap-3">
+                    <AlertTriangle className="w-5 h-5 text-yellow-600 mt-0.5" />
+                    <p className="text-sm text-yellow-700">This action cannot be undone. Applications using this key will immediately lose access.</p>
+                  </div>
+                </div>
+                <div className="flex gap-3 pt-4">
+                  <Button variant="outline" className="flex-1" onClick={() => setKeyToRevoke(null)}>
+                    Cancel
+                  </Button>
+                  <Button variant="destructive" className="flex-1" onClick={() => {
+                    toast.success('Key revoked', { description: `${keyToRevoke.name} has been permanently revoked.` })
+                    setKeyToRevoke(null)
+                  }}>
+                    Revoke Key
+                  </Button>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Copy Key Dialog */}
+        <Dialog open={!!keyToCopy} onOpenChange={() => setKeyToCopy(null)}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Copy className="w-5 h-5" />
+                Copy API Key
+              </DialogTitle>
+            </DialogHeader>
+            {keyToCopy && (
+              <div className="space-y-4 pt-4">
+                <div className="p-4 rounded-lg bg-gray-100 dark:bg-gray-800">
+                  <p className="text-xs text-gray-500 mb-2">{keyToCopy.name}</p>
+                  <div className="flex items-center gap-2">
+                    <code className="flex-1 p-2 bg-white dark:bg-gray-900 rounded text-sm font-mono">
+                      {keyToCopy.key_prefix}{keyToCopy.key_code}
+                    </code>
+                  </div>
+                </div>
+                <div className="flex gap-3 pt-4">
+                  <Button variant="outline" className="flex-1" onClick={() => setKeyToCopy(null)}>
+                    Close
+                  </Button>
+                  <Button className="flex-1" onClick={() => {
+                    navigator.clipboard.writeText(`${keyToCopy.key_prefix}${keyToCopy.key_code}`)
+                    toast.success('Copied to clipboard')
+                    setKeyToCopy(null)
+                  }}>
+                    <Copy className="w-4 h-4 mr-2" />
+                    Copy Key
+                  </Button>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Set Expiry Dialog */}
+        <Dialog open={setExpiryDialogOpen} onOpenChange={setSetExpiryDialogOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Clock className="w-5 h-5" />
+                Set Key Expiration
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 pt-4">
+              <div>
+                <label className="text-sm font-medium">Expiration Period</label>
+                <select
+                  className="w-full mt-1 p-2 border rounded-md"
+                  value={expiryDays}
+                  onChange={(e) => setExpiryDays(Number(e.target.value))}
+                >
+                  <option value={30}>30 days</option>
+                  <option value={60}>60 days</option>
+                  <option value={90}>90 days</option>
+                  <option value={180}>180 days</option>
+                  <option value={365}>1 year</option>
+                  <option value={0}>No expiration</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-sm font-medium">Apply to</label>
+                <div className="mt-2 space-y-2">
+                  {mockApiKeys.filter(k => k.status === 'active').map(key => (
+                    <label key={key.id} className="flex items-center gap-2 text-sm">
+                      <input type="checkbox" />
+                      {key.name}
+                    </label>
+                  ))}
+                </div>
+              </div>
+              <div className="flex gap-3 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setSetExpiryDialogOpen(false)}>
+                  Cancel
+                </Button>
+                <Button className="flex-1" onClick={() => {
+                  toast.success('Expiration set', { description: `Keys will expire in ${expiryDays} days.` })
+                  setSetExpiryDialogOpen(false)
+                }}>
+                  Apply
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Permissions Dialog */}
+        <Dialog open={permissionsDialogOpen} onOpenChange={setPermissionsDialogOpen}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Shield className="w-5 h-5" />
+                Manage Permissions
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 pt-4">
+              <div>
+                <label className="text-sm font-medium">Available Scopes</label>
+                <div className="mt-2 max-h-64 overflow-y-auto space-y-2">
+                  {mockScopes.map(scope => (
+                    <div key={scope.id} className="flex items-center justify-between p-2 rounded-lg bg-gray-50 dark:bg-gray-800">
+                      <div className="flex items-center gap-2">
+                        <input type="checkbox" />
+                        <div>
+                          <code className="text-sm">{scope.name}</code>
+                          <p className="text-xs text-gray-500">{scope.description}</p>
+                        </div>
+                      </div>
+                      {scope.is_sensitive && (
+                        <Badge className="bg-red-100 text-red-800 text-xs">Sensitive</Badge>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="flex gap-3 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setPermissionsDialogOpen(false)}>
+                  Cancel
+                </Button>
+                <Button className="flex-1" onClick={() => {
+                  toast.success('Permissions updated')
+                  setPermissionsDialogOpen(false)
+                }}>
+                  Save Permissions
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* History Dialog */}
+        <Dialog open={historyDialogOpen} onOpenChange={setHistoryDialogOpen}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <History className="w-5 h-5" />
+                Key History
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 pt-4">
+              <div className="max-h-96 overflow-y-auto space-y-3">
+                {[
+                  { action: 'Key created', key: 'Production API Key', user: 'admin@company.com', time: '2 hours ago' },
+                  { action: 'Key rotated', key: 'Staging Test Key', user: 'devops@company.com', time: '1 day ago' },
+                  { action: 'Permissions updated', key: 'Mobile App Service Key', user: 'admin@company.com', time: '3 days ago' },
+                  { action: 'Key revoked', key: 'Old Production Key', user: 'security@company.com', time: '1 week ago' },
+                ].map((event, i) => (
+                  <div key={i} className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
+                    <div>
+                      <p className="font-medium">{event.action}</p>
+                      <p className="text-sm text-gray-500">{event.key}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm">{event.user}</p>
+                      <p className="text-xs text-gray-500">{event.time}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <Button className="w-full" onClick={() => setHistoryDialogOpen(false)}>
+                Close
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Filters Dialog */}
+        <Dialog open={filtersDialogOpen} onOpenChange={setFiltersDialogOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Filter className="w-5 h-5" />
+                Filters
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 pt-4">
+              <div>
+                <label className="text-sm font-medium">Status</label>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {['active', 'inactive', 'expired', 'revoked'].map(status => (
+                    <label key={status} className="flex items-center gap-2 text-sm">
+                      <input type="checkbox" defaultChecked={status === 'active'} />
+                      <span className="capitalize">{status}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <label className="text-sm font-medium">Environment</label>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {['production', 'staging', 'development', 'sandbox'].map(env => (
+                    <label key={env} className="flex items-center gap-2 text-sm">
+                      <input type="checkbox" />
+                      <span className="capitalize">{env}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <label className="text-sm font-medium">Key Type</label>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {['api', 'webhook', 'oauth', 'jwt'].map(type => (
+                    <label key={type} className="flex items-center gap-2 text-sm">
+                      <input type="checkbox" />
+                      <span className="uppercase">{type}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+              <div className="flex gap-3 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setFiltersDialogOpen(false)}>
+                  Reset
+                </Button>
+                <Button className="flex-1" onClick={() => {
+                  toast.success('Filters applied')
+                  setFiltersDialogOpen(false)
+                }}>
+                  Apply Filters
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* More Options Dialog */}
+        <Dialog open={moreOptionsDialogOpen} onOpenChange={setMoreOptionsDialogOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <MoreHorizontal className="w-5 h-5" />
+                Key Options
+              </DialogTitle>
+            </DialogHeader>
+            {selectedKey && (
+              <div className="space-y-2 pt-4">
+                <Button variant="outline" className="w-full justify-start" onClick={() => { setMoreOptionsDialogOpen(false); setKeyToCopy(selectedKey); }}>
+                  <Copy className="w-4 h-4 mr-2" />
+                  Copy Key
+                </Button>
+                <Button variant="outline" className="w-full justify-start" onClick={() => { setMoreOptionsDialogOpen(false); setKeyToRotate(selectedKey); }}>
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                  Rotate Key
+                </Button>
+                <Button variant="outline" className="w-full justify-start" onClick={() => { setMoreOptionsDialogOpen(false); setSetExpiryDialogOpen(true); }}>
+                  <Clock className="w-4 h-4 mr-2" />
+                  Set Expiration
+                </Button>
+                <Button variant="outline" className="w-full justify-start" onClick={() => { setMoreOptionsDialogOpen(false); setPermissionsDialogOpen(true); }}>
+                  <Shield className="w-4 h-4 mr-2" />
+                  Edit Permissions
+                </Button>
+                <Button variant="outline" className="w-full justify-start text-red-600" onClick={() => { setMoreOptionsDialogOpen(false); setKeyToRevoke(selectedKey); }}>
+                  <Lock className="w-4 h-4 mr-2" />
+                  Revoke Key
+                </Button>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Live Feed Dialog */}
+        <Dialog open={liveFeedDialogOpen} onOpenChange={setLiveFeedDialogOpen}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Activity className="w-5 h-5 text-green-600" />
+                Live API Feed
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 pt-4">
+              <div className="flex items-center gap-2 p-2 rounded-lg bg-green-50 border border-green-200">
+                <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                <span className="text-sm text-green-700">Streaming live requests...</span>
+              </div>
+              <div className="max-h-96 overflow-y-auto space-y-2">
+                {mockApiLogs.map(log => (
+                  <div key={log.id} className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
+                    <div className="flex items-center gap-3">
+                      <Badge className={getLogLevelColor(log.log_level)}>{log.method}</Badge>
+                      <span className="text-sm font-mono">{log.endpoint}</span>
+                    </div>
+                    <span className={`text-sm font-medium ${log.status_code < 400 ? 'text-green-600' : 'text-red-600'}`}>
+                      {log.status_code}
+                    </span>
+                  </div>
+                ))}
+              </div>
+              <Button className="w-full" onClick={() => setLiveFeedDialogOpen(false)}>
+                Close
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Analytics Dialog */}
+        <Dialog open={analyticsDialogOpen} onOpenChange={setAnalyticsDialogOpen}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <BarChart3 className="w-5 h-5 text-blue-600" />
+                API Analytics
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 pt-4">
+              <div className="grid grid-cols-3 gap-4">
+                <div className="p-4 rounded-lg bg-blue-50 text-center">
+                  <p className="text-2xl font-bold text-blue-700">{formatNumber(stats.totalRequests)}</p>
+                  <p className="text-sm text-blue-600">Total Requests</p>
+                </div>
+                <div className="p-4 rounded-lg bg-green-50 text-center">
+                  <p className="text-2xl font-bold text-green-700">99.9%</p>
+                  <p className="text-sm text-green-600">Success Rate</p>
+                </div>
+                <div className="p-4 rounded-lg bg-purple-50 text-center">
+                  <p className="text-2xl font-bold text-purple-700">45ms</p>
+                  <p className="text-sm text-purple-600">Avg Latency</p>
+                </div>
+              </div>
+              <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-800">
+                <h4 className="font-medium mb-3">Top Endpoints</h4>
+                <div className="space-y-2">
+                  {['/api/v1/users', '/api/v1/data', '/api/v1/auth/token'].map((endpoint, i) => (
+                    <div key={endpoint} className="flex items-center justify-between">
+                      <code className="text-sm">{endpoint}</code>
+                      <span className="text-sm text-gray-500">{formatNumber(10000 - i * 2000)} calls</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <Button className="w-full" onClick={() => setAnalyticsDialogOpen(false)}>
+                Close
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Security Dialog */}
+        <Dialog open={securityDialogOpen} onOpenChange={setSecurityDialogOpen}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Shield className="w-5 h-5 text-red-600" />
+                Security Center
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 pt-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-4 rounded-lg bg-green-50 text-center">
+                  <ShieldCheck className="w-8 h-8 text-green-600 mx-auto mb-2" />
+                  <p className="text-xl font-bold text-green-700">94%</p>
+                  <p className="text-sm text-green-600">Security Score</p>
+                </div>
+                <div className="p-4 rounded-lg bg-blue-50 text-center">
+                  <Lock className="w-8 h-8 text-blue-600 mx-auto mb-2" />
+                  <p className="text-xl font-bold text-blue-700">0</p>
+                  <p className="text-sm text-blue-600">Active Threats</p>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <h4 className="font-medium">Security Checklist</h4>
+                {[
+                  { item: 'IP whitelisting enabled', done: true },
+                  { item: 'Key rotation policy', done: true },
+                  { item: 'Rate limiting configured', done: true },
+                  { item: 'MFA for API management', done: false },
+                ].map((check, i) => (
+                  <div key={i} className="flex items-center gap-2 text-sm">
+                    {check.done ? (
+                      <CheckCircle className="w-4 h-4 text-green-600" />
+                    ) : (
+                      <XCircle className="w-4 h-4 text-gray-400" />
+                    )}
+                    <span className={check.done ? '' : 'text-gray-500'}>{check.item}</span>
+                  </div>
+                ))}
+              </div>
+              <Button className="w-full" onClick={() => setSecurityDialogOpen(false)}>
+                Close
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Alerts Dialog */}
+        <Dialog open={alertsDialogOpen} onOpenChange={setAlertsDialogOpen}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <AlertTriangle className="w-5 h-5 text-orange-600" />
+                API Alerts
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 pt-4">
+              <div className="space-y-3">
+                {[
+                  { type: 'warning', message: 'Production API Key expires in 7 days', time: '2 hours ago' },
+                  { type: 'info', message: 'Mobile app approaching 80% rate limit', time: '1 day ago' },
+                  { type: 'success', message: 'Key rotation completed successfully', time: '3 days ago' },
+                ].map((alert, i) => (
+                  <div key={i} className={`p-4 rounded-lg border ${
+                    alert.type === 'warning' ? 'bg-yellow-50 border-yellow-200' :
+                    alert.type === 'info' ? 'bg-blue-50 border-blue-200' :
+                    'bg-green-50 border-green-200'
+                  }`}>
+                    <p className={`font-medium ${
+                      alert.type === 'warning' ? 'text-yellow-800' :
+                      alert.type === 'info' ? 'text-blue-800' :
+                      'text-green-800'
+                    }`}>{alert.message}</p>
+                    <p className="text-xs text-gray-500 mt-1">{alert.time}</p>
+                  </div>
+                ))}
+              </div>
+              <Button className="w-full" onClick={() => setAlertsDialogOpen(false)}>
+                Close
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Docs Dialog */}
+        <Dialog open={docsDialogOpen} onOpenChange={setDocsDialogOpen}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <FileText className="w-5 h-5 text-purple-600" />
+                API Documentation
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 pt-4">
+              <div className="space-y-3">
+                {[
+                  { title: 'Getting Started', desc: 'Quick start guide for API integration' },
+                  { title: 'Authentication', desc: 'Learn about API key authentication' },
+                  { title: 'Rate Limits', desc: 'Understanding rate limits and quotas' },
+                  { title: 'Webhooks', desc: 'Setting up webhook endpoints' },
+                  { title: 'Error Handling', desc: 'Common errors and how to handle them' },
+                ].map((doc, i) => (
+                  <div key={i} className="p-4 rounded-lg bg-gray-50 dark:bg-gray-800 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700">
+                    <p className="font-medium">{doc.title}</p>
+                    <p className="text-sm text-gray-500">{doc.desc}</p>
+                  </div>
+                ))}
+              </div>
+              <Button className="w-full" onClick={() => setDocsDialogOpen(false)}>
+                Close
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Settings Dialog */}
+        <Dialog open={settingsDialogOpen} onOpenChange={setSettingsDialogOpen}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Settings className="w-5 h-5" />
+                API Settings
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 pt-4">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
+                  <div>
+                    <p className="font-medium">Auto Key Rotation</p>
+                    <p className="text-sm text-gray-500">Automatically rotate keys every 90 days</p>
+                  </div>
+                  <Switch defaultChecked />
+                </div>
+                <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
+                  <div>
+                    <p className="font-medium">Rate Limit Alerts</p>
+                    <p className="text-sm text-gray-500">Get notified when limits are exceeded</p>
+                  </div>
+                  <Switch defaultChecked />
+                </div>
+                <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
+                  <div>
+                    <p className="font-medium">IP Whitelisting</p>
+                    <p className="text-sm text-gray-500">Require IP whitelist for all keys</p>
+                  </div>
+                  <Switch />
+                </div>
+              </div>
+              <div className="flex gap-3 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setSettingsDialogOpen(false)}>
+                  Cancel
+                </Button>
+                <Button className="flex-1" onClick={() => {
+                  toast.success('Settings saved')
+                  setSettingsDialogOpen(false)
+                }}>
+                  Save Settings
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Create Application Dialog */}
+        <Dialog open={createAppDialogOpen} onOpenChange={setCreateAppDialogOpen}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Plus className="w-5 h-5" />
+                Create Application
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 pt-4">
+              <div>
+                <label className="text-sm font-medium">Application Name</label>
+                <Input
+                  placeholder="e.g., My Web App"
+                  value={newAppName}
+                  onChange={(e) => setNewAppName(e.target.value)}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Application Type</label>
+                <select
+                  className="w-full mt-1 p-2 border rounded-md"
+                  value={newAppType}
+                  onChange={(e) => setNewAppType(e.target.value as typeof newAppType)}
+                >
+                  <option value="regular_web">Regular Web Application</option>
+                  <option value="spa">Single Page Application (SPA)</option>
+                  <option value="native">Native Application</option>
+                  <option value="machine_to_machine">Machine to Machine</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-sm font-medium">Description</label>
+                <Input placeholder="Brief description of your application" className="mt-1" />
+              </div>
+              <div className="flex gap-3 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setCreateAppDialogOpen(false)}>
+                  Cancel
+                </Button>
+                <Button className="flex-1" onClick={() => {
+                  toast.success('Application created', { description: 'Your new application has been created.' })
+                  setCreateAppDialogOpen(false)
+                  setNewAppName('')
+                }}>
+                  Create
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* App Settings Dialog */}
+        <Dialog open={appSettingsDialogOpen} onOpenChange={setAppSettingsDialogOpen}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Settings className="w-5 h-5" />
+                Application Settings
+              </DialogTitle>
+            </DialogHeader>
+            {appToManage && (
+              <div className="space-y-4 pt-4">
+                <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-800">
+                  <p className="font-medium">{appToManage.name}</p>
+                  <p className="text-sm text-gray-500">{appToManage.description}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Client ID</label>
+                  <div className="flex items-center gap-2 mt-1">
+                    <code className="flex-1 p-2 bg-gray-100 rounded text-sm">{appToManage.client_id}</code>
+                    <Button variant="outline" size="sm" onClick={() => { navigator.clipboard.writeText(appToManage.client_id); toast.success('Copied'); }}>
+                      <Copy className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Callback URLs</label>
+                  <Input defaultValue={appToManage.callback_urls.join(', ')} className="mt-1" />
+                </div>
+                <div className="flex gap-3 pt-4">
+                  <Button variant="outline" className="flex-1" onClick={() => setAppSettingsDialogOpen(false)}>
+                    Cancel
+                  </Button>
+                  <Button className="flex-1" onClick={() => {
+                    toast.success('Settings saved')
+                    setAppSettingsDialogOpen(false)
+                  }}>
+                    Save
+                  </Button>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Quickstart Dialog */}
+        <Dialog open={quickstartDialogOpen} onOpenChange={setQuickstartDialogOpen}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <ExternalLink className="w-5 h-5" />
+                Quickstart Guide
+              </DialogTitle>
+            </DialogHeader>
+            {appToManage && (
+              <div className="space-y-4 pt-4">
+                <div className="p-4 rounded-lg bg-blue-50 border border-blue-200">
+                  <p className="font-medium text-blue-800">Get started with {appToManage.name}</p>
+                </div>
+                <div>
+                  <h4 className="font-medium mb-2">1. Install the SDK</h4>
+                  <code className="block p-3 bg-gray-100 rounded text-sm">npm install @company/auth-sdk</code>
+                </div>
+                <div>
+                  <h4 className="font-medium mb-2">2. Configure your application</h4>
+                  <code className="block p-3 bg-gray-100 rounded text-sm whitespace-pre">{`const auth = new Auth({
+  clientId: '${appToManage.client_id}',
+  domain: 'auth.company.com'
+});`}</code>
+                </div>
+                <div>
+                  <h4 className="font-medium mb-2">3. Implement login</h4>
+                  <code className="block p-3 bg-gray-100 rounded text-sm">auth.loginWithRedirect();</code>
+                </div>
+                <Button className="w-full" onClick={() => setQuickstartDialogOpen(false)}>
+                  Close
+                </Button>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Webhook Dialog */}
+        <Dialog open={addWebhookDialogOpen} onOpenChange={setAddWebhookDialogOpen}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Webhook className="w-5 h-5" />
+                Add Webhook Endpoint
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 pt-4">
+              <div>
+                <label className="text-sm font-medium">Endpoint Name</label>
+                <Input
+                  placeholder="e.g., Payment Events"
+                  value={newWebhookName}
+                  onChange={(e) => setNewWebhookName(e.target.value)}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Endpoint URL</label>
+                <Input
+                  placeholder="https://api.example.com/webhooks"
+                  value={newWebhookUrl}
+                  onChange={(e) => setNewWebhookUrl(e.target.value)}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Events</label>
+                <div className="mt-2 max-h-40 overflow-y-auto space-y-2">
+                  {['payment.created', 'payment.succeeded', 'payment.failed', 'user.created', 'user.updated', 'user.deleted'].map(event => (
+                    <label key={event} className="flex items-center gap-2 text-sm">
+                      <input
+                        type="checkbox"
+                        checked={newWebhookEvents.includes(event)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setNewWebhookEvents([...newWebhookEvents, event])
+                          } else {
+                            setNewWebhookEvents(newWebhookEvents.filter(ev => ev !== event))
+                          }
+                        }}
+                      />
+                      {event}
+                    </label>
+                  ))}
+                </div>
+              </div>
+              <div className="flex gap-3 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setAddWebhookDialogOpen(false)}>
+                  Cancel
+                </Button>
+                <Button className="flex-1" onClick={() => {
+                  toast.success('Webhook created', { description: 'Your new webhook endpoint has been created.' })
+                  setAddWebhookDialogOpen(false)
+                  setNewWebhookName('')
+                  setNewWebhookUrl('')
+                  setNewWebhookEvents([])
+                }}>
+                  Create Webhook
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Test Webhook Dialog */}
+        <Dialog open={testWebhookDialogOpen} onOpenChange={setTestWebhookDialogOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Play className="w-5 h-5" />
+                Test Webhook
+              </DialogTitle>
+            </DialogHeader>
+            {webhookToManage && (
+              <div className="space-y-4 pt-4">
+                <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-800">
+                  <p className="font-medium">{webhookToManage.name}</p>
+                  <code className="text-sm text-gray-500">{webhookToManage.url}</code>
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Event Type</label>
+                  <select className="w-full mt-1 p-2 border rounded-md">
+                    {webhookToManage.events.map(event => (
+                      <option key={event} value={event}>{event}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="flex gap-3 pt-4">
+                  <Button variant="outline" className="flex-1" onClick={() => setTestWebhookDialogOpen(false)}>
+                    Cancel
+                  </Button>
+                  <Button className="flex-1" onClick={() => {
+                    toast.success('Test webhook sent', { description: 'Check your endpoint for the test payload.' })
+                    setTestWebhookDialogOpen(false)
+                  }}>
+                    Send Test
+                  </Button>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Webhook Settings Dialog */}
+        <Dialog open={webhookSettingsDialogOpen} onOpenChange={setWebhookSettingsDialogOpen}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Settings className="w-5 h-5" />
+                Webhook Settings
+              </DialogTitle>
+            </DialogHeader>
+            {webhookToManage && (
+              <div className="space-y-4 pt-4">
+                <div>
+                  <label className="text-sm font-medium">Endpoint URL</label>
+                  <Input defaultValue={webhookToManage.url} className="mt-1" />
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Signing Secret</label>
+                  <div className="flex items-center gap-2 mt-1">
+                    <code className="flex-1 p-2 bg-gray-100 rounded text-sm">{webhookToManage.secret}</code>
+                    <Button variant="outline" size="sm" onClick={() => { navigator.clipboard.writeText(webhookToManage.secret); toast.success('Copied'); }}>
+                      <Copy className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Retry Policy</label>
+                  <select className="w-full mt-1 p-2 border rounded-md" defaultValue={webhookToManage.retry_policy}>
+                    <option value="none">None</option>
+                    <option value="linear">Linear</option>
+                    <option value="exponential">Exponential</option>
+                  </select>
+                </div>
+                <div className="flex gap-3 pt-4">
+                  <Button variant="outline" className="flex-1" onClick={() => setWebhookSettingsDialogOpen(false)}>
+                    Cancel
+                  </Button>
+                  <Button className="flex-1" onClick={() => {
+                    toast.success('Webhook settings saved')
+                    setWebhookSettingsDialogOpen(false)
+                  }}>
+                    Save
+                  </Button>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Revoke Key Dialog (Global) */}
+        <Dialog open={revokeKeyDialogOpen} onOpenChange={setRevokeKeyDialogOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-600">
+                <Lock className="w-5 h-5" />
+                Revoke API Keys
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 pt-4">
+              <div className="p-4 rounded-lg bg-yellow-50 border border-yellow-200">
+                <div className="flex items-start gap-3">
+                  <AlertTriangle className="w-5 h-5 text-yellow-600 mt-0.5" />
+                  <p className="text-sm text-yellow-700">Select keys to revoke. This action cannot be undone.</p>
+                </div>
+              </div>
+              <div className="space-y-2">
+                {mockApiKeys.filter(k => k.status === 'active').map(key => (
+                  <label key={key.id} className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-50">
+                    <input type="checkbox" />
+                    <span>{key.name}</span>
+                  </label>
+                ))}
+              </div>
+              <div className="flex gap-3 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setRevokeKeyDialogOpen(false)}>
+                  Cancel
+                </Button>
+                <Button variant="destructive" className="flex-1" onClick={() => {
+                  toast.success('Keys revoked')
+                  setRevokeKeyDialogOpen(false)
+                }}>
+                  Revoke Selected
+                </Button>
+              </div>
+            </div>
           </DialogContent>
         </Dialog>
       </div>

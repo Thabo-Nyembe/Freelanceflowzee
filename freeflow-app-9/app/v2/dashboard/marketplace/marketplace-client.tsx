@@ -369,6 +369,31 @@ export default function MarketplaceClient() {
   const [checkoutProduct, setCheckoutProduct] = useState<Product | null>(null)
   const [contactProduct, setContactProduct] = useState<Product | null>(null)
 
+  // New dialog states for buttons without onClick handlers
+  const [showWishlistDialog, setShowWishlistDialog] = useState(false)
+  const [showInstallDialog, setShowInstallDialog] = useState(false)
+  const [installProduct, setInstallProduct] = useState<Product | null>(null)
+  const [showLearnMoreDialog, setShowLearnMoreDialog] = useState(false)
+  const [showVisitStoreDialog, setShowVisitStoreDialog] = useState(false)
+  const [showFollowDialog, setShowFollowDialog] = useState(false)
+  const [showApplyVendorDialog, setShowApplyVendorDialog] = useState(false)
+  const [showExportReviewsDialog, setShowExportReviewsDialog] = useState(false)
+  const [showRespondAllDialog, setShowRespondAllDialog] = useState(false)
+  const [showExportOrdersDialog, setShowExportOrdersDialog] = useState(false)
+  const [showGenerateReportDialog, setShowGenerateReportDialog] = useState(false)
+  const [showFiltersDialog, setShowFiltersDialog] = useState(false)
+  const [showMoreOptionsDialog, setShowMoreOptionsDialog] = useState(false)
+  const [selectedOrderForOptions, setSelectedOrderForOptions] = useState<Order | null>(null)
+  const [showProcessOrdersDialog, setShowProcessOrdersDialog] = useState(false)
+  const [showGenerateInvoicesDialog, setShowGenerateInvoicesDialog] = useState(false)
+  const [showProcessPayoutsDialog, setShowProcessPayoutsDialog] = useState(false)
+  const [showSendNotificationsDialog, setShowSendNotificationsDialog] = useState(false)
+  const [showExportCSVDialog, setShowExportCSVDialog] = useState(false)
+  const [showAddProviderDialog, setShowAddProviderDialog] = useState(false)
+  const [showDownloadInvoiceDialog, setShowDownloadInvoiceDialog] = useState(false)
+  const [showVendorStoreDialog, setShowVendorStoreDialog] = useState(false)
+  const [selectedVendorForStore, setSelectedVendorForStore] = useState<Vendor | null>(null)
+
   // Database state
   const [dbApps, setDbApps] = useState<any[]>([])
   const [dbWebhooks, setDbWebhooks] = useState<any[]>([])
@@ -750,7 +775,7 @@ export default function MarketplaceClient() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input placeholder="Search apps..." className="w-72 pl-10" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
             </div>
-            <Button variant="outline"><Heart className="h-4 w-4 mr-2" />Wishlist ({wishlist.length})</Button>
+            <Button variant="outline" onClick={() => setShowWishlistDialog(true)}><Heart className="h-4 w-4 mr-2" />Wishlist ({wishlist.length})</Button>
             <Button onClick={() => setShowNewListingDialog(true)} className="bg-gradient-to-r from-violet-600 to-purple-600"><Plus className="h-4 w-4 mr-2" />Submit App</Button>
           </div>
         </div>
@@ -982,8 +1007,8 @@ export default function MarketplaceClient() {
                     <span className="text-white">4.9 (2,847 reviews)</span>
                   </div>
                   <div className="flex gap-3">
-                    <Button className="bg-white text-violet-600 hover:bg-violet-50"><Download className="h-4 w-4 mr-2" />Install Now</Button>
-                    <Button variant="outline" className="border-white/50 text-white hover:bg-white/10">Learn More</Button>
+                    <Button className="bg-white text-violet-600 hover:bg-violet-50" onClick={() => { setInstallProduct(mockProducts[0]); setShowInstallDialog(true) }}><Download className="h-4 w-4 mr-2" />Install Now</Button>
+                    <Button variant="outline" className="border-white/50 text-white hover:bg-white/10" onClick={() => setShowLearnMoreDialog(true)}>Learn More</Button>
                   </div>
                 </div>
                 <div className="p-8">
@@ -1033,7 +1058,7 @@ export default function MarketplaceClient() {
                           <span className="flex items-center gap-1 text-gray-500"><Download className="h-4 w-4" />{(product.downloads / 1000).toFixed(0)}K</span>
                           <span className="flex items-center gap-1 text-gray-500"><Zap className="h-4 w-4" />{(product.activeInstalls / 1000).toFixed(0)}K active</span>
                         </div>
-                        <Button className="bg-gradient-to-r from-violet-600 to-purple-600"><Download className="h-4 w-4 mr-2" />Install</Button>
+                        <Button className="bg-gradient-to-r from-violet-600 to-purple-600" onClick={() => { setInstallProduct(product); setShowInstallDialog(true) }}><Download className="h-4 w-4 mr-2" />Install</Button>
                       </div>
                     </div>
                   </CardContent>
@@ -1067,9 +1092,9 @@ export default function MarketplaceClient() {
                       <div className="text-center"><p className="text-xl font-bold">&lt;2hr</p><p className="text-xs text-gray-500">Response</p></div>
                     </div>
                     <div className="flex gap-3">
-                      <Button><ExternalLink className="h-4 w-4 mr-2" />Visit Store</Button>
-                      <Button variant="outline"><Mail className="h-4 w-4 mr-2" />Contact</Button>
-                      <Button variant="outline"><Heart className="h-4 w-4 mr-2" />Follow</Button>
+                      <Button onClick={() => setShowVisitStoreDialog(true)}><ExternalLink className="h-4 w-4 mr-2" />Visit Store</Button>
+                      <Button variant="outline" onClick={() => { setContactProduct(mockProducts[0]); setShowContactDialog(true) }}><Mail className="h-4 w-4 mr-2" />Contact</Button>
+                      <Button variant="outline" onClick={() => setShowFollowDialog(true)}><Heart className="h-4 w-4 mr-2" />Follow</Button>
                     </div>
                   </div>
                 </div>
@@ -1140,7 +1165,7 @@ export default function MarketplaceClient() {
                   <h2 className="text-xl font-bold">Vendor Ecosystem</h2>
                   <p className="text-indigo-200 text-sm">Partner network performance overview</p>
                 </div>
-                <Button variant="outline" className="border-white/50 text-white hover:bg-white/10">
+                <Button variant="outline" className="border-white/50 text-white hover:bg-white/10" onClick={() => setShowApplyVendorDialog(true)}>
                   <Plus className="h-4 w-4 mr-2" />Apply as Vendor
                 </Button>
               </div>
@@ -1248,7 +1273,7 @@ export default function MarketplaceClient() {
                         </div>
                         <div className="flex gap-2">
                           <Button variant="outline" size="sm" onClick={() => { window.location.href = `mailto:${vendor.email || 'vendor@example.com'}`; toast.success('Email client opened') }}><Mail className="h-4 w-4" /></Button>
-                          <Button size="sm"><ExternalLink className="h-4 w-4 mr-1" />Store</Button>
+                          <Button size="sm" onClick={() => { setSelectedVendorForStore(vendor); setShowVendorStoreDialog(true) }}><ExternalLink className="h-4 w-4 mr-1" />Store</Button>
                         </div>
                       </div>
                     </div>
@@ -1303,8 +1328,8 @@ export default function MarketplaceClient() {
                   <p className="text-amber-100 text-sm">Monitor and respond to customer feedback</p>
                 </div>
                 <div className="flex gap-2">
-                  <Button variant="outline" className="border-white/50 text-white hover:bg-white/10"><Download className="h-4 w-4 mr-2" />Export</Button>
-                  <Button className="bg-white text-amber-700 hover:bg-amber-50"><MessageSquare className="h-4 w-4 mr-2" />Respond All</Button>
+                  <Button variant="outline" className="border-white/50 text-white hover:bg-white/10" onClick={() => setShowExportReviewsDialog(true)}><Download className="h-4 w-4 mr-2" />Export</Button>
+                  <Button className="bg-white text-amber-700 hover:bg-amber-50" onClick={() => setShowRespondAllDialog(true)}><MessageSquare className="h-4 w-4 mr-2" />Respond All</Button>
                 </div>
               </div>
               <div className="grid grid-cols-6 gap-4">
@@ -1398,8 +1423,8 @@ export default function MarketplaceClient() {
                   <p className="text-emerald-200 text-sm">Track and manage all marketplace transactions</p>
                 </div>
                 <div className="flex gap-2">
-                  <Button variant="outline" className="border-white/50 text-white hover:bg-white/10"><Download className="h-4 w-4 mr-2" />Export</Button>
-                  <Button className="bg-white text-emerald-700 hover:bg-emerald-50"><FileText className="h-4 w-4 mr-2" />Generate Report</Button>
+                  <Button variant="outline" className="border-white/50 text-white hover:bg-white/10" onClick={() => setShowExportOrdersDialog(true)}><Download className="h-4 w-4 mr-2" />Export</Button>
+                  <Button className="bg-white text-emerald-700 hover:bg-emerald-50" onClick={() => setShowGenerateReportDialog(true)}><FileText className="h-4 w-4 mr-2" />Generate Report</Button>
                 </div>
               </div>
               <div className="grid grid-cols-6 gap-4">
@@ -1462,7 +1487,7 @@ export default function MarketplaceClient() {
                   </div>
                   <div className="flex gap-2">
                     <Button variant="outline" size="sm" onClick={() => { toast.success('Orders refreshed') }}><RefreshCw className="h-4 w-4" /></Button>
-                    <Button variant="outline" size="sm"><Filter className="h-4 w-4 mr-1" />Filters</Button>
+                    <Button variant="outline" size="sm" onClick={() => setShowFiltersDialog(true)}><Filter className="h-4 w-4 mr-1" />Filters</Button>
                   </div>
                 </div>
               </CardContent>
@@ -1514,7 +1539,7 @@ export default function MarketplaceClient() {
                             <div className="flex items-center justify-end gap-1">
                               <Button variant="ghost" size="sm" onClick={() => { setSelectedOrder(order); setShowOrderDialog(true) }}><Eye className="h-4 w-4" /></Button>
                               <Button variant="ghost" size="sm" onClick={() => { const invoiceData = `Invoice: ${order.orderNumber}\nAmount: $${order.amount}\nDate: ${order.date}\nProduct: ${order.product.name}`; const blob = new Blob([invoiceData], { type: 'text/plain' }); const url = URL.createObjectURL(blob); const link = document.createElement('a'); link.href = url; link.download = `invoice-${order.orderNumber}.txt`; link.click(); URL.revokeObjectURL(url); toast.success('Invoice downloaded') }}><FileText className="h-4 w-4" /></Button>
-                              <Button variant="ghost" size="sm"><MoreHorizontal className="h-4 w-4" /></Button>
+                              <Button variant="ghost" size="sm" onClick={() => { setSelectedOrderForOptions(order); setShowMoreOptionsDialog(true) }}><MoreHorizontal className="h-4 w-4" /></Button>
                             </div>
                           </td>
                         </tr>
@@ -1582,11 +1607,11 @@ export default function MarketplaceClient() {
               <Card className="border-gray-200 dark:border-gray-700">
                 <CardHeader><CardTitle className="text-sm">Quick Actions</CardTitle></CardHeader>
                 <CardContent className="space-y-2">
-                  <Button variant="outline" className="w-full justify-start"><RefreshCw className="h-4 w-4 mr-2" />Process Pending Orders</Button>
-                  <Button variant="outline" className="w-full justify-start"><FileText className="h-4 w-4 mr-2" />Generate Invoices</Button>
-                  <Button variant="outline" className="w-full justify-start"><DollarSign className="h-4 w-4 mr-2" />Process Payouts</Button>
-                  <Button variant="outline" className="w-full justify-start"><Send className="h-4 w-4 mr-2" />Send Notifications</Button>
-                  <Button variant="outline" className="w-full justify-start"><Download className="h-4 w-4 mr-2" />Export to CSV</Button>
+                  <Button variant="outline" className="w-full justify-start" onClick={() => setShowProcessOrdersDialog(true)}><RefreshCw className="h-4 w-4 mr-2" />Process Pending Orders</Button>
+                  <Button variant="outline" className="w-full justify-start" onClick={() => setShowGenerateInvoicesDialog(true)}><FileText className="h-4 w-4 mr-2" />Generate Invoices</Button>
+                  <Button variant="outline" className="w-full justify-start" onClick={() => setShowProcessPayoutsDialog(true)}><DollarSign className="h-4 w-4 mr-2" />Process Payouts</Button>
+                  <Button variant="outline" className="w-full justify-start" onClick={() => setShowSendNotificationsDialog(true)}><Send className="h-4 w-4 mr-2" />Send Notifications</Button>
+                  <Button variant="outline" className="w-full justify-start" onClick={() => setShowExportCSVDialog(true)}><Download className="h-4 w-4 mr-2" />Export to CSV</Button>
                 </CardContent>
               </Card>
             </div>
@@ -1861,7 +1886,7 @@ export default function MarketplaceClient() {
                 )}
                 {settingsTab === 'payments' && (
                   <Card className="border-gray-200 dark:border-gray-700">
-                    <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Payment Providers</CardTitle><Button><Plus className="h-4 w-4 mr-2" />Add Provider</Button></CardHeader>
+                    <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Payment Providers</CardTitle><Button onClick={() => setShowAddProviderDialog(true)}><Plus className="h-4 w-4 mr-2" />Add Provider</Button></CardHeader>
                     <CardContent className="space-y-4">
                       {mockPaymentProviders.map(provider => (
                         <div key={provider.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
@@ -2079,7 +2104,7 @@ export default function MarketplaceClient() {
                 </div>
                 <DialogFooter className="gap-2">
                   <Button variant="outline" onClick={() => toggleWishlist(selectedProduct.id)}><Heart className={`h-4 w-4 mr-2 ${wishlist.includes(selectedProduct.id) ? 'fill-red-500 text-red-500' : ''}`} />Wishlist</Button>
-                  <Button className="bg-gradient-to-r from-violet-600 to-purple-600"><Download className="h-4 w-4 mr-2" />Install Now</Button>
+                  <Button className="bg-gradient-to-r from-violet-600 to-purple-600" onClick={() => { setInstallProduct(selectedProduct); setShowProductDialog(false); setShowInstallDialog(true) }}><Download className="h-4 w-4 mr-2" />Install Now</Button>
                 </DialogFooter>
               </>
             )}
@@ -2136,7 +2161,7 @@ export default function MarketplaceClient() {
                   </div>
                 </div>
                 <DialogFooter className="gap-2">
-                  {selectedOrder.invoice && <Button variant="outline"><FileText className="h-4 w-4 mr-2" />Download Invoice</Button>}
+                  {selectedOrder.invoice && <Button variant="outline" onClick={() => setShowDownloadInvoiceDialog(true)}><FileText className="h-4 w-4 mr-2" />Download Invoice</Button>}
                   <Button variant="outline" onClick={() => setShowOrderDialog(false)}>Close</Button>
                 </DialogFooter>
               </>
@@ -2174,7 +2199,7 @@ export default function MarketplaceClient() {
               </div>
               <div className="grid grid-cols-2 gap-4"><div><Label>Discount %</Label><Input type="number" placeholder="25" className="mt-1" /></div><div><Label>Bundle Price</Label><Input type="number" placeholder="99" className="mt-1" /></div></div>
             </div>
-            <DialogFooter><Button variant="outline" onClick={() => setShowBundleDialog(false)}>Cancel</Button><Button className="bg-gradient-to-r from-violet-600 to-purple-600">Create Bundle</Button></DialogFooter>
+            <DialogFooter><Button variant="outline" onClick={() => setShowBundleDialog(false)}>Cancel</Button><Button className="bg-gradient-to-r from-violet-600 to-purple-600" onClick={() => { toast.success('Bundle created successfully!'); setShowBundleDialog(false) }}>Create Bundle</Button></DialogFooter>
           </DialogContent>
         </Dialog>
 
@@ -2340,6 +2365,827 @@ export default function MarketplaceClient() {
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowContactDialog(false)}>Cancel</Button>
               <Button onClick={() => { toast.success('Message sent!', { description: `Your message has been sent to ${contactProduct?.vendor.name}` }); setShowContactDialog(false); setContactProduct(null) }} className="bg-gradient-to-r from-violet-600 to-purple-600"><Send className="h-4 w-4 mr-2" />Send Message</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Wishlist Dialog */}
+        <Dialog open={showWishlistDialog} onOpenChange={setShowWishlistDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>My Wishlist</DialogTitle>
+              <DialogDescription>Apps you've saved for later</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              {wishlist.length === 0 ? (
+                <div className="text-center py-8">
+                  <Heart className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                  <p className="text-gray-500">Your wishlist is empty</p>
+                  <p className="text-sm text-gray-400">Browse apps and click the heart icon to save them here</p>
+                </div>
+              ) : (
+                mockProducts.filter(p => wishlist.includes(p.id)).map(product => (
+                  <div key={product.id} className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <div className="w-12 h-12 bg-gradient-to-br from-violet-100 to-purple-100 dark:from-violet-900/30 dark:to-purple-900/30 rounded-lg flex items-center justify-center">
+                      <Package className="w-6 h-6 text-violet-300" />
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-semibold">{product.name}</h4>
+                      <p className="text-sm text-gray-500">{product.vendor.name}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-bold text-violet-600">{formatPrice(product.price, product.pricingModel)}</p>
+                    </div>
+                    <Button variant="ghost" size="icon" onClick={() => toggleWishlist(product.id)}>
+                      <Heart className="h-4 w-4 fill-red-500 text-red-500" />
+                    </Button>
+                  </div>
+                ))
+              )}
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowWishlistDialog(false)}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Install App Dialog */}
+        <Dialog open={showInstallDialog} onOpenChange={setShowInstallDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Install App</DialogTitle>
+              <DialogDescription>Confirm installation of {installProduct?.name}</DialogDescription>
+            </DialogHeader>
+            {installProduct && (
+              <div className="space-y-4 py-4">
+                <div className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div className="w-16 h-16 bg-gradient-to-br from-violet-100 to-purple-100 dark:from-violet-900/30 dark:to-purple-900/30 rounded-lg flex items-center justify-center">
+                    <Package className="w-8 h-8 text-violet-300" />
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-semibold text-lg">{installProduct.name}</h4>
+                    <p className="text-sm text-gray-500">by {installProduct.vendor.name}</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
+                      <span className="text-sm">{installProduct.rating} ({installProduct.reviewCount} reviews)</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <h5 className="font-medium">This app will:</h5>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-green-500" /><span>Access your account information</span></div>
+                    <div className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-green-500" /><span>Integrate with your existing workflows</span></div>
+                    <div className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-green-500" /><span>Send notifications about updates</span></div>
+                  </div>
+                </div>
+                <div className="p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
+                  <p className="text-sm text-amber-700">By installing, you agree to the app's terms of service and privacy policy.</p>
+                </div>
+              </div>
+            )}
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowInstallDialog(false)}>Cancel</Button>
+              <Button className="bg-gradient-to-r from-violet-600 to-purple-600" onClick={() => { toast.success('App installed successfully!', { description: `${installProduct?.name} is now ready to use` }); setShowInstallDialog(false); setInstallProduct(null) }}>
+                <Download className="h-4 w-4 mr-2" />Install App
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Learn More Dialog */}
+        <Dialog open={showLearnMoreDialog} onOpenChange={setShowLearnMoreDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Analytics Pro Suite</DialogTitle>
+              <DialogDescription>Comprehensive analytics solution for growing businesses</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="bg-gradient-to-br from-violet-100 to-purple-100 dark:from-violet-900/30 dark:to-purple-900/30 h-48 rounded-lg flex items-center justify-center">
+                <BarChart3 className="h-24 w-24 text-violet-300" />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <h4 className="font-semibold">Key Features</h4>
+                  <ul className="space-y-1 text-sm">
+                    <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-green-500" />Real-time analytics dashboard</li>
+                    <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-green-500" />AI-powered insights</li>
+                    <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-green-500" />Custom report builder</li>
+                    <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-green-500" />Team collaboration</li>
+                  </ul>
+                </div>
+                <div className="space-y-2">
+                  <h4 className="font-semibold">Pricing</h4>
+                  <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <p className="text-2xl font-bold text-violet-600">$49<span className="text-sm font-normal text-gray-500">/month</span></p>
+                    <p className="text-sm text-gray-500">14-day free trial included</p>
+                    <Badge className="mt-2 bg-green-100 text-green-700">Save 20% annually</Badge>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowLearnMoreDialog(false)}>Close</Button>
+              <Button className="bg-gradient-to-r from-violet-600 to-purple-600" onClick={() => { setShowLearnMoreDialog(false); setInstallProduct(mockProducts[0]); setShowInstallDialog(true) }}>
+                <Download className="h-4 w-4 mr-2" />Start Free Trial
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Visit Store Dialog */}
+        <Dialog open={showVisitStoreDialog} onOpenChange={setShowVisitStoreDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Visit Vendor Store</DialogTitle>
+              <DialogDescription>You're about to visit TechPro Solutions store</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <Avatar className="h-16 w-16"><AvatarFallback className="bg-gradient-to-br from-violet-500 to-purple-500 text-white text-xl">TP</AvatarFallback></Avatar>
+                <div>
+                  <h4 className="font-semibold text-lg">TechPro Solutions</h4>
+                  <div className="flex items-center gap-2">
+                    <Shield className="h-4 w-4 text-blue-500" />
+                    <span className="text-sm text-gray-500">Verified Elite Partner</span>
+                  </div>
+                  <div className="flex items-center gap-1 mt-1">
+                    <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
+                    <span className="text-sm">4.9 (2,847 reviews)</span>
+                  </div>
+                </div>
+              </div>
+              <div className="grid grid-cols-3 gap-4 text-center">
+                <div><p className="text-xl font-bold">15</p><p className="text-xs text-gray-500">Products</p></div>
+                <div><p className="text-xl font-bold">45K</p><p className="text-xs text-gray-500">Customers</p></div>
+                <div><p className="text-xl font-bold">$2.3M</p><p className="text-xs text-gray-500">Revenue</p></div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowVisitStoreDialog(false)}>Cancel</Button>
+              <Button className="bg-gradient-to-r from-violet-600 to-purple-600" onClick={() => { toast.success('Opening store...'); setShowVisitStoreDialog(false) }}>
+                <ExternalLink className="h-4 w-4 mr-2" />Visit Store
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Follow Vendor Dialog */}
+        <Dialog open={showFollowDialog} onOpenChange={setShowFollowDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Follow TechPro Solutions</DialogTitle>
+              <DialogDescription>Get notified about new products and updates</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <Avatar className="h-12 w-12"><AvatarFallback className="bg-gradient-to-br from-violet-500 to-purple-500 text-white">TP</AvatarFallback></Avatar>
+                <div>
+                  <h4 className="font-semibold">TechPro Solutions</h4>
+                  <p className="text-sm text-gray-500">15 products • 45K followers</p>
+                </div>
+              </div>
+              <div className="space-y-3">
+                <h5 className="font-medium">Notification preferences:</h5>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm">New product releases</span>
+                    <Switch defaultChecked />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm">Product updates</span>
+                    <Switch defaultChecked />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm">Special offers</span>
+                    <Switch />
+                  </div>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowFollowDialog(false)}>Cancel</Button>
+              <Button className="bg-gradient-to-r from-violet-600 to-purple-600" onClick={() => { toast.success('Now following TechPro Solutions!'); setShowFollowDialog(false) }}>
+                <Heart className="h-4 w-4 mr-2" />Follow
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Apply as Vendor Dialog */}
+        <Dialog open={showApplyVendorDialog} onOpenChange={setShowApplyVendorDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Become a Vendor</DialogTitle>
+              <DialogDescription>Apply to sell your products on the marketplace</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div><Label>Company Name</Label><Input placeholder="Your company name" className="mt-1" /></div>
+              <div><Label>Business Email</Label><Input type="email" placeholder="contact@yourcompany.com" className="mt-1" /></div>
+              <div><Label>Website</Label><Input placeholder="https://yourcompany.com" className="mt-1" /></div>
+              <div><Label>Business Type</Label>
+                <Select>
+                  <SelectTrigger className="mt-1"><SelectValue placeholder="Select business type" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="software">Software Company</SelectItem>
+                    <SelectItem value="agency">Digital Agency</SelectItem>
+                    <SelectItem value="freelancer">Freelancer</SelectItem>
+                    <SelectItem value="startup">Startup</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div><Label>Tell us about your products</Label><Textarea placeholder="Describe the products you plan to sell..." className="mt-1" rows={3} /></div>
+              <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                <p className="text-sm text-blue-700">Vendor applications are typically reviewed within 2-3 business days.</p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowApplyVendorDialog(false)}>Cancel</Button>
+              <Button className="bg-gradient-to-r from-violet-600 to-purple-600" onClick={() => { toast.success('Application submitted!', { description: 'We will review your application and get back to you soon.' }); setShowApplyVendorDialog(false) }}>
+                Submit Application
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Export Reviews Dialog */}
+        <Dialog open={showExportReviewsDialog} onOpenChange={setShowExportReviewsDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Export Reviews</DialogTitle>
+              <DialogDescription>Download review data in your preferred format</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div><Label>Export Format</Label>
+                <Select defaultValue="csv">
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="csv">CSV</SelectItem>
+                    <SelectItem value="excel">Excel (.xlsx)</SelectItem>
+                    <SelectItem value="json">JSON</SelectItem>
+                    <SelectItem value="pdf">PDF Report</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div><Label>Date Range</Label>
+                <Select defaultValue="all">
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Time</SelectItem>
+                    <SelectItem value="30">Last 30 Days</SelectItem>
+                    <SelectItem value="90">Last 90 Days</SelectItem>
+                    <SelectItem value="365">Last Year</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Include:</Label>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2"><input type="checkbox" defaultChecked /><span className="text-sm">Review content</span></div>
+                  <div className="flex items-center gap-2"><input type="checkbox" defaultChecked /><span className="text-sm">Ratings breakdown</span></div>
+                  <div className="flex items-center gap-2"><input type="checkbox" defaultChecked /><span className="text-sm">Author information</span></div>
+                  <div className="flex items-center gap-2"><input type="checkbox" /><span className="text-sm">Vendor responses</span></div>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowExportReviewsDialog(false)}>Cancel</Button>
+              <Button className="bg-gradient-to-r from-violet-600 to-purple-600" onClick={() => { toast.success('Export started', { description: 'Your file will download shortly.' }); setShowExportReviewsDialog(false) }}>
+                <Download className="h-4 w-4 mr-2" />Export
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Respond All Dialog */}
+        <Dialog open={showRespondAllDialog} onOpenChange={setShowRespondAllDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Bulk Response</DialogTitle>
+              <DialogDescription>Send a response to multiple reviews at once</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <p className="text-sm text-gray-500 mb-2">Reviews without response:</p>
+                <p className="text-2xl font-bold">{mockReviews.filter(r => !r.response).length} reviews</p>
+              </div>
+              <div><Label>Response Template</Label>
+                <Select>
+                  <SelectTrigger className="mt-1"><SelectValue placeholder="Select template" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="thank">Thank You Response</SelectItem>
+                    <SelectItem value="apology">Apology Response</SelectItem>
+                    <SelectItem value="followup">Follow-up Response</SelectItem>
+                    <SelectItem value="custom">Custom Response</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div><Label>Response Message</Label><Textarea placeholder="Thank you for your review! We appreciate your feedback..." className="mt-1" rows={4} /></div>
+              <div className="flex items-center gap-2">
+                <input type="checkbox" id="positive-only" />
+                <label htmlFor="positive-only" className="text-sm">Only respond to positive reviews (4-5 stars)</label>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowRespondAllDialog(false)}>Cancel</Button>
+              <Button className="bg-gradient-to-r from-violet-600 to-purple-600" onClick={() => { toast.success('Responses sent!', { description: `Responded to ${mockReviews.filter(r => !r.response).length} reviews` }); setShowRespondAllDialog(false) }}>
+                <MessageSquare className="h-4 w-4 mr-2" />Send Responses
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Export Orders Dialog */}
+        <Dialog open={showExportOrdersDialog} onOpenChange={setShowExportOrdersDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Export Orders</DialogTitle>
+              <DialogDescription>Download order data for reporting</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div><Label>Export Format</Label>
+                <Select defaultValue="csv">
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="csv">CSV</SelectItem>
+                    <SelectItem value="excel">Excel (.xlsx)</SelectItem>
+                    <SelectItem value="json">JSON</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div><Label>Order Status</Label>
+                <Select defaultValue="all">
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Orders</SelectItem>
+                    <SelectItem value="completed">Completed</SelectItem>
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="refunded">Refunded</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div><Label>From Date</Label><Input type="date" className="mt-1" /></div>
+                <div><Label>To Date</Label><Input type="date" className="mt-1" /></div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowExportOrdersDialog(false)}>Cancel</Button>
+              <Button className="bg-gradient-to-r from-violet-600 to-purple-600" onClick={() => { toast.success('Export started', { description: 'Your file will download shortly.' }); setShowExportOrdersDialog(false) }}>
+                <Download className="h-4 w-4 mr-2" />Export
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Generate Report Dialog */}
+        <Dialog open={showGenerateReportDialog} onOpenChange={setShowGenerateReportDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Generate Report</DialogTitle>
+              <DialogDescription>Create a comprehensive order report</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div><Label>Report Type</Label>
+                <Select defaultValue="summary">
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="summary">Summary Report</SelectItem>
+                    <SelectItem value="detailed">Detailed Report</SelectItem>
+                    <SelectItem value="financial">Financial Report</SelectItem>
+                    <SelectItem value="product">Product Performance</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div><Label>Time Period</Label>
+                <Select defaultValue="month">
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="week">This Week</SelectItem>
+                    <SelectItem value="month">This Month</SelectItem>
+                    <SelectItem value="quarter">This Quarter</SelectItem>
+                    <SelectItem value="year">This Year</SelectItem>
+                    <SelectItem value="custom">Custom Range</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Include Sections:</Label>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2"><input type="checkbox" defaultChecked /><span className="text-sm">Revenue breakdown</span></div>
+                  <div className="flex items-center gap-2"><input type="checkbox" defaultChecked /><span className="text-sm">Order statistics</span></div>
+                  <div className="flex items-center gap-2"><input type="checkbox" defaultChecked /><span className="text-sm">Product performance</span></div>
+                  <div className="flex items-center gap-2"><input type="checkbox" /><span className="text-sm">Customer insights</span></div>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowGenerateReportDialog(false)}>Cancel</Button>
+              <Button className="bg-gradient-to-r from-violet-600 to-purple-600" onClick={() => { toast.success('Report generated!', { description: 'Your report is ready for download.' }); setShowGenerateReportDialog(false) }}>
+                <FileText className="h-4 w-4 mr-2" />Generate
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Filters Dialog */}
+        <Dialog open={showFiltersDialog} onOpenChange={setShowFiltersDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Advanced Filters</DialogTitle>
+              <DialogDescription>Filter orders by multiple criteria</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div><Label>Order Status</Label>
+                <Select>
+                  <SelectTrigger className="mt-1"><SelectValue placeholder="All statuses" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Statuses</SelectItem>
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="processing">Processing</SelectItem>
+                    <SelectItem value="completed">Completed</SelectItem>
+                    <SelectItem value="refunded">Refunded</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div><Label>Payment Method</Label>
+                <Select>
+                  <SelectTrigger className="mt-1"><SelectValue placeholder="All methods" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Methods</SelectItem>
+                    <SelectItem value="card">Credit Card</SelectItem>
+                    <SelectItem value="paypal">PayPal</SelectItem>
+                    <SelectItem value="crypto">Crypto</SelectItem>
+                    <SelectItem value="wire">Wire Transfer</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div><Label>Amount Range</Label>
+                <div className="grid grid-cols-2 gap-2 mt-1">
+                  <Input placeholder="Min $" type="number" />
+                  <Input placeholder="Max $" type="number" />
+                </div>
+              </div>
+              <div><Label>Product</Label>
+                <Select>
+                  <SelectTrigger className="mt-1"><SelectValue placeholder="All products" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Products</SelectItem>
+                    {mockProducts.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => { toast.success('Filters cleared'); setShowFiltersDialog(false) }}>Clear All</Button>
+              <Button className="bg-gradient-to-r from-violet-600 to-purple-600" onClick={() => { toast.success('Filters applied'); setShowFiltersDialog(false) }}>
+                <Filter className="h-4 w-4 mr-2" />Apply Filters
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* More Options Dialog */}
+        <Dialog open={showMoreOptionsDialog} onOpenChange={setShowMoreOptionsDialog}>
+          <DialogContent className="max-w-sm">
+            <DialogHeader>
+              <DialogTitle>Order Actions</DialogTitle>
+              <DialogDescription>{selectedOrderForOptions?.orderNumber}</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-2 py-4">
+              <Button variant="outline" className="w-full justify-start" onClick={() => { toast.success('Order marked as complete'); setShowMoreOptionsDialog(false) }}>
+                <CheckCircle className="h-4 w-4 mr-2" />Mark as Complete
+              </Button>
+              <Button variant="outline" className="w-full justify-start" onClick={() => { toast.success('Refund initiated'); setShowMoreOptionsDialog(false) }}>
+                <DollarSign className="h-4 w-4 mr-2" />Process Refund
+              </Button>
+              <Button variant="outline" className="w-full justify-start" onClick={() => { toast.success('Email sent to customer'); setShowMoreOptionsDialog(false) }}>
+                <Mail className="h-4 w-4 mr-2" />Email Customer
+              </Button>
+              <Button variant="outline" className="w-full justify-start" onClick={() => { toast.success('License renewed'); setShowMoreOptionsDialog(false) }}>
+                <RefreshCw className="h-4 w-4 mr-2" />Renew License
+              </Button>
+              <Button variant="outline" className="w-full justify-start text-red-600 hover:text-red-700" onClick={() => { toast.success('Order cancelled'); setShowMoreOptionsDialog(false) }}>
+                <XCircle className="h-4 w-4 mr-2" />Cancel Order
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Process Orders Dialog */}
+        <Dialog open={showProcessOrdersDialog} onOpenChange={setShowProcessOrdersDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Process Pending Orders</DialogTitle>
+              <DialogDescription>Bulk process all pending orders</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
+                <p className="text-sm text-amber-700 mb-2">Pending orders to process:</p>
+                <p className="text-2xl font-bold">{mockOrders.filter(o => o.status === 'pending').length} orders</p>
+              </div>
+              <div className="space-y-2">
+                <Label>Processing Options:</Label>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2"><input type="checkbox" defaultChecked /><span className="text-sm">Send confirmation emails</span></div>
+                  <div className="flex items-center gap-2"><input type="checkbox" defaultChecked /><span className="text-sm">Generate licenses</span></div>
+                  <div className="flex items-center gap-2"><input type="checkbox" /><span className="text-sm">Notify vendors</span></div>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowProcessOrdersDialog(false)}>Cancel</Button>
+              <Button className="bg-gradient-to-r from-violet-600 to-purple-600" onClick={() => { toast.success('Orders processed!', { description: `${mockOrders.filter(o => o.status === 'pending').length} orders have been processed` }); setShowProcessOrdersDialog(false) }}>
+                <RefreshCw className="h-4 w-4 mr-2" />Process Orders
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Generate Invoices Dialog */}
+        <Dialog open={showGenerateInvoicesDialog} onOpenChange={setShowGenerateInvoicesDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Generate Invoices</DialogTitle>
+              <DialogDescription>Create invoices for orders</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div><Label>Order Selection</Label>
+                <Select defaultValue="pending">
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="pending">Orders without invoices</SelectItem>
+                    <SelectItem value="all">All orders (regenerate)</SelectItem>
+                    <SelectItem value="month">This month's orders</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div><Label>Invoice Format</Label>
+                <Select defaultValue="pdf">
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="pdf">PDF</SelectItem>
+                    <SelectItem value="html">HTML</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2"><input type="checkbox" defaultChecked /><span className="text-sm">Send to customers automatically</span></div>
+                <div className="flex items-center gap-2"><input type="checkbox" /><span className="text-sm">Include detailed breakdown</span></div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowGenerateInvoicesDialog(false)}>Cancel</Button>
+              <Button className="bg-gradient-to-r from-violet-600 to-purple-600" onClick={() => { toast.success('Invoices generated!'); setShowGenerateInvoicesDialog(false) }}>
+                <FileText className="h-4 w-4 mr-2" />Generate
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Process Payouts Dialog */}
+        <Dialog open={showProcessPayoutsDialog} onOpenChange={setShowProcessPayoutsDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Process Payouts</DialogTitle>
+              <DialogDescription>Send earnings to vendors</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                <p className="text-sm text-green-700 mb-2">Total payout amount:</p>
+                <p className="text-2xl font-bold text-green-600">${(mockOrders.reduce((sum, o) => sum + o.amount, 0) * 0.85).toFixed(2)}</p>
+                <p className="text-xs text-gray-500 mt-1">After 15% platform fee</p>
+              </div>
+              <div><Label>Payout Method</Label>
+                <Select defaultValue="bank">
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="bank">Bank Transfer</SelectItem>
+                    <SelectItem value="paypal">PayPal</SelectItem>
+                    <SelectItem value="stripe">Stripe Connect</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div><Label>Minimum Threshold</Label><Input type="number" defaultValue="50" className="mt-1" /></div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowProcessPayoutsDialog(false)}>Cancel</Button>
+              <Button className="bg-gradient-to-r from-violet-600 to-purple-600" onClick={() => { toast.success('Payouts processed!', { description: 'Vendors will receive their earnings within 2-3 business days.' }); setShowProcessPayoutsDialog(false) }}>
+                <DollarSign className="h-4 w-4 mr-2" />Process Payouts
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Send Notifications Dialog */}
+        <Dialog open={showSendNotificationsDialog} onOpenChange={setShowSendNotificationsDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Send Notifications</DialogTitle>
+              <DialogDescription>Notify customers about their orders</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div><Label>Notification Type</Label>
+                <Select defaultValue="reminder">
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="reminder">Payment Reminder</SelectItem>
+                    <SelectItem value="update">Order Update</SelectItem>
+                    <SelectItem value="promo">Promotional</SelectItem>
+                    <SelectItem value="renewal">Renewal Reminder</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div><Label>Recipients</Label>
+                <Select defaultValue="pending">
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="pending">Customers with pending orders</SelectItem>
+                    <SelectItem value="all">All customers</SelectItem>
+                    <SelectItem value="expiring">Customers with expiring licenses</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div><Label>Message</Label><Textarea placeholder="Enter your notification message..." className="mt-1" rows={3} /></div>
+              <div className="flex items-center gap-2">
+                <input type="checkbox" defaultChecked />
+                <span className="text-sm">Send via email</span>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowSendNotificationsDialog(false)}>Cancel</Button>
+              <Button className="bg-gradient-to-r from-violet-600 to-purple-600" onClick={() => { toast.success('Notifications sent!'); setShowSendNotificationsDialog(false) }}>
+                <Send className="h-4 w-4 mr-2" />Send
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Export CSV Dialog */}
+        <Dialog open={showExportCSVDialog} onOpenChange={setShowExportCSVDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Export to CSV</DialogTitle>
+              <DialogDescription>Download order data as CSV file</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div><Label>Data to Export</Label>
+                <Select defaultValue="orders">
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="orders">Orders</SelectItem>
+                    <SelectItem value="customers">Customers</SelectItem>
+                    <SelectItem value="products">Products</SelectItem>
+                    <SelectItem value="revenue">Revenue Summary</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Columns to Include:</Label>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="flex items-center gap-2"><input type="checkbox" defaultChecked /><span className="text-sm">Order ID</span></div>
+                  <div className="flex items-center gap-2"><input type="checkbox" defaultChecked /><span className="text-sm">Date</span></div>
+                  <div className="flex items-center gap-2"><input type="checkbox" defaultChecked /><span className="text-sm">Customer</span></div>
+                  <div className="flex items-center gap-2"><input type="checkbox" defaultChecked /><span className="text-sm">Amount</span></div>
+                  <div className="flex items-center gap-2"><input type="checkbox" defaultChecked /><span className="text-sm">Status</span></div>
+                  <div className="flex items-center gap-2"><input type="checkbox" /><span className="text-sm">Product</span></div>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowExportCSVDialog(false)}>Cancel</Button>
+              <Button className="bg-gradient-to-r from-violet-600 to-purple-600" onClick={() => { toast.success('CSV exported!', { description: 'Download starting...' }); setShowExportCSVDialog(false) }}>
+                <Download className="h-4 w-4 mr-2" />Download CSV
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Payment Provider Dialog */}
+        <Dialog open={showAddProviderDialog} onOpenChange={setShowAddProviderDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Add Payment Provider</DialogTitle>
+              <DialogDescription>Connect a new payment gateway</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div><Label>Provider</Label>
+                <Select>
+                  <SelectTrigger className="mt-1"><SelectValue placeholder="Select provider" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="stripe">Stripe</SelectItem>
+                    <SelectItem value="paypal">PayPal</SelectItem>
+                    <SelectItem value="square">Square</SelectItem>
+                    <SelectItem value="braintree">Braintree</SelectItem>
+                    <SelectItem value="coinbase">Coinbase Commerce</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div><Label>API Key</Label><Input placeholder="Enter your API key" className="mt-1 font-mono" /></div>
+              <div><Label>Secret Key</Label><Input type="password" placeholder="Enter your secret key" className="mt-1 font-mono" /></div>
+              <div><Label>Environment</Label>
+                <Select defaultValue="test">
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="test">Test/Sandbox</SelectItem>
+                    <SelectItem value="live">Live/Production</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
+                <p className="text-sm text-amber-700">Test your integration before going live to ensure everything works correctly.</p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowAddProviderDialog(false)}>Cancel</Button>
+              <Button className="bg-gradient-to-r from-violet-600 to-purple-600" onClick={() => { toast.success('Payment provider added!'); setShowAddProviderDialog(false) }}>
+                <Plus className="h-4 w-4 mr-2" />Add Provider
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Download Invoice Dialog */}
+        <Dialog open={showDownloadInvoiceDialog} onOpenChange={setShowDownloadInvoiceDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Download Invoice</DialogTitle>
+              <DialogDescription>Select invoice format and options</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div><Label>Format</Label>
+                <Select defaultValue="pdf">
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="pdf">PDF</SelectItem>
+                    <SelectItem value="html">HTML</SelectItem>
+                    <SelectItem value="txt">Plain Text</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Include:</Label>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2"><input type="checkbox" defaultChecked /><span className="text-sm">Company details</span></div>
+                  <div className="flex items-center gap-2"><input type="checkbox" defaultChecked /><span className="text-sm">Tax breakdown</span></div>
+                  <div className="flex items-center gap-2"><input type="checkbox" /><span className="text-sm">Payment history</span></div>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowDownloadInvoiceDialog(false)}>Cancel</Button>
+              <Button className="bg-gradient-to-r from-violet-600 to-purple-600" onClick={() => { toast.success('Invoice downloaded!'); setShowDownloadInvoiceDialog(false); setShowOrderDialog(false) }}>
+                <Download className="h-4 w-4 mr-2" />Download
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Vendor Store Dialog */}
+        <Dialog open={showVendorStoreDialog} onOpenChange={setShowVendorStoreDialog}>
+          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>{selectedVendorForStore?.name} Store</DialogTitle>
+              <DialogDescription>Browse products from this vendor</DialogDescription>
+            </DialogHeader>
+            {selectedVendorForStore && (
+              <div className="space-y-4 py-4">
+                <div className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <Avatar className="h-16 w-16"><AvatarFallback className="bg-gradient-to-br from-violet-500 to-purple-500 text-white text-xl">{selectedVendorForStore.name.charAt(0)}</AvatarFallback></Avatar>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-semibold text-lg">{selectedVendorForStore.name}</h3>
+                      {selectedVendorForStore.isVerified && <Shield className="h-4 w-4 text-blue-500" />}
+                    </div>
+                    <p className="text-sm text-gray-500">{selectedVendorForStore.description}</p>
+                    <div className="flex items-center gap-4 mt-2 text-sm">
+                      <span className="flex items-center gap-1"><Star className="h-4 w-4 fill-amber-400 text-amber-400" />{selectedVendorForStore.rating}</span>
+                      <span>{selectedVendorForStore.productCount} products</span>
+                      <span className="text-green-600">${(selectedVendorForStore.totalRevenue / 1000).toFixed(0)}K revenue</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  {mockProducts.filter(p => p.vendor.id === selectedVendorForStore.id || mockVendors.indexOf(selectedVendorForStore) < 2).slice(0, 4).map(product => (
+                    <div key={product.id} className="p-4 border rounded-lg hover:shadow-md transition-shadow">
+                      <div className="w-full h-24 bg-gradient-to-br from-violet-100 to-purple-100 dark:from-violet-900/30 dark:to-purple-900/30 rounded-lg flex items-center justify-center mb-3">
+                        <Package className="h-8 w-8 text-violet-300" />
+                      </div>
+                      <h4 className="font-semibold">{product.name}</h4>
+                      <p className="text-sm text-gray-500 line-clamp-2">{product.shortDescription}</p>
+                      <div className="flex items-center justify-between mt-3">
+                        <span className="font-bold text-violet-600">{formatPrice(product.price, product.pricingModel)}</span>
+                        <Button size="sm" onClick={() => { setInstallProduct(product); setShowVendorStoreDialog(false); setShowInstallDialog(true) }}>
+                          <Download className="h-4 w-4 mr-1" />Install
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowVendorStoreDialog(false)}>Close</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

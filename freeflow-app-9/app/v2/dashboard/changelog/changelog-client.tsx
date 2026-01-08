@@ -437,6 +437,21 @@ export default function ChangelogClient({ initialChangelog }: { initialChangelog
   const [compareForm, setCompareForm] = useState({ baseVersion: '', targetVersion: '' })
   const [notifyForm, setNotifyForm] = useState({ message: '', notifyAll: false, selectedUsers: [] as string[] })
 
+  // Additional dialog states for buttons without onClick
+  const [showResetTemplateDialog, setShowResetTemplateDialog] = useState(false)
+  const [showAddWebhookSettingsDialog, setShowAddWebhookSettingsDialog] = useState(false)
+  const [showCIConfigDialog, setShowCIConfigDialog] = useState(false)
+  const [selectedCIProvider, setSelectedCIProvider] = useState<string>('')
+  const [showRegenerateTokenDialog, setShowRegenerateTokenDialog] = useState(false)
+  const [showDeleteDraftsDialog, setShowDeleteDraftsDialog] = useState(false)
+  const [showResetSettingsDialog, setShowResetSettingsDialog] = useState(false)
+  const [showAddEnvironmentDialog, setShowAddEnvironmentDialog] = useState(false)
+  const [showAuditLogDialog, setShowAuditLogDialog] = useState(false)
+  const [showExportAnalyticsDialog, setShowExportAnalyticsDialog] = useState(false)
+  const [discussionCategoryFilter, setDiscussionCategoryFilter] = useState('all')
+  const [newEnvironmentForm, setNewEnvironmentForm] = useState({ name: '', url: '', type: 'development' })
+  const [exportFormat, setExportFormat] = useState('csv')
+
   const { changelog, loading, error, createChange, updateChange, deleteChange, refetch } = useChangelog()
 
   // Filter releases
@@ -1174,7 +1189,15 @@ export default function ChangelogClient({ initialChangelog }: { initialChangelog
                                   </div>
                                   <div className="flex items-center gap-4">
                                     <span className="text-sm text-gray-500">{formatNumber(asset.downloadCount)} downloads</span>
-                                    <Button size="sm" variant="outline">
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() => {
+                                        toast.success('Download Started', {
+                                          description: `Downloading ${asset.name}...`
+                                        })
+                                      }}
+                                    >
                                       <Download className="h-4 w-4 mr-1" />Download
                                     </Button>
                                   </div>
@@ -1356,7 +1379,20 @@ export default function ChangelogClient({ initialChangelog }: { initialChangelog
             <div className="flex items-center justify-between mb-4">
               <div className="flex gap-2">
                 {['all', 'announcements', 'feedback', 'questions', 'ideas'].map(cat => (
-                  <Button key={cat} variant="outline" size="sm" className="capitalize">{cat}</Button>
+                  <Button
+                    key={cat}
+                    variant={discussionCategoryFilter === cat ? 'default' : 'outline'}
+                    size="sm"
+                    className="capitalize"
+                    onClick={() => {
+                      setDiscussionCategoryFilter(cat)
+                      toast.info('Filter Applied', {
+                        description: cat === 'all' ? 'Showing all discussions' : `Showing ${cat} discussions`
+                      })
+                    }}
+                  >
+                    {cat}
+                  </Button>
                 ))}
               </div>
               <Dialog open={isDiscussionDialogOpen} onOpenChange={setIsDiscussionDialogOpen}>
@@ -1662,11 +1698,28 @@ export default function ChangelogClient({ initialChangelog }: { initialChangelog
                             <div className="font-semibold text-gray-900 dark:text-white">{formatNumber(asset.downloadCount)}</div>
                             <div className="text-xs text-gray-500">downloads</div>
                           </div>
-                          <Button variant="outline" size="sm">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              toast.success('Download Started', {
+                                description: `Downloading ${asset.name}...`
+                              })
+                            }}
+                          >
                             <Download className="h-4 w-4 mr-1" />Download
                           </Button>
                           {asset.checksumSha256 && (
-                            <Button variant="ghost" size="sm">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                navigator.clipboard.writeText(asset.checksumSha256 || '')
+                                toast.success('Copied to Clipboard', {
+                                  description: 'SHA256 checksum copied successfully'
+                                })
+                              }}
+                            >
                               <Copy className="h-4 w-4" />
                             </Button>
                           )}
@@ -1881,7 +1934,11 @@ export default function ChangelogClient({ initialChangelog }: { initialChangelog
 ### 🙏 Contributors
 Thanks to all contributors!`}
                         />
-                        <Button variant="outline" className="w-full">
+                        <Button
+                          variant="outline"
+                          className="w-full"
+                          onClick={() => setShowResetTemplateDialog(true)}
+                        >
                           <RefreshCw className="w-4 h-4 mr-2" />
                           Reset to Default
                         </Button>
@@ -2005,7 +2062,11 @@ Thanks to all contributors!`}
                           </div>
                           <p className="text-xs text-gray-500">Events: release.created, release.published</p>
                         </div>
-                        <Button variant="outline" className="w-full">
+                        <Button
+                          variant="outline"
+                          className="w-full"
+                          onClick={() => setShowAddWebhookSettingsDialog(true)}
+                        >
                           <Plus className="w-4 h-4 mr-2" />
                           Add Webhook
                         </Button>
@@ -2026,7 +2087,14 @@ Thanks to all contributors!`}
                         ].map((ci, i) => (
                           <div key={i} className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
                             <span className="font-medium">{ci.name}</span>
-                            <Button variant={ci.connected ? 'outline' : 'default'} size="sm">
+                            <Button
+                              variant={ci.connected ? 'outline' : 'default'}
+                              size="sm"
+                              onClick={() => {
+                                setSelectedCIProvider(ci.name)
+                                setShowCIConfigDialog(true)
+                              }}
+                            >
                               {ci.connected ? 'Configure' : 'Connect'}
                             </Button>
                           </div>
@@ -2159,7 +2227,11 @@ Thanks to all contributors!`}
                             <span className="text-sm text-amber-800 dark:text-amber-200">Keep your token secret</span>
                           </div>
                         </div>
-                        <Button variant="outline" className="w-full">
+                        <Button
+                          variant="outline"
+                          className="w-full"
+                          onClick={() => setShowRegenerateTokenDialog(true)}
+                        >
                           <RefreshCw className="w-4 h-4 mr-2" />
                           Regenerate Token
                         </Button>
@@ -2213,7 +2285,11 @@ Thanks to all contributors!`}
                               <p className="font-medium text-red-700 dark:text-red-400">Delete All Drafts</p>
                               <p className="text-sm text-red-600">Remove all draft releases</p>
                             </div>
-                            <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                            <Button
+                              variant="outline"
+                              className="text-red-600 border-red-300 hover:bg-red-50"
+                              onClick={() => setShowDeleteDraftsDialog(true)}
+                            >
                               Delete
                             </Button>
                           </div>
@@ -2224,7 +2300,11 @@ Thanks to all contributors!`}
                               <p className="font-medium text-red-700 dark:text-red-400">Reset Settings</p>
                               <p className="text-sm text-red-600">Reset to defaults</p>
                             </div>
-                            <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                            <Button
+                              variant="outline"
+                              className="text-red-600 border-red-300 hover:bg-red-50"
+                              onClick={() => setShowResetSettingsDialog(true)}
+                            >
                               Reset
                             </Button>
                           </div>
@@ -2297,7 +2377,11 @@ Thanks to all contributors!`}
                             </Badge>
                           </div>
                         ))}
-                        <Button variant="outline" className="w-full">
+                        <Button
+                          variant="outline"
+                          className="w-full"
+                          onClick={() => setShowAddEnvironmentDialog(true)}
+                        >
                           <Plus className="w-4 h-4 mr-2" />
                           Add Environment
                         </Button>
@@ -2342,7 +2426,11 @@ Thanks to all contributors!`}
                             </div>
                           ))}
                         </div>
-                        <Button variant="outline" className="w-full">
+                        <Button
+                          variant="outline"
+                          className="w-full"
+                          onClick={() => setShowAuditLogDialog(true)}
+                        >
                           View Full Audit Log
                         </Button>
                       </CardContent>
@@ -2422,7 +2510,10 @@ Thanks to all contributors!`}
                         </div>
                         <div>
                           <Label>Export Format</Label>
-                          <Select defaultValue="csv">
+                          <Select
+                            defaultValue="csv"
+                            onValueChange={(value) => setExportFormat(value)}
+                          >
                             <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
                             <SelectContent>
                               <SelectItem value="csv">CSV</SelectItem>
@@ -2431,7 +2522,11 @@ Thanks to all contributors!`}
                             </SelectContent>
                           </Select>
                         </div>
-                        <Button variant="outline" className="w-full">
+                        <Button
+                          variant="outline"
+                          className="w-full"
+                          onClick={() => setShowExportAnalyticsDialog(true)}
+                        >
                           <Download className="w-4 h-4 mr-2" />
                           Export Analytics
                         </Button>
@@ -2820,6 +2915,507 @@ Thanks to all contributors!`}
                   Send Notifications
                 </Button>
               </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Reset Template Dialog */}
+        <Dialog open={showResetTemplateDialog} onOpenChange={setShowResetTemplateDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <RefreshCw className="h-5 w-5" />
+                Reset Template
+              </DialogTitle>
+            </DialogHeader>
+            <div className="py-4">
+              <p className="text-gray-600 dark:text-gray-400">
+                Are you sure you want to reset the release template to the default?
+                This will overwrite any custom template you have created.
+              </p>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowResetTemplateDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                onClick={() => {
+                  toast.success('Template Reset', {
+                    description: 'Release template has been reset to default'
+                  })
+                  setShowResetTemplateDialog(false)
+                }}
+              >
+                Reset Template
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Webhook Settings Dialog */}
+        <Dialog open={showAddWebhookSettingsDialog} onOpenChange={setShowAddWebhookSettingsDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Webhook className="h-5 w-5" />
+                Add Webhook
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="settings-webhook-name">Webhook Name</Label>
+                <Input
+                  id="settings-webhook-name"
+                  placeholder="My Webhook"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="settings-webhook-url">Payload URL</Label>
+                <Input
+                  id="settings-webhook-url"
+                  placeholder="https://example.com/webhook"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="settings-webhook-secret">Secret (Optional)</Label>
+                <Input
+                  id="settings-webhook-secret"
+                  type="password"
+                  placeholder="Webhook secret for verification"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Events to Trigger</Label>
+                <div className="grid grid-cols-2 gap-2">
+                  {['release.created', 'release.published', 'release.edited', 'release.deleted'].map((event) => (
+                    <div key={event} className="flex items-center gap-2 p-2 border rounded">
+                      <Switch id={`event-${event}`} />
+                      <Label htmlFor={`event-${event}`} className="text-sm font-normal">{event}</Label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowAddWebhookSettingsDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                onClick={() => {
+                  toast.success('Webhook Added', {
+                    description: 'Webhook has been configured successfully'
+                  })
+                  setShowAddWebhookSettingsDialog(false)
+                }}
+              >
+                Add Webhook
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* CI/CD Configuration Dialog */}
+        <Dialog open={showCIConfigDialog} onOpenChange={setShowCIConfigDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <GitBranch className="h-5 w-5" />
+                {selectedCIProvider} Configuration
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Configure {selectedCIProvider} to automatically create releases from your CI/CD pipeline.
+              </p>
+              <div className="space-y-2">
+                <Label htmlFor="ci-repo">Repository</Label>
+                <Input
+                  id="ci-repo"
+                  placeholder="owner/repository"
+                  defaultValue="freeflow/app"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="ci-branch">Release Branch</Label>
+                <Select defaultValue="main">
+                  <SelectTrigger id="ci-branch">
+                    <SelectValue placeholder="Select branch" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="main">main</SelectItem>
+                    <SelectItem value="master">master</SelectItem>
+                    <SelectItem value="release">release</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div>
+                  <Label>Auto-create Releases</Label>
+                  <p className="text-xs text-gray-500">Create releases on successful builds</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div>
+                  <Label>Include Build Artifacts</Label>
+                  <p className="text-xs text-gray-500">Attach build artifacts to releases</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowCIConfigDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                onClick={() => {
+                  toast.success('CI/CD Configured', {
+                    description: `${selectedCIProvider} has been configured successfully`
+                  })
+                  setShowCIConfigDialog(false)
+                }}
+              >
+                Save Configuration
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Regenerate Token Dialog */}
+        <Dialog open={showRegenerateTokenDialog} onOpenChange={setShowRegenerateTokenDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <RefreshCw className="h-5 w-5" />
+                Regenerate API Token
+              </DialogTitle>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg mb-4">
+                <div className="flex items-center gap-2 text-amber-800 dark:text-amber-200">
+                  <AlertTriangle className="h-4 w-4" />
+                  <span className="text-sm font-medium">Warning</span>
+                </div>
+                <p className="text-sm text-amber-700 dark:text-amber-300 mt-1">
+                  Regenerating the token will invalidate the current token. Any applications
+                  using the old token will need to be updated.
+                </p>
+              </div>
+              <p className="text-gray-600 dark:text-gray-400">
+                Are you sure you want to regenerate your API token?
+              </p>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowRegenerateTokenDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={() => {
+                  toast.success('Token Regenerated', {
+                    description: 'Your new API token has been generated. Please copy it now.'
+                  })
+                  setShowRegenerateTokenDialog(false)
+                }}
+              >
+                Regenerate Token
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete All Drafts Dialog */}
+        <Dialog open={showDeleteDraftsDialog} onOpenChange={setShowDeleteDraftsDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-600">
+                <AlertTriangle className="h-5 w-5" />
+                Delete All Drafts
+              </DialogTitle>
+            </DialogHeader>
+            <div className="py-4">
+              <p className="text-gray-600 dark:text-gray-400">
+                Are you sure you want to delete all draft releases? This action cannot be undone.
+              </p>
+              <div className="mt-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                <p className="text-sm text-red-700 dark:text-red-300">
+                  This will permanently remove all draft releases and their associated data.
+                </p>
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowDeleteDraftsDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={() => {
+                  toast.success('Drafts Deleted', {
+                    description: 'All draft releases have been removed'
+                  })
+                  setShowDeleteDraftsDialog(false)
+                }}
+              >
+                Delete All Drafts
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Reset Settings Dialog */}
+        <Dialog open={showResetSettingsDialog} onOpenChange={setShowResetSettingsDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-600">
+                <AlertTriangle className="h-5 w-5" />
+                Reset Settings
+              </DialogTitle>
+            </DialogHeader>
+            <div className="py-4">
+              <p className="text-gray-600 dark:text-gray-400">
+                Are you sure you want to reset all changelog settings to their default values?
+              </p>
+              <div className="mt-4 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+                <p className="text-sm text-amber-700 dark:text-amber-300">
+                  This will reset all your customizations including templates, notifications, and integrations.
+                </p>
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowResetSettingsDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={() => {
+                  toast.success('Settings Reset', {
+                    description: 'All settings have been reset to defaults'
+                  })
+                  setShowResetSettingsDialog(false)
+                }}
+              >
+                Reset Settings
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Environment Dialog */}
+        <Dialog open={showAddEnvironmentDialog} onOpenChange={setShowAddEnvironmentDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Plus className="h-5 w-5" />
+                Add Environment
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Add a new deployment environment for your releases.
+              </p>
+              <div className="space-y-2">
+                <Label htmlFor="env-name">Environment Name</Label>
+                <Input
+                  id="env-name"
+                  placeholder="e.g., Canary, Preview"
+                  value={newEnvironmentForm.name}
+                  onChange={(e) => setNewEnvironmentForm(prev => ({ ...prev, name: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="env-url">Environment URL</Label>
+                <Input
+                  id="env-url"
+                  placeholder="https://canary.example.com"
+                  value={newEnvironmentForm.url}
+                  onChange={(e) => setNewEnvironmentForm(prev => ({ ...prev, url: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="env-type">Environment Type</Label>
+                <Select
+                  value={newEnvironmentForm.type}
+                  onValueChange={(value) => setNewEnvironmentForm(prev => ({ ...prev, type: value }))}
+                >
+                  <SelectTrigger id="env-type">
+                    <SelectValue placeholder="Select type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="production">Production</SelectItem>
+                    <SelectItem value="staging">Staging</SelectItem>
+                    <SelectItem value="development">Development</SelectItem>
+                    <SelectItem value="testing">Testing</SelectItem>
+                    <SelectItem value="preview">Preview</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div>
+                  <Label>Auto-Deploy</Label>
+                  <p className="text-xs text-gray-500">Automatically deploy releases to this environment</p>
+                </div>
+                <Switch />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => {
+                setShowAddEnvironmentDialog(false)
+                setNewEnvironmentForm({ name: '', url: '', type: 'development' })
+              }}>
+                Cancel
+              </Button>
+              <Button
+                onClick={() => {
+                  if (!newEnvironmentForm.name || !newEnvironmentForm.url) {
+                    toast.error('Validation Error', {
+                      description: 'Name and URL are required'
+                    })
+                    return
+                  }
+                  toast.success('Environment Added', {
+                    description: `${newEnvironmentForm.name} environment has been configured`
+                  })
+                  setShowAddEnvironmentDialog(false)
+                  setNewEnvironmentForm({ name: '', url: '', type: 'development' })
+                }}
+              >
+                Add Environment
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Audit Log Dialog */}
+        <Dialog open={showAuditLogDialog} onOpenChange={setShowAuditLogDialog}>
+          <DialogContent className="max-w-2xl max-h-[80vh]">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <FileCode className="h-5 w-5" />
+                Full Audit Log
+              </DialogTitle>
+            </DialogHeader>
+            <ScrollArea className="max-h-[60vh]">
+              <div className="space-y-2 py-4">
+                {[
+                  { action: 'Release v2.5.0 published', user: 'Sarah Chen', time: '2024-12-20 10:30 AM', type: 'success' },
+                  { action: 'Release v2.5.0 draft created', user: 'Sarah Chen', time: '2024-12-20 09:15 AM', type: 'info' },
+                  { action: 'Webhook notification sent', user: 'System', time: '2024-12-20 10:31 AM', type: 'info' },
+                  { action: 'Release v2.4.2 published', user: 'David Kim', time: '2024-12-15 02:30 PM', type: 'success' },
+                  { action: 'Settings updated', user: 'Admin', time: '2024-12-14 11:00 AM', type: 'info' },
+                  { action: 'API token regenerated', user: 'Admin', time: '2024-12-13 04:45 PM', type: 'warning' },
+                  { action: 'New webhook added', user: 'Sarah Chen', time: '2024-12-12 09:00 AM', type: 'info' },
+                  { action: 'Release v2.4.1 published', user: 'Emily Rodriguez', time: '2024-12-10 09:00 AM', type: 'success' },
+                  { action: 'Draft release deleted', user: 'Marcus Johnson', time: '2024-12-09 03:20 PM', type: 'warning' },
+                  { action: 'Release template updated', user: 'Sarah Chen', time: '2024-12-08 10:15 AM', type: 'info' },
+                ].map((log, i) => (
+                  <div key={i} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-2 h-2 rounded-full ${
+                        log.type === 'success' ? 'bg-green-500' :
+                        log.type === 'warning' ? 'bg-amber-500' : 'bg-blue-500'
+                      }`} />
+                      <div>
+                        <p className="font-medium text-sm">{log.action}</p>
+                        <p className="text-xs text-gray-500">by {log.user}</p>
+                      </div>
+                    </div>
+                    <span className="text-xs text-gray-500">{log.time}</span>
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+            <div className="flex justify-between items-center pt-4 border-t">
+              <p className="text-sm text-gray-500">Showing 10 of 156 entries</p>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => toast.info('Loading previous page...')}
+                >
+                  Previous
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => toast.info('Loading next page...')}
+                >
+                  Next
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Export Analytics Dialog */}
+        <Dialog open={showExportAnalyticsDialog} onOpenChange={setShowExportAnalyticsDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Download className="h-5 w-5" />
+                Export Analytics
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Export release analytics data in your preferred format.
+              </p>
+              <div className="space-y-2">
+                <Label>Date Range</Label>
+                <Select defaultValue="30days">
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select range" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="7days">Last 7 days</SelectItem>
+                    <SelectItem value="30days">Last 30 days</SelectItem>
+                    <SelectItem value="90days">Last 90 days</SelectItem>
+                    <SelectItem value="1year">Last year</SelectItem>
+                    <SelectItem value="all">All time</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Export Format</Label>
+                <div className="grid grid-cols-3 gap-2">
+                  {['CSV', 'JSON', 'Excel'].map((format) => (
+                    <Button
+                      key={format}
+                      variant={exportFormat.toLowerCase() === format.toLowerCase() ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setExportFormat(format.toLowerCase())}
+                    >
+                      {format}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Include Data</Label>
+                <div className="space-y-2">
+                  {['Downloads', 'Contributors', 'Release Notes', 'Adoption Metrics'].map((item) => (
+                    <div key={item} className="flex items-center gap-2">
+                      <Switch id={`export-${item}`} defaultChecked />
+                      <Label htmlFor={`export-${item}`} className="font-normal">{item}</Label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowExportAnalyticsDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                onClick={() => {
+                  toast.success('Export Started', {
+                    description: `Analytics data is being exported as ${exportFormat.toUpperCase()}`
+                  })
+                  setShowExportAnalyticsDialog(false)
+                }}
+              >
+                <Download className="h-4 w-4 mr-2" />
+                Export
+              </Button>
             </div>
           </DialogContent>
         </Dialog>

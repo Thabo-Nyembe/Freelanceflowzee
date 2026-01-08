@@ -772,6 +772,28 @@ export default function RegistrationsClient() {
   const [showImportListDialog, setShowImportListDialog] = useState(false)
   const [showExportDataDialog, setShowExportDataDialog] = useState(false)
 
+  // Additional Dialog States for Buttons
+  const [showQrCodeDialog, setShowQrCodeDialog] = useState(false)
+  const [showSendEmailDialog, setShowSendEmailDialog] = useState(false)
+  const [showMoreOptionsDialog, setShowMoreOptionsDialog] = useState(false)
+  const [showViewDetailsDialog, setShowViewDetailsDialog] = useState(false)
+  const [showStartScanningDialog, setShowStartScanningDialog] = useState(false)
+  const [showSendCommunicationDialog, setShowSendCommunicationDialog] = useState(false)
+  const [showBulkEmailDialog, setShowBulkEmailDialog] = useState(false)
+  const [showSendRemindersDialog, setShowSendRemindersDialog] = useState(false)
+  const [showCreateTemplateDialog, setShowCreateTemplateDialog] = useState(false)
+  const [showIntegrationDialog, setShowIntegrationDialog] = useState(false)
+  const [showExportAllDataDialog, setShowExportAllDataDialog] = useState(false)
+  const [showClearCacheDialog, setShowClearCacheDialog] = useState(false)
+  const [showCheckInConfirmDialog, setShowCheckInConfirmDialog] = useState(false)
+  const [showPrintBadgeDialog, setShowPrintBadgeDialog] = useState(false)
+  const [showTicketsDialog, setShowTicketsDialog] = useState(false)
+  const [showBadgesDialog, setShowBadgesDialog] = useState(false)
+  const [showReportsDialog, setShowReportsDialog] = useState(false)
+  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null)
+  const [selectedIntegration, setSelectedIntegration] = useState<{ name: string; connected: boolean; icon: string } | null>(null)
+  const [selectedTemplate, setSelectedTemplate] = useState<{ name: string; type: string; lastSent: string; openRate: number } | null>(null)
+
   // Form State
   const [formData, setFormData] = useState<RegistrationFormData>(initialFormData)
 
@@ -1344,19 +1366,20 @@ export default function RegistrationsClient() {
             {/* Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
-                { icon: UserPlus, label: 'New', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
-                { icon: QrCode, label: 'Check-In', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
-                { icon: Mail, label: 'Email All', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
-                { icon: Download, label: 'Export', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
-                { icon: Ticket, label: 'Tickets', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
-                { icon: Tag, label: 'Badges', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
-                { icon: BarChart3, label: 'Reports', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
-                { icon: Settings, label: 'Settings', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400' },
+                { icon: UserPlus, label: 'New', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => { setFormData(initialFormData); setShowCreateDialog(true) } },
+                { icon: QrCode, label: 'Check-In', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', action: () => setActiveTab('check-in') },
+                { icon: Mail, label: 'Email All', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: () => setShowBulkEmailDialog(true) },
+                { icon: Download, label: 'Export', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', action: () => setShowExportDataDialog(true) },
+                { icon: Ticket, label: 'Tickets', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', action: () => setShowTicketsDialog(true) },
+                { icon: Tag, label: 'Badges', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', action: () => setShowBadgesDialog(true) },
+                { icon: BarChart3, label: 'Reports', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', action: () => setShowReportsDialog(true) },
+                { icon: Settings, label: 'Settings', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400', action: () => setActiveTab('settings') },
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={action.action}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1559,13 +1582,37 @@ export default function RegistrationsClient() {
                           {getPaymentBadge(registration.paymentStatus)}
                         </div>
                         <div className="flex items-center gap-2">
-                          <Button variant="ghost" size="sm">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              setSelectedRegistration(registration)
+                              setShowQrCodeDialog(true)
+                            }}
+                          >
                             <QrCode className="w-4 h-4" />
                           </Button>
-                          <Button variant="ghost" size="sm">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              setSelectedRegistration(registration)
+                              setShowSendEmailDialog(true)
+                            }}
+                          >
                             <Mail className="w-4 h-4" />
                           </Button>
-                          <Button variant="ghost" size="sm">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              setSelectedRegistration(registration)
+                              setShowMoreOptionsDialog(true)
+                            }}
+                          >
                             <MoreHorizontal className="w-4 h-4" />
                           </Button>
                         </div>
@@ -1628,7 +1675,15 @@ export default function RegistrationsClient() {
                       </div>
                     </div>
 
-                    <Button variant="outline" size="sm" className="w-full mt-4">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full mt-4"
+                      onClick={() => {
+                        setSelectedEvent(event)
+                        setShowViewDetailsDialog(true)
+                      }}
+                    >
                       <Eye className="w-4 h-4 mr-2" />
                       View Details
                     </Button>
@@ -1653,7 +1708,7 @@ export default function RegistrationsClient() {
                   <div className="aspect-square bg-gray-100 dark:bg-gray-800 rounded-xl flex flex-col items-center justify-center">
                     <QrCode className="w-24 h-24 text-muted-foreground mb-4" />
                     <p className="text-muted-foreground mb-4">Point camera at QR code</p>
-                    <Button>
+                    <Button onClick={() => setShowStartScanningDialog(true)}>
                       <QrCode className="w-4 h-4 mr-2" />
                       Start Scanning
                     </Button>
@@ -1760,7 +1815,14 @@ export default function RegistrationsClient() {
                             <p className="font-semibold">{template.openRate}%</p>
                             <p className="text-xs text-muted-foreground">Open Rate</p>
                           </div>
-                          <Button variant="outline" size="sm">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setSelectedTemplate(template)
+                              setShowSendCommunicationDialog(true)
+                            }}
+                          >
                             <Send className="w-4 h-4 mr-2" />
                             Send
                           </Button>
@@ -1796,15 +1858,27 @@ export default function RegistrationsClient() {
                     <CardTitle>Quick Actions</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-2">
-                    <Button variant="outline" className="w-full justify-start">
+                    <Button
+                      variant="outline"
+                      className="w-full justify-start"
+                      onClick={() => setShowBulkEmailDialog(true)}
+                    >
                       <Mail className="w-4 h-4 mr-2" />
                       Send Bulk Email
                     </Button>
-                    <Button variant="outline" className="w-full justify-start">
+                    <Button
+                      variant="outline"
+                      className="w-full justify-start"
+                      onClick={() => setShowSendRemindersDialog(true)}
+                    >
                       <Send className="w-4 h-4 mr-2" />
                       Send Reminders
                     </Button>
-                    <Button variant="outline" className="w-full justify-start">
+                    <Button
+                      variant="outline"
+                      className="w-full justify-start"
+                      onClick={() => setShowCreateTemplateDialog(true)}
+                    >
                       <Plus className="w-4 h-4 mr-2" />
                       Create Template
                     </Button>
@@ -1956,19 +2030,20 @@ export default function RegistrationsClient() {
             {/* Settings Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
-                { icon: Settings, label: 'General', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400' },
-                { icon: Ticket, label: 'Tickets', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
-                { icon: Bell, label: 'Notifications', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
-                { icon: Network, label: 'Integrations', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
-                { icon: Shield, label: 'Security', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
-                { icon: Sliders, label: 'Advanced', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' },
-                { icon: Download, label: 'Export', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
-                { icon: RefreshCw, label: 'Reset', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
+                { icon: Settings, label: 'General', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400', action: () => setSettingsTab('general') },
+                { icon: Ticket, label: 'Tickets', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => setSettingsTab('tickets') },
+                { icon: Bell, label: 'Notifications', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', action: () => setSettingsTab('notifications') },
+                { icon: Network, label: 'Integrations', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: () => setSettingsTab('integrations') },
+                { icon: Shield, label: 'Security', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', action: () => setSettingsTab('security') },
+                { icon: Sliders, label: 'Advanced', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', action: () => setSettingsTab('advanced') },
+                { icon: Download, label: 'Export', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', action: () => setShowExportAllDataDialog(true) },
+                { icon: RefreshCw, label: 'Reset', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', action: () => setShowClearCacheDialog(true) },
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={action.action}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -2136,7 +2211,14 @@ export default function RegistrationsClient() {
                                 <p className="text-sm text-gray-500">{integration.connected ? 'Connected' : 'Not connected'}</p>
                               </div>
                             </div>
-                            <Button variant={integration.connected ? 'outline' : 'default'} size="sm">
+                            <Button
+                              variant={integration.connected ? 'outline' : 'default'}
+                              size="sm"
+                              onClick={() => {
+                                setSelectedIntegration(integration)
+                                setShowIntegrationDialog(true)
+                              }}
+                            >
                               {integration.connected ? 'Disconnect' : 'Connect'}
                             </Button>
                           </div>
@@ -2205,11 +2287,11 @@ export default function RegistrationsClient() {
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
                           <div><p className="font-medium">Export All Data</p><p className="text-sm text-gray-500">Download CSV/Excel</p></div>
-                          <Button variant="outline" size="sm">Export</Button>
+                          <Button variant="outline" size="sm" onClick={() => setShowExportAllDataDialog(true)}>Export</Button>
                         </div>
                         <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
                           <div><p className="font-medium">Clear Cache</p><p className="text-sm text-gray-500">128 MB used</p></div>
-                          <Button variant="outline" size="sm">Clear</Button>
+                          <Button variant="outline" size="sm" onClick={() => setShowClearCacheDialog(true)}>Clear</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -2394,24 +2476,48 @@ export default function RegistrationsClient() {
                 {/* Actions */}
                 <div className="flex items-center gap-3 pt-4 border-t">
                   {selectedRegistration.status === 'confirmed' && (
-                    <Button className="flex-1 bg-green-600 hover:bg-green-700">
+                    <Button
+                      className="flex-1 bg-green-600 hover:bg-green-700"
+                      onClick={() => setShowCheckInConfirmDialog(true)}
+                    >
                       <UserCheck className="w-4 h-4 mr-2" />
                       Check In
                     </Button>
                   )}
-                  <Button variant="outline">
+                  <Button variant="outline" onClick={() => setShowQrCodeDialog(true)}>
                     <QrCode className="w-4 h-4 mr-2" />
                     View QR Code
                   </Button>
-                  <Button variant="outline">
+                  <Button variant="outline" onClick={() => setShowPrintBadgeDialog(true)}>
                     <Printer className="w-4 h-4 mr-2" />
                     Print Badge
                   </Button>
-                  <Button variant="outline">
+                  <Button variant="outline" onClick={() => setShowSendEmailDialog(true)}>
                     <Mail className="w-4 h-4 mr-2" />
                     Send Email
                   </Button>
-                  <Button variant="outline">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setShowRegistrationDialog(false)
+                      if (selectedRegistration) {
+                        setFormData({
+                          registrant_name: `${selectedRegistration.attendee.firstName} ${selectedRegistration.attendee.lastName}`,
+                          registrant_email: selectedRegistration.attendee.email,
+                          registrant_phone: selectedRegistration.attendee.phone || '',
+                          company: selectedRegistration.attendee.company || '',
+                          job_title: selectedRegistration.attendee.jobTitle || '',
+                          event_id: selectedRegistration.event.id,
+                          registration_type: selectedRegistration.event.type as any || 'event',
+                          ticket_type: selectedRegistration.ticketType as any || 'paid',
+                          ticket_price: selectedRegistration.ticketPrice,
+                          status: selectedRegistration.status as any || 'pending',
+                          payment_status: selectedRegistration.paymentStatus as any || 'pending'
+                        })
+                        setShowEditDialog(true)
+                      }
+                    }}
+                  >
                     <Edit className="w-4 h-4 mr-2" />
                     Edit
                   </Button>
@@ -2728,7 +2834,21 @@ export default function RegistrationsClient() {
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
                 Drag and drop your file here, or click to browse
               </p>
-              <Button variant="outline" size="sm">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  const input = document.createElement('input')
+                  input.type = 'file'
+                  input.accept = '.csv,.xlsx'
+                  input.onchange = () => {
+                    if (input.files && input.files[0]) {
+                      toast.success('File Selected', { description: `${input.files[0].name} ready for import` })
+                    }
+                  }
+                  input.click()
+                }}
+              >
                 Choose File
               </Button>
               <p className="text-xs text-gray-500 mt-2">
@@ -2814,6 +2934,827 @@ export default function RegistrationsClient() {
             }}>
               <Download className="w-4 h-4 mr-2" />
               Export Data
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* QR Code Dialog */}
+      <Dialog open={showQrCodeDialog} onOpenChange={setShowQrCodeDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Registration QR Code</DialogTitle>
+            <DialogDescription>
+              {selectedRegistration ? `QR code for ${selectedRegistration.attendee.firstName} ${selectedRegistration.attendee.lastName}` : 'Scan this QR code at check-in'}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col items-center py-6">
+            <div className="w-48 h-48 bg-gray-100 dark:bg-gray-800 rounded-xl flex items-center justify-center mb-4">
+              <QrCode className="w-32 h-32 text-gray-400" />
+            </div>
+            <p className="text-sm text-muted-foreground mb-2">
+              Registration: {selectedRegistration?.registrationNumber || 'N/A'}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              {selectedRegistration?.event.name}
+            </p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowQrCodeDialog(false)}>Close</Button>
+            <Button onClick={() => {
+              toast.success('QR Code Downloaded', { description: 'QR code saved to downloads' })
+              setShowQrCodeDialog(false)
+            }}>
+              <Download className="w-4 h-4 mr-2" />
+              Download
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Send Email Dialog */}
+      <Dialog open={showSendEmailDialog} onOpenChange={setShowSendEmailDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Send Email</DialogTitle>
+            <DialogDescription>
+              Send an email to {selectedRegistration?.attendee.firstName} {selectedRegistration?.attendee.lastName}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>To</Label>
+              <Input value={selectedRegistration?.attendee.email || ''} disabled />
+            </div>
+            <div className="space-y-2">
+              <Label>Subject</Label>
+              <Input placeholder="Email subject..." />
+            </div>
+            <div className="space-y-2">
+              <Label>Email Template</Label>
+              <Select defaultValue="confirmation">
+                <SelectTrigger>
+                  <SelectValue placeholder="Select template" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="confirmation">Registration Confirmation</SelectItem>
+                  <SelectItem value="reminder">Event Reminder</SelectItem>
+                  <SelectItem value="checkin">Check-in Instructions</SelectItem>
+                  <SelectItem value="update">Event Update</SelectItem>
+                  <SelectItem value="custom">Custom Message</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Message</Label>
+              <Input placeholder="Additional message (optional)..." />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowSendEmailDialog(false)}>Cancel</Button>
+            <Button onClick={() => {
+              toast.success('Email Sent', { description: `Email sent to ${selectedRegistration?.attendee.email}` })
+              setShowSendEmailDialog(false)
+            }}>
+              <Send className="w-4 h-4 mr-2" />
+              Send Email
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* More Options Dialog */}
+      <Dialog open={showMoreOptionsDialog} onOpenChange={setShowMoreOptionsDialog}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Registration Options</DialogTitle>
+            <DialogDescription>
+              Actions for {selectedRegistration?.attendee.firstName} {selectedRegistration?.attendee.lastName}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2 py-4">
+            <Button
+              variant="outline"
+              className="w-full justify-start"
+              onClick={() => {
+                setShowMoreOptionsDialog(false)
+                setShowQrCodeDialog(true)
+              }}
+            >
+              <QrCode className="w-4 h-4 mr-2" />
+              View QR Code
+            </Button>
+            <Button
+              variant="outline"
+              className="w-full justify-start"
+              onClick={() => {
+                setShowMoreOptionsDialog(false)
+                setShowSendEmailDialog(true)
+              }}
+            >
+              <Mail className="w-4 h-4 mr-2" />
+              Send Email
+            </Button>
+            <Button
+              variant="outline"
+              className="w-full justify-start"
+              onClick={() => {
+                setShowMoreOptionsDialog(false)
+                setShowPrintBadgeDialog(true)
+              }}
+            >
+              <Printer className="w-4 h-4 mr-2" />
+              Print Badge
+            </Button>
+            <Button
+              variant="outline"
+              className="w-full justify-start"
+              onClick={() => {
+                toast.success('Registration Resent', { description: 'Confirmation email resent successfully' })
+                setShowMoreOptionsDialog(false)
+              }}
+            >
+              <RefreshCw className="w-4 h-4 mr-2" />
+              Resend Confirmation
+            </Button>
+            <Button
+              variant="outline"
+              className="w-full justify-start text-red-600 hover:text-red-700"
+              onClick={() => {
+                toast.info('Registration Cancelled', { description: 'Registration has been cancelled' })
+                setShowMoreOptionsDialog(false)
+              }}
+            >
+              <XCircle className="w-4 h-4 mr-2" />
+              Cancel Registration
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* View Event Details Dialog */}
+      <Dialog open={showViewDetailsDialog} onOpenChange={setShowViewDetailsDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>{selectedEvent?.name || 'Event Details'}</DialogTitle>
+            <DialogDescription>
+              Complete event information and statistics
+            </DialogDescription>
+          </DialogHeader>
+          {selectedEvent && (
+            <div className="space-y-6 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label className="text-muted-foreground">Event Type</Label>
+                  <p className="font-medium capitalize">{selectedEvent.type}</p>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-muted-foreground">Status</Label>
+                  <Badge className={
+                    selectedEvent.status === 'published' ? 'bg-green-100 text-green-700' :
+                    selectedEvent.status === 'ongoing' ? 'bg-blue-100 text-blue-700' :
+                    'bg-yellow-100 text-yellow-700'
+                  }>{selectedEvent.status}</Badge>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-muted-foreground">Date</Label>
+                  <p className="font-medium">{formatDate(selectedEvent.date)}</p>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-muted-foreground">Location</Label>
+                  <p className="font-medium">{selectedEvent.location}</p>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-muted-foreground">Capacity</Label>
+                  <p className="font-medium">{selectedEvent.registrationCount} / {selectedEvent.capacity}</p>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-muted-foreground">Revenue</Label>
+                  <p className="font-medium text-green-600">{formatCurrency(selectedEvent.revenue)}</p>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-muted-foreground">Description</Label>
+                <p className="text-sm">{selectedEvent.description}</p>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-muted-foreground">Registration Progress</Label>
+                <Progress value={(selectedEvent.registrationCount / selectedEvent.capacity) * 100} className="h-3" />
+                <p className="text-xs text-muted-foreground">{selectedEvent.waitlistCount} on waitlist</p>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowViewDetailsDialog(false)}>Close</Button>
+            <Button onClick={() => {
+              toast.success('Event Opened', { description: 'Navigating to event management' })
+              setShowViewDetailsDialog(false)
+            }}>
+              <Edit className="w-4 h-4 mr-2" />
+              Manage Event
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Start Scanning Dialog */}
+      <Dialog open={showStartScanningDialog} onOpenChange={setShowStartScanningDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>QR Code Scanner</DialogTitle>
+            <DialogDescription>
+              Position the QR code within the frame to scan
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-6">
+            <div className="aspect-square bg-gray-900 rounded-xl flex flex-col items-center justify-center relative overflow-hidden">
+              <div className="absolute inset-4 border-2 border-white/30 rounded-lg" />
+              <QrCode className="w-16 h-16 text-white/50 mb-4" />
+              <p className="text-white/70 text-sm">Camera access required</p>
+              <Loader2 className="w-6 h-6 text-white/50 animate-spin mt-4" />
+            </div>
+          </div>
+          <div className="space-y-2">
+            <Label>Or enter manually</Label>
+            <Input placeholder="Registration number (e.g., REG-2025-001)" />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowStartScanningDialog(false)}>Cancel</Button>
+            <Button onClick={() => {
+              toast.success('Check-in Successful', { description: 'Attendee has been checked in' })
+              setShowStartScanningDialog(false)
+            }}>
+              <UserCheck className="w-4 h-4 mr-2" />
+              Manual Check-in
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Send Communication Dialog */}
+      <Dialog open={showSendCommunicationDialog} onOpenChange={setShowSendCommunicationDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Send {selectedTemplate?.name}</DialogTitle>
+            <DialogDescription>
+              Send this communication template to selected recipients
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="p-4 bg-muted/50 rounded-lg">
+              <p className="font-medium mb-1">{selectedTemplate?.name}</p>
+              <p className="text-sm text-muted-foreground">Last sent: {selectedTemplate?.lastSent}</p>
+              <p className="text-sm text-muted-foreground">Open rate: {selectedTemplate?.openRate}%</p>
+            </div>
+            <div className="space-y-2">
+              <Label>Recipients</Label>
+              <Select defaultValue="all">
+                <SelectTrigger>
+                  <SelectValue placeholder="Select recipients" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Registrants</SelectItem>
+                  <SelectItem value="confirmed">Confirmed Only</SelectItem>
+                  <SelectItem value="pending">Pending Only</SelectItem>
+                  <SelectItem value="checked_in">Checked In</SelectItem>
+                  <SelectItem value="not_checked_in">Not Checked In</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Estimated Recipients</Label>
+              <p className="text-2xl font-bold">{stats.total}</p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowSendCommunicationDialog(false)}>Cancel</Button>
+            <Button onClick={() => {
+              toast.success('Communication Sent', { description: `${selectedTemplate?.name} sent to ${stats.total} recipients` })
+              setShowSendCommunicationDialog(false)
+            }}>
+              <Send className="w-4 h-4 mr-2" />
+              Send Now
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Bulk Email Dialog */}
+      <Dialog open={showBulkEmailDialog} onOpenChange={setShowBulkEmailDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Send Bulk Email</DialogTitle>
+            <DialogDescription>
+              Send an email to multiple registrants at once
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Recipients</Label>
+              <Select defaultValue="all">
+                <SelectTrigger>
+                  <SelectValue placeholder="Select recipients" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Registrants ({stats.total})</SelectItem>
+                  <SelectItem value="confirmed">Confirmed ({stats.confirmed})</SelectItem>
+                  <SelectItem value="pending">Pending ({stats.pending})</SelectItem>
+                  <SelectItem value="waitlist">Waitlist ({stats.waitlist})</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Subject</Label>
+              <Input placeholder="Email subject..." />
+            </div>
+            <div className="space-y-2">
+              <Label>Template</Label>
+              <Select defaultValue="custom">
+                <SelectTrigger>
+                  <SelectValue placeholder="Select template" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="custom">Custom Message</SelectItem>
+                  <SelectItem value="reminder">Event Reminder</SelectItem>
+                  <SelectItem value="update">Event Update</SelectItem>
+                  <SelectItem value="checkin">Check-in Instructions</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Message</Label>
+              <Input placeholder="Enter your message..." />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowBulkEmailDialog(false)}>Cancel</Button>
+            <Button onClick={() => {
+              toast.success('Bulk Email Sent', { description: `Email sent to ${stats.total} registrants` })
+              setShowBulkEmailDialog(false)
+            }}>
+              <Mail className="w-4 h-4 mr-2" />
+              Send to All
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Send Reminders Dialog */}
+      <Dialog open={showSendRemindersDialog} onOpenChange={setShowSendRemindersDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Send Event Reminders</DialogTitle>
+            <DialogDescription>
+              Send reminder emails to confirmed registrants
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Reminder Type</Label>
+              <Select defaultValue="1day">
+                <SelectTrigger>
+                  <SelectValue placeholder="Select reminder type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="1day">1 Day Before</SelectItem>
+                  <SelectItem value="3days">3 Days Before</SelectItem>
+                  <SelectItem value="1week">1 Week Before</SelectItem>
+                  <SelectItem value="custom">Custom Message</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="p-4 bg-muted/50 rounded-lg">
+              <p className="text-sm text-muted-foreground mb-2">This will send reminders to:</p>
+              <p className="text-2xl font-bold">{stats.confirmed} confirmed registrants</p>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Switch id="include-agenda" defaultChecked />
+              <Label htmlFor="include-agenda" className="font-normal">Include event agenda</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Switch id="include-venue" defaultChecked />
+              <Label htmlFor="include-venue" className="font-normal">Include venue details</Label>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowSendRemindersDialog(false)}>Cancel</Button>
+            <Button onClick={() => {
+              toast.success('Reminders Sent', { description: `Reminders sent to ${stats.confirmed} registrants` })
+              setShowSendRemindersDialog(false)
+            }}>
+              <Send className="w-4 h-4 mr-2" />
+              Send Reminders
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Template Dialog */}
+      <Dialog open={showCreateTemplateDialog} onOpenChange={setShowCreateTemplateDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Create Email Template</DialogTitle>
+            <DialogDescription>
+              Create a reusable email template for communications
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Template Name</Label>
+              <Input placeholder="e.g., Event Reminder - 1 Day" />
+            </div>
+            <div className="space-y-2">
+              <Label>Template Type</Label>
+              <Select defaultValue="reminder">
+                <SelectTrigger>
+                  <SelectValue placeholder="Select type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="confirmation">Confirmation</SelectItem>
+                  <SelectItem value="reminder">Reminder</SelectItem>
+                  <SelectItem value="checkin">Check-in</SelectItem>
+                  <SelectItem value="followup">Follow-up</SelectItem>
+                  <SelectItem value="custom">Custom</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Subject Line</Label>
+              <Input placeholder="Email subject..." />
+            </div>
+            <div className="space-y-2">
+              <Label>Message Body</Label>
+              <Input placeholder="Enter template content..." />
+            </div>
+            <div className="flex items-center space-x-2">
+              <Switch id="active-template" defaultChecked />
+              <Label htmlFor="active-template" className="font-normal">Set as active template</Label>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCreateTemplateDialog(false)}>Cancel</Button>
+            <Button onClick={() => {
+              toast.success('Template Created', { description: 'New email template saved successfully' })
+              setShowCreateTemplateDialog(false)
+            }}>
+              <Plus className="w-4 h-4 mr-2" />
+              Create Template
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Integration Dialog */}
+      <Dialog open={showIntegrationDialog} onOpenChange={setShowIntegrationDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>
+              {selectedIntegration?.connected ? 'Disconnect' : 'Connect'} {selectedIntegration?.name}
+            </DialogTitle>
+            <DialogDescription>
+              {selectedIntegration?.connected
+                ? `Are you sure you want to disconnect ${selectedIntegration?.name}?`
+                : `Connect your ${selectedIntegration?.name} account to enable integration`
+              }
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <div className="flex items-center gap-4 p-4 bg-muted/50 rounded-lg">
+              <span className="text-3xl">{selectedIntegration?.icon}</span>
+              <div>
+                <p className="font-medium">{selectedIntegration?.name}</p>
+                <p className="text-sm text-muted-foreground">
+                  {selectedIntegration?.connected ? 'Currently connected' : 'Not connected'}
+                </p>
+              </div>
+            </div>
+            {!selectedIntegration?.connected && (
+              <div className="mt-4 space-y-2">
+                <Label>API Key</Label>
+                <Input type="password" placeholder="Enter your API key..." />
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowIntegrationDialog(false)}>Cancel</Button>
+            <Button
+              variant={selectedIntegration?.connected ? 'destructive' : 'default'}
+              onClick={() => {
+                toast.success(
+                  selectedIntegration?.connected ? 'Disconnected' : 'Connected',
+                  { description: `${selectedIntegration?.name} ${selectedIntegration?.connected ? 'disconnected' : 'connected'} successfully` }
+                )
+                setShowIntegrationDialog(false)
+              }}
+            >
+              {selectedIntegration?.connected ? 'Disconnect' : 'Connect'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Export All Data Dialog */}
+      <Dialog open={showExportAllDataDialog} onOpenChange={setShowExportAllDataDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Export All Registration Data</DialogTitle>
+            <DialogDescription>
+              Download a complete backup of all registration data
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Export Format</Label>
+              <Select defaultValue="csv">
+                <SelectTrigger>
+                  <SelectValue placeholder="Select format" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="csv">CSV (.csv)</SelectItem>
+                  <SelectItem value="xlsx">Excel (.xlsx)</SelectItem>
+                  <SelectItem value="json">JSON (.json)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="p-4 bg-muted/50 rounded-lg">
+              <p className="text-sm text-muted-foreground mb-2">Export will include:</p>
+              <ul className="text-sm space-y-1">
+                <li>- {stats.total} registrations</li>
+                <li>- {events.length} events</li>
+                <li>- All payment records</li>
+                <li>- Communication history</li>
+              </ul>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowExportAllDataDialog(false)}>Cancel</Button>
+            <Button onClick={() => {
+              handleExportRegistrations()
+              setShowExportAllDataDialog(false)
+            }}>
+              <Download className="w-4 h-4 mr-2" />
+              Export All
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Clear Cache Dialog */}
+      <Dialog open={showClearCacheDialog} onOpenChange={setShowClearCacheDialog}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Clear Cache</DialogTitle>
+            <DialogDescription>
+              This will clear all cached data and may temporarily slow down the application
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <div className="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
+              <p className="text-sm text-amber-700 dark:text-amber-400">
+                Warning: This action will clear 128 MB of cached data. The application may be slower until the cache rebuilds.
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowClearCacheDialog(false)}>Cancel</Button>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                toast.success('Cache Cleared', { description: 'All cached data has been cleared' })
+                setShowClearCacheDialog(false)
+              }}
+            >
+              <RefreshCw className="w-4 h-4 mr-2" />
+              Clear Cache
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Check-In Confirmation Dialog */}
+      <Dialog open={showCheckInConfirmDialog} onOpenChange={setShowCheckInConfirmDialog}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Confirm Check-In</DialogTitle>
+            <DialogDescription>
+              Check in {selectedRegistration?.attendee.firstName} {selectedRegistration?.attendee.lastName} to the event?
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <div className="flex items-center gap-4 p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+              <Avatar className="w-12 h-12">
+                <AvatarFallback className="bg-green-100 text-green-700">
+                  {selectedRegistration?.attendee.firstName[0]}{selectedRegistration?.attendee.lastName[0]}
+                </AvatarFallback>
+              </Avatar>
+              <div>
+                <p className="font-medium">{selectedRegistration?.attendee.firstName} {selectedRegistration?.attendee.lastName}</p>
+                <p className="text-sm text-muted-foreground">{selectedRegistration?.registrationNumber}</p>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCheckInConfirmDialog(false)}>Cancel</Button>
+            <Button
+              className="bg-green-600 hover:bg-green-700"
+              onClick={() => {
+                toast.success('Check-In Complete', { description: `${selectedRegistration?.attendee.firstName} ${selectedRegistration?.attendee.lastName} has been checked in` })
+                setShowCheckInConfirmDialog(false)
+                setShowRegistrationDialog(false)
+              }}
+            >
+              <UserCheck className="w-4 h-4 mr-2" />
+              Confirm Check-In
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Print Badge Dialog */}
+      <Dialog open={showPrintBadgeDialog} onOpenChange={setShowPrintBadgeDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Print Badge</DialogTitle>
+            <DialogDescription>
+              Print a name badge for {selectedRegistration?.attendee.firstName} {selectedRegistration?.attendee.lastName}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <div className="border-2 border-dashed rounded-lg p-6 text-center">
+              <div className="mb-4">
+                <p className="text-2xl font-bold">{selectedRegistration?.attendee.firstName} {selectedRegistration?.attendee.lastName}</p>
+                <p className="text-muted-foreground">{selectedRegistration?.attendee.company}</p>
+                <p className="text-sm text-muted-foreground">{selectedRegistration?.attendee.jobTitle}</p>
+              </div>
+              <div className="inline-block">
+                {getTicketTypeBadge(selectedRegistration?.ticketType || 'regular')}
+              </div>
+            </div>
+            <div className="mt-4 space-y-2">
+              <Label>Badge Size</Label>
+              <Select defaultValue="standard">
+                <SelectTrigger>
+                  <SelectValue placeholder="Select size" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="standard">Standard (4" x 3")</SelectItem>
+                  <SelectItem value="large">Large (4" x 6")</SelectItem>
+                  <SelectItem value="compact">Compact (3" x 2")</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowPrintBadgeDialog(false)}>Cancel</Button>
+            <Button onClick={() => {
+              toast.success('Badge Printed', { description: 'Badge sent to printer' })
+              setShowPrintBadgeDialog(false)
+            }}>
+              <Printer className="w-4 h-4 mr-2" />
+              Print Badge
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Tickets Dialog */}
+      <Dialog open={showTicketsDialog} onOpenChange={setShowTicketsDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Ticket Management</DialogTitle>
+            <DialogDescription>
+              View and manage ticket types for your events
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            {events[0]?.ticketTypes.map((ticket, idx) => (
+              <div key={idx} className="flex items-center justify-between p-4 border rounded-lg">
+                <div>
+                  <p className="font-medium">{ticket.name}</p>
+                  <p className="text-sm text-muted-foreground">{ticket.sold} / {ticket.quantity} sold</p>
+                </div>
+                <div className="text-right">
+                  <p className="font-bold">{formatCurrency(ticket.price)}</p>
+                  <Progress value={(ticket.sold / ticket.quantity) * 100} className="w-24 h-2" />
+                </div>
+              </div>
+            ))}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowTicketsDialog(false)}>Close</Button>
+            <Button onClick={() => {
+              toast.success('Opening Ticket Editor', { description: 'Navigating to ticket configuration' })
+              setShowTicketsDialog(false)
+            }}>
+              <Edit className="w-4 h-4 mr-2" />
+              Edit Tickets
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Badges Dialog */}
+      <Dialog open={showBadgesDialog} onOpenChange={setShowBadgesDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Badge Printing</DialogTitle>
+            <DialogDescription>
+              Print badges for checked-in attendees
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="p-4 bg-muted/50 rounded-lg">
+              <p className="text-sm text-muted-foreground mb-2">Ready to print:</p>
+              <p className="text-3xl font-bold">{stats.checkedIn} badges</p>
+            </div>
+            <div className="space-y-2">
+              <Label>Print Selection</Label>
+              <Select defaultValue="unprinted">
+                <SelectTrigger>
+                  <SelectValue placeholder="Select badges to print" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="unprinted">Unprinted Only</SelectItem>
+                  <SelectItem value="all">All Checked In</SelectItem>
+                  <SelectItem value="vip">VIP Only</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowBadgesDialog(false)}>Cancel</Button>
+            <Button onClick={() => {
+              toast.success('Printing Badges', { description: `${stats.checkedIn} badges sent to printer` })
+              setShowBadgesDialog(false)
+            }}>
+              <Printer className="w-4 h-4 mr-2" />
+              Print All
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Reports Dialog */}
+      <Dialog open={showReportsDialog} onOpenChange={setShowReportsDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Generate Reports</DialogTitle>
+            <DialogDescription>
+              Create detailed reports for your events
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Report Type</Label>
+              <Select defaultValue="registration">
+                <SelectTrigger>
+                  <SelectValue placeholder="Select report type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="registration">Registration Summary</SelectItem>
+                  <SelectItem value="attendance">Attendance Report</SelectItem>
+                  <SelectItem value="revenue">Revenue Analysis</SelectItem>
+                  <SelectItem value="demographics">Demographics</SelectItem>
+                  <SelectItem value="engagement">Engagement Metrics</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Date Range</Label>
+              <Select defaultValue="all">
+                <SelectTrigger>
+                  <SelectValue placeholder="Select date range" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Time</SelectItem>
+                  <SelectItem value="7days">Last 7 Days</SelectItem>
+                  <SelectItem value="30days">Last 30 Days</SelectItem>
+                  <SelectItem value="90days">Last 90 Days</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Format</Label>
+              <Select defaultValue="pdf">
+                <SelectTrigger>
+                  <SelectValue placeholder="Select format" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="pdf">PDF Report</SelectItem>
+                  <SelectItem value="xlsx">Excel Spreadsheet</SelectItem>
+                  <SelectItem value="csv">CSV Data</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowReportsDialog(false)}>Cancel</Button>
+            <Button onClick={() => {
+              toast.success('Report Generated', { description: 'Your report is being prepared for download' })
+              setShowReportsDialog(false)
+            }}>
+              <BarChart3 className="w-4 h-4 mr-2" />
+              Generate Report
             </Button>
           </DialogFooter>
         </DialogContent>

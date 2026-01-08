@@ -449,6 +449,21 @@ export default function OverviewClient() {
   const [showHealthCheckDialog, setShowHealthCheckDialog] = useState(false)
   const [showDeployDialog, setShowDeployDialog] = useState(false)
 
+  // Additional Dialog States for buttons without onClick
+  const [showFilterDialog, setShowFilterDialog] = useState(false)
+  const [showAlertActionsDialog, setShowAlertActionsDialog] = useState<string | null>(null)
+  const [showExportLogsDialog, setShowExportLogsDialog] = useState(false)
+  const [showLiveTailDialog, setShowLiveTailDialog] = useState(false)
+  const [showEditChannelDialog, setShowEditChannelDialog] = useState<string | null>(null)
+  const [showAddChannelDialog, setShowAddChannelDialog] = useState(false)
+  const [showEditEscalationDialog, setShowEditEscalationDialog] = useState<string | null>(null)
+  const [showAddEscalationDialog, setShowAddEscalationDialog] = useState(false)
+  const [showConfigureProviderDialog, setShowConfigureProviderDialog] = useState<string | null>(null)
+  const [showRegenerateApiKeyDialog, setShowRegenerateApiKeyDialog] = useState(false)
+  const [showEditWebhookDialog, setShowEditWebhookDialog] = useState<string | null>(null)
+  const [showDeleteWebhookDialog, setShowDeleteWebhookDialog] = useState<string | null>(null)
+  const [showAddWebhookDialog, setShowAddWebhookDialog] = useState(false)
+
   // Loading States
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
@@ -1156,7 +1171,7 @@ export default function OverviewClient() {
                 />
               </div>
               <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" onClick={() => setShowFilterDialog(true)}>
                   <Filter className="w-4 h-4 mr-2" />
                   Filter
                 </Button>
@@ -1183,7 +1198,10 @@ export default function OverviewClient() {
                       </div>
                       <div className="flex items-center gap-2">
                         <Badge variant="outline">{alert.status}</Badge>
-                        <Button variant="ghost" size="sm">
+                        <Button variant="ghost" size="sm" onClick={(e) => {
+                          e.stopPropagation()
+                          setShowAlertActionsDialog(alert.id)
+                        }}>
                           <MoreHorizontal className="w-4 h-4" />
                         </Button>
                       </div>
@@ -1215,11 +1233,11 @@ export default function OverviewClient() {
                 />
               </div>
               <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" onClick={() => setShowExportLogsDialog(true)}>
                   <Download className="w-4 h-4 mr-2" />
                   Export
                 </Button>
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" onClick={() => setShowLiveTailDialog(true)}>
                   <Play className="w-4 h-4 mr-2" />
                   Live Tail
                 </Button>
@@ -1646,14 +1664,14 @@ export default function OverviewClient() {
                               </div>
                             </div>
                             <div className="flex items-center gap-3">
-                              <Button variant="ghost" size="sm">
+                              <Button variant="ghost" size="sm" onClick={() => setShowEditChannelDialog(channel.name)}>
                                 <Edit3 className="h-4 w-4" />
                               </Button>
                               <Switch defaultChecked={channel.enabled} />
                             </div>
                           </div>
                         ))}
-                        <Button variant="outline" className="w-full mt-4">
+                        <Button variant="outline" className="w-full mt-4" onClick={() => setShowAddChannelDialog(true)}>
                           <Plus className="h-4 w-4 mr-2" />
                           Add Notification Channel
                         </Button>
@@ -1738,12 +1756,12 @@ export default function OverviewClient() {
                                 After {policy.delay} → {policy.channels.join(', ')}
                               </p>
                             </div>
-                            <Button variant="ghost" size="sm">
+                            <Button variant="ghost" size="sm" onClick={() => setShowEditEscalationDialog(policy.tier)}>
                               <Edit3 className="h-4 w-4" />
                             </Button>
                           </div>
                         ))}
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => setShowAddEscalationDialog(true)}>
                           <Plus className="h-4 w-4 mr-2" />
                           Add Escalation Tier
                         </Button>
@@ -1927,7 +1945,11 @@ export default function OverviewClient() {
                                 )}
                               </div>
                             </div>
-                            <Button variant={provider.status === 'connected' ? 'outline' : 'default'} size="sm">
+                            <Button
+                              variant={provider.status === 'connected' ? 'outline' : 'default'}
+                              size="sm"
+                              onClick={() => setShowConfigureProviderDialog(provider.name)}
+                            >
                               {provider.status === 'connected' ? 'Configure' : 'Connect'}
                             </Button>
                           </div>
@@ -1945,10 +1967,13 @@ export default function OverviewClient() {
                           <Label>API Key</Label>
                           <div className="flex items-center gap-2">
                             <Input type="password" value="kazi-prod-xxxxxxxxxxxxxxxxxxxxx" readOnly className="font-mono" />
-                            <Button variant="outline" size="sm">
+                            <Button variant="outline" size="sm" onClick={() => {
+                              navigator.clipboard.writeText('kazi-prod-xxxxxxxxxxxxxxxxxxxxx')
+                              toast.success('API key copied to clipboard')
+                            }}>
                               <Copy className="h-4 w-4" />
                             </Button>
-                            <Button variant="outline" size="sm">
+                            <Button variant="outline" size="sm" onClick={() => setShowRegenerateApiKeyDialog(true)}>
                               <RefreshCw className="h-4 w-4" />
                             </Button>
                           </div>
@@ -1987,16 +2012,16 @@ export default function OverviewClient() {
                               <p className="text-sm text-gray-500 font-mono">{webhook.url}</p>
                             </div>
                             <div className="flex items-center gap-2">
-                              <Button variant="ghost" size="sm">
+                              <Button variant="ghost" size="sm" onClick={() => setShowEditWebhookDialog(webhook.name)}>
                                 <Edit3 className="h-4 w-4" />
                               </Button>
-                              <Button variant="ghost" size="sm" className="text-red-600">
+                              <Button variant="ghost" size="sm" className="text-red-600" onClick={() => setShowDeleteWebhookDialog(webhook.name)}>
                                 <Trash2 className="h-4 w-4" />
                               </Button>
                             </div>
                           </div>
                         ))}
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => setShowAddWebhookDialog(true)}>
                           <Plus className="h-4 w-4 mr-2" />
                           Add Webhook
                         </Button>
@@ -2178,11 +2203,20 @@ export default function OverviewClient() {
                 </div>
 
                 <div className="flex gap-3">
-                  <Button className="flex-1 bg-indigo-600 hover:bg-indigo-700">
+                  <Button className="flex-1 bg-indigo-600 hover:bg-indigo-700" onClick={() => {
+                    handleAcknowledgeAlert(selectedAlert.title)
+                    setSelectedAlert(null)
+                  }}>
                     <CheckCircle className="w-4 h-4 mr-2" />
                     Acknowledge
                   </Button>
-                  <Button variant="outline" className="flex-1">
+                  <Button variant="outline" className="flex-1" onClick={() => {
+                    if (selectedAlert.runbook_url) {
+                      window.open(selectedAlert.runbook_url, '_blank')
+                    } else {
+                      toast.info('No runbook available', { description: 'This alert does not have an associated runbook' })
+                    }
+                  }}>
                     <ExternalLink className="w-4 h-4 mr-2" />
                     View Runbook
                   </Button>
@@ -2561,6 +2595,702 @@ export default function OverviewClient() {
                 }}>
                   <Play className="w-4 h-4 mr-2" />
                   Start Deploy
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Filter Alerts Dialog */}
+        <Dialog open={showFilterDialog} onOpenChange={setShowFilterDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Filter className="w-5 h-5 text-indigo-600" />
+                Filter Alerts
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Severity</Label>
+                <Select defaultValue="all">
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select severity" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Severities</SelectItem>
+                    <SelectItem value="critical">Critical</SelectItem>
+                    <SelectItem value="warning">Warning</SelectItem>
+                    <SelectItem value="info">Info</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Status</Label>
+                <Select defaultValue="all">
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Statuses</SelectItem>
+                    <SelectItem value="triggered">Triggered</SelectItem>
+                    <SelectItem value="acknowledged">Acknowledged</SelectItem>
+                    <SelectItem value="resolved">Resolved</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Service</Label>
+                <Select defaultValue="all">
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select service" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Services</SelectItem>
+                    <SelectItem value="api-gateway">API Gateway</SelectItem>
+                    <SelectItem value="auth-service">Auth Service</SelectItem>
+                    <SelectItem value="database">Database</SelectItem>
+                    <SelectItem value="worker-nodes">Worker Nodes</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Time Range</Label>
+                <Select defaultValue="24h">
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select time range" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1h">Last 1 hour</SelectItem>
+                    <SelectItem value="6h">Last 6 hours</SelectItem>
+                    <SelectItem value="24h">Last 24 hours</SelectItem>
+                    <SelectItem value="7d">Last 7 days</SelectItem>
+                    <SelectItem value="30d">Last 30 days</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex gap-3 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowFilterDialog(false)}>
+                  Cancel
+                </Button>
+                <Button className="flex-1 bg-indigo-600 hover:bg-indigo-700" onClick={() => {
+                  toast.success('Filters applied')
+                  setShowFilterDialog(false)
+                }}>
+                  Apply Filters
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Alert Actions Dialog */}
+        <Dialog open={!!showAlertActionsDialog} onOpenChange={() => setShowAlertActionsDialog(null)}>
+          <DialogContent className="max-w-sm">
+            <DialogHeader>
+              <DialogTitle>Alert Actions</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-2 py-4">
+              <Button variant="outline" className="w-full justify-start" onClick={() => {
+                toast.success('Alert acknowledged')
+                setShowAlertActionsDialog(null)
+              }}>
+                <CheckCircle className="w-4 h-4 mr-2" />
+                Acknowledge Alert
+              </Button>
+              <Button variant="outline" className="w-full justify-start" onClick={() => {
+                toast.success('Alert muted for 1 hour')
+                setShowAlertActionsDialog(null)
+              }}>
+                <Bell className="w-4 h-4 mr-2" />
+                Mute for 1 Hour
+              </Button>
+              <Button variant="outline" className="w-full justify-start" onClick={() => {
+                toast.success('Alert resolved')
+                setShowAlertActionsDialog(null)
+              }}>
+                <CheckCircle className="w-4 h-4 mr-2 text-green-600" />
+                Mark as Resolved
+              </Button>
+              <Button variant="outline" className="w-full justify-start text-red-600" onClick={() => {
+                toast.success('Alert deleted')
+                setShowAlertActionsDialog(null)
+              }}>
+                <Trash2 className="w-4 h-4 mr-2" />
+                Delete Alert
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Export Logs Dialog */}
+        <Dialog open={showExportLogsDialog} onOpenChange={setShowExportLogsDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Download className="w-5 h-5 text-indigo-600" />
+                Export Logs
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Export Format</Label>
+                <Select defaultValue="json">
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="json">JSON</SelectItem>
+                    <SelectItem value="csv">CSV</SelectItem>
+                    <SelectItem value="txt">Plain Text</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Time Range</Label>
+                <Select defaultValue="24h">
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1h">Last 1 hour</SelectItem>
+                    <SelectItem value="6h">Last 6 hours</SelectItem>
+                    <SelectItem value="24h">Last 24 hours</SelectItem>
+                    <SelectItem value="7d">Last 7 days</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Log Level</Label>
+                <Select defaultValue="all">
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Levels</SelectItem>
+                    <SelectItem value="error">Error Only</SelectItem>
+                    <SelectItem value="warn">Warning & Above</SelectItem>
+                    <SelectItem value="info">Info & Above</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex gap-3 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowExportLogsDialog(false)}>
+                  Cancel
+                </Button>
+                <Button className="flex-1 bg-indigo-600 hover:bg-indigo-700" onClick={() => {
+                  const exportData = {
+                    logs: mockLogs,
+                    exportedAt: new Date().toISOString()
+                  }
+                  const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
+                  const url = URL.createObjectURL(blob)
+                  const a = document.createElement('a')
+                  a.href = url
+                  a.download = `logs-export-${new Date().toISOString().split('T')[0]}.json`
+                  document.body.appendChild(a)
+                  a.click()
+                  document.body.removeChild(a)
+                  URL.revokeObjectURL(url)
+                  toast.success('Logs exported successfully')
+                  setShowExportLogsDialog(false)
+                }}>
+                  <Download className="w-4 h-4 mr-2" />
+                  Export
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Live Tail Dialog */}
+        <Dialog open={showLiveTailDialog} onOpenChange={setShowLiveTailDialog}>
+          <DialogContent className="max-w-3xl max-h-[80vh]">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Play className="w-5 h-5 text-green-600" />
+                Live Log Tail
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="flex items-center gap-2">
+                <Badge className="bg-green-100 text-green-800">
+                  <div className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse" />
+                  Live
+                </Badge>
+                <Select defaultValue="all">
+                  <SelectTrigger className="w-[150px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Services</SelectItem>
+                    <SelectItem value="api-gateway">API Gateway</SelectItem>
+                    <SelectItem value="auth-service">Auth Service</SelectItem>
+                    <SelectItem value="worker-nodes">Worker Nodes</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Select defaultValue="all">
+                  <SelectTrigger className="w-[120px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Levels</SelectItem>
+                    <SelectItem value="error">Error</SelectItem>
+                    <SelectItem value="warn">Warning</SelectItem>
+                    <SelectItem value="info">Info</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <ScrollArea className="h-[350px] border rounded-lg bg-gray-900 p-4">
+                <div className="font-mono text-sm text-gray-100 space-y-2">
+                  {mockLogs.map(log => (
+                    <div key={log.id} className="flex items-start gap-3">
+                      <span className="text-xs text-gray-500">{formatDate(log.timestamp)}</span>
+                      <Badge className={getLogLevelColor(log.level)}>{log.level.toUpperCase()}</Badge>
+                      <span className="text-blue-400">{log.service}</span>
+                      <span className="text-gray-300">{log.message}</span>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+              <div className="flex justify-between">
+                <Button variant="outline" onClick={() => toast.success('Log stream paused')}>
+                  Pause Stream
+                </Button>
+                <Button variant="outline" onClick={() => setShowLiveTailDialog(false)}>
+                  Close
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Notification Channel Dialog */}
+        <Dialog open={!!showEditChannelDialog} onOpenChange={() => setShowEditChannelDialog(null)}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Edit3 className="w-5 h-5 text-indigo-600" />
+                Edit Notification Channel
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Channel Name</Label>
+                <Input defaultValue={showEditChannelDialog || ''} />
+              </div>
+              <div className="space-y-2">
+                <Label>Configuration</Label>
+                <Input placeholder="e.g., team@company.com or #channel-name" />
+              </div>
+              <div className="space-y-2">
+                <Label>Alert Types</Label>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Switch defaultChecked />
+                    <Label className="text-sm">Critical Alerts</Label>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Switch defaultChecked />
+                    <Label className="text-sm">Warning Alerts</Label>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Switch />
+                    <Label className="text-sm">Info Alerts</Label>
+                  </div>
+                </div>
+              </div>
+              <div className="flex gap-3 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowEditChannelDialog(null)}>
+                  Cancel
+                </Button>
+                <Button className="flex-1 bg-indigo-600 hover:bg-indigo-700" onClick={() => {
+                  toast.success('Notification channel updated')
+                  setShowEditChannelDialog(null)
+                }}>
+                  Save Changes
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Notification Channel Dialog */}
+        <Dialog open={showAddChannelDialog} onOpenChange={setShowAddChannelDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Plus className="w-5 h-5 text-indigo-600" />
+                Add Notification Channel
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Channel Type</Label>
+                <Select defaultValue="email">
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="email">Email</SelectItem>
+                    <SelectItem value="slack">Slack</SelectItem>
+                    <SelectItem value="pagerduty">PagerDuty</SelectItem>
+                    <SelectItem value="teams">Microsoft Teams</SelectItem>
+                    <SelectItem value="webhook">Webhook</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Channel Name</Label>
+                <Input placeholder="e.g., Primary Email" />
+              </div>
+              <div className="space-y-2">
+                <Label>Configuration</Label>
+                <Input placeholder="e.g., team@company.com" />
+              </div>
+              <div className="flex gap-3 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowAddChannelDialog(false)}>
+                  Cancel
+                </Button>
+                <Button className="flex-1 bg-indigo-600 hover:bg-indigo-700" onClick={() => {
+                  toast.success('Notification channel added')
+                  setShowAddChannelDialog(false)
+                }}>
+                  Add Channel
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Escalation Policy Dialog */}
+        <Dialog open={!!showEditEscalationDialog} onOpenChange={() => setShowEditEscalationDialog(null)}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Edit3 className="w-5 h-5 text-indigo-600" />
+                Edit Escalation Policy
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Tier Name</Label>
+                <Input defaultValue={showEditEscalationDialog || ''} />
+              </div>
+              <div className="space-y-2">
+                <Label>Team/Person</Label>
+                <Input placeholder="e.g., On-call Engineer" />
+              </div>
+              <div className="space-y-2">
+                <Label>Delay Before Escalation</Label>
+                <Select defaultValue="15">
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="0">Immediate</SelectItem>
+                    <SelectItem value="5">5 minutes</SelectItem>
+                    <SelectItem value="15">15 minutes</SelectItem>
+                    <SelectItem value="30">30 minutes</SelectItem>
+                    <SelectItem value="60">1 hour</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Notification Channels</Label>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Switch defaultChecked />
+                    <Label className="text-sm">PagerDuty</Label>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Switch />
+                    <Label className="text-sm">SMS</Label>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Switch />
+                    <Label className="text-sm">Phone Call</Label>
+                  </div>
+                </div>
+              </div>
+              <div className="flex gap-3 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowEditEscalationDialog(null)}>
+                  Cancel
+                </Button>
+                <Button className="flex-1 bg-indigo-600 hover:bg-indigo-700" onClick={() => {
+                  toast.success('Escalation policy updated')
+                  setShowEditEscalationDialog(null)
+                }}>
+                  Save Changes
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Escalation Tier Dialog */}
+        <Dialog open={showAddEscalationDialog} onOpenChange={setShowAddEscalationDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Plus className="w-5 h-5 text-indigo-600" />
+                Add Escalation Tier
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Tier Number</Label>
+                <Select defaultValue="4">
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="4">Tier 4</SelectItem>
+                    <SelectItem value="5">Tier 5</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Team/Person</Label>
+                <Input placeholder="e.g., VP of Engineering" />
+              </div>
+              <div className="space-y-2">
+                <Label>Delay Before Escalation</Label>
+                <Select defaultValue="60">
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="30">30 minutes</SelectItem>
+                    <SelectItem value="60">1 hour</SelectItem>
+                    <SelectItem value="120">2 hours</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex gap-3 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowAddEscalationDialog(false)}>
+                  Cancel
+                </Button>
+                <Button className="flex-1 bg-indigo-600 hover:bg-indigo-700" onClick={() => {
+                  toast.success('Escalation tier added')
+                  setShowAddEscalationDialog(false)
+                }}>
+                  Add Tier
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Configure Cloud Provider Dialog */}
+        <Dialog open={!!showConfigureProviderDialog} onOpenChange={() => setShowConfigureProviderDialog(null)}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Cloud className="w-5 h-5 text-indigo-600" />
+                {showConfigureProviderDialog?.includes('not_connected') ? 'Connect' : 'Configure'} {showConfigureProviderDialog}
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>API Key / Access Key</Label>
+                <Input type="password" placeholder="Enter your API key" />
+              </div>
+              <div className="space-y-2">
+                <Label>Secret Key</Label>
+                <Input type="password" placeholder="Enter your secret key" />
+              </div>
+              <div className="space-y-2">
+                <Label>Region</Label>
+                <Select defaultValue="us-east-1">
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="us-east-1">US East (N. Virginia)</SelectItem>
+                    <SelectItem value="us-west-2">US West (Oregon)</SelectItem>
+                    <SelectItem value="eu-west-1">EU (Ireland)</SelectItem>
+                    <SelectItem value="ap-southeast-1">Asia Pacific (Singapore)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex items-center justify-between pt-2">
+                <div>
+                  <Label>Auto-sync Metrics</Label>
+                  <p className="text-sm text-gray-500">Automatically import metrics</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+              <div className="flex gap-3 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowConfigureProviderDialog(null)}>
+                  Cancel
+                </Button>
+                <Button className="flex-1 bg-indigo-600 hover:bg-indigo-700" onClick={() => {
+                  toast.success(`${showConfigureProviderDialog} configured successfully`)
+                  setShowConfigureProviderDialog(null)
+                }}>
+                  Save Configuration
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Regenerate API Key Dialog */}
+        <Dialog open={showRegenerateApiKeyDialog} onOpenChange={setShowRegenerateApiKeyDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <RefreshCw className="w-5 h-5 text-orange-600" />
+                Regenerate API Key
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="p-4 rounded-lg bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800">
+                <p className="text-sm text-orange-800 dark:text-orange-200">
+                  <AlertTriangle className="w-4 h-4 inline mr-1" />
+                  Warning: Regenerating your API key will invalidate the current key. Any integrations using the old key will stop working immediately.
+                </p>
+              </div>
+              <div className="flex gap-3 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowRegenerateApiKeyDialog(false)}>
+                  Cancel
+                </Button>
+                <Button className="flex-1 bg-orange-600 hover:bg-orange-700" onClick={() => {
+                  toast.success('API key regenerated', { description: 'Your new API key has been created' })
+                  setShowRegenerateApiKeyDialog(false)
+                }}>
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                  Regenerate Key
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Webhook Dialog */}
+        <Dialog open={!!showEditWebhookDialog} onOpenChange={() => setShowEditWebhookDialog(null)}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Edit3 className="w-5 h-5 text-indigo-600" />
+                Edit Webhook
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Webhook Name</Label>
+                <Input defaultValue={showEditWebhookDialog || ''} />
+              </div>
+              <div className="space-y-2">
+                <Label>URL</Label>
+                <Input placeholder="https://example.com/webhook" />
+              </div>
+              <div className="space-y-2">
+                <Label>Events</Label>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Switch defaultChecked />
+                    <Label className="text-sm">Metrics</Label>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Switch defaultChecked />
+                    <Label className="text-sm">Alerts</Label>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Switch />
+                    <Label className="text-sm">Logs</Label>
+                  </div>
+                </div>
+              </div>
+              <div className="flex gap-3 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowEditWebhookDialog(null)}>
+                  Cancel
+                </Button>
+                <Button className="flex-1 bg-indigo-600 hover:bg-indigo-700" onClick={() => {
+                  toast.success('Webhook updated')
+                  setShowEditWebhookDialog(null)
+                }}>
+                  Save Changes
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Webhook Dialog */}
+        <Dialog open={!!showDeleteWebhookDialog} onOpenChange={() => setShowDeleteWebhookDialog(null)}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-600">
+                <Trash2 className="w-5 h-5" />
+                Delete Webhook
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <p className="text-gray-600 dark:text-gray-400">
+                Are you sure you want to delete the webhook <span className="font-semibold">"{showDeleteWebhookDialog}"</span>? This action cannot be undone.
+              </p>
+              <div className="flex gap-3 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowDeleteWebhookDialog(null)}>
+                  Cancel
+                </Button>
+                <Button variant="destructive" className="flex-1" onClick={() => {
+                  toast.success('Webhook deleted')
+                  setShowDeleteWebhookDialog(null)
+                }}>
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Delete Webhook
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Webhook Dialog */}
+        <Dialog open={showAddWebhookDialog} onOpenChange={setShowAddWebhookDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Plus className="w-5 h-5 text-indigo-600" />
+                Add Webhook
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Webhook Name</Label>
+                <Input placeholder="e.g., Metrics Export" />
+              </div>
+              <div className="space-y-2">
+                <Label>URL</Label>
+                <Input placeholder="https://example.com/webhook" />
+              </div>
+              <div className="space-y-2">
+                <Label>Events to Send</Label>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Switch defaultChecked />
+                    <Label className="text-sm">Metrics</Label>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Switch />
+                    <Label className="text-sm">Alerts</Label>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Switch />
+                    <Label className="text-sm">Logs</Label>
+                  </div>
+                </div>
+              </div>
+              <div className="flex gap-3 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowAddWebhookDialog(false)}>
+                  Cancel
+                </Button>
+                <Button className="flex-1 bg-indigo-600 hover:bg-indigo-700" onClick={() => {
+                  toast.success('Webhook added')
+                  setShowAddWebhookDialog(false)
+                }}>
+                  Add Webhook
                 </Button>
               </div>
             </div>

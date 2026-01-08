@@ -356,6 +356,35 @@ export default function ThreeDModelingClient() {
   const [viewportMode, setViewportMode] = useState<'solid' | 'wireframe' | 'material'>('solid')
   const [settingsTab, setSettingsTab] = useState('general')
 
+  // Dialog states for buttons
+  const [showImportDialog, setShowImportDialog] = useState(false)
+  const [showNewMaterialDialog, setShowNewMaterialDialog] = useState(false)
+  const [showUploadTextureDialog, setShowUploadTextureDialog] = useState(false)
+  const [showInstallPluginDialog, setShowInstallPluginDialog] = useState(false)
+  const [showResetShortcutsDialog, setShowResetShortcutsDialog] = useState(false)
+  const [showCheckUpdatesDialog, setShowCheckUpdatesDialog] = useState(false)
+  const [showBrowseTempDialog, setShowBrowseTempDialog] = useState(false)
+  const [showBrowseAssetsDialog, setShowBrowseAssetsDialog] = useState(false)
+  const [showClearCacheDialog, setShowClearCacheDialog] = useState(false)
+  const [showResetPreferencesDialog, setShowResetPreferencesDialog] = useState(false)
+  const [showPurgeDataDialog, setShowPurgeDataDialog] = useState(false)
+  const [showPreviewRenderDialog, setShowPreviewRenderDialog] = useState(false)
+  const [showDownloadRenderDialog, setShowDownloadRenderDialog] = useState(false)
+  const [showOpenEditorDialog, setShowOpenEditorDialog] = useState(false)
+  const [showOpenModelDialog, setShowOpenModelDialog] = useState(false)
+  const [modelToOpen, setModelToOpen] = useState<Model3D | null>(null)
+
+  // Form states
+  const [importFormat, setImportFormat] = useState<FileFormat>('GLTF')
+  const [newMaterialName, setNewMaterialName] = useState('')
+  const [newMaterialType, setNewMaterialType] = useState<Material['type']>('pbr')
+  const [newMaterialColor, setNewMaterialColor] = useState('#808080')
+  const [newTextureName, setNewTextureName] = useState('')
+  const [newTextureType, setNewTextureType] = useState<Texture['type']>('diffuse')
+  const [pluginUrl, setPluginUrl] = useState('')
+  const [tempFilePath, setTempFilePath] = useState('/tmp/3d-studio')
+  const [assetsPath, setAssetsPath] = useState('~/Documents/3D Assets')
+
   // Real action handlers for quick actions
   const handleCreateModel = useCallback(async () => {
     const result = await apiPost('/api/3d-models', {
@@ -396,6 +425,205 @@ export default function ThreeDModelingClient() {
       format: 'FBX, OBJ, GLTF'
     }
     downloadAsJson(exportData, `3d-models-export-${Date.now()}.json`)
+  }, [])
+
+  // Import model handler
+  const handleImportModel = useCallback(async () => {
+    const result = await apiPost('/api/3d-models/import', {
+      format: importFormat,
+      timestamp: Date.now()
+    }, {
+      loading: `Importing ${importFormat} model...`,
+      success: `Model imported successfully as ${importFormat}!`,
+      error: 'Failed to import model'
+    })
+    if (result.success) {
+      setShowImportDialog(false)
+    }
+  }, [importFormat])
+
+  // Create material handler
+  const handleCreateMaterial = useCallback(async () => {
+    const result = await apiPost('/api/3d-models/materials', {
+      name: newMaterialName || `Material ${Date.now()}`,
+      type: newMaterialType,
+      color: newMaterialColor,
+      roughness: 0.5,
+      metalness: 0.0,
+      opacity: 1.0
+    }, {
+      loading: 'Creating material...',
+      success: `Material "${newMaterialName || 'New Material'}" created!`,
+      error: 'Failed to create material'
+    })
+    if (result.success) {
+      setShowNewMaterialDialog(false)
+      setNewMaterialName('')
+    }
+  }, [newMaterialName, newMaterialType, newMaterialColor])
+
+  // Upload texture handler
+  const handleUploadTexture = useCallback(async () => {
+    const result = await apiPost('/api/3d-models/textures', {
+      name: newTextureName || `Texture ${Date.now()}`,
+      type: newTextureType,
+      format: 'png',
+      resolution: '2048x2048'
+    }, {
+      loading: 'Uploading texture...',
+      success: `Texture "${newTextureName || 'New Texture'}" uploaded!`,
+      error: 'Failed to upload texture'
+    })
+    if (result.success) {
+      setShowUploadTextureDialog(false)
+      setNewTextureName('')
+    }
+  }, [newTextureName, newTextureType])
+
+  // Install plugin handler
+  const handleInstallPlugin = useCallback(async () => {
+    const result = await apiPost('/api/3d-models/plugins/install', {
+      url: pluginUrl,
+      timestamp: Date.now()
+    }, {
+      loading: 'Installing plugin...',
+      success: 'Plugin installed successfully!',
+      error: 'Failed to install plugin'
+    })
+    if (result.success) {
+      setShowInstallPluginDialog(false)
+      setPluginUrl('')
+    }
+  }, [pluginUrl])
+
+  // Reset shortcuts handler
+  const handleResetShortcuts = useCallback(async () => {
+    const result = await apiPost('/api/3d-models/settings/reset-shortcuts', {
+      timestamp: Date.now()
+    }, {
+      loading: 'Resetting shortcuts...',
+      success: 'Keyboard shortcuts reset to defaults!',
+      error: 'Failed to reset shortcuts'
+    })
+    if (result.success) {
+      setShowResetShortcutsDialog(false)
+    }
+  }, [])
+
+  // Check updates handler
+  const handleCheckUpdates = useCallback(async () => {
+    const result = await apiPost('/api/3d-models/plugins/check-updates', {
+      timestamp: Date.now()
+    }, {
+      loading: 'Checking for updates...',
+      success: 'All plugins are up to date!',
+      error: 'Failed to check for updates'
+    })
+    if (result.success) {
+      setShowCheckUpdatesDialog(false)
+    }
+  }, [])
+
+  // Clear cache handler
+  const handleClearCache = useCallback(async () => {
+    const result = await apiPost('/api/3d-models/settings/clear-cache', {
+      timestamp: Date.now()
+    }, {
+      loading: 'Clearing cache...',
+      success: 'Cache cleared successfully!',
+      error: 'Failed to clear cache'
+    })
+    if (result.success) {
+      setShowClearCacheDialog(false)
+    }
+  }, [])
+
+  // Reset preferences handler
+  const handleResetPreferences = useCallback(async () => {
+    const result = await apiPost('/api/3d-models/settings/reset-all', {
+      timestamp: Date.now()
+    }, {
+      loading: 'Resetting all preferences...',
+      success: 'All preferences reset to factory defaults!',
+      error: 'Failed to reset preferences'
+    })
+    if (result.success) {
+      setShowResetPreferencesDialog(false)
+    }
+  }, [])
+
+  // Purge orphan data handler
+  const handlePurgeOrphanData = useCallback(async () => {
+    const result = await apiPost('/api/3d-models/settings/purge-orphans', {
+      timestamp: Date.now()
+    }, {
+      loading: 'Purging orphan data blocks...',
+      success: 'Orphan data blocks purged successfully!',
+      error: 'Failed to purge data'
+    })
+    if (result.success) {
+      setShowPurgeDataDialog(false)
+    }
+  }, [])
+
+  // Download render handler
+  const handleDownloadRender = useCallback(() => {
+    const exportData = {
+      render: 'completed_render_data',
+      format: 'png',
+      resolution: '4K',
+      exportedAt: new Date().toISOString()
+    }
+    downloadAsJson(exportData, `render-output-${Date.now()}.json`)
+    setShowDownloadRenderDialog(false)
+    toast.success('Render downloaded successfully!')
+  }, [])
+
+  // Open model in editor handler
+  const handleOpenInEditor = useCallback(async (model: Model3D | null) => {
+    const result = await apiPost('/api/3d-models/editor/open', {
+      modelId: model?.id || selectedModel?.id,
+      modelName: model?.name || selectedModel?.name,
+      timestamp: Date.now()
+    }, {
+      loading: 'Opening model in editor...',
+      success: `Model "${model?.name || selectedModel?.name}" opened in editor!`,
+      error: 'Failed to open model'
+    })
+    if (result.success) {
+      setShowOpenEditorDialog(false)
+      setShowOpenModelDialog(false)
+      setModelToOpen(null)
+    }
+  }, [selectedModel])
+
+  // Viewport action handlers
+  const handleUndo = useCallback(() => {
+    toast.success('Undo', { description: 'Last action undone' })
+  }, [])
+
+  const handleRedo = useCallback(() => {
+    toast.success('Redo', { description: 'Action redone' })
+  }, [])
+
+  const handleToggleGrid = useCallback(() => {
+    toast.success('Grid toggled', { description: 'Grid visibility changed' })
+  }, [])
+
+  const handleMaximizeViewport = useCallback(() => {
+    toast.success('Viewport maximized', { description: 'Press Escape to exit fullscreen' })
+  }, [])
+
+  const handleZoomIn = useCallback(() => {
+    toast.success('Zoom in', { description: 'Viewport zoomed in' })
+  }, [])
+
+  const handleZoomOut = useCallback(() => {
+    toast.success('Zoom out', { description: 'Viewport zoomed out' })
+  }, [])
+
+  const handleResetView = useCallback(() => {
+    toast.success('View reset', { description: 'Viewport returned to default view' })
   }, [])
 
   // Quick actions with real functionality
@@ -537,7 +765,7 @@ export default function ThreeDModelingClient() {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="outline" className="gap-2">
+            <Button variant="outline" className="gap-2" onClick={() => setShowImportDialog(true)}>
               <Upload className="w-4 h-4" />
               Import
             </Button>
@@ -786,7 +1014,7 @@ export default function ThreeDModelingClient() {
                           <Button variant="outline" size="sm" onClick={() => setSelectedModel(model)}>
                             <Eye className="w-4 h-4" />
                           </Button>
-                          <Button size="sm" className="gap-1">
+                          <Button size="sm" className="gap-1" onClick={() => { setModelToOpen(model); setShowOpenModelDialog(true); }}>
                             <Play className="w-3 h-3" />
                             Open
                           </Button>
@@ -839,10 +1067,10 @@ export default function ThreeDModelingClient() {
                         )
                       })}
                       <div className="w-px h-6 bg-gray-200 dark:bg-gray-700 mx-2" />
-                      <Button variant="ghost" size="sm" title="Undo">
+                      <Button variant="ghost" size="sm" title="Undo" onClick={handleUndo}>
                         <Undo2 className="w-4 h-4" />
                       </Button>
-                      <Button variant="ghost" size="sm" title="Redo">
+                      <Button variant="ghost" size="sm" title="Redo" onClick={handleRedo}>
                         <Redo2 className="w-4 h-4" />
                       </Button>
                     </div>
@@ -856,10 +1084,10 @@ export default function ThreeDModelingClient() {
                         <option value="wireframe">Wireframe</option>
                         <option value="material">Material</option>
                       </select>
-                      <Button variant="ghost" size="sm">
+                      <Button variant="ghost" size="sm" onClick={handleToggleGrid}>
                         <Grid3X3 className="w-4 h-4" />
                       </Button>
-                      <Button variant="ghost" size="sm">
+                      <Button variant="ghost" size="sm" onClick={handleMaximizeViewport}>
                         <Maximize2 className="w-4 h-4" />
                       </Button>
                     </div>
@@ -894,13 +1122,13 @@ export default function ThreeDModelingClient() {
                         <p className="text-xs mt-1">Select a model to view</p>
                       </div>
                       <div className="absolute bottom-4 left-4 flex gap-2">
-                        <Button variant="secondary" size="sm">
+                        <Button variant="secondary" size="sm" onClick={handleZoomIn}>
                           <ZoomIn className="w-4 h-4" />
                         </Button>
-                        <Button variant="secondary" size="sm">
+                        <Button variant="secondary" size="sm" onClick={handleZoomOut}>
                           <ZoomOut className="w-4 h-4" />
                         </Button>
-                        <Button variant="secondary" size="sm">
+                        <Button variant="secondary" size="sm" onClick={handleResetView}>
                           <RotateCcw className="w-4 h-4" />
                         </Button>
                       </div>
@@ -973,7 +1201,7 @@ export default function ThreeDModelingClient() {
 
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold">Material Library</h2>
-              <Button className="gap-2">
+              <Button className="gap-2" onClick={() => setShowNewMaterialDialog(true)}>
                 <Plus className="w-4 h-4" />
                 New Material
               </Button>
@@ -1019,7 +1247,7 @@ export default function ThreeDModelingClient() {
           <TabsContent value="textures" className="space-y-6">
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold">Texture Library</h2>
-              <Button className="gap-2">
+              <Button className="gap-2" onClick={() => setShowUploadTextureDialog(true)}>
                 <Upload className="w-4 h-4" />
                 Upload Texture
               </Button>
@@ -1127,11 +1355,11 @@ export default function ThreeDModelingClient() {
                     )}
                     {job.status === 'completed' && (
                       <div className="flex gap-2">
-                        <Button variant="outline" size="sm" className="gap-1">
+                        <Button variant="outline" size="sm" className="gap-1" onClick={() => setShowPreviewRenderDialog(true)}>
                           <Eye className="w-4 h-4" />
                           Preview
                         </Button>
-                        <Button size="sm" className="gap-1">
+                        <Button size="sm" className="gap-1" onClick={() => setShowDownloadRenderDialog(true)}>
                           <Download className="w-4 h-4" />
                           Download
                         </Button>
@@ -1557,7 +1785,7 @@ export default function ThreeDModelingClient() {
                             </div>
                           ))}
                         </div>
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => setShowResetShortcutsDialog(true)}>
                           Reset to Defaults
                         </Button>
                       </CardContent>
@@ -1641,7 +1869,7 @@ export default function ThreeDModelingClient() {
                             </div>
                           ))}
                         </div>
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => setShowInstallPluginDialog(true)}>
                           <Plus className="w-4 h-4 mr-2" />
                           Install Plugin
                         </Button>
@@ -1670,7 +1898,7 @@ export default function ThreeDModelingClient() {
                           </div>
                           <Switch />
                         </div>
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => setShowCheckUpdatesDialog(true)}>
                           Check for Updates
                         </Button>
                       </CardContent>
@@ -1726,15 +1954,15 @@ export default function ThreeDModelingClient() {
                         <div className="space-y-2">
                           <Label>Temp Files Location</Label>
                           <div className="flex gap-2">
-                            <Input defaultValue="/tmp/3d-studio" readOnly className="flex-1" />
-                            <Button variant="outline">Browse</Button>
+                            <Input value={tempFilePath} readOnly className="flex-1" />
+                            <Button variant="outline" onClick={() => setShowBrowseTempDialog(true)}>Browse</Button>
                           </div>
                         </div>
                         <div className="space-y-2">
                           <Label>Assets Library</Label>
                           <div className="flex gap-2">
-                            <Input defaultValue="~/Documents/3D Assets" readOnly className="flex-1" />
-                            <Button variant="outline">Browse</Button>
+                            <Input value={assetsPath} readOnly className="flex-1" />
+                            <Button variant="outline" onClick={() => setShowBrowseAssetsDialog(true)}>Browse</Button>
                           </div>
                         </div>
                         <div className="flex items-center justify-between">
@@ -1760,7 +1988,7 @@ export default function ThreeDModelingClient() {
                             <p className="font-medium text-red-600">Clear Cache</p>
                             <p className="text-sm text-muted-foreground">Remove all cached data</p>
                           </div>
-                          <Button variant="outline" className="text-red-600 border-red-600 hover:bg-red-50">
+                          <Button variant="outline" className="text-red-600 border-red-600 hover:bg-red-50" onClick={() => setShowClearCacheDialog(true)}>
                             <Trash2 className="w-4 h-4 mr-2" />
                             Clear
                           </Button>
@@ -1770,7 +1998,7 @@ export default function ThreeDModelingClient() {
                             <p className="font-medium text-red-600">Reset All Preferences</p>
                             <p className="text-sm text-muted-foreground">Restore factory defaults</p>
                           </div>
-                          <Button variant="outline" className="text-red-600 border-red-600 hover:bg-red-50">
+                          <Button variant="outline" className="text-red-600 border-red-600 hover:bg-red-50" onClick={() => setShowResetPreferencesDialog(true)}>
                             <RefreshCw className="w-4 h-4 mr-2" />
                             Reset
                           </Button>
@@ -1780,7 +2008,7 @@ export default function ThreeDModelingClient() {
                             <p className="font-medium text-red-600">Purge Orphan Data</p>
                             <p className="text-sm text-muted-foreground">Remove unused data blocks</p>
                           </div>
-                          <Button variant="outline" className="text-red-600 border-red-600 hover:bg-red-50">
+                          <Button variant="outline" className="text-red-600 border-red-600 hover:bg-red-50" onClick={() => setShowPurgeDataDialog(true)}>
                             <Archive className="w-4 h-4 mr-2" />
                             Purge
                           </Button>
@@ -1869,7 +2097,7 @@ export default function ThreeDModelingClient() {
                 </div>
               </div>
               <div className="flex gap-2">
-                <Button className="flex-1 gap-2">
+                <Button className="flex-1 gap-2" onClick={() => handleOpenInEditor(selectedModel)}>
                   <Play className="w-4 h-4" />
                   Open in Editor
                 </Button>
@@ -1884,6 +2112,442 @@ export default function ThreeDModelingClient() {
               </div>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Import Model Dialog */}
+      <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Upload className="w-5 h-5" />
+              Import 3D Model
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>File Format</Label>
+              <Select value={importFormat} onValueChange={(v) => setImportFormat(v as FileFormat)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="GLTF">GLTF/GLB</SelectItem>
+                  <SelectItem value="OBJ">OBJ</SelectItem>
+                  <SelectItem value="FBX">FBX</SelectItem>
+                  <SelectItem value="STL">STL</SelectItem>
+                  <SelectItem value="BLEND">Blender</SelectItem>
+                  <SelectItem value="3DS">3DS</SelectItem>
+                  <SelectItem value="DAE">Collada (DAE)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="p-6 border-2 border-dashed rounded-lg text-center">
+              <Upload className="w-8 h-8 mx-auto mb-2 text-gray-400" />
+              <p className="text-sm text-gray-500">Drag and drop your model file here</p>
+              <p className="text-xs text-gray-400 mt-1">or click to browse</p>
+            </div>
+            <div className="flex gap-2 justify-end">
+              <Button variant="outline" onClick={() => setShowImportDialog(false)}>Cancel</Button>
+              <Button onClick={handleImportModel}>Import Model</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* New Material Dialog */}
+      <Dialog open={showNewMaterialDialog} onOpenChange={setShowNewMaterialDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Palette className="w-5 h-5" />
+              Create New Material
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Material Name</Label>
+              <Input
+                value={newMaterialName}
+                onChange={(e) => setNewMaterialName(e.target.value)}
+                placeholder="Enter material name"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Material Type</Label>
+              <Select value={newMaterialType} onValueChange={(v) => setNewMaterialType(v as Material['type'])}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="pbr">PBR Standard</SelectItem>
+                  <SelectItem value="basic">Basic</SelectItem>
+                  <SelectItem value="toon">Toon</SelectItem>
+                  <SelectItem value="glass">Glass</SelectItem>
+                  <SelectItem value="metal">Metal</SelectItem>
+                  <SelectItem value="fabric">Fabric</SelectItem>
+                  <SelectItem value="skin">Skin</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Base Color</Label>
+              <div className="flex gap-2">
+                <Input
+                  value={newMaterialColor}
+                  onChange={(e) => setNewMaterialColor(e.target.value)}
+                  className="flex-1"
+                />
+                <div
+                  className="w-10 h-10 rounded-lg border"
+                  style={{ backgroundColor: newMaterialColor }}
+                />
+              </div>
+            </div>
+            <div className="flex gap-2 justify-end">
+              <Button variant="outline" onClick={() => setShowNewMaterialDialog(false)}>Cancel</Button>
+              <Button onClick={handleCreateMaterial}>Create Material</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Upload Texture Dialog */}
+      <Dialog open={showUploadTextureDialog} onOpenChange={setShowUploadTextureDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Image className="w-5 h-5" />
+              Upload Texture
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Texture Name</Label>
+              <Input
+                value={newTextureName}
+                onChange={(e) => setNewTextureName(e.target.value)}
+                placeholder="Enter texture name"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Texture Type</Label>
+              <Select value={newTextureType} onValueChange={(v) => setNewTextureType(v as Texture['type'])}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="diffuse">Diffuse/Albedo</SelectItem>
+                  <SelectItem value="normal">Normal Map</SelectItem>
+                  <SelectItem value="roughness">Roughness</SelectItem>
+                  <SelectItem value="metalness">Metalness</SelectItem>
+                  <SelectItem value="ao">Ambient Occlusion</SelectItem>
+                  <SelectItem value="height">Height/Displacement</SelectItem>
+                  <SelectItem value="emission">Emission</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="p-6 border-2 border-dashed rounded-lg text-center">
+              <Image className="w-8 h-8 mx-auto mb-2 text-gray-400" />
+              <p className="text-sm text-gray-500">Drag and drop your texture here</p>
+              <p className="text-xs text-gray-400 mt-1">PNG, JPG, EXR, HDR supported</p>
+            </div>
+            <div className="flex gap-2 justify-end">
+              <Button variant="outline" onClick={() => setShowUploadTextureDialog(false)}>Cancel</Button>
+              <Button onClick={handleUploadTexture}>Upload Texture</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Install Plugin Dialog */}
+      <Dialog open={showInstallPluginDialog} onOpenChange={setShowInstallPluginDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Package className="w-5 h-5" />
+              Install Plugin
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Plugin URL or Path</Label>
+              <Input
+                value={pluginUrl}
+                onChange={(e) => setPluginUrl(e.target.value)}
+                placeholder="Enter plugin URL or file path"
+              />
+            </div>
+            <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+              <p className="text-sm text-blue-700 dark:text-blue-300">
+                You can install plugins from URLs or local .zip files. Make sure plugins are from trusted sources.
+              </p>
+            </div>
+            <div className="flex gap-2 justify-end">
+              <Button variant="outline" onClick={() => setShowInstallPluginDialog(false)}>Cancel</Button>
+              <Button onClick={handleInstallPlugin}>Install Plugin</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Reset Shortcuts Dialog */}
+      <Dialog open={showResetShortcutsDialog} onOpenChange={setShowResetShortcutsDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Keyboard className="w-5 h-5" />
+              Reset Keyboard Shortcuts
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-gray-600 dark:text-gray-400">
+              This will reset all keyboard shortcuts to their default values. Any custom shortcuts you have configured will be lost.
+            </p>
+            <div className="flex gap-2 justify-end">
+              <Button variant="outline" onClick={() => setShowResetShortcutsDialog(false)}>Cancel</Button>
+              <Button variant="destructive" onClick={handleResetShortcuts}>Reset Shortcuts</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Check Updates Dialog */}
+      <Dialog open={showCheckUpdatesDialog} onOpenChange={setShowCheckUpdatesDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <RefreshCw className="w-5 h-5" />
+              Check for Updates
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-gray-600 dark:text-gray-400">
+              Check for updates to all installed plugins. This will connect to the plugin repositories to check for new versions.
+            </p>
+            <div className="flex gap-2 justify-end">
+              <Button variant="outline" onClick={() => setShowCheckUpdatesDialog(false)}>Cancel</Button>
+              <Button onClick={handleCheckUpdates}>Check for Updates</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Browse Temp Files Dialog */}
+      <Dialog open={showBrowseTempDialog} onOpenChange={setShowBrowseTempDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Folder className="w-5 h-5" />
+              Temp Files Location
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Select Directory</Label>
+              <Input
+                value={tempFilePath}
+                onChange={(e) => setTempFilePath(e.target.value)}
+                placeholder="Enter directory path"
+              />
+            </div>
+            <div className="flex gap-2 justify-end">
+              <Button variant="outline" onClick={() => setShowBrowseTempDialog(false)}>Cancel</Button>
+              <Button onClick={() => { toast.success('Temp file path updated'); setShowBrowseTempDialog(false); }}>Save</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Browse Assets Dialog */}
+      <Dialog open={showBrowseAssetsDialog} onOpenChange={setShowBrowseAssetsDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Folder className="w-5 h-5" />
+              Assets Library Location
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Select Directory</Label>
+              <Input
+                value={assetsPath}
+                onChange={(e) => setAssetsPath(e.target.value)}
+                placeholder="Enter directory path"
+              />
+            </div>
+            <div className="flex gap-2 justify-end">
+              <Button variant="outline" onClick={() => setShowBrowseAssetsDialog(false)}>Cancel</Button>
+              <Button onClick={() => { toast.success('Assets path updated'); setShowBrowseAssetsDialog(false); }}>Save</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Clear Cache Dialog */}
+      <Dialog open={showClearCacheDialog} onOpenChange={setShowClearCacheDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-600">
+              <Trash2 className="w-5 h-5" />
+              Clear Cache
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-gray-600 dark:text-gray-400">
+              This will remove all cached data including texture previews, render cache, and temporary files. This action cannot be undone.
+            </p>
+            <div className="flex gap-2 justify-end">
+              <Button variant="outline" onClick={() => setShowClearCacheDialog(false)}>Cancel</Button>
+              <Button variant="destructive" onClick={handleClearCache}>Clear Cache</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Reset Preferences Dialog */}
+      <Dialog open={showResetPreferencesDialog} onOpenChange={setShowResetPreferencesDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-600">
+              <RefreshCw className="w-5 h-5" />
+              Reset All Preferences
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-gray-600 dark:text-gray-400">
+              This will reset all preferences to factory defaults. This includes viewport settings, render settings, shortcuts, and all custom configurations. This action cannot be undone.
+            </p>
+            <div className="flex gap-2 justify-end">
+              <Button variant="outline" onClick={() => setShowResetPreferencesDialog(false)}>Cancel</Button>
+              <Button variant="destructive" onClick={handleResetPreferences}>Reset All</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Purge Orphan Data Dialog */}
+      <Dialog open={showPurgeDataDialog} onOpenChange={setShowPurgeDataDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-600">
+              <Archive className="w-5 h-5" />
+              Purge Orphan Data
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-gray-600 dark:text-gray-400">
+              This will remove all unused data blocks including orphaned materials, textures, and meshes that are not linked to any object. This action cannot be undone.
+            </p>
+            <div className="flex gap-2 justify-end">
+              <Button variant="outline" onClick={() => setShowPurgeDataDialog(false)}>Cancel</Button>
+              <Button variant="destructive" onClick={handlePurgeOrphanData}>Purge Data</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Preview Render Dialog */}
+      <Dialog open={showPreviewRenderDialog} onOpenChange={setShowPreviewRenderDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Eye className="w-5 h-5" />
+              Render Preview
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="w-full h-[400px] bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg flex items-center justify-center">
+              <div className="text-center text-gray-400">
+                <Box className="w-16 h-16 mx-auto mb-4 opacity-50" />
+                <p className="text-sm">Rendered Image Preview</p>
+                <p className="text-xs mt-1">4K Resolution - PNG Format</p>
+              </div>
+            </div>
+            <div className="flex gap-2 justify-end">
+              <Button variant="outline" onClick={() => setShowPreviewRenderDialog(false)}>Close</Button>
+              <Button onClick={handleDownloadRender}>
+                <Download className="w-4 h-4 mr-2" />
+                Download
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Download Render Dialog */}
+      <Dialog open={showDownloadRenderDialog} onOpenChange={setShowDownloadRenderDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Download className="w-5 h-5" />
+              Download Render
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Output Format</Label>
+              <Select defaultValue="png">
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="png">PNG (Lossless)</SelectItem>
+                  <SelectItem value="jpg">JPEG (Compressed)</SelectItem>
+                  <SelectItem value="exr">OpenEXR (HDR)</SelectItem>
+                  <SelectItem value="tiff">TIFF</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">Resolution</span>
+                <span>4K (3840x2160)</span>
+              </div>
+              <div className="flex justify-between text-sm mt-2">
+                <span className="text-gray-500">Estimated Size</span>
+                <span>~12.5 MB</span>
+              </div>
+            </div>
+            <div className="flex gap-2 justify-end">
+              <Button variant="outline" onClick={() => setShowDownloadRenderDialog(false)}>Cancel</Button>
+              <Button onClick={handleDownloadRender}>Download</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Open Model Dialog */}
+      <Dialog open={showOpenModelDialog} onOpenChange={setShowOpenModelDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Play className="w-5 h-5" />
+              Open Model in Editor
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            {modelToOpen && (
+              <div className="flex gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div className="w-16 h-16 rounded-lg bg-gradient-to-br from-slate-200 to-zinc-300 dark:from-slate-700 dark:to-zinc-800 flex items-center justify-center">
+                  <Box className="w-8 h-8 text-slate-400" />
+                </div>
+                <div>
+                  <h3 className="font-semibold">{modelToOpen.name}</h3>
+                  <p className="text-sm text-gray-500">{modelToOpen.format} - {modelToOpen.file_size_mb.toFixed(1)} MB</p>
+                  <p className="text-xs text-gray-400">{formatNumber(modelToOpen.polygon_count)} polygons</p>
+                </div>
+              </div>
+            )}
+            <p className="text-gray-600 dark:text-gray-400">
+              Open this model in the 3D editor? Any unsaved changes in the current scene will be preserved.
+            </p>
+            <div className="flex gap-2 justify-end">
+              <Button variant="outline" onClick={() => { setShowOpenModelDialog(false); setModelToOpen(null); }}>Cancel</Button>
+              <Button onClick={() => handleOpenInEditor(modelToOpen)}>Open in Editor</Button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

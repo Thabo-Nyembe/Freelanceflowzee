@@ -389,6 +389,23 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
   const [showPreviewDialog, setShowPreviewDialog] = useState(false)
   const [showAnalyticsDialog, setShowAnalyticsDialog] = useState(false)
 
+  // Additional dialog states
+  const [showFeatureFlagDialog, setShowFeatureFlagDialog] = useState(false)
+  const [selectedFeatureFlag, setSelectedFeatureFlag] = useState<FeatureFlag | null>(null)
+  const [showWebhookDialog, setShowWebhookDialog] = useState(false)
+  const [showConnectServiceDialog, setShowConnectServiceDialog] = useState(false)
+  const [selectedService, setSelectedService] = useState<string>('')
+  const [showRegenerateKeyDialog, setShowRegenerateKeyDialog] = useState(false)
+  const [showCreateTemplateDialog, setShowCreateTemplateDialog] = useState(false)
+  const [showUploadLogoDialog, setShowUploadLogoDialog] = useState(false)
+  const [showExportAllDialog, setShowExportAllDialog] = useState(false)
+  const [showGeneratePdfDialog, setShowGeneratePdfDialog] = useState(false)
+  const [showClearCacheDialog, setShowClearCacheDialog] = useState(false)
+  const [showDeleteAllReleasesDialog, setShowDeleteAllReleasesDialog] = useState(false)
+  const [showResetSettingsDialog, setShowResetSettingsDialog] = useState(false)
+  const [showDisableReleasesDialog, setShowDisableReleasesDialog] = useState(false)
+  const [previewMode, setPreviewMode] = useState<'desktop' | 'mobile' | 'email'>('desktop')
+
   // Quick actions with proper dialog handlers
   const releaseNotesQuickActions = [
     { id: '1', label: 'New Release', icon: 'Rocket', shortcut: 'N', action: () => handleOpenCreateModal() },
@@ -1133,7 +1150,7 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
                           <div className="text-xs text-gray-500">rollout</div>
                         </div>
                         <Progress value={flag.rolloutPercentage} className="w-24 h-2" />
-                        <Button variant="outline" size="sm">
+                        <Button variant="outline" size="sm" onClick={() => { setSelectedFeatureFlag(flag); setShowFeatureFlagDialog(true); }}>
                           <Settings className="w-4 h-4" />
                         </Button>
                       </div>
@@ -1693,7 +1710,7 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
                         </div>
                         <code className="text-xs text-gray-500">https://api.yourapp.com/webhooks/releases</code>
                       </div>
-                      <Button variant="outline" className="w-full">
+                      <Button variant="outline" className="w-full" onClick={() => setShowWebhookDialog(true)}>
                         <Plus className="h-4 w-4 mr-2" />
                         Add Webhook
                       </Button>
@@ -1735,7 +1752,7 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
                             {service.status === 'connected' ? (
                               <Badge className="bg-green-100 text-green-700">Connected</Badge>
                             ) : (
-                              <Button variant="outline" size="sm">Connect</Button>
+                              <Button variant="outline" size="sm" onClick={() => { setSelectedService(service.name); setShowConnectServiceDialog(true); }}>Connect</Button>
                             )}
                           </div>
                         ))}
@@ -1764,7 +1781,7 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
                           Keep your API key secure. Never share it publicly.
                         </p>
                       </div>
-                      <Button variant="outline" className="w-full">
+                      <Button variant="outline" className="w-full" onClick={() => setShowRegenerateKeyDialog(true)}>
                         <RefreshCw className="h-4 w-4 mr-2" />
                         Regenerate API Key
                       </Button>
@@ -1832,7 +1849,7 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
                           </div>
                         </div>
                       ))}
-                      <Button variant="outline" className="w-full">
+                      <Button variant="outline" className="w-full" onClick={() => setShowCreateTemplateDialog(true)}>
                         <Plus className="h-4 w-4 mr-2" />
                         Create Template
                       </Button>
@@ -1910,7 +1927,7 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
                         </div>
                         <div className="space-y-2">
                           <Label className="font-medium">Logo</Label>
-                          <Button variant="outline" className="w-full">Upload Logo</Button>
+                          <Button variant="outline" className="w-full" onClick={() => setShowUploadLogoDialog(true)}>Upload Logo</Button>
                         </div>
                       </div>
                       <div className="space-y-2">
@@ -1949,11 +1966,11 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
                           </SelectContent>
                         </Select>
                       </div>
-                      <Button variant="outline" className="w-full">
+                      <Button variant="outline" className="w-full" onClick={() => setShowExportAllDialog(true)}>
                         <Download className="h-4 w-4 mr-2" />
                         Export All Releases
                       </Button>
-                      <Button variant="outline" className="w-full">
+                      <Button variant="outline" className="w-full" onClick={() => setShowGeneratePdfDialog(true)}>
                         <FileText className="h-4 w-4 mr-2" />
                         Generate Changelog PDF
                       </Button>
@@ -1988,7 +2005,7 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
                           </SelectContent>
                         </Select>
                       </div>
-                      <Button variant="outline" className="w-full">
+                      <Button variant="outline" className="w-full" onClick={() => setShowClearCacheDialog(true)}>
                         <RefreshCw className="h-4 w-4 mr-2" />
                         Clear Cache
                       </Button>
@@ -2037,15 +2054,15 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
                           These actions are irreversible. Proceed with caution.
                         </p>
                       </div>
-                      <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50">
+                      <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50" onClick={() => setShowDeleteAllReleasesDialog(true)}>
                         <Trash2 className="h-4 w-4 mr-2" />
                         Delete All Releases
                       </Button>
-                      <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50">
+                      <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50" onClick={() => setShowResetSettingsDialog(true)}>
                         <RefreshCw className="h-4 w-4 mr-2" />
                         Reset All Settings
                       </Button>
-                      <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50">
+                      <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50" onClick={() => setShowDisableReleasesDialog(true)}>
                         <Lock className="h-4 w-4 mr-2" />
                         Disable Release Notes
                       </Button>
@@ -2321,7 +2338,10 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
                       Like
                     </Button>
                     {selectedRelease.downloadUrl && (
-                      <Button size="sm" className="bg-orange-600">
+                      <Button size="sm" className="bg-orange-600" onClick={() => {
+                        window.open(selectedRelease.downloadUrl, '_blank')
+                        toast.success('Download Started', { description: `Downloading ${selectedRelease.version}` })
+                      }}>
                         <Download className="w-4 h-4 mr-1" />
                         Download
                       </Button>
@@ -2650,15 +2670,15 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
             <div className="flex items-center gap-4">
               <Label>Preview Mode:</Label>
               <div className="flex gap-2">
-                <Button variant="outline" size="sm" className="gap-2">
+                <Button variant={previewMode === 'desktop' ? 'default' : 'outline'} size="sm" className="gap-2" onClick={() => setPreviewMode('desktop')}>
                   <Monitor className="w-4 h-4" />
                   Desktop
                 </Button>
-                <Button variant="outline" size="sm" className="gap-2">
+                <Button variant={previewMode === 'mobile' ? 'default' : 'outline'} size="sm" className="gap-2" onClick={() => setPreviewMode('mobile')}>
                   <Smartphone className="w-4 h-4" />
                   Mobile
                 </Button>
-                <Button variant="outline" size="sm" className="gap-2">
+                <Button variant={previewMode === 'email' ? 'default' : 'outline'} size="sm" className="gap-2" onClick={() => setPreviewMode('email')}>
                   <Mail className="w-4 h-4" />
                   Email
                 </Button>
@@ -2811,6 +2831,642 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
             }}>
               <Download className="w-4 h-4 mr-2" />
               Export Report
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Feature Flag Settings Dialog */}
+      <Dialog open={showFeatureFlagDialog} onOpenChange={setShowFeatureFlagDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Flag className="w-5 h-5 text-orange-600" />
+              Feature Flag Settings
+            </DialogTitle>
+          </DialogHeader>
+          {selectedFeatureFlag && (
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Flag Name</Label>
+                <Input defaultValue={selectedFeatureFlag.name} />
+              </div>
+              <div className="space-y-2">
+                <Label>Flag Key</Label>
+                <Input defaultValue={selectedFeatureFlag.key} readOnly className="font-mono bg-gray-50" />
+              </div>
+              <div className="space-y-2">
+                <Label>Description</Label>
+                <Textarea defaultValue={selectedFeatureFlag.description} rows={2} />
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div>
+                  <Label className="font-medium">Enabled</Label>
+                  <p className="text-sm text-gray-500">Toggle this flag on/off</p>
+                </div>
+                <Switch defaultChecked={selectedFeatureFlag.enabled} />
+              </div>
+              <div className="space-y-2">
+                <Label>Rollout Percentage: {selectedFeatureFlag.rolloutPercentage}%</Label>
+                <Progress value={selectedFeatureFlag.rolloutPercentage} className="h-2" />
+                <Input type="range" min="0" max="100" defaultValue={selectedFeatureFlag.rolloutPercentage} className="w-full" />
+              </div>
+              <div className="space-y-2">
+                <Label>Platforms</Label>
+                <div className="flex gap-2">
+                  {['ios', 'android', 'web', 'desktop'].map(p => (
+                    <Badge key={p} variant={selectedFeatureFlag.platforms.includes(p) ? 'default' : 'outline'} className="cursor-pointer">
+                      {p}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowFeatureFlagDialog(false)}>
+              Cancel
+            </Button>
+            <Button className="bg-orange-600 hover:bg-orange-700" onClick={() => {
+              toast.success('Feature Flag Updated', { description: `${selectedFeatureFlag?.name} settings saved` })
+              setShowFeatureFlagDialog(false)
+            }}>
+              Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Webhook Dialog */}
+      <Dialog open={showWebhookDialog} onOpenChange={setShowWebhookDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Webhook className="w-5 h-5 text-orange-600" />
+              Add Webhook
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Webhook Name</Label>
+              <Input placeholder="e.g., Production Notification" />
+            </div>
+            <div className="space-y-2">
+              <Label>Webhook URL</Label>
+              <Input placeholder="https://api.yourapp.com/webhooks/..." />
+            </div>
+            <div className="space-y-2">
+              <Label>Events</Label>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                  <span className="text-sm">Release Published</span>
+                  <Switch defaultChecked />
+                </div>
+                <div className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                  <span className="text-sm">Release Scheduled</span>
+                  <Switch />
+                </div>
+                <div className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                  <span className="text-sm">Release Archived</span>
+                  <Switch />
+                </div>
+                <div className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                  <span className="text-sm">Feature Flag Changed</span>
+                  <Switch />
+                </div>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Secret (Optional)</Label>
+              <Input type="password" placeholder="Webhook secret for verification" />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowWebhookDialog(false)}>
+              Cancel
+            </Button>
+            <Button className="bg-orange-600 hover:bg-orange-700" onClick={() => {
+              toast.success('Webhook Added', { description: 'Your webhook has been configured' })
+              setShowWebhookDialog(false)
+            }}>
+              Add Webhook
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Connect Service Dialog */}
+      <Dialog open={showConnectServiceDialog} onOpenChange={setShowConnectServiceDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Link2 className="w-5 h-5 text-orange-600" />
+              Connect {selectedService}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="p-4 bg-gray-50 rounded-lg text-center">
+              <div className="w-16 h-16 mx-auto bg-gray-100 rounded-full flex items-center justify-center text-3xl mb-4">
+                {selectedService === 'Linear' && '📐'}
+                {selectedService === 'Notion' && '📝'}
+                {selectedService === 'LaunchDarkly' && '🚀'}
+              </div>
+              <h3 className="font-semibold text-lg">{selectedService}</h3>
+              <p className="text-sm text-gray-500 mt-1">
+                {selectedService === 'Linear' && 'Sync issues with your releases'}
+                {selectedService === 'Notion' && 'Publish release notes to Notion docs'}
+                {selectedService === 'LaunchDarkly' && 'Sync feature flags automatically'}
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label>API Key or Access Token</Label>
+              <Input type="password" placeholder={`Enter your ${selectedService} API key`} />
+            </div>
+            {selectedService === 'Notion' && (
+              <div className="space-y-2">
+                <Label>Workspace ID</Label>
+                <Input placeholder="Enter your Notion workspace ID" />
+              </div>
+            )}
+            {selectedService === 'Linear' && (
+              <div className="space-y-2">
+                <Label>Team ID</Label>
+                <Input placeholder="Enter your Linear team ID" />
+              </div>
+            )}
+            <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <p className="text-sm text-blue-800">
+                Your credentials are encrypted and stored securely. We never share your data with third parties.
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowConnectServiceDialog(false)}>
+              Cancel
+            </Button>
+            <Button className="bg-orange-600 hover:bg-orange-700" onClick={() => {
+              toast.success('Service Connected', { description: `${selectedService} has been connected successfully` })
+              setShowConnectServiceDialog(false)
+            }}>
+              Connect {selectedService}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Regenerate API Key Dialog */}
+      <Dialog open={showRegenerateKeyDialog} onOpenChange={setShowRegenerateKeyDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-amber-600">
+              <AlertCircle className="w-5 h-5" />
+              Regenerate API Key
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
+              <p className="text-sm text-amber-800">
+                <strong>Warning:</strong> Regenerating your API key will invalidate the current key. Any applications using the old key will stop working immediately.
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label>Type REGENERATE to confirm</Label>
+              <Input placeholder="REGENERATE" />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowRegenerateKeyDialog(false)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={() => {
+              toast.success('API Key Regenerated', { description: 'Your new API key has been generated. Copy it now as it will not be shown again.' })
+              setShowRegenerateKeyDialog(false)
+            }}>
+              Regenerate Key
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Template Dialog */}
+      <Dialog open={showCreateTemplateDialog} onOpenChange={setShowCreateTemplateDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileText className="w-5 h-5 text-orange-600" />
+              Create Release Template
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Template Name</Label>
+              <Input placeholder="e.g., Security Update" />
+            </div>
+            <div className="space-y-2">
+              <Label>Description</Label>
+              <Input placeholder="Brief description of when to use this template" />
+            </div>
+            <div className="space-y-2">
+              <Label>Sections to Include</Label>
+              <div className="grid grid-cols-2 gap-2">
+                {['Features', 'Improvements', 'Bug Fixes', 'Breaking Changes', 'Known Issues', 'Migration Guide'].map(section => (
+                  <div key={section} className="flex items-center gap-2 p-2 bg-gray-50 rounded">
+                    <Switch defaultChecked={['Features', 'Improvements', 'Bug Fixes'].includes(section)} />
+                    <span className="text-sm">{section}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="flex items-center justify-between p-3 bg-orange-50 rounded-lg">
+              <div>
+                <Label className="font-medium">Set as Default</Label>
+                <p className="text-sm text-gray-500">Use this template for new releases</p>
+              </div>
+              <Switch />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCreateTemplateDialog(false)}>
+              Cancel
+            </Button>
+            <Button className="bg-orange-600 hover:bg-orange-700" onClick={() => {
+              toast.success('Template Created', { description: 'Your new release template is ready to use' })
+              setShowCreateTemplateDialog(false)
+            }}>
+              Create Template
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Upload Logo Dialog */}
+      <Dialog open={showUploadLogoDialog} onOpenChange={setShowUploadLogoDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Palette className="w-5 h-5 text-orange-600" />
+              Upload Logo
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-orange-400 transition-colors cursor-pointer">
+              <Palette className="w-12 h-12 mx-auto text-gray-400 mb-4" />
+              <p className="text-sm text-gray-600 mb-2">Drag and drop your logo here, or click to browse</p>
+              <p className="text-xs text-gray-400">SVG, PNG, or JPG (max. 2MB)</p>
+              <Input type="file" accept=".svg,.png,.jpg,.jpeg" className="hidden" id="logo-upload" />
+              <Button variant="outline" size="sm" className="mt-4" onClick={() => document.getElementById('logo-upload')?.click()}>
+                Choose File
+              </Button>
+            </div>
+            <div className="space-y-2">
+              <Label>Logo Position</Label>
+              <Select defaultValue="left">
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="left">Left</SelectItem>
+                  <SelectItem value="center">Center</SelectItem>
+                  <SelectItem value="right">Right</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowUploadLogoDialog(false)}>
+              Cancel
+            </Button>
+            <Button className="bg-orange-600 hover:bg-orange-700" onClick={() => {
+              toast.success('Logo Uploaded', { description: 'Your logo has been updated' })
+              setShowUploadLogoDialog(false)
+            }}>
+              Upload Logo
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Export All Releases Dialog */}
+      <Dialog open={showExportAllDialog} onOpenChange={setShowExportAllDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Download className="w-5 h-5 text-orange-600" />
+              Export All Releases
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Export Format</Label>
+              <Select defaultValue="json">
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="json">JSON</SelectItem>
+                  <SelectItem value="csv">CSV</SelectItem>
+                  <SelectItem value="markdown">Markdown</SelectItem>
+                  <SelectItem value="html">HTML</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Date Range</Label>
+              <Select defaultValue="all">
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Time</SelectItem>
+                  <SelectItem value="year">Last Year</SelectItem>
+                  <SelectItem value="6months">Last 6 Months</SelectItem>
+                  <SelectItem value="3months">Last 3 Months</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Include</Label>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <Switch defaultChecked />
+                  <span className="text-sm">Published Releases</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Switch defaultChecked />
+                  <span className="text-sm">Draft Releases</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Switch />
+                  <span className="text-sm">Archived Releases</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Switch defaultChecked />
+                  <span className="text-sm">Metrics Data</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowExportAllDialog(false)}>
+              Cancel
+            </Button>
+            <Button className="bg-orange-600 hover:bg-orange-700" onClick={() => {
+              handleExportNotes()
+              setShowExportAllDialog(false)
+            }}>
+              Export Releases
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Generate PDF Dialog */}
+      <Dialog open={showGeneratePdfDialog} onOpenChange={setShowGeneratePdfDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileText className="w-5 h-5 text-orange-600" />
+              Generate Changelog PDF
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>PDF Title</Label>
+              <Input defaultValue="Product Changelog" />
+            </div>
+            <div className="space-y-2">
+              <Label>Date Range</Label>
+              <Select defaultValue="all">
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Releases</SelectItem>
+                  <SelectItem value="year">Last Year</SelectItem>
+                  <SelectItem value="6months">Last 6 Months</SelectItem>
+                  <SelectItem value="latest10">Latest 10 Releases</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Options</Label>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <Switch defaultChecked />
+                  <span className="text-sm">Include Table of Contents</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Switch defaultChecked />
+                  <span className="text-sm">Include Cover Page</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Switch />
+                  <span className="text-sm">Include Metrics</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Switch defaultChecked />
+                  <span className="text-sm">Include Company Logo</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowGeneratePdfDialog(false)}>
+              Cancel
+            </Button>
+            <Button className="bg-orange-600 hover:bg-orange-700" onClick={() => {
+              toast.promise(
+                new Promise((resolve) => setTimeout(resolve, 2000)),
+                {
+                  loading: 'Generating PDF...',
+                  success: 'PDF Generated! Download starting...',
+                  error: 'Failed to generate PDF'
+                }
+              )
+              setShowGeneratePdfDialog(false)
+            }}>
+              Generate PDF
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Clear Cache Dialog */}
+      <Dialog open={showClearCacheDialog} onOpenChange={setShowClearCacheDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <RefreshCw className="w-5 h-5 text-orange-600" />
+              Clear Cache
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <p className="text-gray-600">
+              This will clear all cached release data. The cache will be rebuilt automatically when users access your release notes.
+            </p>
+            <div className="p-4 bg-gray-50 rounded-lg">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm text-gray-600">Current Cache Size</span>
+                <span className="font-semibold">12.4 MB</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-600">Last Cleared</span>
+                <span className="font-semibold">3 days ago</span>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>What to Clear</Label>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <Switch defaultChecked />
+                  <span className="text-sm">Release Data Cache</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Switch defaultChecked />
+                  <span className="text-sm">Analytics Cache</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Switch />
+                  <span className="text-sm">User Preferences Cache</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowClearCacheDialog(false)}>
+              Cancel
+            </Button>
+            <Button className="bg-orange-600 hover:bg-orange-700" onClick={() => {
+              toast.success('Cache Cleared', { description: 'All cached data has been cleared' })
+              setShowClearCacheDialog(false)
+            }}>
+              Clear Cache
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete All Releases Dialog */}
+      <Dialog open={showDeleteAllReleasesDialog} onOpenChange={setShowDeleteAllReleasesDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-600">
+              <Trash2 className="w-5 h-5" />
+              Delete All Releases
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-sm text-red-800">
+                <strong>This action is irreversible!</strong> All release notes, including drafts, published, and archived releases will be permanently deleted.
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label>Type DELETE ALL RELEASES to confirm</Label>
+              <Input placeholder="DELETE ALL RELEASES" />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowDeleteAllReleasesDialog(false)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={() => {
+              toast.success('All Releases Deleted', { description: 'All release notes have been permanently deleted' })
+              setShowDeleteAllReleasesDialog(false)
+            }}>
+              Delete All Releases
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Reset Settings Dialog */}
+      <Dialog open={showResetSettingsDialog} onOpenChange={setShowResetSettingsDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-600">
+              <RefreshCw className="w-5 h-5" />
+              Reset All Settings
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-sm text-red-800">
+                <strong>Warning:</strong> This will reset all settings to their default values, including display preferences, publishing settings, notifications, and integrations.
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label>What will be reset:</Label>
+              <ul className="text-sm text-gray-600 space-y-1 ml-4 list-disc">
+                <li>Display preferences</li>
+                <li>Publishing workflow settings</li>
+                <li>Notification preferences</li>
+                <li>Integration configurations</li>
+                <li>Template settings</li>
+                <li>Branding customizations</li>
+              </ul>
+            </div>
+            <div className="space-y-2">
+              <Label>Type RESET to confirm</Label>
+              <Input placeholder="RESET" />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowResetSettingsDialog(false)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={() => {
+              toast.success('Settings Reset', { description: 'All settings have been restored to defaults' })
+              setShowResetSettingsDialog(false)
+            }}>
+              Reset Settings
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Disable Release Notes Dialog */}
+      <Dialog open={showDisableReleasesDialog} onOpenChange={setShowDisableReleasesDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-600">
+              <Lock className="w-5 h-5" />
+              Disable Release Notes
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-sm text-red-800">
+                <strong>Warning:</strong> Disabling release notes will hide all public changelog pages and stop all notifications. Your data will be preserved and can be re-enabled later.
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label>What will happen:</Label>
+              <ul className="text-sm text-gray-600 space-y-1 ml-4 list-disc">
+                <li>Public changelog page will return 404</li>
+                <li>Email notifications will stop</li>
+                <li>Slack integrations will be paused</li>
+                <li>Webhooks will stop firing</li>
+                <li>RSS feeds will be disabled</li>
+              </ul>
+            </div>
+            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+              <div>
+                <Label className="font-medium">Send notification to team</Label>
+                <p className="text-sm text-gray-500">Notify team members about this change</p>
+              </div>
+              <Switch defaultChecked />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowDisableReleasesDialog(false)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={() => {
+              toast.success('Release Notes Disabled', { description: 'Release notes feature has been disabled. You can re-enable it anytime.' })
+              setShowDisableReleasesDialog(false)
+            }}>
+              Disable Release Notes
             </Button>
           </DialogFooter>
         </DialogContent>

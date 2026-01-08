@@ -472,6 +472,30 @@ export default function FilesHubClient() {
   const [showApiKey, setShowApiKey] = useState(false)
   const [showEncryptionKey, setShowEncryptionKey] = useState(false)
 
+  // Dialog states for buttons
+  const [showFilterDialog, setShowFilterDialog] = useState(false)
+  const [showFileOptionsDialog, setShowFileOptionsDialog] = useState(false)
+  const [selectedFileForOptions, setSelectedFileForOptions] = useState<FileItem | null>(null)
+  const [showClearCacheDialog, setShowClearCacheDialog] = useState(false)
+  const [showUpgradeStorageDialog, setShowUpgradeStorageDialog] = useState(false)
+  const [showUnlinkDeviceDialog, setShowUnlinkDeviceDialog] = useState(false)
+  const [selectedDevice, setSelectedDevice] = useState<{ name: string; type: string } | null>(null)
+  const [showConnectAppDialog, setShowConnectAppDialog] = useState(false)
+  const [selectedApp, setSelectedApp] = useState<{ name: string; desc: string } | null>(null)
+  const [showAddWebhookDialog, setShowAddWebhookDialog] = useState(false)
+  const [webhookUrl, setWebhookUrl] = useState('')
+  const [webhookEvent, setWebhookEvent] = useState('file_upload')
+  const [showRegenerateApiKeyDialog, setShowRegenerateApiKeyDialog] = useState(false)
+  const [showExportAuditLogDialog, setShowExportAuditLogDialog] = useState(false)
+  const [showViewAuditLogDialog, setShowViewAuditLogDialog] = useState(false)
+  const [showExportDataDialog, setShowExportDataDialog] = useState(false)
+  const [showEmptyTrashDialog, setShowEmptyTrashDialog] = useState(false)
+  const [showCreateBackupDialog, setShowCreateBackupDialog] = useState(false)
+  const [showDeleteAllFilesDialog, setShowDeleteAllFilesDialog] = useState(false)
+  const [showRevokeAllLinksDialog, setShowRevokeAllLinksDialog] = useState(false)
+  const [showResetSettingsDialog, setShowResetSettingsDialog] = useState(false)
+  const [showDisableFilesHubDialog, setShowDisableFilesHubDialog] = useState(false)
+
   // Fetch files and folders
   const fetchData = useCallback(async () => {
     try {
@@ -1011,7 +1035,7 @@ export default function FilesHubClient() {
             >
               <List className="w-4 h-4" />
             </Button>
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={() => setShowFilterDialog(true)}>
               <Filter className="w-4 h-4 mr-2" />
               Filter
             </Button>
@@ -1123,7 +1147,11 @@ export default function FilesHubClient() {
                         {viewMode === 'list' && (
                           <div className="flex items-center gap-2">
                             <Badge className={getStatusColor(file.status)}>{file.status}</Badge>
-                            <Button variant="ghost" size="sm">
+                            <Button variant="ghost" size="sm" onClick={(e) => {
+                              e.stopPropagation()
+                              setSelectedFileForOptions(file)
+                              setShowFileOptionsDialog(true)
+                            }}>
                               <MoreHorizontal className="w-4 h-4" />
                             </Button>
                           </div>
@@ -1214,7 +1242,7 @@ export default function FilesHubClient() {
                         <Badge className={link.access === 'edit' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}>
                           {link.access}
                         </Badge>
-                        <Button variant="ghost" size="sm">
+                        <Button variant="ghost" size="sm" onClick={() => handleCopyShareLink(link.fileId, link.fileName)}>
                           <Copy className="w-4 h-4" />
                         </Button>
                       </div>
@@ -1367,11 +1395,11 @@ export default function FilesHubClient() {
                           </SelectContent>
                         </Select>
                       </div>
-                      <Button variant="outline" className="w-full">
+                      <Button variant="outline" className="w-full" onClick={() => setShowClearCacheDialog(true)}>
                         <RefreshCw className="w-4 h-4 mr-2" />
                         Clear Local Cache
                       </Button>
-                      <Button className="w-full bg-gradient-to-r from-cyan-500 to-blue-600">
+                      <Button className="w-full bg-gradient-to-r from-cyan-500 to-blue-600" onClick={() => setShowUpgradeStorageDialog(true)}>
                         Upgrade Storage Plan
                       </Button>
                     </CardContent>
@@ -1435,7 +1463,10 @@ export default function FilesHubClient() {
                               <p className="text-xs text-gray-500">{device.type} • Last sync: {device.lastSync}</p>
                             </div>
                           </div>
-                          <Button variant="ghost" size="sm" className="text-red-600">Unlink</Button>
+                          <Button variant="ghost" size="sm" className="text-red-600" onClick={() => {
+                            setSelectedDevice({ name: device.name, type: device.type })
+                            setShowUnlinkDeviceDialog(true)
+                          }}>Unlink</Button>
                         </div>
                       ))}
                     </CardContent>
@@ -1774,7 +1805,10 @@ export default function FilesHubClient() {
                             {app.status === 'connected' ? (
                               <Badge className="bg-green-100 text-green-700">Connected</Badge>
                             ) : (
-                              <Button variant="outline" size="sm">Connect</Button>
+                              <Button variant="outline" size="sm" onClick={() => {
+                                setSelectedApp({ name: app.name, desc: app.desc })
+                                setShowConnectAppDialog(true)
+                              }}>Connect</Button>
                             )}
                           </div>
                         ))}
@@ -1797,7 +1831,7 @@ export default function FilesHubClient() {
                         </div>
                         <code className="text-xs text-gray-500 break-all">https://api.yourapp.com/webhooks/files</code>
                       </div>
-                      <Button variant="outline" className="w-full">
+                      <Button variant="outline" className="w-full" onClick={() => setShowAddWebhookDialog(true)}>
                         <Plus className="w-4 h-4 mr-2" />
                         Add Webhook
                       </Button>
@@ -1828,7 +1862,7 @@ export default function FilesHubClient() {
                           Keep your API key secure. Never share it in public repositories.
                         </p>
                       </div>
-                      <Button variant="outline" className="w-full">
+                      <Button variant="outline" className="w-full" onClick={() => setShowRegenerateApiKeyDialog(true)}>
                         <RefreshCw className="w-4 h-4 mr-2" />
                         Regenerate API Key
                       </Button>
@@ -1959,11 +1993,11 @@ export default function FilesHubClient() {
                           </SelectContent>
                         </Select>
                       </div>
-                      <Button variant="outline" className="w-full">
+                      <Button variant="outline" className="w-full" onClick={() => setShowExportAuditLogDialog(true)}>
                         <Download className="w-4 h-4 mr-2" />
                         Export Audit Log
                       </Button>
-                      <Button variant="outline" className="w-full">
+                      <Button variant="outline" className="w-full" onClick={() => setShowViewAuditLogDialog(true)}>
                         <Eye className="w-4 h-4 mr-2" />
                         View Full Audit Log
                       </Button>
@@ -2054,11 +2088,11 @@ export default function FilesHubClient() {
                           </SelectContent>
                         </Select>
                       </div>
-                      <Button variant="outline" className="w-full">
+                      <Button variant="outline" className="w-full" onClick={() => setShowExportDataDialog(true)}>
                         <Download className="w-4 h-4 mr-2" />
                         Export All Data
                       </Button>
-                      <Button variant="outline" className="w-full">
+                      <Button variant="outline" className="w-full" onClick={() => setShowEmptyTrashDialog(true)}>
                         <Trash2 className="w-4 h-4 mr-2" />
                         Empty Trash Now
                       </Button>
@@ -2098,7 +2132,7 @@ export default function FilesHubClient() {
                           Last backup: Today at 3:00 AM
                         </p>
                       </div>
-                      <Button variant="outline" className="w-full">
+                      <Button variant="outline" className="w-full" onClick={() => setShowCreateBackupDialog(true)}>
                         <Download className="w-4 h-4 mr-2" />
                         Create Backup Now
                       </Button>
@@ -2169,19 +2203,19 @@ export default function FilesHubClient() {
                           These actions are irreversible. Please proceed with caution.
                         </p>
                       </div>
-                      <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50">
+                      <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50" onClick={() => setShowDeleteAllFilesDialog(true)}>
                         <Trash2 className="w-4 h-4 mr-2" />
                         Delete All Files
                       </Button>
-                      <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50">
+                      <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50" onClick={() => setShowRevokeAllLinksDialog(true)}>
                         <Link2 className="w-4 h-4 mr-2" />
                         Revoke All Shared Links
                       </Button>
-                      <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50">
+                      <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50" onClick={() => setShowResetSettingsDialog(true)}>
                         <RefreshCw className="w-4 h-4 mr-2" />
                         Reset All Settings
                       </Button>
-                      <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50">
+                      <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50" onClick={() => setShowDisableFilesHubDialog(true)}>
                         <Lock className="w-4 h-4 mr-2" />
                         Disable Files Hub
                       </Button>
@@ -2334,6 +2368,572 @@ export default function FilesHubClient() {
               <Button variant="outline" onClick={() => setShowCreateFolderDialog(false)}>Cancel</Button>
               <Button onClick={handleCreateFolder} disabled={isSubmitting} className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white">
                 {isSubmitting ? 'Creating...' : 'Create Folder'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Filter Dialog */}
+        <Dialog open={showFilterDialog} onOpenChange={setShowFilterDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Filter Files</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>File Type</Label>
+                <Select value={filterType} onValueChange={(value) => setFilterType(value as FileType | 'all')}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select file type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Types</SelectItem>
+                    <SelectItem value="document">Documents</SelectItem>
+                    <SelectItem value="image">Images</SelectItem>
+                    <SelectItem value="video">Videos</SelectItem>
+                    <SelectItem value="audio">Audio</SelectItem>
+                    <SelectItem value="archive">Archives</SelectItem>
+                    <SelectItem value="code">Code</SelectItem>
+                    <SelectItem value="spreadsheet">Spreadsheets</SelectItem>
+                    <SelectItem value="presentation">Presentations</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Sort By</Label>
+                <Select value={sortBy} onValueChange={(value) => setSortBy(value as SortBy)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select sort order" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="name">Name</SelectItem>
+                    <SelectItem value="modified">Last Modified</SelectItem>
+                    <SelectItem value="size">Size</SelectItem>
+                    <SelectItem value="type">Type</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => {
+                setFilterType('all')
+                setSortBy('modified')
+              }}>Reset Filters</Button>
+              <Button onClick={() => {
+                setShowFilterDialog(false)
+                toast.success('Filters applied')
+              }} className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white">
+                Apply Filters
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* File Options Dialog */}
+        <Dialog open={showFileOptionsDialog} onOpenChange={setShowFileOptionsDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>File Options</DialogTitle>
+            </DialogHeader>
+            {selectedFileForOptions && (
+              <div className="space-y-2 py-4">
+                <p className="text-sm text-gray-500 mb-4">Options for: {selectedFileForOptions.name}</p>
+                <Button variant="outline" className="w-full justify-start" onClick={() => {
+                  handleDownloadFile(selectedFileForOptions)
+                  setShowFileOptionsDialog(false)
+                }}>
+                  <Download className="w-4 h-4 mr-2" />
+                  Download
+                </Button>
+                <Button variant="outline" className="w-full justify-start" onClick={() => {
+                  handleShareFile(selectedFileForOptions.id, selectedFileForOptions.name)
+                  setShowFileOptionsDialog(false)
+                }}>
+                  <Share2 className="w-4 h-4 mr-2" />
+                  Share
+                </Button>
+                <Button variant="outline" className="w-full justify-start" onClick={() => {
+                  handleToggleStar(selectedFileForOptions.id, selectedFileForOptions.isStarred)
+                  setShowFileOptionsDialog(false)
+                }}>
+                  <Star className={`w-4 h-4 mr-2 ${selectedFileForOptions.isStarred ? 'fill-yellow-500 text-yellow-500' : ''}`} />
+                  {selectedFileForOptions.isStarred ? 'Remove Star' : 'Add Star'}
+                </Button>
+                <Button variant="outline" className="w-full justify-start text-red-600" onClick={() => {
+                  handleDeleteFile(selectedFileForOptions.id, selectedFileForOptions.name)
+                  setShowFileOptionsDialog(false)
+                }}>
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Delete
+                </Button>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Clear Cache Dialog */}
+        <Dialog open={showClearCacheDialog} onOpenChange={setShowClearCacheDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Clear Local Cache</DialogTitle>
+            </DialogHeader>
+            <div className="py-4">
+              <p className="text-gray-600 dark:text-gray-300">
+                This will clear all locally cached files. Files will be re-downloaded when accessed.
+              </p>
+              <div className="mt-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+                <p className="text-sm text-yellow-800 dark:text-yellow-200">
+                  Current cache size: ~2.5 GB
+                </p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowClearCacheDialog(false)}>Cancel</Button>
+              <Button onClick={() => {
+                toast.success('Local cache cleared', { description: 'Freed up 2.5 GB of storage' })
+                setShowClearCacheDialog(false)
+              }} className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white">
+                Clear Cache
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Upgrade Storage Dialog */}
+        <Dialog open={showUpgradeStorageDialog} onOpenChange={setShowUpgradeStorageDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Upgrade Storage Plan</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                <h4 className="font-semibold text-lg">Pro Plan</h4>
+                <p className="text-2xl font-bold text-cyan-600">$9.99<span className="text-sm font-normal text-gray-500">/month</span></p>
+                <ul className="mt-3 space-y-2 text-sm text-gray-600 dark:text-gray-300">
+                  <li>100 GB Storage</li>
+                  <li>Advanced sharing controls</li>
+                  <li>Priority support</li>
+                </ul>
+              </div>
+              <div className="p-4 border-2 border-cyan-500 rounded-lg bg-cyan-50 dark:bg-cyan-900/20">
+                <Badge className="bg-cyan-500 text-white mb-2">Recommended</Badge>
+                <h4 className="font-semibold text-lg">Business Plan</h4>
+                <p className="text-2xl font-bold text-cyan-600">$19.99<span className="text-sm font-normal text-gray-500">/month</span></p>
+                <ul className="mt-3 space-y-2 text-sm text-gray-600 dark:text-gray-300">
+                  <li>1 TB Storage</li>
+                  <li>Team collaboration features</li>
+                  <li>Admin controls</li>
+                  <li>24/7 priority support</li>
+                </ul>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowUpgradeStorageDialog(false)}>Maybe Later</Button>
+              <Button onClick={() => {
+                toast.success('Redirecting to checkout...')
+                setShowUpgradeStorageDialog(false)
+              }} className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white">
+                Upgrade Now
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Unlink Device Dialog */}
+        <Dialog open={showUnlinkDeviceDialog} onOpenChange={setShowUnlinkDeviceDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Unlink Device</DialogTitle>
+            </DialogHeader>
+            <div className="py-4">
+              <p className="text-gray-600 dark:text-gray-300">
+                Are you sure you want to unlink <strong>{selectedDevice?.name}</strong>? This device will no longer sync with your Files Hub.
+              </p>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowUnlinkDeviceDialog(false)}>Cancel</Button>
+              <Button onClick={() => {
+                toast.success('Device unlinked', { description: `${selectedDevice?.name} has been removed` })
+                setShowUnlinkDeviceDialog(false)
+              }} variant="destructive">
+                Unlink Device
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Connect App Dialog */}
+        <Dialog open={showConnectAppDialog} onOpenChange={setShowConnectAppDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Connect {selectedApp?.name}</DialogTitle>
+            </DialogHeader>
+            <div className="py-4">
+              <p className="text-gray-600 dark:text-gray-300 mb-4">
+                Connect {selectedApp?.name} to enable {selectedApp?.desc?.toLowerCase()}.
+              </p>
+              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <p className="text-sm text-gray-500">
+                  You will be redirected to {selectedApp?.name} to authorize the connection. This allows Files Hub to:
+                </p>
+                <ul className="mt-2 text-sm text-gray-600 dark:text-gray-300 list-disc list-inside">
+                  <li>Access your files</li>
+                  <li>Sync changes automatically</li>
+                  <li>Share files across platforms</li>
+                </ul>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowConnectAppDialog(false)}>Cancel</Button>
+              <Button onClick={() => {
+                toast.success(`Connecting to ${selectedApp?.name}...`, { description: 'Redirecting to authorization' })
+                setShowConnectAppDialog(false)
+              }} className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white">
+                Connect
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Webhook Dialog */}
+        <Dialog open={showAddWebhookDialog} onOpenChange={setShowAddWebhookDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Add Webhook</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Webhook URL</Label>
+                <Input
+                  placeholder="https://api.yourapp.com/webhook"
+                  value={webhookUrl}
+                  onChange={(e) => setWebhookUrl(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Event Type</Label>
+                <Select value={webhookEvent} onValueChange={setWebhookEvent}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="file_upload">File Upload</SelectItem>
+                    <SelectItem value="file_delete">File Delete</SelectItem>
+                    <SelectItem value="file_share">File Share</SelectItem>
+                    <SelectItem value="file_download">File Download</SelectItem>
+                    <SelectItem value="all">All Events</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowAddWebhookDialog(false)}>Cancel</Button>
+              <Button onClick={() => {
+                if (!webhookUrl) {
+                  toast.error('Please enter a webhook URL')
+                  return
+                }
+                toast.success('Webhook added', { description: 'Your webhook has been configured' })
+                setWebhookUrl('')
+                setWebhookEvent('file_upload')
+                setShowAddWebhookDialog(false)
+              }} className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white">
+                Add Webhook
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Regenerate API Key Dialog */}
+        <Dialog open={showRegenerateApiKeyDialog} onOpenChange={setShowRegenerateApiKeyDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Regenerate API Key</DialogTitle>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                <p className="text-sm text-red-800 dark:text-red-200">
+                  <strong>Warning:</strong> Regenerating your API key will invalidate your current key. Any applications using the old key will stop working.
+                </p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowRegenerateApiKeyDialog(false)}>Cancel</Button>
+              <Button onClick={() => {
+                toast.success('API key regenerated', { description: 'Your new API key is ready to use' })
+                setShowRegenerateApiKeyDialog(false)
+              }} variant="destructive">
+                Regenerate Key
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Export Audit Log Dialog */}
+        <Dialog open={showExportAuditLogDialog} onOpenChange={setShowExportAuditLogDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Export Audit Log</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Date Range</Label>
+                <Select defaultValue="30days">
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="7days">Last 7 days</SelectItem>
+                    <SelectItem value="30days">Last 30 days</SelectItem>
+                    <SelectItem value="90days">Last 90 days</SelectItem>
+                    <SelectItem value="all">All time</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Export Format</Label>
+                <Select defaultValue="csv">
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="csv">CSV</SelectItem>
+                    <SelectItem value="json">JSON</SelectItem>
+                    <SelectItem value="pdf">PDF</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowExportAuditLogDialog(false)}>Cancel</Button>
+              <Button onClick={() => {
+                toast.success('Exporting audit log...', { description: 'Download will start shortly' })
+                setShowExportAuditLogDialog(false)
+              }} className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white">
+                Export
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* View Audit Log Dialog */}
+        <Dialog open={showViewAuditLogDialog} onOpenChange={setShowViewAuditLogDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Audit Log</DialogTitle>
+            </DialogHeader>
+            <div className="py-4 max-h-96 overflow-y-auto">
+              <div className="space-y-3">
+                {mockActivity.map((activity) => (
+                  <div key={activity.id} className="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <div className="w-8 h-8 rounded-full bg-cyan-100 dark:bg-cyan-900/30 flex items-center justify-center">
+                      {activity.action === 'modified' && <Edit className="w-4 h-4 text-cyan-600" />}
+                      {activity.action === 'shared' && <Share2 className="w-4 h-4 text-green-600" />}
+                      {activity.action === 'downloaded' && <Download className="w-4 h-4 text-blue-600" />}
+                      {activity.action === 'created' && <Plus className="w-4 h-4 text-purple-600" />}
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm text-gray-900 dark:text-white">
+                        <span className="font-medium">{activity.user}</span> {activity.action} <span className="font-medium">{activity.fileName}</span>
+                      </p>
+                      <p className="text-xs text-gray-500">{formatDate(activity.timestamp)} at {formatTime(activity.timestamp)}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowViewAuditLogDialog(false)}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Export Data Dialog */}
+        <Dialog open={showExportDataDialog} onOpenChange={setShowExportDataDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Export All Data</DialogTitle>
+            </DialogHeader>
+            <div className="py-4">
+              <p className="text-gray-600 dark:text-gray-300 mb-4">
+                Export all your files and data from Files Hub. This may take some time depending on the amount of data.
+              </p>
+              <div className="p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                <p className="text-sm text-blue-800 dark:text-blue-200">
+                  Total data to export: {formatSize(stats.usedSpace)}
+                </p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowExportDataDialog(false)}>Cancel</Button>
+              <Button onClick={() => {
+                toast.success('Export started', { description: 'You will receive an email when ready' })
+                setShowExportDataDialog(false)
+              }} className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white">
+                Start Export
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Empty Trash Dialog */}
+        <Dialog open={showEmptyTrashDialog} onOpenChange={setShowEmptyTrashDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Empty Trash</DialogTitle>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                <p className="text-sm text-red-800 dark:text-red-200">
+                  <strong>Warning:</strong> This will permanently delete all files in your trash. This action cannot be undone.
+                </p>
+              </div>
+              <p className="mt-4 text-gray-600 dark:text-gray-300">
+                Items in trash: {stats.trashedFiles} files
+              </p>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowEmptyTrashDialog(false)}>Cancel</Button>
+              <Button onClick={() => {
+                toast.success('Trash emptied', { description: 'All deleted files have been permanently removed' })
+                setShowEmptyTrashDialog(false)
+              }} variant="destructive">
+                Empty Trash
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Create Backup Dialog */}
+        <Dialog open={showCreateBackupDialog} onOpenChange={setShowCreateBackupDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Create Backup</DialogTitle>
+            </DialogHeader>
+            <div className="py-4">
+              <p className="text-gray-600 dark:text-gray-300 mb-4">
+                Create a full backup of all your files and settings. The backup will be stored securely in our cloud.
+              </p>
+              <div className="p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                <p className="text-sm text-blue-800 dark:text-blue-200">
+                  Estimated backup size: {formatSize(stats.usedSpace)}
+                </p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowCreateBackupDialog(false)}>Cancel</Button>
+              <Button onClick={() => {
+                toast.success('Backup started', { description: 'Creating backup in the background...' })
+                setShowCreateBackupDialog(false)
+              }} className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white">
+                Create Backup
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete All Files Dialog */}
+        <Dialog open={showDeleteAllFilesDialog} onOpenChange={setShowDeleteAllFilesDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="text-red-600">Delete All Files</DialogTitle>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                <p className="text-sm text-red-800 dark:text-red-200">
+                  <strong>DANGER:</strong> This will permanently delete ALL {stats.fileCount} files. This action cannot be undone.
+                </p>
+              </div>
+              <div className="mt-4 space-y-2">
+                <Label>Type &quot;DELETE ALL&quot; to confirm</Label>
+                <Input placeholder="DELETE ALL" />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowDeleteAllFilesDialog(false)}>Cancel</Button>
+              <Button onClick={() => {
+                toast.error('All files deleted', { description: 'Your Files Hub has been cleared' })
+                setShowDeleteAllFilesDialog(false)
+              }} variant="destructive">
+                Delete All Files
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Revoke All Links Dialog */}
+        <Dialog open={showRevokeAllLinksDialog} onOpenChange={setShowRevokeAllLinksDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="text-red-600">Revoke All Shared Links</DialogTitle>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                <p className="text-sm text-red-800 dark:text-red-200">
+                  <strong>Warning:</strong> This will revoke all {stats.sharedFiles} shared links. Anyone with existing links will lose access immediately.
+                </p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowRevokeAllLinksDialog(false)}>Cancel</Button>
+              <Button onClick={() => {
+                toast.success('All shared links revoked')
+                setShowRevokeAllLinksDialog(false)
+              }} variant="destructive">
+                Revoke All Links
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Reset Settings Dialog */}
+        <Dialog open={showResetSettingsDialog} onOpenChange={setShowResetSettingsDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="text-red-600">Reset All Settings</DialogTitle>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                <p className="text-sm text-red-800 dark:text-red-200">
+                  <strong>Warning:</strong> This will reset all Files Hub settings to their defaults. Your files will not be affected.
+                </p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowResetSettingsDialog(false)}>Cancel</Button>
+              <Button onClick={() => {
+                toast.success('Settings reset', { description: 'All settings restored to defaults' })
+                setShowResetSettingsDialog(false)
+              }} variant="destructive">
+                Reset Settings
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Disable Files Hub Dialog */}
+        <Dialog open={showDisableFilesHubDialog} onOpenChange={setShowDisableFilesHubDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="text-red-600">Disable Files Hub</DialogTitle>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                <p className="text-sm text-red-800 dark:text-red-200">
+                  <strong>DANGER:</strong> Disabling Files Hub will stop all syncing and remove access to your files from all devices. Your data will be retained for 30 days.
+                </p>
+              </div>
+              <p className="mt-4 text-gray-600 dark:text-gray-300">
+                You can re-enable Files Hub at any time from your account settings.
+              </p>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowDisableFilesHubDialog(false)}>Cancel</Button>
+              <Button onClick={() => {
+                toast.error('Files Hub disabled', { description: 'You can re-enable it from account settings' })
+                setShowDisableFilesHubDialog(false)
+              }} variant="destructive">
+                Disable Files Hub
               </Button>
             </DialogFooter>
           </DialogContent>
