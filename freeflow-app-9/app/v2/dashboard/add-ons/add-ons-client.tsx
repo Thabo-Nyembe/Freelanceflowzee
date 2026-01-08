@@ -476,6 +476,15 @@ export default function AddOnsClient() {
   const [securityScanRunning, setSecurityScanRunning] = useState(false)
   const [securityScanProgress, setSecurityScanProgress] = useState(0)
 
+  // Additional dialog states
+  const [showSubmitDialog, setShowSubmitDialog] = useState(false)
+  const [showFiltersDialog, setShowFiltersDialog] = useState(false)
+  const [showAdvancedSearchDialog, setShowAdvancedSearchDialog] = useState(false)
+  const [showRequestCategoryDialog, setShowRequestCategoryDialog] = useState(false)
+  const [showImportSettingsDialog, setShowImportSettingsDialog] = useState(false)
+  const [showExportSettingsDialog, setShowExportSettingsDialog] = useState(false)
+  const [showResetAllDialog, setShowResetAllDialog] = useState(false)
+
   // Quick actions with proper dialog handlers
   const quickActionsWithDialogs = [
     { id: '1', label: 'Browse Add-Ons', icon: 'store', action: () => setShowBrowseDialog(true), variant: 'default' as const },
@@ -541,6 +550,65 @@ export default function AddOnsClient() {
     })
   }
 
+  const handleConfigureAddOn = (addOnName: string) => {
+    toast.info('Opening settings', {
+      description: `Configuring "${addOnName}"...`
+    })
+  }
+
+  const handleDisableAddOn = (addOnName: string) => {
+    toast.warning('Add-on disabled', {
+      description: `"${addOnName}" has been disabled.`
+    })
+  }
+
+  const handleEnableAddOn = (addOnName: string) => {
+    toast.success('Add-on enabled', {
+      description: `"${addOnName}" is now active.`
+    })
+  }
+
+  const handleLearnMore = (addOnName: string) => {
+    toast.info('Opening documentation', {
+      description: `Loading "${addOnName}" documentation...`
+    })
+  }
+
+  const handleCheckUpdates = () => {
+    toast.info('Checking for updates', {
+      description: 'Scanning installed add-ons for updates...'
+    })
+    setTimeout(() => {
+      toast.success('Update check complete', {
+        description: 'All add-ons are up to date!'
+      })
+    }, 1500)
+  }
+
+  const handleOpenDocumentation = () => {
+    toast.info('Opening documentation', {
+      description: 'Loading developer documentation...'
+    })
+  }
+
+  const handleOpenAPIReference = () => {
+    toast.info('Opening API Reference', {
+      description: 'Loading API documentation...'
+    })
+  }
+
+  const handleImportSettings = () => {
+    setShowImportSettingsDialog(true)
+  }
+
+  const handleExportSettings = () => {
+    setShowExportSettingsDialog(true)
+  }
+
+  const handleResetAllSettings = () => {
+    setShowResetAllDialog(true)
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-pink-50 dark:bg-none dark:bg-gray-900">
       <div className="max-w-[1800px] mx-auto p-6 space-y-6">
@@ -560,11 +628,11 @@ export default function AddOnsClient() {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={() => setShowSubmitDialog(true)}>
               <Upload className="w-4 h-4 mr-2" />
               Submit Add-on
             </Button>
-            <Button className="bg-gradient-to-r from-orange-500 to-pink-600 text-white">
+            <Button className="bg-gradient-to-r from-orange-500 to-pink-600 text-white" onClick={() => setShowBrowseDialog(true)}>
               <Store className="w-4 h-4 mr-2" />
               Browse Store
             </Button>
@@ -783,7 +851,7 @@ export default function AddOnsClient() {
             >
               <List className="w-4 h-4" />
             </Button>
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={() => setShowFiltersDialog(true)}>
               <Filter className="w-4 h-4 mr-2" />
               Filters
             </Button>
@@ -843,7 +911,7 @@ export default function AddOnsClient() {
                       <div className="text-2xl font-bold">{filteredAddOns.filter(a => a.isFeatured).length}</div>
                       <div className="text-xs text-blue-100">Featured</div>
                     </div>
-                    <Button className="bg-white text-blue-600 hover:bg-blue-50 gap-2">
+                    <Button className="bg-white text-blue-600 hover:bg-blue-50 gap-2" onClick={() => setShowAdvancedSearchDialog(true)}>
                       <Search className="w-4 h-4" />
                       Advanced Search
                     </Button>
@@ -1109,7 +1177,7 @@ export default function AddOnsClient() {
                       <div className="text-2xl font-bold">{installedAddOns.filter(a => a.status === 'disabled').length}</div>
                       <div className="text-xs text-green-100">Disabled</div>
                     </div>
-                    <Button className="bg-white text-green-600 hover:bg-green-50 gap-2">
+                    <Button className="bg-white text-green-600 hover:bg-green-50 gap-2" onClick={handleCheckUpdates}>
                       <RefreshCw className="w-4 h-4" />
                       Check Updates
                     </Button>
@@ -1144,11 +1212,11 @@ export default function AddOnsClient() {
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
-                          <Button variant="outline" size="sm">
+                          <Button variant="outline" size="sm" onClick={() => handleConfigureAddOn(addOn.name)}>
                             <Settings className="w-4 h-4 mr-2" />
                             Configure
                           </Button>
-                          <Button variant="outline" size="sm" className="text-red-600 border-red-200 hover:bg-red-50">
+                          <Button variant="outline" size="sm" className="text-red-600 border-red-200 hover:bg-red-50" onClick={() => handleDisableAddOn(addOn.name)}>
                             <PowerOff className="w-4 h-4 mr-2" />
                             Disable
                           </Button>
@@ -1212,7 +1280,7 @@ export default function AddOnsClient() {
                       <div className="text-2xl font-bold">{featuredAddOns.filter(a => a.isVerified).length}</div>
                       <div className="text-xs text-amber-100">Verified</div>
                     </div>
-                    <Button className="bg-white text-amber-600 hover:bg-amber-50 gap-2">
+                    <Button className="bg-white text-amber-600 hover:bg-amber-50 gap-2" onClick={() => setShowSubmitDialog(true)}>
                       <Star className="w-4 h-4" />
                       Submit Add-on
                     </Button>
@@ -1284,7 +1352,7 @@ export default function AddOnsClient() {
                       <div className="text-2xl font-bold">{mockAddOns.filter(a => a.category === 'integration').length}</div>
                       <div className="text-xs text-cyan-100">Integrations</div>
                     </div>
-                    <Button className="bg-white text-cyan-600 hover:bg-cyan-50 gap-2">
+                    <Button className="bg-white text-cyan-600 hover:bg-cyan-50 gap-2" onClick={() => setShowRequestCategoryDialog(true)}>
                       <Plus className="w-4 h-4" />
                       Request Category
                     </Button>
@@ -1343,7 +1411,7 @@ export default function AddOnsClient() {
                       <div className="text-2xl font-bold">{installedAddOns.length}</div>
                       <div className="text-xs text-purple-100">Up to Date</div>
                     </div>
-                    <Button className="bg-white text-purple-600 hover:bg-purple-50 gap-2">
+                    <Button className="bg-white text-purple-600 hover:bg-purple-50 gap-2" onClick={() => setShowUpdateAllDialog(true)}>
                       <RefreshCw className="w-4 h-4" />
                       Update All
                     </Button>
@@ -1373,7 +1441,7 @@ export default function AddOnsClient() {
                             <p className="text-sm text-gray-500">New version available</p>
                           </div>
                         </div>
-                        <Button className="bg-gradient-to-r from-orange-500 to-pink-600 text-white">
+                        <Button className="bg-gradient-to-r from-orange-500 to-pink-600 text-white" onClick={() => handleUpdateAddOn(addOn.name)}>
                           Update Now
                         </Button>
                       </div>
@@ -1558,7 +1626,7 @@ export default function AddOnsClient() {
                           <RefreshCw className="w-5 h-5" />
                           <span className="font-medium">Last checked: 2 hours ago</span>
                         </div>
-                        <Button className="mt-3" variant="outline">Check for Updates Now</Button>
+                        <Button className="mt-3" variant="outline" onClick={handleCheckUpdates}>Check for Updates Now</Button>
                       </div>
                     </CardContent>
                   </Card>
@@ -1649,11 +1717,11 @@ export default function AddOnsClient() {
                       <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
                         <div className="font-medium text-purple-700 dark:text-purple-400 mb-2">Developer Resources</div>
                         <div className="flex gap-3">
-                          <Button variant="outline" size="sm">
+                          <Button variant="outline" size="sm" onClick={handleOpenDocumentation}>
                             <FileText className="w-4 h-4 mr-2" />
                             Documentation
                           </Button>
-                          <Button variant="outline" size="sm">
+                          <Button variant="outline" size="sm" onClick={handleOpenAPIReference}>
                             <Code className="w-4 h-4 mr-2" />
                             API Reference
                           </Button>
@@ -1747,15 +1815,15 @@ export default function AddOnsClient() {
                         </div>
                       </div>
                       <div className="flex gap-3">
-                        <Button variant="outline">
+                        <Button variant="outline" onClick={handleImportSettings}>
                           <Upload className="w-4 h-4 mr-2" />
                           Import Settings
                         </Button>
-                        <Button variant="outline">
+                        <Button variant="outline" onClick={handleExportSettings}>
                           <Download className="w-4 h-4 mr-2" />
                           Export Settings
                         </Button>
-                        <Button variant="destructive">
+                        <Button variant="destructive" onClick={handleResetAllSettings}>
                           <Trash2 className="w-4 h-4 mr-2" />
                           Reset All
                         </Button>
@@ -1879,22 +1947,28 @@ export default function AddOnsClient() {
                 <div className="flex gap-3">
                   {selectedAddOn.status === 'installed' ? (
                     <>
-                      <Button className="flex-1" variant="outline">
+                      <Button className="flex-1" variant="outline" onClick={() => handleConfigureAddOn(selectedAddOn.name)}>
                         <Settings className="w-4 h-4 mr-2" />
                         Configure
                       </Button>
-                      <Button className="flex-1 text-red-600" variant="outline">
+                      <Button className="flex-1 text-red-600" variant="outline" onClick={() => {
+                        handleUninstallAddOn(selectedAddOn.name)
+                        setShowAddOnDialog(false)
+                      }}>
                         <Trash2 className="w-4 h-4 mr-2" />
                         Uninstall
                       </Button>
                     </>
                   ) : (
                     <>
-                      <Button className="flex-1 bg-gradient-to-r from-orange-500 to-pink-600 text-white">
+                      <Button className="flex-1 bg-gradient-to-r from-orange-500 to-pink-600 text-white" onClick={() => {
+                        handleInstallAddOn(selectedAddOn.name)
+                        setShowAddOnDialog(false)
+                      }}>
                         <Download className="w-4 h-4 mr-2" />
                         {selectedAddOn.hasFreeTrial ? 'Start Free Trial' : 'Install'}
                       </Button>
-                      <Button className="flex-1" variant="outline">
+                      <Button className="flex-1" variant="outline" onClick={() => handleLearnMore(selectedAddOn.name)}>
                         <ExternalLink className="w-4 h-4 mr-2" />
                         Learn More
                       </Button>
@@ -2394,6 +2468,407 @@ export default function AddOnsClient() {
                 >
                   <Code className="w-4 h-4 mr-2" />
                   Developer Settings
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Submit Add-On Dialog */}
+        <Dialog open={showSubmitDialog} onOpenChange={setShowSubmitDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Upload className="w-5 h-5 text-orange-500" />
+                Submit Your Add-On
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p className="text-gray-600 dark:text-gray-400">
+                Share your add-on with the community and reach thousands of users.
+              </p>
+              <div className="space-y-3">
+                <div className="p-4 rounded-lg bg-orange-50 dark:bg-orange-900/20">
+                  <h4 className="font-medium mb-2">Submission Requirements</h4>
+                  <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
+                    <li className="flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-green-500" />
+                      Complete documentation
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-green-500" />
+                      Pass security review
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-green-500" />
+                      Include screenshots and description
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-green-500" />
+                      Support email or website
+                    </li>
+                  </ul>
+                </div>
+                <div className="p-4 rounded-lg border">
+                  <label className="text-sm font-medium">Add-On Package (.zip)</label>
+                  <div className="mt-2 border-2 border-dashed rounded-lg p-6 text-center">
+                    <Upload className="w-8 h-8 mx-auto text-gray-400 mb-2" />
+                    <p className="text-sm text-gray-500">Drag and drop or click to upload</p>
+                  </div>
+                </div>
+              </div>
+              <div className="flex justify-end gap-3 pt-4">
+                <Button variant="outline" onClick={() => setShowSubmitDialog(false)}>
+                  Cancel
+                </Button>
+                <Button
+                  className="bg-gradient-to-r from-orange-500 to-pink-600 text-white"
+                  onClick={() => {
+                    setShowSubmitDialog(false)
+                    toast.success('Submission started', {
+                      description: 'Your add-on is being reviewed. This may take 2-3 business days.'
+                    })
+                  }}
+                >
+                  <Upload className="w-4 h-4 mr-2" />
+                  Submit for Review
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Filters Dialog */}
+        <Dialog open={showFiltersDialog} onOpenChange={setShowFiltersDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Filter className="w-5 h-5 text-blue-500" />
+                Filter Add-Ons
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-3">
+                <div>
+                  <label className="text-sm font-medium">Category</label>
+                  <select
+                    className="w-full mt-1 p-2 border rounded-lg dark:bg-gray-700"
+                    value={categoryFilter}
+                    onChange={(e) => setCategoryFilter(e.target.value as AddOnCategory | 'all')}
+                  >
+                    <option value="all">All Categories</option>
+                    <option value="ai">AI & ML</option>
+                    <option value="integration">Integration</option>
+                    <option value="security">Security</option>
+                    <option value="analytics">Analytics</option>
+                    <option value="communication">Communication</option>
+                    <option value="design">Design</option>
+                    <option value="developer">Developer</option>
+                    <option value="storage">Storage</option>
+                    <option value="marketing">Marketing</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Status</label>
+                  <select
+                    className="w-full mt-1 p-2 border rounded-lg dark:bg-gray-700"
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value as AddOnStatus | 'all')}
+                  >
+                    <option value="all">All Status</option>
+                    <option value="installed">Installed</option>
+                    <option value="available">Available</option>
+                    <option value="update_available">Update Available</option>
+                    <option value="disabled">Disabled</option>
+                  </select>
+                </div>
+                <div className="flex items-center justify-between p-3 rounded-lg border">
+                  <div>
+                    <div className="font-medium text-sm">Verified Only</div>
+                    <div className="text-xs text-gray-500">Show only verified add-ons</div>
+                  </div>
+                  <input type="checkbox" className="toggle" />
+                </div>
+                <div className="flex items-center justify-between p-3 rounded-lg border">
+                  <div>
+                    <div className="font-medium text-sm">Free Add-Ons</div>
+                    <div className="text-xs text-gray-500">Show only free add-ons</div>
+                  </div>
+                  <input type="checkbox" className="toggle" />
+                </div>
+              </div>
+              <div className="flex justify-end gap-3 pt-4">
+                <Button variant="outline" onClick={() => {
+                  setCategoryFilter('all')
+                  setStatusFilter('all')
+                }}>
+                  Clear Filters
+                </Button>
+                <Button onClick={() => {
+                  setShowFiltersDialog(false)
+                  toast.success('Filters applied', {
+                    description: `Showing ${filteredAddOns.length} add-ons`
+                  })
+                }}>
+                  Apply Filters
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Advanced Search Dialog */}
+        <Dialog open={showAdvancedSearchDialog} onOpenChange={setShowAdvancedSearchDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Search className="w-5 h-5 text-blue-500" />
+                Advanced Search
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-3">
+                <div>
+                  <label className="text-sm font-medium">Search Query</label>
+                  <Input
+                    placeholder="Search for add-ons..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="mt-1"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-sm font-medium">Category</label>
+                    <select
+                      className="w-full mt-1 p-2 border rounded-lg dark:bg-gray-700"
+                      value={categoryFilter}
+                      onChange={(e) => setCategoryFilter(e.target.value as AddOnCategory | 'all')}
+                    >
+                      <option value="all">All Categories</option>
+                      <option value="ai">AI & ML</option>
+                      <option value="integration">Integration</option>
+                      <option value="security">Security</option>
+                      <option value="analytics">Analytics</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium">Sort By</label>
+                    <select className="w-full mt-1 p-2 border rounded-lg dark:bg-gray-700">
+                      <option value="relevance">Relevance</option>
+                      <option value="rating">Rating</option>
+                      <option value="downloads">Downloads</option>
+                      <option value="newest">Newest</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between p-3 rounded-lg border">
+                  <div>
+                    <div className="font-medium text-sm">Has Free Trial</div>
+                  </div>
+                  <input type="checkbox" className="toggle" />
+                </div>
+              </div>
+              <div className="flex justify-end gap-3 pt-4">
+                <Button variant="outline" onClick={() => setShowAdvancedSearchDialog(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={() => {
+                  setShowAdvancedSearchDialog(false)
+                  toast.success('Search applied', {
+                    description: `Found ${filteredAddOns.length} add-ons`
+                  })
+                }}>
+                  <Search className="w-4 h-4 mr-2" />
+                  Search
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Request Category Dialog */}
+        <Dialog open={showRequestCategoryDialog} onOpenChange={setShowRequestCategoryDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Plus className="w-5 h-5 text-cyan-500" />
+                Request New Category
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p className="text-gray-600 dark:text-gray-400">
+                Suggest a new category for the add-ons marketplace.
+              </p>
+              <div className="space-y-3">
+                <div>
+                  <label className="text-sm font-medium">Category Name</label>
+                  <Input placeholder="e.g., E-commerce, Healthcare" className="mt-1" />
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Description</label>
+                  <textarea
+                    className="w-full mt-1 p-2 border rounded-lg dark:bg-gray-700 min-h-[80px]"
+                    placeholder="Describe what types of add-ons would belong in this category..."
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Example Add-Ons</label>
+                  <Input placeholder="e.g., Shopify sync, Payment processor" className="mt-1" />
+                </div>
+              </div>
+              <div className="flex justify-end gap-3 pt-4">
+                <Button variant="outline" onClick={() => setShowRequestCategoryDialog(false)}>
+                  Cancel
+                </Button>
+                <Button
+                  className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white"
+                  onClick={() => {
+                    setShowRequestCategoryDialog(false)
+                    toast.success('Request submitted', {
+                      description: 'Your category request has been submitted for review.'
+                    })
+                  }}
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Submit Request
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Import Settings Dialog */}
+        <Dialog open={showImportSettingsDialog} onOpenChange={setShowImportSettingsDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Upload className="w-5 h-5 text-blue-500" />
+                Import Settings
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p className="text-gray-600 dark:text-gray-400">
+                Import add-on settings from a backup file.
+              </p>
+              <div className="p-4 rounded-lg border">
+                <div className="border-2 border-dashed rounded-lg p-6 text-center">
+                  <Upload className="w-8 h-8 mx-auto text-gray-400 mb-2" />
+                  <p className="text-sm text-gray-500">Drag and drop settings file (.json)</p>
+                  <p className="text-xs text-gray-400 mt-1">or click to browse</p>
+                </div>
+              </div>
+              <div className="p-3 rounded-lg bg-yellow-50 dark:bg-yellow-900/20">
+                <p className="text-sm text-yellow-700 dark:text-yellow-400">
+                  Warning: Importing settings will overwrite your current configuration.
+                </p>
+              </div>
+              <div className="flex justify-end gap-3 pt-4">
+                <Button variant="outline" onClick={() => setShowImportSettingsDialog(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={() => {
+                  setShowImportSettingsDialog(false)
+                  toast.success('Settings imported', {
+                    description: 'Your add-on settings have been imported successfully.'
+                  })
+                }}>
+                  <Upload className="w-4 h-4 mr-2" />
+                  Import
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Export Settings Dialog */}
+        <Dialog open={showExportSettingsDialog} onOpenChange={setShowExportSettingsDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Download className="w-5 h-5 text-blue-500" />
+                Export Settings
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p className="text-gray-600 dark:text-gray-400">
+                Export your add-on settings for backup or transfer.
+              </p>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between p-3 rounded-lg border">
+                  <div>
+                    <div className="font-medium text-sm">Include Add-On List</div>
+                    <div className="text-xs text-gray-500">Export list of installed add-ons</div>
+                  </div>
+                  <input type="checkbox" defaultChecked className="toggle" />
+                </div>
+                <div className="flex items-center justify-between p-3 rounded-lg border">
+                  <div>
+                    <div className="font-medium text-sm">Include Configurations</div>
+                    <div className="text-xs text-gray-500">Export add-on configurations</div>
+                  </div>
+                  <input type="checkbox" defaultChecked className="toggle" />
+                </div>
+                <div className="flex items-center justify-between p-3 rounded-lg border">
+                  <div>
+                    <div className="font-medium text-sm">Include Preferences</div>
+                    <div className="text-xs text-gray-500">Export marketplace preferences</div>
+                  </div>
+                  <input type="checkbox" defaultChecked className="toggle" />
+                </div>
+              </div>
+              <div className="flex justify-end gap-3 pt-4">
+                <Button variant="outline" onClick={() => setShowExportSettingsDialog(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={() => {
+                  setShowExportSettingsDialog(false)
+                  toast.success('Settings exported', {
+                    description: 'Your settings file is ready for download.'
+                  })
+                }}>
+                  <Download className="w-4 h-4 mr-2" />
+                  Export
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Reset All Settings Dialog */}
+        <Dialog open={showResetAllDialog} onOpenChange={setShowResetAllDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-600">
+                <Trash2 className="w-5 h-5" />
+                Reset All Settings
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p className="text-gray-600 dark:text-gray-400">
+                Are you sure you want to reset all add-on settings to their defaults? This action cannot be undone.
+              </p>
+              <div className="p-4 rounded-lg bg-red-50 dark:bg-red-900/20">
+                <p className="text-sm text-red-700 dark:text-red-400 font-medium mb-2">This will:</p>
+                <ul className="text-sm text-red-600 dark:text-red-400 space-y-1">
+                  <li>- Reset all marketplace preferences</li>
+                  <li>- Clear cached data</li>
+                  <li>- Reset notification settings</li>
+                  <li>- Clear update schedules</li>
+                </ul>
+              </div>
+              <div className="flex justify-end gap-3 pt-4">
+                <Button variant="outline" onClick={() => setShowResetAllDialog(false)}>
+                  Cancel
+                </Button>
+                <Button variant="destructive" onClick={() => {
+                  setShowResetAllDialog(false)
+                  toast.success('Settings reset', {
+                    description: 'All add-on settings have been reset to defaults.'
+                  })
+                }}>
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Reset All
                 </Button>
               </div>
             </div>

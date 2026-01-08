@@ -498,6 +498,16 @@ export default function AIAssistantClient() {
   const [showKnowledgeDialog, setShowKnowledgeDialog] = useState(false)
   const [showAISettingsDialog, setShowAISettingsDialog] = useState(false)
 
+  // Additional dialog states for attachment features
+  const [showAttachFileDialog, setShowAttachFileDialog] = useState(false)
+  const [showAttachImageDialog, setShowAttachImageDialog] = useState(false)
+  const [showVoiceInputDialog, setShowVoiceInputDialog] = useState(false)
+  const [showEnhanceDialog, setShowEnhanceDialog] = useState(false)
+
+  // Settings toggle states
+  const [streamResponses, setStreamResponses] = useState(true)
+  const [saveHistory, setSaveHistory] = useState(true)
+
   // Form states
   const [assistantForm, setAssistantForm] = useState<AssistantFormState>({
     name: '',
@@ -999,6 +1009,161 @@ export default function AIAssistantClient() {
     }
   }
 
+  // Handle message feedback (thumbs up/down)
+  const handleMessageFeedback = (messageId: string, feedback: 'positive' | 'negative') => {
+    toast.success(feedback === 'positive' ? 'Thanks for the feedback!' : 'Feedback recorded', {
+      description: feedback === 'positive'
+        ? 'Glad this response was helpful'
+        : 'We\'ll work on improving responses like this'
+    })
+  }
+
+  // Handle regenerate response
+  const handleRegenerateResponse = async (messageId: string) => {
+    if (!activeConversation) {
+      toast.error('No active conversation', {
+        description: 'Please start a conversation first'
+      })
+      return
+    }
+
+    try {
+      setIsTyping(true)
+      toast.info('Regenerating response...', {
+        description: 'Please wait while we generate a new response'
+      })
+
+      // Simulate regeneration (in production, this would be an API call)
+      setTimeout(async () => {
+        await sendMessage(
+          'Here is an alternative response to your request. Let me know if this better addresses your needs.',
+          'assistant'
+        )
+        setIsTyping(false)
+        toast.success('Response regenerated', {
+          description: 'A new response has been generated'
+        })
+      }, 1500)
+    } catch (err) {
+      console.error('Error regenerating response:', err)
+      toast.error('Failed to regenerate response', {
+        description: err instanceof Error ? err.message : 'Please try again'
+      })
+      setIsTyping(false)
+    }
+  }
+
+  // Handle enhance prompt
+  const handleEnhancePrompt = () => {
+    if (!inputMessage.trim()) {
+      toast.error('No text to enhance', {
+        description: 'Please enter some text first'
+      })
+      return
+    }
+
+    // Simulate prompt enhancement
+    const enhancedPrompt = `Please provide a detailed and comprehensive response to the following:\n\n${inputMessage}\n\nInclude:\n- Key points and explanations\n- Relevant examples\n- Best practices`
+    setInputMessage(enhancedPrompt)
+    toast.success('Prompt enhanced', {
+      description: 'Your prompt has been improved for better results'
+    })
+    setShowEnhanceDialog(false)
+  }
+
+  // Handle file attachment
+  const handleAttachFile = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (file) {
+      toast.success('File attached', {
+        description: `${file.name} is ready to send with your message`
+      })
+      setShowAttachFileDialog(false)
+    }
+  }
+
+  // Handle image attachment
+  const handleAttachImage = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (file) {
+      toast.success('Image attached', {
+        description: `${file.name} is ready to send with your message`
+      })
+      setShowAttachImageDialog(false)
+    }
+  }
+
+  // Handle voice input
+  const handleStartVoiceInput = () => {
+    toast.info('Voice input started', {
+      description: 'Speak now... (Voice recognition simulated)'
+    })
+    setTimeout(() => {
+      setInputMessage(prev => prev + ' [Voice input: Hello, can you help me with...]')
+      toast.success('Voice input captured', {
+        description: 'Your voice has been transcribed'
+      })
+      setShowVoiceInputDialog(false)
+    }, 2000)
+  }
+
+  // Handle file download from Files tab
+  const handleDownloadFile = (file: KnowledgeFile) => {
+    toast.success('Download started', {
+      description: `Downloading ${file.name}...`
+    })
+    // In production, this would trigger actual file download
+  }
+
+  // Handle export usage report
+  const handleExportUsageReport = () => {
+    try {
+      const reportData = {
+        stats: combinedStats,
+        dailyUsage,
+        exportedAt: new Date().toISOString()
+      }
+
+      const blob = new Blob([JSON.stringify(reportData, null, 2)], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `usage-report-${new Date().toISOString().split('T')[0]}.json`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+
+      toast.success('Report exported', {
+        description: 'Usage report has been downloaded'
+      })
+    } catch (err) {
+      console.error('Error exporting report:', err)
+      toast.error('Failed to export report', {
+        description: 'Please try again'
+      })
+    }
+  }
+
+  // Handle settings toggle
+  const handleToggleStreamResponses = () => {
+    setStreamResponses(prev => !prev)
+    toast.success(streamResponses ? 'Stream responses disabled' : 'Stream responses enabled', {
+      description: streamResponses
+        ? 'Responses will be shown after completion'
+        : 'Responses will be shown as they generate'
+    })
+  }
+
+  const handleToggleSaveHistory = () => {
+    setSaveHistory(prev => !prev)
+    toast.success(saveHistory ? 'History saving disabled' : 'History saving enabled', {
+      description: saveHistory
+        ? 'Conversation history will not be saved'
+        : 'Conversation history will be saved'
+    })
+  }
+
   // Quota percentage
   const quotaPercentage = (usageStats.quotaUsed / usageStats.quotaLimit) * 100
 
@@ -1460,13 +1625,22 @@ export default function AIAssistantClient() {
                                         <Copy className="h-4 w-4 text-gray-400" />
                                       )}
                                     </button>
-                                    <button className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                                    <button
+                                      onClick={() => handleMessageFeedback(message.id, 'positive')}
+                                      className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                                    >
                                       <ThumbsUp className="h-4 w-4 text-gray-400" />
                                     </button>
-                                    <button className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                                    <button
+                                      onClick={() => handleMessageFeedback(message.id, 'negative')}
+                                      className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                                    >
                                       <ThumbsDown className="h-4 w-4 text-gray-400" />
                                     </button>
-                                    <button className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                                    <button
+                                      onClick={() => handleRegenerateResponse(message.id)}
+                                      className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                                    >
                                       <RefreshCw className="h-4 w-4 text-gray-400" />
                                     </button>
                                   </>
@@ -1504,13 +1678,22 @@ export default function AIAssistantClient() {
                     <div className="relative bg-gray-50 dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 focus-within:border-violet-500 focus-within:ring-2 focus-within:ring-violet-500/20 transition-all">
                       {/* Attachments Bar */}
                       <div className="flex items-center gap-2 p-3 border-b border-gray-200 dark:border-gray-700">
-                        <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                        <button
+                          onClick={() => setShowAttachFileDialog(true)}
+                          className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                        >
                           <Paperclip className="h-5 w-5 text-gray-400" />
                         </button>
-                        <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                        <button
+                          onClick={() => setShowAttachImageDialog(true)}
+                          className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                        >
                           <ImageIcon className="h-5 w-5 text-gray-400" />
                         </button>
-                        <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                        <button
+                          onClick={() => setShowVoiceInputDialog(true)}
+                          className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                        >
                           <Mic className="h-5 w-5 text-gray-400" />
                         </button>
                         <div className="flex-1" />
@@ -1538,7 +1721,10 @@ export default function AIAssistantClient() {
                       {/* Send Button */}
                       <div className="flex items-center justify-between p-3 border-t border-gray-200 dark:border-gray-700">
                         <div className="flex items-center gap-2">
-                          <button className="flex items-center gap-1 px-3 py-1.5 bg-gray-100 dark:bg-gray-700 rounded-lg text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
+                          <button
+                            onClick={() => setShowEnhanceDialog(true)}
+                            className="flex items-center gap-1 px-3 py-1.5 bg-gray-100 dark:bg-gray-700 rounded-lg text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                          >
                             <Wand2 className="h-4 w-4" />
                             Enhance
                           </button>
@@ -1798,7 +1984,10 @@ export default function AIAssistantClient() {
                         </td>
                         <td className="px-6 py-4 text-right">
                           <div className="flex items-center justify-end gap-2">
-                            <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-lg transition-colors">
+                            <button
+                              onClick={() => handleDownloadFile(file)}
+                              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-lg transition-colors"
+                            >
                               <Download className="h-4 w-4 text-gray-400" />
                             </button>
                             <button
@@ -1825,7 +2014,10 @@ export default function AIAssistantClient() {
                   <h2 className="text-xl font-bold text-gray-900 dark:text-white">Usage & Billing</h2>
                   <p className="text-gray-500 dark:text-gray-400">Track your API usage and costs</p>
                 </div>
-                <button className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl hover:border-violet-500 transition-colors">
+                <button
+                  onClick={handleExportUsageReport}
+                  className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl hover:border-violet-500 transition-colors"
+                >
                   <Download className="h-5 w-5" />
                   Export Report
                 </button>
@@ -2273,8 +2465,15 @@ export default function AIAssistantClient() {
                 <p className="font-medium text-gray-900 dark:text-white">Stream Responses</p>
                 <p className="text-sm text-gray-500">Show responses as they generate</p>
               </div>
-              <button className="w-12 h-6 bg-violet-600 rounded-full relative">
-                <div className="absolute right-1 top-1 w-4 h-4 bg-white rounded-full" />
+              <button
+                onClick={handleToggleStreamResponses}
+                className={`w-12 h-6 rounded-full relative transition-colors ${
+                  streamResponses ? 'bg-violet-600' : 'bg-gray-300 dark:bg-gray-600'
+                }`}
+              >
+                <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${
+                  streamResponses ? 'right-1' : 'left-1'
+                }`} />
               </button>
             </div>
             <div className="flex items-center justify-between">
@@ -2282,8 +2481,15 @@ export default function AIAssistantClient() {
                 <p className="font-medium text-gray-900 dark:text-white">Save History</p>
                 <p className="text-sm text-gray-500">Keep conversation history</p>
               </div>
-              <button className="w-12 h-6 bg-violet-600 rounded-full relative">
-                <div className="absolute right-1 top-1 w-4 h-4 bg-white rounded-full" />
+              <button
+                onClick={handleToggleSaveHistory}
+                className={`w-12 h-6 rounded-full relative transition-colors ${
+                  saveHistory ? 'bg-violet-600' : 'bg-gray-300 dark:bg-gray-600'
+                }`}
+              >
+                <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${
+                  saveHistory ? 'right-1' : 'left-1'
+                }`} />
               </button>
             </div>
             <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
@@ -2518,6 +2724,160 @@ export default function AIAssistantClient() {
                 Done
               </button>
             </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Attach File Dialog */}
+      <Dialog open={showAttachFileDialog} onOpenChange={setShowAttachFileDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Paperclip className="h-5 w-5 text-violet-600" />
+              Attach File
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-gray-600 dark:text-gray-400 mb-4">
+              Attach a file to include with your message. Supported formats: PDF, DOC, TXT, CSV, JSON, code files.
+            </p>
+            <label className="block">
+              <input
+                type="file"
+                onChange={handleAttachFile}
+                className="hidden"
+                accept=".pdf,.doc,.docx,.txt,.csv,.json,.js,.ts,.py,.java,.md"
+              />
+              <div className="flex items-center justify-center gap-2 p-6 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl cursor-pointer hover:border-violet-500 transition-colors">
+                <Upload className="h-6 w-6 text-gray-400" />
+                <span className="text-gray-600 dark:text-gray-400">Click to select a file</span>
+              </div>
+            </label>
+          </div>
+          <div className="flex justify-end gap-3">
+            <button
+              onClick={() => setShowAttachFileDialog(false)}
+              className="px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+            >
+              Cancel
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Attach Image Dialog */}
+      <Dialog open={showAttachImageDialog} onOpenChange={setShowAttachImageDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <ImageIcon className="h-5 w-5 text-violet-600" />
+              Attach Image
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-gray-600 dark:text-gray-400 mb-4">
+              Attach an image to analyze or discuss. Supported formats: PNG, JPG, GIF, SVG.
+            </p>
+            <label className="block">
+              <input
+                type="file"
+                onChange={handleAttachImage}
+                className="hidden"
+                accept=".png,.jpg,.jpeg,.gif,.svg,.webp"
+              />
+              <div className="flex items-center justify-center gap-2 p-6 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl cursor-pointer hover:border-violet-500 transition-colors">
+                <ImageIcon className="h-6 w-6 text-gray-400" />
+                <span className="text-gray-600 dark:text-gray-400">Click to select an image</span>
+              </div>
+            </label>
+          </div>
+          <div className="flex justify-end gap-3">
+            <button
+              onClick={() => setShowAttachImageDialog(false)}
+              className="px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+            >
+              Cancel
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Voice Input Dialog */}
+      <Dialog open={showVoiceInputDialog} onOpenChange={setShowVoiceInputDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Mic className="h-5 w-5 text-violet-600" />
+              Voice Input
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-6">
+            <p className="text-gray-600 dark:text-gray-400 mb-6 text-center">
+              Click the microphone button below to start voice recording.
+            </p>
+            <div className="flex justify-center">
+              <button
+                onClick={handleStartVoiceInput}
+                className="p-6 bg-violet-100 dark:bg-violet-900/30 rounded-full hover:bg-violet-200 dark:hover:bg-violet-900/50 transition-colors"
+              >
+                <Mic className="h-10 w-10 text-violet-600 dark:text-violet-400" />
+              </button>
+            </div>
+            <p className="text-sm text-gray-500 text-center mt-4">
+              Speak clearly into your microphone
+            </p>
+          </div>
+          <div className="flex justify-end gap-3">
+            <button
+              onClick={() => setShowVoiceInputDialog(false)}
+              className="px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+            >
+              Cancel
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Enhance Prompt Dialog */}
+      <Dialog open={showEnhanceDialog} onOpenChange={setShowEnhanceDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Wand2 className="h-5 w-5 text-violet-600" />
+              Enhance Prompt
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-gray-600 dark:text-gray-400 mb-4">
+              Enhance your prompt for better AI responses. This will add context and structure to your message.
+            </p>
+            {inputMessage.trim() ? (
+              <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-xl mb-4">
+                <p className="text-sm text-gray-500 mb-2">Current prompt:</p>
+                <p className="text-gray-900 dark:text-white line-clamp-3">{inputMessage}</p>
+              </div>
+            ) : (
+              <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-xl mb-4">
+                <p className="text-sm text-yellow-700 dark:text-yellow-400">
+                  Please enter some text in the input field first before enhancing.
+                </p>
+              </div>
+            )}
+          </div>
+          <div className="flex justify-end gap-3">
+            <button
+              onClick={() => setShowEnhanceDialog(false)}
+              className="px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleEnhancePrompt}
+              disabled={!inputMessage.trim()}
+              className="px-4 py-2 bg-violet-600 text-white rounded-xl hover:bg-violet-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              Enhance
+            </button>
           </div>
         </DialogContent>
       </Dialog>

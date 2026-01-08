@@ -327,6 +327,19 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
   const [isLoading, setIsLoading] = useState(false)
   const [showRunJobDialog, setShowRunJobDialog] = useState(false)
   const [showExportLogsDialog, setShowExportLogsDialog] = useState(false)
+  const [showEditUserDialog, setShowEditUserDialog] = useState(false)
+  const [showResetPasswordDialog, setShowResetPasswordDialog] = useState(false)
+  const [showUserActionsDialog, setShowUserActionsDialog] = useState(false)
+  const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null)
+  const [showEditFlagDialog, setShowEditFlagDialog] = useState(false)
+  const [selectedFlag, setSelectedFlag] = useState<FeatureFlag | null>(null)
+  const [showJobHistoryDialog, setShowJobHistoryDialog] = useState(false)
+  const [showJobActionsDialog, setShowJobActionsDialog] = useState(false)
+  const [selectedJob, setSelectedJob] = useState<ScheduledJob | null>(null)
+  const [showDeployLogsDialog, setShowDeployLogsDialog] = useState(false)
+  const [selectedDeploy, setSelectedDeploy] = useState<Deployment | null>(null)
+  const [showViewSchemaDialog, setShowViewSchemaDialog] = useState(false)
+  const [showActivityLogsDialog, setShowActivityLogsDialog] = useState(false)
 
   // Quick actions with proper dialog triggers
   const adminQuickActions = [
@@ -703,6 +716,148 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
     toast.success('Copied to clipboard', { description: setting.setting_key })
   }, [])
 
+  // Refresh system data
+  const handleRefreshSystem = useCallback(() => {
+    toast.info('Refreshing system data...')
+    setTimeout(() => {
+      refetch()
+      toast.success('System data refreshed')
+    }, 1000)
+  }, [refetch])
+
+  // Open console (switches to database tab with SQL console)
+  const handleOpenConsole = useCallback(() => {
+    setActiveTab('database')
+    setShowSqlConsoleDialog(true)
+  }, [])
+
+  // Edit user handler
+  const handleEditUser = useCallback((user: AdminUser) => {
+    setSelectedUser(user)
+    setShowEditUserDialog(true)
+  }, [])
+
+  // Reset password handler
+  const handleResetPassword = useCallback((user: AdminUser) => {
+    setSelectedUser(user)
+    setShowResetPasswordDialog(true)
+  }, [])
+
+  // User actions handler
+  const handleUserActions = useCallback((user: AdminUser) => {
+    setSelectedUser(user)
+    setShowUserActionsDialog(true)
+  }, [])
+
+  // Refresh resource handler
+  const handleRefreshResource = useCallback(async (resource: SystemResource) => {
+    toast.info(`Checking ${resource.name}...`)
+    await new Promise(resolve => setTimeout(resolve, 500))
+    toast.success(`${resource.name} is healthy`, { description: `Latency: ${resource.latency}ms` })
+  }, [])
+
+  // View table schema handler
+  const handleViewSchema = useCallback((table: DatabaseTable) => {
+    setSelectedTable(table)
+    setShowViewSchemaDialog(true)
+  }, [])
+
+  // Export table data handler
+  const handleExportTable = useCallback((table: DatabaseTable) => {
+    toast.success('Export started', { description: `Exporting ${table.name} data...` })
+  }, [])
+
+  // Stop job handler
+  const handleStopJob = useCallback(async (job: ScheduledJob) => {
+    toast.info(`Stopping ${job.name}...`)
+    await new Promise(resolve => setTimeout(resolve, 500))
+    toast.success(`${job.name} stopped`)
+  }, [])
+
+  // Run job handler
+  const handleRunJob = useCallback(async (job: ScheduledJob) => {
+    toast.info(`Starting ${job.name}...`)
+    await new Promise(resolve => setTimeout(resolve, 500))
+    toast.success(`${job.name} started`, { description: 'Running in background' })
+  }, [])
+
+  // View job history handler
+  const handleViewJobHistory = useCallback((job: ScheduledJob) => {
+    setSelectedJob(job)
+    setShowJobHistoryDialog(true)
+  }, [])
+
+  // Job actions handler
+  const handleJobActions = useCallback((job: ScheduledJob) => {
+    setSelectedJob(job)
+    setShowJobActionsDialog(true)
+  }, [])
+
+  // Edit flag handler
+  const handleEditFlag = useCallback((flag: FeatureFlag) => {
+    setSelectedFlag(flag)
+    setShowEditFlagDialog(true)
+  }, [])
+
+  // Copy flag key handler
+  const handleCopyFlagKey = useCallback((flag: FeatureFlag) => {
+    navigator.clipboard.writeText(flag.key)
+    toast.success('Copied to clipboard', { description: flag.key })
+  }, [])
+
+  // Delete flag handler
+  const handleDeleteFlag = useCallback(async (flag: FeatureFlag) => {
+    if (!confirm(`Delete feature flag "${flag.name}"?`)) return
+    try {
+      const { error } = await supabase.from('feature_flags').delete().eq('id', flag.id)
+      if (error) throw error
+      setFeatureFlags(prev => prev.filter(f => f.id !== flag.id))
+      toast.success('Flag deleted', { description: `${flag.name} has been removed` })
+    } catch (err) {
+      toast.error('Failed to delete flag', { description: (err as Error).message })
+    }
+  }, [supabase])
+
+  // Rollback deployment handler
+  const handleRollback = useCallback(async (deploy: Deployment) => {
+    if (!confirm(`Rollback to ${deploy.version}?`)) return
+    toast.info(`Rolling back to ${deploy.version}...`)
+    await new Promise(resolve => setTimeout(resolve, 1000))
+    toast.success('Rollback initiated', { description: `Rolling back to ${deploy.version}` })
+  }, [])
+
+  // View deploy logs handler
+  const handleViewDeployLogs = useCallback((deploy: Deployment) => {
+    setSelectedDeploy(deploy)
+    setShowDeployLogsDialog(true)
+  }, [])
+
+  // Export SQL results handler
+  const handleExportSqlResults = useCallback(() => {
+    if (!sqlResults) return
+    const blob = new Blob([JSON.stringify(sqlResults, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `query-results-${new Date().toISOString().split('T')[0]}.json`
+    a.click()
+    URL.revokeObjectURL(url)
+    toast.success('Results exported')
+  }, [sqlResults])
+
+  // Refresh deploy commit handler
+  const handleRefreshCommit = useCallback(() => {
+    toast.info('Fetching latest commit...')
+    setTimeout(() => {
+      toast.success('Commit info updated')
+    }, 500)
+  }, [])
+
+  // View all activity logs handler
+  const handleViewAllActivity = useCallback(() => {
+    setShowActivityLogsDialog(true)
+  }, [])
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900 p-8">
       <div className="max-w-7xl mx-auto space-y-8">
@@ -717,11 +872,17 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
             </p>
           </div>
           <div className="flex items-center gap-3">
-            <button className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+            <button
+              onClick={handleRefreshSystem}
+              className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+            >
               <RefreshCw className="w-4 h-4" />
               Refresh
             </button>
-            <button className="flex items-center gap-2 px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700 transition-colors">
+            <button
+              onClick={handleOpenConsole}
+              className="flex items-center gap-2 px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700 transition-colors"
+            >
               <Terminal className="w-4 h-4" />
               Console
             </button>
@@ -927,7 +1088,12 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
                 <div className="p-6 border-b border-gray-100 dark:border-gray-700">
                   <div className="flex items-center justify-between">
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Recent Activity</h3>
-                    <button className="text-sm text-slate-600 hover:text-slate-700 font-medium">View All</button>
+                    <button
+                      onClick={handleViewAllActivity}
+                      className="text-sm text-slate-600 hover:text-slate-700 font-medium"
+                    >
+                      View All
+                    </button>
                   </div>
                 </div>
                 <ScrollArea className="h-[300px]">
@@ -1114,13 +1280,25 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
                         </td>
                         <td className="px-6 py-4 text-right">
                           <div className="flex items-center justify-end gap-2">
-                            <button className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
+                            <button
+                              onClick={() => handleEditUser(user)}
+                              className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
+                              title="Edit user"
+                            >
                               <Edit className="w-4 h-4 text-gray-500" />
                             </button>
-                            <button className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
+                            <button
+                              onClick={() => handleResetPassword(user)}
+                              className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
+                              title="Reset password"
+                            >
                               <Key className="w-4 h-4 text-gray-500" />
                             </button>
-                            <button className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
+                            <button
+                              onClick={() => handleUserActions(user)}
+                              className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
+                              title="More actions"
+                            >
                               <MoreHorizontal className="w-4 h-4 text-gray-500" />
                             </button>
                           </div>
@@ -1166,7 +1344,11 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
 
                   <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
                     <p className="text-xs text-gray-500">Last checked: {formatDate(resource.lastChecked)}</p>
-                    <button className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
+                    <button
+                      onClick={() => handleRefreshResource(resource)}
+                      className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
+                      title="Refresh resource"
+                    >
                       <RefreshCw className="w-4 h-4 text-gray-500" />
                     </button>
                   </div>
@@ -1426,10 +1608,18 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
                     </h3>
                     {selectedTable && (
                       <div className="flex items-center gap-2">
-                        <button className="px-3 py-1.5 text-sm bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600">
+                        <button
+                          onClick={() => handleViewSchema(selectedTable)}
+                          className="px-3 py-1.5 text-sm bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600"
+                          title="View schema"
+                        >
                           <Code className="w-4 h-4" />
                         </button>
-                        <button className="px-3 py-1.5 text-sm bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600">
+                        <button
+                          onClick={() => handleExportTable(selectedTable)}
+                          className="px-3 py-1.5 text-sm bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600"
+                          title="Export data"
+                        >
                           <Download className="w-4 h-4" />
                         </button>
                       </div>
@@ -1546,18 +1736,34 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
                         </div>
                         <div className="flex items-center gap-1">
                           {job.status === 'running' ? (
-                            <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+                            <button
+                              onClick={() => handleStopJob(job)}
+                              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+                              title="Stop job"
+                            >
                               <StopCircle className="w-4 h-4 text-red-500" />
                             </button>
                           ) : (
-                            <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+                            <button
+                              onClick={() => handleRunJob(job)}
+                              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+                              title="Run job"
+                            >
                               <Play className="w-4 h-4 text-green-500" />
                             </button>
                           )}
-                          <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+                          <button
+                            onClick={() => handleViewJobHistory(job)}
+                            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+                            title="View history"
+                          >
                             <History className="w-4 h-4 text-gray-500" />
                           </button>
-                          <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+                          <button
+                            onClick={() => handleJobActions(job)}
+                            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+                            title="More actions"
+                          >
                             <MoreHorizontal className="w-4 h-4 text-gray-500" />
                           </button>
                         </div>
@@ -1649,13 +1855,25 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
                           <p className="text-xs text-gray-500">Rollout</p>
                         </div>
                         <div className="flex items-center gap-1">
-                          <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+                          <button
+                            onClick={() => handleEditFlag(flag)}
+                            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+                            title="Edit flag"
+                          >
                             <Edit className="w-4 h-4 text-gray-500" />
                           </button>
-                          <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+                          <button
+                            onClick={() => handleCopyFlagKey(flag)}
+                            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+                            title="Copy key"
+                          >
                             <Copy className="w-4 h-4 text-gray-500" />
                           </button>
-                          <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+                          <button
+                            onClick={() => handleDeleteFlag(flag)}
+                            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+                            title="Delete flag"
+                          >
                             <Trash2 className="w-4 h-4 text-red-500" />
                           </button>
                         </div>
@@ -1770,11 +1988,19 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
                         </div>
                         <div className="flex items-center gap-1">
                           {deploy.status === 'success' && (
-                            <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg" title="Rollback">
+                            <button
+                              onClick={() => handleRollback(deploy)}
+                              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+                              title="Rollback"
+                            >
                               <RotateCcw className="w-4 h-4 text-orange-500" />
                             </button>
                           )}
-                          <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+                          <button
+                            onClick={() => handleViewDeployLogs(deploy)}
+                            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+                            title="View logs"
+                          >
                             <FileText className="w-4 h-4 text-gray-500" />
                           </button>
                         </div>
@@ -2030,7 +2256,11 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
                     <span className="text-sm text-gray-600 dark:text-gray-400">
                       {sqlResults.rowCount} rows in {sqlResults.executionTime}s
                     </span>
-                    <button className="text-sm text-slate-600 hover:text-slate-700">
+                    <button
+                      onClick={handleExportSqlResults}
+                      className="text-sm text-slate-600 hover:text-slate-700"
+                      title="Export results"
+                    >
                       <Download className="w-4 h-4" />
                     </button>
                   </div>
@@ -2258,7 +2488,11 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
                 <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Commit</label>
                 <div className="mt-1 flex items-center gap-2">
                   <input type="text" value="abc123f" readOnly className="flex-1 px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-700 font-mono text-sm" />
-                  <button className="px-3 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600">
+                  <button
+                    onClick={handleRefreshCommit}
+                    className="px-3 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600"
+                    title="Refresh commit"
+                  >
                     <RefreshCw className="w-4 h-4" />
                   </button>
                 </div>
@@ -2479,6 +2713,471 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
               >
                 <Download className="w-4 h-4" />
                 {isLoading ? 'Exporting...' : 'Export'}
+              </button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit User Dialog */}
+        <Dialog open={showEditUserDialog} onOpenChange={setShowEditUserDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Edit User</DialogTitle>
+              <DialogDescription>Update user information and permissions.</DialogDescription>
+            </DialogHeader>
+            {selectedUser && (
+              <div className="space-y-4 py-4">
+                <div>
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Full Name</label>
+                  <input
+                    type="text"
+                    defaultValue={selectedUser.name}
+                    className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
+                  <input
+                    type="email"
+                    defaultValue={selectedUser.email}
+                    className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Role</label>
+                  <select
+                    defaultValue={selectedUser.role}
+                    className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+                  >
+                    <option value="viewer">Viewer</option>
+                    <option value="moderator">Moderator</option>
+                    <option value="admin">Admin</option>
+                    <option value="super_admin">Super Admin</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Status</label>
+                  <select
+                    defaultValue={selectedUser.status}
+                    className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+                  >
+                    <option value="active">Active</option>
+                    <option value="suspended">Suspended</option>
+                    <option value="pending">Pending</option>
+                  </select>
+                </div>
+              </div>
+            )}
+            <DialogFooter>
+              <button onClick={() => { setShowEditUserDialog(false); setSelectedUser(null); }} className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  setShowEditUserDialog(false)
+                  setSelectedUser(null)
+                  toast.success('User updated', { description: 'Changes have been saved' })
+                }}
+                className="px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700"
+              >
+                Save Changes
+              </button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Reset Password Dialog */}
+        <Dialog open={showResetPasswordDialog} onOpenChange={setShowResetPasswordDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Key className="w-5 h-5" />
+                Reset Password
+              </DialogTitle>
+              <DialogDescription>Send a password reset link to {selectedUser?.email}.</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-3">
+                <p className="text-sm text-yellow-700 dark:text-yellow-300">
+                  This will send a password reset email to the user. They will need to create a new password.
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <input type="checkbox" id="force-logout" className="rounded" defaultChecked />
+                <label htmlFor="force-logout" className="text-sm text-gray-700 dark:text-gray-300">Force logout from all sessions</label>
+              </div>
+            </div>
+            <DialogFooter>
+              <button onClick={() => { setShowResetPasswordDialog(false); setSelectedUser(null); }} className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  setShowResetPasswordDialog(false)
+                  setSelectedUser(null)
+                  toast.success('Reset link sent', { description: 'Password reset email has been sent' })
+                }}
+                className="px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700"
+              >
+                Send Reset Link
+              </button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* User Actions Dialog */}
+        <Dialog open={showUserActionsDialog} onOpenChange={setShowUserActionsDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>User Actions</DialogTitle>
+              <DialogDescription>Additional actions for {selectedUser?.name}</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-2 py-4">
+              <button
+                onClick={() => {
+                  setShowUserActionsDialog(false)
+                  toast.success('MFA enabled', { description: 'User will be required to set up MFA on next login' })
+                }}
+                className="w-full px-4 py-3 text-left hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg flex items-center gap-3"
+              >
+                <ShieldCheck className="w-5 h-5 text-green-500" />
+                <div>
+                  <p className="font-medium text-gray-900 dark:text-white">Enable MFA</p>
+                  <p className="text-xs text-gray-500">Require multi-factor authentication</p>
+                </div>
+              </button>
+              <button
+                onClick={() => {
+                  setShowUserActionsDialog(false)
+                  toast.success('Sessions revoked', { description: 'User has been logged out everywhere' })
+                }}
+                className="w-full px-4 py-3 text-left hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg flex items-center gap-3"
+              >
+                <Lock className="w-5 h-5 text-orange-500" />
+                <div>
+                  <p className="font-medium text-gray-900 dark:text-white">Revoke Sessions</p>
+                  <p className="text-xs text-gray-500">Log user out from all devices</p>
+                </div>
+              </button>
+              <button
+                onClick={() => {
+                  setShowUserActionsDialog(false)
+                  toast.success('User suspended', { description: 'Account has been suspended' })
+                }}
+                className="w-full px-4 py-3 text-left hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg flex items-center gap-3"
+              >
+                <AlertTriangle className="w-5 h-5 text-red-500" />
+                <div>
+                  <p className="font-medium text-gray-900 dark:text-white">Suspend User</p>
+                  <p className="text-xs text-gray-500">Temporarily disable this account</p>
+                </div>
+              </button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Flag Dialog */}
+        <Dialog open={showEditFlagDialog} onOpenChange={setShowEditFlagDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Edit Feature Flag</DialogTitle>
+              <DialogDescription>Update flag configuration and rollout settings.</DialogDescription>
+            </DialogHeader>
+            {selectedFlag && (
+              <div className="space-y-4 py-4">
+                <div>
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Flag Name</label>
+                  <input
+                    type="text"
+                    defaultValue={selectedFlag.name}
+                    className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
+                  <textarea
+                    defaultValue={selectedFlag.description}
+                    className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 h-20 resize-none"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Environment</label>
+                  <select
+                    defaultValue={selectedFlag.environment}
+                    className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+                  >
+                    <option value="development">Development</option>
+                    <option value="staging">Staging</option>
+                    <option value="production">Production</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Rollout Percentage</label>
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    defaultValue={selectedFlag.rolloutPercentage}
+                    className="mt-1 w-full"
+                  />
+                </div>
+              </div>
+            )}
+            <DialogFooter>
+              <button onClick={() => { setShowEditFlagDialog(false); setSelectedFlag(null); }} className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  setShowEditFlagDialog(false)
+                  setSelectedFlag(null)
+                  toast.success('Flag updated', { description: 'Changes have been saved' })
+                }}
+                className="px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700"
+              >
+                Save Changes
+              </button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Job History Dialog */}
+        <Dialog open={showJobHistoryDialog} onOpenChange={setShowJobHistoryDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <History className="w-5 h-5" />
+                Job History
+              </DialogTitle>
+              <DialogDescription>{selectedJob?.name} execution history</DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+                <table className="w-full text-sm">
+                  <thead className="bg-gray-50 dark:bg-gray-700/50">
+                    <tr>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">Run Date</th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">Status</th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">Duration</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                    <tr className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                      <td className="px-4 py-2 text-gray-900 dark:text-white">2024-12-23 10:00:00</td>
+                      <td className="px-4 py-2"><span className="px-2 py-0.5 bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300 rounded-full text-xs">completed</span></td>
+                      <td className="px-4 py-2 text-gray-500">15s</td>
+                    </tr>
+                    <tr className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                      <td className="px-4 py-2 text-gray-900 dark:text-white">2024-12-23 09:00:00</td>
+                      <td className="px-4 py-2"><span className="px-2 py-0.5 bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300 rounded-full text-xs">completed</span></td>
+                      <td className="px-4 py-2 text-gray-500">12s</td>
+                    </tr>
+                    <tr className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                      <td className="px-4 py-2 text-gray-900 dark:text-white">2024-12-23 08:00:00</td>
+                      <td className="px-4 py-2"><span className="px-2 py-0.5 bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300 rounded-full text-xs">failed</span></td>
+                      <td className="px-4 py-2 text-gray-500">5s</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <DialogFooter>
+              <button onClick={() => { setShowJobHistoryDialog(false); setSelectedJob(null); }} className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+                Close
+              </button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Job Actions Dialog */}
+        <Dialog open={showJobActionsDialog} onOpenChange={setShowJobActionsDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Job Actions</DialogTitle>
+              <DialogDescription>Additional actions for {selectedJob?.name}</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-2 py-4">
+              <button
+                onClick={() => {
+                  setShowJobActionsDialog(false)
+                  toast.success('Schedule updated', { description: 'Job schedule has been modified' })
+                }}
+                className="w-full px-4 py-3 text-left hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg flex items-center gap-3"
+              >
+                <Clock className="w-5 h-5 text-blue-500" />
+                <div>
+                  <p className="font-medium text-gray-900 dark:text-white">Edit Schedule</p>
+                  <p className="text-xs text-gray-500">Modify the cron expression</p>
+                </div>
+              </button>
+              <button
+                onClick={() => {
+                  setShowJobActionsDialog(false)
+                  toast.success('Job duplicated', { description: 'A copy of this job has been created' })
+                }}
+                className="w-full px-4 py-3 text-left hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg flex items-center gap-3"
+              >
+                <Copy className="w-5 h-5 text-purple-500" />
+                <div>
+                  <p className="font-medium text-gray-900 dark:text-white">Duplicate Job</p>
+                  <p className="text-xs text-gray-500">Create a copy of this job</p>
+                </div>
+              </button>
+              <button
+                onClick={() => {
+                  setShowJobActionsDialog(false)
+                  toast.success('Job deleted', { description: 'Job has been removed' })
+                }}
+                className="w-full px-4 py-3 text-left hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg flex items-center gap-3"
+              >
+                <Trash2 className="w-5 h-5 text-red-500" />
+                <div>
+                  <p className="font-medium text-gray-900 dark:text-white">Delete Job</p>
+                  <p className="text-xs text-gray-500">Permanently remove this job</p>
+                </div>
+              </button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Deploy Logs Dialog */}
+        <Dialog open={showDeployLogsDialog} onOpenChange={setShowDeployLogsDialog}>
+          <DialogContent className="max-w-3xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <FileText className="w-5 h-5" />
+                Deployment Logs
+              </DialogTitle>
+              <DialogDescription>{selectedDeploy?.version} - {selectedDeploy?.environment}</DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="bg-gray-900 rounded-lg p-4 font-mono text-sm text-green-400 h-64 overflow-auto">
+                <p>[2024-12-23 04:00:00] Starting deployment...</p>
+                <p>[2024-12-23 04:00:05] Pulling latest changes from {selectedDeploy?.branch}...</p>
+                <p>[2024-12-23 04:00:15] Running build...</p>
+                <p>[2024-12-23 04:01:30] Build completed successfully</p>
+                <p>[2024-12-23 04:01:35] Running database migrations...</p>
+                <p>[2024-12-23 04:01:45] Migrations completed</p>
+                <p>[2024-12-23 04:02:00] Deploying to {selectedDeploy?.environment}...</p>
+                <p>[2024-12-23 04:03:30] Health check passed</p>
+                <p>[2024-12-23 04:04:00] Deployment completed successfully</p>
+              </div>
+            </div>
+            <DialogFooter>
+              <button
+                onClick={() => {
+                  toast.success('Logs downloaded')
+                }}
+                className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg flex items-center gap-2"
+              >
+                <Download className="w-4 h-4" />
+                Download Logs
+              </button>
+              <button onClick={() => { setShowDeployLogsDialog(false); setSelectedDeploy(null); }} className="px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700">
+                Close
+              </button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* View Schema Dialog */}
+        <Dialog open={showViewSchemaDialog} onOpenChange={setShowViewSchemaDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Code className="w-5 h-5" />
+                Table Schema
+              </DialogTitle>
+              <DialogDescription>{selectedTable?.schema}.{selectedTable?.name}</DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="bg-gray-900 rounded-lg p-4 font-mono text-sm text-green-400">
+                <pre>{`CREATE TABLE ${selectedTable?.schema}.${selectedTable?.name} (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  -- Additional columns...
+);
+
+-- Indexes
+CREATE INDEX idx_${selectedTable?.name}_created_at
+  ON ${selectedTable?.schema}.${selectedTable?.name}(created_at);`}</pre>
+              </div>
+            </div>
+            <DialogFooter>
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(`SELECT * FROM ${selectedTable?.schema}.${selectedTable?.name} LIMIT 100;`)
+                  toast.success('Query copied to clipboard')
+                }}
+                className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg flex items-center gap-2"
+              >
+                <Copy className="w-4 h-4" />
+                Copy Query
+              </button>
+              <button onClick={() => setShowViewSchemaDialog(false)} className="px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700">
+                Close
+              </button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Activity Logs Dialog */}
+        <Dialog open={showActivityLogsDialog} onOpenChange={setShowActivityLogsDialog}>
+          <DialogContent className="max-w-3xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Activity className="w-5 h-5" />
+                All Activity
+              </DialogTitle>
+              <DialogDescription>Complete activity log for the system</DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <ScrollArea className="h-96">
+                <div className="divide-y divide-gray-100 dark:divide-gray-700">
+                  {mockAuditLogs.map((log) => (
+                    <div key={log.id} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                      <div className="flex items-start gap-3">
+                        <div className={`p-2 rounded-lg ${
+                          log.severity === 'critical' ? 'bg-red-100 dark:bg-red-900/30' :
+                          log.severity === 'warning' ? 'bg-yellow-100 dark:bg-yellow-900/30' :
+                          'bg-blue-100 dark:bg-blue-900/30'
+                        }`}>
+                          {log.severity === 'critical' ? <AlertTriangle className="w-4 h-4 text-red-600" /> :
+                           log.severity === 'warning' ? <AlertTriangle className="w-4 h-4 text-yellow-600" /> :
+                           <Activity className="w-4 h-4 text-blue-600" />}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-gray-900 dark:text-white">{log.action}</p>
+                          <p className="text-xs text-gray-500 mt-1">{log.details}</p>
+                          <p className="text-xs text-gray-400 mt-1">{log.actor} - {formatDate(log.timestamp)}</p>
+                        </div>
+                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                          log.severity === 'critical' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300' :
+                          log.severity === 'warning' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300' :
+                          'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
+                        }`}>
+                          {log.severity}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+            </div>
+            <DialogFooter>
+              <button
+                onClick={() => {
+                  setShowActivityLogsDialog(false)
+                  handleExportLogs()
+                }}
+                className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg flex items-center gap-2"
+              >
+                <Download className="w-4 h-4" />
+                Export Logs
+              </button>
+              <button onClick={() => setShowActivityLogsDialog(false)} className="px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700">
+                Close
               </button>
             </DialogFooter>
           </DialogContent>

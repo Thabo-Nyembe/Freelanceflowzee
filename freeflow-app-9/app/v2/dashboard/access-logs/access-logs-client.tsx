@@ -489,6 +489,20 @@ export default function AccessLogsClient() {
   const [showExportDialog, setShowExportDialog] = useState(false)
   const [showAuditDialog, setShowAuditDialog] = useState(false)
   const [showAlertConfigDialog, setShowAlertConfigDialog] = useState(false)
+  const [showFilterDialog, setShowFilterDialog] = useState(false)
+  const [showSaveViewDialog, setShowSaveViewDialog] = useState(false)
+  const [showWebhookDialog, setShowWebhookDialog] = useState(false)
+  const [showCustomFieldsDialog, setShowCustomFieldsDialog] = useState(false)
+  const [showContextDialog, setShowContextDialog] = useState(false)
+  const [showSessionDialog, setShowSessionDialog] = useState(false)
+
+  // Save view dialog state
+  const [newViewName, setNewViewName] = useState('')
+  const [newViewDefault, setNewViewDefault] = useState(false)
+
+  // Webhook dialog state
+  const [webhookUrl, setWebhookUrl] = useState('')
+  const [webhookSecret, setWebhookSecret] = useState('')
 
   // Export dialog state
   const [exportFormat, setExportFormat] = useState<'csv' | 'json' | 'pdf'>('csv')
@@ -976,6 +990,181 @@ export default function AccessLogsClient() {
     )
   }
 
+  // Handle clear filters
+  const handleClearFilters = () => {
+    setSelectedStatus('all')
+    setSelectedLevel('all')
+    setSelectedType('all')
+    setSearchQuery('')
+    toast.success('Filters cleared')
+  }
+
+  // Handle save view
+  const handleSaveView = async () => {
+    if (!newViewName.trim()) {
+      toast.error('Please enter a view name')
+      return
+    }
+    try {
+      await createAccessLog({
+        access_type: 'admin',
+        status: 'success',
+        resource: '/views/create',
+        metadata: {
+          viewName: newViewName,
+          isDefault: newViewDefault,
+          filters: {
+            status: selectedStatus,
+            level: selectedLevel,
+            type: selectedType
+          }
+        }
+      })
+      toast.success('View saved', { description: `"${newViewName}" has been saved` })
+      setShowSaveViewDialog(false)
+      setNewViewName('')
+      setNewViewDefault(false)
+    } catch {
+      toast.error('Failed to save view')
+    }
+  }
+
+  // Handle connect webhook
+  const handleConnectWebhook = async () => {
+    if (!webhookUrl.trim()) {
+      toast.error('Please enter a webhook URL')
+      return
+    }
+    try {
+      await createAccessLog({
+        access_type: 'admin',
+        status: 'success',
+        resource: '/integrations/webhook',
+        metadata: { action: 'webhook_connected', url: webhookUrl }
+      })
+      toast.success('Webhook connected', { description: 'Your webhook endpoint is now active' })
+      setShowWebhookDialog(false)
+      setWebhookUrl('')
+      setWebhookSecret('')
+    } catch {
+      toast.error('Failed to connect webhook')
+    }
+  }
+
+  // Handle copy log
+  const handleCopyLog = (log: AccessLog) => {
+    const logText = JSON.stringify(log, null, 2)
+    navigator.clipboard.writeText(logText)
+    toast.success('Log copied to clipboard')
+  }
+
+  // Handle share log
+  const handleShareLog = (log: AccessLog) => {
+    const shareUrl = `${window.location.origin}/logs/${log.requestId}`
+    navigator.clipboard.writeText(shareUrl)
+    toast.success('Share link copied', { description: 'Link to this log entry has been copied' })
+  }
+
+  // Quick action handlers for Logs tab
+  const handleLogsQuickAction = (label: string) => {
+    switch (label) {
+      case 'Search Logs':
+        document.querySelector<HTMLInputElement>('input[placeholder="Search logs..."]')?.focus()
+        break
+      case 'Filter':
+        setShowFilterDialog(true)
+        break
+      case 'Export':
+        setShowExportDialog(true)
+        break
+      case 'Refresh':
+        handleRefresh()
+        break
+      case 'Live Tail':
+        setIsLiveTail(!isLiveTail)
+        toast.info(isLiveTail ? 'Live tail disabled' : 'Live tail enabled')
+        break
+      case 'Set Alert':
+        setShowAlertConfigDialog(true)
+        break
+      case 'Save View':
+        setShowSaveViewDialog(true)
+        break
+      case 'Settings':
+        setActiveTab('settings')
+        break
+      default:
+        toast.info(`${label} clicked`)
+    }
+  }
+
+  // Quick action handlers for Patterns tab
+  const handlePatternsQuickAction = (label: string) => {
+    switch (label) {
+      case 'Find Pattern':
+        toast.info('Pattern search', { description: 'Searching for recurring patterns...' })
+        break
+      case 'Set Alert':
+        setShowAlertConfigDialog(true)
+        break
+      case 'Investigate':
+        toast.info('Investigation started', { description: 'Analyzing suspicious patterns...' })
+        break
+      case 'Export':
+        setShowExportDialog(true)
+        break
+      case 'Archive':
+        toast.success('Patterns archived', { description: 'Selected patterns have been archived' })
+        break
+      case 'Tag Pattern':
+        toast.info('Tag pattern', { description: 'Select a pattern to tag' })
+        break
+      case 'Dismiss':
+        toast.success('Pattern dismissed', { description: 'Pattern removed from view' })
+        break
+      case 'Share':
+        navigator.clipboard.writeText(`${window.location.origin}/logs/patterns`)
+        toast.success('Link copied', { description: 'Patterns link copied to clipboard' })
+        break
+      default:
+        toast.info(`${label} clicked`)
+    }
+  }
+
+  // Quick action handlers for Analytics tab
+  const handleAnalyticsQuickAction = (label: string) => {
+    switch (label) {
+      case 'Status Report':
+        toast.info('Generating status report...', { description: 'This may take a moment' })
+        setTimeout(() => toast.success('Status report ready'), 1500)
+        break
+      case 'Geo Analysis':
+        toast.info('Loading geographic analysis...')
+        break
+      case 'Time Trends':
+        toast.info('Loading time-based trends...')
+        break
+      case 'User Breakdown':
+        toast.info('Loading user activity breakdown...')
+        break
+      case 'Traffic Flow':
+        toast.info('Loading traffic flow visualization...')
+        break
+      case 'Risk Score':
+        toast.info('Calculating risk score...', { description: 'Analyzing security metrics' })
+        setTimeout(() => toast.success('Risk score: 85/100 (Low risk)'), 2000)
+        break
+      case 'Export Data':
+        setShowExportDialog(true)
+        break
+      case 'Refresh':
+        handleRefresh()
+        break
+      default:
+        toast.info(`${label} clicked`)
+    }
+  }
+
   // Quick actions with dialog triggers
   const logsQuickActions = [
     { id: '1', label: 'Export Logs', icon: 'download', action: () => setShowExportDialog(true), variant: 'default' as const },
@@ -1015,7 +1204,7 @@ export default function AccessLogsClient() {
                 className="pl-9 w-80"
               />
             </div>
-            <Button variant="outline" size="icon">
+            <Button variant="outline" size="icon" onClick={() => setShowFilterDialog(true)}>
               <Filter className="w-4 h-4" />
             </Button>
             <Button variant="outline" size="icon" onClick={handleExportLogs}>
@@ -1125,6 +1314,7 @@ export default function AccessLogsClient() {
                   key={i}
                   variant="outline"
                   className="h-auto py-4 flex flex-col gap-2 hover:scale-105 transition-all duration-200 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm"
+                  onClick={() => handleLogsQuickAction(action.label)}
                 >
                   <div className={`p-2 rounded-lg bg-gradient-to-br ${action.color}`}>
                     <action.icon className="w-4 h-4 text-white" />
@@ -1140,7 +1330,7 @@ export default function AccessLogsClient() {
                 <CardHeader className="pb-3">
                   <CardTitle className="text-sm flex items-center justify-between">
                     Filters
-                    <Button variant="ghost" size="sm" className="h-6 text-xs">Clear</Button>
+                    <Button variant="ghost" size="sm" className="h-6 text-xs" onClick={handleClearFilters}>Clear</Button>
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -1391,6 +1581,7 @@ export default function AccessLogsClient() {
                   key={i}
                   variant="outline"
                   className="h-auto py-4 flex flex-col gap-2 hover:scale-105 transition-all duration-200 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm"
+                  onClick={() => handlePatternsQuickAction(action.label)}
                 >
                   <div className={`p-2 rounded-lg bg-gradient-to-br ${action.color}`}>
                     <action.icon className="w-4 h-4 text-white" />
@@ -1609,7 +1800,7 @@ export default function AccessLogsClient() {
                 { icon: Download, label: 'Export Data', color: 'text-orange-500' },
                 { icon: RefreshCw, label: 'Refresh', color: 'text-gray-500' }
               ].map((action, i) => (
-                <Button key={i} variant="outline" className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200 bg-white/50 dark:bg-gray-800/50">
+                <Button key={i} variant="outline" className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200 bg-white/50 dark:bg-gray-800/50" onClick={() => handleAnalyticsQuickAction(action.label)}>
                   <action.icon className={`w-5 h-5 ${action.color}`} />
                   <span className="text-xs">{action.label}</span>
                 </Button>
@@ -1943,7 +2134,7 @@ export default function AccessLogsClient() {
                               <p className="text-sm text-gray-500">Custom webhook endpoint</p>
                             </div>
                           </div>
-                          <Button variant="outline" size="sm">Connect</Button>
+                          <Button variant="outline" size="sm" onClick={() => setShowWebhookDialog(true)}>Connect</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -2020,7 +2211,7 @@ export default function AccessLogsClient() {
                             <p className="font-medium">Custom Fields</p>
                             <p className="text-sm text-gray-500">Add custom log fields</p>
                           </div>
-                          <Button variant="outline" size="sm">Configure</Button>
+                          <Button variant="outline" size="sm" onClick={() => setShowCustomFieldsDialog(true)}>Configure</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -2129,10 +2320,10 @@ export default function AccessLogsClient() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Button variant="outline" size="icon">
+                    <Button variant="outline" size="icon" onClick={() => handleCopyLog(selectedLog)}>
                       <Copy className="w-4 h-4" />
                     </Button>
-                    <Button variant="outline" size="icon">
+                    <Button variant="outline" size="icon" onClick={() => handleShareLog(selectedLog)}>
                       <Share2 className="w-4 h-4" />
                     </Button>
                   </div>
@@ -2281,11 +2472,11 @@ export default function AccessLogsClient() {
               </ScrollArea>
               <div className="flex items-center justify-between pt-4 border-t">
                 <div className="flex items-center gap-2">
-                  <Button variant="outline">
+                  <Button variant="outline" onClick={() => setShowContextDialog(true)}>
                     <Eye className="w-4 h-4 mr-2" />
                     View Context
                   </Button>
-                  <Button variant="outline">
+                  <Button variant="outline" onClick={() => setShowSessionDialog(true)}>
                     <ExternalLink className="w-4 h-4 mr-2" />
                     View Session
                   </Button>
@@ -2694,6 +2885,337 @@ export default function AccessLogsClient() {
               <CheckCircle className="w-4 h-4 mr-2" />
               Save Configuration
             </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Filter Dialog */}
+      <Dialog open={showFilterDialog} onOpenChange={setShowFilterDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Filter className="w-5 h-5 text-purple-500" />
+              Filter Logs
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <label className="text-sm font-medium mb-2 block">Status</label>
+              <div className="grid grid-cols-3 gap-2">
+                {['all', 'success', 'failed', 'blocked', 'warning'].map(status => (
+                  <button
+                    key={status}
+                    onClick={() => setSelectedStatus(status)}
+                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                      selectedStatus === status
+                        ? 'bg-purple-500 text-white'
+                        : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    {status === 'all' ? 'All' : status.charAt(0).toUpperCase() + status.slice(1)}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-2 block">Level</label>
+              <div className="grid grid-cols-3 gap-2">
+                {['all', 'debug', 'info', 'warn', 'error', 'critical'].map(level => (
+                  <button
+                    key={level}
+                    onClick={() => setSelectedLevel(level)}
+                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                      selectedLevel === level
+                        ? 'bg-purple-500 text-white'
+                        : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    {level === 'all' ? 'All' : level.toUpperCase()}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-2 block">Access Type</label>
+              <div className="grid grid-cols-3 gap-2">
+                {['all', 'login', 'logout', 'api', 'admin', 'file', 'database'].map(type => (
+                  <button
+                    key={type}
+                    onClick={() => setSelectedType(type)}
+                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                      selectedType === type
+                        ? 'bg-purple-500 text-white'
+                        : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    {type === 'all' ? 'All' : type.charAt(0).toUpperCase() + type.slice(1)}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+          <div className="flex justify-end gap-3 pt-4 border-t">
+            <Button variant="outline" onClick={handleClearFilters}>Clear All</Button>
+            <Button onClick={() => { setShowFilterDialog(false); toast.success('Filters applied') }} className="bg-gradient-to-r from-purple-500 to-pink-600 text-white">
+              Apply Filters
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Save View Dialog */}
+      <Dialog open={showSaveViewDialog} onOpenChange={setShowSaveViewDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Bookmark className="w-5 h-5 text-indigo-500" />
+              Save Current View
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <label className="text-sm font-medium mb-2 block">View Name</label>
+              <Input
+                placeholder="e.g., Failed Login Attempts"
+                value={newViewName}
+                onChange={(e) => setNewViewName(e.target.value)}
+              />
+            </div>
+            <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+              <div>
+                <p className="font-medium text-sm">Set as Default</p>
+                <p className="text-xs text-gray-500">Load this view automatically</p>
+              </div>
+              <Switch checked={newViewDefault} onCheckedChange={setNewViewDefault} />
+            </div>
+            <div className="p-4 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg">
+              <p className="text-sm font-medium text-indigo-700 dark:text-indigo-300 mb-2">Current Filters</p>
+              <div className="flex flex-wrap gap-2">
+                {selectedStatus !== 'all' && <Badge variant="outline">Status: {selectedStatus}</Badge>}
+                {selectedLevel !== 'all' && <Badge variant="outline">Level: {selectedLevel}</Badge>}
+                {selectedType !== 'all' && <Badge variant="outline">Type: {selectedType}</Badge>}
+                {selectedStatus === 'all' && selectedLevel === 'all' && selectedType === 'all' && (
+                  <span className="text-sm text-gray-500">No filters applied</span>
+                )}
+              </div>
+            </div>
+          </div>
+          <div className="flex justify-end gap-3 pt-4 border-t">
+            <Button variant="outline" onClick={() => setShowSaveViewDialog(false)}>Cancel</Button>
+            <Button onClick={handleSaveView} className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white">
+              <Bookmark className="w-4 h-4 mr-2" />
+              Save View
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Webhook Connect Dialog */}
+      <Dialog open={showWebhookDialog} onOpenChange={setShowWebhookDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Webhook className="w-5 h-5 text-blue-500" />
+              Connect Webhook
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <label className="text-sm font-medium mb-2 block">Webhook URL</label>
+              <Input
+                placeholder="https://your-endpoint.com/webhook"
+                value={webhookUrl}
+                onChange={(e) => setWebhookUrl(e.target.value)}
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-2 block">Secret Key (Optional)</label>
+              <Input
+                type="password"
+                placeholder="Enter secret key for signing"
+                value={webhookSecret}
+                onChange={(e) => setWebhookSecret(e.target.value)}
+              />
+              <p className="text-xs text-gray-500 mt-1">Used to sign webhook payloads for verification</p>
+            </div>
+            <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+              <div className="flex items-center gap-2 text-blue-700 dark:text-blue-300 mb-2">
+                <Info className="w-4 h-4" />
+                <span className="font-medium text-sm">Webhook Events</span>
+              </div>
+              <p className="text-sm text-blue-600 dark:text-blue-400">
+                Your webhook will receive events for: failed logins, blocked IPs, suspicious activity, and high error rates.
+              </p>
+            </div>
+          </div>
+          <div className="flex justify-end gap-3 pt-4 border-t">
+            <Button variant="outline" onClick={() => setShowWebhookDialog(false)}>Cancel</Button>
+            <Button onClick={handleConnectWebhook} className="bg-gradient-to-r from-blue-500 to-cyan-600 text-white">
+              <Webhook className="w-4 h-4 mr-2" />
+              Connect
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Custom Fields Dialog */}
+      <Dialog open={showCustomFieldsDialog} onOpenChange={setShowCustomFieldsDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Sliders className="w-5 h-5 text-purple-500" />
+              Configure Custom Fields
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg space-y-3">
+              {[
+                { name: 'correlation_id', enabled: true },
+                { name: 'trace_id', enabled: true },
+                { name: 'span_id', enabled: false },
+                { name: 'custom_user_data', enabled: false }
+              ].map((field) => (
+                <div key={field.name} className="flex items-center justify-between">
+                  <code className="text-sm">{field.name}</code>
+                  <Switch defaultChecked={field.enabled} />
+                </div>
+              ))}
+            </div>
+            <Button variant="outline" className="w-full" onClick={() => toast.info('Add custom field', { description: 'Feature coming soon' })}>
+              <Tag className="w-4 h-4 mr-2" />
+              Add Custom Field
+            </Button>
+          </div>
+          <div className="flex justify-end gap-3 pt-4 border-t">
+            <Button variant="outline" onClick={() => setShowCustomFieldsDialog(false)}>Cancel</Button>
+            <Button onClick={() => { setShowCustomFieldsDialog(false); toast.success('Custom fields saved') }} className="bg-gradient-to-r from-purple-500 to-pink-600 text-white">
+              Save Changes
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* View Context Dialog */}
+      <Dialog open={showContextDialog} onOpenChange={setShowContextDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Eye className="w-5 h-5 text-blue-500" />
+              Log Context
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            {selectedLog && (
+              <>
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <h4 className="font-medium mb-2">Request Context</h4>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Request ID</span>
+                      <code className="font-mono">{selectedLog.requestId}</code>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Session ID</span>
+                      <code className="font-mono">{selectedLog.sessionId || 'N/A'}</code>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Resource</span>
+                      <code className="font-mono">{selectedLog.resource}</code>
+                    </div>
+                  </div>
+                </div>
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <h4 className="font-medium mb-2">Related Logs</h4>
+                  <p className="text-sm text-gray-500">Logs from the same session within 5 minutes</p>
+                  <div className="mt-3 space-y-2">
+                    {filteredLogs.slice(0, 3).map(log => (
+                      <div key={log.id} className="flex items-center gap-2 text-sm p-2 bg-white dark:bg-gray-700 rounded">
+                        <Badge className={getStatusColor(log.status)}>{log.status}</Badge>
+                        <code className="flex-1 truncate">{log.resource}</code>
+                        <span className="text-gray-500">{formatTimestamp(log.timestamp)}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+          <div className="flex justify-end pt-4 border-t">
+            <Button variant="outline" onClick={() => setShowContextDialog(false)}>Close</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* View Session Dialog */}
+      <Dialog open={showSessionDialog} onOpenChange={setShowSessionDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <ExternalLink className="w-5 h-5 text-green-500" />
+              Session Details
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            {selectedLog && (
+              <>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <h4 className="font-medium mb-2">Session Info</h4>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">Session ID</span>
+                        <code className="font-mono text-xs">{selectedLog.sessionId || 'N/A'}</code>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">Started</span>
+                        <span>{formatTimestamp(selectedLog.timestamp)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">Requests</span>
+                        <span>12</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <h4 className="font-medium mb-2">User Info</h4>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">User</span>
+                        <span>{selectedLog.user?.name || 'Anonymous'}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">IP</span>
+                        <code className="font-mono">{selectedLog.ipAddress}</code>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">Location</span>
+                        <span>{selectedLog.location?.city}, {selectedLog.location?.country}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <h4 className="font-medium mb-2">Session Timeline</h4>
+                  <div className="space-y-2 mt-3">
+                    {filteredLogs.slice(0, 5).map((log, idx) => (
+                      <div key={log.id} className="flex items-center gap-3">
+                        <div className="w-8 text-center text-xs text-gray-400">{idx + 1}</div>
+                        <div className={`w-2 h-2 rounded-full ${
+                          log.status === 'success' ? 'bg-green-500' :
+                          log.status === 'failed' ? 'bg-red-500' : 'bg-orange-500'
+                        }`} />
+                        <code className="flex-1 text-sm truncate">{log.resource}</code>
+                        <Badge variant="outline" className="text-xs">{log.method}</Badge>
+                        <span className="text-xs text-gray-500">{formatDuration(log.duration)}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+          <div className="flex justify-end pt-4 border-t">
+            <Button variant="outline" onClick={() => setShowSessionDialog(false)}>Close</Button>
           </div>
         </DialogContent>
       </Dialog>

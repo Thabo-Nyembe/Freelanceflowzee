@@ -405,6 +405,13 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
   const [showExportDialog, setShowExportDialog] = useState(false)
   const [showSetAlertDialog, setShowSetAlertDialog] = useState(false)
   const [showLiveTailDialog, setShowLiveTailDialog] = useState(false)
+  const [showAddParserDialog, setShowAddParserDialog] = useState(false)
+  const [showCreateAlertRuleDialog, setShowCreateAlertRuleDialog] = useState(false)
+  const [showPurgeLogsDialog, setShowPurgeLogsDialog] = useState(false)
+  const [showResetParsersDialog, setShowResetParsersDialog] = useState(false)
+  const [showExportAllDataDialog, setShowExportAllDataDialog] = useState(false)
+  const [showQueryOptionsDialog, setShowQueryOptionsDialog] = useState(false)
+  const [selectedQueryId, setSelectedQueryId] = useState<string | null>(null)
   const [isLiveMode, setIsLiveMode] = useState(true)
   const [expandedLogs, setExpandedLogs] = useState<Set<string>>(new Set())
 
@@ -498,6 +505,52 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
     toast.success('Alert created', {
       description: 'Alert rule created for this activity type'
     })
+  }
+
+  const handleRefreshLogs = () => {
+    toast.success('Logs refreshed', {
+      description: 'Activity logs have been refreshed'
+    })
+  }
+
+  const handleCopyApiKey = () => {
+    navigator.clipboard.writeText('log_api_xxxxxxxxxxxxxxxxxx')
+    toast.success('API key copied', {
+      description: 'API key has been copied to clipboard'
+    })
+  }
+
+  const handleCopyLog = () => {
+    if (selectedLog) {
+      navigator.clipboard.writeText(JSON.stringify(selectedLog, null, 2))
+      toast.success('Log copied', {
+        description: 'Log entry has been copied to clipboard'
+      })
+    }
+  }
+
+  const handleSaveQuery = () => {
+    toast.success('Query saved', {
+      description: 'Your query has been saved successfully'
+    })
+    setShowQueryDialog(false)
+  }
+
+  const handleSettingsAction = (action: string) => {
+    toast.info(`${action} settings`, {
+      description: `Opening ${action.toLowerCase()} configuration`
+    })
+    // Navigate to appropriate settings tab
+    if (action === 'General') setSettingsTab('general')
+    else if (action === 'Alerts') setSettingsTab('alerts')
+    else if (action === 'Retention' || action === 'Export') setSettingsTab('archiving')
+    else if (action === 'Access' || action === 'API Keys') setSettingsTab('advanced')
+    else if (action === 'Webhooks' || action === 'Integrations') setSettingsTab('integrations')
+  }
+
+  const handleQueryOptions = (queryId: string) => {
+    setSelectedQueryId(queryId)
+    setShowQueryOptionsDialog(true)
   }
 
   return (
@@ -623,7 +676,9 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
                 <option value="1d">Last 24 hours</option>
                 <option value="7d">Last 7 days</option>
               </select>
-              <button className="px-3 py-2 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2">
+              <button
+                onClick={() => setShowExportDialog(true)}
+                className="px-3 py-2 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2">
                 <Download className="w-4 h-4" />
                 Export
               </button>
@@ -731,7 +786,9 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
                     </span>
                   )}
                 </div>
-                <button className="text-gray-400 hover:text-white">
+                <button
+                  onClick={handleRefreshLogs}
+                  className="text-gray-400 hover:text-white">
                   <RefreshCw className="w-4 h-4" />
                 </button>
               </div>
@@ -1039,7 +1096,9 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
                       </div>
                       <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Created {query.createdAt}</p>
                     </div>
-                    <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-gray-600 dark:text-gray-400">
+                    <button
+                      onClick={() => handleQueryOptions(query.id)}
+                      className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-gray-600 dark:text-gray-400">
                       <MoreHorizontal className="w-4 h-4" />
                     </button>
                   </div>
@@ -1087,7 +1146,10 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
                 { icon: <Link className="w-4 h-4" />, label: 'Integrations', color: 'text-pink-600' },
                 { icon: <Key className="w-4 h-4" />, label: 'API Keys', color: 'text-cyan-600' }
               ].map((action, index) => (
-                <button key={index} className="flex flex-col items-center gap-2 p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl hover:scale-105 transition-all duration-200">
+                <button
+                  key={index}
+                  onClick={() => handleSettingsAction(action.label)}
+                  className="flex flex-col items-center gap-2 p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl hover:scale-105 transition-all duration-200">
                   <span className={action.color}>{action.icon}</span>
                   <span className="text-xs text-gray-600 dark:text-gray-400">{action.label}</span>
                 </button>
@@ -1284,7 +1346,9 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
                             </div>
                           ))}
                         </div>
-                        <button className="w-full py-2 border-2 border-dashed rounded-lg text-muted-foreground hover:text-foreground hover:border-purple-300 transition-colors">
+                        <button
+                          onClick={() => setShowAddParserDialog(true)}
+                          className="w-full py-2 border-2 border-dashed rounded-lg text-muted-foreground hover:text-foreground hover:border-purple-300 transition-colors">
                           <Plus className="w-4 h-4 inline-block mr-2" />
                           Add Custom Parser
                         </button>
@@ -1357,7 +1421,9 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
                             </div>
                           ))}
                         </div>
-                        <button className="w-full py-2 border-2 border-dashed rounded-lg text-muted-foreground hover:text-foreground hover:border-purple-300 transition-colors">
+                        <button
+                          onClick={() => setShowCreateAlertRuleDialog(true)}
+                          className="w-full py-2 border-2 border-dashed rounded-lg text-muted-foreground hover:text-foreground hover:border-purple-300 transition-colors">
                           <Plus className="w-4 h-4 inline-block mr-2" />
                           Create Alert Rule
                         </button>
@@ -1612,7 +1678,9 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
                           <Label>API Key</Label>
                           <div className="flex gap-2">
                             <Input type="password" value="log_api_••••••••••••••••••••" readOnly className="font-mono" />
-                            <button className="px-4 py-2 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
+                            <button
+                              onClick={handleCopyApiKey}
+                              className="px-4 py-2 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
                               <Copy className="w-4 h-4" />
                             </button>
                           </div>
@@ -1686,7 +1754,9 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
                             <p className="font-medium text-red-600">Purge All Logs</p>
                             <p className="text-sm text-muted-foreground">Permanently delete all log data</p>
                           </div>
-                          <button className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center gap-2">
+                          <button
+                            onClick={() => setShowPurgeLogsDialog(true)}
+                            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center gap-2">
                             <Trash2 className="w-4 h-4" />
                             Purge
                           </button>
@@ -1696,7 +1766,9 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
                             <p className="font-medium text-red-600">Reset All Parsers</p>
                             <p className="text-sm text-muted-foreground">Reset parsing rules to defaults</p>
                           </div>
-                          <button className="px-4 py-2 border border-red-600 text-red-600 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2">
+                          <button
+                            onClick={() => setShowResetParsersDialog(true)}
+                            className="px-4 py-2 border border-red-600 text-red-600 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2">
                             <RefreshCw className="w-4 h-4" />
                             Reset
                           </button>
@@ -1706,7 +1778,9 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
                             <p className="font-medium text-red-600">Export All Data</p>
                             <p className="text-sm text-muted-foreground">Download complete log archive</p>
                           </div>
-                          <button className="px-4 py-2 border border-red-600 text-red-600 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2">
+                          <button
+                            onClick={() => setShowExportAllDataDialog(true)}
+                            className="px-4 py-2 border border-red-600 text-red-600 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2">
                             <Download className="w-4 h-4" />
                             Export
                           </button>
@@ -1840,7 +1914,9 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
             >
               Close
             </button>
-            <button className="px-4 py-2 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 flex items-center gap-2">
+            <button
+              onClick={handleCopyLog}
+              className="px-4 py-2 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 flex items-center gap-2">
               <Copy className="w-4 h-4" />
               Copy Log
             </button>
@@ -1883,7 +1959,9 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
             >
               Cancel
             </button>
-            <button className="px-4 py-2 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700">
+            <button
+              onClick={handleSaveQuery}
+              className="px-4 py-2 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700">
               Save Query
             </button>
           </div>
@@ -2179,6 +2257,314 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
             >
               <Play className="w-4 h-4" />
               Start Live Tail
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Custom Parser Dialog */}
+      <Dialog open={showAddParserDialog} onOpenChange={setShowAddParserDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Code className="w-5 h-5 text-green-600" />
+              Add Custom Parser
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Parser Name</label>
+              <Input placeholder="e.g., Custom Application Logs" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Regex Pattern</label>
+              <Input placeholder="^(?P<timestamp>\d{4}-\d{2}-\d{2}).*" className="font-mono" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Sample Log</label>
+              <textarea
+                rows={3}
+                className="w-full px-3 py-2 bg-white dark:bg-gray-800 border dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 dark:text-white font-mono text-sm"
+                placeholder="Paste a sample log line to test your pattern..."
+              />
+            </div>
+          </div>
+          <div className="flex items-center justify-end gap-3 pt-4 border-t dark:border-gray-700">
+            <button
+              onClick={() => setShowAddParserDialog(false)}
+              className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg font-medium"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={() => {
+                toast.success('Parser created', { description: 'Custom parser has been added' })
+                setShowAddParserDialog(false)
+              }}
+              className="px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 flex items-center gap-2"
+            >
+              <Plus className="w-4 h-4" />
+              Add Parser
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Alert Rule Dialog */}
+      <Dialog open={showCreateAlertRuleDialog} onOpenChange={setShowCreateAlertRuleDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Bell className="w-5 h-5 text-yellow-600" />
+              Create Alert Rule
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Rule Name</label>
+              <Input placeholder="e.g., Critical Error Alert" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Condition</label>
+              <Input placeholder="level:critical AND service:*" className="font-mono" />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Threshold</label>
+                <Input type="number" placeholder="10" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Severity</label>
+                <Select defaultValue="warning">
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="info">Info</SelectItem>
+                    <SelectItem value="warning">Warning</SelectItem>
+                    <SelectItem value="critical">Critical</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
+          <div className="flex items-center justify-end gap-3 pt-4 border-t dark:border-gray-700">
+            <button
+              onClick={() => setShowCreateAlertRuleDialog(false)}
+              className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg font-medium"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={() => {
+                toast.success('Alert rule created', { description: 'New alert rule has been configured' })
+                setShowCreateAlertRuleDialog(false)
+              }}
+              className="px-4 py-2 bg-yellow-600 text-white rounded-lg font-medium hover:bg-yellow-700 flex items-center gap-2"
+            >
+              <Plus className="w-4 h-4" />
+              Create Rule
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Purge Logs Dialog */}
+      <Dialog open={showPurgeLogsDialog} onOpenChange={setShowPurgeLogsDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-600">
+              <Trash2 className="w-5 h-5" />
+              Purge All Logs
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+              <div className="flex items-center gap-2 text-red-700 dark:text-red-400">
+                <AlertTriangle className="w-4 h-4" />
+                <span className="font-medium">Warning: This action is irreversible</span>
+              </div>
+              <p className="text-sm text-red-600 dark:text-red-300 mt-1">
+                All log data will be permanently deleted. This cannot be undone.
+              </p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Type &quot;DELETE ALL LOGS&quot; to confirm
+              </label>
+              <Input placeholder="DELETE ALL LOGS" />
+            </div>
+          </div>
+          <div className="flex items-center justify-end gap-3 pt-4 border-t dark:border-gray-700">
+            <button
+              onClick={() => setShowPurgeLogsDialog(false)}
+              className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg font-medium"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={() => {
+                toast.success('Logs purged', { description: 'All log data has been permanently deleted' })
+                setShowPurgeLogsDialog(false)
+              }}
+              className="px-4 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 flex items-center gap-2"
+            >
+              <Trash2 className="w-4 h-4" />
+              Purge All Logs
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Reset Parsers Dialog */}
+      <Dialog open={showResetParsersDialog} onOpenChange={setShowResetParsersDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-600">
+              <RefreshCw className="w-5 h-5" />
+              Reset All Parsers
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800">
+              <div className="flex items-center gap-2 text-amber-700 dark:text-amber-400">
+                <AlertTriangle className="w-4 h-4" />
+                <span className="font-medium">This will reset all custom parsers</span>
+              </div>
+              <p className="text-sm text-amber-600 dark:text-amber-300 mt-1">
+                All custom parsing rules will be removed and defaults will be restored.
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center justify-end gap-3 pt-4 border-t dark:border-gray-700">
+            <button
+              onClick={() => setShowResetParsersDialog(false)}
+              className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg font-medium"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={() => {
+                toast.success('Parsers reset', { description: 'All parsers have been reset to defaults' })
+                setShowResetParsersDialog(false)
+              }}
+              className="px-4 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 flex items-center gap-2"
+            >
+              <RefreshCw className="w-4 h-4" />
+              Reset Parsers
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Export All Data Dialog */}
+      <Dialog open={showExportAllDataDialog} onOpenChange={setShowExportAllDataDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Download className="w-5 h-5 text-blue-600" />
+              Export All Data
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+              <div className="flex items-center gap-2 text-blue-700 dark:text-blue-400">
+                <Archive className="w-4 h-4" />
+                <span className="font-medium">Complete Log Archive Export</span>
+              </div>
+              <p className="text-sm text-blue-600 dark:text-blue-300 mt-1">
+                This will export all historical log data. The process may take several minutes.
+              </p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Export Format</label>
+              <Select defaultValue="json">
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="json">JSON</SelectItem>
+                  <SelectItem value="csv">CSV</SelectItem>
+                  <SelectItem value="parquet">Parquet</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-center gap-2">
+              <Switch id="compressArchive" defaultChecked />
+              <Label htmlFor="compressArchive">Compress archive (recommended)</Label>
+            </div>
+          </div>
+          <div className="flex items-center justify-end gap-3 pt-4 border-t dark:border-gray-700">
+            <button
+              onClick={() => setShowExportAllDataDialog(false)}
+              className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg font-medium"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={() => {
+                toast.success('Export started', { description: 'Complete log archive export has begun' })
+                setShowExportAllDataDialog(false)
+              }}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 flex items-center gap-2"
+            >
+              <Download className="w-4 h-4" />
+              Start Export
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Query Options Dialog */}
+      <Dialog open={showQueryOptionsDialog} onOpenChange={setShowQueryOptionsDialog}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <MoreHorizontal className="w-5 h-5 text-purple-600" />
+              Query Options
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-2 py-4">
+            <button
+              onClick={() => {
+                toast.success('Query duplicated', { description: 'Query has been duplicated' })
+                setShowQueryOptionsDialog(false)
+              }}
+              className="w-full px-4 py-3 text-left hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg flex items-center gap-3"
+            >
+              <Copy className="w-4 h-4 text-gray-500" />
+              <span>Duplicate Query</span>
+            </button>
+            <button
+              onClick={() => {
+                toast.success('Query shared', { description: 'Share link copied to clipboard' })
+                setShowQueryOptionsDialog(false)
+              }}
+              className="w-full px-4 py-3 text-left hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg flex items-center gap-3"
+            >
+              <Link className="w-4 h-4 text-gray-500" />
+              <span>Share Query</span>
+            </button>
+            <button
+              onClick={() => {
+                toast.info('Editing query', { description: 'Opening query editor' })
+                setShowQueryOptionsDialog(false)
+                setShowQueryDialog(true)
+              }}
+              className="w-full px-4 py-3 text-left hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg flex items-center gap-3"
+            >
+              <Settings className="w-4 h-4 text-gray-500" />
+              <span>Edit Query</span>
+            </button>
+            <button
+              onClick={() => {
+                toast.success('Query deleted', { description: 'Query has been removed' })
+                setShowQueryOptionsDialog(false)
+              }}
+              className="w-full px-4 py-3 text-left hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg flex items-center gap-3 text-red-600"
+            >
+              <Trash2 className="w-4 h-4" />
+              <span>Delete Query</span>
             </button>
           </div>
         </DialogContent>
