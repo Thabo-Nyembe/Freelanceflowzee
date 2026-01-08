@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Progress } from '@/components/ui/progress'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import {
   FileText,
@@ -698,6 +698,16 @@ export default function InvoicingClient() {
   const [showInvoiceOptionsDialog, setShowInvoiceOptionsDialog] = useState(false)
   const [showProcessRecurringDialog, setShowProcessRecurringDialog] = useState(false)
   const [selectedGateway, setSelectedGateway] = useState<string | null>(null)
+
+  // New dialog states for buttons without onClick handlers
+  const [showEditCategoryDialog, setShowEditCategoryDialog] = useState(false)
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
+  const [showEditExpenseCategoryDialog, setShowEditExpenseCategoryDialog] = useState(false)
+  const [selectedExpenseCategory, setSelectedExpenseCategory] = useState<string | null>(null)
+  const [showEditVendorDialog, setShowEditVendorDialog] = useState(false)
+  const [selectedVendor, setSelectedVendor] = useState<string | null>(null)
+  const [showDownloadReceiptDialog, setShowDownloadReceiptDialog] = useState(false)
+  const [selectedPaymentReceipt, setSelectedPaymentReceipt] = useState<{id: string; amount: number; invoiceNumber: string; date: string} | null>(null)
 
   // Quick Actions with dialog openers
   const invoicingQuickActions = [
@@ -2836,7 +2846,7 @@ export default function InvoicingClient() {
               {['Corporate', 'Small Business', 'Startup', 'Enterprise', 'Non-Profit'].map((cat) => (
                 <div key={cat} className="flex items-center justify-between p-3 border rounded-lg">
                   <span>{cat}</span>
-                  <Button variant="ghost" size="sm">
+                  <Button variant="ghost" size="sm" onClick={() => { setSelectedCategory(cat); setShowEditCategoryDialog(true); }}>
                     <Edit className="w-4 h-4" />
                   </Button>
                 </div>
@@ -2868,7 +2878,13 @@ export default function InvoicingClient() {
             <div className="border-2 border-dashed rounded-lg p-8 text-center">
               <Globe className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
               <p className="text-sm text-muted-foreground mb-2">Drop CSV or Excel file here</p>
-              <Button variant="outline" size="sm">Browse Files</Button>
+              <Button variant="outline" size="sm" onClick={() => {
+                const input = document.createElement('input')
+                input.type = 'file'
+                input.accept = '.csv,.xlsx,.xls'
+                input.onchange = () => toast.success('File selected for import')
+                input.click()
+              }}>Browse Files</Button>
             </div>
             <div>
               <Label>Import Source</Label>
@@ -3077,7 +3093,7 @@ export default function InvoicingClient() {
                   </div>
                   <div className="text-right">
                     <p className="font-semibold text-green-600">{formatCurrency(payment.amount)}</p>
-                    <Button variant="ghost" size="sm">
+                    <Button variant="ghost" size="sm" onClick={() => { setSelectedPaymentReceipt({ id: payment.id, amount: payment.amount, invoiceNumber: payment.invoice.invoiceNumber, date: payment.date }); setShowDownloadReceiptDialog(true); }}>
                       <Download className="w-4 h-4" />
                     </Button>
                   </div>
@@ -3237,7 +3253,14 @@ export default function InvoicingClient() {
             <div className="border-2 border-dashed rounded-lg p-8 text-center">
               <Receipt className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
               <p className="text-sm text-muted-foreground mb-2">Drop receipt images here</p>
-              <Button variant="outline" size="sm">Browse Files</Button>
+              <Button variant="outline" size="sm" onClick={() => {
+                const input = document.createElement('input')
+                input.type = 'file'
+                input.accept = 'image/*,.pdf'
+                input.multiple = true
+                input.onchange = () => toast.success('Receipt files selected')
+                input.click()
+              }}>Browse Files</Button>
             </div>
             <div className="flex items-center gap-2 p-3 bg-pink-50 dark:bg-pink-900/20 rounded-lg">
               <input type="checkbox" className="rounded" />
@@ -3273,7 +3296,7 @@ export default function InvoicingClient() {
               {['Software', 'Infrastructure', 'Office', 'Travel', 'Marketing', 'Equipment'].map((cat) => (
                 <div key={cat} className="flex items-center justify-between p-3 border rounded-lg">
                   <span>{cat}</span>
-                  <Button variant="ghost" size="sm">
+                  <Button variant="ghost" size="sm" onClick={() => { setSelectedExpenseCategory(cat); setShowEditExpenseCategoryDialog(true); }}>
                     <Edit className="w-4 h-4" />
                   </Button>
                 </div>
@@ -3308,7 +3331,7 @@ export default function InvoicingClient() {
                   <span>{vendor}</span>
                   <div className="flex items-center gap-2">
                     <Badge variant="outline">Active</Badge>
-                    <Button variant="ghost" size="sm">
+                    <Button variant="ghost" size="sm" onClick={() => { setSelectedVendor(vendor); setShowEditVendorDialog(true); }}>
                       <Edit className="w-4 h-4" />
                     </Button>
                   </div>
@@ -4273,6 +4296,185 @@ export default function InvoicingClient() {
             <Button variant="outline" className="w-full" onClick={() => setShowExpenseReportDialog(false)}>
               Close
             </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Category Dialog */}
+      <Dialog open={showEditCategoryDialog} onOpenChange={setShowEditCategoryDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Edit className="w-5 h-5 text-purple-600" />
+              Edit Category
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Category Name</Label>
+              <Input defaultValue={selectedCategory || ''} className="mt-1" />
+            </div>
+            <div>
+              <Label>Description (Optional)</Label>
+              <Input placeholder="Category description..." className="mt-1" />
+            </div>
+            <div className="flex items-center gap-2 p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+              <input type="checkbox" defaultChecked className="rounded" />
+              <span className="text-sm">Active category</span>
+            </div>
+            <div className="flex items-center gap-3 pt-4 border-t">
+              <Button className="flex-1 bg-purple-600 hover:bg-purple-700" onClick={() => {
+                toast.success(`Category "${selectedCategory}" updated successfully`)
+                setShowEditCategoryDialog(false)
+              }}>
+                <CheckCircle2 className="w-4 h-4 mr-2" />
+                Save Changes
+              </Button>
+              <Button variant="outline" onClick={() => setShowEditCategoryDialog(false)}>
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Expense Category Dialog */}
+      <Dialog open={showEditExpenseCategoryDialog} onOpenChange={setShowEditExpenseCategoryDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Tag className="w-5 h-5 text-fuchsia-600" />
+              Edit Expense Category
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Category Name</Label>
+              <Input defaultValue={selectedExpenseCategory || ''} className="mt-1" />
+            </div>
+            <div>
+              <Label>Default Tax Rate (%)</Label>
+              <Input type="number" defaultValue="0" className="mt-1" />
+            </div>
+            <div className="flex items-center gap-2 p-3 bg-fuchsia-50 dark:bg-fuchsia-900/20 rounded-lg">
+              <input type="checkbox" defaultChecked className="rounded" />
+              <span className="text-sm">Track receipts for this category</span>
+            </div>
+            <div className="flex items-center gap-3 pt-4 border-t">
+              <Button className="flex-1 bg-fuchsia-600 hover:bg-fuchsia-700" onClick={() => {
+                toast.success(`Expense category "${selectedExpenseCategory}" updated successfully`)
+                setShowEditExpenseCategoryDialog(false)
+              }}>
+                <CheckCircle2 className="w-4 h-4 mr-2" />
+                Save Changes
+              </Button>
+              <Button variant="outline" onClick={() => setShowEditExpenseCategoryDialog(false)}>
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Vendor Dialog */}
+      <Dialog open={showEditVendorDialog} onOpenChange={setShowEditVendorDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Users className="w-5 h-5 text-purple-600" />
+              Edit Vendor: {selectedVendor}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Vendor Name</Label>
+              <Input defaultValue={selectedVendor || ''} className="mt-1" />
+            </div>
+            <div>
+              <Label>Contact Email</Label>
+              <Input type="email" placeholder="vendor@example.com" className="mt-1" />
+            </div>
+            <div>
+              <Label>Contact Phone</Label>
+              <Input placeholder="+1 (555) 000-0000" className="mt-1" />
+            </div>
+            <div>
+              <Label>Default Payment Terms</Label>
+              <select className="w-full mt-1 px-3 py-2 border rounded-lg bg-white dark:bg-gray-800">
+                <option value="15">Net 15</option>
+                <option value="30">Net 30</option>
+                <option value="45">Net 45</option>
+                <option value="60">Net 60</option>
+              </select>
+            </div>
+            <div className="flex items-center gap-2 p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+              <input type="checkbox" defaultChecked className="rounded" />
+              <span className="text-sm">Active vendor</span>
+            </div>
+            <div className="flex items-center gap-3 pt-4 border-t">
+              <Button className="flex-1 bg-purple-600 hover:bg-purple-700" onClick={() => {
+                toast.success(`Vendor "${selectedVendor}" updated successfully`)
+                setShowEditVendorDialog(false)
+              }}>
+                <CheckCircle2 className="w-4 h-4 mr-2" />
+                Save Changes
+              </Button>
+              <Button variant="outline" onClick={() => setShowEditVendorDialog(false)}>
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Download Receipt Dialog */}
+      <Dialog open={showDownloadReceiptDialog} onOpenChange={setShowDownloadReceiptDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Download className="w-5 h-5 text-blue-600" />
+              Download Payment Receipt
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm text-muted-foreground">Invoice</span>
+                <span className="font-medium">{selectedPaymentReceipt?.invoiceNumber}</span>
+              </div>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm text-muted-foreground">Payment Amount</span>
+                <span className="font-semibold text-green-600">{formatCurrency(selectedPaymentReceipt?.amount || 0)}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Payment Date</span>
+                <span className="font-medium">{selectedPaymentReceipt?.date ? new Date(selectedPaymentReceipt.date).toLocaleDateString() : ''}</span>
+              </div>
+            </div>
+            <div>
+              <Label>Export Format</Label>
+              <select className="w-full mt-1 px-3 py-2 border rounded-lg bg-white dark:bg-gray-800">
+                <option value="pdf">PDF</option>
+                <option value="png">PNG Image</option>
+                <option value="csv">CSV</option>
+              </select>
+            </div>
+            <div className="flex items-center gap-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+              <input type="checkbox" defaultChecked className="rounded" />
+              <span className="text-sm">Include company logo</span>
+            </div>
+            <div className="flex items-center gap-3 pt-4 border-t">
+              <Button className="flex-1 bg-blue-600 hover:bg-blue-700" onClick={() => {
+                toast.success(`Receipt for ${selectedPaymentReceipt?.invoiceNumber} downloaded successfully`)
+                setShowDownloadReceiptDialog(false)
+              }}>
+                <Download className="w-4 h-4 mr-2" />
+                Download Receipt
+              </Button>
+              <Button variant="outline" onClick={() => setShowDownloadReceiptDialog(false)}>
+                Cancel
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>

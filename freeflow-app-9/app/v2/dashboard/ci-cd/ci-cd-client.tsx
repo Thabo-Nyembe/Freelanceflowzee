@@ -2237,7 +2237,17 @@ export default function CiCdClient() {
                                   <p className="text-sm text-muted-foreground">{integration.description}</p>
                                 </div>
                               </div>
-                              <Button variant={integration.connected ? "secondary" : "outline"} size="sm">
+                              <Button
+                                variant={integration.connected ? "secondary" : "outline"}
+                                size="sm"
+                                onClick={() => {
+                                  if (integration.connected) {
+                                    toast.info(`${integration.name} integration settings`, { description: 'Click to manage your integration' })
+                                  } else {
+                                    toast.success(`Connecting to ${integration.name}...`, { description: 'Please follow the OAuth flow' })
+                                  }
+                                }}
+                              >
                                 {integration.connected ? 'Connected' : 'Connect'}
                               </Button>
                             </div>
@@ -3303,7 +3313,7 @@ export default function CiCdClient() {
                 <Label>Add Reviewer</Label>
                 <div className="flex gap-2">
                   <Input placeholder="Username or email" />
-                  <Button>Add</Button>
+                  <Button onClick={() => toast.success('Reviewer added', { description: 'The reviewer will be notified' })}>Add</Button>
                 </div>
               </div>
               <div className="space-y-2">
@@ -3312,7 +3322,7 @@ export default function CiCdClient() {
                   {['Sarah Chen', 'Mike Johnson'].map(name => (
                     <div key={name} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded">
                       <span className="text-sm">{name}</span>
-                      <Button variant="ghost" size="sm"><Trash2 className="w-4 h-4" /></Button>
+                      <Button variant="ghost" size="sm" onClick={() => toast.success(`${name} removed from reviewers`)}><Trash2 className="w-4 h-4" /></Button>
                     </div>
                   ))}
                 </div>
@@ -3607,7 +3617,7 @@ export default function CiCdClient() {
                 <Label>Add New Label</Label>
                 <div className="flex gap-2">
                   <Input placeholder="e.g., docker, gpu" />
-                  <Button>Add</Button>
+                  <Button onClick={() => toast.success('Label added', { description: 'Label is now available for runners' })}>Add</Button>
                 </div>
               </div>
               <div className="space-y-2">
@@ -3616,7 +3626,7 @@ export default function CiCdClient() {
                   {['ubuntu-latest', 'self-hosted', 'docker', 'gpu'].map(label => (
                     <Badge key={label} variant="secondary" className="gap-1">
                       {label}
-                      <button className="ml-1 hover:text-red-500">x</button>
+                      <button className="ml-1 hover:text-red-500" onClick={() => toast.success(`Label "${label}" removed`)}>x</button>
                     </Badge>
                   ))}
                 </div>

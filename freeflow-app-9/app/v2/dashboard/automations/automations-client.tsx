@@ -402,6 +402,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
   const [showEditorDialog, setShowEditorDialog] = useState(false)
   const [showViewLogsDialog, setShowViewLogsDialog] = useState(false)
   const [showPreviewTemplateDialog, setShowPreviewTemplateDialog] = useState(false)
+  const [showUpgradePlanDialog, setShowUpgradePlanDialog] = useState(false)
   const [importJsonContent, setImportJsonContent] = useState('')
   const [newConnectionForm, setNewConnectionForm] = useState({ name: '', app: '', apiKey: '' })
   const [newWebhookForm, setNewWebhookForm] = useState({ name: '', method: 'POST' as 'GET' | 'POST' | 'PUT' | 'DELETE', scenarioId: '' })
@@ -2572,7 +2573,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                             <Progress value={42} className="h-2" />
                           </div>
                         </div>
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => setShowUpgradePlanDialog(true)}>
                           <Rocket className="h-4 w-4 mr-2" />
                           Upgrade Plan
                         </Button>
@@ -4282,6 +4283,78 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                   Use Template
                 </Button>
               )}
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Upgrade Plan Dialog */}
+        <Dialog open={showUpgradePlanDialog} onOpenChange={setShowUpgradePlanDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Rocket className="h-5 w-5 text-purple-600" />
+                Upgrade Your Plan
+              </DialogTitle>
+              <DialogDescription>
+                Unlock more automation power with a premium plan
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="p-4 border rounded-lg hover:border-gray-400 transition-all cursor-pointer">
+                  <div className="font-semibold mb-1">Starter</div>
+                  <div className="text-2xl font-bold mb-2">$19<span className="text-sm font-normal text-gray-500">/mo</span></div>
+                  <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-1 mb-4">
+                    <li>- 5,000 operations/month</li>
+                    <li>- 2 GB data transfer</li>
+                    <li>- 5 active scenarios</li>
+                    <li>- Email support</li>
+                  </ul>
+                  <Button variant="outline" className="w-full" onClick={() => { toast.success('Starter plan selected'); setShowUpgradePlanDialog(false); }}>
+                    Select Starter
+                  </Button>
+                </div>
+                <div className="p-4 border-2 border-emerald-500 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 relative">
+                  <Badge className="absolute -top-2 right-4 bg-emerald-500">Popular</Badge>
+                  <div className="font-semibold mb-1">Pro</div>
+                  <div className="text-2xl font-bold mb-2">$49<span className="text-sm font-normal text-gray-500">/mo</span></div>
+                  <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-1 mb-4">
+                    <li>- 25,000 operations/month</li>
+                    <li>- 10 GB data transfer</li>
+                    <li>- 25 active scenarios</li>
+                    <li>- Priority support</li>
+                    <li>- AI automation features</li>
+                  </ul>
+                  <Button className="w-full bg-emerald-600 hover:bg-emerald-700" onClick={() => { toast.success('Pro plan selected - redirecting to checkout'); setShowUpgradePlanDialog(false); }}>
+                    Upgrade to Pro
+                  </Button>
+                </div>
+                <div className="p-4 border rounded-lg hover:border-gray-400 transition-all cursor-pointer">
+                  <div className="font-semibold mb-1">Enterprise</div>
+                  <div className="text-2xl font-bold mb-2">Custom</div>
+                  <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-1 mb-4">
+                    <li>- Unlimited operations</li>
+                    <li>- Unlimited data transfer</li>
+                    <li>- Unlimited scenarios</li>
+                    <li>- Dedicated support</li>
+                    <li>- Custom integrations</li>
+                  </ul>
+                  <Button variant="outline" className="w-full" onClick={() => { toast.success('Contact sales request sent'); setShowUpgradePlanDialog(false); }}>
+                    Contact Sales
+                  </Button>
+                </div>
+              </div>
+              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                  <Shield className="h-4 w-4" />
+                  <span>All plans include SSL encryption, 99.9% uptime SLA, and 30-day money-back guarantee</span>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowUpgradePlanDialog(false)}>
+                Cancel
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

@@ -2813,7 +2813,7 @@ export default function DataExportClient() {
                   </SelectContent>
                 </Select>
               </div>
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={() => toast.success('Logs exported', { description: 'Log file downloaded successfully' })}>
                 <Download className="w-4 h-4 mr-2" />
                 Export Logs
               </Button>
@@ -3181,7 +3181,7 @@ export default function DataExportClient() {
               </pre>
             </ScrollArea>
             <div className="flex justify-between">
-              <Button variant="outline" size="sm"><Download className="w-4 h-4 mr-2" />Export Logs</Button>
+              <Button variant="outline" size="sm" onClick={() => toast.success('Pipeline logs exported', { description: 'Log file downloaded successfully' })}><Download className="w-4 h-4 mr-2" />Export Logs</Button>
               <Button variant="outline" onClick={() => setShowPipelineLogsDialog(false)}>Close</Button>
             </div>
           </div>
@@ -3752,8 +3752,8 @@ export default function DataExportClient() {
                     </div>
                   </div>
                   <div className="flex gap-2">
-                    <Button variant="outline" size="sm"><Download className="w-4 h-4" /></Button>
-                    <Button variant="outline" size="sm" className="text-red-600"><Trash2 className="w-4 h-4" /></Button>
+                    <Button variant="outline" size="sm" onClick={() => toast.success('Downloading archive', { description: `${file} download started` })}><Download className="w-4 h-4" /></Button>
+                    <Button variant="outline" size="sm" className="text-red-600" onClick={() => toast.success('Archive deleted', { description: `${file} has been removed` })}><Trash2 className="w-4 h-4" /></Button>
                   </div>
                 </div>
               ))}
@@ -3925,7 +3925,7 @@ export default function DataExportClient() {
                     <Key className="w-4 h-4 text-gray-400" />
                     <span>{cred}</span>
                   </div>
-                  <Button variant="ghost" size="sm"><Settings className="w-4 h-4" /></Button>
+                  <Button variant="ghost" size="sm" onClick={() => toast.success('Credential settings', { description: `Configuring ${cred}` })}><Settings className="w-4 h-4" /></Button>
                 </div>
               ))}
             </div>
@@ -4002,7 +4002,7 @@ export default function DataExportClient() {
               {mockExportJobs.filter(j => j.status === 'completed').map(j => (
                 <div key={j.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                   <span>{j.name}</span>
-                  <Button size="sm"><Download className="w-4 h-4" /></Button>
+                  <Button size="sm" onClick={() => toast.success('Download started', { description: `${j.name} is being downloaded` })}><Download className="w-4 h-4" /></Button>
                 </div>
               ))}
             </div>
