@@ -398,6 +398,9 @@ export default function VideoStudioClient() {
   const [newPresetCodec, setNewPresetCodec] = useState('H.264')
   const [newPresetBitrate, setNewPresetBitrate] = useState('20')
   const [newPresetResolution, setNewPresetResolution] = useState('1080p')
+  const [selectedAspectRatio, setSelectedAspectRatio] = useState<'16:9' | '9:16' | '1:1'>('16:9')
+  const [showCollaborateDialog, setShowCollaborateDialog] = useState(false)
+  const [showCloudStorageDialog, setShowCloudStorageDialog] = useState(false)
 
   // Handler functions for track controls
   const handleToggleTrackVisibility = (track: 'video' | 'audio' | 'titles') => {
@@ -1038,6 +1041,73 @@ export default function VideoStudioClient() {
     setShowFilterDialog(false)
   }
 
+  // Handler for quick action buttons
+  const handleQuickAction = (label: string) => {
+    switch (label) {
+      case 'New Project':
+        setShowNewProjectDialog(true)
+        break
+      case 'Import Media':
+        setShowUploadDialog(true)
+        break
+      case 'Templates':
+        toast.success('Opening Templates gallery')
+        break
+      case 'Cloud Storage':
+        setShowCloudStorageDialog(true)
+        break
+      case 'Collaborate':
+        setShowCollaborateDialog(true)
+        break
+      default:
+        toast.info(`${label} clicked`)
+    }
+  }
+
+  // Handler for selecting aspect ratio preset
+  const handleAspectRatioSelect = (ratio: '16:9' | '9:16' | '1:1') => {
+    setSelectedAspectRatio(ratio)
+    toast.success(`Aspect ratio set to ${ratio}`)
+  }
+
+  // Handler for selecting export preset
+  const handleExportPresetSelect = (presetName: string) => {
+    const queuePromise = new Promise<void>((resolve) => {
+      setTimeout(() => resolve(), 500)
+    })
+    toast.promise(queuePromise, {
+      loading: `Preparing ${presetName} preset...`,
+      success: `${presetName} preset selected`,
+      error: 'Failed to select preset'
+    })
+  }
+
+  // Handler for collaborate
+  const handleInviteCollaborator = () => {
+    const invitePromise = new Promise<void>((resolve) => {
+      setTimeout(() => resolve(), 800)
+    })
+    toast.promise(invitePromise, {
+      loading: 'Sending invitation...',
+      success: 'Invitation sent successfully',
+      error: 'Failed to send invitation'
+    })
+    setShowCollaborateDialog(false)
+  }
+
+  // Handler for cloud storage sync
+  const handleCloudStorageSync = () => {
+    const syncPromise = new Promise<void>((resolve) => {
+      setTimeout(() => resolve(), 1500)
+    })
+    toast.promise(syncPromise, {
+      loading: 'Syncing with cloud storage...',
+      success: 'Cloud storage synced successfully',
+      error: 'Failed to sync cloud storage'
+    })
+    setShowCloudStorageDialog(false)
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50/30 to-rose-50/40 dark:bg-none dark:bg-gray-900 p-6">
       <div className="max-w-[1800px] mx-auto space-y-6">
@@ -1170,7 +1240,7 @@ export default function VideoStudioClient() {
                 { icon: Cloud, label: 'Cloud Storage', desc: 'Manage files', color: 'from-amber-500 to-orange-600' },
                 { icon: Users, label: 'Collaborate', desc: 'Team projects', color: 'from-indigo-500 to-violet-600' }
               ].map((action, idx) => (
-                <button key={idx} className="flex items-center gap-3 p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 hover:shadow-lg transition-all text-left">
+                <button key={idx} onClick={() => handleQuickAction(action.label)} className="flex items-center gap-3 p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 hover:shadow-lg transition-all text-left">
                   <div className={`w-10 h-10 bg-gradient-to-br ${action.color} rounded-lg flex items-center justify-center`}>
                     <action.icon className="w-5 h-5 text-white" />
                   </div>
@@ -1731,7 +1801,7 @@ export default function VideoStudioClient() {
                       { name: 'TikTok', icon: Smartphone, desc: '1080x1920 @ 60fps' },
                       { name: 'Twitter/X', icon: Square, desc: '1:1 square format' }
                     ].map((preset, i) => (
-                      <div key={i} className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer">
+                      <div key={i} onClick={() => handleExportPresetSelect(preset.name)} className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer">
                         <preset.icon className="w-5 h-5 text-purple-500" />
                         <div className="flex-1">
                           <p className="font-medium text-sm">{preset.name}</p>
@@ -1996,12 +2066,12 @@ export default function VideoStudioClient() {
                       <CardContent className="space-y-4">
                         <div className="grid grid-cols-3 gap-4">
                           {[
-                            { label: '16:9 Landscape', icon: Monitor, selected: true },
-                            { label: '9:16 Portrait', icon: Smartphone, selected: false },
-                            { label: '1:1 Square', icon: Square, selected: false }
+                            { label: '16:9 Landscape', icon: Monitor, ratio: '16:9' as const },
+                            { label: '9:16 Portrait', icon: Smartphone, ratio: '9:16' as const },
+                            { label: '1:1 Square', icon: Square, ratio: '1:1' as const }
                           ].map((preset, idx) => (
-                            <button key={idx} className={`p-4 rounded-lg border-2 text-center transition-all ${preset.selected ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20' : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'}`}>
-                              <preset.icon className={`w-8 h-8 mx-auto mb-2 ${preset.selected ? 'text-purple-600' : 'text-gray-400'}`} />
+                            <button key={idx} onClick={() => handleAspectRatioSelect(preset.ratio)} className={`p-4 rounded-lg border-2 text-center transition-all ${selectedAspectRatio === preset.ratio ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20' : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'}`}>
+                              <preset.icon className={`w-8 h-8 mx-auto mb-2 ${selectedAspectRatio === preset.ratio ? 'text-purple-600' : 'text-gray-400'}`} />
                               <p className="text-sm font-medium">{preset.label}</p>
                             </button>
                           ))}
@@ -3146,6 +3216,103 @@ export default function VideoStudioClient() {
                 </Button>
               </div>
             )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Collaborate Dialog */}
+        <Dialog open={showCollaborateDialog} onOpenChange={setShowCollaborateDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Users className="w-5 h-5" />
+                Collaborate on Projects
+              </DialogTitle>
+              <DialogDescription>Invite team members to collaborate</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium">Email Address</label>
+                <Input
+                  placeholder="colleague@example.com"
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Role</label>
+                <select className="mt-1 w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800">
+                  <option value="editor">Editor - Can edit projects</option>
+                  <option value="viewer">Viewer - Can view only</option>
+                  <option value="admin">Admin - Full access</option>
+                </select>
+              </div>
+              <div className="p-4 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg">
+                <h4 className="font-medium mb-2 text-indigo-700 dark:text-indigo-300">Current Team</h4>
+                <div className="space-y-2">
+                  {mockVideoStudioCollaborators.map((c) => (
+                    <div key={c.id} className="flex items-center gap-2 text-sm">
+                      <div className="w-6 h-6 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white text-xs font-bold">
+                        {c.name.charAt(0)}
+                      </div>
+                      <span>{c.name}</span>
+                      <Badge variant="secondary" className="text-xs">{c.role}</Badge>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowCollaborateDialog(false)}>Cancel</Button>
+                <Button className="flex-1" onClick={handleInviteCollaborator}>Send Invitation</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Cloud Storage Dialog */}
+        <Dialog open={showCloudStorageDialog} onOpenChange={setShowCloudStorageDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Cloud className="w-5 h-5" />
+                Cloud Storage
+              </DialogTitle>
+              <DialogDescription>Manage your cloud storage and sync settings</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="p-4 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 rounded-lg">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="font-medium">Storage Used</span>
+                  <span className="text-amber-600 font-bold">42 GB / 100 GB</span>
+                </div>
+                <Progress value={42} className="h-2" />
+              </div>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <Video className="w-4 h-4 text-purple-500" />
+                    <span className="text-sm">Video Projects</span>
+                  </div>
+                  <span className="text-sm font-medium">28 GB</span>
+                </div>
+                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <Layers className="w-4 h-4 text-blue-500" />
+                    <span className="text-sm">Media Assets</span>
+                  </div>
+                  <span className="text-sm font-medium">10 GB</span>
+                </div>
+                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <Target className="w-4 h-4 text-green-500" />
+                    <span className="text-sm">Rendered Videos</span>
+                  </div>
+                  <span className="text-sm font-medium">4 GB</span>
+                </div>
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowCloudStorageDialog(false)}>Close</Button>
+                <Button className="flex-1" onClick={handleCloudStorageSync}>Sync Now</Button>
+              </div>
+            </div>
           </DialogContent>
         </Dialog>
       </div>

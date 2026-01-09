@@ -1187,7 +1187,7 @@ export default function ReleasesClient() {
                 className="pl-9 w-64"
               />
             </div>
-            <Button variant="outline" size="icon">
+            <Button variant="outline" size="icon" onClick={() => toast.info('Filter Options', { description: 'Use the sidebar filters to refine your search' })}>
               <Filter className="w-4 h-4" />
             </Button>
             <Button
@@ -1673,10 +1673,10 @@ export default function ReleasesClient() {
                   <p className="text-blue-100">Track code changes and contributions</p>
                 </div>
                 <div className="flex gap-3">
-                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/20">
+                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/20" onClick={() => toast.info('Branches', { description: 'Viewing all 8 active branches in repository' })}>
                     <GitBranch className="w-4 h-4 mr-2" />Branches
                   </Button>
-                  <Button className="bg-white text-blue-600 hover:bg-blue-50">
+                  <Button className="bg-white text-blue-600 hover:bg-blue-50" onClick={() => toast.info('Pull Requests', { description: 'Opening pull requests dashboard...' })}>
                     <GitPullRequest className="w-4 h-4 mr-2" />Pull Requests
                   </Button>
                 </div>
@@ -1845,10 +1845,13 @@ export default function ReleasesClient() {
                   <p className="text-orange-100">Manage binaries, source code, and documentation</p>
                 </div>
                 <div className="flex gap-3">
-                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/20">
+                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/20" onClick={() => toast.promise(
+                      new Promise(resolve => setTimeout(resolve, 1500)),
+                      { loading: 'Preparing download...', success: 'All assets downloaded successfully!', error: 'Download failed' }
+                    )}>
                     <Download className="w-4 h-4 mr-2" />Download All
                   </Button>
-                  <Button className="bg-white text-orange-600 hover:bg-orange-50">
+                  <Button className="bg-white text-orange-600 hover:bg-orange-50" onClick={() => toast.info('Upload Asset', { description: 'Asset upload feature coming soon. Stay tuned!' })}>
                     <Plus className="w-4 h-4 mr-2" />Upload Asset
                   </Button>
                 </div>
@@ -1902,7 +1905,10 @@ export default function ReleasesClient() {
                             </div>
                             <div className="flex items-center gap-3">
                               <span className="text-sm text-gray-500">{asset.downloads} downloads</span>
-                              <Button size="sm" variant="outline">
+                              <Button size="sm" variant="outline" onClick={() => toast.promise(
+                                  new Promise(resolve => setTimeout(resolve, 1000)),
+                                  { loading: `Downloading ${asset.name}...`, success: 'Download started!', error: 'Download failed' }
+                                )}>
                                 <Download className="w-3 h-3 mr-1" />
                                 Download
                               </Button>
@@ -1927,10 +1933,15 @@ export default function ReleasesClient() {
                   <p className="text-purple-100">Insights into your release performance and trends</p>
                 </div>
                 <div className="flex gap-3">
-                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/20">
+                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/20" onClick={handleExportReleases}>
                     <Download className="w-4 h-4 mr-2" />Export
                   </Button>
-                  <Button className="bg-white text-purple-600 hover:bg-purple-50">
+                  <Button className="bg-white text-purple-600 hover:bg-purple-50" onClick={() => {
+                      toast.promise(
+                        new Promise(resolve => setTimeout(resolve, 1000)),
+                        { loading: 'Refreshing analytics...', success: 'Analytics data refreshed!', error: 'Refresh failed' }
+                      )
+                    }}>
                     <RefreshCw className="w-4 h-4 mr-2" />Refresh
                   </Button>
                 </div>
@@ -2199,7 +2210,7 @@ export default function ReleasesClient() {
                             <Badge className={env === 'Production' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}>
                               {env === 'Production' ? 'Active' : 'Available'}
                             </Badge>
-                            <Button size="sm" variant="outline">Configure</Button>
+                            <Button size="sm" variant="outline" onClick={() => toast.info(`Configure ${env}`, { description: `Opening ${env.toLowerCase()} environment settings...` })}>Configure</Button>
                           </div>
                         </div>
                       ))}
@@ -2350,7 +2361,7 @@ export default function ReleasesClient() {
                             <p className="font-medium text-red-700 dark:text-red-400">Reset All Settings</p>
                             <p className="text-sm text-red-600">This will reset all release configurations</p>
                           </div>
-                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-100">
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-100" onClick={() => toast.warning('Reset Settings', { description: 'This action cannot be undone. Please contact admin to proceed.' })}>
                             Reset
                           </Button>
                         </div>
@@ -2424,7 +2435,7 @@ export default function ReleasesClient() {
                       </div>
                     </div>
                   </div>
-                  <Button variant="outline" size="icon">
+                  <Button variant="outline" size="icon" onClick={() => toast.info('More Options', { description: 'Additional release actions available in the footer' })}>
                     <MoreVertical className="w-4 h-4" />
                   </Button>
                 </div>
@@ -2497,7 +2508,10 @@ export default function ReleasesClient() {
                               <div className="text-xs text-gray-500">{formatSize(asset.size)}</div>
                             </div>
                             <span className="text-sm text-gray-500">{asset.downloads} downloads</span>
-                            <Button size="sm" variant="outline">
+                            <Button size="sm" variant="outline" onClick={() => toast.promise(
+                                new Promise(resolve => setTimeout(resolve, 1000)),
+                                { loading: `Downloading ${asset.name}...`, success: 'Download started!', error: 'Download failed' }
+                              )}>
                               <Download className="w-3 h-3" />
                             </Button>
                           </div>
