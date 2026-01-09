@@ -580,6 +580,29 @@ export default function BugsClient() {
   const [exportFormat, setExportFormat] = useState('pdf')
   const [exportDateRange, setExportDateRange] = useState('all')
 
+  // Additional Dialog States
+  const [showAssignDialog, setShowAssignDialog] = useState(false)
+  const [showStatusDialog, setShowStatusDialog] = useState(false)
+  const [showFiltersDialog, setShowFiltersDialog] = useState(false)
+  const [showImportDialog, setShowImportDialog] = useState(false)
+  const [showLinkPRDialog, setShowLinkPRDialog] = useState(false)
+  const [showArchiveDialog, setShowArchiveDialog] = useState(false)
+  const [showHistoryDialog, setShowHistoryDialog] = useState(false)
+  const [showAddCommentDialog, setShowAddCommentDialog] = useState(false)
+  const [showAddLabelDialog, setShowAddLabelDialog] = useState(false)
+  const [showDeleteConfirmDialog, setShowDeleteConfirmDialog] = useState(false)
+  const [bugToDelete, setBugToDelete] = useState<string | null>(null)
+  const [bugToAssign, setBugToAssign] = useState<BugItem | null>(null)
+  const [bugToChangeStatus, setBugToChangeStatus] = useState<BugItem | null>(null)
+  const [selectedAssignee, setSelectedAssignee] = useState('')
+  const [selectedNewStatus, setSelectedNewStatus] = useState<BugStatus>('open')
+  const [commentText, setCommentText] = useState('')
+  const [newLabelName, setNewLabelName] = useState('')
+  const [newLabelColor, setNewLabelColor] = useState('#3b82f6')
+  const [importFile, setImportFile] = useState<File | null>(null)
+  const [prLink, setPrLink] = useState('')
+  const [isImporting, setIsImporting] = useState(false)
+
   // Handler for running tests
   const handleRunTests = async () => {
     setIsRunningTests(true)
@@ -603,6 +626,169 @@ export default function BugsClient() {
     setShowExportReportDialog(false)
     toast.success('Report Exported', { description: `Bug summary exported to ${exportFormat.toUpperCase()}` })
   }
+
+  // Handler for assigning bug
+  const handleAssignBug = async () => {
+    if (!bugToAssign || !selectedAssignee) return
+    try {
+      // Find the matching DB bug if exists
+      const dbBug = bugs.find(b => b.bug_code === bugToAssign.key)
+      if (dbBug) {
+        const { error } = await supabase
+          .from('bugs')
+          .update({
+            assignee_name: selectedAssignee,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', dbBug.id)
+        if (error) throw error
+        fetchBugs()
+      }
+      toast.success('Bug Assigned', { description: `Bug ${bugToAssign.key} assigned to ${selectedAssignee}` })
+      setShowAssignDialog(false)
+      setBugToAssign(null)
+      setSelectedAssignee('')
+    } catch (error) {
+      console.error('Error assigning bug:', error)
+      toast.error('Failed to assign bug')
+    }
+  }
+
+  // Handler for changing status
+  const handleChangeStatus = async () => {
+    if (!bugToChangeStatus) return
+    try {
+      const dbBug = bugs.find(b => b.bug_code === bugToChangeStatus.key)
+      if (dbBug) {
+        await handleUpdateStatus(dbBug.id, selectedNewStatus)
+      } else {
+        toast.success('Status Changed', { description: `Bug ${bugToChangeStatus.key} status changed to ${selectedNewStatus}` })
+      }
+      setShowStatusDialog(false)
+      setBugToChangeStatus(null)
+      setSelectedNewStatus('open')
+    } catch (error) {
+      console.error('Error changing status:', error)
+      toast.error('Failed to change status')
+    }
+  }
+
+  // Handler for importing bugs
+  const handleImportBugs = async () => {
+    if (!importFile) {
+      toast.error('Please select a file to import')
+      return
+    }
+    setIsImporting(true)
+    // Simulate import process
+    await new Promise(resolve => setTimeout(resolve, 2000))
+    setIsImporting(false)
+    setShowImportDialog(false)
+    setImportFile(null)
+    toast.success('Bugs Imported', { description: `Successfully imported bugs from ${importFile.name}` })
+  }
+
+  // Handler for linking PR
+  const handleLinkPR = () => {
+    if (!prLink) {
+      toast.error('Please enter a PR link')
+      return
+    }
+    toast.success('PR Linked', { description: 'Pull request linked to bug successfully' })
+    setShowLinkPRDialog(false)
+    setPrLink('')
+  }
+
+  // Handler for adding comment
+  const handleAddComment = () => {
+    if (!commentText.trim()) {
+      toast.error('Please enter a comment')
+      return
+    }
+    toast.success('Comment Added', { description: 'Your comment has been added to the bug' })
+    setShowAddCommentDialog(false)
+    setCommentText('')
+  }
+
+  // Handler for adding label
+  const handleAddLabel = () => {
+    if (!newLabelName.trim()) {
+      toast.error('Please enter a label name')
+      return
+    }
+    toast.success('Label Created', { description: `Label "${newLabelName}" has been created` })
+    setShowAddLabelDialog(false)
+    setNewLabelName('')
+    setNewLabelColor('#3b82f6')
+  }
+
+  // Handler for confirming delete
+  const handleConfirmDelete = async () => {
+    if (!bugToDelete) return
+    await handleDeleteBug(bugToDelete)
+    setShowDeleteConfirmDialog(false)
+    setBugToDelete(null)
+  }
+
+  // Handler for archiving bugs
+  const handleArchiveBugs = () => {
+    const closedCount = allBugs.filter(b => b.status === 'closed').length
+    toast.success('Bugs Archived', { description: `${closedCount} closed bugs have been archived` })
+    setShowArchiveDialog(false)
+  }
+
+  // Quick action handlers for list actions
+  const handleQuickAction = (action: string) => {
+    switch (action) {
+      case 'Report Bug':
+        setShowCreateDialog(true)
+        break
+      case 'Search Issues':
+        document.querySelector<HTMLInputElement>('input[placeholder="Search bugs..."]')?.focus()
+        toast.info('Search Active', { description: 'Start typing to search bugs' })
+        break
+      case 'Advanced Filter':
+        setShowFiltersDialog(true)
+        break
+      case 'View Archive':
+        setShowArchiveDialog(true)
+        break
+      case 'Export CSV':
+        setExportFormat('csv')
+        setShowExportReportDialog(true)
+        break
+      case 'Import Bugs':
+        setShowImportDialog(true)
+        break
+      case 'Link PRs':
+        setShowLinkPRDialog(true)
+        break
+      case 'View History':
+        setShowHistoryDialog(true)
+        break
+      default:
+        toast.info(action, { description: `${action} action triggered` })
+    }
+  }
+
+  // Team member list for assignment
+  const teamMembers = [
+    { name: 'Sarah Chen', role: 'Senior Developer' },
+    { name: 'Alex Rivera', role: 'Full Stack Developer' },
+    { name: 'Lisa Park', role: 'Frontend Developer' },
+    { name: 'David Kim', role: 'Backend Developer' },
+    { name: 'Mike Johnson', role: 'QA Engineer' },
+    { name: 'Emily Davis', role: 'Product Manager' }
+  ]
+
+  // Activity history mock data
+  const activityHistory = [
+    { id: '1', action: 'Status changed to In Progress', user: 'Sarah Chen', time: '2 hours ago', bug: 'BUG-1234' },
+    { id: '2', action: 'Assigned to Alex Rivera', user: 'System', time: '3 hours ago', bug: 'BUG-1235' },
+    { id: '3', action: 'Comment added', user: 'Lisa Park', time: '5 hours ago', bug: 'BUG-1236' },
+    { id: '4', action: 'Bug resolved', user: 'David Kim', time: '1 day ago', bug: 'BUG-1237' },
+    { id: '5', action: 'Priority changed to Critical', user: 'Emily Davis', time: '2 days ago', bug: 'BUG-1238' },
+  ]
 
   // Quick Actions for toolbar (defined inside component to access setters)
   const bugsQuickActions = [
@@ -928,7 +1114,7 @@ export default function BugsClient() {
                 <LayoutGrid className="w-4 h-4" />
               </Button>
             </div>
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={() => setShowImportDialog(true)}>
               <Upload className="w-4 h-4 mr-2" />
               Import
             </Button>
@@ -1065,7 +1251,7 @@ export default function BugsClient() {
                   className="pl-9 w-64 bg-white/80 dark:bg-gray-800/80"
                 />
               </div>
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={() => setShowFiltersDialog(true)}>
                 <Filter className="w-4 h-4 mr-2" />
                 Filters
               </Button>
@@ -1109,7 +1295,11 @@ export default function BugsClient() {
                     { icon: GitBranch, label: 'Link PRs', color: 'from-teal-500 to-green-500' },
                     { icon: History, label: 'View History', color: 'from-amber-500 to-orange-500' },
                   ].map((action, idx) => (
-                    <button key={idx} className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all hover:scale-105 group">
+                    <button
+                      key={idx}
+                      className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all hover:scale-105 group"
+                      onClick={() => handleQuickAction(action.label)}
+                    >
                       <div className={`w-9 h-9 rounded-lg bg-gradient-to-br ${action.color} flex items-center justify-center`}>
                         <action.icon className="w-4 h-4 text-white" />
                       </div>
@@ -1711,12 +1901,12 @@ export default function BugsClient() {
                               <div className="w-4 h-4 rounded" style={{ backgroundColor: label.color }} />
                               <span className="font-medium">{label.name}</span>
                             </div>
-                            <Button variant="ghost" size="sm">
+                            <Button variant="ghost" size="sm" onClick={() => toast.info('Edit Label', { description: `Editing label: ${label.name}` })}>
                               <Edit className="w-4 h-4" />
                             </Button>
                           </div>
                         ))}
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => setShowAddLabelDialog(true)}>
                           <Plus className="w-4 h-4 mr-2" />
                           Add Label
                         </Button>
@@ -1767,7 +1957,7 @@ export default function BugsClient() {
                         </div>
                         <Switch defaultChecked />
                       </div>
-                      <Button variant="outline" className="w-full">
+                      <Button variant="outline" className="w-full" onClick={() => toast.info('Add Status', { description: 'Custom status creation dialog would open here' })}>
                         <Plus className="w-4 h-4 mr-2" />
                         Add Custom Status
                       </Button>
@@ -1856,7 +2046,18 @@ export default function BugsClient() {
                               </Badge>
                             </div>
                             <p className="text-sm text-muted-foreground mb-3">{integration.description}</p>
-                            <Button variant="outline" size="sm" className="w-full">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="w-full"
+                              onClick={() => {
+                                if (integration.status === 'Connected') {
+                                  toast.info('Configure Integration', { description: `Opening ${integration.name} configuration...` })
+                                } else {
+                                  toast.success('Connecting...', { description: `Initiating connection to ${integration.name}` })
+                                }
+                              }}
+                            >
                               {integration.status === 'Connected' ? 'Configure' : 'Connect'}
                             </Button>
                           </div>
@@ -1972,21 +2173,21 @@ export default function BugsClient() {
                             <p className="font-medium text-red-700 dark:text-red-400">Archive All Closed Bugs</p>
                             <p className="text-sm text-gray-500">Move all closed bugs to archive</p>
                           </div>
-                          <Button variant="destructive" size="sm">Archive</Button>
+                          <Button variant="destructive" size="sm" onClick={() => setShowArchiveDialog(true)}>Archive</Button>
                         </div>
                         <div className="flex items-center justify-between p-4 rounded-xl bg-red-50 dark:bg-red-900/20">
                           <div>
                             <p className="font-medium text-red-700 dark:text-red-400">Delete All Test Data</p>
                             <p className="text-sm text-gray-500">Remove all test and demo bugs</p>
                           </div>
-                          <Button variant="destructive" size="sm">Delete</Button>
+                          <Button variant="destructive" size="sm" onClick={() => toast.warning('Delete Test Data', { description: 'This action would delete all test/demo bugs' })}>Delete</Button>
                         </div>
                         <div className="flex items-center justify-between p-4 rounded-xl bg-red-50 dark:bg-red-900/20">
                           <div>
                             <p className="font-medium text-red-700 dark:text-red-400">Reset Project</p>
                             <p className="text-sm text-gray-500">Delete all bugs and reset to default</p>
                           </div>
-                          <Button variant="destructive" size="sm">Reset</Button>
+                          <Button variant="destructive" size="sm" onClick={() => toast.error('Reset Project', { description: 'This is a destructive action. Please confirm in settings.' })}>Reset</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -2057,13 +2258,55 @@ export default function BugsClient() {
                     ))}
                   </div>
                   <div className="flex items-center gap-2">
-                    <Button variant="outline" size="sm">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        const dbBug = bugs.find(b => b.bug_code === selectedBug?.key)
+                        if (dbBug) {
+                          openEditDialog(dbBug)
+                          setSelectedBug(null)
+                        } else {
+                          toast.info('Edit Bug', { description: 'Edit functionality for this bug' })
+                        }
+                      }}
+                    >
                       <Edit className="w-4 h-4 mr-2" />
                       Edit
                     </Button>
-                    <Button size="sm">
+                    <Button
+                      size="sm"
+                      onClick={() => {
+                        if (selectedBug) {
+                          setBugToChangeStatus(selectedBug)
+                          setSelectedNewStatus('in_progress')
+                          setShowStatusDialog(true)
+                        }
+                      }}
+                    >
                       <Play className="w-4 h-4 mr-2" />
                       Start Progress
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        if (selectedBug) {
+                          setBugToAssign(selectedBug)
+                          setShowAssignDialog(true)
+                        }
+                      }}
+                    >
+                      <Users className="w-4 h-4 mr-2" />
+                      Assign
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowAddCommentDialog(true)}
+                    >
+                      <MessageSquare className="w-4 h-4 mr-2" />
+                      Comment
                     </Button>
                   </div>
                 </div>
@@ -2169,7 +2412,7 @@ export default function BugsClient() {
                             <p className="font-medium text-sm truncate">{att.name}</p>
                             <p className="text-xs text-muted-foreground">{formatFileSize(att.size)}</p>
                           </div>
-                          <Button variant="ghost" size="sm">
+                          <Button variant="ghost" size="sm" onClick={() => toast.success('Downloading', { description: `Downloading ${att.name}...` })}>
                             <Download className="w-4 h-4" />
                           </Button>
                         </div>
@@ -2630,6 +2873,561 @@ export default function BugsClient() {
                     Export Report
                   </>
                 )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Assign Bug Dialog */}
+        <Dialog open={showAssignDialog} onOpenChange={setShowAssignDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Users className="w-5 h-5 text-blue-600" />
+                Assign Bug
+              </DialogTitle>
+              <DialogDescription>
+                {bugToAssign ? `Assign ${bugToAssign.key} to a team member` : 'Select a team member'}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="grid gap-2">
+                <Label>Select Assignee</Label>
+                <Select value={selectedAssignee} onValueChange={setSelectedAssignee}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Choose a team member" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {teamMembers.map(member => (
+                      <SelectItem key={member.name} value={member.name}>
+                        <div className="flex items-center gap-2">
+                          <Avatar className="w-6 h-6">
+                            <AvatarFallback className="text-[10px]">{member.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <span className="font-medium">{member.name}</span>
+                            <span className="text-muted-foreground ml-2 text-xs">{member.role}</span>
+                          </div>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              {bugToAssign && (
+                <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                  <p className="text-sm font-medium">{bugToAssign.key}</p>
+                  <p className="text-sm text-muted-foreground truncate">{bugToAssign.title}</p>
+                </div>
+              )}
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => { setShowAssignDialog(false); setBugToAssign(null); setSelectedAssignee(''); }}>
+                Cancel
+              </Button>
+              <Button onClick={handleAssignBug} disabled={!selectedAssignee}>
+                <Users className="w-4 h-4 mr-2" />
+                Assign
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Change Status Dialog */}
+        <Dialog open={showStatusDialog} onOpenChange={setShowStatusDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Workflow className="w-5 h-5 text-orange-600" />
+                Change Status
+              </DialogTitle>
+              <DialogDescription>
+                {bugToChangeStatus ? `Update status for ${bugToChangeStatus.key}` : 'Select a new status'}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="grid gap-2">
+                <Label>New Status</Label>
+                <Select value={selectedNewStatus} onValueChange={(v) => setSelectedNewStatus(v as BugStatus)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="open">Open</SelectItem>
+                    <SelectItem value="in_progress">In Progress</SelectItem>
+                    <SelectItem value="in_review">In Review</SelectItem>
+                    <SelectItem value="resolved">Resolved</SelectItem>
+                    <SelectItem value="closed">Closed</SelectItem>
+                    <SelectItem value="wont_fix">Won&apos;t Fix</SelectItem>
+                    <SelectItem value="duplicate">Duplicate</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex items-center gap-2">
+                {bugToChangeStatus && (
+                  <>
+                    <Badge className={getStatusColor(bugToChangeStatus.status)} variant="outline">
+                      {bugToChangeStatus.status.replace('_', ' ')}
+                    </Badge>
+                    <ArrowRight className="w-4 h-4 text-muted-foreground" />
+                    <Badge className={getStatusColor(selectedNewStatus)} variant="outline">
+                      {selectedNewStatus.replace('_', ' ')}
+                    </Badge>
+                  </>
+                )}
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => { setShowStatusDialog(false); setBugToChangeStatus(null); }}>
+                Cancel
+              </Button>
+              <Button onClick={handleChangeStatus}>
+                <CheckCircle className="w-4 h-4 mr-2" />
+                Update Status
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Advanced Filters Dialog */}
+        <Dialog open={showFiltersDialog} onOpenChange={setShowFiltersDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Filter className="w-5 h-5 text-green-600" />
+                Advanced Filters
+              </DialogTitle>
+              <DialogDescription>
+                Apply multiple filters to narrow down your bug search
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="grid gap-2">
+                  <Label>Status</Label>
+                  <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as BugStatus | 'all')}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Statuses</SelectItem>
+                      <SelectItem value="open">Open</SelectItem>
+                      <SelectItem value="in_progress">In Progress</SelectItem>
+                      <SelectItem value="in_review">In Review</SelectItem>
+                      <SelectItem value="resolved">Resolved</SelectItem>
+                      <SelectItem value="closed">Closed</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="grid gap-2">
+                  <Label>Severity</Label>
+                  <Select value={severityFilter} onValueChange={(v) => setSeverityFilter(v as BugSeverity | 'all')}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Severities</SelectItem>
+                      <SelectItem value="critical">Critical</SelectItem>
+                      <SelectItem value="high">High</SelectItem>
+                      <SelectItem value="medium">Medium</SelectItem>
+                      <SelectItem value="low">Low</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="grid gap-2">
+                <Label>Assignee</Label>
+                <Select onValueChange={(v) => toast.info('Filter Applied', { description: `Filtering by assignee: ${v}` })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Any assignee" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="any">Any Assignee</SelectItem>
+                    <SelectItem value="unassigned">Unassigned</SelectItem>
+                    {teamMembers.map(member => (
+                      <SelectItem key={member.name} value={member.name}>{member.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid gap-2">
+                <Label>Labels</Label>
+                <div className="flex flex-wrap gap-2">
+                  {mockLabels.map(label => (
+                    <Badge
+                      key={label.id}
+                      variant="outline"
+                      className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
+                      style={{ borderColor: label.color }}
+                      onClick={() => toast.info('Label Filter', { description: `Toggled filter for: ${label.name}` })}
+                    >
+                      <div className="w-2 h-2 rounded-full mr-1" style={{ backgroundColor: label.color }} />
+                      {label.name}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="grid gap-2">
+                  <Label>Date Created (From)</Label>
+                  <Input type="date" onChange={() => toast.info('Date Filter', { description: 'Date filter applied' })} />
+                </div>
+                <div className="grid gap-2">
+                  <Label>Date Created (To)</Label>
+                  <Input type="date" onChange={() => toast.info('Date Filter', { description: 'Date filter applied' })} />
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => { setStatusFilter('all'); setSeverityFilter('all'); toast.success('Filters Cleared'); }}>
+                Clear Filters
+              </Button>
+              <Button onClick={() => { setShowFiltersDialog(false); toast.success('Filters Applied'); }}>
+                Apply Filters
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Import Bugs Dialog */}
+        <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Upload className="w-5 h-5 text-pink-600" />
+                Import Bugs
+              </DialogTitle>
+              <DialogDescription>
+                Import bugs from CSV, JSON, or Jira export files
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-xl p-8 text-center">
+                <Upload className="w-10 h-10 mx-auto mb-4 text-muted-foreground" />
+                <p className="font-medium mb-2">Drop your file here or click to browse</p>
+                <p className="text-sm text-muted-foreground mb-4">Supports CSV, JSON, XML (Jira export)</p>
+                <Input
+                  type="file"
+                  accept=".csv,.json,.xml"
+                  className="max-w-xs mx-auto"
+                  onChange={(e) => setImportFile(e.target.files?.[0] || null)}
+                />
+              </div>
+              {importFile && (
+                <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg flex items-center gap-3">
+                  <CheckCircle className="w-5 h-5 text-green-600" />
+                  <div>
+                    <p className="font-medium text-green-700 dark:text-green-400">{importFile.name}</p>
+                    <p className="text-sm text-green-600">{(importFile.size / 1024).toFixed(1)} KB</p>
+                  </div>
+                </div>
+              )}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                  <span className="text-sm">Skip duplicates</span>
+                  <Switch defaultChecked />
+                </div>
+                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                  <span className="text-sm">Auto-assign to me</span>
+                  <Switch />
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => { setShowImportDialog(false); setImportFile(null); }}>
+                Cancel
+              </Button>
+              <Button onClick={handleImportBugs} disabled={!importFile || isImporting}>
+                {isImporting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Importing...
+                  </>
+                ) : (
+                  <>
+                    <Upload className="w-4 h-4 mr-2" />
+                    Import
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Link PR Dialog */}
+        <Dialog open={showLinkPRDialog} onOpenChange={setShowLinkPRDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <GitBranch className="w-5 h-5 text-teal-600" />
+                Link Pull Request
+              </DialogTitle>
+              <DialogDescription>
+                Connect a GitHub/GitLab pull request to this bug
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="grid gap-2">
+                <Label>PR URL or Number</Label>
+                <Input
+                  placeholder="https://github.com/org/repo/pull/123 or #123"
+                  value={prLink}
+                  onChange={(e) => setPrLink(e.target.value)}
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label>Link Type</Label>
+                <Select defaultValue="fixes">
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="fixes">Fixes this bug</SelectItem>
+                    <SelectItem value="related">Related to bug</SelectItem>
+                    <SelectItem value="refs">References bug</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="p-3 bg-teal-50 dark:bg-teal-900/20 rounded-lg">
+                <p className="text-sm text-teal-700 dark:text-teal-400">
+                  Linking PRs helps track code changes and enables automatic status updates when PRs are merged.
+                </p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => { setShowLinkPRDialog(false); setPrLink(''); }}>
+                Cancel
+              </Button>
+              <Button onClick={handleLinkPR} disabled={!prLink}>
+                <Link2 className="w-4 h-4 mr-2" />
+                Link PR
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Archive Dialog */}
+        <Dialog open={showArchiveDialog} onOpenChange={setShowArchiveDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Archive className="w-5 h-5 text-gray-600" />
+                Archive Bugs
+              </DialogTitle>
+              <DialogDescription>
+                View archived bugs or archive closed bugs
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="font-medium">Closed Bugs</span>
+                  <Badge variant="secondary">{allBugs.filter(b => b.status === 'closed').length}</Badge>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  These bugs will be moved to the archive and hidden from the main view.
+                </p>
+              </div>
+              <div className="space-y-2">
+                {allBugs.filter(b => b.status === 'closed').slice(0, 3).map(bug => (
+                  <div key={bug.id} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-medium">{bug.key}</span>
+                      <span className="text-sm text-muted-foreground truncate max-w-[200px]">{bug.title}</span>
+                    </div>
+                  </div>
+                ))}
+                {allBugs.filter(b => b.status === 'closed').length > 3 && (
+                  <p className="text-sm text-muted-foreground text-center">
+                    +{allBugs.filter(b => b.status === 'closed').length - 3} more closed bugs
+                  </p>
+                )}
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowArchiveDialog(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleArchiveBugs}>
+                <Archive className="w-4 h-4 mr-2" />
+                Archive All Closed
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* History Dialog */}
+        <Dialog open={showHistoryDialog} onOpenChange={setShowHistoryDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <History className="w-5 h-5 text-amber-600" />
+                Activity History
+              </DialogTitle>
+              <DialogDescription>
+                Recent activity across all bugs
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <ScrollArea className="h-[400px]">
+                <div className="space-y-3">
+                  {activityHistory.map(activity => (
+                    <div key={activity.id} className="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                      <Avatar className="w-8 h-8">
+                        <AvatarFallback className="text-xs">{activity.user.charAt(0)}</AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1">
+                        <p className="text-sm">
+                          <span className="font-medium">{activity.user}</span>
+                          <span className="text-muted-foreground"> {activity.action}</span>
+                        </p>
+                        <div className="flex items-center gap-2 mt-1">
+                          <Badge variant="outline" className="text-xs">{activity.bug}</Badge>
+                          <span className="text-xs text-muted-foreground">{activity.time}</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowHistoryDialog(false)}>
+                Close
+              </Button>
+              <Button onClick={() => toast.info('View Full History', { description: 'Opening full activity log...' })}>
+                View Full Log
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Comment Dialog */}
+        <Dialog open={showAddCommentDialog} onOpenChange={setShowAddCommentDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <MessageSquare className="w-5 h-5 text-blue-600" />
+                Add Comment
+              </DialogTitle>
+              <DialogDescription>
+                Add a comment to the bug
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="grid gap-2">
+                <Label>Comment</Label>
+                <Textarea
+                  placeholder="Write your comment here..."
+                  value={commentText}
+                  onChange={(e) => setCommentText(e.target.value)}
+                  rows={4}
+                />
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                <span className="text-sm">Internal note (team only)</span>
+                <Switch />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => { setShowAddCommentDialog(false); setCommentText(''); }}>
+                Cancel
+              </Button>
+              <Button onClick={handleAddComment} disabled={!commentText.trim()}>
+                <MessageSquare className="w-4 h-4 mr-2" />
+                Add Comment
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Label Dialog */}
+        <Dialog open={showAddLabelDialog} onOpenChange={setShowAddLabelDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Tag className="w-5 h-5 text-purple-600" />
+                Create Label
+              </DialogTitle>
+              <DialogDescription>
+                Create a new label for categorizing bugs
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="grid gap-2">
+                <Label>Label Name</Label>
+                <Input
+                  placeholder="e.g., documentation, needs-review"
+                  value={newLabelName}
+                  onChange={(e) => setNewLabelName(e.target.value)}
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label>Color</Label>
+                <div className="flex items-center gap-3">
+                  <Input
+                    type="color"
+                    value={newLabelColor}
+                    onChange={(e) => setNewLabelColor(e.target.value)}
+                    className="w-16 h-10 p-1"
+                  />
+                  <div className="flex gap-2">
+                    {['#ef4444', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#ec4899'].map(color => (
+                      <button
+                        key={color}
+                        className="w-8 h-8 rounded-full border-2 border-transparent hover:border-gray-400"
+                        style={{ backgroundColor: color }}
+                        onClick={() => setNewLabelColor(color)}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                <p className="text-sm text-muted-foreground mb-2">Preview:</p>
+                <Badge style={{ backgroundColor: newLabelColor, color: 'white' }}>
+                  {newLabelName || 'label-name'}
+                </Badge>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => { setShowAddLabelDialog(false); setNewLabelName(''); setNewLabelColor('#3b82f6'); }}>
+                Cancel
+              </Button>
+              <Button onClick={handleAddLabel} disabled={!newLabelName.trim()}>
+                <Tag className="w-4 h-4 mr-2" />
+                Create Label
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Confirmation Dialog */}
+        <Dialog open={showDeleteConfirmDialog} onOpenChange={setShowDeleteConfirmDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-600">
+                <AlertTriangle className="w-5 h-5" />
+                Delete Bug
+              </DialogTitle>
+              <DialogDescription>
+                Are you sure you want to delete this bug? This action cannot be undone.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                <p className="text-sm text-red-700 dark:text-red-400">
+                  This will permanently delete the bug and all associated comments and attachments.
+                </p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => { setShowDeleteConfirmDialog(false); setBugToDelete(null); }}>
+                Cancel
+              </Button>
+              <Button variant="destructive" onClick={handleConfirmDelete}>
+                <AlertTriangle className="w-4 h-4 mr-2" />
+                Delete Bug
               </Button>
             </DialogFooter>
           </DialogContent>

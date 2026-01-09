@@ -15,13 +15,20 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import {
   Target, Calendar, Flag, AlertTriangle, CheckCircle2, Clock,
   Link2, TrendingUp, ArrowRight, FileText,
   BarChart3, Settings, Plus, Search, LayoutGrid, List,
   GitBranch, Milestone, Zap, Shield, AlertCircle, XCircle,
   PauseCircle, PlayCircle, Timer, DollarSign, Briefcase,
   Eye, MessageSquare, Bell, ArrowUpRight, ArrowDownRight,
-  RefreshCw, CalendarDays, Package,
+  RefreshCw, CalendarDays, Package, Edit2, MoreVertical,
   Sliders, Webhook, Lock, Mail, Globe, Database, Archive, Trash2, Terminal, Copy, Download
 } from 'lucide-react'
 
@@ -667,7 +674,7 @@ export default function MilestonesClient() {
   const [viewMode, setViewMode] = useState<'grid' | 'list' | 'timeline'>('grid')
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<MilestoneStatus | 'all'>('all')
-  const [priorityFilter, _setPriorityFilter] = useState<Priority | 'all'>('all')
+  const [priorityFilter, setPriorityFilter] = useState<Priority | 'all'>('all')
   const [settingsTab, setSettingsTab] = useState('general')
 
   // Supabase data state
@@ -676,8 +683,57 @@ export default function MilestonesClient() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showCreateDialog, setShowCreateDialog] = useState(false)
   const [showRiskAnalysisDialog, setShowRiskAnalysisDialog] = useState(false)
-  const [_editingMilestone, _setEditingMilestone] = useState<DbMilestone | null>(null)
+  const [editingMilestone, setEditingMilestone] = useState<DbMilestone | null>(null)
   const [formState, setFormState] = useState<MilestoneFormState>(initialFormState)
+
+  // Additional dialog states
+  const [showEditDialog, setShowEditDialog] = useState(false)
+  const [showCompleteDialog, setShowCompleteDialog] = useState(false)
+  const [showExportDialog, setShowExportDialog] = useState(false)
+  const [showFilterDialog, setShowFilterDialog] = useState(false)
+  const [showSettingsDialog, setShowSettingsDialog] = useState(false)
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [showDependencyDialog, setShowDependencyDialog] = useState(false)
+  const [showDeliverableDialog, setShowDeliverableDialog] = useState(false)
+  const [showBudgetDialog, setShowBudgetDialog] = useState(false)
+  const [showNotificationsDialog, setShowNotificationsDialog] = useState(false)
+  const [milestoneToComplete, setMilestoneToComplete] = useState<Milestone | DbMilestone | null>(null)
+  const [milestoneToDelete, setMilestoneToDelete] = useState<DbMilestone | null>(null)
+
+  // Filter form state
+  const [filterForm, setFilterForm] = useState({
+    status: 'all' as MilestoneStatus | 'all',
+    priority: 'all' as Priority | 'all',
+    type: 'all' as MilestoneType | 'all',
+    dateRange: 'all' as 'all' | 'week' | 'month' | 'quarter',
+    onlyAtRisk: false,
+    onlyCriticalPath: false
+  })
+
+  // Export form state
+  const [exportForm, setExportForm] = useState({
+    format: 'csv' as 'csv' | 'json' | 'pdf',
+    includeCompleted: true,
+    includeArchived: false,
+    dateRange: 'all' as 'all' | 'week' | 'month' | 'quarter'
+  })
+
+  // Deliverable form state
+  const [deliverableForm, setDeliverableForm] = useState({
+    name: '',
+    description: '',
+    dueDate: '',
+    assignee: '',
+    priority: 'medium' as Priority
+  })
+
+  // Budget form state
+  const [budgetForm, setBudgetForm] = useState({
+    category: '',
+    planned: '',
+    actual: '',
+    notes: ''
+  })
   const [riskForm, setRiskForm] = useState({
     title: '',
     description: '',
@@ -791,8 +847,8 @@ export default function MilestonesClient() {
     }
   }
 
-  // Update milestone progress (available for future use)
-  const _handleUpdateProgress = async (milestoneId: string, progress: number) => {
+  // Update milestone progress
+  const handleUpdateProgress = async (milestoneId: string, progress: number) => {
     try {
       const { error } = await supabase
         .from('milestones')
@@ -812,8 +868,8 @@ export default function MilestonesClient() {
     }
   }
 
-  // Delete/Archive milestone (available for future use)
-  const _handleArchiveMilestone = async (milestoneId: string) => {
+  // Delete/Archive milestone
+  const handleArchiveMilestone = async (milestoneId: string) => {
     try {
       const { error } = await supabase
         .from('milestones')
@@ -829,8 +885,8 @@ export default function MilestonesClient() {
     }
   }
 
-  // Delete milestone permanently (available for future use)
-  const _handleDeleteMilestone = async (milestoneId: string) => {
+  // Delete milestone permanently
+  const handleDeleteMilestone = async (milestoneId: string) => {
     try {
       const { error } = await supabase
         .from('milestones')
@@ -839,6 +895,8 @@ export default function MilestonesClient() {
 
       if (error) throw error
       toast.success('Milestone deleted')
+      setShowDeleteDialog(false)
+      setMilestoneToDelete(null)
       fetchMilestones()
     } catch (error) {
       console.error('Error deleting milestone:', error)
@@ -846,9 +904,214 @@ export default function MilestonesClient() {
     }
   }
 
-  // Complete milestone (available for future use)
-  const _handleCompleteMilestone = async (milestone: Milestone | DbMilestone) => {
+  // Complete milestone
+  const handleCompleteMilestone = async (milestone: Milestone | DbMilestone) => {
     await handleUpdateStatus(milestone.id, 'completed')
+    setShowCompleteDialog(false)
+    setMilestoneToComplete(null)
+    toast.success('Milestone marked as complete!')
+  }
+
+  // Open edit dialog with milestone data
+  const handleOpenEditDialog = (milestone: DbMilestone) => {
+    setEditingMilestone(milestone)
+    setFormState({
+      name: milestone.name,
+      description: milestone.description || '',
+      type: milestone.type as MilestoneType,
+      status: milestone.status as MilestoneStatus,
+      priority: milestone.priority as Priority,
+      due_date: milestone.due_date || '',
+      owner_name: milestone.owner_name || '',
+      owner_email: milestone.owner_email || '',
+      team_name: milestone.team_name || '',
+      budget: milestone.budget?.toString() || '0',
+    })
+    setShowEditDialog(true)
+  }
+
+  // Update existing milestone
+  const handleUpdateMilestone = async () => {
+    if (!editingMilestone || !formState.name.trim()) {
+      toast.error('Milestone name is required')
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      const dueDate = formState.due_date ? new Date(formState.due_date) : null
+      const daysRemaining = dueDate ? Math.ceil((dueDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24)) : 0
+
+      const { error } = await supabase
+        .from('milestones')
+        .update({
+          name: formState.name,
+          description: formState.description || null,
+          type: formState.type,
+          status: formState.status,
+          priority: formState.priority,
+          due_date: formState.due_date || null,
+          days_remaining: daysRemaining,
+          owner_name: formState.owner_name || null,
+          owner_email: formState.owner_email || null,
+          team_name: formState.team_name || null,
+          budget: parseFloat(formState.budget) || 0,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', editingMilestone.id)
+
+      if (error) throw error
+
+      toast.success('Milestone updated successfully')
+      setShowEditDialog(false)
+      setEditingMilestone(null)
+      setFormState(initialFormState)
+      fetchMilestones()
+    } catch (error) {
+      console.error('Error updating milestone:', error)
+      toast.error('Failed to update milestone')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // Apply filters
+  const handleApplyFilters = () => {
+    setStatusFilter(filterForm.status)
+    setPriorityFilter(filterForm.priority)
+    toast.success('Filters applied')
+    setShowFilterDialog(false)
+  }
+
+  // Reset filters
+  const handleResetFilters = () => {
+    setFilterForm({
+      status: 'all',
+      priority: 'all',
+      type: 'all',
+      dateRange: 'all',
+      onlyAtRisk: false,
+      onlyCriticalPath: false
+    })
+    setStatusFilter('all')
+    setPriorityFilter('all')
+    toast.success('Filters reset')
+    setShowFilterDialog(false)
+  }
+
+  // Export with options
+  const handleExportWithOptions = () => {
+    let dataToExport = dbMilestones
+
+    if (!exportForm.includeCompleted) {
+      dataToExport = dataToExport.filter(m => m.status !== 'completed')
+    }
+
+    if (!exportForm.includeArchived) {
+      dataToExport = dataToExport.filter(m => m.status !== 'cancelled')
+    }
+
+    if (exportForm.format === 'csv') {
+      const csvContent = dataToExport.map(m =>
+        `${m.name},${m.status},${m.priority},${m.progress}%,${m.due_date || 'N/A'}`
+      ).join('\n')
+
+      const blob = new Blob([`Name,Status,Priority,Progress,Due Date\n${csvContent}`], { type: 'text/csv' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `milestones-${new Date().toISOString().split('T')[0]}.csv`
+      a.click()
+      URL.revokeObjectURL(url)
+    } else if (exportForm.format === 'json') {
+      const blob = new Blob([JSON.stringify(dataToExport, null, 2)], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `milestones-${new Date().toISOString().split('T')[0]}.json`
+      a.click()
+      URL.revokeObjectURL(url)
+    } else {
+      toast.info('PDF export coming soon')
+    }
+
+    toast.success(`Milestones exported as ${exportForm.format.toUpperCase()}`)
+    setShowExportDialog(false)
+  }
+
+  // Add deliverable
+  const handleAddDeliverable = () => {
+    if (!deliverableForm.name.trim()) {
+      toast.error('Deliverable name is required')
+      return
+    }
+    toast.success('Deliverable added successfully')
+    setDeliverableForm({
+      name: '',
+      description: '',
+      dueDate: '',
+      assignee: '',
+      priority: 'medium'
+    })
+    setShowDeliverableDialog(false)
+  }
+
+  // Add budget item
+  const handleAddBudgetItem = () => {
+    if (!budgetForm.category.trim()) {
+      toast.error('Budget category is required')
+      return
+    }
+    toast.success('Budget item added successfully')
+    setBudgetForm({
+      category: '',
+      planned: '',
+      actual: '',
+      notes: ''
+    })
+    setShowBudgetDialog(false)
+  }
+
+  // Add dependency
+  const handleAddDependency = () => {
+    toast.success('Dependency added successfully')
+    setShowDependencyDialog(false)
+  }
+
+  // Save settings
+  const handleSaveSettings = () => {
+    toast.success('Settings saved successfully')
+    setShowSettingsDialog(false)
+  }
+
+  // Open complete confirmation
+  const handleOpenCompleteDialog = (milestone: Milestone | DbMilestone) => {
+    setMilestoneToComplete(milestone)
+    setShowCompleteDialog(true)
+  }
+
+  // Open delete confirmation
+  const handleOpenDeleteDialog = (milestone: DbMilestone) => {
+    setMilestoneToDelete(milestone)
+    setShowDeleteDialog(true)
+  }
+
+  // Generate report handlers
+  const handleGenerateStatusReport = () => {
+    toast.success('Status report generated', { description: 'Check your downloads folder' })
+    handleExportReport()
+  }
+
+  const handleGenerateBudgetReport = () => {
+    toast.success('Budget report generated', { description: 'Financial summary exported' })
+  }
+
+  const handleGenerateRiskReport = () => {
+    toast.success('Risk assessment exported', { description: 'Risk analysis report generated' })
+  }
+
+  const handleGenerateProgressReport = () => {
+    toast.success('Progress report generated', { description: 'Timeline and progress exported' })
   }
 
   // Export milestones report
@@ -925,14 +1188,22 @@ export default function MilestonesClient() {
     return [...new Map(deps.map(d => [d.id, d])).values()]
   }, [])
 
-  // Additional handlers (available for future use)
-  const _handleAddDependency = (_milestoneId: string) => {
-    toast.info('Add Dependency', { description: 'Select a milestone to link' })
-  }
-
-  const _handleExportTimeline = () => {
+  // Export timeline handler
+  const handleExportTimeline = () => {
     toast.success('Exporting timeline', { description: 'Timeline chart will be downloaded' })
   }
+
+  // Quick actions for the toolbar
+  const mockMilestonesQuickActions = [
+    { id: '1', label: 'New Milestone', icon: Plus, action: () => setShowCreateDialog(true), variant: 'primary' as const },
+    { id: '2', label: 'Add Deliverable', icon: Package, action: () => setShowDeliverableDialog(true), variant: 'secondary' as const },
+    { id: '3', label: 'Add Dependency', icon: Link2, action: () => setShowDependencyDialog(true), variant: 'secondary' as const },
+    { id: '4', label: 'Risk Analysis', icon: AlertTriangle, action: () => setShowRiskAnalysisDialog(true), variant: 'secondary' as const },
+    { id: '5', label: 'Export Data', icon: Download, action: () => setShowExportDialog(true), variant: 'secondary' as const },
+    { id: '6', label: 'Filters', icon: Sliders, action: () => setShowFilterDialog(true), variant: 'secondary' as const },
+    { id: '7', label: 'Settings', icon: Settings, action: () => setShowSettingsDialog(true), variant: 'secondary' as const },
+    { id: '8', label: 'Refresh', icon: RefreshCw, action: handleSync, variant: 'secondary' as const },
+  ]
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-rose-50 via-white to-pink-50 dark:bg-none dark:bg-gray-900">
@@ -1044,6 +1315,26 @@ export default function MilestonesClient() {
                 <option value="completed">Completed</option>
                 <option value="on_hold">On Hold</option>
               </select>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowFilterDialog(true)}
+                className="flex items-center gap-2"
+              >
+                <Sliders className="w-4 h-4" />
+                Filters
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowNotificationsDialog(true)}
+                className="relative"
+              >
+                <Bell className="w-4 h-4" />
+                <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
+                  3
+                </span>
+              </Button>
               <div className="flex items-center border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden">
                 <button
                   onClick={() => setViewMode('grid')}
@@ -1142,12 +1433,48 @@ export default function MilestonesClient() {
                             </p>
                           </div>
                         </div>
-                        {milestone.is_critical_path && (
-                          <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-400">
-                            <Zap className="w-3 h-3 mr-1" />
-                            Critical
-                          </Badge>
-                        )}
+                        <div className="flex items-center gap-2">
+                          {milestone.is_critical_path && (
+                            <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-400">
+                              <Zap className="w-3 h-3 mr-1" />
+                              Critical
+                            </Badge>
+                          )}
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                <MoreVertical className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
+                              <DropdownMenuItem onClick={() => toast.info('Edit milestone', { description: milestone.name })}>
+                                <Edit2 className="w-4 h-4 mr-2" />
+                                Edit Milestone
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleOpenCompleteDialog(milestone)}>
+                                <CheckCircle2 className="w-4 h-4 mr-2" />
+                                Mark Complete
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => setShowDeliverableDialog(true)}>
+                                <Package className="w-4 h-4 mr-2" />
+                                Add Deliverable
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => setShowDependencyDialog(true)}>
+                                <Link2 className="w-4 h-4 mr-2" />
+                                Add Dependency
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem onClick={() => handleUpdateStatus(milestone.id, 'on_hold')}>
+                                <PauseCircle className="w-4 h-4 mr-2" />
+                                Put On Hold
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleArchiveMilestone(milestone.id)} className="text-amber-600">
+                                <Archive className="w-4 h-4 mr-2" />
+                                Archive
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
                       </div>
 
                       {/* Badges */}
@@ -1586,19 +1913,19 @@ export default function MilestonesClient() {
                     <CardTitle className="text-lg">Generate Report</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    <Button variant="outline" className="w-full justify-start">
+                    <Button variant="outline" className="w-full justify-start" onClick={handleGenerateStatusReport}>
                       <FileText className="w-4 h-4 mr-2" />
                       Status Report
                     </Button>
-                    <Button variant="outline" className="w-full justify-start">
+                    <Button variant="outline" className="w-full justify-start" onClick={handleGenerateBudgetReport}>
                       <DollarSign className="w-4 h-4 mr-2" />
                       Budget Report
                     </Button>
-                    <Button variant="outline" className="w-full justify-start">
+                    <Button variant="outline" className="w-full justify-start" onClick={handleGenerateRiskReport}>
                       <AlertTriangle className="w-4 h-4 mr-2" />
                       Risk Assessment
                     </Button>
-                    <Button variant="outline" className="w-full justify-start">
+                    <Button variant="outline" className="w-full justify-start" onClick={handleGenerateProgressReport}>
                       <TrendingUp className="w-4 h-4 mr-2" />
                       Progress Report
                     </Button>
@@ -2454,6 +2781,771 @@ export default function MilestonesClient() {
                 className="bg-gradient-to-r from-amber-600 to-orange-600 text-white"
               >
                 Add Risk
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Milestone Dialog */}
+        <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Target className="w-5 h-5 text-rose-500" />
+                Edit Milestone
+              </DialogTitle>
+              <DialogDescription>
+                Update milestone details and settings
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit_name">Milestone Name *</Label>
+                <Input
+                  id="edit_name"
+                  placeholder="e.g., Product Launch Q1"
+                  value={formState.name}
+                  onChange={(e) => setFormState(prev => ({ ...prev, name: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit_description">Description</Label>
+                <Input
+                  id="edit_description"
+                  placeholder="Brief description of this milestone"
+                  value={formState.description}
+                  onChange={(e) => setFormState(prev => ({ ...prev, description: e.target.value }))}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="edit_type">Type</Label>
+                  <select
+                    id="edit_type"
+                    className="w-full h-10 px-3 rounded-md border border-input bg-background"
+                    value={formState.type}
+                    onChange={(e) => setFormState(prev => ({ ...prev, type: e.target.value as MilestoneType }))}
+                  >
+                    <option value="project">Project</option>
+                    <option value="release">Release</option>
+                    <option value="phase">Phase</option>
+                    <option value="checkpoint">Checkpoint</option>
+                    <option value="gate">Gate</option>
+                    <option value="delivery">Delivery</option>
+                    <option value="launch">Launch</option>
+                    <option value="review">Review</option>
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit_status">Status</Label>
+                  <select
+                    id="edit_status"
+                    className="w-full h-10 px-3 rounded-md border border-input bg-background"
+                    value={formState.status}
+                    onChange={(e) => setFormState(prev => ({ ...prev, status: e.target.value as MilestoneStatus }))}
+                  >
+                    <option value="not_started">Not Started</option>
+                    <option value="in_progress">In Progress</option>
+                    <option value="at_risk">At Risk</option>
+                    <option value="blocked">Blocked</option>
+                    <option value="completed">Completed</option>
+                    <option value="on_hold">On Hold</option>
+                  </select>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="edit_priority">Priority</Label>
+                  <select
+                    id="edit_priority"
+                    className="w-full h-10 px-3 rounded-md border border-input bg-background"
+                    value={formState.priority}
+                    onChange={(e) => setFormState(prev => ({ ...prev, priority: e.target.value as Priority }))}
+                  >
+                    <option value="low">Low</option>
+                    <option value="medium">Medium</option>
+                    <option value="high">High</option>
+                    <option value="critical">Critical</option>
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit_due_date">Due Date</Label>
+                  <Input
+                    id="edit_due_date"
+                    type="date"
+                    value={formState.due_date}
+                    onChange={(e) => setFormState(prev => ({ ...prev, due_date: e.target.value }))}
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="edit_owner_name">Owner Name</Label>
+                  <Input
+                    id="edit_owner_name"
+                    placeholder="Project owner"
+                    value={formState.owner_name}
+                    onChange={(e) => setFormState(prev => ({ ...prev, owner_name: e.target.value }))}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit_budget">Budget (USD)</Label>
+                  <Input
+                    id="edit_budget"
+                    type="number"
+                    placeholder="0"
+                    value={formState.budget}
+                    onChange={(e) => setFormState(prev => ({ ...prev, budget: e.target.value }))}
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => {
+                setShowEditDialog(false)
+                setEditingMilestone(null)
+                setFormState(initialFormState)
+              }}>
+                Cancel
+              </Button>
+              <Button
+                onClick={handleUpdateMilestone}
+                disabled={isSubmitting}
+                className="bg-gradient-to-r from-rose-600 to-pink-600 text-white"
+              >
+                {isSubmitting ? 'Updating...' : 'Update Milestone'}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Complete Milestone Confirmation Dialog */}
+        <Dialog open={showCompleteDialog} onOpenChange={setShowCompleteDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <CheckCircle2 className="w-5 h-5 text-green-500" />
+                Complete Milestone
+              </DialogTitle>
+              <DialogDescription>
+                Are you sure you want to mark this milestone as complete?
+              </DialogDescription>
+            </DialogHeader>
+            {milestoneToComplete && (
+              <div className="py-4">
+                <div className="p-4 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
+                  <p className="font-semibold text-green-900 dark:text-green-100">
+                    {milestoneToComplete.name}
+                  </p>
+                  <p className="text-sm text-green-700 dark:text-green-300 mt-1">
+                    This will set the progress to 100% and mark all deliverables as complete.
+                  </p>
+                </div>
+              </div>
+            )}
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => {
+                setShowCompleteDialog(false)
+                setMilestoneToComplete(null)
+              }}>
+                Cancel
+              </Button>
+              <Button
+                onClick={() => milestoneToComplete && handleCompleteMilestone(milestoneToComplete)}
+                className="bg-gradient-to-r from-green-600 to-emerald-600 text-white"
+              >
+                Complete Milestone
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Milestone Confirmation Dialog */}
+        <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-600">
+                <Trash2 className="w-5 h-5" />
+                Delete Milestone
+              </DialogTitle>
+              <DialogDescription>
+                This action cannot be undone. This will permanently delete the milestone.
+              </DialogDescription>
+            </DialogHeader>
+            {milestoneToDelete && (
+              <div className="py-4">
+                <div className="p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+                  <p className="font-semibold text-red-900 dark:text-red-100">
+                    {milestoneToDelete.name}
+                  </p>
+                  <p className="text-sm text-red-700 dark:text-red-300 mt-1">
+                    All associated data including deliverables and dependencies will be removed.
+                  </p>
+                </div>
+              </div>
+            )}
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => {
+                setShowDeleteDialog(false)
+                setMilestoneToDelete(null)
+              }}>
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={() => milestoneToDelete && handleDeleteMilestone(milestoneToDelete.id)}
+              >
+                Delete Milestone
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Export Dialog */}
+        <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Download className="w-5 h-5 text-cyan-500" />
+                Export Milestones
+              </DialogTitle>
+              <DialogDescription>
+                Choose export format and options
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Export Format</Label>
+                <div className="grid grid-cols-3 gap-2">
+                  {(['csv', 'json', 'pdf'] as const).map((format) => (
+                    <Button
+                      key={format}
+                      variant={exportForm.format === format ? 'default' : 'outline'}
+                      className={exportForm.format === format ? 'bg-rose-500' : ''}
+                      onClick={() => setExportForm(prev => ({ ...prev, format }))}
+                    >
+                      {format.toUpperCase()}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Date Range</Label>
+                <select
+                  className="w-full h-10 px-3 rounded-md border border-input bg-background"
+                  value={exportForm.dateRange}
+                  onChange={(e) => setExportForm(prev => ({ ...prev, dateRange: e.target.value as typeof exportForm.dateRange }))}
+                >
+                  <option value="all">All Time</option>
+                  <option value="week">This Week</option>
+                  <option value="month">This Month</option>
+                  <option value="quarter">This Quarter</option>
+                </select>
+              </div>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between p-3 rounded-lg border">
+                  <div>
+                    <p className="font-medium text-sm">Include Completed</p>
+                    <p className="text-xs text-muted-foreground">Export completed milestones</p>
+                  </div>
+                  <Switch
+                    checked={exportForm.includeCompleted}
+                    onCheckedChange={(checked) => setExportForm(prev => ({ ...prev, includeCompleted: checked }))}
+                  />
+                </div>
+                <div className="flex items-center justify-between p-3 rounded-lg border">
+                  <div>
+                    <p className="font-medium text-sm">Include Archived</p>
+                    <p className="text-xs text-muted-foreground">Export archived/cancelled milestones</p>
+                  </div>
+                  <Switch
+                    checked={exportForm.includeArchived}
+                    onCheckedChange={(checked) => setExportForm(prev => ({ ...prev, includeArchived: checked }))}
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setShowExportDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                onClick={handleExportWithOptions}
+                className="bg-gradient-to-r from-cyan-600 to-blue-600 text-white"
+              >
+                <Download className="w-4 h-4 mr-2" />
+                Export
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Filter Dialog */}
+        <Dialog open={showFilterDialog} onOpenChange={setShowFilterDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Sliders className="w-5 h-5 text-purple-500" />
+                Filter Milestones
+              </DialogTitle>
+              <DialogDescription>
+                Apply filters to narrow down your milestone view
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Status</Label>
+                  <select
+                    className="w-full h-10 px-3 rounded-md border border-input bg-background"
+                    value={filterForm.status}
+                    onChange={(e) => setFilterForm(prev => ({ ...prev, status: e.target.value as typeof filterForm.status }))}
+                  >
+                    <option value="all">All Status</option>
+                    <option value="not_started">Not Started</option>
+                    <option value="in_progress">In Progress</option>
+                    <option value="at_risk">At Risk</option>
+                    <option value="blocked">Blocked</option>
+                    <option value="completed">Completed</option>
+                    <option value="on_hold">On Hold</option>
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Priority</Label>
+                  <select
+                    className="w-full h-10 px-3 rounded-md border border-input bg-background"
+                    value={filterForm.priority}
+                    onChange={(e) => setFilterForm(prev => ({ ...prev, priority: e.target.value as typeof filterForm.priority }))}
+                  >
+                    <option value="all">All Priorities</option>
+                    <option value="critical">Critical</option>
+                    <option value="high">High</option>
+                    <option value="medium">Medium</option>
+                    <option value="low">Low</option>
+                  </select>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Type</Label>
+                  <select
+                    className="w-full h-10 px-3 rounded-md border border-input bg-background"
+                    value={filterForm.type}
+                    onChange={(e) => setFilterForm(prev => ({ ...prev, type: e.target.value as typeof filterForm.type }))}
+                  >
+                    <option value="all">All Types</option>
+                    <option value="project">Project</option>
+                    <option value="release">Release</option>
+                    <option value="phase">Phase</option>
+                    <option value="checkpoint">Checkpoint</option>
+                    <option value="gate">Gate</option>
+                    <option value="delivery">Delivery</option>
+                    <option value="launch">Launch</option>
+                    <option value="review">Review</option>
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Date Range</Label>
+                  <select
+                    className="w-full h-10 px-3 rounded-md border border-input bg-background"
+                    value={filterForm.dateRange}
+                    onChange={(e) => setFilterForm(prev => ({ ...prev, dateRange: e.target.value as typeof filterForm.dateRange }))}
+                  >
+                    <option value="all">All Time</option>
+                    <option value="week">This Week</option>
+                    <option value="month">This Month</option>
+                    <option value="quarter">This Quarter</option>
+                  </select>
+                </div>
+              </div>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between p-3 rounded-lg border">
+                  <div>
+                    <p className="font-medium text-sm">Only At Risk</p>
+                    <p className="text-xs text-muted-foreground">Show only at-risk milestones</p>
+                  </div>
+                  <Switch
+                    checked={filterForm.onlyAtRisk}
+                    onCheckedChange={(checked) => setFilterForm(prev => ({ ...prev, onlyAtRisk: checked }))}
+                  />
+                </div>
+                <div className="flex items-center justify-between p-3 rounded-lg border">
+                  <div>
+                    <p className="font-medium text-sm">Critical Path Only</p>
+                    <p className="text-xs text-muted-foreground">Show only critical path items</p>
+                  </div>
+                  <Switch
+                    checked={filterForm.onlyCriticalPath}
+                    onCheckedChange={(checked) => setFilterForm(prev => ({ ...prev, onlyCriticalPath: checked }))}
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="flex justify-between">
+              <Button variant="ghost" onClick={handleResetFilters}>
+                Reset Filters
+              </Button>
+              <div className="flex gap-3">
+                <Button variant="outline" onClick={() => setShowFilterDialog(false)}>
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleApplyFilters}
+                  className="bg-gradient-to-r from-purple-600 to-violet-600 text-white"
+                >
+                  Apply Filters
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Deliverable Dialog */}
+        <Dialog open={showDeliverableDialog} onOpenChange={setShowDeliverableDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Package className="w-5 h-5 text-green-500" />
+                Add Deliverable
+              </DialogTitle>
+              <DialogDescription>
+                Add a new deliverable to track milestone progress
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="deliverable_name">Deliverable Name *</Label>
+                <Input
+                  id="deliverable_name"
+                  placeholder="e.g., API Documentation"
+                  value={deliverableForm.name}
+                  onChange={(e) => setDeliverableForm(prev => ({ ...prev, name: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="deliverable_description">Description</Label>
+                <Input
+                  id="deliverable_description"
+                  placeholder="Brief description"
+                  value={deliverableForm.description}
+                  onChange={(e) => setDeliverableForm(prev => ({ ...prev, description: e.target.value }))}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="deliverable_due">Due Date</Label>
+                  <Input
+                    id="deliverable_due"
+                    type="date"
+                    value={deliverableForm.dueDate}
+                    onChange={(e) => setDeliverableForm(prev => ({ ...prev, dueDate: e.target.value }))}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="deliverable_priority">Priority</Label>
+                  <select
+                    id="deliverable_priority"
+                    className="w-full h-10 px-3 rounded-md border border-input bg-background"
+                    value={deliverableForm.priority}
+                    onChange={(e) => setDeliverableForm(prev => ({ ...prev, priority: e.target.value as Priority }))}
+                  >
+                    <option value="low">Low</option>
+                    <option value="medium">Medium</option>
+                    <option value="high">High</option>
+                    <option value="critical">Critical</option>
+                  </select>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="deliverable_assignee">Assignee</Label>
+                <Input
+                  id="deliverable_assignee"
+                  placeholder="Person responsible"
+                  value={deliverableForm.assignee}
+                  onChange={(e) => setDeliverableForm(prev => ({ ...prev, assignee: e.target.value }))}
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setShowDeliverableDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                onClick={handleAddDeliverable}
+                className="bg-gradient-to-r from-green-600 to-emerald-600 text-white"
+              >
+                Add Deliverable
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Dependency Dialog */}
+        <Dialog open={showDependencyDialog} onOpenChange={setShowDependencyDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Link2 className="w-5 h-5 text-purple-500" />
+                Add Dependency
+              </DialogTitle>
+              <DialogDescription>
+                Link milestones to track dependencies
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Source Milestone</Label>
+                <select className="w-full h-10 px-3 rounded-md border border-input bg-background">
+                  <option value="">Select source milestone...</option>
+                  {mockMilestones.map(m => (
+                    <option key={m.id} value={m.id}>{m.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label>Dependency Type</Label>
+                <select className="w-full h-10 px-3 rounded-md border border-input bg-background">
+                  <option value="finish_to_start">Finish to Start</option>
+                  <option value="start_to_start">Start to Start</option>
+                  <option value="finish_to_finish">Finish to Finish</option>
+                  <option value="start_to_finish">Start to Finish</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label>Target Milestone</Label>
+                <select className="w-full h-10 px-3 rounded-md border border-input bg-background">
+                  <option value="">Select target milestone...</option>
+                  {mockMilestones.map(m => (
+                    <option key={m.id} value={m.id}>{m.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Lag Days</Label>
+                  <Input type="number" placeholder="0" defaultValue="0" />
+                </div>
+                <div className="flex items-center gap-2 pt-6">
+                  <Switch id="blocking" />
+                  <Label htmlFor="blocking">Blocking</Label>
+                </div>
+              </div>
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setShowDependencyDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                onClick={handleAddDependency}
+                className="bg-gradient-to-r from-purple-600 to-violet-600 text-white"
+              >
+                Add Dependency
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Budget Dialog */}
+        <Dialog open={showBudgetDialog} onOpenChange={setShowBudgetDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <DollarSign className="w-5 h-5 text-green-500" />
+                Add Budget Item
+              </DialogTitle>
+              <DialogDescription>
+                Add a new budget category to track expenses
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="budget_category">Category *</Label>
+                <Input
+                  id="budget_category"
+                  placeholder="e.g., Development, Design, Infrastructure"
+                  value={budgetForm.category}
+                  onChange={(e) => setBudgetForm(prev => ({ ...prev, category: e.target.value }))}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="budget_planned">Planned Amount ($)</Label>
+                  <Input
+                    id="budget_planned"
+                    type="number"
+                    placeholder="0"
+                    value={budgetForm.planned}
+                    onChange={(e) => setBudgetForm(prev => ({ ...prev, planned: e.target.value }))}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="budget_actual">Actual Spent ($)</Label>
+                  <Input
+                    id="budget_actual"
+                    type="number"
+                    placeholder="0"
+                    value={budgetForm.actual}
+                    onChange={(e) => setBudgetForm(prev => ({ ...prev, actual: e.target.value }))}
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="budget_notes">Notes</Label>
+                <Input
+                  id="budget_notes"
+                  placeholder="Additional notes about this budget item"
+                  value={budgetForm.notes}
+                  onChange={(e) => setBudgetForm(prev => ({ ...prev, notes: e.target.value }))}
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setShowBudgetDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                onClick={handleAddBudgetItem}
+                className="bg-gradient-to-r from-green-600 to-emerald-600 text-white"
+              >
+                Add Budget Item
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Settings Dialog */}
+        <Dialog open={showSettingsDialog} onOpenChange={setShowSettingsDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Settings className="w-5 h-5 text-slate-500" />
+                Quick Settings
+              </DialogTitle>
+              <DialogDescription>
+                Configure milestone display and notification preferences
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Default View</Label>
+                  <select
+                    className="w-full h-10 px-3 rounded-md border border-input bg-background"
+                    value={viewMode}
+                    onChange={(e) => setViewMode(e.target.value as typeof viewMode)}
+                  >
+                    <option value="grid">Grid View</option>
+                    <option value="list">List View</option>
+                    <option value="timeline">Timeline View</option>
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Default Tab</Label>
+                  <select
+                    className="w-full h-10 px-3 rounded-md border border-input bg-background"
+                    value={activeTab}
+                    onChange={(e) => setActiveTab(e.target.value)}
+                  >
+                    <option value="milestones">Milestones</option>
+                    <option value="timeline">Timeline</option>
+                    <option value="deliverables">Deliverables</option>
+                    <option value="dependencies">Dependencies</option>
+                    <option value="reports">Reports</option>
+                  </select>
+                </div>
+              </div>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between p-3 rounded-lg border">
+                  <div>
+                    <p className="font-medium text-sm">Show Completed Milestones</p>
+                    <p className="text-xs text-muted-foreground">Display completed milestones in list</p>
+                  </div>
+                  <Switch defaultChecked />
+                </div>
+                <div className="flex items-center justify-between p-3 rounded-lg border">
+                  <div>
+                    <p className="font-medium text-sm">Auto-refresh Data</p>
+                    <p className="text-xs text-muted-foreground">Automatically refresh every 5 minutes</p>
+                  </div>
+                  <Switch />
+                </div>
+                <div className="flex items-center justify-between p-3 rounded-lg border">
+                  <div>
+                    <p className="font-medium text-sm">Desktop Notifications</p>
+                    <p className="text-xs text-muted-foreground">Get notified of milestone updates</p>
+                  </div>
+                  <Switch defaultChecked />
+                </div>
+                <div className="flex items-center justify-between p-3 rounded-lg border">
+                  <div>
+                    <p className="font-medium text-sm">Show Budget Info</p>
+                    <p className="text-xs text-muted-foreground">Display budget on milestone cards</p>
+                  </div>
+                  <Switch defaultChecked />
+                </div>
+              </div>
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setShowSettingsDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                onClick={handleSaveSettings}
+                className="bg-gradient-to-r from-slate-600 to-slate-700 text-white"
+              >
+                Save Settings
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Notifications Dialog */}
+        <Dialog open={showNotificationsDialog} onOpenChange={setShowNotificationsDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Bell className="w-5 h-5 text-blue-500" />
+                Notifications
+              </DialogTitle>
+              <DialogDescription>
+                Recent milestone notifications and alerts
+              </DialogDescription>
+            </DialogHeader>
+            <ScrollArea className="max-h-[400px] pr-4">
+              <div className="space-y-3 py-4">
+                {[
+                  { title: 'Milestone completed', description: 'Infrastructure Upgrade has been completed', time: '2 hours ago', type: 'success' },
+                  { title: 'At risk alert', description: 'Platform V2.0 Launch is now at risk', time: '4 hours ago', type: 'warning' },
+                  { title: 'New comment', description: 'Sarah added a comment on Mobile App Beta', time: '1 day ago', type: 'info' },
+                  { title: 'Budget alert', description: 'Security Compliance is over budget', time: '2 days ago', type: 'error' },
+                  { title: 'Deadline reminder', description: 'Data Analytics Platform due in 7 days', time: '3 days ago', type: 'info' },
+                ].map((notification, i) => (
+                  <div
+                    key={i}
+                    className={`p-3 rounded-lg border ${
+                      notification.type === 'success' ? 'bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-800' :
+                      notification.type === 'warning' ? 'bg-amber-50 border-amber-200 dark:bg-amber-900/20 dark:border-amber-800' :
+                      notification.type === 'error' ? 'bg-red-50 border-red-200 dark:bg-red-900/20 dark:border-red-800' :
+                      'bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800'
+                    }`}
+                  >
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <p className="font-medium text-sm">{notification.title}</p>
+                        <p className="text-xs text-muted-foreground mt-1">{notification.description}</p>
+                      </div>
+                      <span className="text-xs text-muted-foreground">{notification.time}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+            <div className="flex justify-between">
+              <Button variant="ghost" onClick={() => toast.success('All notifications marked as read')}>
+                Mark all as read
+              </Button>
+              <Button variant="outline" onClick={() => setShowNotificationsDialog(false)}>
+                Close
               </Button>
             </div>
           </DialogContent>

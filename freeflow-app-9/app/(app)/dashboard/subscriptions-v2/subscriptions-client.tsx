@@ -2,8 +2,8 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import {
-  CreditCard, Receipt, DollarSign, Users, Plus, BarChart3, Settings, RefreshCw, Download, AlertCircle, AlertTriangle, Clock, Trash2, Edit, Eye,
-  Zap, Package, TrendingUp, ExternalLink, Crown, Star, Check, X, ArrowUpRight, ArrowRight, Calendar, Shield, Rocket, Sparkles, ChevronRight
+  CreditCard, Receipt, DollarSign, Users, Plus, BarChart3, Settings, RefreshCw, Download, AlertCircle, AlertTriangle, Clock, Edit, Eye,
+  Zap, Package, ExternalLink, Crown, Star, Check, X, ArrowRight, Shield, Rocket, Sparkles, ChevronRight, Filter
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog'
@@ -109,7 +109,35 @@ export default function SubscriptionsClient() {
   // Dialogs
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false)
   const [showCancelDialog, setShowCancelDialog] = useState(false)
+  const [showAddPaymentMethodDialog, setShowAddPaymentMethodDialog] = useState(false)
+  const [showExportDialog, setShowExportDialog] = useState(false)
+  const [showSettingsDialog, setShowSettingsDialog] = useState(false)
+  const [showFilterDialog, setShowFilterDialog] = useState(false)
+  const [showPauseDialog, setShowPauseDialog] = useState(false)
+  const [showViewInvoiceDialog, setShowViewInvoiceDialog] = useState(false)
+  const [showBillingAddressDialog, setShowBillingAddressDialog] = useState(false)
   const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null)
+  const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null)
+
+  // Form States
+  const [cardNumber, setCardNumber] = useState('')
+  const [cardExpiry, setCardExpiry] = useState('')
+  const [cardCvc, setCardCvc] = useState('')
+  const [billingAddress, setBillingAddress] = useState({
+    name: '',
+    email: '',
+    address: '',
+    city: '',
+    state: '',
+    postalCode: '',
+    country: 'US'
+  })
+  const [exportFormat, setExportFormat] = useState<'csv' | 'json' | 'pdf'>('csv')
+  const [filterStatus, setFilterStatus] = useState<string>('all')
+  const [filterDateRange, setFilterDateRange] = useState<string>('all')
+  const [pauseDuration, setPauseDuration] = useState<string>('1_month')
+  const [autoRenewEnabled, setAutoRenewEnabled] = useState(true)
+  const [emailNotificationsEnabled, setEmailNotificationsEnabled] = useState(true)
 
   // ============================================================================
   // Data Fetching
@@ -118,7 +146,7 @@ export default function SubscriptionsClient() {
   const loadSubscriptionData = useCallback(async () => {
     setLoading(true)
     try {
-      const [subResult, invoicesResult, usageResult, plansResult] = await Promise.all([
+      const [subResult, invoicesResult, usageResult, plansResult, paymentMethodsResult] = await Promise.all([
         fetchWithAuth('/api/stripe/subscriptions', {
           method: 'POST',
           body: JSON.stringify({ action: 'get-subscription' }),
@@ -135,6 +163,10 @@ export default function SubscriptionsClient() {
           method: 'POST',
           body: JSON.stringify({ action: 'get-plans', billingInterval }),
         }),
+        fetchWithAuth('/api/stripe/payment-methods', {
+          method: 'POST',
+          body: JSON.stringify({ action: 'list-payment-methods' }),
+        }),
       ])
 
       if (subResult.success && subResult.data?.subscription) {
@@ -148,6 +180,9 @@ export default function SubscriptionsClient() {
       }
       if (plansResult.success && plansResult.data?.plans) {
         setPlans(plansResult.data.plans)
+      }
+      if (paymentMethodsResult.success && paymentMethodsResult.data?.paymentMethods) {
+        setPaymentMethods(paymentMethodsResult.data.paymentMethods)
       }
     } catch (error) {
       console.error('Failed to load subscription data:', error)
@@ -361,6 +396,384 @@ export default function SubscriptionsClient() {
     })
   }
 
+  /**
+   * Handle adding a new payment method
+   */
+  const handleAddPaymentMethod = async () => {
+    if (!cardNumber || !cardExpiry || !cardCvc) {
+      toast.error('Please fill in all card details')
+      return
+    }
+
+    const addPaymentPromise = async () => {
+      const response = await fetchWithAuth('/api/stripe/payment-methods', {
+        method: 'POST',
+        body: JSON.stringify({
+          action: 'add-payment-method',
+          card: {
+            number: cardNumber.replace(/\s/g, ''),
+            expMonth: cardExpiry.split('/')[0],
+            expYear: cardExpiry.split('/')[1],
+            cvc: cardCvc,
+          },
+        }),
+      })
+
+      if (!response.success) {
+        throw new Error(response.error || 'Failed to add payment method')
+      }
+
+      setShowAddPaymentMethodDialog(false)
+      setCardNumber('')
+      setCardExpiry('')
+      setCardCvc('')
+      await loadSubscriptionData()
+
+      return response.data?.message || 'Payment method added successfully'
+    }
+
+    toast.promise(addPaymentPromise(), {
+      loading: 'Adding payment method...',
+      success: (message) => message,
+      error: (err) => err.message || 'Failed to add payment method',
+    })
+  }
+
+  /**
+   * Handle export invoices
+   */
+  const handleExportInvoices = async () => {
+    const exportPromise = async () => {
+      if (invoices.length === 0) {
+        throw new Error('No invoices to export')
+      }
+
+      const filteredInvoices = invoices.filter(inv => {
+        if (filterStatus !== 'all' && inv.status !== filterStatus) return false
+        return true
+      })
+
+      if (exportFormat === 'csv') {
+        const csvContent = [
+          'Invoice Number,Status,Amount,Currency,Date,PDF URL',
+          ...filteredInvoices.map(inv =>
+            `${inv.number},${inv.status},${inv.amount / 100},${inv.currency},${formatDate(inv.created)},${inv.pdfUrl || ''}`
+          )
+        ].join('\n')
+
+        const blob = new Blob([csvContent], { type: 'text/csv' })
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `invoices-${new Date().toISOString().split('T')[0]}.csv`
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+        URL.revokeObjectURL(url)
+      } else if (exportFormat === 'json') {
+        const jsonContent = JSON.stringify(filteredInvoices, null, 2)
+        const blob = new Blob([jsonContent], { type: 'application/json' })
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `invoices-${new Date().toISOString().split('T')[0]}.json`
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+        URL.revokeObjectURL(url)
+      } else if (exportFormat === 'pdf') {
+        // For PDF export, we would typically call an API endpoint
+        const response = await fetchWithAuth('/api/invoices/export-pdf', {
+          method: 'POST',
+          body: JSON.stringify({ invoiceIds: filteredInvoices.map(i => i.id) }),
+        })
+
+        if (response.success && response.data?.url) {
+          window.open(response.data.url, '_blank')
+        } else {
+          // Fallback: open all PDFs
+          filteredInvoices.forEach(inv => {
+            if (inv.pdfUrl) window.open(inv.pdfUrl, '_blank')
+          })
+        }
+      }
+
+      setShowExportDialog(false)
+      return `Exported ${filteredInvoices.length} invoices as ${exportFormat.toUpperCase()}`
+    }
+
+    toast.promise(exportPromise(), {
+      loading: 'Exporting invoices...',
+      success: (message) => message,
+      error: (err) => err.message || 'Export failed',
+    })
+  }
+
+  /**
+   * Handle pause subscription
+   */
+  const handlePauseSubscription = async () => {
+    const pausePromise = async () => {
+      const response = await fetchWithAuth('/api/stripe/subscriptions', {
+        method: 'POST',
+        body: JSON.stringify({
+          action: 'pause-subscription',
+          duration: pauseDuration,
+        }),
+      })
+
+      if (!response.success) {
+        throw new Error(response.error || 'Failed to pause subscription')
+      }
+
+      setShowPauseDialog(false)
+      await loadSubscriptionData()
+
+      return response.data?.message || `Subscription paused for ${pauseDuration.replace('_', ' ')}`
+    }
+
+    toast.promise(pausePromise(), {
+      loading: 'Pausing subscription...',
+      success: (message) => message,
+      error: (err) => err.message || 'Failed to pause subscription',
+    })
+  }
+
+  /**
+   * Handle resume subscription
+   */
+  const handleResumeSubscription = async () => {
+    const resumePromise = async () => {
+      const response = await fetchWithAuth('/api/stripe/subscriptions', {
+        method: 'POST',
+        body: JSON.stringify({
+          action: 'resume-subscription',
+        }),
+      })
+
+      if (!response.success) {
+        throw new Error(response.error || 'Failed to resume subscription')
+      }
+
+      await loadSubscriptionData()
+      return response.data?.message || 'Subscription resumed successfully'
+    }
+
+    toast.promise(resumePromise(), {
+      loading: 'Resuming subscription...',
+      success: (message) => message,
+      error: (err) => err.message || 'Failed to resume subscription',
+    })
+  }
+
+  /**
+   * Handle update billing address
+   */
+  const handleUpdateBillingAddress = async () => {
+    if (!billingAddress.name || !billingAddress.email || !billingAddress.address) {
+      toast.error('Please fill in required fields')
+      return
+    }
+
+    const updateAddressPromise = async () => {
+      const response = await fetchWithAuth('/api/stripe/billing', {
+        method: 'POST',
+        body: JSON.stringify({
+          action: 'update-billing-address',
+          address: billingAddress,
+        }),
+      })
+
+      if (!response.success) {
+        throw new Error(response.error || 'Failed to update billing address')
+      }
+
+      setShowBillingAddressDialog(false)
+      return response.data?.message || 'Billing address updated successfully'
+    }
+
+    toast.promise(updateAddressPromise(), {
+      loading: 'Updating billing address...',
+      success: (message) => message,
+      error: (err) => err.message || 'Failed to update billing address',
+    })
+  }
+
+  /**
+   * Handle save subscription settings
+   */
+  const handleSaveSettings = async () => {
+    const saveSettingsPromise = async () => {
+      const response = await fetchWithAuth('/api/stripe/settings', {
+        method: 'POST',
+        body: JSON.stringify({
+          action: 'update-settings',
+          settings: {
+            autoRenew: autoRenewEnabled,
+            emailNotifications: emailNotificationsEnabled,
+          },
+        }),
+      })
+
+      if (!response.success) {
+        throw new Error(response.error || 'Failed to save settings')
+      }
+
+      setShowSettingsDialog(false)
+      return response.data?.message || 'Settings saved successfully'
+    }
+
+    toast.promise(saveSettingsPromise(), {
+      loading: 'Saving settings...',
+      success: (message) => message,
+      error: (err) => err.message || 'Failed to save settings',
+    })
+  }
+
+  /**
+   * Handle apply filters
+   */
+  const handleApplyFilters = () => {
+    toast.success(`Filters applied: Status - ${filterStatus}, Date Range - ${filterDateRange}`)
+    setShowFilterDialog(false)
+  }
+
+  /**
+   * Handle reset filters
+   */
+  const handleResetFilters = () => {
+    setFilterStatus('all')
+    setFilterDateRange('all')
+    toast.success('Filters reset')
+    setShowFilterDialog(false)
+  }
+
+  /**
+   * Handle view invoice details
+   */
+  const handleViewInvoice = (invoice: Invoice) => {
+    setSelectedInvoice(invoice)
+    setShowViewInvoiceDialog(true)
+  }
+
+  /**
+   * Handle retry failed payment
+   */
+  const handleRetryPayment = async (invoiceId: string) => {
+    const retryPromise = async () => {
+      const response = await fetchWithAuth('/api/stripe/invoices', {
+        method: 'POST',
+        body: JSON.stringify({
+          action: 'retry-payment',
+          invoiceId,
+        }),
+      })
+
+      if (!response.success) {
+        throw new Error(response.error || 'Payment retry failed')
+      }
+
+      await loadSubscriptionData()
+      return response.data?.message || 'Payment successful'
+    }
+
+    toast.promise(retryPromise(), {
+      loading: 'Retrying payment...',
+      success: (message) => message,
+      error: (err) => err.message || 'Payment retry failed',
+    })
+  }
+
+  /**
+   * Handle delete payment method
+   */
+  const handleDeletePaymentMethod = async (paymentMethodId: string) => {
+    const deletePromise = async () => {
+      const response = await fetchWithAuth('/api/stripe/payment-methods', {
+        method: 'DELETE',
+        body: JSON.stringify({
+          paymentMethodId,
+        }),
+      })
+
+      if (!response.success) {
+        throw new Error(response.error || 'Failed to delete payment method')
+      }
+
+      await loadSubscriptionData()
+      return response.data?.message || 'Payment method removed'
+    }
+
+    toast.promise(deletePromise(), {
+      loading: 'Removing payment method...',
+      success: (message) => message,
+      error: (err) => err.message || 'Failed to remove payment method',
+    })
+  }
+
+  /**
+   * Handle set default payment method
+   */
+  const handleSetDefaultPaymentMethod = async (paymentMethodId: string) => {
+    const setDefaultPromise = async () => {
+      const response = await fetchWithAuth('/api/stripe/payment-methods', {
+        method: 'POST',
+        body: JSON.stringify({
+          action: 'set-default',
+          paymentMethodId,
+        }),
+      })
+
+      if (!response.success) {
+        throw new Error(response.error || 'Failed to set default payment method')
+      }
+
+      await loadSubscriptionData()
+      return response.data?.message || 'Default payment method updated'
+    }
+
+    toast.promise(setDefaultPromise(), {
+      loading: 'Updating default payment method...',
+      success: (message) => message,
+      error: (err) => err.message || 'Failed to update default payment method',
+    })
+  }
+
+  /**
+   * Handle contact support
+   */
+  const handleContactSupport = () => {
+    toast.info('Opening support chat...')
+    // In a real implementation, this would open a support widget or redirect to support page
+    window.open('/support', '_blank')
+  }
+
+  /**
+   * Handle request refund
+   */
+  const handleRequestRefund = async (invoiceId: string) => {
+    const refundPromise = async () => {
+      const response = await fetchWithAuth('/api/stripe/refunds', {
+        method: 'POST',
+        body: JSON.stringify({
+          invoiceId,
+        }),
+      })
+
+      if (!response.success) {
+        throw new Error(response.error || 'Failed to submit refund request')
+      }
+
+      return response.data?.message || 'Refund request submitted. We will review and respond within 3-5 business days.'
+    }
+
+    toast.promise(refundPromise(), {
+      loading: 'Submitting refund request...',
+      success: (message) => message,
+      error: (err) => err.message || 'Failed to submit refund request',
+    })
+  }
+
   // ============================================================================
   // Utility Functions
   // ============================================================================
@@ -428,10 +841,16 @@ export default function SubscriptionsClient() {
             Manage your subscription, billing, and usage
           </p>
         </div>
-        <Button onClick={() => loadSubscriptionData()} variant="outline">
-          <RefreshCw className="h-4 w-4 mr-2" />
-          Refresh
-        </Button>
+        <div className="flex gap-2">
+          <Button onClick={() => setShowSettingsDialog(true)} variant="outline">
+            <Settings className="h-4 w-4 mr-2" />
+            Settings
+          </Button>
+          <Button onClick={() => loadSubscriptionData()} variant="outline">
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Refresh
+          </Button>
+        </div>
       </div>
 
       <Tabs defaultValue="overview" className="space-y-6">
@@ -509,6 +928,26 @@ export default function SubscriptionsClient() {
                       <CreditCard className="h-4 w-4 mr-2" />
                       Update Payment Method
                     </Button>
+                    <Button variant="outline" onClick={() => setShowAddPaymentMethodDialog(true)}>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Payment Method
+                    </Button>
+                    <Button variant="outline" onClick={() => setShowBillingAddressDialog(true)}>
+                      <Edit className="h-4 w-4 mr-2" />
+                      Billing Address
+                    </Button>
+                    {subscription.status === 'active' && !subscription.cancelAtPeriodEnd && (
+                      <Button variant="outline" onClick={() => setShowPauseDialog(true)}>
+                        <Clock className="h-4 w-4 mr-2" />
+                        Pause Subscription
+                      </Button>
+                    )}
+                    {subscription.status === 'paused' && (
+                      <Button variant="outline" onClick={handleResumeSubscription}>
+                        <Zap className="h-4 w-4 mr-2" />
+                        Resume Subscription
+                      </Button>
+                    )}
                     {!subscription.cancelAtPeriodEnd && (
                       <Button
                         variant="outline"
@@ -612,15 +1051,105 @@ export default function SubscriptionsClient() {
             </div>
           )}
 
+          {/* Payment Methods Card */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-primary/10 rounded-lg">
+                    <CreditCard className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <CardTitle>Payment Methods</CardTitle>
+                    <CardDescription>Manage your payment options</CardDescription>
+                  </div>
+                </div>
+                <Button variant="outline" size="sm" onClick={() => setShowAddPaymentMethodDialog(true)}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Card
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {paymentMethods.length > 0 ? (
+                <div className="space-y-3">
+                  {paymentMethods.map((method) => (
+                    <div
+                      key={method.id}
+                      className="flex items-center justify-between p-3 bg-muted/50 rounded-lg"
+                    >
+                      <div className="flex items-center gap-3">
+                        <CreditCard className="h-5 w-5 text-muted-foreground" />
+                        <div>
+                          <p className="font-medium">
+                            {method.brand} ****{method.last4}
+                            {method.isDefault && (
+                              <Badge variant="secondary" className="ml-2 text-xs">Default</Badge>
+                            )}
+                          </p>
+                          <p className="text-sm text-muted-foreground">
+                            Expires {method.expMonth}/{method.expYear}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        {!method.isDefault && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleSetDefaultPaymentMethod(method.id)}
+                          >
+                            Set Default
+                          </Button>
+                        )}
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-red-600 hover:text-red-700"
+                          onClick={() => handleDeletePaymentMethod(method.id)}
+                        >
+                          Remove
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-6">
+                  <CreditCard className="h-10 w-10 mx-auto text-muted-foreground mb-3" />
+                  <p className="text-muted-foreground mb-3">No payment methods added</p>
+                  <Button variant="outline" size="sm" onClick={() => setShowAddPaymentMethodDialog(true)}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Payment Method
+                  </Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
           {/* Recent Invoices */}
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle>Recent Invoices</CardTitle>
-                <Button variant="ghost" size="sm">
-                  View All
-                  <ChevronRight className="h-4 w-4 ml-1" />
-                </Button>
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm" onClick={() => setShowExportDialog(true)}>
+                    <Download className="h-4 w-4 mr-1" />
+                    Export
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => setShowFilterDialog(true)}>
+                    <Filter className="h-4 w-4 mr-1" />
+                    Filter
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={() => {
+                    const tabsList = document.querySelector('[value="invoices"]') as HTMLElement
+                    tabsList?.click()
+                    toast.info('Viewing all invoices')
+                  }}>
+                    View All
+                    <ChevronRight className="h-4 w-4 ml-1" />
+                  </Button>
+                </div>
               </div>
             </CardHeader>
             <CardContent>
@@ -645,6 +1174,13 @@ export default function SubscriptionsClient() {
                           {invoice.status}
                         </Badge>
                         <p className="font-medium">{formatCurrency(invoice.amount)}</p>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleViewInvoice(invoice)}
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
                         <Button
                           variant="ghost"
                           size="sm"
@@ -758,10 +1294,28 @@ export default function SubscriptionsClient() {
         <TabsContent value="invoices" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Invoice History</CardTitle>
-              <CardDescription>
-                View and download your past invoices
-              </CardDescription>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Invoice History</CardTitle>
+                  <CardDescription>
+                    View and download your past invoices
+                  </CardDescription>
+                </div>
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm" onClick={() => setShowExportDialog(true)}>
+                    <Download className="h-4 w-4 mr-2" />
+                    Export All
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => setShowFilterDialog(true)}>
+                    <Filter className="h-4 w-4 mr-2" />
+                    Filter
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={handleContactSupport}>
+                    <AlertCircle className="h-4 w-4 mr-2" />
+                    Support
+                  </Button>
+                </div>
+              </div>
             </CardHeader>
             <CardContent>
               {invoices.length > 0 ? (
@@ -791,6 +1345,13 @@ export default function SubscriptionsClient() {
                         </p>
                         <div className="flex gap-2">
                           <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleViewInvoice(invoice)}
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          <Button
                             variant="outline"
                             size="sm"
                             onClick={() => handleDownloadInvoice(invoice)}
@@ -805,6 +1366,25 @@ export default function SubscriptionsClient() {
                               onClick={() => window.open(invoice.hostedUrl!, '_blank')}
                             >
                               <ExternalLink className="h-4 w-4" />
+                            </Button>
+                          )}
+                          {invoice.status === 'open' && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleRetryPayment(invoice.id)}
+                            >
+                              <RefreshCw className="h-4 w-4 mr-2" />
+                              Pay Now
+                            </Button>
+                          )}
+                          {invoice.status === 'paid' && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleRequestRefund(invoice.id)}
+                            >
+                              Request Refund
                             </Button>
                           )}
                         </div>
@@ -1026,6 +1606,465 @@ export default function SubscriptionsClient() {
             </Button>
             <Button variant="destructive" onClick={handleCancelSubscription}>
               Cancel Subscription
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Payment Method Dialog */}
+      <Dialog open={showAddPaymentMethodDialog} onOpenChange={setShowAddPaymentMethodDialog}>
+        <DialogContent className="sm:max-w-[450px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <CreditCard className="h-5 w-5" />
+              Add Payment Method
+            </DialogTitle>
+            <DialogDescription>
+              Add a new card to your account
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="cardNumber">Card Number</Label>
+              <Input
+                id="cardNumber"
+                placeholder="1234 5678 9012 3456"
+                value={cardNumber}
+                onChange={(e) => {
+                  const value = e.target.value.replace(/\D/g, '').replace(/(\d{4})/g, '$1 ').trim()
+                  setCardNumber(value.slice(0, 19))
+                }}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="cardExpiry">Expiry Date</Label>
+                <Input
+                  id="cardExpiry"
+                  placeholder="MM/YY"
+                  value={cardExpiry}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/\D/g, '')
+                    if (value.length <= 4) {
+                      setCardExpiry(value.length > 2 ? `${value.slice(0, 2)}/${value.slice(2)}` : value)
+                    }
+                  }}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="cardCvc">CVC</Label>
+                <Input
+                  id="cardCvc"
+                  placeholder="123"
+                  value={cardCvc}
+                  onChange={(e) => setCardCvc(e.target.value.replace(/\D/g, '').slice(0, 4))}
+                />
+              </div>
+            </div>
+            <div className="p-3 bg-muted/50 rounded-lg flex items-center gap-2">
+              <Shield className="h-4 w-4 text-green-600" />
+              <span className="text-sm text-muted-foreground">Your payment information is secure and encrypted</span>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => {
+              setShowAddPaymentMethodDialog(false)
+              setCardNumber('')
+              setCardExpiry('')
+              setCardCvc('')
+            }}>
+              Cancel
+            </Button>
+            <Button onClick={handleAddPaymentMethod}>
+              <Plus className="h-4 w-4 mr-2" />
+              Add Card
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Export Dialog */}
+      <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
+        <DialogContent className="sm:max-w-[400px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Download className="h-5 w-5" />
+              Export Invoices
+            </DialogTitle>
+            <DialogDescription>
+              Choose the format for your invoice export
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Export Format</Label>
+              <Select value={exportFormat} onValueChange={(value: 'csv' | 'json' | 'pdf') => setExportFormat(value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select format" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="csv">CSV (Spreadsheet)</SelectItem>
+                  <SelectItem value="json">JSON (Data)</SelectItem>
+                  <SelectItem value="pdf">PDF (Documents)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Filter by Status</Label>
+              <Select value={filterStatus} onValueChange={setFilterStatus}>
+                <SelectTrigger>
+                  <SelectValue placeholder="All statuses" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Statuses</SelectItem>
+                  <SelectItem value="paid">Paid</SelectItem>
+                  <SelectItem value="open">Open</SelectItem>
+                  <SelectItem value="draft">Draft</SelectItem>
+                  <SelectItem value="void">Void</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              {invoices.length} invoice(s) will be exported
+            </p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowExportDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleExportInvoices}>
+              <Download className="h-4 w-4 mr-2" />
+              Export
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Settings Dialog */}
+      <Dialog open={showSettingsDialog} onOpenChange={setShowSettingsDialog}>
+        <DialogContent className="sm:max-w-[450px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Settings className="h-5 w-5" />
+              Subscription Settings
+            </DialogTitle>
+            <DialogDescription>
+              Configure your subscription preferences
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="flex items-center justify-between p-4 border rounded-lg">
+              <div>
+                <p className="font-medium">Auto-Renew</p>
+                <p className="text-sm text-muted-foreground">Automatically renew your subscription</p>
+              </div>
+              <Button
+                variant={autoRenewEnabled ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setAutoRenewEnabled(!autoRenewEnabled)}
+              >
+                {autoRenewEnabled ? 'Enabled' : 'Disabled'}
+              </Button>
+            </div>
+            <div className="flex items-center justify-between p-4 border rounded-lg">
+              <div>
+                <p className="font-medium">Email Notifications</p>
+                <p className="text-sm text-muted-foreground">Receive billing and subscription emails</p>
+              </div>
+              <Button
+                variant={emailNotificationsEnabled ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setEmailNotificationsEnabled(!emailNotificationsEnabled)}
+              >
+                {emailNotificationsEnabled ? 'Enabled' : 'Disabled'}
+              </Button>
+            </div>
+            <div className="p-4 border rounded-lg">
+              <p className="font-medium mb-2">Billing Portal</p>
+              <p className="text-sm text-muted-foreground mb-3">Access full billing management</p>
+              <Button variant="outline" size="sm" onClick={handleUpdatePaymentMethod}>
+                <ExternalLink className="h-4 w-4 mr-2" />
+                Open Billing Portal
+              </Button>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowSettingsDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSaveSettings}>
+              <Check className="h-4 w-4 mr-2" />
+              Save Settings
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Filter Dialog */}
+      <Dialog open={showFilterDialog} onOpenChange={setShowFilterDialog}>
+        <DialogContent className="sm:max-w-[400px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Filter className="h-5 w-5" />
+              Filter Invoices
+            </DialogTitle>
+            <DialogDescription>
+              Set filters to narrow down your invoice list
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Status</Label>
+              <Select value={filterStatus} onValueChange={setFilterStatus}>
+                <SelectTrigger>
+                  <SelectValue placeholder="All statuses" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Statuses</SelectItem>
+                  <SelectItem value="paid">Paid</SelectItem>
+                  <SelectItem value="open">Open</SelectItem>
+                  <SelectItem value="draft">Draft</SelectItem>
+                  <SelectItem value="void">Void</SelectItem>
+                  <SelectItem value="uncollectible">Uncollectible</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Date Range</Label>
+              <Select value={filterDateRange} onValueChange={setFilterDateRange}>
+                <SelectTrigger>
+                  <SelectValue placeholder="All time" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Time</SelectItem>
+                  <SelectItem value="30days">Last 30 Days</SelectItem>
+                  <SelectItem value="90days">Last 90 Days</SelectItem>
+                  <SelectItem value="year">This Year</SelectItem>
+                  <SelectItem value="lastyear">Last Year</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={handleResetFilters}>
+              Reset Filters
+            </Button>
+            <Button onClick={handleApplyFilters}>
+              Apply Filters
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Pause Subscription Dialog */}
+      <Dialog open={showPauseDialog} onOpenChange={setShowPauseDialog}>
+        <DialogContent className="sm:max-w-[450px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Clock className="h-5 w-5" />
+              Pause Subscription
+            </DialogTitle>
+            <DialogDescription>
+              Temporarily pause your subscription instead of canceling
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Pause Duration</Label>
+              <Select value={pauseDuration} onValueChange={setPauseDuration}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select duration" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="1_month">1 Month</SelectItem>
+                  <SelectItem value="2_months">2 Months</SelectItem>
+                  <SelectItem value="3_months">3 Months</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg space-y-2">
+              <p className="font-medium text-blue-800">What happens when you pause:</p>
+              <ul className="text-sm text-blue-700 space-y-1">
+                <li>- You will not be charged during the pause</li>
+                <li>- Your data and settings are preserved</li>
+                <li>- Access to premium features is limited</li>
+                <li>- You can resume anytime</li>
+              </ul>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowPauseDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handlePauseSubscription}>
+              <Clock className="h-4 w-4 mr-2" />
+              Pause Subscription
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* View Invoice Dialog */}
+      <Dialog open={showViewInvoiceDialog} onOpenChange={setShowViewInvoiceDialog}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Receipt className="h-5 w-5" />
+              Invoice Details
+            </DialogTitle>
+            <DialogDescription>
+              {selectedInvoice?.number}
+            </DialogDescription>
+          </DialogHeader>
+          {selectedInvoice && (
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm text-muted-foreground">Invoice Number</p>
+                  <p className="font-medium">{selectedInvoice.number}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Status</p>
+                  <Badge className={getStatusColor(selectedInvoice.status)}>
+                    {selectedInvoice.status}
+                  </Badge>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Amount</p>
+                  <p className="font-medium">{formatCurrency(selectedInvoice.amount)}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Currency</p>
+                  <p className="font-medium">{selectedInvoice.currency.toUpperCase()}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Date</p>
+                  <p className="font-medium">{formatDate(selectedInvoice.created)}</p>
+                </div>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowViewInvoiceDialog(false)}>
+              Close
+            </Button>
+            {selectedInvoice && (
+              <>
+                <Button variant="outline" onClick={() => handleDownloadInvoice(selectedInvoice)}>
+                  <Download className="h-4 w-4 mr-2" />
+                  Download PDF
+                </Button>
+                {selectedInvoice.hostedUrl && (
+                  <Button onClick={() => window.open(selectedInvoice.hostedUrl!, '_blank')}>
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    View Online
+                  </Button>
+                )}
+              </>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Billing Address Dialog */}
+      <Dialog open={showBillingAddressDialog} onOpenChange={setShowBillingAddressDialog}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Edit className="h-5 w-5" />
+              Billing Address
+            </DialogTitle>
+            <DialogDescription>
+              Update your billing information
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2 col-span-2">
+                <Label htmlFor="billingName">Full Name *</Label>
+                <Input
+                  id="billingName"
+                  placeholder="John Doe"
+                  value={billingAddress.name}
+                  onChange={(e) => setBillingAddress({ ...billingAddress, name: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2 col-span-2">
+                <Label htmlFor="billingEmail">Email *</Label>
+                <Input
+                  id="billingEmail"
+                  type="email"
+                  placeholder="john@example.com"
+                  value={billingAddress.email}
+                  onChange={(e) => setBillingAddress({ ...billingAddress, email: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2 col-span-2">
+                <Label htmlFor="billingAddress">Address *</Label>
+                <Input
+                  id="billingAddress"
+                  placeholder="123 Main St"
+                  value={billingAddress.address}
+                  onChange={(e) => setBillingAddress({ ...billingAddress, address: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="billingCity">City</Label>
+                <Input
+                  id="billingCity"
+                  placeholder="New York"
+                  value={billingAddress.city}
+                  onChange={(e) => setBillingAddress({ ...billingAddress, city: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="billingState">State</Label>
+                <Input
+                  id="billingState"
+                  placeholder="NY"
+                  value={billingAddress.state}
+                  onChange={(e) => setBillingAddress({ ...billingAddress, state: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="billingPostal">Postal Code</Label>
+                <Input
+                  id="billingPostal"
+                  placeholder="10001"
+                  value={billingAddress.postalCode}
+                  onChange={(e) => setBillingAddress({ ...billingAddress, postalCode: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="billingCountry">Country</Label>
+                <Select
+                  value={billingAddress.country}
+                  onValueChange={(value) => setBillingAddress({ ...billingAddress, country: value })}
+                >
+                  <SelectTrigger id="billingCountry">
+                    <SelectValue placeholder="Select country" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="US">United States</SelectItem>
+                    <SelectItem value="CA">Canada</SelectItem>
+                    <SelectItem value="GB">United Kingdom</SelectItem>
+                    <SelectItem value="AU">Australia</SelectItem>
+                    <SelectItem value="DE">Germany</SelectItem>
+                    <SelectItem value="FR">France</SelectItem>
+                    <SelectItem value="JP">Japan</SelectItem>
+                    <SelectItem value="ZA">South Africa</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowBillingAddressDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleUpdateBillingAddress}>
+              <Check className="h-4 w-4 mr-2" />
+              Save Address
             </Button>
           </DialogFooter>
         </DialogContent>

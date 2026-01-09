@@ -306,6 +306,12 @@ export function BadgesClient() {
   const [awardDialogOpen, setAwardDialogOpen] = useState(false)
   const [detailDialogOpen, setDetailDialogOpen] = useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [editDialogOpen, setEditDialogOpen] = useState(false)
+  const [settingsDialogOpen, setSettingsDialogOpen] = useState(false)
+  const [filtersDialogOpen, setFiltersDialogOpen] = useState(false)
+  const [exportDialogOpen, setExportDialogOpen] = useState(false)
+  const [shareDialogOpen, setShareDialogOpen] = useState(false)
+  const [bulkAwardDialogOpen, setBulkAwardDialogOpen] = useState(false)
 
   // Selected items
   const [selectedBadge, setSelectedBadge] = useState<BadgeData | null>(null)
@@ -323,6 +329,24 @@ export function BadgesClient() {
     is_public: true
   })
   const [awardReason, setAwardReason] = useState('')
+  const [editBadge, setEditBadge] = useState({
+    name: '',
+    description: '',
+    category: 'achievement' as BadgeCategory,
+    rarity: 'common' as BadgeRarity,
+    xp_value: 100,
+    skills: '',
+    is_public: true
+  })
+  const [badgeSettings, setBadgeSettings] = useState({
+    emailNotifications: true,
+    showOnProfile: true,
+    allowSharing: true,
+    autoAward: false,
+    requireApproval: false
+  })
+  const [exportFormat, setExportFormat] = useState<'json' | 'csv' | 'pdf'>('json')
+  const [selectedMembers, setSelectedMembers] = useState<string[]>([])
 
   // Data state (would come from API in production)
   const [badges, setBadges] = useState<BadgeData[]>(mockBadges)
@@ -697,6 +721,276 @@ export function BadgesClient() {
     }
   }, [])
 
+  // Handle opening edit dialog with badge data
+  const handleOpenEditDialog = useCallback((badge: BadgeData) => {
+    setSelectedBadge(badge)
+    setEditBadge({
+      name: badge.name,
+      description: badge.description,
+      category: badge.category,
+      rarity: badge.rarity,
+      xp_value: badge.xp_value,
+      skills: badge.skills.join(', '),
+      is_public: badge.is_public
+    })
+    setEditDialogOpen(true)
+  }, [])
+
+  // Handle editing a badge
+  const handleEditBadge = useCallback(async () => {
+    if (!selectedBadge || !editBadge.name.trim()) {
+      toast.error('Badge name is required')
+      return
+    }
+
+    setIsLoading(true)
+
+    const editPromise = fetch('/api/badges', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        id: selectedBadge.id,
+        name: editBadge.name,
+        description: editBadge.description,
+        category: editBadge.category,
+        rarity: editBadge.rarity,
+        xp_value: editBadge.xp_value,
+        skills: editBadge.skills.split(',').map(s => s.trim()).filter(Boolean),
+        is_public: editBadge.is_public
+      })
+    }).then(async (res) => {
+      if (!res.ok) {
+        const error = await res.json()
+        throw new Error(error.error || 'Failed to update badge')
+      }
+      return res.json()
+    })
+
+    toast.promise(editPromise, {
+      loading: 'Updating badge...',
+      success: (data) => {
+        // Update local state
+        setBadges(prev => prev.map(b =>
+          b.id === selectedBadge.id
+            ? {
+                ...b,
+                name: editBadge.name,
+                description: editBadge.description,
+                category: editBadge.category,
+                rarity: editBadge.rarity,
+                xp_value: editBadge.xp_value,
+                skills: editBadge.skills.split(',').map(s => s.trim()).filter(Boolean),
+                is_public: editBadge.is_public,
+                updated_at: new Date().toISOString()
+              }
+            : b
+        ))
+        setEditDialogOpen(false)
+        setSelectedBadge(null)
+        return `Badge "${editBadge.name}" updated successfully!`
+      },
+      error: (err) => err.message || 'Failed to update badge'
+    })
+
+    try {
+      await editPromise
+    } finally {
+      setIsLoading(false)
+    }
+  }, [selectedBadge, editBadge])
+
+  // Handle export badges
+  const handleExportBadges = useCallback(async () => {
+    setIsLoading(true)
+
+    try {
+      let data: string
+      let filename: string
+      let mimeType: string
+
+      const exportData = userBadges.map(ub => ({
+        badge_name: ub.badge.name,
+        category: ub.badge.category,
+        rarity: ub.badge.rarity,
+        xp_value: ub.badge.xp_value,
+        awarded_at: ub.awarded_at,
+        skills: ub.badge.skills.join(', ')
+      }))
+
+      switch (exportFormat) {
+        case 'json':
+          data = JSON.stringify(exportData, null, 2)
+          filename = 'badges-export.json'
+          mimeType = 'application/json'
+          break
+        case 'csv':
+          const headers = ['Badge Name', 'Category', 'Rarity', 'XP Value', 'Awarded At', 'Skills']
+          const rows = exportData.map(item => [
+            item.badge_name,
+            item.category,
+            item.rarity,
+            item.xp_value.toString(),
+            item.awarded_at,
+            item.skills
+          ])
+          data = [headers.join(','), ...rows.map(r => r.join(','))].join('\n')
+          filename = 'badges-export.csv'
+          mimeType = 'text/csv'
+          break
+        case 'pdf':
+          // For PDF, we'll create a simple text representation
+          // In production, you'd use a library like jsPDF
+          const pdfContent = exportData.map(item =>
+            `Badge: ${item.badge_name}\nCategory: ${item.category}\nRarity: ${item.rarity}\nXP: ${item.xp_value}\nAwarded: ${item.awarded_at}\nSkills: ${item.skills}\n---`
+          ).join('\n\n')
+          data = pdfContent
+          filename = 'badges-export.txt'
+          mimeType = 'text/plain'
+          toast.info('PDF export coming soon! Downloading as text file.')
+          break
+        default:
+          throw new Error('Invalid export format')
+      }
+
+      // Create and download file
+      const blob = new Blob([data], { type: mimeType })
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = filename
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
+
+      setExportDialogOpen(false)
+      toast.success(`Badges exported successfully as ${exportFormat.toUpperCase()}!`)
+    } catch (error) {
+      console.error('Export error:', error)
+      toast.error('Failed to export badges')
+    } finally {
+      setIsLoading(false)
+    }
+  }, [userBadges, exportFormat])
+
+  // Handle save settings
+  const handleSaveSettings = useCallback(async () => {
+    setIsLoading(true)
+
+    const settingsPromise = fetch('/api/badges/settings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(badgeSettings)
+    }).then(async (res) => {
+      if (!res.ok) {
+        const error = await res.json()
+        throw new Error(error.error || 'Failed to save settings')
+      }
+      return res.json()
+    })
+
+    toast.promise(settingsPromise, {
+      loading: 'Saving settings...',
+      success: () => {
+        setSettingsDialogOpen(false)
+        return 'Badge settings saved successfully!'
+      },
+      error: (err) => err.message || 'Failed to save settings'
+    })
+
+    try {
+      await settingsPromise
+    } finally {
+      setIsLoading(false)
+    }
+  }, [badgeSettings])
+
+  // Handle bulk award badges
+  const handleBulkAward = useCallback(async () => {
+    if (!selectedBadge || selectedMembers.length === 0) {
+      toast.error('Please select a badge and at least one team member')
+      return
+    }
+
+    setIsLoading(true)
+
+    const bulkAwardPromise = fetch('/api/badges/bulk-award', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        badge_id: selectedBadge.id,
+        user_ids: selectedMembers,
+        reason: awardReason
+      })
+    }).then(async (res) => {
+      if (!res.ok) {
+        const error = await res.json()
+        throw new Error(error.error || 'Failed to bulk award badges')
+      }
+      return res.json()
+    })
+
+    toast.promise(bulkAwardPromise, {
+      loading: `Awarding "${selectedBadge.name}" to ${selectedMembers.length} members...`,
+      success: (data) => {
+        setBulkAwardDialogOpen(false)
+        setSelectedBadge(null)
+        setSelectedMembers([])
+        setAwardReason('')
+        return data.message || `Badge awarded to ${selectedMembers.length} members!`
+      },
+      error: (err) => err.message || 'Failed to bulk award badges'
+    })
+
+    try {
+      await bulkAwardPromise
+    } finally {
+      setIsLoading(false)
+    }
+  }, [selectedBadge, selectedMembers, awardReason])
+
+  // Handle clear filters
+  const handleClearFilters = useCallback(() => {
+    setSearchQuery('')
+    setSelectedCategory('all')
+    setSelectedRarity('all')
+    setFiltersDialogOpen(false)
+    toast.success('Filters cleared')
+  }, [])
+
+  // Handle apply filters from dialog
+  const handleApplyFilters = useCallback(() => {
+    setFiltersDialogOpen(false)
+    toast.success('Filters applied')
+  }, [])
+
+  // Toggle member selection for bulk award
+  const toggleMemberSelection = useCallback((memberId: string) => {
+    setSelectedMembers(prev =>
+      prev.includes(memberId)
+        ? prev.filter(id => id !== memberId)
+        : [...prev, memberId]
+    )
+  }, [])
+
+  // Handle view on external site
+  const handleViewExternal = useCallback((badge: BadgeData) => {
+    const url = `${window.location.origin}/badges/${badge.id}`
+    window.open(url, '_blank')
+    toast.success('Opening badge page in new tab')
+  }, [])
+
+  // Handle copy badge link
+  const handleCopyBadgeLink = useCallback(async (badge: BadgeData) => {
+    const url = `${window.location.origin}/badges/${badge.id}`
+    try {
+      await navigator.clipboard.writeText(url)
+      toast.success('Badge link copied to clipboard!')
+    } catch {
+      toast.error('Failed to copy link')
+    }
+  }, [])
+
   // Badge Card Component
   const BadgeCard = ({ badge, userBadge, showActions = true }: {
     badge: BadgeData;
@@ -789,6 +1083,24 @@ export function BadgesClient() {
                       variant="ghost"
                       size="icon"
                       className="h-8 w-8"
+                      onClick={() => handleCopyBadgeLink(badge)}
+                      title="Copy badge link"
+                    >
+                      <Copy className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8"
+                      onClick={() => handleViewExternal(badge)}
+                      title="View badge page"
+                    >
+                      <ExternalLink className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8"
                       onClick={() => handleDownloadBadge(badge)}
                       title="Download badge"
                     >
@@ -813,6 +1125,15 @@ export function BadgesClient() {
                       variant="ghost"
                       size="icon"
                       className="h-8 w-8"
+                      onClick={() => handleOpenEditDialog(badge)}
+                      title="Edit badge"
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8"
                       onClick={() => {
                         setSelectedBadge(badge)
                         setAwardDialogOpen(true)
@@ -820,6 +1141,18 @@ export function BadgesClient() {
                       title="Award badge"
                     >
                       <Gift className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-destructive hover:text-destructive"
+                      onClick={() => {
+                        setSelectedBadge(badge)
+                        setDeleteDialogOpen(true)
+                      }}
+                      title="Delete badge"
+                    >
+                      <Trash2 className="h-4 w-4" />
                     </Button>
                   </>
                 )}
@@ -862,10 +1195,42 @@ export function BadgesClient() {
           <Button
             variant="outline"
             size="icon"
+            onClick={() => setFiltersDialogOpen(true)}
+            title="Advanced filters"
+          >
+            <Filter className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => setExportDialogOpen(true)}
+            title="Export badges"
+          >
+            <Download className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => setSettingsDialogOpen(true)}
+            title="Badge settings"
+          >
+            <Settings className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="outline"
+            size="icon"
             onClick={handleRefresh}
             disabled={isRefreshing}
+            title="Refresh badges"
           >
             <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => setBulkAwardDialogOpen(true)}
+          >
+            <UserPlus className="h-4 w-4 mr-2" />
+            Bulk Award
           </Button>
           <Button onClick={() => setCreateDialogOpen(true)}>
             <Plus className="h-4 w-4 mr-2" />
@@ -1347,9 +1712,19 @@ export function BadgesClient() {
                   <span>Created {new Date(selectedBadge.created_at).toLocaleDateString()}</span>
                 </div>
               </div>
-              <DialogFooter>
+              <DialogFooter className="flex gap-2">
                 <Button variant="outline" onClick={() => setDetailDialogOpen(false)}>
                   Close
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setDetailDialogOpen(false)
+                    handleOpenEditDialog(selectedBadge)
+                  }}
+                >
+                  <Pencil className="w-4 h-4 mr-2" />
+                  Edit
                 </Button>
                 <Button onClick={() => {
                   setDetailDialogOpen(false)
@@ -1361,6 +1736,548 @@ export function BadgesClient() {
               </DialogFooter>
             </>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Badge Dialog */}
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Pencil className="w-5 h-5" />
+              Edit Badge
+            </DialogTitle>
+            <DialogDescription>
+              Update the badge details
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Badge Name *</Label>
+              <Input
+                placeholder="e.g., Innovation Champion"
+                value={editBadge.name}
+                onChange={(e) => setEditBadge(prev => ({ ...prev, name: e.target.value }))}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Description</Label>
+              <Textarea
+                placeholder="Describe what this badge represents..."
+                value={editBadge.description}
+                onChange={(e) => setEditBadge(prev => ({ ...prev, description: e.target.value }))}
+                rows={3}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Category</Label>
+                <Select
+                  value={editBadge.category}
+                  onValueChange={(v) => setEditBadge(prev => ({ ...prev, category: v as BadgeCategory }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="milestone">Milestone</SelectItem>
+                    <SelectItem value="achievement">Achievement</SelectItem>
+                    <SelectItem value="collaboration">Collaboration</SelectItem>
+                    <SelectItem value="technical">Technical</SelectItem>
+                    <SelectItem value="leadership">Leadership</SelectItem>
+                    <SelectItem value="community">Community</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Rarity</Label>
+                <Select
+                  value={editBadge.rarity}
+                  onValueChange={(v) => setEditBadge(prev => ({ ...prev, rarity: v as BadgeRarity }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="common">Common</SelectItem>
+                    <SelectItem value="uncommon">Uncommon</SelectItem>
+                    <SelectItem value="rare">Rare</SelectItem>
+                    <SelectItem value="epic">Epic</SelectItem>
+                    <SelectItem value="legendary">Legendary</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>XP Value</Label>
+              <Input
+                type="number"
+                min={0}
+                value={editBadge.xp_value}
+                onChange={(e) => setEditBadge(prev => ({ ...prev, xp_value: parseInt(e.target.value) || 0 }))}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Skills (comma-separated)</Label>
+              <Input
+                placeholder="e.g., Leadership, Innovation, Teamwork"
+                value={editBadge.skills}
+                onChange={(e) => setEditBadge(prev => ({ ...prev, skills: e.target.value }))}
+              />
+            </div>
+            <div className="flex items-center justify-between">
+              <Label>Public Badge</Label>
+              <Switch
+                checked={editBadge.is_public}
+                onCheckedChange={(v) => setEditBadge(prev => ({ ...prev, is_public: v }))}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleEditBadge} disabled={isLoading || !editBadge.name.trim()}>
+              {isLoading ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                'Save Changes'
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Badge Dialog */}
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-destructive">
+              <Trash2 className="w-5 h-5" />
+              Delete Badge
+            </DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this badge? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          {selectedBadge && (
+            <div className="p-4 border rounded-lg bg-muted/50">
+              <div className="flex items-center gap-3">
+                <div className={`w-12 h-12 rounded-full flex items-center justify-center ${rarityConfig[selectedBadge.rarity].bgColor} ${rarityConfig[selectedBadge.rarity].color}`}>
+                  <Award className="w-6 h-6" />
+                </div>
+                <div>
+                  <h4 className="font-semibold">{selectedBadge.name}</h4>
+                  <p className="text-sm text-muted-foreground">
+                    {selectedBadge.rarity} - {selectedBadge.holders} holders
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleDeleteBadge} disabled={isLoading}>
+              {isLoading ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                <>
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Delete Badge
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Settings Dialog */}
+      <Dialog open={settingsDialogOpen} onOpenChange={setSettingsDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Settings className="w-5 h-5" />
+              Badge Settings
+            </DialogTitle>
+            <DialogDescription>
+              Configure your badge notification and display preferences
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label>Email Notifications</Label>
+                <p className="text-sm text-muted-foreground">
+                  Receive emails when you earn new badges
+                </p>
+              </div>
+              <Switch
+                checked={badgeSettings.emailNotifications}
+                onCheckedChange={(v) => setBadgeSettings(prev => ({ ...prev, emailNotifications: v }))}
+              />
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label>Show on Profile</Label>
+                <p className="text-sm text-muted-foreground">
+                  Display earned badges on your public profile
+                </p>
+              </div>
+              <Switch
+                checked={badgeSettings.showOnProfile}
+                onCheckedChange={(v) => setBadgeSettings(prev => ({ ...prev, showOnProfile: v }))}
+              />
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label>Allow Sharing</Label>
+                <p className="text-sm text-muted-foreground">
+                  Allow others to share your badge achievements
+                </p>
+              </div>
+              <Switch
+                checked={badgeSettings.allowSharing}
+                onCheckedChange={(v) => setBadgeSettings(prev => ({ ...prev, allowSharing: v }))}
+              />
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label>Auto-Award Badges</Label>
+                <p className="text-sm text-muted-foreground">
+                  Automatically award badges when criteria are met
+                </p>
+              </div>
+              <Switch
+                checked={badgeSettings.autoAward}
+                onCheckedChange={(v) => setBadgeSettings(prev => ({ ...prev, autoAward: v }))}
+              />
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label>Require Approval</Label>
+                <p className="text-sm text-muted-foreground">
+                  Require manager approval before awarding badges
+                </p>
+              </div>
+              <Switch
+                checked={badgeSettings.requireApproval}
+                onCheckedChange={(v) => setBadgeSettings(prev => ({ ...prev, requireApproval: v }))}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setSettingsDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSaveSettings} disabled={isLoading}>
+              {isLoading ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                'Save Settings'
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Filters Dialog */}
+      <Dialog open={filtersDialogOpen} onOpenChange={setFiltersDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Filter className="w-5 h-5" />
+              Advanced Filters
+            </DialogTitle>
+            <DialogDescription>
+              Filter badges by various criteria
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Search</Label>
+              <Input
+                placeholder="Search by name or description..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Category</Label>
+              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                <SelectTrigger>
+                  <SelectValue placeholder="All Categories" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Categories</SelectItem>
+                  <SelectItem value="milestone">Milestone</SelectItem>
+                  <SelectItem value="achievement">Achievement</SelectItem>
+                  <SelectItem value="collaboration">Collaboration</SelectItem>
+                  <SelectItem value="technical">Technical</SelectItem>
+                  <SelectItem value="leadership">Leadership</SelectItem>
+                  <SelectItem value="community">Community</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Rarity</Label>
+              <Select value={selectedRarity} onValueChange={setSelectedRarity}>
+                <SelectTrigger>
+                  <SelectValue placeholder="All Rarities" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Rarities</SelectItem>
+                  <SelectItem value="common">Common</SelectItem>
+                  <SelectItem value="uncommon">Uncommon</SelectItem>
+                  <SelectItem value="rare">Rare</SelectItem>
+                  <SelectItem value="epic">Epic</SelectItem>
+                  <SelectItem value="legendary">Legendary</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>View Mode</Label>
+              <div className="flex gap-2">
+                <Button
+                  variant={viewMode === 'grid' ? 'default' : 'outline'}
+                  className="flex-1"
+                  onClick={() => setViewMode('grid')}
+                >
+                  <LayoutGrid className="w-4 h-4 mr-2" />
+                  Grid
+                </Button>
+                <Button
+                  variant={viewMode === 'list' ? 'default' : 'outline'}
+                  className="flex-1"
+                  onClick={() => setViewMode('list')}
+                >
+                  <List className="w-4 h-4 mr-2" />
+                  List
+                </Button>
+              </div>
+            </div>
+          </div>
+          <DialogFooter className="flex gap-2">
+            <Button variant="outline" onClick={handleClearFilters}>
+              Clear All
+            </Button>
+            <Button onClick={handleApplyFilters}>
+              Apply Filters
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Export Dialog */}
+      <Dialog open={exportDialogOpen} onOpenChange={setExportDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Download className="w-5 h-5" />
+              Export Badges
+            </DialogTitle>
+            <DialogDescription>
+              Export your earned badges in various formats
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="p-4 border rounded-lg bg-muted/50">
+              <div className="flex items-center justify-between mb-2">
+                <span className="font-medium">Badges to Export</span>
+                <BadgeUI variant="secondary">{userBadges.length} badges</BadgeUI>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Total XP: {stats.total_xp.toLocaleString()}
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label>Export Format</Label>
+              <div className="grid grid-cols-3 gap-2">
+                <Button
+                  variant={exportFormat === 'json' ? 'default' : 'outline'}
+                  onClick={() => setExportFormat('json')}
+                  className="flex flex-col h-auto py-3"
+                >
+                  <span className="font-medium">JSON</span>
+                  <span className="text-xs text-muted-foreground">Data format</span>
+                </Button>
+                <Button
+                  variant={exportFormat === 'csv' ? 'default' : 'outline'}
+                  onClick={() => setExportFormat('csv')}
+                  className="flex flex-col h-auto py-3"
+                >
+                  <span className="font-medium">CSV</span>
+                  <span className="text-xs text-muted-foreground">Spreadsheet</span>
+                </Button>
+                <Button
+                  variant={exportFormat === 'pdf' ? 'default' : 'outline'}
+                  onClick={() => setExportFormat('pdf')}
+                  className="flex flex-col h-auto py-3"
+                >
+                  <span className="font-medium">PDF</span>
+                  <span className="text-xs text-muted-foreground">Document</span>
+                </Button>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setExportDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleExportBadges} disabled={isLoading || userBadges.length === 0}>
+              {isLoading ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Exporting...
+                </>
+              ) : (
+                <>
+                  <Download className="w-4 h-4 mr-2" />
+                  Export {exportFormat.toUpperCase()}
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Bulk Award Dialog */}
+      <Dialog open={bulkAwardDialogOpen} onOpenChange={setBulkAwardDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <UserPlus className="w-5 h-5" />
+              Bulk Award Badge
+            </DialogTitle>
+            <DialogDescription>
+              Award a badge to multiple team members at once
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid grid-cols-2 gap-4">
+            {/* Select Badge */}
+            <div className="space-y-2">
+              <Label>Select Badge</Label>
+              <ScrollArea className="h-[300px] border rounded-lg p-2">
+                <div className="space-y-2">
+                  {badges.map((badge) => {
+                    const rarity = rarityConfig[badge.rarity]
+                    const isSelected = selectedBadge?.id === badge.id
+                    return (
+                      <div
+                        key={badge.id}
+                        className={`p-2 rounded-lg border cursor-pointer transition-all ${
+                          isSelected ? 'border-primary bg-primary/5' : 'hover:bg-muted'
+                        }`}
+                        onClick={() => setSelectedBadge(badge)}
+                      >
+                        <div className="flex items-center gap-2">
+                          <div className={`w-8 h-8 rounded-full flex items-center justify-center ${rarity.bgColor} ${rarity.color}`}>
+                            <Award className="w-4 h-4" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="font-medium text-sm truncate">{badge.name}</div>
+                            <p className="text-xs text-muted-foreground">{badge.xp_value} XP</p>
+                          </div>
+                          {isSelected && <Check className="w-4 h-4 text-primary" />}
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </ScrollArea>
+            </div>
+
+            {/* Select Members */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label>Select Team Members</Label>
+                <BadgeUI variant="secondary">{selectedMembers.length} selected</BadgeUI>
+              </div>
+              <ScrollArea className="h-[300px] border rounded-lg p-2">
+                <div className="space-y-2">
+                  {mockTeamMembers.map((member) => {
+                    const isSelected = selectedMembers.includes(member.id)
+                    return (
+                      <div
+                        key={member.id}
+                        className={`p-2 rounded-lg border cursor-pointer transition-all ${
+                          isSelected ? 'border-primary bg-primary/5' : 'hover:bg-muted'
+                        }`}
+                        onClick={() => toggleMemberSelection(member.id)}
+                      >
+                        <div className="flex items-center gap-2">
+                          <Avatar className="h-8 w-8">
+                            <AvatarImage src={member.avatar} />
+                            <AvatarFallback className="text-xs">
+                              {member.name.split(' ').map(n => n[0]).join('')}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1 min-w-0">
+                            <div className="font-medium text-sm">{member.name}</div>
+                            <p className="text-xs text-muted-foreground">
+                              {member.badges_count} badges
+                            </p>
+                          </div>
+                          {isSelected && <Check className="w-4 h-4 text-primary" />}
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </ScrollArea>
+            </div>
+          </div>
+
+          {/* Reason */}
+          <div className="space-y-2">
+            <Label>Reason for awarding (optional)</Label>
+            <Textarea
+              placeholder="Why are these members receiving this badge?"
+              value={awardReason}
+              onChange={(e) => setAwardReason(e.target.value)}
+              rows={2}
+            />
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setBulkAwardDialogOpen(false)
+                setSelectedBadge(null)
+                setSelectedMembers([])
+                setAwardReason('')
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleBulkAward}
+              disabled={isLoading || !selectedBadge || selectedMembers.length === 0}
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Awarding...
+                </>
+              ) : (
+                <>
+                  <Gift className="w-4 h-4 mr-2" />
+                  Award to {selectedMembers.length} Members
+                </>
+              )}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

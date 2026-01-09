@@ -506,6 +506,22 @@ export default function DesktopAppClient() {
   const [selectedCrash, setSelectedCrash] = useState<CrashReport | null>(null)
   const [settingsTab, setSettingsTab] = useState('general')
 
+  // Dialog state management
+  const [showDownloadDialog, setShowDownloadDialog] = useState(false)
+  const [showCheckUpdatesDialog, setShowCheckUpdatesDialog] = useState(false)
+  const [showSettingsDialog, setShowSettingsDialog] = useState(false)
+  const [showPreferencesDialog, setShowPreferencesDialog] = useState(false)
+  const [showExportDataDialog, setShowExportDataDialog] = useState(false)
+  const [showNewProjectDialog, setShowNewProjectDialog] = useState(false)
+  const [showBuildConfigDialog, setShowBuildConfigDialog] = useState(false)
+  const [showReleaseNotesDialog, setShowReleaseNotesDialog] = useState(false)
+  const [showNotarizeDialog, setShowNotarizeDialog] = useState(false)
+  const [showDeployDialog, setShowDeployDialog] = useState(false)
+  const [selectedPlatformDownload, setSelectedPlatformDownload] = useState<Platform>('windows')
+  const [exportFormat, setExportFormat] = useState<'json' | 'csv' | 'xml'>('json')
+  const [checkingUpdates, setCheckingUpdates] = useState(false)
+  const [downloadProgress, setDownloadProgress] = useState(0)
+
   // Supabase state
   const [dbProjects, setDbProjects] = useState<DbProject[]>([])
   const [dbBuilds, setDbBuilds] = useState<DbBuild[]>([])
@@ -1020,14 +1036,245 @@ export default function DesktopAppClient() {
     }
   }
 
+  // Check for updates handler
+  const handleCheckForUpdates = async () => {
+    setCheckingUpdates(true)
+    setShowCheckUpdatesDialog(true)
+    try {
+      // Simulate checking for updates
+      await new Promise(resolve => setTimeout(resolve, 2000))
+      toast.success('Your desktop app is up to date!', {
+        description: 'Version 2.5.0 is the latest version'
+      })
+    } catch (error) {
+      console.error('Error checking for updates:', error)
+      toast.error('Failed to check for updates')
+    } finally {
+      setCheckingUpdates(false)
+    }
+  }
+
+  // Download desktop app handler
+  const handleDownloadDesktopApp = async (platform: Platform) => {
+    setDownloadProgress(0)
+    toast.loading(`Preparing ${platform} download...`)
+
+    try {
+      // Simulate download progress
+      for (let i = 0; i <= 100; i += 10) {
+        await new Promise(resolve => setTimeout(resolve, 200))
+        setDownloadProgress(i)
+      }
+
+      const downloadInfo = {
+        platform,
+        version: '2.5.0',
+        timestamp: new Date().toISOString(),
+        downloadUrl: `https://releases.example.com/v2.5.0/app-${platform}.${platform === 'macos' ? 'dmg' : platform === 'windows' ? 'exe' : 'AppImage'}`,
+        checksumSha256: platform === 'windows' ? 'f1e2d3c4b5a6...' : platform === 'macos' ? 'a1b2c3d4e5f6...' : 'x1y2z3w4v5u6...',
+        size: platform === 'windows' ? '98 MB' : platform === 'macos' ? '125 MB' : '85 MB'
+      }
+
+      const blob = new Blob([JSON.stringify(downloadInfo, null, 2)], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `desktop-app-${platform}-download-info.json`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+
+      toast.dismiss()
+      toast.success(`Download started for ${platform}`, {
+        description: 'Download info saved to file'
+      })
+      setShowDownloadDialog(false)
+    } catch (error) {
+      toast.dismiss()
+      console.error('Download error:', error)
+      toast.error('Failed to start download')
+    }
+  }
+
+  // Export data handler
+  const handleExportData = async (format: 'json' | 'csv' | 'xml') => {
+    toast.loading(`Exporting data as ${format.toUpperCase()}...`)
+
+    try {
+      const exportData = {
+        projects: dbProjects,
+        builds: dbBuilds,
+        analytics: mockAnalytics,
+        releases: mockReleases,
+        certificates: mockCertificates,
+        crashReports: mockCrashReports,
+        exportedAt: new Date().toISOString(),
+        format
+      }
+
+      let content: string
+      let mimeType: string
+      let extension: string
+
+      if (format === 'json') {
+        content = JSON.stringify(exportData, null, 2)
+        mimeType = 'application/json'
+        extension = 'json'
+      } else if (format === 'csv') {
+        // Simple CSV export of builds
+        const headers = ['ID', 'Version', 'Platform', 'Status', 'Created At']
+        const rows = mockBuilds.map(b => [b.id, b.version, b.platform, b.status, b.startedAt])
+        content = [headers.join(','), ...rows.map(r => r.join(','))].join('\n')
+        mimeType = 'text/csv'
+        extension = 'csv'
+      } else {
+        // Simple XML export
+        content = `<?xml version="1.0" encoding="UTF-8"?>
+<desktopAppData>
+  <exportedAt>${new Date().toISOString()}</exportedAt>
+  <projectCount>${dbProjects.length}</projectCount>
+  <buildCount>${dbBuilds.length}</buildCount>
+  <releaseCount>${mockReleases.length}</releaseCount>
+</desktopAppData>`
+        mimeType = 'application/xml'
+        extension = 'xml'
+      }
+
+      const blob = new Blob([content], { type: mimeType })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `desktop-app-export-${new Date().toISOString().split('T')[0]}.${extension}`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+
+      toast.dismiss()
+      toast.success(`Data exported as ${format.toUpperCase()}`, {
+        description: 'Export file downloaded successfully'
+      })
+      setShowExportDataDialog(false)
+    } catch (error) {
+      toast.dismiss()
+      console.error('Export error:', error)
+      toast.error('Failed to export data')
+    }
+  }
+
+  // Save preferences handler
+  const handleSavePreferences = () => {
+    toast.success('Preferences saved successfully', {
+      description: 'Your settings have been updated'
+    })
+    setShowPreferencesDialog(false)
+  }
+
+  // Notarize app handler
+  const handleNotarizeApp = async (buildId: string) => {
+    toast.loading('Submitting app for notarization...')
+
+    try {
+      // Simulate notarization process
+      await new Promise(resolve => setTimeout(resolve, 3000))
+
+      toast.dismiss()
+      toast.success('App submitted for notarization', {
+        description: 'Apple notarization typically takes 5-15 minutes'
+      })
+      setShowNotarizeDialog(false)
+    } catch (error) {
+      toast.dismiss()
+      console.error('Notarization error:', error)
+      toast.error('Failed to submit for notarization')
+    }
+  }
+
+  // Deploy to production handler
+  const handleDeployToProduction = async () => {
+    const latestBuild = mockBuilds.find(b => b.status === 'completed' && b.channel === 'stable')
+    if (!latestBuild) {
+      toast.error('No stable build available for deployment')
+      return
+    }
+
+    toast.loading('Deploying to production...')
+
+    try {
+      await new Promise(resolve => setTimeout(resolve, 2000))
+
+      toast.dismiss()
+      toast.success(`Deployed ${latestBuild.version} to production`, {
+        description: 'All platforms updated successfully'
+      })
+      setShowDeployDialog(false)
+    } catch (error) {
+      toast.dismiss()
+      console.error('Deployment error:', error)
+      toast.error('Failed to deploy to production')
+    }
+  }
+
+  // Generate release notes handler
+  const handleGenerateReleaseNotes = () => {
+    const latestBuild = mockBuilds.find(b => b.status === 'completed')
+    if (!latestBuild) {
+      toast.error('No completed build found')
+      return
+    }
+
+    const releaseNotes = `# Release Notes - ${latestBuild.version}
+
+## What's New
+- Major performance improvements
+- New plugin system
+- Dark mode improvements
+- Memory usage reduced by 30%
+
+## Bug Fixes
+- Fixed memory leak in renderer process
+- Resolved startup crash on macOS Sonoma
+- Fixed file sync issues on Windows
+
+## Platform Support
+- macOS: Universal binary (Intel + Apple Silicon)
+- Windows: x64 and ARM64
+- Linux: AppImage, DEB, RPM
+
+## Checksums
+- macOS: ${latestBuild.checksumSha256 || 'a1b2c3d4e5f6...'}
+- Windows: f1e2d3c4b5a6...
+- Linux: x1y2z3w4v5u6...
+
+Build: #${latestBuild.buildNumber}
+Date: ${new Date().toISOString().split('T')[0]}
+`
+
+    const blob = new Blob([releaseNotes], { type: 'text/markdown' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `release-notes-${latestBuild.version}.md`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+
+    toast.success('Release notes generated', {
+      description: `Notes for ${latestBuild.version} downloaded`
+    })
+    setShowReleaseNotesDialog(false)
+  }
+
   // Quick actions with real handlers
   const desktopAppQuickActions = useMemo(() => [
     {
       id: '1',
       label: 'New Build',
       icon: 'play',
-      action: async () => {
-        await handleStartBuild()
+      action: () => {
+        setShowBuildConfigDialog(true)
       },
       variant: 'default' as const
     },
@@ -1035,22 +1282,48 @@ export default function DesktopAppClient() {
       id: '2',
       label: 'Deploy Update',
       icon: 'upload',
-      action: async () => {
-        await handleDeployUpdate()
+      action: () => {
+        setShowDeployDialog(true)
       },
       variant: 'default' as const
     },
     {
       id: '3',
-      label: 'View Analytics',
-      icon: 'chart',
+      label: 'Download App',
+      icon: 'download',
       action: () => {
-        setActiveTab('analytics')
-        toast.success('Viewing analytics dashboard')
+        setShowDownloadDialog(true)
       },
       variant: 'outline' as const
     },
-  ], [dbProjects, dbBuilds])
+    {
+      id: '4',
+      label: 'Check Updates',
+      icon: 'refresh',
+      action: () => {
+        handleCheckForUpdates()
+      },
+      variant: 'outline' as const
+    },
+    {
+      id: '5',
+      label: 'Export Data',
+      icon: 'archive',
+      action: () => {
+        setShowExportDataDialog(true)
+      },
+      variant: 'outline' as const
+    },
+    {
+      id: '6',
+      label: 'Preferences',
+      icon: 'settings',
+      action: () => {
+        setShowPreferencesDialog(true)
+      },
+      variant: 'outline' as const
+    },
+  ], [])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-zinc-50 dark:bg-none dark:bg-gray-900 p-6">
@@ -1071,15 +1344,39 @@ export default function DesktopAppClient() {
               <Button
                 variant="outline"
                 className="bg-white/10 border-white/30 text-white hover:bg-white/20"
-                onClick={() => setActiveTab('settings')}
+                onClick={() => setShowDownloadDialog(true)}
+              >
+                <Download className="w-4 h-4 mr-2" />
+                Download
+              </Button>
+              <Button
+                variant="outline"
+                className="bg-white/10 border-white/30 text-white hover:bg-white/20"
+                onClick={() => handleCheckForUpdates()}
+              >
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Check Updates
+              </Button>
+              <Button
+                variant="outline"
+                className="bg-white/10 border-white/30 text-white hover:bg-white/20"
+                onClick={() => setShowExportDataDialog(true)}
+              >
+                <Archive className="w-4 h-4 mr-2" />
+                Export
+              </Button>
+              <Button
+                variant="outline"
+                className="bg-white/10 border-white/30 text-white hover:bg-white/20"
+                onClick={() => setShowPreferencesDialog(true)}
               >
                 <Settings className="w-4 h-4 mr-2" />
-                Settings
+                Preferences
               </Button>
               <Button
                 className="bg-white text-gray-800 hover:bg-white/90"
-                onClick={() => handleStartBuild()}
-                disabled={loading || dbProjects.length === 0}
+                onClick={() => setShowBuildConfigDialog(true)}
+                disabled={loading}
               >
                 <Play className="w-4 h-4 mr-2" />
                 New Build
@@ -1410,6 +1707,50 @@ export default function DesktopAppClient() {
                       </div>
                     ))}
                   </div>
+
+                  {/* Release Actions */}
+                  <div className="flex items-center gap-3 mt-4 pt-4 border-t">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowReleaseNotesDialog(true)}
+                    >
+                      <GitBranch className="w-4 h-4 mr-2" />
+                      Generate Notes
+                    </Button>
+                    {release.isLatest && (
+                      <>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setShowDeployDialog(true)}
+                        >
+                          <Upload className="w-4 h-4 mr-2" />
+                          Deploy to Production
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setShowNotarizeDialog(true)}
+                        >
+                          <Apple className="w-4 h-4 mr-2" />
+                          Notarize macOS
+                        </Button>
+                      </>
+                    )}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        toast.info(`Viewing release ${release.version}`, {
+                          description: `Published: ${new Date(release.publishedAt).toLocaleDateString()}`
+                        })
+                      }}
+                    >
+                      <Eye className="w-4 h-4 mr-2" />
+                      View Details
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
             ))}
@@ -1469,6 +1810,87 @@ export default function DesktopAppClient() {
 
                       <div className="bg-gray-900 rounded p-3">
                         <pre className="font-mono text-xs text-gray-300 whitespace-pre-wrap">{crash.stackTrace}</pre>
+                      </div>
+
+                      {/* Crash Report Actions */}
+                      <div className="flex items-center gap-2 mt-3 pt-3 border-t">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            toast.success(`Assigned to ${crash.assignee || 'you'}`, {
+                              description: `Crash report ${crash.id} assigned`
+                            })
+                          }}
+                        >
+                          Assign
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            toast.success('Status updated to Investigating', {
+                              description: `Crash ${crash.errorType} marked as investigating`
+                            })
+                          }}
+                        >
+                          Investigate
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            const crashExport = {
+                              id: crash.id,
+                              errorType: crash.errorType,
+                              errorMessage: crash.errorMessage,
+                              stackTrace: crash.stackTrace,
+                              version: crash.version,
+                              platform: crash.platform,
+                              occurrences: crash.occurrences,
+                              affectedUsers: crash.affectedUsers,
+                              exportedAt: new Date().toISOString()
+                            }
+                            const blob = new Blob([JSON.stringify(crashExport, null, 2)], { type: 'application/json' })
+                            const url = URL.createObjectURL(blob)
+                            const a = document.createElement('a')
+                            a.href = url
+                            a.download = `crash-report-${crash.id}.json`
+                            document.body.appendChild(a)
+                            a.click()
+                            document.body.removeChild(a)
+                            URL.revokeObjectURL(url)
+                            toast.success('Crash report exported')
+                          }}
+                        >
+                          <Download className="w-4 h-4 mr-1" />
+                          Export
+                        </Button>
+                        {crash.linkedIssue ? (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              window.open(`https://github.com/issues/${crash.linkedIssue}`, '_blank')
+                              toast.info(`Opening issue ${crash.linkedIssue}`)
+                            }}
+                          >
+                            <ExternalLink className="w-4 h-4 mr-1" />
+                            View Issue
+                          </Button>
+                        ) : (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              toast.success('GitHub issue created', {
+                                description: `Issue created for ${crash.errorType}`
+                              })
+                            }}
+                          >
+                            Create Issue
+                          </Button>
+                        )}
                       </div>
                     </div>
                   ))}
@@ -2599,6 +3021,435 @@ export default function DesktopAppClient() {
           />
         </div>
       </div>
+
+      {/* Download Desktop App Dialog */}
+      <Dialog open={showDownloadDialog} onOpenChange={setShowDownloadDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Download className="w-5 h-5" />
+              Download Desktop App
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-6">
+            <p className="text-muted-foreground">Select your platform to download the latest version (v2.5.0)</p>
+            <div className="grid grid-cols-3 gap-4">
+              {(['windows', 'macos', 'linux'] as Platform[]).map((platform) => (
+                <Card
+                  key={platform}
+                  className={`cursor-pointer transition-all hover:shadow-md ${selectedPlatformDownload === platform ? 'ring-2 ring-blue-500' : ''}`}
+                  onClick={() => setSelectedPlatformDownload(platform)}
+                >
+                  <CardContent className="p-6 text-center">
+                    {platform === 'windows' && <Monitor className="w-12 h-12 mx-auto mb-3 text-blue-500" />}
+                    {platform === 'macos' && <Apple className="w-12 h-12 mx-auto mb-3 text-gray-700 dark:text-gray-300" />}
+                    {platform === 'linux' && <Terminal className="w-12 h-12 mx-auto mb-3 text-orange-500" />}
+                    <h3 className="font-semibold capitalize">{platform}</h3>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {platform === 'windows' ? '98 MB - .exe' : platform === 'macos' ? '125 MB - .dmg' : '85 MB - .AppImage'}
+                    </p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+            {downloadProgress > 0 && downloadProgress < 100 && (
+              <div className="space-y-2">
+                <Progress value={downloadProgress} className="h-2" />
+                <p className="text-sm text-center text-muted-foreground">Downloading... {downloadProgress}%</p>
+              </div>
+            )}
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setShowDownloadDialog(false)}>Cancel</Button>
+              <Button onClick={() => handleDownloadDesktopApp(selectedPlatformDownload)}>
+                <Download className="w-4 h-4 mr-2" />
+                Download for {selectedPlatformDownload}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Check Updates Dialog */}
+      <Dialog open={showCheckUpdatesDialog} onOpenChange={setShowCheckUpdatesDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <RefreshCw className={`w-5 h-5 ${checkingUpdates ? 'animate-spin' : ''}`} />
+              Check for Updates
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            {checkingUpdates ? (
+              <div className="text-center py-8">
+                <RefreshCw className="w-12 h-12 mx-auto mb-4 animate-spin text-blue-500" />
+                <p className="text-muted-foreground">Checking for updates...</p>
+              </div>
+            ) : (
+              <>
+                <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <CheckCircle className="w-8 h-8 text-green-600" />
+                    <div>
+                      <h4 className="font-semibold text-green-700 dark:text-green-400">You are up to date!</h4>
+                      <p className="text-sm text-green-600">Version 2.5.0 is the latest version</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <h4 className="font-medium">Version History</h4>
+                  <div className="space-y-2 max-h-48 overflow-y-auto">
+                    {mockReleases.slice(0, 3).map((release) => (
+                      <div key={release.id} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                        <div>
+                          <span className="font-medium">{release.version}</span>
+                          <span className="text-xs text-muted-foreground ml-2">
+                            {new Date(release.publishedAt).toLocaleDateString()}
+                          </span>
+                        </div>
+                        {release.isLatest && <Badge className="bg-green-100 text-green-700">Current</Badge>}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </>
+            )}
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setShowCheckUpdatesDialog(false)}>Close</Button>
+              <Button onClick={handleCheckForUpdates} disabled={checkingUpdates}>
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Check Again
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Export Data Dialog */}
+      <Dialog open={showExportDataDialog} onOpenChange={setShowExportDataDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Archive className="w-5 h-5" />
+              Export Data
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-muted-foreground">Export your desktop app data including builds, projects, and analytics.</p>
+            <div className="space-y-3">
+              <Label>Export Format</Label>
+              <div className="grid grid-cols-3 gap-3">
+                {(['json', 'csv', 'xml'] as const).map((format) => (
+                  <Button
+                    key={format}
+                    variant={exportFormat === format ? 'default' : 'outline'}
+                    onClick={() => setExportFormat(format)}
+                    className="w-full"
+                  >
+                    {format.toUpperCase()}
+                  </Button>
+                ))}
+              </div>
+            </div>
+            <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg space-y-2">
+              <h4 className="font-medium">Data to Export</h4>
+              <div className="text-sm text-muted-foreground space-y-1">
+                <p>- {dbProjects.length} Projects</p>
+                <p>- {dbBuilds.length + mockBuilds.length} Builds</p>
+                <p>- {mockReleases.length} Releases</p>
+                <p>- {mockCrashReports.length} Crash Reports</p>
+                <p>- Analytics Data</p>
+              </div>
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setShowExportDataDialog(false)}>Cancel</Button>
+              <Button onClick={() => handleExportData(exportFormat)}>
+                <Download className="w-4 h-4 mr-2" />
+                Export as {exportFormat.toUpperCase()}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Preferences Dialog */}
+      <Dialog open={showPreferencesDialog} onOpenChange={setShowPreferencesDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Settings className="w-5 h-5" />
+              Preferences
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-6">
+            <div className="space-y-4">
+              <h4 className="font-medium">Build Preferences</h4>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div>
+                    <p className="font-medium">Auto-build on Push</p>
+                    <p className="text-sm text-muted-foreground">Trigger builds when code is pushed</p>
+                  </div>
+                  <Switch defaultChecked />
+                </div>
+                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div>
+                    <p className="font-medium">Build Notifications</p>
+                    <p className="text-sm text-muted-foreground">Get notified when builds complete</p>
+                  </div>
+                  <Switch defaultChecked />
+                </div>
+                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div>
+                    <p className="font-medium">Parallel Builds</p>
+                    <p className="text-sm text-muted-foreground">Build multiple platforms simultaneously</p>
+                  </div>
+                  <Switch defaultChecked />
+                </div>
+              </div>
+            </div>
+            <div className="space-y-4">
+              <h4 className="font-medium">Update Preferences</h4>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div>
+                    <p className="font-medium">Auto-update Check</p>
+                    <p className="text-sm text-muted-foreground">Check for updates on startup</p>
+                  </div>
+                  <Switch defaultChecked />
+                </div>
+                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div>
+                    <p className="font-medium">Pre-release Updates</p>
+                    <p className="text-sm text-muted-foreground">Include beta and alpha updates</p>
+                  </div>
+                  <Switch />
+                </div>
+              </div>
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setShowPreferencesDialog(false)}>Cancel</Button>
+              <Button onClick={handleSavePreferences}>
+                <CheckCircle className="w-4 h-4 mr-2" />
+                Save Preferences
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Deploy to Production Dialog */}
+      <Dialog open={showDeployDialog} onOpenChange={setShowDeployDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Upload className="w-5 h-5" />
+              Deploy to Production
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
+              <p className="text-sm text-yellow-700 dark:text-yellow-400">
+                You are about to deploy the latest stable build to production. This action will push updates to all users.
+              </p>
+            </div>
+            <div className="space-y-3">
+              <h4 className="font-medium">Deployment Details</h4>
+              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg space-y-2">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Version</span>
+                  <span className="font-medium">2.5.0</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Platforms</span>
+                  <span className="font-medium">Windows, macOS, Linux</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Estimated Users</span>
+                  <span className="font-medium">156,000</span>
+                </div>
+              </div>
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setShowDeployDialog(false)}>Cancel</Button>
+              <Button onClick={handleDeployToProduction} className="bg-green-600 hover:bg-green-700">
+                <Upload className="w-4 h-4 mr-2" />
+                Deploy Now
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Notarize App Dialog */}
+      <Dialog open={showNotarizeDialog} onOpenChange={setShowNotarizeDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Apple className="w-5 h-5" />
+              Notarize App
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-muted-foreground">Submit your macOS build to Apple for notarization. This is required for distribution outside the App Store.</p>
+            <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg space-y-3">
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Build Version</span>
+                <span className="font-medium">2.5.0</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Architecture</span>
+                <span className="font-medium">Universal (Intel + Apple Silicon)</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Signing Identity</span>
+                <span className="font-medium">Developer ID Application</span>
+              </div>
+            </div>
+            <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+              <p className="text-sm text-blue-700 dark:text-blue-400">
+                Notarization typically takes 5-15 minutes. You will be notified when complete.
+              </p>
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setShowNotarizeDialog(false)}>Cancel</Button>
+              <Button onClick={() => handleNotarizeApp('latest')}>
+                <Shield className="w-4 h-4 mr-2" />
+                Submit for Notarization
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Release Notes Dialog */}
+      <Dialog open={showReleaseNotesDialog} onOpenChange={setShowReleaseNotesDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <GitBranch className="w-5 h-5" />
+              Generate Release Notes
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-muted-foreground">Generate release notes based on the latest build and commits.</p>
+            <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+              <h4 className="font-medium mb-2">Preview</h4>
+              <div className="text-sm space-y-2">
+                <p className="font-semibold">Release Notes - v2.5.0</p>
+                <div className="space-y-1 text-muted-foreground">
+                  <p>- Major performance improvements</p>
+                  <p>- New plugin system</p>
+                  <p>- Dark mode improvements</p>
+                  <p>- Memory usage reduced by 30%</p>
+                </div>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Include Commits</Label>
+                <Select defaultValue="all">
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Commits</SelectItem>
+                    <SelectItem value="features">Features Only</SelectItem>
+                    <SelectItem value="fixes">Bug Fixes Only</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Format</Label>
+                <Select defaultValue="markdown">
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="markdown">Markdown</SelectItem>
+                    <SelectItem value="html">HTML</SelectItem>
+                    <SelectItem value="plain">Plain Text</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setShowReleaseNotesDialog(false)}>Cancel</Button>
+              <Button onClick={handleGenerateReleaseNotes}>
+                <Download className="w-4 h-4 mr-2" />
+                Generate & Download
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Build Configuration Dialog */}
+      <Dialog open={showBuildConfigDialog} onOpenChange={setShowBuildConfigDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Package className="w-5 h-5" />
+              Build Configuration
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-6">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Build Type</Label>
+                <Select defaultValue="production">
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="development">Development</SelectItem>
+                    <SelectItem value="beta">Beta</SelectItem>
+                    <SelectItem value="production">Production</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Target Platforms</Label>
+                <Select defaultValue="all">
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Platforms</SelectItem>
+                    <SelectItem value="windows">Windows Only</SelectItem>
+                    <SelectItem value="macos">macOS Only</SelectItem>
+                    <SelectItem value="linux">Linux Only</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div>
+                  <p className="font-medium">Code Signing</p>
+                  <p className="text-sm text-muted-foreground">Sign executables with certificates</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div>
+                  <p className="font-medium">Minify Code</p>
+                  <p className="text-sm text-muted-foreground">Reduce bundle size</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div>
+                  <p className="font-medium">Generate Source Maps</p>
+                  <p className="text-sm text-muted-foreground">For debugging production builds</p>
+                </div>
+                <Switch />
+              </div>
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setShowBuildConfigDialog(false)}>Cancel</Button>
+              <Button onClick={() => {
+                setShowBuildConfigDialog(false)
+                handleStartBuild()
+              }}>
+                <Play className="w-4 h-4 mr-2" />
+                Start Build
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

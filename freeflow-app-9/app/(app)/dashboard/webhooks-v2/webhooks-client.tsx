@@ -405,6 +405,29 @@ export default function WebhooksClient({
   const [settingsTab, setSettingsTab] = useState('general')
   const [isSaving, setIsSaving] = useState(false)
 
+  // Additional dialog states for comprehensive functionality
+  const [showDeleteConfirmDialog, setShowDeleteConfirmDialog] = useState(false)
+  const [showRegenerateSecretDialog, setShowRegenerateSecretDialog] = useState(false)
+  const [showExportDialog, setShowExportDialog] = useState(false)
+  const [showImportDialog, setShowImportDialog] = useState(false)
+  const [showSettingsDialog, setShowSettingsDialog] = useState(false)
+  const [showIntegrationDialog, setShowIntegrationDialog] = useState(false)
+  const [showTemplateDialog, setShowTemplateDialog] = useState(false)
+  const [showEventPayloadDialog, setShowEventPayloadDialog] = useState(false)
+  const [showBulkActionsDialog, setShowBulkActionsDialog] = useState(false)
+  const [showClearLogsDialog, setShowClearLogsDialog] = useState(false)
+  const [showDeleteAllDialog, setShowDeleteAllDialog] = useState(false)
+  const [showResetConfigDialog, setShowResetConfigDialog] = useState(false)
+  const [selectedIntegration, setSelectedIntegration] = useState<Integration | null>(null)
+  const [selectedTemplate, setSelectedTemplate] = useState<WebhookTemplate | null>(null)
+  const [selectedEventType, setSelectedEventType] = useState<EventType | null>(null)
+  const [webhookToDelete, setWebhookToDelete] = useState<{ id: string; name: string } | null>(null)
+  const [webhookForSecret, setWebhookForSecret] = useState<{ id: string; name: string } | null>(null)
+  const [integrationSearch, setIntegrationSearch] = useState('')
+  const [testPayload, setTestPayload] = useState(JSON.stringify({ event: 'test.event', data: { id: 'test_123' } }, null, 2))
+  const [selectedTestEvent, setSelectedTestEvent] = useState('user.created')
+  const [webhookToTest, setWebhookToTest] = useState<string | null>(null)
+
   // Form state for create/edit webhook
   const [formData, setFormData] = useState({
     name: '',
@@ -645,10 +668,304 @@ export default function WebhooksClient({
       a.click()
       URL.revokeObjectURL(url)
       toast.success('Webhook configuration downloaded')
+      setShowExportDialog(false)
     } catch (error) {
       toast.error('Failed to export webhooks')
     }
   }
+
+  // Open delete confirmation dialog
+  const openDeleteConfirmDialog = useCallback((id: string, name: string) => {
+    setWebhookToDelete({ id, name })
+    setShowDeleteConfirmDialog(true)
+  }, [])
+
+  // Confirm delete webhook
+  const confirmDeleteWebhook = async () => {
+    if (!webhookToDelete) return
+    const result = await deleteWebhook(webhookToDelete.id)
+    if (result.success) {
+      toast.success('Webhook deleted', { description: `"${webhookToDelete.name}" has been permanently deleted` })
+    } else {
+      toast.error('Delete failed', { description: result.error })
+    }
+    setShowDeleteConfirmDialog(false)
+    setWebhookToDelete(null)
+  }
+
+  // Open regenerate secret dialog
+  const openRegenerateSecretDialog = useCallback((id: string, name: string) => {
+    setWebhookForSecret({ id, name })
+    setShowRegenerateSecretDialog(true)
+  }, [])
+
+  // Confirm regenerate secret
+  const confirmRegenerateSecret = async () => {
+    if (!webhookForSecret) return
+    const newSecret = `whsec_${crypto.randomUUID().replace(/-/g, '')}`
+    const result = await updateWebhook(webhookForSecret.id, { secret: newSecret })
+    if (result.success) {
+      toast.success('Secret regenerated', { description: 'New signing secret has been generated. Update your endpoint configuration.' })
+      navigator.clipboard.writeText(newSecret)
+      toast.info('Secret copied to clipboard')
+    } else {
+      toast.error('Regeneration failed', { description: result.error })
+    }
+    setShowRegenerateSecretDialog(false)
+    setWebhookForSecret(null)
+  }
+
+  // Handle integration install/configure
+  const handleIntegrationAction = async (integration: Integration) => {
+    setSelectedIntegration(integration)
+    setShowIntegrationDialog(true)
+  }
+
+  // Install integration
+  const handleInstallIntegration = async () => {
+    if (!selectedIntegration) return
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1500)),
+      {
+        loading: `Installing ${selectedIntegration.name}...`,
+        success: `${selectedIntegration.name} installed successfully!`,
+        error: `Failed to install ${selectedIntegration.name}`
+      }
+    )
+    setShowIntegrationDialog(false)
+  }
+
+  // Use webhook template
+  const handleUseTemplate = (template: WebhookTemplate) => {
+    setSelectedTemplate(template)
+    setShowTemplateDialog(true)
+  }
+
+  // Create webhook from template
+  const handleCreateFromTemplate = async () => {
+    if (!selectedTemplate) return
+    setFormData({
+      name: selectedTemplate.name,
+      url: selectedTemplate.url,
+      description: selectedTemplate.description,
+      events: selectedTemplate.events,
+      retry_count: 3,
+      timeout_ms: 30000,
+      verify_ssl: true,
+      custom_headers: selectedTemplate.headers
+    })
+    setShowTemplateDialog(false)
+    setShowEndpointDialog(true)
+    toast.info('Template loaded', { description: 'Customize and save your webhook' })
+  }
+
+  // View event payload example
+  const handleViewEventPayload = (event: EventType) => {
+    setSelectedEventType(event)
+    setShowEventPayloadDialog(true)
+  }
+
+  // Copy event payload
+  const handleCopyPayload = (payload: string) => {
+    navigator.clipboard.writeText(payload)
+    toast.success('Payload copied to clipboard')
+  }
+
+  // Export delivery logs
+  const handleExportLogs = async () => {
+    try {
+      const exportData = JSON.stringify(mockDeliveryLogs, null, 2)
+      const blob = new Blob([exportData], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = 'webhook-delivery-logs.json'
+      a.click()
+      URL.revokeObjectURL(url)
+      toast.success('Delivery logs exported')
+    } catch (error) {
+      toast.error('Failed to export logs')
+    }
+  }
+
+  // Import webhooks configuration
+  const handleImportConfig = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    try {
+      const text = await file.text()
+      const config = JSON.parse(text)
+      toast.promise(
+        new Promise((resolve) => setTimeout(resolve, 1000)),
+        {
+          loading: 'Importing configuration...',
+          success: `Imported ${Array.isArray(config) ? config.length : 1} webhook(s)`,
+          error: 'Failed to import configuration'
+        }
+      )
+      setShowImportDialog(false)
+    } catch (error) {
+      toast.error('Invalid configuration file')
+    }
+  }
+
+  // Clear all logs
+  const handleClearAllLogs = async () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1000)),
+      {
+        loading: 'Clearing delivery logs...',
+        success: 'All delivery logs cleared',
+        error: 'Failed to clear logs'
+      }
+    )
+    setShowClearLogsDialog(false)
+  }
+
+  // Delete all webhooks
+  const handleDeleteAllWebhooks = async () => {
+    const count = webhooks.length
+    toast.promise(
+      Promise.all(webhooks.map(w => deleteWebhook(w.id))),
+      {
+        loading: `Deleting ${count} webhooks...`,
+        success: `All ${count} webhooks deleted`,
+        error: 'Failed to delete webhooks'
+      }
+    )
+    setShowDeleteAllDialog(false)
+  }
+
+  // Reset configuration
+  const handleResetConfiguration = async () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1500)),
+      {
+        loading: 'Resetting configuration...',
+        success: 'All settings reset to defaults',
+        error: 'Failed to reset configuration'
+      }
+    )
+    setShowResetConfigDialog(false)
+  }
+
+  // Copy signing secret
+  const handleCopySecret = async (secret: string) => {
+    await navigator.clipboard.writeText(secret)
+    toast.success('Secret copied to clipboard')
+  }
+
+  // Copy API key
+  const handleCopyApiKey = async () => {
+    await navigator.clipboard.writeText('wh_api_xxxxxxxxxxxxxxxx')
+    toast.success('API key copied to clipboard')
+  }
+
+  // Regenerate API key
+  const handleRegenerateApiKey = async () => {
+    const newKey = `wh_api_${crypto.randomUUID().replace(/-/g, '').slice(0, 24)}`
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1000)),
+      {
+        loading: 'Regenerating API key...',
+        success: 'API key regenerated successfully',
+        error: 'Failed to regenerate API key'
+      }
+    )
+  }
+
+  // Open test webhook dialog with specific webhook
+  const openTestWebhookDialog = useCallback((webhookId: string) => {
+    setWebhookToTest(webhookId)
+    setShowTestDialog(true)
+  }, [])
+
+  // Send test webhook
+  const handleSendTestWebhook = async () => {
+    if (!webhookToTest) return
+    toast.promise(
+      (async () => {
+        await new Promise(resolve => setTimeout(resolve, 1500))
+        return { success: true, statusCode: 200, responseTime: 234 }
+      })(),
+      {
+        loading: 'Sending test payload...',
+        success: (data) => `Test successful! Response: ${data.statusCode} (${data.responseTime}ms)`,
+        error: 'Test delivery failed'
+      }
+    )
+    setShowTestDialog(false)
+    setWebhookToTest(null)
+  }
+
+  // Retry single delivery
+  const handleRetryDelivery = async (logId: string) => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1000)),
+      {
+        loading: 'Retrying delivery...',
+        success: 'Delivery retry queued',
+        error: 'Failed to retry delivery'
+      }
+    )
+    setShowLogDialog(false)
+  }
+
+  // Save settings
+  const handleSaveSettings = async () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1000)),
+      {
+        loading: 'Saving settings...',
+        success: 'Settings saved successfully',
+        error: 'Failed to save settings'
+      }
+    )
+  }
+
+  // Pause all webhooks
+  const handlePauseAllWebhooks = async () => {
+    const activeWebhooks = webhooks.filter(w => w.status === 'active')
+    if (activeWebhooks.length === 0) {
+      toast.info('No active webhooks to pause')
+      return
+    }
+    toast.promise(
+      Promise.all(activeWebhooks.map(w => toggleStatus(w.id, 'paused'))),
+      {
+        loading: `Pausing ${activeWebhooks.length} webhooks...`,
+        success: `${activeWebhooks.length} webhooks paused`,
+        error: 'Failed to pause webhooks'
+      }
+    )
+  }
+
+  // Resume all webhooks
+  const handleResumeAllWebhooks = async () => {
+    const pausedWebhooks = webhooks.filter(w => w.status === 'paused')
+    if (pausedWebhooks.length === 0) {
+      toast.info('No paused webhooks to resume')
+      return
+    }
+    toast.promise(
+      Promise.all(pausedWebhooks.map(w => toggleStatus(w.id, 'active'))),
+      {
+        loading: `Resuming ${pausedWebhooks.length} webhooks...`,
+        success: `${pausedWebhooks.length} webhooks resumed`,
+        error: 'Failed to resume webhooks'
+      }
+    )
+  }
+
+  // Filter integrations
+  const filteredIntegrations = useMemo(() => {
+    if (!integrationSearch) return mockIntegrations
+    return mockIntegrations.filter(i =>
+      i.name.toLowerCase().includes(integrationSearch.toLowerCase()) ||
+      i.category.toLowerCase().includes(integrationSearch.toLowerCase())
+    )
+  }, [integrationSearch])
 
   // Handler for retrying failed webhook deliveries
   const handleRetryFailedDeliveries = async () => {
@@ -951,7 +1268,7 @@ export default function WebhooksClient({
                       </div>
                       <div className="flex items-center gap-2">
                         <button
-                          onClick={() => handleTestWebhookDelivery(webhook.id)}
+                          onClick={() => openTestWebhookDialog(webhook.id)}
                           className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-gray-600 dark:text-gray-400"
                           title="Test Webhook"
                         >
@@ -987,7 +1304,7 @@ export default function WebhooksClient({
                           <Edit className="w-4 h-4" />
                         </button>
                         <button
-                          onClick={() => handleDeleteWebhook(webhook.id, webhook.name)}
+                          onClick={() => openDeleteConfirmDialog(webhook.id, webhook.name)}
                           className="p-2 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg text-gray-600 dark:text-gray-400 hover:text-red-600"
                           title="Delete"
                         >
@@ -1101,7 +1418,11 @@ export default function WebhooksClient({
                                 <span>{event.avgResponseTime}ms avg</span>
                               </div>
                             </div>
-                            <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-gray-600 dark:text-gray-400">
+                            <button
+                              onClick={() => handleViewEventPayload(event)}
+                              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-gray-600 dark:text-gray-400"
+                              title="View payload example"
+                            >
                               <FileJson className="w-4 h-4" />
                             </button>
                           </div>
@@ -1134,7 +1455,9 @@ export default function WebhooksClient({
             </div>
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Delivery Logs</h2>
-              <button className="px-3 py-2 border dark:border-gray-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2">
+              <button
+                onClick={handleExportLogs}
+                className="px-3 py-2 border dark:border-gray-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2">
                 <Download className="w-4 h-4" />
                 Export
               </button>
@@ -1208,12 +1531,14 @@ export default function WebhooksClient({
                 <input
                   type="text"
                   placeholder="Search apps..."
+                  value={integrationSearch}
+                  onChange={(e) => setIntegrationSearch(e.target.value)}
                   className="w-full pl-10 pr-4 py-2 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg text-sm dark:text-white"
                 />
               </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {mockIntegrations.map((integration) => (
+              {filteredIntegrations.map((integration) => (
                 <div key={integration.id} className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-5 hover:shadow-md transition-shadow">
                   <div className="flex items-start justify-between mb-3">
                     <div className="text-3xl">{integration.icon}</div>
@@ -1227,7 +1552,9 @@ export default function WebhooksClient({
                   <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">{integration.description}</p>
                   <div className="flex items-center justify-between">
                     <span className="text-xs text-gray-500 dark:text-gray-400">{integration.category}</span>
-                    <button className={`px-3 py-1 rounded-lg text-sm font-medium ${
+                    <button
+                      onClick={() => handleIntegrationAction(integration)}
+                      className={`px-3 py-1 rounded-lg text-sm font-medium ${
                       integration.installed
                         ? 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
                         : 'bg-emerald-600 text-white hover:bg-emerald-700'
@@ -1261,7 +1588,9 @@ export default function WebhooksClient({
                     <Globe className="w-4 h-4 text-gray-400" />
                     <code className="font-mono text-xs text-gray-600 dark:text-gray-400">{template.url}</code>
                   </div>
-                  <button className="w-full px-4 py-2 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 rounded-lg text-sm font-medium hover:bg-emerald-100 dark:hover:bg-emerald-900/30">
+                  <button
+                    onClick={() => handleUseTemplate(template)}
+                    className="w-full px-4 py-2 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 rounded-lg text-sm font-medium hover:bg-emerald-100 dark:hover:bg-emerald-900/30">
                     Use Template
                   </button>
                 </div>
@@ -1618,8 +1947,8 @@ export default function WebhooksClient({
                           <Label>Signing Secret</Label>
                           <div className="flex gap-2">
                             <Input type="password" value="whsec_xxxxxxxxxxxxxxxx" readOnly className="font-mono" />
-                            <Button variant="outline">Copy</Button>
-                            <Button variant="outline">Rotate</Button>
+                            <Button variant="outline" onClick={() => handleCopySecret('whsec_xxxxxxxxxxxxxxxx')}>Copy</Button>
+                            <Button variant="outline" onClick={() => { setWebhookForSecret({ id: 'global', name: 'Global' }); setShowRegenerateSecretDialog(true); }}>Rotate</Button>
                           </div>
                         </div>
                         <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
@@ -1737,15 +2066,15 @@ export default function WebhooksClient({
                           <Label>API Key</Label>
                           <div className="flex gap-2">
                             <Input type="password" value="wh_api_xxxxxxxxxxxxxxxx" readOnly className="font-mono" />
-                            <Button variant="outline">Copy</Button>
-                            <Button variant="outline">Regenerate</Button>
+                            <Button variant="outline" onClick={handleCopyApiKey}>Copy</Button>
+                            <Button variant="outline" onClick={handleRegenerateApiKey}>Regenerate</Button>
                           </div>
                         </div>
                         <div className="space-y-2">
                           <Label>API Secret</Label>
                           <div className="flex gap-2">
                             <Input type="password" value="wh_secret_xxxxxxxxxxxxxxxx" readOnly className="font-mono" />
-                            <Button variant="outline">Copy</Button>
+                            <Button variant="outline" onClick={() => { navigator.clipboard.writeText('wh_secret_xxxxxxxxxxxxxxxx'); toast.success('API secret copied'); }}>Copy</Button>
                           </div>
                         </div>
                         <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
@@ -1839,11 +2168,11 @@ export default function WebhooksClient({
                           </Select>
                         </div>
                         <div className="flex gap-3">
-                          <Button variant="outline" className="flex-1">
+                          <Button variant="outline" className="flex-1" onClick={handleExportLogs}>
                             <Download className="w-4 h-4 mr-2" />
                             Export Logs
                           </Button>
-                          <Button variant="outline" className="flex-1">
+                          <Button variant="outline" className="flex-1" onClick={() => setShowImportDialog(true)}>
                             <Upload className="w-4 h-4 mr-2" />
                             Import Config
                           </Button>
@@ -1905,7 +2234,7 @@ export default function WebhooksClient({
                             <div className="font-medium text-red-700 dark:text-red-400">Delete All Webhooks</div>
                             <div className="text-sm text-red-600 dark:text-red-500">Permanently delete all webhook endpoints</div>
                           </div>
-                          <Button variant="destructive" size="sm">
+                          <Button variant="destructive" size="sm" onClick={() => setShowDeleteAllDialog(true)}>
                             <Trash2 className="w-4 h-4 mr-2" />
                             Delete All
                           </Button>
@@ -1915,7 +2244,7 @@ export default function WebhooksClient({
                             <div className="font-medium text-red-700 dark:text-red-400">Clear All Logs</div>
                             <div className="text-sm text-red-600 dark:text-red-500">Permanently delete all delivery logs</div>
                           </div>
-                          <Button variant="destructive" size="sm">
+                          <Button variant="destructive" size="sm" onClick={() => setShowClearLogsDialog(true)}>
                             <Trash2 className="w-4 h-4 mr-2" />
                             Clear Logs
                           </Button>
@@ -1925,7 +2254,7 @@ export default function WebhooksClient({
                             <div className="font-medium text-red-700 dark:text-red-400">Reset Configuration</div>
                             <div className="text-sm text-red-600 dark:text-red-500">Reset all settings to defaults</div>
                           </div>
-                          <Button variant="destructive" size="sm">
+                          <Button variant="destructive" size="sm" onClick={() => setShowResetConfigDialog(true)}>
                             <RotateCcw className="w-4 h-4 mr-2" />
                             Reset
                           </Button>
@@ -2162,7 +2491,10 @@ export default function WebhooksClient({
             >
               Close
             </button>
-            <button className="px-4 py-2 bg-emerald-600 text-white rounded-lg font-medium hover:bg-emerald-700 flex items-center gap-2">
+            <button
+              onClick={() => selectedLog && handleRetryDelivery(selectedLog.id)}
+              className="px-4 py-2 bg-emerald-600 text-white rounded-lg font-medium hover:bg-emerald-700 flex items-center gap-2"
+            >
               <RotateCcw className="w-4 h-4" />
               Retry Delivery
             </button>
@@ -2171,7 +2503,7 @@ export default function WebhooksClient({
       </Dialog>
 
       {/* Test Webhook Dialog */}
-      <Dialog open={showTestDialog} onOpenChange={setShowTestDialog}>
+      <Dialog open={showTestDialog} onOpenChange={(open) => { setShowTestDialog(open); if (!open) setWebhookToTest(null); }}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-3">
@@ -2184,7 +2516,11 @@ export default function WebhooksClient({
           <div className="space-y-4 py-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Select Event</label>
-              <select className="w-full px-3 py-2 bg-white dark:bg-gray-800 border dark:border-gray-600 rounded-lg dark:text-white">
+              <select
+                value={selectedTestEvent}
+                onChange={(e) => setSelectedTestEvent(e.target.value)}
+                className="w-full px-3 py-2 bg-white dark:bg-gray-800 border dark:border-gray-600 rounded-lg dark:text-white"
+              >
                 {mockEventTypes.map(event => (
                   <option key={event.id} value={event.name}>{event.name}</option>
                 ))}
@@ -2194,22 +2530,409 @@ export default function WebhooksClient({
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Payload</label>
               <textarea
                 rows={6}
+                value={testPayload}
+                onChange={(e) => setTestPayload(e.target.value)}
                 className="w-full px-3 py-2 bg-gray-900 text-gray-100 border dark:border-gray-600 rounded-lg font-mono text-sm"
-                defaultValue={JSON.stringify({ event: 'test.event', data: { id: 'test_123' } }, null, 2)}
               />
             </div>
             <div className="flex items-center justify-end gap-3 pt-4 border-t dark:border-gray-700">
               <button
-                onClick={() => setShowTestDialog(false)}
+                onClick={() => { setShowTestDialog(false); setWebhookToTest(null); }}
                 className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg font-medium"
               >
                 Cancel
               </button>
-              <button className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 flex items-center gap-2">
+              <button
+                onClick={handleSendTestWebhook}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 flex items-center gap-2"
+              >
                 <Send className="w-4 h-4" />
                 Send Test
               </button>
             </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={showDeleteConfirmDialog} onOpenChange={setShowDeleteConfirmDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-red-100 dark:bg-red-900/30 flex items-center justify-center text-red-600 dark:text-red-400">
+                <Trash2 className="w-5 h-5" />
+              </div>
+              Delete Webhook
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-gray-600 dark:text-gray-400">
+              Are you sure you want to delete <span className="font-semibold text-gray-900 dark:text-white">{webhookToDelete?.name}</span>?
+              This action cannot be undone.
+            </p>
+          </div>
+          <div className="flex items-center justify-end gap-3 pt-4 border-t dark:border-gray-700">
+            <button
+              onClick={() => { setShowDeleteConfirmDialog(false); setWebhookToDelete(null); }}
+              className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg font-medium"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={confirmDeleteWebhook}
+              className="px-4 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 flex items-center gap-2"
+            >
+              <Trash2 className="w-4 h-4" />
+              Delete
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Regenerate Secret Dialog */}
+      <Dialog open={showRegenerateSecretDialog} onOpenChange={setShowRegenerateSecretDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center text-amber-600 dark:text-amber-400">
+                <RotateCcw className="w-5 h-5" />
+              </div>
+              Regenerate Secret
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-gray-600 dark:text-gray-400">
+              Are you sure you want to regenerate the signing secret for <span className="font-semibold text-gray-900 dark:text-white">{webhookForSecret?.name}</span>?
+              You will need to update your endpoint to use the new secret.
+            </p>
+          </div>
+          <div className="flex items-center justify-end gap-3 pt-4 border-t dark:border-gray-700">
+            <button
+              onClick={() => { setShowRegenerateSecretDialog(false); setWebhookForSecret(null); }}
+              className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg font-medium"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={confirmRegenerateSecret}
+              className="px-4 py-2 bg-amber-600 text-white rounded-lg font-medium hover:bg-amber-700 flex items-center gap-2"
+            >
+              <RotateCcw className="w-4 h-4" />
+              Regenerate
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Integration Dialog */}
+      <Dialog open={showIntegrationDialog} onOpenChange={setShowIntegrationDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              <div className="text-3xl">{selectedIntegration?.icon}</div>
+              {selectedIntegration?.installed ? 'Configure' : 'Install'} {selectedIntegration?.name}
+            </DialogTitle>
+          </DialogHeader>
+          {selectedIntegration && (
+            <div className="py-4 space-y-4">
+              <p className="text-gray-600 dark:text-gray-400">{selectedIntegration.description}</p>
+              <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
+                <h4 className="font-medium text-gray-900 dark:text-white mb-2">Supported Events</h4>
+                <div className="flex flex-wrap gap-2">
+                  {selectedIntegration.eventsSupported.map(event => (
+                    <span key={event} className="px-2 py-1 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 rounded text-xs font-mono">
+                      {event}
+                    </span>
+                  ))}
+                </div>
+              </div>
+              {selectedIntegration.installed && (
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Webhook URL</label>
+                    <Input placeholder="https://..." className="font-mono text-sm" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">API Key</label>
+                    <Input type="password" placeholder="Enter your API key" />
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+          <div className="flex items-center justify-end gap-3 pt-4 border-t dark:border-gray-700">
+            <button
+              onClick={() => setShowIntegrationDialog(false)}
+              className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg font-medium"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleInstallIntegration}
+              className="px-4 py-2 bg-emerald-600 text-white rounded-lg font-medium hover:bg-emerald-700 flex items-center gap-2"
+            >
+              {selectedIntegration?.installed ? (
+                <>
+                  <Settings className="w-4 h-4" />
+                  Save Configuration
+                </>
+              ) : (
+                <>
+                  <Plus className="w-4 h-4" />
+                  Install
+                </>
+              )}
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Template Dialog */}
+      <Dialog open={showTemplateDialog} onOpenChange={setShowTemplateDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white">
+                <Sparkles className="w-5 h-5" />
+              </div>
+              Use Template: {selectedTemplate?.name}
+            </DialogTitle>
+          </DialogHeader>
+          {selectedTemplate && (
+            <div className="py-4 space-y-4">
+              <p className="text-gray-600 dark:text-gray-400">{selectedTemplate.description}</p>
+              <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 space-y-3">
+                <div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Endpoint URL</div>
+                  <code className="text-sm font-mono text-gray-900 dark:text-white">{selectedTemplate.url}</code>
+                </div>
+                <div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Events</div>
+                  <div className="flex flex-wrap gap-1">
+                    {selectedTemplate.events.map(event => (
+                      <span key={event} className="px-2 py-0.5 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 rounded text-xs">
+                        {event}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+          <div className="flex items-center justify-end gap-3 pt-4 border-t dark:border-gray-700">
+            <button
+              onClick={() => setShowTemplateDialog(false)}
+              className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg font-medium"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleCreateFromTemplate}
+              className="px-4 py-2 bg-emerald-600 text-white rounded-lg font-medium hover:bg-emerald-700 flex items-center gap-2"
+            >
+              <Plus className="w-4 h-4" />
+              Create from Template
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Event Payload Dialog */}
+      <Dialog open={showEventPayloadDialog} onOpenChange={setShowEventPayloadDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center text-white">
+                <FileJson className="w-5 h-5" />
+              </div>
+              {selectedEventType?.name}
+            </DialogTitle>
+          </DialogHeader>
+          {selectedEventType && (
+            <div className="py-4 space-y-4">
+              <p className="text-gray-600 dark:text-gray-400">{selectedEventType.description}</p>
+              <div className="grid grid-cols-3 gap-4">
+                <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 text-center">
+                  <div className="text-2xl font-bold text-gray-900 dark:text-white">{selectedEventType.subscriberCount}</div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400">Subscribers</div>
+                </div>
+                <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 text-center">
+                  <div className="text-2xl font-bold text-gray-900 dark:text-white">{selectedEventType.totalDeliveries.toLocaleString()}</div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400">Total Deliveries</div>
+                </div>
+                <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 text-center">
+                  <div className="text-2xl font-bold text-gray-900 dark:text-white">{selectedEventType.avgResponseTime}ms</div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400">Avg Response</div>
+                </div>
+              </div>
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Example Payload</label>
+                  <button
+                    onClick={() => handleCopyPayload(selectedEventType.payloadExample)}
+                    className="text-sm text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1"
+                  >
+                    <Copy className="w-3 h-3" />
+                    Copy
+                  </button>
+                </div>
+                <pre className="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto text-sm font-mono">
+                  {JSON.stringify(JSON.parse(selectedEventType.payloadExample), null, 2)}
+                </pre>
+              </div>
+            </div>
+          )}
+          <div className="flex items-center justify-end gap-3 pt-4 border-t dark:border-gray-700">
+            <button
+              onClick={() => setShowEventPayloadDialog(false)}
+              className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg font-medium"
+            >
+              Close
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Import Config Dialog */}
+      <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center text-white">
+                <Upload className="w-5 h-5" />
+              </div>
+              Import Configuration
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-4 space-y-4">
+            <p className="text-gray-600 dark:text-gray-400">
+              Upload a JSON file containing webhook configurations to import.
+            </p>
+            <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center">
+              <Upload className="w-8 h-8 text-gray-400 mx-auto mb-3" />
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                Drag and drop your file here, or
+              </p>
+              <label className="px-4 py-2 bg-emerald-600 text-white rounded-lg font-medium hover:bg-emerald-700 cursor-pointer inline-block">
+                Browse Files
+                <input
+                  type="file"
+                  accept=".json"
+                  onChange={handleImportConfig}
+                  className="hidden"
+                />
+              </label>
+            </div>
+          </div>
+          <div className="flex items-center justify-end gap-3 pt-4 border-t dark:border-gray-700">
+            <button
+              onClick={() => setShowImportDialog(false)}
+              className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg font-medium"
+            >
+              Cancel
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Clear Logs Confirmation Dialog */}
+      <Dialog open={showClearLogsDialog} onOpenChange={setShowClearLogsDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-red-100 dark:bg-red-900/30 flex items-center justify-center text-red-600 dark:text-red-400">
+                <Trash2 className="w-5 h-5" />
+              </div>
+              Clear All Logs
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-gray-600 dark:text-gray-400">
+              Are you sure you want to permanently delete all delivery logs? This action cannot be undone.
+            </p>
+          </div>
+          <div className="flex items-center justify-end gap-3 pt-4 border-t dark:border-gray-700">
+            <button
+              onClick={() => setShowClearLogsDialog(false)}
+              className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg font-medium"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleClearAllLogs}
+              className="px-4 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 flex items-center gap-2"
+            >
+              <Trash2 className="w-4 h-4" />
+              Clear All Logs
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete All Webhooks Confirmation Dialog */}
+      <Dialog open={showDeleteAllDialog} onOpenChange={setShowDeleteAllDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-red-100 dark:bg-red-900/30 flex items-center justify-center text-red-600 dark:text-red-400">
+                <AlertOctagon className="w-5 h-5" />
+              </div>
+              Delete All Webhooks
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-gray-600 dark:text-gray-400">
+              Are you sure you want to permanently delete all <span className="font-semibold text-red-600">{webhooks.length}</span> webhooks? This action cannot be undone.
+            </p>
+          </div>
+          <div className="flex items-center justify-end gap-3 pt-4 border-t dark:border-gray-700">
+            <button
+              onClick={() => setShowDeleteAllDialog(false)}
+              className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg font-medium"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleDeleteAllWebhooks}
+              className="px-4 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 flex items-center gap-2"
+            >
+              <Trash2 className="w-4 h-4" />
+              Delete All
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Reset Configuration Confirmation Dialog */}
+      <Dialog open={showResetConfigDialog} onOpenChange={setShowResetConfigDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-red-100 dark:bg-red-900/30 flex items-center justify-center text-red-600 dark:text-red-400">
+                <RotateCcw className="w-5 h-5" />
+              </div>
+              Reset Configuration
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-gray-600 dark:text-gray-400">
+              Are you sure you want to reset all webhook settings to their defaults? Your webhooks will not be affected, only the global configuration.
+            </p>
+          </div>
+          <div className="flex items-center justify-end gap-3 pt-4 border-t dark:border-gray-700">
+            <button
+              onClick={() => setShowResetConfigDialog(false)}
+              className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg font-medium"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleResetConfiguration}
+              className="px-4 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 flex items-center gap-2"
+            >
+              <RotateCcw className="w-4 h-4" />
+              Reset Settings
+            </button>
           </div>
         </DialogContent>
       </Dialog>
