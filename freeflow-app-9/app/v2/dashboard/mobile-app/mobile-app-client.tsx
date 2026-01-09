@@ -2445,7 +2445,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
                 Drag and drop your IPA or APK file here
               </p>
               <p className="text-xs text-gray-500">or</p>
-              <Button variant="outline" className="mt-2" onClick={() => toast.info('File browser would open here')}>
+              <Button variant="outline" className="mt-2" onClick={() => { /* TODO: Implement file browser for build upload */ }}>
                 Browse Files
               </Button>
             </div>

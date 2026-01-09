@@ -2029,7 +2029,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
                               <Label className="text-base">API Key</Label>
                               <p className="text-xs text-gray-500">Use this key for API access</p>
                             </div>
-                            <Button size="sm" variant="outline" onClick={() => toast.success('API Key Regenerated', { description: 'Your new API key has been generated. Please update your integrations.' })}>
+                            <Button size="sm" variant="outline" onClick={() => { /* TODO: Implement API key regeneration */ }}>
                               <RefreshCw className="h-4 w-4 mr-2" />
                               Regenerate
                             </Button>
@@ -2506,7 +2506,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowLogActivityDialog(false)}>Cancel</Button>
-              <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white" onClick={() => { setShowLogActivityDialog(false); toast.success('Activity Logged', { description: 'Your activity has been recorded successfully' }) }}>
+              <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white" onClick={() => { setShowLogActivityDialog(false); /* TODO: Implement activity logging */ }}>
                 <Activity className="h-4 w-4 mr-2" />Log Activity
               </Button>
             </DialogFooter>
@@ -2564,7 +2564,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowEmailComposer(false)}>Cancel</Button>
-              <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white" onClick={() => { setShowEmailComposer(false); toast.success('Email Sent', { description: 'Your email has been sent successfully' }) }}>
+              <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white" onClick={() => { setShowEmailComposer(false); /* TODO: Implement email sending */ }}>
                 <Mail className="h-4 w-4 mr-2" />Send Email
               </Button>
             </DialogFooter>
@@ -2628,7 +2628,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowScheduleCallDialog(false)}>Cancel</Button>
-              <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white" onClick={() => { setShowScheduleCallDialog(false); toast.success('Call Scheduled', { description: 'Your call has been scheduled successfully' }) }}>
+              <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white" onClick={() => { setShowScheduleCallDialog(false); /* TODO: Implement call scheduling */ }}>
                 <Phone className="h-4 w-4 mr-2" />Schedule Call
               </Button>
             </DialogFooter>
@@ -2696,7 +2696,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowCalendarDialog(false)}>Cancel</Button>
-              <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white" onClick={() => { setShowCalendarDialog(false); toast.success('Meeting Scheduled', { description: 'Your meeting has been added to the calendar' }) }}>
+              <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white" onClick={() => { setShowCalendarDialog(false); /* TODO: Implement meeting scheduling */ }}>
                 <Calendar className="h-4 w-4 mr-2" />Schedule Meeting
               </Button>
             </DialogFooter>
@@ -2758,7 +2758,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => { setShowCallLogDialog(false); setCallLogContactId(null) }}>Cancel</Button>
-              <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white" onClick={() => { setShowCallLogDialog(false); setCallLogContactId(null); toast.success('Call Logged', { description: 'Your call has been recorded successfully' }) }}>
+              <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white" onClick={() => { setShowCallLogDialog(false); setCallLogContactId(null); /* TODO: Implement call logging */ }}>
                 <PhoneCall className="h-4 w-4 mr-2" />Log Call
               </Button>
             </DialogFooter>
@@ -2775,19 +2775,19 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
               </DialogTitle>
             </DialogHeader>
             <div className="space-y-2 py-4">
-              <Button variant="outline" className="w-full justify-start" onClick={() => { setShowTaskOptionsMenu(null); toast.success('Task marked as complete') }}>
+              <Button variant="outline" className="w-full justify-start" onClick={() => { setShowTaskOptionsMenu(null); /* TODO: Implement mark task as complete */ }}>
                 <CheckCircle className="h-4 w-4 mr-2" />Mark as Complete
               </Button>
-              <Button variant="outline" className="w-full justify-start" onClick={() => { setShowTaskOptionsMenu(null); toast.success('Task edit form opened') }}>
+              <Button variant="outline" className="w-full justify-start" onClick={() => { setShowTaskOptionsMenu(null); /* TODO: Implement edit task */ }}>
                 <Edit className="h-4 w-4 mr-2" />Edit Task
               </Button>
-              <Button variant="outline" className="w-full justify-start" onClick={() => { setShowTaskOptionsMenu(null); toast.success('Task rescheduled') }}>
+              <Button variant="outline" className="w-full justify-start" onClick={() => { setShowTaskOptionsMenu(null); /* TODO: Implement reschedule task */ }}>
                 <Calendar className="h-4 w-4 mr-2" />Reschedule
               </Button>
-              <Button variant="outline" className="w-full justify-start" onClick={() => { setShowTaskOptionsMenu(null); toast.success('Task assigned') }}>
+              <Button variant="outline" className="w-full justify-start" onClick={() => { setShowTaskOptionsMenu(null); /* TODO: Implement reassign task */ }}>
                 <Users className="h-4 w-4 mr-2" />Reassign
               </Button>
-              <Button variant="outline" className="w-full justify-start text-red-600 hover:text-red-700" onClick={() => { setShowTaskOptionsMenu(null); toast.success('Task deleted') }}>
+              <Button variant="outline" className="w-full justify-start text-red-600 hover:text-red-700" onClick={() => { if (confirm('Are you sure you want to delete this task?')) { setShowTaskOptionsMenu(null); /* TODO: Implement delete task */ } }}>
                 <Trash2 className="h-4 w-4 mr-2" />Delete Task
               </Button>
             </div>
@@ -2804,19 +2804,19 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
               </DialogTitle>
             </DialogHeader>
             <div className="space-y-2 py-4">
-              <Button variant="outline" className="w-full justify-start" onClick={() => { setShowStageOptionsMenu(null); toast.success('Stage renamed') }}>
+              <Button variant="outline" className="w-full justify-start" onClick={() => { setShowStageOptionsMenu(null); /* TODO: Implement rename stage */ }}>
                 <Edit className="h-4 w-4 mr-2" />Rename Stage
               </Button>
-              <Button variant="outline" className="w-full justify-start" onClick={() => { setShowStageOptionsMenu(null); toast.success('Stage probability updated') }}>
+              <Button variant="outline" className="w-full justify-start" onClick={() => { setShowStageOptionsMenu(null); /* TODO: Implement change stage probability */ }}>
                 <Target className="h-4 w-4 mr-2" />Change Probability
               </Button>
-              <Button variant="outline" className="w-full justify-start" onClick={() => { setShowStageOptionsMenu(null); toast.success('Stage moved up') }}>
+              <Button variant="outline" className="w-full justify-start" onClick={() => { setShowStageOptionsMenu(null); /* TODO: Implement move stage up */ }}>
                 <ArrowUpRight className="h-4 w-4 mr-2" />Move Up
               </Button>
-              <Button variant="outline" className="w-full justify-start" onClick={() => { setShowStageOptionsMenu(null); toast.success('Stage moved down') }}>
+              <Button variant="outline" className="w-full justify-start" onClick={() => { setShowStageOptionsMenu(null); /* TODO: Implement move stage down */ }}>
                 <ArrowUpRight className="h-4 w-4 mr-2 rotate-90" />Move Down
               </Button>
-              <Button variant="outline" className="w-full justify-start text-red-600 hover:text-red-700" onClick={() => { setShowStageOptionsMenu(null); toast.success('Stage deleted') }}>
+              <Button variant="outline" className="w-full justify-start text-red-600 hover:text-red-700" onClick={() => { if (confirm('Are you sure you want to delete this stage?')) { setShowStageOptionsMenu(null); /* TODO: Implement delete stage */ } }}>
                 <Trash2 className="h-4 w-4 mr-2" />Delete Stage
               </Button>
             </div>
@@ -2852,7 +2852,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowImportDialog(false)}>Cancel</Button>
-              <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white" onClick={() => { setShowImportDialog(false); toast.success('Import Started', { description: 'Your contacts are being imported. You will be notified when complete.' }) }}>
+              <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white" onClick={() => { setShowImportDialog(false); /* TODO: Implement contact import */ }}>
                 <Upload className="h-4 w-4 mr-2" />Start Import
               </Button>
             </DialogFooter>
@@ -2929,7 +2929,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowAddTaskDialog(false)}>Cancel</Button>
-              <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white" onClick={() => { setShowAddTaskDialog(false); toast.success('Task Created', { description: 'Your task has been added to the list' }) }}>
+              <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white" onClick={() => { setShowAddTaskDialog(false); /* TODO: Implement create task */ }}>
                 <CheckCircle className="h-4 w-4 mr-2" />Create Task
               </Button>
             </DialogFooter>
@@ -3011,7 +3011,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowAddCampaignDialog(false)}>Cancel</Button>
-              <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white" onClick={() => { setShowAddCampaignDialog(false); toast.success('Campaign Created', { description: 'Your campaign has been created successfully' }) }}>
+              <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white" onClick={() => { setShowAddCampaignDialog(false); /* TODO: Implement create campaign */ }}>
                 <Megaphone className="h-4 w-4 mr-2" />Create Campaign
               </Button>
             </DialogFooter>
@@ -3072,7 +3072,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowAddStageDialog(false)}>Cancel</Button>
-              <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white" onClick={() => { setShowAddStageDialog(false); toast.success('Stage Added', { description: 'New pipeline stage has been created' }) }}>
+              <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white" onClick={() => { setShowAddStageDialog(false); /* TODO: Implement add pipeline stage */ }}>
                 <Layers className="h-4 w-4 mr-2" />Add Stage
               </Button>
             </DialogFooter>
@@ -3137,7 +3137,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowAddScoringRuleDialog(false)}>Cancel</Button>
-              <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white" onClick={() => { setShowAddScoringRuleDialog(false); toast.success('Scoring Rule Added', { description: 'New lead scoring rule has been created' }) }}>
+              <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white" onClick={() => { setShowAddScoringRuleDialog(false); /* TODO: Implement add scoring rule */ }}>
                 <Target className="h-4 w-4 mr-2" />Add Rule
               </Button>
             </DialogFooter>
@@ -3173,7 +3173,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowConnectSlackDialog(false)}>Cancel</Button>
-              <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white" onClick={() => { setShowConnectSlackDialog(false); toast.success('Slack Connected', { description: 'Your Slack workspace has been connected successfully' }) }}>
+              <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white" onClick={() => { setShowConnectSlackDialog(false); /* TODO: Implement Slack connection */ }}>
                 <ExternalLink className="h-4 w-4 mr-2" />Connect Slack
               </Button>
             </DialogFooter>
@@ -3209,7 +3209,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowConnectZapierDialog(false)}>Cancel</Button>
-              <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white" onClick={() => { setShowConnectZapierDialog(false); toast.success('Zapier Connected', { description: 'Your Zapier account has been connected successfully' }) }}>
+              <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white" onClick={() => { setShowConnectZapierDialog(false); /* TODO: Implement Zapier connection */ }}>
                 <ExternalLink className="h-4 w-4 mr-2" />Connect Zapier
               </Button>
             </DialogFooter>
@@ -3247,7 +3247,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowConnectLinkedInDialog(false)}>Cancel</Button>
-              <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white" onClick={() => { setShowConnectLinkedInDialog(false); toast.success('LinkedIn Connected', { description: 'Your LinkedIn Sales Navigator has been connected' }) }}>
+              <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white" onClick={() => { setShowConnectLinkedInDialog(false); /* TODO: Implement LinkedIn connection */ }}>
                 <ExternalLink className="h-4 w-4 mr-2" />Complete Setup
               </Button>
             </DialogFooter>
@@ -3308,7 +3308,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowExportAllDataDialog(false)}>Cancel</Button>
-              <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white" onClick={() => { setShowExportAllDataDialog(false); toast.success('Export Started', { description: 'Your data export is being prepared. Download will start shortly.' }) }}>
+              <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white" onClick={() => { setShowExportAllDataDialog(false); /* TODO: Implement data export */ }}>
                 <Download className="h-4 w-4 mr-2" />Export Data
               </Button>
             </DialogFooter>
@@ -3355,7 +3355,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowImportDataDialog(false)}>Cancel</Button>
-              <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white" onClick={() => { setShowImportDataDialog(false); toast.success('Import Started', { description: 'Your data is being imported. You will be notified when complete.' }) }}>
+              <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white" onClick={() => { setShowImportDataDialog(false); /* TODO: Implement data import */ }}>
                 <Upload className="h-4 w-4 mr-2" />Import Data
               </Button>
             </DialogFooter>
@@ -3387,7 +3387,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowDeleteAllContactsDialog(false)}>Cancel</Button>
-              <Button variant="destructive" onClick={() => { setShowDeleteAllContactsDialog(false); toast.success('Contacts Deleted', { description: 'All contacts have been permanently deleted' }) }}>
+              <Button variant="destructive" onClick={() => { if (confirm('Are you absolutely sure you want to delete ALL contacts? This action cannot be undone.')) { setShowDeleteAllContactsDialog(false); /* TODO: Implement delete all contacts */ } }}>
                 <Trash2 className="h-4 w-4 mr-2" />Delete All Contacts
               </Button>
             </DialogFooter>
@@ -3419,7 +3419,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowClearHistoryDialog(false)}>Cancel</Button>
-              <Button variant="destructive" onClick={() => { setShowClearHistoryDialog(false); toast.success('History Cleared', { description: 'All activity history has been deleted' }) }}>
+              <Button variant="destructive" onClick={() => { if (confirm('Are you absolutely sure you want to clear all activity history? This action cannot be undone.')) { setShowClearHistoryDialog(false); /* TODO: Implement clear history */ } }}>
                 <Archive className="h-4 w-4 mr-2" />Clear History
               </Button>
             </DialogFooter>
@@ -3456,7 +3456,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowFactoryResetDialog(false)}>Cancel</Button>
-              <Button variant="destructive" onClick={() => { setShowFactoryResetDialog(false); toast.success('CRM Reset', { description: 'CRM has been reset to factory defaults' }) }}>
+              <Button variant="destructive" onClick={() => { if (confirm('Are you absolutely sure you want to factory reset the CRM? ALL data will be permanently deleted.')) { setShowFactoryResetDialog(false); /* TODO: Implement factory reset */ } }}>
                 <AlertOctagon className="h-4 w-4 mr-2" />Factory Reset
               </Button>
             </DialogFooter>

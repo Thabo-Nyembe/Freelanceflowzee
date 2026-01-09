@@ -567,33 +567,25 @@ export default function ExtensionsClient() {
 
   // Handlers
   const handleInstallExtension = (extensionName: string) => {
-    toast.success('Installing extension', {
-      description: `${extensionName} is being installed...`
-    })
+    /* TODO: Implement extension installation logic for ${extensionName} */
   }
 
   const handleUninstallExtension = (extensionName: string) => {
-    toast.info('Extension removed', {
-      description: `${extensionName} has been uninstalled`
-    })
+    if (confirm(`Are you sure you want to uninstall ${extensionName}? This action cannot be undone.`)) {
+      /* TODO: Implement extension uninstallation logic */
+    }
   }
 
   const handleEnableExtension = (extensionName: string) => {
-    toast.success('Extension enabled', {
-      description: `${extensionName} is now active`
-    })
+    /* TODO: Implement extension enabling logic for ${extensionName} */
   }
 
   const handleDisableExtension = (extensionName: string) => {
-    toast.info('Extension disabled', {
-      description: `${extensionName} has been paused`
-    })
+    /* TODO: Implement extension disabling logic for ${extensionName} */
   }
 
   const handleConfigureExtension = (extensionName: string) => {
-    toast.info('Opening settings', {
-      description: `Configuring ${extensionName}...`
-    })
+    /* TODO: Implement opening extension settings for ${extensionName} */
   }
 
   // Browse dialog handlers
@@ -746,9 +738,7 @@ export default function ExtensionsClient() {
 
   // Select folder handler
   const handleSelectFolder = () => {
-    toast.success('Folder selected', {
-      description: 'Extension loaded from /Users/dev/my-extension'
-    })
+    /* TODO: Implement folder selection for loading unpacked extensions */
     setSelectFolderDialogOpen(false)
   }
 
@@ -796,9 +786,7 @@ export default function ExtensionsClient() {
 
   // View docs handler
   const handleViewDocs = () => {
-    toast.success('Opening documentation', {
-      description: 'Developer documentation will open in a new tab'
-    })
+    /* TODO: Implement opening developer documentation in a new tab */
     setViewDocsDialogOpen(false)
   }
 
@@ -881,9 +869,7 @@ export default function ExtensionsClient() {
 
   // Extension options save handler
   const handleSaveExtensionOptions = () => {
-    toast.success('Options saved', {
-      description: `Settings for ${selectedExtension?.name} have been updated`
-    })
+    /* TODO: Implement saving extension options to persistent storage */
     setExtensionOptionsDialogOpen(false)
   }
 
@@ -903,8 +889,10 @@ export default function ExtensionsClient() {
 
   // Share extension handler
   const handleShareExtension = (method: string) => {
+    const extensionUrl = `https://extensions.freeflow.app/${selectedExtension?.id || ''}`
+    navigator.clipboard.writeText(extensionUrl)
     toast.success('Link copied', {
-      description: `Extension link shared via ${method}`
+      description: `Extension link copied to clipboard for sharing via ${method}`
     })
     setShareExtensionDialogOpen(false)
   }
@@ -2964,7 +2952,7 @@ export default function ExtensionsClient() {
               <p className="text-sm text-muted-foreground mb-4">
                 Drag and drop your extension folder here, or click to browse
               </p>
-              <Button variant="outline" onClick={() => toast.success('File browser opened', { description: 'Select your extension folder' })}>Browse Files</Button>
+              <Button variant="outline" onClick={() => { /* TODO: Implement file browser for extension folder selection */ }}>Browse Files</Button>
             </div>
             <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
               <p className="text-sm text-yellow-800 dark:text-yellow-200">

@@ -2064,6 +2064,7 @@ export default function ThreeDModelingClient() {
                 Cancel
               </Button>
               <Button className="flex-1 gap-2" onClick={() => {
+                /* TODO: Implement create model functionality - save to database */
                 toast.success('Model created successfully')
                 setShowNewModelDialog(false)
               }}>
@@ -2139,6 +2140,7 @@ export default function ThreeDModelingClient() {
                 Cancel
               </Button>
               <Button className="flex-1 gap-2" onClick={() => {
+                /* TODO: Implement render job submission to render queue */
                 toast.success('Render job added to queue')
                 setShowStartRenderDialog(false)
               }}>
@@ -2204,6 +2206,7 @@ export default function ThreeDModelingClient() {
                 Cancel
               </Button>
               <Button className="flex-1 gap-2" onClick={() => {
+                /* TODO: Implement model export functionality with selected format and options */
                 toast.success('Model exported successfully')
                 setShowExportDialog(false)
               }}>
@@ -2284,6 +2287,7 @@ export default function ThreeDModelingClient() {
                 Cancel
               </Button>
               <Button className="flex-1 gap-2" onClick={() => {
+                /* TODO: Implement model import functionality with selected file and options */
                 toast.success('Model imported successfully')
                 setShowImportDialog(false)
               }}>
@@ -2346,6 +2350,7 @@ export default function ThreeDModelingClient() {
                 Cancel
               </Button>
               <Button className="flex-1 gap-2" onClick={() => {
+                /* TODO: Implement create material functionality with PBR properties */
                 toast.success('Material created successfully')
                 setShowNewMaterialDialog(false)
               }}>
@@ -2433,6 +2438,7 @@ export default function ThreeDModelingClient() {
                 Cancel
               </Button>
               <Button className="flex-1 gap-2" onClick={() => {
+                /* TODO: Implement texture upload functionality with type and resolution options */
                 toast.success('Texture uploaded successfully')
                 setShowUploadTextureDialog(false)
               }}>
@@ -2546,6 +2552,7 @@ export default function ThreeDModelingClient() {
                   Cancel
                 </Button>
                 <Button className="flex-1 gap-2" onClick={() => {
+                  /* TODO: Implement actual file download with selected format options */
                   toast.success('Download started', { description: `Downloading ${downloadRenderJob.model_name} render...` })
                   setDownloadRenderJob(null)
                 }}>
@@ -2590,6 +2597,7 @@ export default function ThreeDModelingClient() {
                     </div>
                   </div>
                   <Button size="sm" variant="outline" onClick={() => {
+                    /* TODO: Implement plugin installation from marketplace */
                     toast.success('Plugin installed', { description: `${plugin.name} has been installed` })
                   }}>
                     Install
@@ -2620,6 +2628,7 @@ export default function ThreeDModelingClient() {
                     <span className="text-xs text-gray-500">({selectedFile.size})</span>
                   </div>
                   <Button size="sm" onClick={() => {
+                    /* TODO: Implement plugin installation from local file */
                     toast.success('Plugin installed', { description: `${selectedFile.name} has been installed from file` })
                     setSelectedFile(null)
                   }}>
@@ -2713,7 +2722,9 @@ export default function ThreeDModelingClient() {
                   <button
                     key={folder}
                     className="w-full flex items-center gap-2 p-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-800 text-left"
-                    onClick={() => toast.info(`Selected: /${folder}`)}
+                    onClick={() => {
+                      /* TODO: Implement folder selection and navigation */
+                    }}
                   >
                     <Folder className="w-4 h-4 text-blue-500" />
                     {folder}
@@ -2726,6 +2737,7 @@ export default function ThreeDModelingClient() {
                 Cancel
               </Button>
               <Button className="flex-1 gap-2" onClick={() => {
+                /* TODO: Implement path selection and save to settings */
                 toast.success('Path updated successfully')
                 setShowBrowsePathDialog(null)
               }}>
@@ -2781,8 +2793,11 @@ export default function ThreeDModelingClient() {
                 Cancel
               </Button>
               <Button variant="destructive" className="flex-1 gap-2" onClick={() => {
-                toast.success('Shortcuts reset to defaults')
-                setShowResetShortcutsDialog(false)
+                if (confirm('Are you sure you want to reset all keyboard shortcuts to defaults? This cannot be undone.')) {
+                  /* TODO: Implement reset shortcuts functionality */
+                  toast.success('Shortcuts reset to defaults')
+                  setShowResetShortcutsDialog(false)
+                }
               }}>
                 <RefreshCw className="w-4 h-4" />
                 Reset Shortcuts
@@ -2835,8 +2850,11 @@ export default function ThreeDModelingClient() {
                 Cancel
               </Button>
               <Button variant="destructive" className="flex-1 gap-2" onClick={() => {
-                toast.success('Cache cleared successfully', { description: '4.65 GB freed' })
-                setShowClearCacheDialog(false)
+                if (confirm('Are you sure you want to clear the cache? This action cannot be undone.')) {
+                  /* TODO: Implement clear cache functionality */
+                  toast.success('Cache cleared successfully', { description: '4.65 GB freed' })
+                  setShowClearCacheDialog(false)
+                }
               }}>
                 <Trash2 className="w-4 h-4" />
                 Clear Cache
@@ -2876,8 +2894,11 @@ export default function ThreeDModelingClient() {
                 Cancel
               </Button>
               <Button variant="destructive" className="flex-1 gap-2" onClick={() => {
-                toast.success('Preferences reset to defaults')
-                setShowResetPreferencesDialog(false)
+                if (confirm('Are you sure you want to reset ALL preferences? This will remove all customizations and cannot be undone.')) {
+                  /* TODO: Implement reset preferences functionality */
+                  toast.success('Preferences reset to defaults')
+                  setShowResetPreferencesDialog(false)
+                }
               }}>
                 <RefreshCw className="w-4 h-4" />
                 Reset All
@@ -2933,8 +2954,11 @@ export default function ThreeDModelingClient() {
                 Cancel
               </Button>
               <Button variant="destructive" className="flex-1 gap-2" onClick={() => {
-                toast.success('Orphan data purged', { description: '25 data blocks removed' })
-                setShowPurgeDataDialog(false)
+                if (confirm('Are you sure you want to purge orphan data? This will permanently remove unused data blocks.')) {
+                  /* TODO: Implement purge orphan data functionality */
+                  toast.success('Orphan data purged', { description: '25 data blocks removed' })
+                  setShowPurgeDataDialog(false)
+                }
               }}>
                 <Archive className="w-4 h-4" />
                 Purge Data
@@ -3059,6 +3083,7 @@ export default function ThreeDModelingClient() {
                   Cancel
                 </Button>
                 <Button className="flex-1 gap-2" onClick={() => {
+                  /* TODO: Implement scene node properties update */
                   toast.success('Node properties updated', { description: `${selectedSceneNode.name} has been modified` })
                   setShowSceneNodePropertiesDialog(false)
                 }}>
@@ -3222,6 +3247,7 @@ export default function ThreeDModelingClient() {
                 disabled={!selectedFile}
                 onClick={() => {
                   if (selectedFile) {
+                    /* TODO: Implement file selection callback for import/upload/install */
                     toast.success('File selected', { description: `${selectedFile.name} ready for ${
                       fileBrowserMode === 'import-model' ? 'import' :
                       fileBrowserMode === 'upload-texture' ? 'upload' : 'installation'

@@ -196,13 +196,17 @@ export default function AiVideoStudioClient() {
   }
 
   const handleClearRenderQueue = () => {
-    setRenderQueue(prev => prev.filter(item => item.status === 'processing'))
-    toast.success('Render queue cleared')
+    if (confirm('Are you sure you want to clear all completed items from the render queue?')) {
+      setRenderQueue(prev => prev.filter(item => item.status === 'processing'))
+      toast.success('Render queue cleared')
+    }
   }
 
   const handleRemoveFromQueue = (id: string) => {
-    setRenderQueue(prev => prev.filter(item => item.id !== id))
-    toast.success('Removed from render queue')
+    if (confirm('Are you sure you want to remove this item from the render queue?')) {
+      setRenderQueue(prev => prev.filter(item => item.id !== id))
+      toast.success('Removed from render queue')
+    }
   }
 
   const handleRetryRender = (id: string) => {
@@ -487,6 +491,7 @@ export default function AiVideoStudioClient() {
                 />
                 <Button onClick={() => {
                   if (shareEmail) {
+                    /* TODO: Implement send email invitation API call */
                     toast.success(`Invitation sent to ${shareEmail}`)
                     setShareEmail('')
                   } else {
@@ -512,13 +517,23 @@ export default function AiVideoStudioClient() {
             </div>
             <div className="flex gap-2 pt-2">
               <Button variant="outline" className="flex-1" onClick={() => {
-                toast.success('Opening in new tab...')
+                if (shareLink) {
+                  window.open(shareLink, '_blank')
+                } else {
+                  toast.error('Please generate a share link first')
+                }
               }}>
                 <ExternalLink className="h-4 w-4 mr-2" />
                 Open Link
               </Button>
               <Button variant="outline" className="flex-1" onClick={() => {
-                toast.success('Embedding code copied')
+                if (shareLink) {
+                  const embedCode = `<iframe src="${shareLink}" width="640" height="360" frameborder="0" allowfullscreen></iframe>`
+                  navigator.clipboard.writeText(embedCode)
+                  toast.success('Embedding code copied')
+                } else {
+                  toast.error('Please generate a share link first')
+                }
               }}>
                 <Link2 className="h-4 w-4 mr-2" />
                 Embed
@@ -673,7 +688,10 @@ export default function AiVideoStudioClient() {
                       </div>
                       <div className="flex gap-1">
                         {item.status === 'completed' && (
-                          <Button variant="ghost" size="icon" onClick={() => toast.success('Video downloaded')}>
+                          <Button variant="ghost" size="icon" onClick={() => {
+                            /* TODO: Implement actual video download - trigger file download */
+                            toast.success('Video downloaded')
+                          }}>
                             <Download className="h-4 w-4" />
                           </Button>
                         )}
@@ -751,7 +769,7 @@ export default function AiVideoStudioClient() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => {
-              toast.success('Opening documentation...')
+              window.open('https://docs.freeflow.app/ai-video-studio', '_blank')
             }}>
               <ExternalLink className="h-4 w-4 mr-2" />
               Full Documentation

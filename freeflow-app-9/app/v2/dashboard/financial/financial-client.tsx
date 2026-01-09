@@ -2669,8 +2669,7 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                     <button
                       onClick={() => {
                         if (confirm(`Disconnect ${selectedBankAccount?.name}? You will no longer receive automatic transaction syncing.`)) {
-                          /* TODO: Implement bank account disconnect API call */
-                          toast.success(`${selectedBankAccount?.name} disconnected`)
+                          /* TODO: Implement bank account disconnect API call - should call a deleteRecord or similar function */
                           setShowBankAccountOptionsDialog(false)
                         }
                       }}

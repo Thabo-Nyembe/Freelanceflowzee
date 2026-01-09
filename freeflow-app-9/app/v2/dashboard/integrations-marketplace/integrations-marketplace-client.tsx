@@ -2173,7 +2173,7 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
                   </Button>
                 ))}
               </div>
-              <Button variant="outline" size="sm" onClick={() => toast.success('Logs refreshed')}>
+              <Button variant="outline" size="sm" onClick={() => { /* TODO: Implement refresh logs functionality */ }}>
                 <RefreshCw className="w-4 h-4 mr-1" />
                 Refresh
               </Button>
@@ -2213,9 +2213,7 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
             <div className="flex justify-between items-center pt-2 border-t">
               <span className="text-sm text-gray-500">{filteredLogs.length} log entries</span>
               <div className="flex gap-2">
-                <Button variant="outline" size="sm" onClick={() => {
-                  toast.success('Logs exported to CSV')
-                }}>
+                <Button variant="outline" size="sm" onClick={() => { /* TODO: Implement export logs to CSV */ }}>
                   <Download className="w-4 h-4 mr-1" />
                   Export
                 </Button>
@@ -2471,28 +2469,28 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
           <div className="space-y-4">
             <p className="text-gray-600">Access developer resources and documentation to build integrations with FreeFlow.</p>
             <div className="grid grid-cols-2 gap-4">
-              <Card className="cursor-pointer hover:border-teal-300" onClick={() => { toast.success('Opening API Documentation...'); setShowDeveloperPortalDialog(false) }}>
+              <Card className="cursor-pointer hover:border-teal-300" onClick={() => { /* TODO: Navigate to API documentation */ setShowDeveloperPortalDialog(false) }}>
                 <CardContent className="p-4 text-center">
                   <Code className="w-8 h-8 mx-auto mb-2 text-teal-600" />
                   <h4 className="font-semibold">API Documentation</h4>
                   <p className="text-sm text-gray-500">REST API reference and guides</p>
                 </CardContent>
               </Card>
-              <Card className="cursor-pointer hover:border-teal-300" onClick={() => { toast.success('Opening SDK Downloads...'); setShowDeveloperPortalDialog(false) }}>
+              <Card className="cursor-pointer hover:border-teal-300" onClick={() => { /* TODO: Navigate to SDK downloads */ setShowDeveloperPortalDialog(false) }}>
                 <CardContent className="p-4 text-center">
                   <Download className="w-8 h-8 mx-auto mb-2 text-blue-600" />
                   <h4 className="font-semibold">SDK Downloads</h4>
                   <p className="text-sm text-gray-500">JavaScript, Python, Ruby SDKs</p>
                 </CardContent>
               </Card>
-              <Card className="cursor-pointer hover:border-teal-300" onClick={() => { toast.success('Opening Webhook Guide...'); setShowDeveloperPortalDialog(false) }}>
+              <Card className="cursor-pointer hover:border-teal-300" onClick={() => { /* TODO: Navigate to webhook guide */ setShowDeveloperPortalDialog(false) }}>
                 <CardContent className="p-4 text-center">
                   <Webhook className="w-8 h-8 mx-auto mb-2 text-purple-600" />
                   <h4 className="font-semibold">Webhook Guide</h4>
                   <p className="text-sm text-gray-500">Events and payload reference</p>
                 </CardContent>
               </Card>
-              <Card className="cursor-pointer hover:border-teal-300" onClick={() => { toast.success('Opening Sample Apps...'); setShowDeveloperPortalDialog(false) }}>
+              <Card className="cursor-pointer hover:border-teal-300" onClick={() => { /* TODO: Navigate to sample apps */ setShowDeveloperPortalDialog(false) }}>
                 <CardContent className="p-4 text-center">
                   <Package className="w-8 h-8 mx-auto mb-2 text-orange-600" />
                   <h4 className="font-semibold">Sample Apps</h4>
@@ -2551,7 +2549,7 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
             </div>
             <div className="flex justify-end gap-2 pt-4 border-t">
               <Button variant="outline" onClick={() => setShowSubmitAppDialog(false)}>Cancel</Button>
-              <Button className="bg-teal-600" onClick={() => { toast.success('App submission received! We will review it within 5 business days.'); setShowSubmitAppDialog(false) }}>Submit for Review</Button>
+              <Button className="bg-teal-600" onClick={() => { /* TODO: Implement app submission */ setShowSubmitAppDialog(false) }}>Submit for Review</Button>
             </div>
           </div>
         </DialogContent>
@@ -2613,7 +2611,7 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
               </div>
               <div className="flex justify-end gap-2 pt-4 border-t">
                 <Button variant="outline" onClick={() => setShowConfigureAppDialog(false)}>Cancel</Button>
-                <Button className="bg-teal-600" onClick={() => { toast.success(`${selectedAppForAction.name} configuration saved`); setShowConfigureAppDialog(false) }}>Save Configuration</Button>
+                <Button className="bg-teal-600" onClick={() => { /* TODO: Implement save app configuration */ setShowConfigureAppDialog(false) }}>Save Configuration</Button>
               </div>
             </div>
           )}
@@ -2642,7 +2640,7 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
               </div>
               <div className="flex justify-end gap-2 pt-4 border-t">
                 <Button variant="outline" onClick={() => setShowUninstallDialog(false)}>Cancel</Button>
-                <Button variant="destructive" onClick={() => { toast.success(`${selectedAppForAction.name} has been uninstalled`); setShowUninstallDialog(false) }}>Uninstall</Button>
+                <Button variant="destructive" onClick={() => { if (confirm(`Are you sure you want to uninstall ${selectedAppForAction.name}?`)) { /* TODO: Implement uninstall app */ setShowUninstallDialog(false) } }}>Uninstall</Button>
               </div>
             </div>
           )}
@@ -2668,7 +2666,7 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
               </ul>
               <div className="flex justify-end gap-2 pt-4 border-t">
                 <Button variant="outline" onClick={() => setShowReconnectDialog(false)}>Cancel</Button>
-                <Button className="bg-teal-600" onClick={() => { toast.success(`${selectedAppForAction.name} reconnected successfully`); setShowReconnectDialog(false) }}>Reconnect</Button>
+                <Button className="bg-teal-600" onClick={() => { /* TODO: Implement reconnect app */ setShowReconnectDialog(false) }}>Reconnect</Button>
               </div>
             </div>
           )}
@@ -2689,7 +2687,7 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
               <p className="text-gray-600">This will disconnect the app but keep it installed. You can reconnect at any time.</p>
               <div className="flex justify-end gap-2 pt-4 border-t">
                 <Button variant="outline" onClick={() => setShowDisconnectDialog(false)}>Cancel</Button>
-                <Button variant="destructive" onClick={() => { toast.success(`${selectedAppForAction.name} disconnected`); setShowDisconnectDialog(false) }}>Disconnect</Button>
+                <Button variant="destructive" onClick={() => { if (confirm(`Are you sure you want to disconnect ${selectedAppForAction.name}?`)) { /* TODO: Implement disconnect app */ setShowDisconnectDialog(false) } }}>Disconnect</Button>
               </div>
             </div>
           )}
@@ -2712,7 +2710,7 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
             </div>
             <div className="flex justify-end gap-2 pt-4 border-t">
               <Button variant="outline" onClick={() => setShowRegenerateKeyDialog(false)}>Cancel</Button>
-              <Button className="bg-yellow-600 hover:bg-yellow-700" onClick={() => { toast.success(`${keyTypeToRegenerate === 'production' ? 'Production' : 'Test'} API key regenerated`); setShowRegenerateKeyDialog(false) }}>Regenerate Key</Button>
+              <Button className="bg-yellow-600 hover:bg-yellow-700" onClick={() => { if (confirm(`Are you sure you want to regenerate your ${keyTypeToRegenerate} API key? This will invalidate your current key.`)) { /* TODO: Implement regenerate API key */ setShowRegenerateKeyDialog(false) } }}>Regenerate Key</Button>
             </div>
           </div>
         </DialogContent>
@@ -2763,7 +2761,7 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
             </div>
             <div className="flex justify-end gap-2 pt-4 border-t">
               <Button variant="outline" onClick={() => { setShowCreateApiKeyDialog(false); setNewApiKeyName('') }}>Cancel</Button>
-              <Button className="bg-teal-600" onClick={() => { toast.success('New API key created'); setShowCreateApiKeyDialog(false); setNewApiKeyName('') }}>Create Key</Button>
+              <Button className="bg-teal-600" onClick={() => { /* TODO: Implement create new API key */ setShowCreateApiKeyDialog(false); setNewApiKeyName('') }}>Create Key</Button>
             </div>
           </div>
         </DialogContent>
@@ -2812,7 +2810,7 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
             </div>
             <div className="flex justify-end gap-2 pt-4 border-t">
               <Button variant="outline" onClick={() => { setShowAddWebhookDialog(false); setNewWebhookUrl(''); setNewWebhookEvents([]) }}>Cancel</Button>
-              <Button className="bg-teal-600" onClick={() => { toast.success('Webhook endpoint added'); setShowAddWebhookDialog(false); setNewWebhookUrl(''); setNewWebhookEvents([]) }}>Add Webhook</Button>
+              <Button className="bg-teal-600" onClick={() => { /* TODO: Implement add webhook endpoint */ setShowAddWebhookDialog(false); setNewWebhookUrl(''); setNewWebhookEvents([]) }}>Add Webhook</Button>
             </div>
           </div>
         </DialogContent>
@@ -2831,7 +2829,7 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
             <p className="text-gray-600">This will allow users to install UnsafeApp Pro again. Are you sure you want to unblock this app?</p>
             <div className="flex justify-end gap-2 pt-4 border-t">
               <Button variant="outline" onClick={() => setShowUnblockAppDialog(false)}>Cancel</Button>
-              <Button className="bg-green-600" onClick={() => { toast.success('App unblocked'); setShowUnblockAppDialog(false) }}>Unblock</Button>
+              <Button className="bg-green-600" onClick={() => { /* TODO: Implement unblock app */ setShowUnblockAppDialog(false) }}>Unblock</Button>
             </div>
           </div>
         </DialogContent>
@@ -2867,7 +2865,7 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
             </div>
             <div className="flex justify-end gap-2 pt-4 border-t">
               <Button variant="outline" onClick={() => { setShowBlockAppDialog(false); setAppToBlock('') }}>Cancel</Button>
-              <Button variant="destructive" disabled={!appToBlock} onClick={() => { toast.success('App blocked'); setShowBlockAppDialog(false); setAppToBlock('') }}>Block App</Button>
+              <Button variant="destructive" disabled={!appToBlock} onClick={() => { if (confirm('Are you sure you want to block this app?')) { /* TODO: Implement block app */ setShowBlockAppDialog(false); setAppToBlock('') } }}>Block App</Button>
             </div>
           </div>
         </DialogContent>
@@ -2916,7 +2914,7 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
             </div>
             <div className="flex justify-end gap-2 pt-4 border-t">
               <Button variant="outline" onClick={() => setShowExportDialog(false)}>Cancel</Button>
-              <Button className="bg-teal-600" onClick={() => { toast.success('Export started. Download will begin shortly.'); setShowExportDialog(false) }}>Export</Button>
+              <Button className="bg-teal-600" onClick={() => { /* TODO: Implement export marketplace data */ setShowExportDialog(false) }}>Export</Button>
             </div>
           </div>
         </DialogContent>
@@ -2941,7 +2939,7 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
             </div>
             <div className="flex justify-end gap-2 pt-4 border-t">
               <Button variant="outline" onClick={() => setShowImportDialog(false)}>Cancel</Button>
-              <Button className="bg-teal-600" onClick={() => { toast.success('Configuration imported successfully'); setShowImportDialog(false) }}>Import</Button>
+              <Button className="bg-teal-600" onClick={() => { /* TODO: Implement import configuration */ setShowImportDialog(false) }}>Import</Button>
             </div>
           </div>
         </DialogContent>
@@ -2963,7 +2961,7 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
             </div>
             <div className="flex justify-end gap-2 pt-4 border-t">
               <Button variant="outline" onClick={() => setShowClearCacheDialog(false)}>Cancel</Button>
-              <Button className="bg-teal-600" onClick={() => { toast.success('Cache cleared successfully'); setShowClearCacheDialog(false) }}>Clear Cache</Button>
+              <Button className="bg-teal-600" onClick={() => { /* TODO: Implement clear cache */ setShowClearCacheDialog(false) }}>Clear Cache</Button>
             </div>
           </div>
         </DialogContent>
@@ -2985,7 +2983,7 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
             </div>
             <div className="flex justify-end gap-2 pt-4 border-t">
               <Button variant="outline" onClick={() => setShowResetSettingsDialog(false)}>Cancel</Button>
-              <Button variant="destructive" onClick={() => { toast.success('All settings have been reset to defaults'); setShowResetSettingsDialog(false) }}>Reset All Settings</Button>
+              <Button variant="destructive" onClick={() => { if (confirm('Are you sure you want to reset all settings? This action cannot be undone.')) { /* TODO: Implement reset all settings */ setShowResetSettingsDialog(false) } }}>Reset All Settings</Button>
             </div>
           </div>
         </DialogContent>
@@ -3017,7 +3015,7 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
             </div>
             <div className="flex justify-end gap-2 pt-4 border-t">
               <Button variant="outline" onClick={() => setShowDisconnectAllDialog(false)}>Cancel</Button>
-              <Button variant="destructive" onClick={() => { toast.success('All apps have been disconnected'); setShowDisconnectAllDialog(false) }}>Disconnect All</Button>
+              <Button variant="destructive" onClick={() => { if (confirm('Are you sure you want to disconnect all apps? This action cannot be undone.')) { /* TODO: Implement disconnect all apps */ setShowDisconnectAllDialog(false) } }}>Disconnect All</Button>
             </div>
           </div>
         </DialogContent>

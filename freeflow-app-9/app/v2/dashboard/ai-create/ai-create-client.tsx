@@ -2245,6 +2245,7 @@ export default function AICreateClient() {
               <Button
                 className="bg-gradient-to-r from-violet-500 to-purple-600 text-white"
                 onClick={() => {
+                  /* TODO: Implement AI creation API call with prompt and settings */
                   toast.success('Creation started', { description: 'Your AI creation is being generated' })
                   setShowNewCreationDialog(false)
                 }}
@@ -2277,6 +2278,7 @@ export default function AICreateClient() {
                       key={template.id}
                       className="cursor-pointer hover:shadow-md transition-shadow hover:ring-2 hover:ring-purple-500"
                       onClick={() => {
+                        /* TODO: Apply template settings to generator (prompt, style, etc.) */
                         toast.success('Template loaded', { description: `"${template.name}" template applied to generator` })
                         setShowTemplateDialog(false)
                       }}
@@ -2410,6 +2412,7 @@ export default function AICreateClient() {
               <Button
                 className="bg-gradient-to-r from-violet-500 to-purple-600 text-white"
                 onClick={() => {
+                  /* TODO: Redirect to payment gateway or subscription management */
                   toast.success('Upgrade initiated', { description: 'Redirecting to payment...' })
                   setShowUpgradeDialog(false)
                 }}
@@ -2457,6 +2460,7 @@ export default function AICreateClient() {
               <Button
                 className="bg-gradient-to-r from-green-500 to-emerald-600 text-white"
                 onClick={() => {
+                  /* TODO: Save template to database with name, description, prompt, and style */
                   toast.success('Template created', { description: 'Your template has been saved' })
                   setShowCreateTemplateDialog(false)
                 }}
@@ -2527,7 +2531,12 @@ export default function AICreateClient() {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => toast.success('Model removed', { description: `${model.name} has been deleted` })}
+                      onClick={() => {
+                        if (confirm(`Are you sure you want to remove ${model.name}? This action cannot be undone.`)) {
+                          /* TODO: Implement model removal API call */
+                          toast.success('Model removed', { description: `${model.name} has been deleted` })
+                        }
+                      }}
                     >
                       <Trash2 className="w-4 h-4" />
                     </Button>

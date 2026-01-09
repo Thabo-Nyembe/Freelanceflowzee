@@ -1219,16 +1219,12 @@ export default function PluginsClient() {
 
       <div className="flex items-center gap-2">
         <Switch checked={plugin.isActivated} onCheckedChange={() => {
-          if (plugin.isActivated) {
-            toast.success(`"${plugin.name}" deactivated`, { description: 'Plugin has been successfully deactivated.' })
-          } else {
-            toast.success(`"${plugin.name}" activated`, { description: 'Plugin has been successfully activated.' })
-          }
+          /* TODO: Implement plugin activation/deactivation toggle for ${plugin.id} */
         }} />
         <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); handleConfigurePlugin(plugin.name) }}>
           <Settings className="h-4 w-4" />
         </Button>
-        <Button variant="ghost" size="icon" className="text-red-500 hover:text-red-600" onClick={(e) => { e.stopPropagation(); toast.success(`"${plugin.name}" has been removed`, { description: 'Plugin has been successfully uninstalled.' }) }}>
+        <Button variant="ghost" size="icon" className="text-red-500 hover:text-red-600" onClick={(e) => { e.stopPropagation(); if (confirm(`Are you sure you want to remove "${plugin.name}"?`)) { /* TODO: Implement plugin removal for ${plugin.id} */ } }}>
           <Trash2 className="h-4 w-4" />
         </Button>
       </div>
@@ -2087,7 +2083,7 @@ export default function PluginsClient() {
                         </div>
                       </div>
                       <div className="flex justify-end">
-                        <Button className="bg-gradient-to-r from-green-600 to-emerald-600" onClick={() => toast.success('General settings saved successfully!', { description: 'Your plugin settings have been updated.' })}>Save Changes</Button>
+                        <Button className="bg-gradient-to-r from-green-600 to-emerald-600" onClick={() => { /* TODO: Implement save general settings */ }}>Save Changes</Button>
                       </div>
                     </CardContent>
                   </Card>
