@@ -3059,7 +3059,7 @@ export default function SalesClient() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowEmailComposerDialog(false)}>Cancel</Button>
-            <Button variant="outline" onClick={() => toast.success('Email saved as draft')}>Save Draft</Button>
+            <Button variant="outline" onClick={() => { /* TODO: Implement save email as draft */ }}>Save Draft</Button>
             <Button onClick={() => {
               toast.success('Email sent successfully')
               setShowEmailComposerDialog(false)
@@ -3344,7 +3344,7 @@ export default function SalesClient() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowQuoteBuilderDialog(false)}>Cancel</Button>
-            <Button variant="outline" onClick={() => toast.success('Quote saved as draft')}>Save Draft</Button>
+            <Button variant="outline" onClick={() => { /* TODO: Implement save quote as draft */ }}>Save Draft</Button>
             <Button onClick={() => {
               toast.success('Quote created successfully')
               setShowQuoteBuilderDialog(false)
@@ -3399,11 +3399,11 @@ export default function SalesClient() {
                 Use our template to ensure your data is formatted correctly
               </p>
               <div className="flex gap-2">
-                <Button variant="outline" size="sm" onClick={() => toast.success('Template downloaded: contacts_template.csv')}>
+                <Button variant="outline" size="sm" onClick={() => { /* TODO: Implement CSV template download */ }}>
                   <Download className="w-4 h-4 mr-2" />
                   CSV Template
                 </Button>
-                <Button variant="outline" size="sm" onClick={() => toast.success('Template downloaded: contacts_template.xlsx')}>
+                <Button variant="outline" size="sm" onClick={() => { /* TODO: Implement Excel template download */ }}>
                   <Download className="w-4 h-4 mr-2" />
                   Excel Template
                 </Button>

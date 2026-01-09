@@ -3313,7 +3313,7 @@ export default function CiCdClient() {
                 <Label>Add Reviewer</Label>
                 <div className="flex gap-2">
                   <Input placeholder="Username or email" />
-                  <Button onClick={() => toast.success('Reviewer added', { description: 'The reviewer will be notified' })}>Add</Button>
+                  <Button onClick={() => { /* TODO: Implement add reviewer functionality */ }}>Add</Button>
                 </div>
               </div>
               <div className="space-y-2">
@@ -3322,7 +3322,7 @@ export default function CiCdClient() {
                   {['Sarah Chen', 'Mike Johnson'].map(name => (
                     <div key={name} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded">
                       <span className="text-sm">{name}</span>
-                      <Button variant="ghost" size="sm" onClick={() => toast.success(`${name} removed from reviewers`)}><Trash2 className="w-4 h-4" /></Button>
+                      <Button variant="ghost" size="sm" onClick={() => { if (confirm(`Remove ${name} from reviewers?`)) { /* TODO: Implement remove reviewer functionality */ } }}><Trash2 className="w-4 h-4" /></Button>
                     </div>
                   ))}
                 </div>
@@ -3617,7 +3617,7 @@ export default function CiCdClient() {
                 <Label>Add New Label</Label>
                 <div className="flex gap-2">
                   <Input placeholder="e.g., docker, gpu" />
-                  <Button onClick={() => toast.success('Label added', { description: 'Label is now available for runners' })}>Add</Button>
+                  <Button onClick={() => { /* TODO: Implement add label functionality */ }}>Add</Button>
                 </div>
               </div>
               <div className="space-y-2">
@@ -3626,7 +3626,7 @@ export default function CiCdClient() {
                   {['ubuntu-latest', 'self-hosted', 'docker', 'gpu'].map(label => (
                     <Badge key={label} variant="secondary" className="gap-1">
                       {label}
-                      <button className="ml-1 hover:text-red-500" onClick={() => toast.success(`Label "${label}" removed`)}>x</button>
+                      <button className="ml-1 hover:text-red-500" onClick={() => { if (confirm(`Remove label "${label}"?`)) { /* TODO: Implement remove label functionality */ } }}>x</button>
                     </Badge>
                   ))}
                 </div>

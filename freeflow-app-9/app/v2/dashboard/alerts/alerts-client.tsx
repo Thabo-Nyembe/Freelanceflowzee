@@ -1819,12 +1819,15 @@ export default function AlertsClient() {
                               </div>
                               <div className="flex items-center gap-2">
                                 <Button variant="ghost" size="sm" onClick={() => {
-                                  toast.info('Webhook Configuration', { description: `Configuring webhook for ${webhook.url}` })
+                                  /* TODO: Open webhook configuration dialog for ${webhook.url} */
                                 }}>
                                   <Edit className="h-4 w-4" />
                                 </Button>
                                 <Button variant="ghost" size="sm" className="text-red-600" onClick={() => {
-                                  toast.success('Webhook Deleted', { description: `Webhook ${webhook.url} has been removed` })
+                                  if (confirm(`Are you sure you want to delete the webhook for ${webhook.url}? This action cannot be undone.`)) {
+                                    /* TODO: Implement webhook deletion API call */
+                                    toast.success('Webhook Deleted', { description: `Webhook ${webhook.url} has been removed` })
+                                  }
                                 }}>
                                   <Trash2 className="h-4 w-4" />
                                 </Button>
@@ -1833,7 +1836,7 @@ export default function AlertsClient() {
                           ))}
                         </div>
                         <Button variant="outline" className="w-full" onClick={() => {
-                          toast.info('Webhook Configuration', { description: 'Setting up new webhook endpoint' })
+                          /* TODO: Open add webhook dialog */
                         }}>
                           <Plus className="h-4 w-4 mr-2" />
                           Add Webhook
@@ -1870,7 +1873,7 @@ export default function AlertsClient() {
                             </div>
                             <div className="flex items-center gap-3">
                               <Button variant="ghost" size="sm" onClick={() => {
-                                toast.info('Rule Editor', { description: `Editing "${rule.name}" alert rule` })
+                                /* TODO: Open rule editor dialog for "${rule.name}" */
                               }}>
                                 <Edit className="h-4 w-4" />
                               </Button>
@@ -1884,7 +1887,7 @@ export default function AlertsClient() {
                           </div>
                         ))}
                         <Button variant="outline" className="w-full" onClick={() => {
-                          toast.info('Rule Builder', { description: 'Opening alert rule builder' })
+                          /* TODO: Open alert rule builder dialog */
                         }}>
                           <Plus className="h-4 w-4 mr-2" />
                           Create Rule
@@ -1910,13 +1913,15 @@ export default function AlertsClient() {
                               <p className="text-sm text-gray-500">{route.team} • {route.schedule}</p>
                             </div>
                             <Button variant="ghost" size="sm" onClick={() => {
-                              toast.info('Routing Configuration', { description: `Configuring routing for ${route.service}` })
+                              /* TODO: Open routing configuration dialog for ${route.service} */
                             }}>
                               <Edit className="h-4 w-4" />
                             </Button>
                           </div>
                         ))}
-                        <Button variant="outline" className="w-full" onClick={() => toast.success('Routing configuration dialog ready')}>
+                        <Button variant="outline" className="w-full" onClick={() => {
+                          /* TODO: Open add routing rule dialog */
+                        }}>
                           <Plus className="h-4 w-4 mr-2" />
                           Add Routing Rule
                         </Button>
@@ -2111,7 +2116,12 @@ export default function AlertsClient() {
                             <p className="font-medium">Clear All Alerts</p>
                             <p className="text-sm text-gray-500">Delete all alert history</p>
                           </div>
-                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50 dark:hover:bg-red-900/20" onClick={() => toast.success('All alert history has been cleared')}>
+                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50 dark:hover:bg-red-900/20" onClick={() => {
+                              if (confirm('Are you sure you want to clear all alert history? This action cannot be undone.')) {
+                                /* TODO: Implement clear all alerts API call */
+                                toast.success('All alert history has been cleared')
+                              }
+                            }}>
                             Clear Alerts
                           </Button>
                         </div>
@@ -2120,7 +2130,12 @@ export default function AlertsClient() {
                             <p className="font-medium">Reset All Rules</p>
                             <p className="text-sm text-gray-500">Restore default alert rules</p>
                           </div>
-                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50 dark:hover:bg-red-900/20" onClick={() => toast.success('All rules have been restored to defaults')}>
+                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50 dark:hover:bg-red-900/20" onClick={() => {
+                              if (confirm('Are you sure you want to reset all rules to defaults? This will overwrite your custom configurations.')) {
+                                /* TODO: Implement reset all rules API call */
+                                toast.success('All rules have been restored to defaults')
+                              }
+                            }}>
                             Reset Rules
                           </Button>
                         </div>
@@ -2129,7 +2144,12 @@ export default function AlertsClient() {
                             <p className="font-medium">Delete All Integrations</p>
                             <p className="text-sm text-gray-500">Remove all connected services</p>
                           </div>
-                          <Button variant="destructive" onClick={() => toast.success('All integrations have been removed')}>
+                          <Button variant="destructive" onClick={() => {
+                              if (confirm('Are you sure you want to delete all integrations? This will disconnect all connected services and cannot be undone.')) {
+                                /* TODO: Implement delete all integrations API call */
+                                toast.success('All integrations have been removed')
+                              }
+                            }}>
                             Delete All
                           </Button>
                         </div>

@@ -3054,7 +3054,7 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
               </div>
             </ScrollArea>
             <div className="flex justify-between pt-4 border-t">
-              <Button variant="outline" onClick={() => toast.success('Invite sent', { description: 'Invitation email has been sent' })}>
+              <Button variant="outline" onClick={() => { /* TODO: Implement invite member functionality */ }}>
                 <Plus className="w-4 h-4 mr-2" />
                 Invite Member
               </Button>
@@ -3192,7 +3192,7 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
             </div>
             <div className="flex items-center justify-between pt-4 border-t">
               <Button variant="outline" onClick={() => setShowImportDialog(false)}>Cancel</Button>
-              <Button onClick={() => { toast.success('Import complete', { description: 'Templates have been imported' }); setShowImportDialog(false) }}>
+              <Button onClick={() => { /* TODO: Implement template import functionality */ setShowImportDialog(false) }}>
                 <FileCode className="w-4 h-4 mr-2" />
                 Import
               </Button>
@@ -3217,7 +3217,7 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
                 <Label>Share Link</Label>
                 <div className="flex items-center gap-2 mt-1">
                   <Input readOnly value="https://docs.company.com/templates/shared" className="flex-1" />
-                  <Button variant="outline" onClick={() => toast.success('Link copied')}>
+                  <Button variant="outline" onClick={() => { navigator.clipboard.writeText('https://docs.company.com/templates/shared'); toast.success('Link copied'); }}>
                     <Copy className="w-4 h-4" />
                   </Button>
                 </div>
@@ -3254,7 +3254,7 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
                   <div
                     key={template.id}
                     className="p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer border"
-                    onClick={() => { toast.success('Template duplicated', { description: `"${template.name} (Copy)" has been created` }); setShowDuplicateDialog(false) }}
+                    onClick={() => { /* TODO: Implement template duplication functionality */ setShowDuplicateDialog(false) }}
                   >
                     <p className="font-medium">{template.name}</p>
                     <p className="text-sm text-muted-foreground">{template.description}</p>
@@ -3289,7 +3289,7 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
                       key={color}
                       className="w-8 h-8 rounded-full cursor-pointer border-2 border-transparent hover:border-gray-400"
                       style={{ backgroundColor: color }}
-                      onClick={() => toast.success('Color updated')}
+                      onClick={() => { /* TODO: Implement color selection functionality */ }}
                     />
                   ))}
                 </div>
@@ -3313,7 +3313,7 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
             </div>
             <div className="flex items-center justify-between pt-4 border-t">
               <Button variant="outline" onClick={() => setShowCustomizeDialog(false)}>Cancel</Button>
-              <Button onClick={() => { toast.success('Customizations saved'); setShowCustomizeDialog(false) }}>
+              <Button onClick={() => { /* TODO: Implement save customizations functionality */ setShowCustomizeDialog(false) }}>
                 Save Changes
               </Button>
             </div>
@@ -3353,7 +3353,7 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
               </div>
             </ScrollArea>
             <div className="flex items-center justify-between pt-4 border-t">
-              <Button variant="outline" onClick={() => toast.success('Category created')}>
+              <Button variant="outline" onClick={() => { /* TODO: Implement add category functionality */ }}>
                 <Plus className="w-4 h-4 mr-2" />
                 Add Category
               </Button>

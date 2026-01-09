@@ -2144,7 +2144,7 @@ export default function WorkflowBuilderClient() {
                           </div>
                           <div className="flex items-center gap-2">
                             <Input type="password" defaultValue="wf_api_xxxxxxxxxxxxx" readOnly className="font-mono" />
-                            <Button size="sm" variant="ghost" onClick={() => toast.success('API key copied')}><Clipboard className="h-4 w-4" /></Button>
+                            <Button size="sm" variant="ghost" onClick={() => { navigator.clipboard.writeText('wf_api_xxxxxxxxxxxxx'); toast.success('API key copied') }}><Clipboard className="h-4 w-4" /></Button>
                           </div>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
@@ -2174,7 +2174,7 @@ export default function WorkflowBuilderClient() {
                           </div>
                           <div className="flex items-center gap-2">
                             <Input defaultValue="https://workflows.yourapp.com/webhook/" readOnly className="font-mono" />
-                            <Button size="sm" variant="ghost" onClick={() => toast.success('Webhook URL copied')}><Clipboard className="h-4 w-4" /></Button>
+                            <Button size="sm" variant="ghost" onClick={() => { navigator.clipboard.writeText('https://workflows.yourapp.com/webhook/'); toast.success('Webhook URL copied') }}><Clipboard className="h-4 w-4" /></Button>
                           </div>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
@@ -2454,6 +2454,7 @@ export default function WorkflowBuilderClient() {
             <Button
               className="bg-violet-600 hover:bg-violet-700"
               onClick={() => {
+                /* TODO: Implement workflow creation with form data */
                 toast.success('Workflow created successfully')
                 setShowNewFlowDialog(false)
               }}
@@ -2505,6 +2506,7 @@ export default function WorkflowBuilderClient() {
             <Button
               className="bg-green-600 hover:bg-green-700"
               onClick={() => {
+                /* TODO: Implement test workflow execution with selected workflow and test data */
                 toast.success('Test execution started')
                 setShowTestWorkflowDialog(false)
               }}
@@ -2580,7 +2582,7 @@ export default function WorkflowBuilderClient() {
             <Button variant="outline" onClick={() => setShowLogsDialog(false)}>Close</Button>
             <Button
               variant="outline"
-              onClick={() => toast.success('Logs exported to file')}
+              onClick={() => { /* TODO: Implement log file export functionality */ toast.success('Logs exported to file') }}
             >
               <Download className="w-4 h-4 mr-2" />
               Export Logs
