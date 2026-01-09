@@ -368,9 +368,7 @@ export default function ClientZonePage() {
       tab: activeTab
     })
 
-    toast.success('Notifications center opened!', {
-      description: `You have ${dashboardData?.unreadNotifications || 0} unread notifications`
-    })
+    // TODO: Implement notifications dialog/panel
   }
 
   // ============================================================================
@@ -384,9 +382,7 @@ export default function ClientZonePage() {
       activeProjects: dashboardData?.projectStats?.active || 0
     })
 
-    toast.success('Team communication opened!', {
-      description: 'Send a message or schedule a call with your team'
-    })
+    // TODO: Implement team communication dialog
   }
 
   // ============================================================================
@@ -792,9 +788,7 @@ export default function ClientZonePage() {
       nextMeeting: dashboardData?.nextMeeting
     })
 
-    toast.info('Meeting scheduler opened', {
-      description: 'Schedule a call with your project team'
-    })
+    // TODO: Implement meeting scheduler dialog
   }, [userId, projects, dashboardData])
 
   // ============================================================================

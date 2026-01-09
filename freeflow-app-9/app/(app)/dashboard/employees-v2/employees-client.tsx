@@ -598,7 +598,6 @@ export default function EmployeesClient() {
 
   const handleSendAnnouncement = () => {
     window.location.href = 'mailto:?subject=Company Announcement&body=Dear Team,%0D%0A%0D%0A'
-    toast.success('Email client opened for announcement')
   }
 
   const renderOrgNode = (node: OrgNode, level: number = 0): JSX.Element => (
@@ -2025,7 +2024,7 @@ export default function EmployeesClient() {
                             input.onchange = (e) => {
                               const file = (e.target as HTMLInputElement).files?.[0]
                               if (file) {
-                                toast.success(`Selected ${file.name} for import - Data import wizard opened`)
+                                toast.success(`Selected ${file.name} for import`)
                               }
                             }
                             input.click()
@@ -2235,7 +2234,7 @@ export default function EmployeesClient() {
                   }
                 }}><Mail className="h-4 w-4 mr-2" />Contact</Button><Button onClick={() => {
                   setShowProfileDialog(false)
-                  toast.success('Profile editor opened')
+                  // TODO: Implement profile editor
                 }}><Edit3 className="h-4 w-4 mr-2" />Edit Profile</Button></DialogFooter>
               </>
             )}

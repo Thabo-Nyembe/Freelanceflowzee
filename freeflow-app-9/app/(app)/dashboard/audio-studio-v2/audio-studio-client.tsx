@@ -1107,7 +1107,7 @@ export default function AudioStudioClient({ initialTracks, initialStats }: Audio
                 { icon: Upload, label: 'Import', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: handleUploadAudio },
                 { icon: Wand2, label: 'Add Effect', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', action: () => { setActiveTab('effects'); toast.success('Browse effects to add to your tracks') } },
                 { icon: Piano, label: 'Instrument', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', action: () => { setActiveTab('instruments'); toast.success('Browse instruments to load') } },
-                { icon: TrendingUp, label: 'Automate', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', action: () => { setActiveTab('automation'); toast.success('Automation lanes ready - draw curves now') } },
+                { icon: TrendingUp, label: 'Automate', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', action: () => setActiveTab('automation') },
                 { icon: Download, label: 'Export', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', action: () => handleExportAudio('Project') },
                 { icon: Share2, label: 'Share', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', action: () => setShowShareDialog(true) },
               ].map((action, idx) => (
@@ -2123,7 +2123,6 @@ export default function AudioStudioClient({ initialTracks, initialStats }: Audio
                         <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => {
                           setActiveTab('effects')
                           setShowTrackDialog(false)
-                          toast.success(`${effect} settings panel opened`)
                         }}>
                           <MoreHorizontal className="w-4 h-4" />
                         </Button>

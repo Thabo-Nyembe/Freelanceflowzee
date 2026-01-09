@@ -376,7 +376,6 @@ const mockApiQuickActions = [
     icon: 'book',
     action: async () => {
       window.open('/api-docs', '_blank')
-      toast.success('API documentation opened in new tab')
     },
     variant: 'outline' as const
   },
@@ -1047,16 +1046,11 @@ export default function ApiClient() {
                   input.click()
                 }},
                 { icon: Download, label: 'Export', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', onClick: handleExportApiDocs },
-                { icon: BookOpen, label: 'Docs', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', onClick: () => {
-                  window.open('/api-docs', '_blank')
-                  toast.success('API Documentation opened in new tab')
-                }},
+                { icon: BookOpen, label: 'Docs', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', onClick: () => window.open('/api-docs', '_blank') },
                 { icon: History, label: 'History', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', onClick: () => {
                   toast.info('Viewing request history', { description: 'Navigate to History tab' })
                 }},
-                { icon: Settings, label: 'Settings', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400', onClick: () => {
-                  toast.info('API settings opened', { description: 'Navigate to Settings tab' })
-                }},
+                { icon: Settings, label: 'Settings', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400', onClick: () => setActiveTab('settings') },
               ].map((action, idx) => (
                 <Button
                   key={idx}

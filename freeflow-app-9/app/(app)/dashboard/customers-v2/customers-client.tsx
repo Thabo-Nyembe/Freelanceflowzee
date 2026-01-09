@@ -770,8 +770,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
   }
 
   const handleLogActivity = () => {
-    // In real app, this would open an activity log modal
-    toast.success('Activity Logger', { description: 'Activity logging feature ready' })
+    // TODO: Implement activity log modal
   }
 
   // Copy to clipboard helper
@@ -2521,7 +2520,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
               <DialogDescription>{selectedTask?.subject}</DialogDescription>
             </DialogHeader>
             <div className="space-y-2">
-              <Button variant="outline" className="w-full justify-start" onClick={() => { setShowTaskOptionsDialog(false); toast.success('Editing Task', { description: 'Task editor opened' }) }}>
+              <Button variant="outline" className="w-full justify-start" onClick={() => { setShowTaskOptionsDialog(false); /* TODO: Implement task editor */ }}>
                 <Edit className="h-4 w-4 mr-2" />Edit Task
               </Button>
               <Button variant="outline" className="w-full justify-start" onClick={() => { setShowTaskOptionsDialog(false); toast.success('Task Reassigned', { description: 'Task has been reassigned' }) }}>
@@ -2659,7 +2658,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
               <DialogDescription>Manage pipeline stage settings</DialogDescription>
             </DialogHeader>
             <div className="space-y-2">
-              <Button variant="outline" className="w-full justify-start" onClick={() => { setShowStageOptionsDialog(false); toast.success('Editing Stage', { description: 'Stage editor opened' }) }}>
+              <Button variant="outline" className="w-full justify-start" onClick={() => { setShowStageOptionsDialog(false); /* TODO: Implement stage editor */ }}>
                 <Edit className="h-4 w-4 mr-2" />Edit Stage Name
               </Button>
               <Button variant="outline" className="w-full justify-start" onClick={() => { setShowStageOptionsDialog(false); toast.success('Updated Probability', { description: 'Stage probability updated' }) }}>
