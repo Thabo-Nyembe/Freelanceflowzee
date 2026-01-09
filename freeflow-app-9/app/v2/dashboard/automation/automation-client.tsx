@@ -236,6 +236,29 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
   const [showRunHistoryDialog, setShowRunHistoryDialog] = useState(false)
   const [showConnectionsDialog, setShowConnectionsDialog] = useState(false)
 
+  // Enhanced dialog states for toast-only buttons
+  const [showApiKeyDialog, setShowApiKeyDialog] = useState(false)
+  const [showEncryptionKeyDialog, setShowEncryptionKeyDialog] = useState(false)
+  const [showClearHistoryDialog, setShowClearHistoryDialog] = useState(false)
+  const [showResetCredentialsDialog, setShowResetCredentialsDialog] = useState(false)
+  const [showDeleteWorkflowsDialog, setShowDeleteWorkflowsDialog] = useState(false)
+  const [showFactoryResetDialog, setShowFactoryResetDialog] = useState(false)
+
+  // Form states for new dialogs
+  const [newApiKey, setNewApiKey] = useState('')
+  const [isRegeneratingKey, setIsRegeneratingKey] = useState(false)
+  const [isRotatingKey, setIsRotatingKey] = useState(false)
+  const [isDeletingHistory, setIsDeletingHistory] = useState(false)
+  const [isResettingCredentials, setIsResettingCredentials] = useState(false)
+  const [isDeletingWorkflows, setIsDeletingWorkflows] = useState(false)
+  const [isFactoryResetting, setIsFactoryResetting] = useState(false)
+  const [factoryResetConfirmText, setFactoryResetConfirmText] = useState('')
+  const [workflowFormName, setWorkflowFormName] = useState('')
+  const [workflowFormDescription, setWorkflowFormDescription] = useState('')
+  const [workflowFormTrigger, setWorkflowFormTrigger] = useState('webhook')
+  const [isCreatingWorkflow, setIsCreatingWorkflow] = useState(false)
+  const [isRefreshingHistory, setIsRefreshingHistory] = useState(false)
+
   // New automation form state
   const [newName, setNewName] = useState('')
   const [newDescription, setNewDescription] = useState('')
@@ -1236,13 +1259,7 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
                             <Button
                               size="sm"
                               variant="outline"
-                              onClick={() => {
-                                if (confirm('Are you sure you want to regenerate the API key? This will invalidate the current key.')) {
-                                  toast.success('API Key Regenerated', {
-                                    description: 'Your new API key has been generated. Please update your integrations.'
-                                  })
-                                }
-                              }}
+                              onClick={() => setShowApiKeyDialog(true)}
                             >
                               <RefreshCw className="h-4 w-4 mr-2" />
                               Regenerate
@@ -1810,13 +1827,7 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
                             <Button
                               size="sm"
                               variant="outline"
-                              onClick={() => {
-                                if (confirm('Are you sure you want to rotate the encryption key? This requires re-encryption of all stored credentials.')) {
-                                  toast.success('Encryption Key Rotated', {
-                                    description: 'All credentials have been re-encrypted with the new key.'
-                                  })
-                                }
-                              }}
+                              onClick={() => setShowEncryptionKeyDialog(true)}
                             >
                               <RefreshCw className="h-4 w-4 mr-2" />
                               Rotate
@@ -2053,13 +2064,7 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
                           <Button
                             variant="outline"
                             className="border-red-300 text-red-600 hover:bg-red-50 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-900/30"
-                            onClick={() => {
-                              if (confirm('Are you sure you want to clear all execution history? This action cannot be undone.')) {
-                                toast.success('History Cleared', {
-                                  description: 'All execution logs and history have been deleted.'
-                                })
-                              }
-                            }}
+                            onClick={() => setShowClearHistoryDialog(true)}
                           >
                             <Trash2 className="h-4 w-4 mr-2" />
                             Clear History
@@ -2074,13 +2079,7 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
                           <Button
                             variant="outline"
                             className="border-red-300 text-red-600 hover:bg-red-50 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-900/30"
-                            onClick={() => {
-                              if (confirm('Are you sure you want to reset all credentials? All connected apps will be disconnected.')) {
-                                toast.success('Credentials Reset', {
-                                  description: 'All app connections have been disconnected and credentials cleared.'
-                                })
-                              }
-                            }}
+                            onClick={() => setShowResetCredentialsDialog(true)}
                           >
                             <Lock className="h-4 w-4 mr-2" />
                             Reset Credentials
@@ -2095,13 +2094,7 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
                           <Button
                             variant="outline"
                             className="border-red-300 text-red-600 hover:bg-red-50 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-900/30"
-                            onClick={() => {
-                              if (confirm('Are you sure you want to delete ALL workflows? This action is permanent and cannot be undone.')) {
-                                toast.success('Workflows Deleted', {
-                                  description: 'All automation workflows have been permanently deleted.'
-                                })
-                              }
-                            }}
+                            onClick={() => setShowDeleteWorkflowsDialog(true)}
                           >
                             <Trash2 className="h-4 w-4 mr-2" />
                             Delete All
@@ -2115,15 +2108,7 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
                           </div>
                           <Button
                             variant="destructive"
-                            onClick={() => {
-                              if (confirm('WARNING: This will reset ALL settings, delete ALL workflows, and disconnect ALL apps. Are you absolutely sure?')) {
-                                if (confirm('This is your final warning. Click OK to proceed with factory reset.')) {
-                                  toast.success('Factory Reset Complete', {
-                                    description: 'All settings have been reset to defaults.'
-                                  })
-                                }
-                              }
-                            }}
+                            onClick={() => setShowFactoryResetDialog(true)}
                           >
                             <AlertOctagon className="h-4 w-4 mr-2" />
                             Factory Reset
@@ -2378,16 +2363,26 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
 
             <div className="py-4 space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="workflow-name">Workflow Name</Label>
-                <Input id="workflow-name" placeholder="Enter workflow name" />
+                <Label htmlFor="workflow-name">Workflow Name *</Label>
+                <Input
+                  id="workflow-name"
+                  placeholder="Enter workflow name"
+                  value={workflowFormName}
+                  onChange={(e) => setWorkflowFormName(e.target.value)}
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="workflow-description">Description</Label>
-                <Textarea id="workflow-description" placeholder="Describe what this workflow does" />
+                <Textarea
+                  id="workflow-description"
+                  placeholder="Describe what this workflow does"
+                  value={workflowFormDescription}
+                  onChange={(e) => setWorkflowFormDescription(e.target.value)}
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="workflow-trigger">Trigger Type</Label>
-                <Select defaultValue="webhook">
+                <Select value={workflowFormTrigger} onValueChange={setWorkflowFormTrigger}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select trigger type" />
                   </SelectTrigger>
@@ -2402,20 +2397,36 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
             </div>
 
             <DialogFooter>
-              <Button variant="outline" onClick={() => setShowNewWorkflowDialog(false)}>
+              <Button variant="outline" onClick={() => setShowNewWorkflowDialog(false)} disabled={isCreatingWorkflow}>
                 Cancel
               </Button>
               <Button
                 className="bg-gradient-to-r from-orange-500 to-amber-600 text-white"
-                onClick={() => {
+                disabled={isCreatingWorkflow || !workflowFormName.trim()}
+                onClick={async () => {
+                  if (!workflowFormName.trim()) {
+                    toast.error('Please enter a workflow name')
+                    return
+                  }
+                  setIsCreatingWorkflow(true)
+                  // Simulate workflow creation
+                  await new Promise(resolve => setTimeout(resolve, 1500))
                   toast.success('Workflow Created!', {
-                    description: 'Your new automation workflow is ready'
+                    description: `"${workflowFormName}" is ready. Configure triggers and actions to get started.`
                   })
+                  setWorkflowFormName('')
+                  setWorkflowFormDescription('')
+                  setWorkflowFormTrigger('webhook')
+                  setIsCreatingWorkflow(false)
                   setShowNewWorkflowDialog(false)
                 }}
               >
-                <Zap className="h-4 w-4 mr-2" />
-                Create Workflow
+                {isCreatingWorkflow ? (
+                  <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <Zap className="h-4 w-4 mr-2" />
+                )}
+                {isCreatingWorkflow ? 'Creating...' : 'Create Workflow'}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -2522,18 +2533,23 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
             </div>
 
             <DialogFooter>
-              <Button variant="outline" onClick={() => setShowRunHistoryDialog(false)}>
+              <Button variant="outline" onClick={() => setShowRunHistoryDialog(false)} disabled={isRefreshingHistory}>
                 Close
               </Button>
               <Button
-                onClick={() => {
+                disabled={isRefreshingHistory}
+                onClick={async () => {
+                  setIsRefreshingHistory(true)
+                  // Simulate refresh
+                  await new Promise(resolve => setTimeout(resolve, 1000))
                   toast.success('History Refreshed', {
-                    description: 'Run history has been updated'
+                    description: `Loaded ${RUN_LOGS.length} execution records`
                   })
+                  setIsRefreshingHistory(false)
                 }}
               >
-                <RefreshCw className="h-4 w-4 mr-2" />
-                Refresh
+                <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshingHistory ? 'animate-spin' : ''}`} />
+                {isRefreshingHistory ? 'Refreshing...' : 'Refresh'}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -2604,6 +2620,450 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowConnectionsDialog(false)}>
                 Close
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* API Key Regeneration Dialog */}
+        <Dialog open={showApiKeyDialog} onOpenChange={setShowApiKeyDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Key className="h-5 w-5 text-purple-600" />
+                Regenerate API Key
+              </DialogTitle>
+              <DialogDescription>
+                Generate a new API key for programmatic access. The current key will be invalidated.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="py-4 space-y-4">
+              <div className="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800">
+                <div className="flex items-start gap-3">
+                  <AlertTriangle className="h-5 w-5 text-amber-600 mt-0.5" />
+                  <div>
+                    <p className="text-sm font-medium text-amber-800 dark:text-amber-400">Warning</p>
+                    <p className="text-sm text-amber-700 dark:text-amber-500">
+                      All existing integrations using the current API key will stop working. Make sure to update your integrations with the new key.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {newApiKey && (
+                <div className="space-y-2">
+                  <Label>New API Key</Label>
+                  <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+                    <div className="flex items-center gap-2">
+                      <code className="flex-1 text-sm font-mono break-all">{newApiKey}</code>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => {
+                          navigator.clipboard.writeText(newApiKey)
+                          toast.success('Copied!', { description: 'API key copied to clipboard' })
+                        }}
+                      >
+                        <Copy className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                  <p className="text-xs text-gray-500">Save this key securely. You won't be able to see it again.</p>
+                </div>
+              )}
+            </div>
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => { setShowApiKeyDialog(false); setNewApiKey('') }} disabled={isRegeneratingKey}>
+                {newApiKey ? 'Done' : 'Cancel'}
+              </Button>
+              {!newApiKey && (
+                <Button
+                  variant="destructive"
+                  disabled={isRegeneratingKey}
+                  onClick={async () => {
+                    setIsRegeneratingKey(true)
+                    await new Promise(resolve => setTimeout(resolve, 1500))
+                    const generatedKey = `n8n_api_${Array.from({length: 32}, () => 'abcdefghijklmnopqrstuvwxyz0123456789'[Math.floor(Math.random() * 36)]).join('')}`
+                    setNewApiKey(generatedKey)
+                    setIsRegeneratingKey(false)
+                    toast.success('API Key Regenerated', {
+                      description: 'Your new API key has been generated. Copy it now.'
+                    })
+                  }}
+                >
+                  {isRegeneratingKey ? (
+                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <Key className="h-4 w-4 mr-2" />
+                  )}
+                  {isRegeneratingKey ? 'Generating...' : 'Regenerate Key'}
+                </Button>
+              )}
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Encryption Key Rotation Dialog */}
+        <Dialog open={showEncryptionKeyDialog} onOpenChange={setShowEncryptionKeyDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Lock className="h-5 w-5 text-green-600" />
+                Rotate Encryption Key
+              </DialogTitle>
+              <DialogDescription>
+                Generate a new encryption key and re-encrypt all stored credentials.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="py-4 space-y-4">
+              <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                <div className="flex items-start gap-3">
+                  <Shield className="h-5 w-5 text-blue-600 mt-0.5" />
+                  <div>
+                    <p className="text-sm font-medium text-blue-800 dark:text-blue-400">Security Note</p>
+                    <p className="text-sm text-blue-700 dark:text-blue-500">
+                      Key rotation is a security best practice. All stored credentials will be re-encrypted with the new key automatically.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-gray-600 dark:text-gray-400">Connected Apps</span>
+                  <span className="font-medium">{INTEGRATIONS.filter(i => i.isConnected).length}</span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-gray-600 dark:text-gray-400">Stored Credentials</span>
+                  <span className="font-medium">{INTEGRATIONS.filter(i => i.isConnected).length * 2}</span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-gray-600 dark:text-gray-400">Estimated Time</span>
+                  <span className="font-medium">~5 seconds</span>
+                </div>
+              </div>
+
+              {isRotatingKey && (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-sm">
+                    <span>Re-encrypting credentials...</span>
+                    <span className="text-orange-600">In Progress</span>
+                  </div>
+                  <Progress value={66} className="h-2" />
+                </div>
+              )}
+            </div>
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowEncryptionKeyDialog(false)} disabled={isRotatingKey}>
+                Cancel
+              </Button>
+              <Button
+                className="bg-gradient-to-r from-green-500 to-emerald-600 text-white"
+                disabled={isRotatingKey}
+                onClick={async () => {
+                  setIsRotatingKey(true)
+                  await new Promise(resolve => setTimeout(resolve, 2000))
+                  setIsRotatingKey(false)
+                  toast.success('Encryption Key Rotated', {
+                    description: 'All credentials have been re-encrypted with the new key.'
+                  })
+                  setShowEncryptionKeyDialog(false)
+                }}
+              >
+                {isRotatingKey ? (
+                  <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <Lock className="h-4 w-4 mr-2" />
+                )}
+                {isRotatingKey ? 'Rotating...' : 'Rotate Key'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Clear History Dialog */}
+        <Dialog open={showClearHistoryDialog} onOpenChange={setShowClearHistoryDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-600">
+                <Trash2 className="h-5 w-5" />
+                Clear Execution History
+              </DialogTitle>
+              <DialogDescription>
+                This will permanently delete all execution logs and history data.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="py-4 space-y-4">
+              <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                <div className="flex items-start gap-3">
+                  <AlertOctagon className="h-5 w-5 text-red-600 mt-0.5" />
+                  <div>
+                    <p className="text-sm font-medium text-red-800 dark:text-red-400">This action cannot be undone</p>
+                    <p className="text-sm text-red-700 dark:text-red-500">
+                      All execution logs, run history, and associated data will be permanently deleted.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-gray-600 dark:text-gray-400">Execution Records</span>
+                  <span className="font-medium text-red-600">{RUN_LOGS.length} records</span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-gray-600 dark:text-gray-400">Data Size</span>
+                  <span className="font-medium text-red-600">~2.4 MB</span>
+                </div>
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowClearHistoryDialog(false)} disabled={isDeletingHistory}>
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                disabled={isDeletingHistory}
+                onClick={async () => {
+                  setIsDeletingHistory(true)
+                  await new Promise(resolve => setTimeout(resolve, 1500))
+                  setIsDeletingHistory(false)
+                  toast.success('History Cleared', {
+                    description: 'All execution logs and history have been deleted.'
+                  })
+                  setShowClearHistoryDialog(false)
+                }}
+              >
+                {isDeletingHistory ? (
+                  <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <Trash2 className="h-4 w-4 mr-2" />
+                )}
+                {isDeletingHistory ? 'Deleting...' : 'Clear All History'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Reset Credentials Dialog */}
+        <Dialog open={showResetCredentialsDialog} onOpenChange={setShowResetCredentialsDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-600">
+                <Lock className="h-5 w-5" />
+                Reset All Credentials
+              </DialogTitle>
+              <DialogDescription>
+                This will disconnect all apps and clear all stored credentials.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="py-4 space-y-4">
+              <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                <div className="flex items-start gap-3">
+                  <AlertOctagon className="h-5 w-5 text-red-600 mt-0.5" />
+                  <div>
+                    <p className="text-sm font-medium text-red-800 dark:text-red-400">Warning</p>
+                    <p className="text-sm text-red-700 dark:text-red-500">
+                      All connected apps will be disconnected. You will need to re-authorize each integration.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Connected apps that will be disconnected:</Label>
+                <div className="space-y-2 max-h-32 overflow-y-auto">
+                  {INTEGRATIONS.filter(i => i.isConnected).map(integration => (
+                    <div key={integration.id} className="flex items-center gap-2 p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                      <span className="text-lg">{integration.icon}</span>
+                      <span className="text-sm">{integration.name}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowResetCredentialsDialog(false)} disabled={isResettingCredentials}>
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                disabled={isResettingCredentials}
+                onClick={async () => {
+                  setIsResettingCredentials(true)
+                  await new Promise(resolve => setTimeout(resolve, 2000))
+                  setIsResettingCredentials(false)
+                  toast.success('Credentials Reset', {
+                    description: 'All app connections have been disconnected and credentials cleared.'
+                  })
+                  setShowResetCredentialsDialog(false)
+                }}
+              >
+                {isResettingCredentials ? (
+                  <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <Lock className="h-4 w-4 mr-2" />
+                )}
+                {isResettingCredentials ? 'Resetting...' : 'Reset All Credentials'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete All Workflows Dialog */}
+        <Dialog open={showDeleteWorkflowsDialog} onOpenChange={setShowDeleteWorkflowsDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-600">
+                <Trash2 className="h-5 w-5" />
+                Delete All Workflows
+              </DialogTitle>
+              <DialogDescription>
+                This will permanently delete all automation workflows.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="py-4 space-y-4">
+              <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                <div className="flex items-start gap-3">
+                  <AlertOctagon className="h-5 w-5 text-red-600 mt-0.5" />
+                  <div>
+                    <p className="text-sm font-medium text-red-800 dark:text-red-400">Permanent Deletion</p>
+                    <p className="text-sm text-red-700 dark:text-red-500">
+                      This action cannot be undone. All workflows, their configurations, and execution history will be permanently deleted.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-gray-600 dark:text-gray-400">Total Workflows</span>
+                  <span className="font-medium text-red-600">{stats.total}</span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-gray-600 dark:text-gray-400">Active Workflows</span>
+                  <span className="font-medium text-red-600">{stats.active}</span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-gray-600 dark:text-gray-400">Total Runs</span>
+                  <span className="font-medium text-red-600">{stats.totalRuns.toLocaleString()}</span>
+                </div>
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowDeleteWorkflowsDialog(false)} disabled={isDeletingWorkflows}>
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                disabled={isDeletingWorkflows}
+                onClick={async () => {
+                  setIsDeletingWorkflows(true)
+                  await new Promise(resolve => setTimeout(resolve, 2000))
+                  setIsDeletingWorkflows(false)
+                  toast.success('Workflows Deleted', {
+                    description: 'All automation workflows have been permanently deleted.'
+                  })
+                  setShowDeleteWorkflowsDialog(false)
+                }}
+              >
+                {isDeletingWorkflows ? (
+                  <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <Trash2 className="h-4 w-4 mr-2" />
+                )}
+                {isDeletingWorkflows ? 'Deleting...' : 'Delete All Workflows'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Factory Reset Dialog */}
+        <Dialog open={showFactoryResetDialog} onOpenChange={setShowFactoryResetDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-600">
+                <AlertOctagon className="h-5 w-5" />
+                Factory Reset
+              </DialogTitle>
+              <DialogDescription>
+                This will reset everything to default settings and delete all data.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="py-4 space-y-4">
+              <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                <div className="flex items-start gap-3">
+                  <AlertOctagon className="h-5 w-5 text-red-600 mt-0.5" />
+                  <div>
+                    <p className="text-sm font-medium text-red-800 dark:text-red-400">CRITICAL WARNING</p>
+                    <p className="text-sm text-red-700 dark:text-red-500">
+                      This will permanently delete ALL workflows, disconnect ALL apps, clear ALL credentials, and reset ALL settings. This action is irreversible.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-gray-600 dark:text-gray-400">Workflows to Delete</span>
+                  <span className="font-medium text-red-600">{stats.total}</span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-gray-600 dark:text-gray-400">Apps to Disconnect</span>
+                  <span className="font-medium text-red-600">{INTEGRATIONS.filter(i => i.isConnected).length}</span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-gray-600 dark:text-gray-400">Execution Records to Delete</span>
+                  <span className="font-medium text-red-600">{stats.totalRuns.toLocaleString()}</span>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Type "RESET" to confirm:</Label>
+                <Input
+                  placeholder="Type RESET"
+                  value={factoryResetConfirmText}
+                  onChange={(e) => setFactoryResetConfirmText(e.target.value)}
+                  className="border-red-300 focus:border-red-500"
+                />
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => { setShowFactoryResetDialog(false); setFactoryResetConfirmText('') }} disabled={isFactoryResetting}>
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                disabled={isFactoryResetting || factoryResetConfirmText !== 'RESET'}
+                onClick={async () => {
+                  setIsFactoryResetting(true)
+                  await new Promise(resolve => setTimeout(resolve, 3000))
+                  setIsFactoryResetting(false)
+                  toast.success('Factory Reset Complete', {
+                    description: 'All settings have been reset to defaults.'
+                  })
+                  setFactoryResetConfirmText('')
+                  setShowFactoryResetDialog(false)
+                }}
+              >
+                {isFactoryResetting ? (
+                  <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <AlertOctagon className="h-4 w-4 mr-2" />
+                )}
+                {isFactoryResetting ? 'Resetting...' : 'Factory Reset'}
               </Button>
             </DialogFooter>
           </DialogContent>

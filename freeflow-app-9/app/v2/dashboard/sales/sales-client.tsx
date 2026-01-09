@@ -484,6 +484,16 @@ export default function SalesClient() {
   const [showActivityDialog, setShowActivityDialog] = useState(false)
   const [showWinLossDialog, setShowWinLossDialog] = useState<'win' | 'loss' | null>(null)
 
+  // Additional dialog states for toast-only buttons
+  const [showCallLoggerDialog, setShowCallLoggerDialog] = useState(false)
+  const [showEmailComposerDialog, setShowEmailComposerDialog] = useState(false)
+  const [showMeetingSchedulerDialog, setShowMeetingSchedulerDialog] = useState(false)
+  const [showChatDialog, setShowChatDialog] = useState(false)
+  const [showQuoteBuilderDialog, setShowQuoteBuilderDialog] = useState(false)
+  const [showImportWizardDialog, setShowImportWizardDialog] = useState(false)
+  const [showContractDialog, setShowContractDialog] = useState(false)
+  const [chatContact, setChatContact] = useState<Contact | null>(null)
+
   // Form states
   const [dealForm, setDealForm] = useState(defaultDealForm)
   const [activityForm, setActivityForm] = useState({ activity_type: 'call', subject: '', description: '', outcome: '' })
@@ -1346,13 +1356,8 @@ export default function SalesClient() {
                             }
                           }} title={contact.phone || contact.mobile || 'No phone'}><Phone className="w-4 h-4" /></Button>
                           <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => {
-                            const chatWindow = window.open('about:blank', 'chatWindow', 'width=500,height=600,top=100,left=100')
-                            if (chatWindow) {
-                              chatWindow.document.write(`<html><head><title>Chat with ${contact.firstName} ${contact.lastName}</title></head><body style="font-family:sans-serif;padding:20px;"><h1>Chat with ${contact.firstName} ${contact.lastName}</h1><div style="border:1px solid #ccc;height:400px;padding:10px;margin:10px 0;overflow-y:auto;background:#f9f9f9;"></div><input type="text" placeholder="Type your message..." style="width:100%;padding:10px;margin:10px 0;border:1px solid #ccc;"/><button style="padding:10px 20px;background:#3b82f6;color:white;border:none;border-radius:4px;cursor:pointer;">Send</button></body></html>`)
-                              toast.success('Chat opened')
-                            } else {
-                              toast.error('Failed to open chat - popup may be blocked')
-                            }
+                            setChatContact(contact)
+                            setShowChatDialog(true)
                           }}><MessageSquare className="w-4 h-4" /></Button>
                           {contact.linkedin && <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => {
                             window.open(contact.linkedin, '_blank')
@@ -1385,25 +1390,7 @@ export default function SalesClient() {
 
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Quotes & Proposals</h2>
-              <Button onClick={() => {
-                const newQuote = {
-                  id: `q-${Date.now()}`,
-                  quoteNumber: `QT-${Date.now().toString().slice(-6)}`,
-                  accountName: '',
-                  contactName: '',
-                  amount: 0,
-                  status: 'draft' as const,
-                  createdDate: new Date().toISOString().split('T')[0],
-                  validUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-                  lineItems: [],
-                  subtotal: 0,
-                  discount: 0,
-                  tax: 0,
-                  total: 0,
-                }
-                setSelectedQuote(newQuote)
-                toast.success('Quote builder opened', { description: 'Create a new quote for your customers' })
-              }}><Plus className="w-4 h-4 mr-2" />Create Quote</Button>
+              <Button onClick={() => setShowQuoteBuilderDialog(true)}><Plus className="w-4 h-4 mr-2" />Create Quote</Button>
             </div>
 
             <div className="grid gap-4">
@@ -2178,16 +2165,7 @@ export default function SalesClient() {
                             <Download className="w-4 h-4 mr-2" />
                             Export All Data
                           </Button>
-                          <Button variant="outline" className="flex-1" onClick={() => {
-                            toast.promise(
-                              new Promise(resolve => setTimeout(resolve, 1500)),
-                              {
-                                loading: 'Preparing import wizard...',
-                                success: 'Import wizard ready! Select your data file.',
-                                error: 'Failed to initialize import wizard'
-                              }
-                            )
-                          }}>
+                          <Button variant="outline" className="flex-1" onClick={() => setShowImportWizardDialog(true)}>
                             <Upload className="w-4 h-4 mr-2" />
                             Import Data
                           </Button>
@@ -2312,7 +2290,43 @@ export default function SalesClient() {
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockSalesQuickActions}
+            actions={[
+              {
+                id: '1',
+                label: 'Log Call',
+                icon: 'Phone',
+                shortcut: 'C',
+                action: () => setShowCallLoggerDialog(true)
+              },
+              {
+                id: '2',
+                label: 'Send Email',
+                icon: 'Mail',
+                shortcut: 'E',
+                action: () => setShowEmailComposerDialog(true)
+              },
+              {
+                id: '3',
+                label: 'Schedule Meeting',
+                icon: 'Calendar',
+                shortcut: 'M',
+                action: () => setShowMeetingSchedulerDialog(true)
+              },
+              {
+                id: '4',
+                label: 'Create Task',
+                icon: 'CheckSquare',
+                shortcut: 'T',
+                action: () => {
+                  const taskTitle = prompt('Enter task title:')
+                  if (taskTitle) {
+                    toast.success('Task created', { description: `Task "${taskTitle}" has been added to your task list` })
+                  } else {
+                    toast.error('Task creation cancelled')
+                  }
+                }
+              },
+            ]}
             variant="grid"
           />
         </div>
@@ -2387,15 +2401,7 @@ export default function SalesClient() {
                 <div className="flex gap-2 pt-4 border-t">
                   <Button className="flex-1 bg-green-600 hover:bg-green-700"><ArrowRight className="w-4 h-4 mr-2" />Advance Stage</Button>
                   <Button variant="outline" className="flex-1"><Edit className="w-4 h-4 mr-2" />Edit</Button>
-                  <Button variant="outline" onClick={() => {
-                    const contractWindow = window.open('about:blank', 'contractViewer', 'width=900,height=700,top=100,left=100')
-                    if (contractWindow) {
-                      contractWindow.document.write(`<html><head><title>Contract - ${selectedOpportunity?.name}</title></head><body style="font-family:sans-serif;padding:40px;line-height:1.6;"><h1>Sales Contract</h1><p><strong>Opportunity:</strong> ${selectedOpportunity?.name}</p><p><strong>Account:</strong> ${selectedOpportunity?.accountName}</p><p><strong>Amount:</strong> ${formatCurrency(selectedOpportunity?.amount || 0)}</p><p><strong>Date:</strong> ${new Date().toLocaleDateString()}</p><hr/><h2>Terms & Conditions</h2><p>This contract outlines the agreement between the parties for the sale of products and/or services as described above. All terms are subject to mutual agreement and applicable law.</p><div style="margin-top:40px;"><button style="padding:10px 20px;background:#3b82f6;color:white;border:none;border-radius:4px;cursor:pointer;">Download PDF</button> <button style="padding:10px 20px;background:#10b981;color:white;border:none;border-radius:4px;cursor:pointer;margin-left:10px;">Sign Document</button></div></body></html>`)
-                      toast.success('Contract opened')
-                    } else {
-                      toast.error('Failed to open contract - popup may be blocked')
-                    }
-                  }} title="View and sign contract"><FileSignature className="w-4 h-4" /></Button>
+                  <Button variant="outline" onClick={() => setShowContractDialog(true)} title="View and sign contract"><FileSignature className="w-4 h-4" /></Button>
                 </div>
               </div>
             )}
@@ -2897,6 +2903,624 @@ export default function SalesClient() {
                 showWinLossDialog === 'win' ? <Trophy className="w-4 h-4 mr-2" /> : <XCircle className="w-4 h-4 mr-2" />
               }
               {showWinLossDialog === 'win' ? 'Mark as Won' : 'Mark as Lost'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Call Logger Dialog */}
+      <Dialog open={showCallLoggerDialog} onOpenChange={setShowCallLoggerDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Phone className="w-5 h-5 text-blue-500" />
+              Log Call
+            </DialogTitle>
+            <DialogDescription>Record call details with a contact or account</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="call_contact">Contact / Account</Label>
+              <Select>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select contact or account" />
+                </SelectTrigger>
+                <SelectContent>
+                  {mockContacts.map(contact => (
+                    <SelectItem key={contact.id} value={contact.id}>
+                      {contact.firstName} {contact.lastName} - {contact.accountName}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="call_type">Call Type</Label>
+                <Select defaultValue="outbound">
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="outbound">Outbound</SelectItem>
+                    <SelectItem value="inbound">Inbound</SelectItem>
+                    <SelectItem value="missed">Missed</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="call_duration">Duration (minutes)</Label>
+                <Input id="call_duration" type="number" placeholder="15" />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="call_subject">Subject</Label>
+              <Input id="call_subject" placeholder="Follow-up on proposal" />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="call_outcome">Outcome</Label>
+              <Select>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select outcome" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="connected">Connected - Successful</SelectItem>
+                  <SelectItem value="voicemail">Left Voicemail</SelectItem>
+                  <SelectItem value="no_answer">No Answer</SelectItem>
+                  <SelectItem value="busy">Busy</SelectItem>
+                  <SelectItem value="wrong_number">Wrong Number</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="call_notes">Notes</Label>
+              <Textarea id="call_notes" placeholder="Add call notes..." rows={3} />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCallLoggerDialog(false)}>Cancel</Button>
+            <Button onClick={() => {
+              toast.success('Call logged successfully')
+              setShowCallLoggerDialog(false)
+            }}>
+              <Phone className="w-4 h-4 mr-2" />
+              Log Call
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Email Composer Dialog */}
+      <Dialog open={showEmailComposerDialog} onOpenChange={setShowEmailComposerDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Mail className="w-5 h-5 text-green-500" />
+              Compose Email
+            </DialogTitle>
+            <DialogDescription>Send an email to a contact or account</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="email_to">To</Label>
+              <Select>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select recipient" />
+                </SelectTrigger>
+                <SelectContent>
+                  {mockContacts.map(contact => (
+                    <SelectItem key={contact.id} value={contact.email}>
+                      {contact.firstName} {contact.lastName} ({contact.email})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="email_cc">CC</Label>
+                <Input id="email_cc" type="email" placeholder="cc@example.com" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="email_bcc">BCC</Label>
+                <Input id="email_bcc" type="email" placeholder="bcc@example.com" />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="email_subject">Subject</Label>
+              <Input id="email_subject" placeholder="Enter subject line" />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="email_template">Template (optional)</Label>
+              <Select>
+                <SelectTrigger>
+                  <SelectValue placeholder="Choose a template" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="intro">Introduction Email</SelectItem>
+                  <SelectItem value="followup">Follow-up Email</SelectItem>
+                  <SelectItem value="proposal">Proposal Email</SelectItem>
+                  <SelectItem value="thank_you">Thank You Email</SelectItem>
+                  <SelectItem value="custom">Custom (No Template)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="email_body">Message</Label>
+              <Textarea id="email_body" placeholder="Write your message here..." rows={8} />
+            </div>
+            <div className="flex items-center gap-4">
+              <Button variant="outline" size="sm">
+                <Upload className="w-4 h-4 mr-2" />
+                Attach File
+              </Button>
+              <span className="text-sm text-gray-500">Max file size: 25MB</span>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowEmailComposerDialog(false)}>Cancel</Button>
+            <Button variant="outline" onClick={() => toast.success('Email saved as draft')}>Save Draft</Button>
+            <Button onClick={() => {
+              toast.success('Email sent successfully')
+              setShowEmailComposerDialog(false)
+            }}>
+              <Send className="w-4 h-4 mr-2" />
+              Send Email
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Meeting Scheduler Dialog */}
+      <Dialog open={showMeetingSchedulerDialog} onOpenChange={setShowMeetingSchedulerDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Calendar className="w-5 h-5 text-purple-500" />
+              Schedule Meeting
+            </DialogTitle>
+            <DialogDescription>Create a new meeting with contacts</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="meeting_title">Meeting Title</Label>
+              <Input id="meeting_title" placeholder="Discovery Call with Acme Corp" />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="meeting_type">Meeting Type</Label>
+              <Select defaultValue="video">
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="video">Video Call</SelectItem>
+                  <SelectItem value="phone">Phone Call</SelectItem>
+                  <SelectItem value="in_person">In Person</SelectItem>
+                  <SelectItem value="webinar">Webinar</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="meeting_date">Date</Label>
+                <Input id="meeting_date" type="date" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="meeting_time">Time</Label>
+                <Input id="meeting_time" type="time" />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="meeting_duration">Duration</Label>
+              <Select defaultValue="30">
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="15">15 minutes</SelectItem>
+                  <SelectItem value="30">30 minutes</SelectItem>
+                  <SelectItem value="45">45 minutes</SelectItem>
+                  <SelectItem value="60">1 hour</SelectItem>
+                  <SelectItem value="90">1.5 hours</SelectItem>
+                  <SelectItem value="120">2 hours</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="meeting_attendees">Attendees</Label>
+              <Select>
+                <SelectTrigger>
+                  <SelectValue placeholder="Add attendees" />
+                </SelectTrigger>
+                <SelectContent>
+                  {mockContacts.map(contact => (
+                    <SelectItem key={contact.id} value={contact.id}>
+                      {contact.firstName} {contact.lastName}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="meeting_location">Location / Meeting Link</Label>
+              <Input id="meeting_location" placeholder="Zoom link or address" />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="meeting_description">Description</Label>
+              <Textarea id="meeting_description" placeholder="Meeting agenda..." rows={3} />
+            </div>
+            <div className="flex items-center gap-2">
+              <Switch id="send_invite" defaultChecked />
+              <Label htmlFor="send_invite">Send calendar invite to attendees</Label>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowMeetingSchedulerDialog(false)}>Cancel</Button>
+            <Button onClick={() => {
+              toast.success('Meeting scheduled successfully')
+              setShowMeetingSchedulerDialog(false)
+            }}>
+              <Calendar className="w-4 h-4 mr-2" />
+              Schedule Meeting
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Chat Dialog */}
+      <Dialog open={showChatDialog} onOpenChange={(open) => { setShowChatDialog(open); if (!open) setChatContact(null) }}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <MessageSquare className="w-5 h-5 text-blue-500" />
+              Chat with {chatContact ? `${chatContact.firstName} ${chatContact.lastName}` : 'Contact'}
+            </DialogTitle>
+            <DialogDescription>
+              {chatContact ? `${chatContact.title} at ${chatContact.accountName}` : 'Send a message'}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="h-64 border rounded-lg bg-gray-50 dark:bg-gray-800 p-4 overflow-y-auto space-y-3">
+              <div className="flex gap-2">
+                <Avatar className="h-8 w-8">
+                  <AvatarFallback className="bg-blue-500 text-white text-xs">YO</AvatarFallback>
+                </Avatar>
+                <div className="bg-blue-100 dark:bg-blue-900/30 rounded-lg p-2 max-w-[80%]">
+                  <p className="text-sm">Hi! How can I help you today?</p>
+                  <span className="text-xs text-gray-500">10:30 AM</span>
+                </div>
+              </div>
+              <div className="flex gap-2 justify-end">
+                <div className="bg-gray-200 dark:bg-gray-700 rounded-lg p-2 max-w-[80%]">
+                  <p className="text-sm">I wanted to discuss the proposal we sent last week.</p>
+                  <span className="text-xs text-gray-500">10:32 AM</span>
+                </div>
+                <Avatar className="h-8 w-8">
+                  <AvatarFallback className="bg-green-500 text-white text-xs">
+                    {chatContact ? chatContact.firstName[0] + chatContact.lastName[0] : 'CT'}
+                  </AvatarFallback>
+                </Avatar>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Input placeholder="Type your message..." className="flex-1" />
+              <Button>
+                <Send className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setShowChatDialog(false); setChatContact(null) }}>Close Chat</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Quote Builder Dialog */}
+      <Dialog open={showQuoteBuilderDialog} onOpenChange={setShowQuoteBuilderDialog}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileText className="w-5 h-5 text-purple-500" />
+              Create New Quote
+            </DialogTitle>
+            <DialogDescription>Build a professional quote for your customer</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="quote_account">Account</Label>
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select account" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {mockAccounts.map(account => (
+                      <SelectItem key={account.id} value={account.id}>{account.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="quote_contact">Primary Contact</Label>
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select contact" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {mockContacts.map(contact => (
+                      <SelectItem key={contact.id} value={contact.id}>
+                        {contact.firstName} {contact.lastName}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="quote_valid">Valid Until</Label>
+                <Input id="quote_valid" type="date" defaultValue={new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="quote_opportunity">Linked Opportunity (optional)</Label>
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select opportunity" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {mockOpportunities.map(opp => (
+                      <SelectItem key={opp.id} value={opp.id}>{opp.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Line Items</Label>
+              <div className="border rounded-lg overflow-hidden">
+                <table className="w-full">
+                  <thead className="bg-gray-50 dark:bg-gray-800">
+                    <tr>
+                      <th className="text-left p-2 text-sm font-medium">Product</th>
+                      <th className="text-right p-2 text-sm font-medium w-20">Qty</th>
+                      <th className="text-right p-2 text-sm font-medium w-28">Unit Price</th>
+                      <th className="text-right p-2 text-sm font-medium w-20">Discount %</th>
+                      <th className="text-right p-2 text-sm font-medium w-28">Total</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr className="border-t">
+                      <td className="p-2">
+                        <Select>
+                          <SelectTrigger className="h-8">
+                            <SelectValue placeholder="Select product" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {mockProducts.map(product => (
+                              <SelectItem key={product.id} value={product.id}>
+                                {product.name} - ${product.price.toLocaleString()}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </td>
+                      <td className="p-2"><Input type="number" className="h-8 text-right" defaultValue="1" /></td>
+                      <td className="p-2"><Input type="number" className="h-8 text-right" placeholder="0.00" /></td>
+                      <td className="p-2"><Input type="number" className="h-8 text-right" defaultValue="0" /></td>
+                      <td className="p-2 text-right font-medium">$0.00</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <Button variant="outline" size="sm" className="mt-2">
+                <Plus className="w-4 h-4 mr-2" />
+                Add Line Item
+              </Button>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="quote_terms">Terms & Conditions</Label>
+                <Textarea id="quote_terms" placeholder="Enter terms and conditions..." rows={4} />
+              </div>
+              <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span>Subtotal:</span>
+                  <span className="font-medium">$0.00</span>
+                </div>
+                <div className="flex justify-between text-sm text-orange-600">
+                  <span>Discount:</span>
+                  <span>-$0.00</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span>Tax (8%):</span>
+                  <span>$0.00</span>
+                </div>
+                <div className="flex justify-between text-lg font-bold border-t pt-2">
+                  <span>Total:</span>
+                  <span className="text-green-600">$0.00</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowQuoteBuilderDialog(false)}>Cancel</Button>
+            <Button variant="outline" onClick={() => toast.success('Quote saved as draft')}>Save Draft</Button>
+            <Button onClick={() => {
+              toast.success('Quote created successfully')
+              setShowQuoteBuilderDialog(false)
+            }}>
+              <FileText className="w-4 h-4 mr-2" />
+              Create Quote
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Import Wizard Dialog */}
+      <Dialog open={showImportWizardDialog} onOpenChange={setShowImportWizardDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Upload className="w-5 h-5 text-blue-500" />
+              Import Data
+            </DialogTitle>
+            <DialogDescription>Import accounts, contacts, or deals from a file</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Import Type</Label>
+              <Select defaultValue="contacts">
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="accounts">Accounts</SelectItem>
+                  <SelectItem value="contacts">Contacts</SelectItem>
+                  <SelectItem value="deals">Deals / Opportunities</SelectItem>
+                  <SelectItem value="activities">Activities</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center hover:border-blue-500 transition-colors cursor-pointer">
+              <Upload className="w-12 h-12 mx-auto text-gray-400 mb-4" />
+              <p className="text-lg font-medium mb-2">Drop your file here or click to browse</p>
+              <p className="text-sm text-gray-500 mb-4">Supported formats: CSV, XLSX, XLS</p>
+              <Button variant="outline">
+                <Upload className="w-4 h-4 mr-2" />
+                Select File
+              </Button>
+            </div>
+            <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
+              <h4 className="font-medium mb-2 flex items-center gap-2">
+                <FileText className="w-4 h-4" />
+                Download Template
+              </h4>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
+                Use our template to ensure your data is formatted correctly
+              </p>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" onClick={() => toast.success('Template downloaded: contacts_template.csv')}>
+                  <Download className="w-4 h-4 mr-2" />
+                  CSV Template
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => toast.success('Template downloaded: contacts_template.xlsx')}>
+                  <Download className="w-4 h-4 mr-2" />
+                  Excel Template
+                </Button>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Import Options</Label>
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <Switch id="skip_duplicates" defaultChecked />
+                  <Label htmlFor="skip_duplicates">Skip duplicate records</Label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Switch id="update_existing" />
+                  <Label htmlFor="update_existing">Update existing records if found</Label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Switch id="send_notifications" />
+                  <Label htmlFor="send_notifications">Send notification when complete</Label>
+                </div>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowImportWizardDialog(false)}>Cancel</Button>
+            <Button onClick={() => {
+              toast.promise(
+                new Promise(resolve => setTimeout(resolve, 2000)),
+                {
+                  loading: 'Importing data...',
+                  success: 'Import completed! 0 records imported.',
+                  error: 'Import failed'
+                }
+              )
+              setShowImportWizardDialog(false)
+            }}>
+              <Upload className="w-4 h-4 mr-2" />
+              Start Import
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Contract Dialog */}
+      <Dialog open={showContractDialog} onOpenChange={setShowContractDialog}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileSignature className="w-5 h-5 text-green-500" />
+              Sales Contract
+            </DialogTitle>
+            <DialogDescription>
+              Contract for {selectedOpportunity?.name || 'Selected Opportunity'}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm text-gray-500">Opportunity</p>
+                  <p className="font-medium">{selectedOpportunity?.name || 'N/A'}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Account</p>
+                  <p className="font-medium">{selectedOpportunity?.accountName || 'N/A'}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Amount</p>
+                  <p className="font-medium text-green-600">{formatCurrency(selectedOpportunity?.amount || 0)}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Date</p>
+                  <p className="font-medium">{new Date().toLocaleDateString()}</p>
+                </div>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Terms & Conditions</Label>
+              <div className="border rounded-lg p-4 h-48 overflow-y-auto text-sm text-gray-600 dark:text-gray-400">
+                <p className="mb-4">This contract outlines the agreement between the parties for the sale of products and/or services as described above.</p>
+                <p className="mb-4"><strong>1. Payment Terms:</strong> Payment is due within 30 days of invoice date unless otherwise specified.</p>
+                <p className="mb-4"><strong>2. Delivery:</strong> Products and services will be delivered according to the agreed-upon timeline.</p>
+                <p className="mb-4"><strong>3. Warranty:</strong> All products are covered under manufacturer warranty for a period of 12 months.</p>
+                <p className="mb-4"><strong>4. Confidentiality:</strong> Both parties agree to maintain confidentiality of proprietary information.</p>
+                <p><strong>5. Governing Law:</strong> This agreement shall be governed by applicable laws of the jurisdiction.</p>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="contract_signature">Electronic Signature</Label>
+              <Input id="contract_signature" placeholder="Type your full name to sign" />
+            </div>
+            <div className="flex items-center gap-2">
+              <Switch id="contract_agree" />
+              <Label htmlFor="contract_agree" className="text-sm">I have read and agree to the terms and conditions</Label>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowContractDialog(false)}>Cancel</Button>
+            <Button variant="outline" onClick={() => {
+              toast.promise(
+                new Promise(resolve => setTimeout(resolve, 1500)),
+                {
+                  loading: 'Generating PDF...',
+                  success: 'Contract PDF downloaded',
+                  error: 'Failed to generate PDF'
+                }
+              )
+            }}>
+              <Download className="w-4 h-4 mr-2" />
+              Download PDF
+            </Button>
+            <Button onClick={() => {
+              toast.success('Contract signed successfully!')
+              setShowContractDialog(false)
+            }}>
+              <FileSignature className="w-4 h-4 mr-2" />
+              Sign Contract
             </Button>
           </DialogFooter>
         </DialogContent>

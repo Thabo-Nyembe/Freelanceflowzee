@@ -530,6 +530,15 @@ export default function CommunityClient() {
   const [selectedMessageForOptions, setSelectedMessageForOptions] = useState<string | null>(null)
   const [editingRoleId, setEditingRoleId] = useState<string | null>(null)
 
+  // New dialog states for toast-only buttons
+  const [showBotStoreDialog, setShowBotStoreDialog] = useState(false)
+  const [showDirectMessageDialog, setShowDirectMessageDialog] = useState(false)
+  const [showRoleSettingsDialog, setShowRoleSettingsDialog] = useState(false)
+  const [showMessageOptionsDialog, setShowMessageOptionsDialog] = useState(false)
+  const [selectedRoleForSettings, setSelectedRoleForSettings] = useState<{id: string, name: string, color: string} | null>(null)
+  const [dmRecipient, setDmRecipient] = useState<{id: string, name: string} | null>(null)
+  const [dmMessage, setDmMessage] = useState('')
+
   // Form states for dialogs
   const [channelForm, setChannelForm] = useState({
     name: '',
@@ -989,7 +998,7 @@ export default function CommunityClient() {
   // Handle Message Options
   const handleMessageOptions = (messageId: string) => {
     setSelectedMessageForOptions(prev => prev === messageId ? null : messageId)
-    toast.success('Message options opened')
+    setShowMessageOptionsDialog(true)
   }
 
   // Handle Attachment Options
@@ -1021,9 +1030,10 @@ export default function CommunityClient() {
   }
 
   // Handle Role Settings
-  const handleRoleSettings = (roleId: string, roleName: string) => {
+  const handleRoleSettings = (roleId: string, roleName: string, roleColor?: string) => {
     setEditingRoleId(roleId)
-    toast.success('Role settings opened', { description: `Editing ${roleName}` })
+    setSelectedRoleForSettings({ id: roleId, name: roleName, color: roleColor || '#6b7280' })
+    setShowRoleSettingsDialog(true)
   }
 
   // Handle Send Friend Request
@@ -1453,7 +1463,7 @@ export default function CommunityClient() {
                         {role.isMentionable && <Badge variant="outline">Mentionable</Badge>}
                         {role.isManaged && <Badge variant="outline">Managed</Badge>}
                       </div>
-                      <Button variant="ghost" size="icon" onClick={() => handleRoleSettings(role.id, role.name)}><Settings className="w-4 h-4" /></Button>
+                      <Button variant="ghost" size="icon" onClick={() => handleRoleSettings(role.id, role.name, role.color)}><Settings className="w-4 h-4" /></Button>
                     </div>
                   </CardContent>
                 </Card>
@@ -2083,7 +2093,7 @@ export default function CommunityClient() {
                             </div>
                             <div className="flex items-center gap-2">
                               <span className="text-sm text-gray-500">{role.memberCount} members</span>
-                              <Button variant="ghost" size="icon" onClick={() => handleRoleSettings(role.id, role.name)}><Settings className="w-4 h-4" /></Button>
+                              <Button variant="ghost" size="icon" onClick={() => handleRoleSettings(role.id, role.name, role.color)}><Settings className="w-4 h-4" /></Button>
                             </div>
                           </div>
                         ))}
@@ -2127,9 +2137,7 @@ export default function CommunityClient() {
                           variant="outline"
                           className="w-full"
                           disabled={isSubmitting}
-                          onClick={async () => {
-                            toast.info('Bot Store', { description: 'Opening bot marketplace...' })
-                          }}
+                          onClick={() => setShowBotStoreDialog(true)}
                         >
                           <Plus className="w-4 h-4 mr-2" />
                           Add Bot or App
@@ -2518,8 +2526,9 @@ export default function CommunityClient() {
               <div className="flex gap-2">
                 <Button className="flex-1" onClick={() => {
                   if (selectedMember) {
-                    toast.success('Direct message', { description: `Opening conversation with ${selectedMember.displayName}` })
+                    setDmRecipient({ id: selectedMember.id, name: selectedMember.displayName })
                     setShowMemberProfile(false)
+                    setShowDirectMessageDialog(true)
                   }
                 }}><MessageSquare className="w-4 h-4 mr-2" />Message</Button>
                 <Button variant="outline" onClick={() => selectedMember && handleSendFriendRequest(selectedMember.id, selectedMember.displayName)}><UserPlus className="w-4 h-4" /></Button>
@@ -2713,6 +2722,339 @@ export default function CommunityClient() {
               {isSubmitting ? 'Creating...' : 'Create Role'}
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Bot Store Dialog */}
+      <Dialog open={showBotStoreDialog} onOpenChange={setShowBotStoreDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Bot className="w-5 h-5 text-blue-600" />
+              Bot Marketplace
+            </DialogTitle>
+            <DialogDescription>Browse and add bots to your community</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <Input placeholder="Search bots..." className="pl-10" />
+            </div>
+            <div className="grid grid-cols-1 gap-3 max-h-[400px] overflow-y-auto">
+              {[
+                { name: 'ModBot', description: 'Advanced moderation and auto-mod features', icon: 'shield' },
+                { name: 'MusicBot', description: 'Play music in voice channels from various sources', icon: 'music' },
+                { name: 'WelcomeBot', description: 'Custom welcome messages and onboarding flows', icon: 'smile' },
+                { name: 'AnalyticsBot', description: 'Track server statistics and member engagement', icon: 'chart' },
+                { name: 'GameBot', description: 'Fun games and activities for your community', icon: 'game' },
+                { name: 'UtilityBot', description: 'Polls, reminders, and general utilities', icon: 'tool' }
+              ].map((bot, index) => (
+                <div key={index} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border hover:border-orange-500 transition-colors">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                      <Bot className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <p className="font-medium">{bot.name}</p>
+                      <p className="text-sm text-gray-500">{bot.description}</p>
+                    </div>
+                  </div>
+                  <Button
+                    size="sm"
+                    onClick={async () => {
+                      if (!userId) {
+                        toast.error('Authentication required', { description: 'Please sign in to add bots' })
+                        return
+                      }
+                      setIsSubmitting(true)
+                      try {
+                        const { error } = await supabase.from('community_bots').insert({
+                          user_id: userId,
+                          community_id: communities?.[0]?.id,
+                          bot_name: bot.name,
+                          description: bot.description,
+                          is_enabled: true
+                        })
+                        if (error) throw error
+                        toast.success('Bot added', { description: `${bot.name} has been added to your community` })
+                        setShowBotStoreDialog(false)
+                      } catch (error: any) {
+                        toast.error('Failed to add bot', { description: error.message })
+                      } finally {
+                        setIsSubmitting(false)
+                      }
+                    }}
+                    disabled={isSubmitting}
+                  >
+                    <Plus className="w-4 h-4 mr-1" />
+                    Add
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowBotStoreDialog(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Direct Message Dialog */}
+      <Dialog open={showDirectMessageDialog} onOpenChange={setShowDirectMessageDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <MessageSquare className="w-5 h-5 text-blue-600" />
+              Direct Message
+            </DialogTitle>
+            <DialogDescription>
+              {dmRecipient ? `Send a message to ${dmRecipient.name}` : 'Start a conversation'}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            {dmRecipient && (
+              <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <Avatar className="w-10 h-10">
+                  <AvatarImage src={`https://avatar.vercel.sh/${dmRecipient.id}`} />
+                  <AvatarFallback>{dmRecipient.name.slice(0, 2)}</AvatarFallback>
+                </Avatar>
+                <div>
+                  <p className="font-medium">{dmRecipient.name}</p>
+                  <p className="text-sm text-gray-500">Online</p>
+                </div>
+              </div>
+            )}
+            <div className="space-y-2">
+              <Label>Message</Label>
+              <Textarea
+                placeholder="Type your message..."
+                value={dmMessage}
+                onChange={(e) => setDmMessage(e.target.value)}
+                rows={4}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => {
+              setShowDirectMessageDialog(false)
+              setDmMessage('')
+              setDmRecipient(null)
+            }}>
+              Cancel
+            </Button>
+            <Button
+              className="bg-orange-500 hover:bg-orange-600"
+              disabled={isSubmitting || !dmMessage.trim()}
+              onClick={async () => {
+                if (!userId || !dmRecipient) {
+                  toast.error('Unable to send message')
+                  return
+                }
+                setIsSubmitting(true)
+                try {
+                  const { error } = await supabase.from('direct_messages').insert({
+                    sender_id: userId,
+                    receiver_id: dmRecipient.id,
+                    content: dmMessage,
+                    is_read: false
+                  })
+                  if (error) throw error
+                  toast.success('Message sent', { description: `Your message to ${dmRecipient.name} has been delivered` })
+                  setShowDirectMessageDialog(false)
+                  setDmMessage('')
+                  setDmRecipient(null)
+                } catch (error: any) {
+                  toast.error('Failed to send message', { description: error.message })
+                } finally {
+                  setIsSubmitting(false)
+                }
+              }}
+            >
+              {isSubmitting ? 'Sending...' : 'Send Message'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Role Settings Dialog */}
+      <Dialog open={showRoleSettingsDialog} onOpenChange={setShowRoleSettingsDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Shield className="w-5 h-5" style={{ color: selectedRoleForSettings?.color }} />
+              Role Settings
+            </DialogTitle>
+            <DialogDescription>
+              {selectedRoleForSettings ? `Configure settings for ${selectedRoleForSettings.name}` : 'Edit role settings'}
+            </DialogDescription>
+          </DialogHeader>
+          {selectedRoleForSettings && (
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Role Name</Label>
+                <Input
+                  defaultValue={selectedRoleForSettings.name}
+                  placeholder="Role name"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Role Color</Label>
+                <div className="flex items-center gap-3">
+                  <Input
+                    type="color"
+                    className="w-12 h-10 p-1"
+                    defaultValue={selectedRoleForSettings.color}
+                  />
+                  <Input
+                    defaultValue={selectedRoleForSettings.color}
+                    className="flex-1"
+                  />
+                </div>
+              </div>
+              <div className="space-y-3">
+                <Label>Permissions</Label>
+                <div className="space-y-2">
+                  {[
+                    { name: 'Manage Messages', description: 'Delete and pin messages' },
+                    { name: 'Manage Members', description: 'Kick and ban members' },
+                    { name: 'Manage Channels', description: 'Create and edit channels' },
+                    { name: 'Manage Roles', description: 'Create and assign roles' },
+                    { name: 'Send Messages', description: 'Send messages in channels' }
+                  ].map((perm, index) => (
+                    <div key={index} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                      <div>
+                        <p className="text-sm font-medium">{perm.name}</p>
+                        <p className="text-xs text-gray-500">{perm.description}</p>
+                      </div>
+                      <Switch defaultChecked={index < 2} />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => {
+              setShowRoleSettingsDialog(false)
+              setSelectedRoleForSettings(null)
+            }}>
+              Cancel
+            </Button>
+            <Button
+              className="bg-orange-500 hover:bg-orange-600"
+              disabled={isSubmitting}
+              onClick={async () => {
+                if (!userId || !selectedRoleForSettings) return
+                setIsSubmitting(true)
+                try {
+                  const { error } = await supabase.from('community_roles')
+                    .update({ updated_at: new Date().toISOString() })
+                    .eq('id', selectedRoleForSettings.id)
+                  if (error) throw error
+                  toast.success('Role updated', { description: `${selectedRoleForSettings.name} settings have been saved` })
+                  setShowRoleSettingsDialog(false)
+                  setSelectedRoleForSettings(null)
+                } catch (error: any) {
+                  toast.error('Failed to update role', { description: error.message })
+                } finally {
+                  setIsSubmitting(false)
+                }
+              }}
+            >
+              {isSubmitting ? 'Saving...' : 'Save Changes'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Message Options Dialog */}
+      <Dialog open={showMessageOptionsDialog} onOpenChange={setShowMessageOptionsDialog}>
+        <DialogContent className="max-w-xs">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <MoreHorizontal className="w-5 h-5" />
+              Message Options
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-1 py-2">
+            <Button
+              variant="ghost"
+              className="w-full justify-start"
+              onClick={() => {
+                const message = mockMessages.find(m => m.id === selectedMessageForOptions)
+                if (message) {
+                  handleReplyToMessage(message)
+                }
+                setShowMessageOptionsDialog(false)
+              }}
+            >
+              <Reply className="w-4 h-4 mr-2" />
+              Reply
+            </Button>
+            <Button
+              variant="ghost"
+              className="w-full justify-start"
+              onClick={() => {
+                handleOpenEmojiPicker(selectedMessageForOptions || undefined)
+                setShowMessageOptionsDialog(false)
+              }}
+            >
+              <Smile className="w-4 h-4 mr-2" />
+              Add Reaction
+            </Button>
+            <Button
+              variant="ghost"
+              className="w-full justify-start"
+              onClick={async () => {
+                if (selectedMessageForOptions) {
+                  await handlePinMessage(selectedMessageForOptions)
+                }
+                setShowMessageOptionsDialog(false)
+              }}
+            >
+              <Pin className="w-4 h-4 mr-2" />
+              Pin Message
+            </Button>
+            <Button
+              variant="ghost"
+              className="w-full justify-start"
+              onClick={() => {
+                const message = mockMessages.find(m => m.id === selectedMessageForOptions)
+                if (message) {
+                  navigator.clipboard.writeText(message.content)
+                  toast.success('Copied', { description: 'Message copied to clipboard' })
+                }
+                setShowMessageOptionsDialog(false)
+              }}
+            >
+              <FileText className="w-4 h-4 mr-2" />
+              Copy Text
+            </Button>
+            <Button
+              variant="ghost"
+              className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
+              onClick={async () => {
+                if (!userId || !selectedMessageForOptions) return
+                setIsSubmitting(true)
+                try {
+                  const { error } = await supabase.from('community_posts')
+                    .update({ deleted_at: new Date().toISOString() })
+                    .eq('id', selectedMessageForOptions)
+                  if (error) throw error
+                  toast.success('Message deleted')
+                  setShowMessageOptionsDialog(false)
+                  refreshPosts()
+                } catch (error: any) {
+                  toast.error('Failed to delete message', { description: error.message })
+                } finally {
+                  setIsSubmitting(false)
+                }
+              }}
+            >
+              <Ban className="w-4 h-4 mr-2" />
+              Delete Message
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

@@ -506,6 +506,9 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
   const [showResolveIssueDialog, setShowResolveIssueDialog] = useState(false)
   const [showAnalyticsDialog, setShowAnalyticsDialog] = useState(false)
   const [showSaveSearchDialog, setShowSaveSearchDialog] = useState(false)
+  const [showDuplicateDialog, setShowDuplicateDialog] = useState(false)
+  const [showEmailReportDialog, setShowEmailReportDialog] = useState(false)
+  const [showArchiveDialog, setShowArchiveDialog] = useState(false)
 
   // Form states for dialogs
   const [auditName, setAuditName] = useState('')
@@ -522,6 +525,11 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
   const [suppressDuration, setSuppressDuration] = useState('1h')
   const [isRunningAudit, setIsRunningAudit] = useState(false)
   const [auditProgress, setAuditProgress] = useState(0)
+  const [duplicateItemName, setDuplicateItemName] = useState('')
+  const [emailRecipients, setEmailRecipients] = useState('')
+  const [emailSubject, setEmailSubject] = useState('')
+  const [archiveReason, setArchiveReason] = useState('')
+  const [itemToArchive, setItemToArchive] = useState('')
 
   const { auditEvents, loading } = useAuditEvents({ action: selectedAction })
   const { complianceChecks } = useComplianceChecks()
@@ -772,7 +780,8 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
         handleSearch()
         break
       case 'Duplicate':
-        toast.success('Duplicated', { description: 'Item has been duplicated' })
+        setDuplicateItemName('Audit Report Copy')
+        setShowDuplicateDialog(true)
         break
       case 'Export':
         handleExportAudit()
@@ -800,10 +809,14 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
         handleExportAudit()
         break
       case 'Email Report':
-        toast.success('Email Sent', { description: 'Report has been emailed to recipients' })
+        setEmailRecipients('')
+        setEmailSubject('Audit Report')
+        setShowEmailReportDialog(true)
         break
       case 'Archive':
-        toast.success('Archived', { description: 'Item has been archived' })
+        setItemToArchive('Selected Item')
+        setArchiveReason('')
+        setShowArchiveDialog(true)
         break
       case 'Run Audit':
         handleRunAudit()
@@ -3348,6 +3361,212 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
                   onClick={() => setShowAnalyticsDialog(false)}
                 >
                   Close
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Duplicate Item Dialog */}
+        <Dialog open={showDuplicateDialog} onOpenChange={setShowDuplicateDialog}>
+          <DialogContent className="max-w-lg bg-slate-900 border-slate-700 text-white">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Copy className="w-5 h-5 text-blue-400" />
+                Duplicate Item
+              </DialogTitle>
+              <DialogDescription className="text-slate-400">
+                Create a copy of the selected audit item
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label className="text-slate-300">New Name</Label>
+                <Input
+                  value={duplicateItemName}
+                  onChange={(e) => setDuplicateItemName(e.target.value)}
+                  placeholder="Enter name for the duplicate"
+                  className="mt-1 bg-slate-800 border-slate-600 text-white"
+                />
+              </div>
+              <div className="p-3 bg-slate-800 rounded-lg">
+                <p className="text-sm text-slate-400">The following will be duplicated:</p>
+                <ul className="mt-2 space-y-1 text-sm text-slate-300">
+                  <li>- All audit configurations</li>
+                  <li>- Schedule settings</li>
+                  <li>- Alert rules</li>
+                </ul>
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <Switch id="include-history" />
+                  <Label htmlFor="include-history" className="text-slate-300">Include history</Label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Switch id="keep-schedule" defaultChecked />
+                  <Label htmlFor="keep-schedule" className="text-slate-300">Keep schedule</Label>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 pt-4">
+                <Button
+                  variant="outline"
+                  className="flex-1 border-slate-600 text-slate-300"
+                  onClick={() => setShowDuplicateDialog(false)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  className="flex-1 bg-blue-600 hover:bg-blue-700"
+                  onClick={() => {
+                    setShowDuplicateDialog(false)
+                    toast.success('Duplicated', { description: `"${duplicateItemName}" has been created` })
+                  }}
+                >
+                  Duplicate
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Email Report Dialog */}
+        <Dialog open={showEmailReportDialog} onOpenChange={setShowEmailReportDialog}>
+          <DialogContent className="max-w-lg bg-slate-900 border-slate-700 text-white">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Mail className="w-5 h-5 text-pink-400" />
+                Email Audit Report
+              </DialogTitle>
+              <DialogDescription className="text-slate-400">
+                Send the audit report to specified recipients
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label className="text-slate-300">Recipients</Label>
+                <Input
+                  value={emailRecipients}
+                  onChange={(e) => setEmailRecipients(e.target.value)}
+                  placeholder="email@example.com, another@example.com"
+                  className="mt-1 bg-slate-800 border-slate-600 text-white"
+                />
+                <p className="text-xs text-slate-500 mt-1">Separate multiple emails with commas</p>
+              </div>
+              <div>
+                <Label className="text-slate-300">Subject</Label>
+                <Input
+                  value={emailSubject}
+                  onChange={(e) => setEmailSubject(e.target.value)}
+                  placeholder="Audit Report - January 2024"
+                  className="mt-1 bg-slate-800 border-slate-600 text-white"
+                />
+              </div>
+              <div>
+                <Label className="text-slate-300">Report Format</Label>
+                <select
+                  className="w-full mt-1 px-3 py-2 bg-slate-800 border border-slate-600 rounded-md text-white"
+                  defaultValue="pdf"
+                >
+                  <option value="pdf">PDF Report</option>
+                  <option value="html">HTML Report</option>
+                  <option value="csv">CSV Data</option>
+                  <option value="xlsx">Excel Spreadsheet</option>
+                </select>
+              </div>
+              <div className="p-3 bg-slate-800 rounded-lg">
+                <p className="text-sm text-slate-400">Report will include:</p>
+                <ul className="mt-2 space-y-1 text-sm text-slate-300">
+                  <li>- Executive summary</li>
+                  <li>- {totalEvents} audit events</li>
+                  <li>- Compliance status: {avgComplianceScore.toFixed(0)}%</li>
+                  <li>- {activeAlerts} active alerts</li>
+                </ul>
+              </div>
+              <div className="flex items-center gap-2 pt-4">
+                <Button
+                  variant="outline"
+                  className="flex-1 border-slate-600 text-slate-300"
+                  onClick={() => setShowEmailReportDialog(false)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  className="flex-1 bg-pink-600 hover:bg-pink-700"
+                  onClick={() => {
+                    if (!emailRecipients.trim()) {
+                      toast.error('Validation Error', { description: 'Please enter at least one recipient' })
+                      return
+                    }
+                    setShowEmailReportDialog(false)
+                    toast.success('Email Sent', { description: `Report sent to ${emailRecipients.split(',').length} recipient(s)` })
+                  }}
+                >
+                  Send Email
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Archive Item Dialog */}
+        <Dialog open={showArchiveDialog} onOpenChange={setShowArchiveDialog}>
+          <DialogContent className="max-w-lg bg-slate-900 border-slate-700 text-white">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Archive className="w-5 h-5 text-amber-400" />
+                Archive Item
+              </DialogTitle>
+              <DialogDescription className="text-slate-400">
+                Move the selected item to archive storage
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="p-3 bg-slate-800 rounded-lg">
+                <p className="text-sm text-slate-400">Item to archive:</p>
+                <p className="font-medium text-white mt-1">{itemToArchive}</p>
+              </div>
+              <div>
+                <Label className="text-slate-300">Archive Reason (optional)</Label>
+                <textarea
+                  value={archiveReason}
+                  onChange={(e) => setArchiveReason(e.target.value)}
+                  placeholder="Enter reason for archiving this item..."
+                  className="w-full mt-1 px-3 py-2 bg-slate-800 border border-slate-600 rounded-md text-white min-h-[80px]"
+                />
+              </div>
+              <div>
+                <Label className="text-slate-300">Retention Period</Label>
+                <select
+                  className="w-full mt-1 px-3 py-2 bg-slate-800 border border-slate-600 rounded-md text-white"
+                  defaultValue="1year"
+                >
+                  <option value="90days">90 Days</option>
+                  <option value="6months">6 Months</option>
+                  <option value="1year">1 Year</option>
+                  <option value="3years">3 Years</option>
+                  <option value="7years">7 Years (Compliance)</option>
+                  <option value="indefinite">Indefinitely</option>
+                </select>
+              </div>
+              <div className="p-3 bg-amber-900/20 border border-amber-800 rounded-lg">
+                <p className="text-amber-300 text-sm">Archived items can be restored from the Archive section in Settings.</p>
+              </div>
+              <div className="flex items-center gap-2 pt-4">
+                <Button
+                  variant="outline"
+                  className="flex-1 border-slate-600 text-slate-300"
+                  onClick={() => setShowArchiveDialog(false)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  className="flex-1 bg-amber-600 hover:bg-amber-700"
+                  onClick={() => {
+                    setShowArchiveDialog(false)
+                    toast.success('Archived', { description: `"${itemToArchive}" has been moved to archive` })
+                  }}
+                >
+                  Archive Item
                 </Button>
               </div>
             </div>

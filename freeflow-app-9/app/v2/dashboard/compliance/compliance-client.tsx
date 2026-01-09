@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Progress } from '@/components/ui/progress'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import {
@@ -524,6 +524,20 @@ export default function ComplianceClient() {
   const [showDistributeDialog, setShowDistributeDialog] = useState(false)
   const [showVersionsDialog, setShowVersionsDialog] = useState(false)
 
+  // New dialog states for toast-only replacements
+  const [showItemDetailsDialog, setShowItemDetailsDialog] = useState(false)
+  const [showEditOrganizationDialog, setShowEditOrganizationDialog] = useState(false)
+  const [showServiceConfigDialog, setShowServiceConfigDialog] = useState(false)
+  const [showApproveDialog, setShowApproveDialog] = useState(false)
+  const [showPolicySettingsDialog, setShowPolicySettingsDialog] = useState(false)
+  const [showVersionViewDialog, setShowVersionViewDialog] = useState(false)
+
+  // State for detail dialogs
+  const [detailItem, setDetailItem] = useState<{ type: string; name: string; data?: unknown } | null>(null)
+  const [selectedService, setSelectedService] = useState<{ name: string; connected: boolean } | null>(null)
+  const [selectedPolicyForSettings, setSelectedPolicyForSettings] = useState<Policy | null>(null)
+  const [selectedVersionForView, setSelectedVersionForView] = useState<{ version: string; date: string; author: string; changes: string } | null>(null)
+
   // Form states
   const [newControlForm, setNewControlForm] = useState<NewControlForm>({
     controlId: '',
@@ -670,7 +684,8 @@ export default function ComplianceClient() {
   }
 
   const handleViewDetails = (itemType: string, itemName: string) => {
-    toast.success(`${itemName} details`, { description: `Viewing ${itemType} information` })
+    setDetailItem({ type: itemType, name: itemName })
+    setShowItemDetailsDialog(true)
   }
 
   const handleAddRisk = () => {
@@ -818,7 +833,7 @@ export default function ComplianceClient() {
       'Assign': () => setShowAssignDialog(true),
       'New Policy': handleCreatePolicy,
       'Templates': () => setShowTemplatesDialog(true),
-      'Approve': () => toast.success('Policy approved', { description: 'Policy has been approved and published' }),
+      'Approve': () => setShowApproveDialog(true),
       'Versions': () => setShowVersionsDialog(true),
       'Attestation': () => setShowAttestationDialog(true),
       'Distribute': () => setShowDistributeDialog(true),
@@ -832,7 +847,7 @@ export default function ComplianceClient() {
   }
 
   const handleEditOrganization = () => {
-    toast.success('Edit mode enabled', { description: 'Update your organization details.' })
+    setShowEditOrganizationDialog(true)
   }
 
   const handleTestWebhook = () => {
@@ -848,7 +863,8 @@ export default function ComplianceClient() {
 
   const handleConnectService = (serviceName: string, isConnected: boolean) => {
     if (isConnected) {
-      toast.success(`${serviceName} configuration opened`, { description: 'Manage your integration settings.' })
+      setSelectedService({ name: serviceName, connected: isConnected })
+      setShowServiceConfigDialog(true)
     } else {
       toast.promise(
         new Promise(resolve => setTimeout(resolve, 2000)),
@@ -1593,7 +1609,7 @@ export default function ComplianceClient() {
                         <Button variant="ghost" size="icon" onClick={() => handleViewDetails('policy', policy.name)}>
                           <Eye className="w-4 h-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" onClick={() => toast.success(`${policy.name} settings opened - Configure policy distribution and approvals`)}>
+                        <Button variant="ghost" size="icon" onClick={() => { setSelectedPolicyForSettings(policy); setShowPolicySettingsDialog(true); }}>
                           <Settings className="w-4 h-4" />
                         </Button>
                       </div>
@@ -3336,7 +3352,7 @@ export default function ComplianceClient() {
                     <Badge className={v.status === 'published' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}>
                       {v.status}
                     </Badge>
-                    <Button variant="ghost" size="sm" onClick={() => toast.success(`Viewing version ${v.version}`, { description: `${v.changes} - Last modified by ${v.author}` })}>
+                    <Button variant="ghost" size="sm" onClick={() => { setSelectedVersionForView(v); setShowVersionViewDialog(true); }}>
                       <Eye className="w-4 h-4" />
                     </Button>
                   </div>
@@ -3347,6 +3363,452 @@ export default function ComplianceClient() {
               <Button variant="outline" onClick={() => setShowVersionsDialog(false)}>Close</Button>
             </div>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Item Details Dialog */}
+      <Dialog open={showItemDetailsDialog} onOpenChange={setShowItemDetailsDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>{detailItem?.name} Details</DialogTitle>
+          </DialogHeader>
+          {detailItem && (
+            <div className="space-y-4">
+              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Type</p>
+                    <p className="font-medium capitalize">{detailItem.type}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Name</p>
+                    <p className="font-medium">{detailItem.name}</p>
+                  </div>
+                </div>
+              </div>
+
+              {detailItem.type === 'control' && (
+                <div className="space-y-3">
+                  <div className="p-4 border rounded-lg">
+                    <h4 className="font-medium mb-2">Control Information</h4>
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <p className="text-gray-500">Status</p>
+                        <Badge className="mt-1 bg-green-100 text-green-700">Active</Badge>
+                      </div>
+                      <div>
+                        <p className="text-gray-500">Last Tested</p>
+                        <p>{new Date().toLocaleDateString()}</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="p-4 border rounded-lg">
+                    <h4 className="font-medium mb-2">Related Evidence</h4>
+                    <p className="text-sm text-gray-500">3 evidence files attached</p>
+                  </div>
+                </div>
+              )}
+
+              {detailItem.type === 'policy' && (
+                <div className="space-y-3">
+                  <div className="p-4 border rounded-lg">
+                    <h4 className="font-medium mb-2">Policy Details</h4>
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <p className="text-gray-500">Status</p>
+                        <Badge className="mt-1 bg-green-100 text-green-700">Published</Badge>
+                      </div>
+                      <div>
+                        <p className="text-gray-500">Last Updated</p>
+                        <p>{new Date().toLocaleDateString()}</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-500">Category</p>
+                        <p>Security</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-500">Acknowledgements</p>
+                        <p>245/250 employees</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {detailItem.type === 'audit' && (
+                <div className="space-y-3">
+                  <div className="p-4 border rounded-lg">
+                    <h4 className="font-medium mb-2">Audit Information</h4>
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <p className="text-gray-500">Status</p>
+                        <Badge className="mt-1 bg-blue-100 text-blue-700">In Progress</Badge>
+                      </div>
+                      <div>
+                        <p className="text-gray-500">Auditor</p>
+                        <p>Internal Audit Team</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-500">Findings</p>
+                        <p>3 findings (0 critical)</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-500">Progress</p>
+                        <Progress value={65} className="h-2 mt-2" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowItemDetailsDialog(false)}>Close</Button>
+            <Button onClick={() => { setShowItemDetailsDialog(false); toast.success(`${detailItem?.name} action completed`) }}>
+              Take Action
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Organization Dialog */}
+      <Dialog open={showEditOrganizationDialog} onOpenChange={setShowEditOrganizationDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Edit Organization Details</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Organization Name</Label>
+              <Input defaultValue="FreeFlow Inc." placeholder="Enter organization name" />
+            </div>
+            <div className="space-y-2">
+              <Label>Legal Entity Name</Label>
+              <Input defaultValue="FreeFlow Technologies Inc." placeholder="Enter legal entity name" />
+            </div>
+            <div className="space-y-2">
+              <Label>Address</Label>
+              <Input defaultValue="123 Tech Park Drive, Suite 500" placeholder="Enter address" />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>City</Label>
+                <Input defaultValue="San Francisco" placeholder="City" />
+              </div>
+              <div className="space-y-2">
+                <Label>Country</Label>
+                <Select defaultValue="us">
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="us">United States</SelectItem>
+                    <SelectItem value="uk">United Kingdom</SelectItem>
+                    <SelectItem value="ca">Canada</SelectItem>
+                    <SelectItem value="de">Germany</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Compliance Contact Email</Label>
+              <Input type="email" defaultValue="compliance@freeflow.com" placeholder="Enter email" />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowEditOrganizationDialog(false)}>Cancel</Button>
+            <Button onClick={() => { setShowEditOrganizationDialog(false); toast.success('Organization details updated') }}>
+              Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Service Configuration Dialog */}
+      <Dialog open={showServiceConfigDialog} onOpenChange={setShowServiceConfigDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>{selectedService?.name} Configuration</DialogTitle>
+          </DialogHeader>
+          {selectedService && (
+            <div className="space-y-4">
+              <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg flex items-center gap-3">
+                <CheckCircle className="w-5 h-5 text-green-600" />
+                <div>
+                  <p className="font-medium text-green-700 dark:text-green-400">Connected</p>
+                  <p className="text-sm text-green-600 dark:text-green-300">Integration is active and syncing</p>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>API Key</Label>
+                <div className="flex gap-2">
+                  <Input type="password" defaultValue="••••••••••••••••" readOnly className="flex-1" />
+                  <Button variant="outline" size="icon">
+                    <Copy className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Sync Frequency</Label>
+                <Select defaultValue="hourly">
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="realtime">Real-time</SelectItem>
+                    <SelectItem value="hourly">Hourly</SelectItem>
+                    <SelectItem value="daily">Daily</SelectItem>
+                    <SelectItem value="weekly">Weekly</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Data to Sync</Label>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between p-2 border rounded">
+                    <span className="text-sm">Controls</span>
+                    <Switch defaultChecked />
+                  </div>
+                  <div className="flex items-center justify-between p-2 border rounded">
+                    <span className="text-sm">Evidence</span>
+                    <Switch defaultChecked />
+                  </div>
+                  <div className="flex items-center justify-between p-2 border rounded">
+                    <span className="text-sm">Audit Logs</span>
+                    <Switch />
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg text-sm">
+                <p className="text-gray-500">Last synced: {new Date().toLocaleString()}</p>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" className="text-red-600 hover:bg-red-50" onClick={() => { setShowServiceConfigDialog(false); toast.success(`${selectedService?.name} disconnected`) }}>
+              Disconnect
+            </Button>
+            <Button onClick={() => { setShowServiceConfigDialog(false); toast.success(`${selectedService?.name} settings saved`) }}>
+              Save Settings
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Approve Policy Dialog */}
+      <Dialog open={showApproveDialog} onOpenChange={setShowApproveDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Approve Policy</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-gray-600 dark:text-gray-400">
+              Review and approve a policy for publication.
+            </p>
+
+            <div className="space-y-2">
+              <Label>Select Policy to Approve</Label>
+              <Select defaultValue="pol3">
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="pol3">Acceptable Use Policy v4.0 (In Review)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="p-4 border rounded-lg space-y-3">
+              <h4 className="font-medium">Policy Summary</h4>
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <p className="text-gray-500">Current Status</p>
+                  <Badge className="mt-1 bg-yellow-100 text-yellow-700">In Review</Badge>
+                </div>
+                <div>
+                  <p className="text-gray-500">Owner</p>
+                  <p>Mike Johnson</p>
+                </div>
+                <div>
+                  <p className="text-gray-500">Last Updated</p>
+                  <p>Jan 10, 2024</p>
+                </div>
+                <div>
+                  <p className="text-gray-500">Version</p>
+                  <p>4.0</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Approval Comments (Optional)</Label>
+              <textarea
+                className="w-full min-h-[80px] p-3 border rounded-lg dark:bg-gray-800 dark:border-gray-700"
+                placeholder="Add any comments for the approval..."
+              />
+            </div>
+
+            <div className="flex items-center gap-2">
+              <input type="checkbox" id="notify-owner" className="rounded" defaultChecked />
+              <label htmlFor="notify-owner" className="text-sm">Notify policy owner of approval</label>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowApproveDialog(false)}>Cancel</Button>
+            <Button variant="outline" className="text-red-600 hover:bg-red-50" onClick={() => { setShowApproveDialog(false); toast.success('Policy returned for revision') }}>
+              Request Changes
+            </Button>
+            <Button onClick={() => { setShowApproveDialog(false); toast.success('Policy approved and published') }}>
+              <CheckCircle className="w-4 h-4 mr-2" />
+              Approve & Publish
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Policy Settings Dialog */}
+      <Dialog open={showPolicySettingsDialog} onOpenChange={setShowPolicySettingsDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>{selectedPolicyForSettings?.name} Settings</DialogTitle>
+          </DialogHeader>
+          {selectedPolicyForSettings && (
+            <div className="space-y-4">
+              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <p className="text-gray-500">Version</p>
+                    <p className="font-medium">v{selectedPolicyForSettings.version}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500">Status</p>
+                    <Badge className={selectedPolicyForSettings.status === 'published' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}>
+                      {selectedPolicyForSettings.status}
+                    </Badge>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Distribution Settings</Label>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between p-2 border rounded">
+                    <span className="text-sm">Auto-distribute on publish</span>
+                    <Switch defaultChecked />
+                  </div>
+                  <div className="flex items-center justify-between p-2 border rounded">
+                    <span className="text-sm">Require acknowledgement</span>
+                    <Switch defaultChecked />
+                  </div>
+                  <div className="flex items-center justify-between p-2 border rounded">
+                    <span className="text-sm">Send reminders</span>
+                    <Switch defaultChecked />
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Approval Workflow</Label>
+                <Select defaultValue="single">
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">No Approval Required</SelectItem>
+                    <SelectItem value="single">Single Approver</SelectItem>
+                    <SelectItem value="multi">Multiple Approvers</SelectItem>
+                    <SelectItem value="sequential">Sequential Approval</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Review Frequency</Label>
+                <Select defaultValue="6months">
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="3months">Every 3 Months</SelectItem>
+                    <SelectItem value="6months">Every 6 Months</SelectItem>
+                    <SelectItem value="annual">Annual</SelectItem>
+                    <SelectItem value="custom">Custom</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowPolicySettingsDialog(false)}>Cancel</Button>
+            <Button onClick={() => { setShowPolicySettingsDialog(false); toast.success('Policy settings saved') }}>
+              Save Settings
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Version View Dialog */}
+      <Dialog open={showVersionViewDialog} onOpenChange={setShowVersionViewDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Version {selectedVersionForView?.version} Details</DialogTitle>
+          </DialogHeader>
+          {selectedVersionForView && (
+            <div className="space-y-4">
+              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div className="grid grid-cols-3 gap-4 text-sm">
+                  <div>
+                    <p className="text-gray-500">Version</p>
+                    <p className="font-medium text-lg">v{selectedVersionForView.version}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500">Author</p>
+                    <p className="font-medium">{selectedVersionForView.author}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500">Date</p>
+                    <p className="font-medium">{new Date(selectedVersionForView.date).toLocaleDateString()}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Change Summary</Label>
+                <div className="p-4 border rounded-lg">
+                  <p className="text-gray-700 dark:text-gray-300">{selectedVersionForView.changes}</p>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Version Content Preview</Label>
+                <div className="p-4 border rounded-lg bg-white dark:bg-gray-900 max-h-[200px] overflow-y-auto">
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    This version includes the following key sections:
+                  </p>
+                  <ul className="list-disc list-inside mt-2 text-sm text-gray-600 dark:text-gray-400 space-y-1">
+                    <li>Purpose and Scope</li>
+                    <li>Policy Statement</li>
+                    <li>Roles and Responsibilities</li>
+                    <li>Compliance Requirements</li>
+                    <li>Enforcement and Violations</li>
+                    <li>Review and Revision History</li>
+                  </ul>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-4 text-sm text-gray-500">
+                <div className="flex items-center gap-2">
+                  <History className="w-4 h-4" />
+                  <span>Changed {Math.floor((Date.now() - new Date(selectedVersionForView.date).getTime()) / (1000 * 60 * 60 * 24))} days ago</span>
+                </div>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowVersionViewDialog(false)}>Close</Button>
+            <Button variant="outline" onClick={() => { toast.success(`Downloaded version ${selectedVersionForView?.version}`) }}>
+              <Download className="w-4 h-4 mr-2" />
+              Download
+            </Button>
+            <Button onClick={() => { setShowVersionViewDialog(false); toast.success(`Restored to version ${selectedVersionForView?.version}`) }}>
+              <RefreshCw className="w-4 h-4 mr-2" />
+              Restore This Version
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

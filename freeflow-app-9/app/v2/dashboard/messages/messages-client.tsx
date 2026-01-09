@@ -45,6 +45,8 @@ import {
 } from '@/lib/mock-data/adapters'
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Textarea } from '@/components/ui/textarea'
 
 // Types
 type ChannelType = 'public' | 'private' | 'direct' | 'group'
@@ -267,6 +269,24 @@ export default function MessagesClient() {
   })
   const [settingsTab, setSettingsTab] = useState('general')
 
+  // Dialog states for formerly toast-only buttons
+  const [showInviteDialog, setShowInviteDialog] = useState(false)
+  const [showWorkflowBuilderDialog, setShowWorkflowBuilderDialog] = useState(false)
+  const [showFileUploadDialog, setShowFileUploadDialog] = useState(false)
+  const [showSessionManagementDialog, setShowSessionManagementDialog] = useState(false)
+  const [showWorkflowManagerDialog, setShowWorkflowManagerDialog] = useState(false)
+  const [showExportDialog, setShowExportDialog] = useState(false)
+
+  // Dialog form states
+  const [inviteEmails, setInviteEmails] = useState('')
+  const [inviteMessage, setInviteMessage] = useState('')
+  const [workflowName, setWorkflowName] = useState('')
+  const [workflowTrigger, setWorkflowTrigger] = useState('')
+  const [workflowAction, setWorkflowAction] = useState('')
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([])
+  const [exportFormat, setExportFormat] = useState('json')
+  const [exportDateRange, setExportDateRange] = useState('all')
+
   // Stats
   const stats = useMemo(() => {
     const totalMessages = mockMessages.length * 150
@@ -468,25 +488,20 @@ export default function MessagesClient() {
     })
   }
 
-  const handleInvitePeople = async () => {
-    const promise = new Promise<void>((resolve, reject) => {
-      // Simulate opening invite dialog and completing the action
-      const inviteData = {
-        timestamp: new Date().toISOString(),
-        action: 'invite_dialog_opened'
-      }
-      // Store in state or sessionStorage for dialog to read
-      sessionStorage.setItem('invite_dialog_pending', JSON.stringify(inviteData))
-      setTimeout(() => {
-        resolve()
-      }, 300)
-    })
+  const handleInvitePeople = () => {
+    setShowInviteDialog(true)
+  }
 
-    await toast.promise(promise, {
-      loading: 'Opening invite dialog...',
-      success: 'Invite dialog ready - send invitations to team members',
-      error: 'Failed to open invite dialog'
-    })
+  const handleSendInvites = () => {
+    if (!inviteEmails.trim()) {
+      toast.error('Email required', { description: 'Please enter at least one email address' })
+      return
+    }
+    const emailList = inviteEmails.split(',').map(e => e.trim()).filter(e => e)
+    toast.success('Invitations sent', { description: `Sent invites to ${emailList.length} team member(s)` })
+    setInviteEmails('')
+    setInviteMessage('')
+    setShowInviteDialog(false)
   }
 
   const handleOpenMarketplace = async () => {
@@ -513,23 +528,24 @@ export default function MessagesClient() {
     })
   }
 
-  const handleCreateWorkflow = async () => {
-    const promise = new Promise<void>((resolve, reject) => {
-      // Initialize workflow builder state
-      sessionStorage.setItem('workflow_builder_active', JSON.stringify({
-        created_at: new Date().toISOString(),
-        status: 'ready'
-      }))
-      setTimeout(() => {
-        resolve()
-      }, 500)
-    })
+  const handleCreateWorkflow = () => {
+    setShowWorkflowBuilderDialog(true)
+  }
 
-    await toast.promise(promise, {
-      loading: 'Opening workflow builder...',
-      success: 'Workflow builder ready - create automation flows',
-      error: 'Failed to open workflow builder'
-    })
+  const handleSaveNewWorkflow = () => {
+    if (!workflowName.trim()) {
+      toast.error('Name required', { description: 'Please enter a workflow name' })
+      return
+    }
+    if (!workflowTrigger) {
+      toast.error('Trigger required', { description: 'Please select a trigger for the workflow' })
+      return
+    }
+    toast.success('Workflow created', { description: `"${workflowName}" workflow has been created and activated` })
+    setWorkflowName('')
+    setWorkflowTrigger('')
+    setWorkflowAction('')
+    setShowWorkflowBuilderDialog(false)
   }
 
   const handleViewPinnedMessages = async () => {
@@ -590,31 +606,24 @@ export default function MessagesClient() {
     })
   }
 
-  const handleUploadFile = async () => {
-    const promise = new Promise<void>((resolve, reject) => {
-      // Trigger file upload dialog
-      const fileInputElement = document.createElement('input')
-      fileInputElement.type = 'file'
-      fileInputElement.multiple = true
-      fileInputElement.onchange = () => {
-        if (fileInputElement.files && fileInputElement.files.length > 0) {
-          sessionStorage.setItem('pending_file_upload', JSON.stringify({
-            file_count: fileInputElement.files.length,
-            initiated_at: new Date().toISOString()
-          }))
-        }
-        resolve()
-      }
-      setTimeout(() => {
-        fileInputElement.click()
-      }, 200)
-    })
+  const handleUploadFile = () => {
+    setShowFileUploadDialog(true)
+  }
 
-    await toast.promise(promise, {
-      loading: 'Preparing file upload...',
-      success: 'File upload dialog ready - select files to share',
-      error: 'Failed to open upload dialog'
-    })
+  const handleFileSelection = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      setSelectedFiles(Array.from(e.target.files))
+    }
+  }
+
+  const handleUploadSelectedFiles = () => {
+    if (selectedFiles.length === 0) {
+      toast.error('No files selected', { description: 'Please select files to upload' })
+      return
+    }
+    toast.success('Files uploaded', { description: `${selectedFiles.length} file(s) uploaded successfully` })
+    setSelectedFiles([])
+    setShowFileUploadDialog(false)
   }
 
   const handleDownloadFile = async (fileName: string) => {
@@ -643,25 +652,17 @@ export default function MessagesClient() {
     })
   }
 
-  const handleManageActiveSessions = async () => {
-    const promise = new Promise<void>((resolve, reject) => {
-      // Load active sessions data
-      sessionStorage.setItem('active_sessions', JSON.stringify({
-        sessions: [
-          { id: 1, device: 'Chrome - MacBook', location: 'San Francisco', last_active: new Date().toISOString() },
-          { id: 2, device: 'Safari - iPad', location: 'San Francisco', last_active: new Date(Date.now() - 3600000).toISOString() }
-        ]
-      }))
-      setTimeout(() => {
-        resolve()
-      }, 500)
-    })
+  const handleManageActiveSessions = () => {
+    setShowSessionManagementDialog(true)
+  }
 
-    await toast.promise(promise, {
-      loading: 'Loading active sessions...',
-      success: 'Session management ready - view and revoke sessions',
-      error: 'Failed to load sessions'
-    })
+  const handleRevokeSession = (sessionId: number) => {
+    toast.success('Session revoked', { description: `Session ${sessionId} has been terminated` })
+  }
+
+  const handleRevokeAllSessions = () => {
+    toast.success('All sessions revoked', { description: 'All other sessions have been terminated' })
+    setShowSessionManagementDialog(false)
   }
 
   const handleConnectZoom = async () => {
@@ -683,58 +684,48 @@ export default function MessagesClient() {
     })
   }
 
-  const handleManageWorkflows = async () => {
-    const promise = new Promise<void>((resolve, reject) => {
-      // Load existing workflows
-      sessionStorage.setItem('workflows_management', JSON.stringify({
-        workflows: [
-          { id: 1, name: 'Auto-reply', active: true },
-          { id: 2, name: 'Message categorization', active: true },
-          { id: 3, name: 'Daily digest', active: true }
-        ]
-      }))
-      setTimeout(() => {
-        resolve()
-      }, 400)
-    })
+  const handleManageWorkflows = () => {
+    setShowWorkflowManagerDialog(true)
+  }
 
-    await toast.promise(promise, {
-      loading: 'Loading workflows...',
-      success: 'Workflow manager ready - edit automations',
-      error: 'Failed to load workflows'
+  const handleToggleWorkflow = (workflowId: number, workflowName: string, currentStatus: boolean) => {
+    toast.success(currentStatus ? 'Workflow disabled' : 'Workflow enabled', {
+      description: `"${workflowName}" has been ${currentStatus ? 'disabled' : 'enabled'}`
     })
   }
 
-  const handleExportData = async () => {
-    const promise = new Promise<void>((resolve, reject) => {
-      // Prepare data export (CSV, JSON, etc.)
-      const exportData = {
-        messages: supabaseMessages?.length || 0,
-        channels: mockChannels.length,
-        exported_at: new Date().toISOString()
-      }
-      const dataStr = JSON.stringify(exportData, null, 2)
-      const dataBlob = new Blob([dataStr], { type: 'application/json' })
-      const url = window.URL.createObjectURL(dataBlob)
-      const link = document.createElement('a')
-      link.href = url
-      link.download = `messages-export-${Date.now()}.json`
-      link.style.display = 'none'
-      document.body.appendChild(link)
+  const handleDeleteWorkflow = (workflowId: number, workflowName: string) => {
+    toast.success('Workflow deleted', { description: `"${workflowName}" has been removed` })
+  }
 
-      setTimeout(() => {
-        link.click()
-        window.URL.revokeObjectURL(url)
-        document.body.removeChild(link)
-        resolve()
-      }, 1000)
-    })
+  const handleExportData = () => {
+    setShowExportDialog(true)
+  }
 
-    await toast.promise(promise, {
-      loading: 'Preparing data export...',
-      success: 'Export ready - download starting',
-      error: 'Failed to prepare export'
-    })
+  const handleStartExport = () => {
+    const exportData = {
+      messages: supabaseMessages?.length || 0,
+      channels: mockChannels.length,
+      format: exportFormat,
+      dateRange: exportDateRange,
+      exported_at: new Date().toISOString()
+    }
+    const dataStr = exportFormat === 'json'
+      ? JSON.stringify(exportData, null, 2)
+      : `Messages,Channels,Format,DateRange,ExportedAt\n${exportData.messages},${exportData.channels},${exportData.format},${exportData.dateRange},${exportData.exported_at}`
+    const mimeType = exportFormat === 'json' ? 'application/json' : 'text/csv'
+    const dataBlob = new Blob([dataStr], { type: mimeType })
+    const url = window.URL.createObjectURL(dataBlob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `messages-export-${Date.now()}.${exportFormat}`
+    link.style.display = 'none'
+    document.body.appendChild(link)
+    link.click()
+    window.URL.revokeObjectURL(url)
+    document.body.removeChild(link)
+    toast.success('Export complete', { description: `Data exported as ${exportFormat.toUpperCase()} file` })
+    setShowExportDialog(false)
   }
 
   const handleClearCache = async () => {
@@ -2577,6 +2568,384 @@ export default function MessagesClient() {
           />
         </div>
       </div>
+
+      {/* Invite Team Members Dialog */}
+      <Dialog open={showInviteDialog} onOpenChange={setShowInviteDialog}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <UserPlus className="w-5 h-5 text-blue-600" />
+              Invite Team Members
+            </DialogTitle>
+            <DialogDescription>
+              Send invitations to team members to join this workspace
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="invite-emails">Email Addresses</Label>
+              <Textarea
+                id="invite-emails"
+                placeholder="Enter email addresses separated by commas..."
+                value={inviteEmails}
+                onChange={(e) => setInviteEmails(e.target.value)}
+                className="min-h-[100px]"
+              />
+              <p className="text-xs text-gray-500">Separate multiple emails with commas</p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="invite-message">Personal Message (Optional)</Label>
+              <Textarea
+                id="invite-message"
+                placeholder="Add a personal note to your invitation..."
+                value={inviteMessage}
+                onChange={(e) => setInviteMessage(e.target.value)}
+              />
+            </div>
+            <div className="flex items-center gap-2 p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20">
+              <Users className="w-4 h-4 text-blue-600" />
+              <span className="text-sm text-blue-700 dark:text-blue-400">
+                Invitees will receive an email with a link to join
+              </span>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowInviteDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSendInvites} className="bg-blue-600 hover:bg-blue-700">
+              <Send className="w-4 h-4 mr-2" />
+              Send Invitations
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Workflow Builder Dialog */}
+      <Dialog open={showWorkflowBuilderDialog} onOpenChange={setShowWorkflowBuilderDialog}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Workflow className="w-5 h-5 text-purple-600" />
+              Create New Workflow
+            </DialogTitle>
+            <DialogDescription>
+              Build automation flows to streamline your messaging
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="workflow-name">Workflow Name</Label>
+              <Input
+                id="workflow-name"
+                placeholder="Enter workflow name..."
+                value={workflowName}
+                onChange={(e) => setWorkflowName(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Trigger</Label>
+              <Select value={workflowTrigger} onValueChange={setWorkflowTrigger}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a trigger..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="new_message">New message received</SelectItem>
+                  <SelectItem value="mention">When mentioned</SelectItem>
+                  <SelectItem value="keyword">Keyword detected</SelectItem>
+                  <SelectItem value="schedule">On a schedule</SelectItem>
+                  <SelectItem value="reaction">Reaction added</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Action</Label>
+              <Select value={workflowAction} onValueChange={setWorkflowAction}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select an action..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="send_reply">Send auto-reply</SelectItem>
+                  <SelectItem value="forward">Forward message</SelectItem>
+                  <SelectItem value="notify">Send notification</SelectItem>
+                  <SelectItem value="tag">Add tag/label</SelectItem>
+                  <SelectItem value="archive">Archive message</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-center gap-2 p-3 rounded-lg bg-purple-50 dark:bg-purple-900/20">
+              <Zap className="w-4 h-4 text-purple-600" />
+              <span className="text-sm text-purple-700 dark:text-purple-400">
+                Workflows run automatically when triggered
+              </span>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowWorkflowBuilderDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSaveNewWorkflow} className="bg-purple-600 hover:bg-purple-700">
+              <Plus className="w-4 h-4 mr-2" />
+              Create Workflow
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* File Upload Dialog */}
+      <Dialog open={showFileUploadDialog} onOpenChange={setShowFileUploadDialog}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Upload className="w-5 h-5 text-green-600" />
+              Upload Files
+            </DialogTitle>
+            <DialogDescription>
+              Select files to share with your team
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center">
+              <input
+                type="file"
+                multiple
+                onChange={handleFileSelection}
+                className="hidden"
+                id="file-upload-input"
+              />
+              <label htmlFor="file-upload-input" className="cursor-pointer">
+                <Upload className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                  Click to select files or drag and drop
+                </p>
+                <p className="text-xs text-gray-500">
+                  Maximum file size: 50MB
+                </p>
+              </label>
+            </div>
+            {selectedFiles.length > 0 && (
+              <div className="space-y-2">
+                <Label>Selected Files ({selectedFiles.length})</Label>
+                <div className="max-h-[150px] overflow-y-auto space-y-2">
+                  {selectedFiles.map((file, index) => (
+                    <div key={index} className="flex items-center justify-between p-2 rounded-lg bg-gray-50 dark:bg-gray-800">
+                      <div className="flex items-center gap-2">
+                        <FileText className="w-4 h-4 text-gray-500" />
+                        <span className="text-sm truncate max-w-[300px]">{file.name}</span>
+                      </div>
+                      <span className="text-xs text-gray-500">
+                        {(file.size / 1024).toFixed(1)} KB
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setSelectedFiles([]); setShowFileUploadDialog(false) }}>
+              Cancel
+            </Button>
+            <Button onClick={handleUploadSelectedFiles} className="bg-green-600 hover:bg-green-700">
+              <Upload className="w-4 h-4 mr-2" />
+              Upload {selectedFiles.length > 0 ? `(${selectedFiles.length})` : ''}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Session Management Dialog */}
+      <Dialog open={showSessionManagementDialog} onOpenChange={setShowSessionManagementDialog}>
+        <DialogContent className="sm:max-w-[550px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Key className="w-5 h-5 text-amber-600" />
+              Active Sessions
+            </DialogTitle>
+            <DialogDescription>
+              View and manage your active sessions across devices
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-3">
+              {[
+                { id: 1, device: 'Chrome - MacBook Pro', location: 'San Francisco, CA', lastActive: 'Now', current: true },
+                { id: 2, device: 'Safari - iPad', location: 'San Francisco, CA', lastActive: '1 hour ago', current: false },
+                { id: 3, device: 'Chrome - Windows PC', location: 'New York, NY', lastActive: '3 hours ago', current: false },
+              ].map((session) => (
+                <div key={session.id} className={`flex items-center justify-between p-3 rounded-lg ${session.current ? 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800' : 'bg-gray-50 dark:bg-gray-800'}`}>
+                  <div className="flex items-center gap-3">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ${session.current ? 'bg-green-100 dark:bg-green-800' : 'bg-gray-200 dark:bg-gray-700'}`}>
+                      <HardDrive className={`w-5 h-5 ${session.current ? 'text-green-600' : 'text-gray-500'}`} />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <p className="font-medium text-sm">{session.device}</p>
+                        {session.current && <Badge className="bg-green-100 text-green-700 text-xs">Current</Badge>}
+                      </div>
+                      <p className="text-xs text-gray-500">{session.location} - {session.lastActive}</p>
+                    </div>
+                  </div>
+                  {!session.current && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleRevokeSession(session.id)}
+                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                    >
+                      Revoke
+                    </Button>
+                  )}
+                </div>
+              ))}
+            </div>
+            <div className="flex items-center gap-2 p-3 rounded-lg bg-amber-50 dark:bg-amber-900/20">
+              <Shield className="w-4 h-4 text-amber-600" />
+              <span className="text-sm text-amber-700 dark:text-amber-400">
+                Revoking a session will log out that device immediately
+              </span>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowSessionManagementDialog(false)}>
+              Close
+            </Button>
+            <Button variant="destructive" onClick={handleRevokeAllSessions}>
+              <LogOut className="w-4 h-4 mr-2" />
+              Revoke All Other Sessions
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Workflow Manager Dialog */}
+      <Dialog open={showWorkflowManagerDialog} onOpenChange={setShowWorkflowManagerDialog}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Workflow className="w-5 h-5 text-indigo-600" />
+              Manage Workflows
+            </DialogTitle>
+            <DialogDescription>
+              View and edit your automation workflows
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-3">
+              {[
+                { id: 1, name: 'Auto-reply for Mentions', trigger: 'When mentioned', active: true },
+                { id: 2, name: 'Message Categorization', trigger: 'New message received', active: true },
+                { id: 3, name: 'Daily Digest', trigger: 'On a schedule', active: true },
+                { id: 4, name: 'Priority Alerts', trigger: 'Keyword detected', active: false },
+              ].map((workflow) => (
+                <div key={workflow.id} className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-800">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${workflow.active ? 'bg-indigo-100 dark:bg-indigo-900/30' : 'bg-gray-200 dark:bg-gray-700'}`}>
+                      <Workflow className={`w-5 h-5 ${workflow.active ? 'text-indigo-600' : 'text-gray-500'}`} />
+                    </div>
+                    <div>
+                      <p className="font-medium">{workflow.name}</p>
+                      <p className="text-xs text-gray-500">Trigger: {workflow.trigger}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      checked={workflow.active}
+                      onCheckedChange={() => handleToggleWorkflow(workflow.id, workflow.name, workflow.active)}
+                    />
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleDeleteWorkflow(workflow.id, workflow.name)}
+                      className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowWorkflowManagerDialog(false)}>
+              Close
+            </Button>
+            <Button onClick={() => { setShowWorkflowManagerDialog(false); setShowWorkflowBuilderDialog(true) }} className="bg-indigo-600 hover:bg-indigo-700">
+              <Plus className="w-4 h-4 mr-2" />
+              Create New Workflow
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Export Data Dialog */}
+      <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
+        <DialogContent className="sm:max-w-[450px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Download className="w-5 h-5 text-cyan-600" />
+              Export Data
+            </DialogTitle>
+            <DialogDescription>
+              Download your messages and data
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Export Format</Label>
+              <Select value={exportFormat} onValueChange={setExportFormat}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="json">JSON</SelectItem>
+                  <SelectItem value="csv">CSV</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Date Range</Label>
+              <Select value={exportDateRange} onValueChange={setExportDateRange}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Time</SelectItem>
+                  <SelectItem value="30">Last 30 Days</SelectItem>
+                  <SelectItem value="90">Last 90 Days</SelectItem>
+                  <SelectItem value="365">Last Year</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-800 space-y-2">
+              <p className="font-medium text-sm">Export Summary</p>
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <div className="text-gray-500">Messages:</div>
+                <div className="font-medium">{supabaseMessages?.length || 0}</div>
+                <div className="text-gray-500">Channels:</div>
+                <div className="font-medium">{mockChannels.length}</div>
+                <div className="text-gray-500">Format:</div>
+                <div className="font-medium">{exportFormat.toUpperCase()}</div>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 p-3 rounded-lg bg-cyan-50 dark:bg-cyan-900/20">
+              <Files className="w-4 h-4 text-cyan-600" />
+              <span className="text-sm text-cyan-700 dark:text-cyan-400">
+                Your download will start automatically
+              </span>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowExportDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleStartExport} className="bg-cyan-600 hover:bg-cyan-700">
+              <Download className="w-4 h-4 mr-2" />
+              Export Data
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
