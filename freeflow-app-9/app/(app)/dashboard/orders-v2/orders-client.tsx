@@ -813,7 +813,7 @@ export default function OrdersClient() {
 
   // Handlers
   const handleCreateOrder = () => {
-    toast.success('New Order', { description: 'Order form ready' })
+    // TODO: Implement create order dialog
   }
 
   const handleRefreshOrders = () => {

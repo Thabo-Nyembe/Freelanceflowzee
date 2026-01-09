@@ -1124,8 +1124,7 @@ export default function LogsClient() {
               variant="outline"
               className="bg-white/10 border-white/20 text-white hover:bg-white/20 h-12"
               onClick={() => {
-                // Toggle facets panel visibility - in production this would toggle a state
-                toast.success('Facets panel ready')
+                // TODO: Implement facets panel toggle
               }}
             >
               <Filter className="w-4 h-4 mr-2" />
@@ -1135,8 +1134,7 @@ export default function LogsClient() {
               variant="outline"
               className="bg-white/10 border-white/20 text-white hover:bg-white/20 h-12"
               onClick={() => {
-                // In production, this would open an AI assistant dialog/panel
-                toast.success('AI assistant ready - ask about your logs')
+                // TODO: Implement AI assistant panel
               }}
             >
               <Sparkles className="w-4 h-4 mr-2" />
@@ -1837,8 +1835,7 @@ export default function LogsClient() {
                   <p className="text-gray-500">Manage log retention and filtering</p>
                 </div>
                 <Button onClick={() => {
-                  // In production, this would open an index creation wizard dialog
-                  toast.success('Index wizard ready')
+                  // TODO: Implement index creation wizard
                 }}>
                   <Plus className="w-4 h-4 mr-2" />Create Index
                 </Button>
@@ -2033,8 +2030,7 @@ export default function LogsClient() {
                   <p className="text-gray-500">Generate metrics from log data</p>
                 </div>
                 <Button onClick={() => {
-                  // In production, this would open a metric creation wizard
-                  toast.success('Metric wizard ready')
+                  // TODO: Implement metric creation wizard
                 }}>
                   <Plus className="w-4 h-4 mr-2" />Create Metric
                 </Button>

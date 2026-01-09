@@ -1413,7 +1413,7 @@ export default function SalesClient() {
                           <Badge className={contact.status === 'customer' ? 'bg-green-100 text-green-700' : contact.status === 'sql' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700'}>{contact.status}</Badge>
                         </div>
                         <div className="flex items-center gap-2 mt-3">
-                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => { window.location.href = `mailto:${contact.email}`; toast.success('Email Opened', { description: `Email draft opened for ${contact.firstName} ${contact.lastName}` }) }} title="Send email"><Mail className="w-4 h-4" /></Button>
+                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => window.location.href = `mailto:${contact.email}`} title="Send email"><Mail className="w-4 h-4" /></Button>
                           <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => { if (contact.phone) { window.location.href = `tel:${contact.phone}`; toast.success('Calling', { description: `Calling ${contact.firstName} ${contact.lastName}...` }) } else { toast.error('No phone number available') } }} title="Call contact"><Phone className="w-4 h-4" /></Button>
                           <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => { navigator.clipboard.writeText(contact.email).then(() => toast.success('Email Copied', { description: `Email copied for ${contact.firstName} ${contact.lastName}` })).catch(() => toast.error('Failed to copy email')) }} title="Send message"><MessageSquare className="w-4 h-4" /></Button>
                           {contact.linkedin && <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => { window.open(`https://${contact.linkedin}`, '_blank'); toast.success('LinkedIn Opened', { description: `Opened LinkedIn profile for ${contact.firstName} ${contact.lastName}` }) }} title="View LinkedIn"><ExternalLink className="w-4 h-4" /></Button>}
@@ -2118,7 +2118,7 @@ export default function SalesClient() {
                           <div className="flex gap-2">
                             <Input type="password" value="sk_live_xxxxxxxxxxxx" readOnly className="font-mono" />
                             <Button variant="outline" onClick={() => toast.promise(navigator.clipboard.writeText('sk_live_xxxxxxxxxxxx'), { loading: 'Copying API key...', success: 'API key copied to clipboard!', error: 'Failed to copy API key' })}>Copy</Button>
-                            <Button variant="outline" onClick={() => { if (confirm('Are you sure you want to regenerate the API key? This will invalidate your current key.')) { toast.success('API Key Regenerated', { description: 'Your new API key is ready' }) } }}>Regenerate</Button>
+                            <Button variant="outline" onClick={() => { if (confirm('Are you sure you want to regenerate the API key? This will invalidate your current key.')) { toast.success('API Key Regenerated') } }}>Regenerate</Button>
                           </div>
                         </div>
                         <div className="space-y-2">
@@ -2353,7 +2353,7 @@ export default function SalesClient() {
                 <div className="flex gap-2 pt-4 border-t">
                   <Button className="flex-1 bg-green-600 hover:bg-green-700"><ArrowRight className="w-4 h-4 mr-2" />Advance Stage</Button>
                   <Button variant="outline" className="flex-1"><Edit className="w-4 h-4 mr-2" />Edit</Button>
-                  <Button variant="outline" onClick={() => { toast.success('Contract', { description: 'Contract document viewer opened' }) }}><FileSignature className="w-4 h-4" /></Button>
+                  <Button variant="outline" onClick={() => { /* TODO: Implement contract document viewer */ }}><FileSignature className="w-4 h-4" /></Button>
                 </div>
               </div>
             )}
@@ -2410,7 +2410,7 @@ export default function SalesClient() {
 
               <div className="flex gap-2">
                 <Button className="flex-1" onClick={() => { toast.success('Quote Sent', { description: 'Quote has been sent to the customer!' }) }}><Send className="w-4 h-4 mr-2" />Send to Customer</Button>
-                <Button variant="outline" onClick={() => { toast.success('PDF Ready', { description: 'PDF generated and ready for download!' }) }}><Download className="w-4 h-4 mr-2" />Download PDF</Button>
+                <Button variant="outline" onClick={() => { /* TODO: Implement PDF download */ }}><Download className="w-4 h-4 mr-2" />Download PDF</Button>
                 <Button variant="outline" onClick={() => { navigator.clipboard.writeText(selectedQuote.quoteNumber).then(() => toast.success('Copied', { description: 'Quote number copied to clipboard!' })).catch(() => toast.error('Failed to copy quote number')) }}><Copy className="w-4 h-4" /></Button>
               </div>
             </div>

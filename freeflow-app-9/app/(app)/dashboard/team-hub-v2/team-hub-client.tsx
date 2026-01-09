@@ -947,7 +947,6 @@ export default function TeamHubClient() {
                 { icon: Mail, label: 'Email All', color: 'bg-blue-500', onClick: () => {
                   const emails = members.map(m => m.email).join(',')
                   window.location.href = `mailto:${emails}?subject=Team Communication`
-                  toast.success('Email composer opened')
                 }},
                 { icon: UserCheck, label: 'Approve', color: 'bg-green-500', onClick: handleOpenApprovalQueue },
                 { icon: Shield, label: 'Roles', color: 'bg-orange-500', onClick: () => setSettingsTab('members') },
@@ -1781,7 +1780,13 @@ export default function TeamHubClient() {
                                 <p className="text-sm text-gray-500">{integration.desc}</p>
                               </div>
                             </div>
-                            <Button variant="outline" size="sm" onClick={() => toast.success(integration.status === 'connected' ? 'Configuration ready' : 'Connected', { description: integration.status === 'connected' ? `Configure ${integration.name} settings` : `${integration.name} connected successfully` })}>
+                            <Button variant="outline" size="sm" onClick={() => {
+                              if (integration.status === 'connected') {
+                                setShowAddAppDialog(true)
+                              } else {
+                                toast.success('Connected', { description: `${integration.name} connected successfully` })
+                              }
+                            }}>
                               {integration.status === 'connected' ? 'Configure' : 'Connect'}
                             </Button>
                           </div>
@@ -2368,7 +2373,7 @@ export default function TeamHubClient() {
             </div>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setShowCreateChannelDialog(false)}>Cancel</Button>
-              <Button onClick={() => { setShowCreateChannelDialog(false); toast.success('Channel created', { description: 'Your new channel is ready' }) }}>Create Channel</Button>
+              <Button onClick={() => { setShowCreateChannelDialog(false); toast.success('Channel created') }}>Create Channel</Button>
             </div>
           </DialogContent>
         </Dialog>

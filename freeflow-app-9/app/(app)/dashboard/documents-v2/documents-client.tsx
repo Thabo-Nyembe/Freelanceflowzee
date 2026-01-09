@@ -754,7 +754,6 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
   // Open document in new tab
   const handleOpenDocument = (doc: DocumentFile) => {
     window.open(`/documents/${doc.id}`, '_blank')
-    toast.success('Document opened', { description: `"${doc.name}" opened in new tab` })
   }
 
   // Restore version - REAL API CALL
@@ -1674,10 +1673,9 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
                   const subject = encodeURIComponent('Shared Documents')
                   const body = encodeURIComponent(`Check out these shared documents: ${window.location.origin}/documents/shared`)
                   window.open(`mailto:?subject=${subject}&body=${body}`)
-                  toast.success('Email composer opened')
                 }},
                 { icon: Lock, label: 'Private', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', action: () => { setSharingFilter('private'); toast.success('Showing private files') } },
-                { icon: Shield, label: 'Permissions', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => { setActiveTab('settings'); setSettingsTab('sharing'); toast.success('Permissions manager ready') } },
+                { icon: Shield, label: 'Permissions', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => { setActiveTab('settings'); setSettingsTab('sharing') } },
                 { icon: Download, label: 'Download', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400', action: () => handleExportAll() },
                 { icon: Settings, label: 'Settings', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', action: () => setActiveTab('settings') },
               ].map((action, idx) => (

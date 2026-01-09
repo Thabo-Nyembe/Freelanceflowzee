@@ -730,9 +730,6 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
   // Additional handlers for new dialogs
   const handleOpenExportDialog = () => {
     setShowExportDialog(true)
-    toast.info('Export dialog opened', {
-      description: 'Select export format and date range'
-    })
   }
 
   const handleExportWithFormat = async () => {
@@ -781,9 +778,6 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
 
   const handleOpenFilterDialog = () => {
     setShowFilterDialog(true)
-    toast.info('Filter dialog opened', {
-      description: 'Configure advanced log filters'
-    })
   }
 
   const handleApplyFilters = () => {
@@ -795,7 +789,6 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
 
   const handleOpenDateRangeDialog = () => {
     setShowDateRangeDialog(true)
-    toast.info('Date range picker opened')
   }
 
   const handleApplyDateRange = () => {
@@ -925,7 +918,6 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
 
   const handleOpenSettingsDialog = () => {
     setShowSettingsDialog(true)
-    toast.info('Log settings opened')
   }
 
   const handleSaveSettings = () => {
@@ -935,7 +927,6 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
 
   const handleOpenParserDialog = () => {
     setShowParserDialog(true)
-    toast.info('Parser configuration opened')
   }
 
   const handleAddParser = () => {
@@ -947,7 +938,6 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
 
   const handleOpenIntegrationDialog = () => {
     setShowIntegrationDialog(true)
-    toast.info('Integration settings opened')
   }
 
   const handleConnectIntegration = (name: string) => {
@@ -958,7 +948,6 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
 
   const handleOpenApiKeyDialog = () => {
     setShowApiKeyDialog(true)
-    toast.info('API key management opened')
   }
 
   const handleRegenerateApiKey = async () => {

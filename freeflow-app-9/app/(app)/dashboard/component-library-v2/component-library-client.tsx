@@ -476,17 +476,15 @@ export default function ComponentLibraryClient() {
   }
 
   const handleCreate = () => {
-    toast.success('Component builder ready', { description: 'Start by defining component name and props' })
+    // TODO: Implement component builder dialog
   }
 
   const handleOpenFigma = () => {
     window.open('https://www.figma.com/community', '_blank')
-    toast.success('Figma design kit opened')
   }
 
   const handleOpenGitHub = () => {
     window.open('https://github.com', '_blank')
-    toast.success('GitHub repository opened')
   }
 
   const handleOpenDocs = (docType: string) => {
@@ -546,7 +544,7 @@ export default function ComponentLibraryClient() {
   }
 
   const handleAddWebhook = () => {
-    toast.success('Webhook configuration ready', { description: 'Enter webhook URL and select events to trigger' })
+    // TODO: Implement webhook configuration dialog
   }
 
   const handleViewApiKey = () => {
@@ -581,7 +579,6 @@ export default function ComponentLibraryClient() {
 
   const handleViewNpm = () => {
     window.open('https://www.npmjs.com/package/@kazi/ui-components', '_blank')
-    toast.success('NPM package page opened')
   }
 
   const handleClearCache = () => {
