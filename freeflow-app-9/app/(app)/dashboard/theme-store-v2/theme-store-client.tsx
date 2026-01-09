@@ -364,7 +364,6 @@ export default function ThemeStoreClient({ initialThemes, initialStats }: ThemeS
   const handleCustomize = () => {
     setCustomizerOpen(true)
     setActiveTab('customizer')
-    toast.success('Customizer ready')
   }
 
   const handleWishlist = async () => {
@@ -446,7 +445,6 @@ export default function ThemeStoreClient({ initialThemes, initialStats }: ThemeS
         break
       case 'settings':
         setActiveTab('settings')
-        toast.success('Settings opened')
         break
       case 'uninstall':
         toast.info('Select a theme to uninstall')
@@ -625,7 +623,6 @@ export default function ThemeStoreClient({ initialThemes, initialStats }: ThemeS
 
   const handleViewDocs = () => {
     window.open('/docs/api/themes', '_blank')
-    toast.success('Documentation opened')
   }
 
   const handleDownloadSDK = async () => {

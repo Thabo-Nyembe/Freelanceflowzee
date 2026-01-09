@@ -1675,9 +1675,9 @@ export default function ReportingClient() {
               ...action,
               action: () => {
                 switch(action.id) {
-                  case '1': setShowCreateDashboard(true); toast.success('Dashboard creation ready'); break
-                  case '2': setShowCreateWorksheet(true); toast.success('Worksheet creation ready'); break
-                  case '3': setShowScheduleDialog(true); toast.success('Report scheduler ready'); break
+                  case '1': setShowCreateDashboard(true); break
+                  case '2': setShowCreateWorksheet(true); break
+                  case '3': setShowScheduleDialog(true); break
                   case '4': handleExportData(); break
                 }
               }

@@ -1991,10 +1991,10 @@ export default function AIDesignClient() {
               ...action,
               action: () => {
                 switch(action.id) {
-                  case '1': setShowGenerateDialog(true); toast.success('AI generation studio ready!'); break;
-                  case '2': setActiveTab('gallery'); toast.success('Gallery loaded'); break;
-                  case '3': setShowUpscaleDialog(true); toast.success('Upscale tool ready'); break;
-                  case '4': setShowStyleEditor(true); toast.success('Style editor ready'); break;
+                  case '1': setShowGenerateDialog(true); break;
+                  case '2': setActiveTab('gallery'); break;
+                  case '3': setShowUpscaleDialog(true); break;
+                  case '4': setShowStyleEditor(true); break;
                 }
               }
             }))}

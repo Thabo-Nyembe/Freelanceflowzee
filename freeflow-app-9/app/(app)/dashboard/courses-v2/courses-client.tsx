@@ -565,7 +565,6 @@ const getCoursesQuickActions = (
     shortcut: 'C',
     action: () => {
       setShowCreateCourseDialog(true)
-      toast.success('Course creation wizard opened')
     }
   },
   {
@@ -575,7 +574,6 @@ const getCoursesQuickActions = (
     shortcut: 'L',
     action: () => {
       setShowAddLectureDialog(true)
-      toast.success('Lecture editor opened')
     }
   },
   {
@@ -586,7 +584,6 @@ const getCoursesQuickActions = (
     action: () => {
       // Navigate to curriculum view where quizzes can be created
       setActiveView('curriculum')
-      toast.success('Quiz builder opened - add a new lecture with type "Quiz"')
     }
   },
   {
@@ -596,7 +593,6 @@ const getCoursesQuickActions = (
     shortcut: 'A',
     action: () => {
       setActiveView('analytics')
-      toast.success('Analytics dashboard opened')
     }
   },
 ]

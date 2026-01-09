@@ -511,7 +511,6 @@ export default function AnalyticsClient() {
   const handleNotifications = async () => {
     setSettingsTab('notifications')
     setActiveTab('settings')
-    toast.success('Notification settings opened', { description: 'Configure your alert preferences' })
   }
 
   const handleExport = async () => {
@@ -575,11 +574,6 @@ export default function AnalyticsClient() {
 
   const handleFilters = async () => {
     setShowFilters(!showFilters)
-    if (!showFilters) {
-      toast.success('Filter panel opened', { description: 'Apply filters to refine your data' })
-    } else {
-      toast.info('Filter panel closed')
-    }
   }
 
   const handleRefresh = async () => {
@@ -1021,10 +1015,7 @@ export default function AnalyticsClient() {
                     <p className="text-blue-100">{filteredMetrics.length} active metrics tracked</p>
                   </div>
                 </div>
-                <Button variant="outline" className="border-white/20 text-white hover:bg-white/10" onClick={async () => {
-                  setShowMetricCreator(true)
-                  toast.success('Metric creator opened', { description: 'Create a new custom metric' })
-                }}>
+                <Button variant="outline" className="border-white/20 text-white hover:bg-white/10" onClick={() => setShowMetricCreator(true)}>
                   <Plus className="h-4 w-4 mr-2" />
                   Add Metric
                 </Button>
@@ -1092,7 +1083,7 @@ export default function AnalyticsClient() {
                         <span>Previous: {formatValue(metric.previousValue, metric.type)}</span>
                         <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 h-6 px-2" onClick={(e) => {
                           e.stopPropagation()
-                          toast.success('Metric options', { description: 'Options menu opened' })
+                          // TODO: Implement metric options dropdown
                         }}>
                           <MoreVertical className="h-3 w-3" />
                         </Button>

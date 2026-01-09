@@ -394,7 +394,6 @@ function handleOpenSearch() {
   // Dispatch custom event to open search modal
   const event = new CustomEvent('open-search-modal')
   window.dispatchEvent(event)
-  toast.success('Search opened')
 }
 
 // Real handler: Show options dropdown
@@ -406,7 +405,6 @@ function handleShowOptions(type: string) {
 function handleToggleReactions(messageId: string) {
   const event = new CustomEvent('toggle-reactions', { detail: { messageId } })
   window.dispatchEvent(event)
-  toast.success('Reactions panel opened')
 }
 
 // Real handler: Start reply to message
@@ -434,7 +432,6 @@ function handleOpenFilePicker() {
 function handleOpenEmojiPicker() {
   const event = new CustomEvent('open-emoji-picker')
   window.dispatchEvent(event)
-  toast.success('Emoji picker opened')
 }
 
 // Real handler: Send message via API
@@ -488,7 +485,6 @@ async function handleShareFile(file: SharedFile) {
 // Real handler: Open external link
 function handleOpenExternalLink(url: string) {
   window.open(url, '_blank', 'noopener,noreferrer')
-  toast.success('Link opened in new tab')
 }
 
 // Real handler: Remove automation action

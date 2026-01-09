@@ -534,7 +534,7 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
     switch (actionType) {
       case 'createTicket': setShowCreateDialog(true); break
       case 'liveChat': setShowLiveChat(true); toast.success('Connecting to support agent...'); break
-      case 'knowledgeBase': setShowKnowledgeBase(true); toast.success('Knowledge Base ready!'); break
+      case 'knowledgeBase': setShowKnowledgeBase(true); break
     }
   }
   const mockSupportQuickActions = mockSupportQuickActionsConfig.map(item => ({
@@ -557,7 +557,7 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="outline" size="sm" onClick={() => { setShowAutomationsDialog(true); toast.success('Automation rules ready to configure'); }}>
+            <Button variant="outline" size="sm" onClick={() => setShowAutomationsDialog(true)}>
               <Bot className="w-4 h-4 mr-2" />
               Automations
             </Button>
@@ -1827,7 +1827,7 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
 
                     <div className="border-t pt-4">
                       <div className="flex gap-2 mb-2">
-                        <Button variant="outline" size="sm" onClick={() => { setShowReplyEditor(true); toast.success('Reply editor ready'); }}>Reply</Button>
+                        <Button variant="outline" size="sm" onClick={() => setShowReplyEditor(true)}>Reply</Button>
                         <Button variant="outline" size="sm" onClick={() => { setShowNoteEditor(true); toast.success('Add your internal note'); }}>Add Note</Button>
                         <Button variant="outline" size="sm" onClick={() => { setShowForwardDialog(true); toast.success('Select recipient to forward ticket'); }}>Forward</Button>
                         <Button variant="outline" size="sm" className="text-green-600 hover:bg-green-50" onClick={() => handleResolveTicket(selectedTicket.id)}>Resolve</Button>
