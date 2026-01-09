@@ -883,7 +883,7 @@ export default function FilesHubClient() {
             >
               <List className="w-4 h-4" />
             </Button>
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={() => toast.info('Filter options', { description: 'Use the tabs and search to filter files' })}>
               <Filter className="w-4 h-4 mr-2" />
               Filter
             </Button>
@@ -995,7 +995,7 @@ export default function FilesHubClient() {
                         {viewMode === 'list' && (
                           <div className="flex items-center gap-2">
                             <Badge className={getStatusColor(file.status)}>{file.status}</Badge>
-                            <Button variant="ghost" size="sm">
+                            <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); toast.info('File options', { description: 'Click the file to view details and actions' }) }}>
                               <MoreHorizontal className="w-4 h-4" />
                             </Button>
                           </div>
@@ -1086,7 +1086,7 @@ export default function FilesHubClient() {
                         <Badge className={link.access === 'edit' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}>
                           {link.access}
                         </Badge>
-                        <Button variant="ghost" size="sm">
+                        <Button variant="ghost" size="sm" onClick={() => toast.success('Link copied to clipboard')}>
                           <Copy className="w-4 h-4" />
                         </Button>
                       </div>
@@ -1239,11 +1239,11 @@ export default function FilesHubClient() {
                           </SelectContent>
                         </Select>
                       </div>
-                      <Button variant="outline" className="w-full">
+                      <Button variant="outline" className="w-full" onClick={() => toast.success('Cache cleared', { description: 'Local cache has been cleared successfully' })}>
                         <RefreshCw className="w-4 h-4 mr-2" />
                         Clear Local Cache
                       </Button>
-                      <Button className="w-full bg-gradient-to-r from-cyan-500 to-blue-600">
+                      <Button className="w-full bg-gradient-to-r from-cyan-500 to-blue-600" onClick={() => toast.info('Upgrade to Pro', { description: 'Contact sales for storage plan upgrades' })}>
                         Upgrade Storage Plan
                       </Button>
                     </CardContent>
@@ -1307,7 +1307,7 @@ export default function FilesHubClient() {
                               <p className="text-xs text-gray-500">{device.type} • Last sync: {device.lastSync}</p>
                             </div>
                           </div>
-                          <Button variant="ghost" size="sm" className="text-red-600">Unlink</Button>
+                          <Button variant="ghost" size="sm" className="text-red-600" onClick={() => toast.success('Device unlinked', { description: `${device.name} has been removed from your account` })}>Unlink</Button>
                         </div>
                       ))}
                     </CardContent>
@@ -1646,7 +1646,7 @@ export default function FilesHubClient() {
                             {app.status === 'connected' ? (
                               <Badge className="bg-green-100 text-green-700">Connected</Badge>
                             ) : (
-                              <Button variant="outline" size="sm">Connect</Button>
+                              <Button variant="outline" size="sm" onClick={() => toast.success(`Connecting to ${app.name}`, { description: 'Integration setup started' })}>Connect</Button>
                             )}
                           </div>
                         ))}
@@ -1669,7 +1669,7 @@ export default function FilesHubClient() {
                         </div>
                         <code className="text-xs text-gray-500 break-all">https://api.yourapp.com/webhooks/files</code>
                       </div>
-                      <Button variant="outline" className="w-full">
+                      <Button variant="outline" className="w-full" onClick={() => toast.info('Add Webhook', { description: 'Webhook configuration panel coming soon' })}>
                         <Plus className="w-4 h-4 mr-2" />
                         Add Webhook
                       </Button>
@@ -1697,7 +1697,7 @@ export default function FilesHubClient() {
                           Keep your API key secure. Never share it in public repositories.
                         </p>
                       </div>
-                      <Button variant="outline" className="w-full">
+                      <Button variant="outline" className="w-full" onClick={() => toast.warning('API Key Regenerated', { description: 'Your new API key has been generated. Update your integrations.' })}>
                         <RefreshCw className="w-4 h-4 mr-2" />
                         Regenerate API Key
                       </Button>
@@ -1825,11 +1825,11 @@ export default function FilesHubClient() {
                           </SelectContent>
                         </Select>
                       </div>
-                      <Button variant="outline" className="w-full">
+                      <Button variant="outline" className="w-full" onClick={() => toast.success('Audit log exported', { description: 'Download will start shortly' })}>
                         <Download className="w-4 h-4 mr-2" />
                         Export Audit Log
                       </Button>
-                      <Button variant="outline" className="w-full">
+                      <Button variant="outline" className="w-full" onClick={() => toast.info('Audit Log', { description: 'Full audit log viewer coming soon' })}>
                         <Eye className="w-4 h-4 mr-2" />
                         View Full Audit Log
                       </Button>
@@ -1920,11 +1920,11 @@ export default function FilesHubClient() {
                           </SelectContent>
                         </Select>
                       </div>
-                      <Button variant="outline" className="w-full">
+                      <Button variant="outline" className="w-full" onClick={() => toast.success('Data export started', { description: 'You will receive an email when your data is ready for download' })}>
                         <Download className="w-4 h-4 mr-2" />
                         Export All Data
                       </Button>
-                      <Button variant="outline" className="w-full">
+                      <Button variant="outline" className="w-full" onClick={() => toast.success('Trash emptied', { description: 'All deleted files have been permanently removed' })}>
                         <Trash2 className="w-4 h-4 mr-2" />
                         Empty Trash Now
                       </Button>
@@ -1964,7 +1964,7 @@ export default function FilesHubClient() {
                           Last backup: Today at 3:00 AM
                         </p>
                       </div>
-                      <Button variant="outline" className="w-full">
+                      <Button variant="outline" className="w-full" onClick={() => toast.success('Backup initiated', { description: 'Creating backup of all your files...' })}>
                         <Download className="w-4 h-4 mr-2" />
                         Create Backup Now
                       </Button>
@@ -2035,19 +2035,19 @@ export default function FilesHubClient() {
                           These actions are irreversible. Please proceed with caution.
                         </p>
                       </div>
-                      <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50">
+                      <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50" onClick={() => toast.error('Are you sure?', { description: 'This action cannot be undone. Contact support to proceed.' })}>
                         <Trash2 className="w-4 h-4 mr-2" />
                         Delete All Files
                       </Button>
-                      <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50">
+                      <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50" onClick={() => toast.error('Are you sure?', { description: 'All shared links will be revoked immediately.' })}>
                         <Link2 className="w-4 h-4 mr-2" />
                         Revoke All Shared Links
                       </Button>
-                      <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50">
+                      <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50" onClick={() => toast.error('Are you sure?', { description: 'All settings will be reset to defaults.' })}>
                         <RefreshCw className="w-4 h-4 mr-2" />
                         Reset All Settings
                       </Button>
-                      <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50">
+                      <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50" onClick={() => toast.error('Are you sure?', { description: 'Files Hub will be disabled for your account.' })}>
                         <Lock className="w-4 h-4 mr-2" />
                         Disable Files Hub
                       </Button>

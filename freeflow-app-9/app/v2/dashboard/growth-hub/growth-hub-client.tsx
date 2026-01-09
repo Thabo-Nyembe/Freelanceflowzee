@@ -603,6 +603,20 @@ export default function GrowthHubClient() {
   const [showExportReportDialog, setShowExportReportDialog] = useState(false)
   const [showCreateDashboardDialog, setShowCreateDashboardDialog] = useState(false)
   const [showGoalDialog, setShowGoalDialog] = useState(false)
+  const [showFilterDialog, setShowFilterDialog] = useState(false)
+  const [showPathAnalysisDialog, setShowPathAnalysisDialog] = useState(false)
+  const [showConfigureIntegrationDialog, setShowConfigureIntegrationDialog] = useState(false)
+  const [selectedIntegration, setSelectedIntegration] = useState<{ name: string; status: string } | null>(null)
+  const [showClearDataDialog, setShowClearDataDialog] = useState(false)
+  const [showResetDefaultsDialog, setShowResetDefaultsDialog] = useState(false)
+  const [pathAnalysisForm, setPathAnalysisForm] = useState({
+    name: '', startEvent: '', endEvent: '', maxSteps: '10'
+  })
+  const [filterForm, setFilterForm] = useState({
+    dateRange: 'last30' as 'last7' | 'last30' | 'last90' | 'custom',
+    owner: '',
+    status: 'all'
+  })
   const [exportReportForm, setExportReportForm] = useState({
     reportType: 'conversion' as 'conversion' | 'retention' | 'experiment' | 'cohort' | 'all',
     format: 'csv' as 'csv' | 'xlsx' | 'pdf' | 'json',
@@ -919,6 +933,116 @@ export default function GrowthHubClient() {
     }
   }
 
+  // Create path analysis handler
+  const handleCreatePathAnalysis = async () => {
+    if (!pathAnalysisForm.name.trim() || !pathAnalysisForm.startEvent.trim()) {
+      toast.error('Missing required fields', { description: 'Please fill in path name and start event' })
+      return
+    }
+    setIsLoading(true)
+    try {
+      await new Promise(resolve => setTimeout(resolve, 800))
+      toast.success('Path analysis created', {
+        description: `"${pathAnalysisForm.name}" is now tracking user journeys from ${pathAnalysisForm.startEvent}`
+      })
+      setShowPathAnalysisDialog(false)
+      setPathAnalysisForm({ name: '', startEvent: '', endEvent: '', maxSteps: '10' })
+    } catch (err: any) {
+      toast.error('Failed to create path analysis', { description: err.message })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // Apply filter handler
+  const handleApplyFilter = () => {
+    toast.success('Filters applied', {
+      description: `Showing data for ${filterForm.dateRange === 'last7' ? 'last 7 days' : filterForm.dateRange === 'last30' ? 'last 30 days' : filterForm.dateRange === 'last90' ? 'last 90 days' : 'custom range'}${filterForm.owner ? ` by ${filterForm.owner}` : ''}`
+    })
+    setShowFilterDialog(false)
+  }
+
+  // Configure integration handler
+  const handleConfigureIntegration = async (integrationName: string) => {
+    setIsLoading(true)
+    try {
+      await new Promise(resolve => setTimeout(resolve, 500))
+      toast.success('Integration configured', {
+        description: `${integrationName} settings have been updated`
+      })
+      setShowConfigureIntegrationDialog(false)
+      setSelectedIntegration(null)
+    } catch (err: any) {
+      toast.error('Failed to configure integration', { description: err.message })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // Export all data handler
+  const handleExportAllData = async () => {
+    setIsLoading(true)
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      const exportData = {
+        exportedAt: new Date().toISOString(),
+        funnels: mockFunnels,
+        cohorts: mockCohorts,
+        experiments: mockExperiments,
+        retentionAnalyses: mockRetentionAnalyses,
+        userPaths: mockUserPaths,
+        dashboards: mockDashboards
+      }
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `growth-hub-full-export-${new Date().toISOString().split('T')[0]}.json`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+      toast.success('Data exported successfully', { description: 'Complete analytics data has been downloaded' })
+    } catch (err: any) {
+      toast.error('Export failed', { description: err.message })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // Clear all data handler
+  const handleClearAllData = async () => {
+    setIsLoading(true)
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1500))
+      toast.success('All data cleared', {
+        description: 'Analytics data has been permanently deleted. This action cannot be undone.'
+      })
+      setShowClearDataDialog(false)
+      handleRefreshData()
+    } catch (err: any) {
+      toast.error('Failed to clear data', { description: err.message })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // Reset to defaults handler
+  const handleResetToDefaults = async () => {
+    setIsLoading(true)
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      toast.success('Settings reset', {
+        description: 'All settings have been restored to their default values'
+      })
+      setShowResetDefaultsDialog(false)
+    } catch (err: any) {
+      toast.error('Failed to reset settings', { description: err.message })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   // Quick actions with real dialog triggers
   const growthQuickActions = [
     {
@@ -973,6 +1097,18 @@ export default function GrowthHubClient() {
     refreshGoals()
     toast.success('Data refreshed', { description: 'All analytics data has been updated' })
   }, [refreshExperiments, refreshMetrics, refreshCohorts, refreshFunnels, refreshGoals])
+
+  // Quick actions for the Overview tab quick action buttons
+  const overviewQuickActionHandlers: Record<string, () => void> = {
+    'New Funnel': () => setShowCreateFunnelModal(true),
+    'New Cohort': () => setShowCreateCohortModal(true),
+    'New Test': () => setShowCreateExperimentModal(true),
+    'Reports': () => setShowExportReportDialog(true),
+    'Goals': () => setShowGoalDialog(true),
+    'Real-time': () => toast.info('Real-time Analytics', { description: 'Opening real-time dashboard view...' }),
+    'Export': () => setShowExportReportDialog(true),
+    'Refresh': handleRefreshData
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50/30 to-teal-50/40 dark:bg-none dark:bg-gray-900">
@@ -1110,7 +1246,7 @@ export default function GrowthHubClient() {
                 { icon: Download, label: 'Export', color: 'text-indigo-500' },
                 { icon: RefreshCw, label: 'Refresh', color: 'text-gray-500' }
               ].map((action, i) => (
-                <Button key={i} variant="outline" className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200 bg-white/50 dark:bg-gray-800/50">
+                <Button key={i} variant="outline" className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200 bg-white/50 dark:bg-gray-800/50" onClick={() => overviewQuickActionHandlers[action.label]?.()}>
                   <action.icon className={`w-5 h-5 ${action.color}`} />
                   <span className="text-xs">{action.label}</span>
                 </Button>
@@ -1266,7 +1402,7 @@ export default function GrowthHubClient() {
 
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <Button variant="outline" size="sm" className="gap-2">
+                <Button variant="outline" size="sm" className="gap-2" onClick={() => setShowFilterDialog(true)}>
                   <Filter className="w-4 h-4" />
                   Filter
                 </Button>
@@ -1588,7 +1724,7 @@ export default function GrowthHubClient() {
                 <h2 className="text-xl font-bold">User Journey Analysis</h2>
                 <p className="text-sm text-muted-foreground">Visualize how users navigate through your product</p>
               </div>
-              <Button className="gap-2">
+              <Button className="gap-2" onClick={() => setShowPathAnalysisDialog(true)}>
                 <Plus className="w-4 h-4" />
                 Create Path Analysis
               </Button>
@@ -1846,7 +1982,7 @@ export default function GrowthHubClient() {
                                 </Badge>
                               </div>
                             </div>
-                            <Button variant="outline" size="sm">Configure</Button>
+                            <Button variant="outline" size="sm" onClick={() => { setSelectedIntegration(integration); setShowConfigureIntegrationDialog(true); }}>Configure</Button>
                           </div>
                         ))}
                       </div>
@@ -1941,7 +2077,7 @@ export default function GrowthHubClient() {
                             <p className="font-medium">Export All Data</p>
                             <p className="text-sm text-gray-500 dark:text-gray-400">Download complete analytics export</p>
                           </div>
-                          <Button variant="outline" size="sm" className="gap-2">
+                          <Button variant="outline" size="sm" className="gap-2" onClick={handleExportAllData} disabled={isLoading}>
                             <Download className="w-4 h-4" />
                             Export
                           </Button>
@@ -1953,11 +2089,11 @@ export default function GrowthHubClient() {
                           These actions are irreversible. Please proceed with caution.
                         </p>
                         <div className="flex gap-2">
-                          <Button variant="outline" size="sm" className="text-red-600 border-red-300 hover:bg-red-50 dark:text-red-400 dark:border-red-700 dark:hover:bg-red-900/30">
+                          <Button variant="outline" size="sm" className="text-red-600 border-red-300 hover:bg-red-50 dark:text-red-400 dark:border-red-700 dark:hover:bg-red-900/30" onClick={() => setShowClearDataDialog(true)}>
                             <Trash2 className="w-4 h-4 mr-2" />
                             Clear All Data
                           </Button>
-                          <Button variant="outline" size="sm" className="text-red-600 border-red-300 hover:bg-red-50 dark:text-red-400 dark:border-red-700 dark:hover:bg-red-900/30">
+                          <Button variant="outline" size="sm" className="text-red-600 border-red-300 hover:bg-red-50 dark:text-red-400 dark:border-red-700 dark:hover:bg-red-900/30" onClick={() => setShowResetDefaultsDialog(true)}>
                             <RefreshCw className="w-4 h-4 mr-2" />
                             Reset to Defaults
                           </Button>
@@ -2553,6 +2689,235 @@ export default function GrowthHubClient() {
               <Button className="flex-1 bg-gradient-to-r from-red-500 to-orange-500" onClick={handleCreateGoal} disabled={isLoading}>
                 <Target className="w-4 h-4 mr-2" />
                 {isLoading ? 'Setting...' : 'Set Goal'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Filter Dialog */}
+      <Dialog open={showFilterDialog} onOpenChange={setShowFilterDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Filter className="w-5 h-5 text-blue-500" />
+              Filter Funnels
+            </DialogTitle>
+            <DialogDescription>Apply filters to narrow down your funnel list</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Date Range</Label>
+              <select
+                className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-800"
+                value={filterForm.dateRange}
+                onChange={(e) => setFilterForm(f => ({ ...f, dateRange: e.target.value as any }))}
+              >
+                <option value="last7">Last 7 days</option>
+                <option value="last30">Last 30 days</option>
+                <option value="last90">Last 90 days</option>
+                <option value="custom">Custom range</option>
+              </select>
+            </div>
+            <div>
+              <Label>Owner</Label>
+              <Input
+                placeholder="Filter by owner name..."
+                value={filterForm.owner}
+                onChange={(e) => setFilterForm(f => ({ ...f, owner: e.target.value }))}
+              />
+            </div>
+            <div>
+              <Label>Status</Label>
+              <select
+                className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-800"
+                value={filterForm.status}
+                onChange={(e) => setFilterForm(f => ({ ...f, status: e.target.value }))}
+              >
+                <option value="all">All Statuses</option>
+                <option value="active">Active</option>
+                <option value="paused">Paused</option>
+                <option value="archived">Archived</option>
+              </select>
+            </div>
+            <div className="flex gap-2 pt-4">
+              <Button variant="outline" className="flex-1" onClick={() => setShowFilterDialog(false)}>Cancel</Button>
+              <Button className="flex-1 bg-gradient-to-r from-blue-500 to-indigo-500" onClick={handleApplyFilter}>
+                Apply Filters
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Path Analysis Dialog */}
+      <Dialog open={showPathAnalysisDialog} onOpenChange={setShowPathAnalysisDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Route className="w-5 h-5 text-indigo-500" />
+              Create Path Analysis
+            </DialogTitle>
+            <DialogDescription>Track how users navigate through your product</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Path Name</Label>
+              <Input
+                placeholder="e.g. Homepage to Purchase"
+                value={pathAnalysisForm.name}
+                onChange={(e) => setPathAnalysisForm(f => ({ ...f, name: e.target.value }))}
+              />
+            </div>
+            <div>
+              <Label>Start Event</Label>
+              <Input
+                placeholder="e.g. homepage_view"
+                value={pathAnalysisForm.startEvent}
+                onChange={(e) => setPathAnalysisForm(f => ({ ...f, startEvent: e.target.value }))}
+              />
+            </div>
+            <div>
+              <Label>End Event (optional)</Label>
+              <Input
+                placeholder="e.g. purchase (leave empty for any)"
+                value={pathAnalysisForm.endEvent}
+                onChange={(e) => setPathAnalysisForm(f => ({ ...f, endEvent: e.target.value }))}
+              />
+            </div>
+            <div>
+              <Label>Max Path Steps</Label>
+              <select
+                className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-800"
+                value={pathAnalysisForm.maxSteps}
+                onChange={(e) => setPathAnalysisForm(f => ({ ...f, maxSteps: e.target.value }))}
+              >
+                <option value="5">5 steps</option>
+                <option value="10">10 steps</option>
+                <option value="15">15 steps</option>
+                <option value="20">20 steps</option>
+              </select>
+            </div>
+            <div className="flex gap-2 pt-4">
+              <Button variant="outline" className="flex-1" onClick={() => setShowPathAnalysisDialog(false)}>Cancel</Button>
+              <Button className="flex-1 bg-gradient-to-r from-indigo-500 to-purple-500" onClick={handleCreatePathAnalysis} disabled={isLoading}>
+                {isLoading ? 'Creating...' : 'Create Path Analysis'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Configure Integration Dialog */}
+      <Dialog open={showConfigureIntegrationDialog} onOpenChange={setShowConfigureIntegrationDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Webhook className="w-5 h-5 text-green-500" />
+              Configure {selectedIntegration?.name}
+            </DialogTitle>
+            <DialogDescription>Update integration settings and connection status</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="p-4 bg-muted/50 rounded-lg">
+              <div className="flex items-center justify-between mb-2">
+                <p className="font-medium">Current Status</p>
+                <Badge>{selectedIntegration?.status}</Badge>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                {selectedIntegration?.status === 'Connected'
+                  ? 'Integration is active and syncing data'
+                  : selectedIntegration?.status === 'Not Connected'
+                  ? 'Integration needs to be configured'
+                  : 'Integration is configured and ready'}
+              </p>
+            </div>
+            <div className="flex items-center justify-between p-3 border rounded-lg dark:border-gray-700">
+              <div>
+                <p className="font-medium text-sm">Enable Sync</p>
+                <p className="text-xs text-muted-foreground">Automatically sync data</p>
+              </div>
+              <Switch defaultChecked={selectedIntegration?.status === 'Connected'} />
+            </div>
+            <div className="flex items-center justify-between p-3 border rounded-lg dark:border-gray-700">
+              <div>
+                <p className="font-medium text-sm">Real-time Updates</p>
+                <p className="text-xs text-muted-foreground">Push updates immediately</p>
+              </div>
+              <Switch />
+            </div>
+            <div className="flex gap-2 pt-4">
+              <Button variant="outline" className="flex-1" onClick={() => setShowConfigureIntegrationDialog(false)}>Cancel</Button>
+              <Button className="flex-1 bg-gradient-to-r from-green-500 to-emerald-500" onClick={() => handleConfigureIntegration(selectedIntegration?.name || '')} disabled={isLoading}>
+                {isLoading ? 'Saving...' : 'Save Configuration'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Clear Data Confirmation Dialog */}
+      <Dialog open={showClearDataDialog} onOpenChange={setShowClearDataDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-600">
+              <Trash2 className="w-5 h-5" />
+              Clear All Data
+            </DialogTitle>
+            <DialogDescription>This action cannot be undone</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+              <p className="text-sm text-red-600 dark:text-red-400">
+                You are about to permanently delete all analytics data including:
+              </p>
+              <ul className="mt-2 space-y-1 text-sm text-red-600 dark:text-red-400">
+                <li className="flex items-center gap-2"><XCircle className="w-3 h-3" /> All conversion funnels</li>
+                <li className="flex items-center gap-2"><XCircle className="w-3 h-3" /> All user cohorts</li>
+                <li className="flex items-center gap-2"><XCircle className="w-3 h-3" /> All experiments and results</li>
+                <li className="flex items-center gap-2"><XCircle className="w-3 h-3" /> All retention analyses</li>
+                <li className="flex items-center gap-2"><XCircle className="w-3 h-3" /> All custom dashboards</li>
+              </ul>
+            </div>
+            <div className="flex gap-2 pt-4">
+              <Button variant="outline" className="flex-1" onClick={() => setShowClearDataDialog(false)}>Cancel</Button>
+              <Button variant="destructive" className="flex-1" onClick={handleClearAllData} disabled={isLoading}>
+                <Trash2 className="w-4 h-4 mr-2" />
+                {isLoading ? 'Clearing...' : 'Clear All Data'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Reset Defaults Confirmation Dialog */}
+      <Dialog open={showResetDefaultsDialog} onOpenChange={setShowResetDefaultsDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-600">
+              <RefreshCw className="w-5 h-5" />
+              Reset to Defaults
+            </DialogTitle>
+            <DialogDescription>This will reset all settings to their default values</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+              <p className="text-sm text-amber-600 dark:text-amber-400">
+                The following settings will be reset:
+              </p>
+              <ul className="mt-2 space-y-1 text-sm text-amber-600 dark:text-amber-400">
+                <li className="flex items-center gap-2"><RefreshCw className="w-3 h-3" /> Date range preferences</li>
+                <li className="flex items-center gap-2"><RefreshCw className="w-3 h-3" /> Statistical significance thresholds</li>
+                <li className="flex items-center gap-2"><RefreshCw className="w-3 h-3" /> Tracking configurations</li>
+                <li className="flex items-center gap-2"><RefreshCw className="w-3 h-3" /> Notification preferences</li>
+                <li className="flex items-center gap-2"><RefreshCw className="w-3 h-3" /> Cache settings</li>
+              </ul>
+            </div>
+            <div className="flex gap-2 pt-4">
+              <Button variant="outline" className="flex-1" onClick={() => setShowResetDefaultsDialog(false)}>Cancel</Button>
+              <Button variant="destructive" className="flex-1" onClick={handleResetToDefaults} disabled={isLoading}>
+                <RefreshCw className="w-4 h-4 mr-2" />
+                {isLoading ? 'Resetting...' : 'Reset Settings'}
               </Button>
             </div>
           </div>

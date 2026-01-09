@@ -138,6 +138,23 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
   const [searchQuery, setSearchQuery] = useState('')
   const [settingsTab, setSettingsTab] = useState('general')
 
+  // Toggle states for settings
+  const [aiCategorizationEnabled, setAiCategorizationEnabled] = useState(true)
+  const [learnFromCorrectionsEnabled, setLearnFromCorrectionsEnabled] = useState(true)
+  const [monthlySummaryEnabled, setMonthlySummaryEnabled] = useState(true)
+  const [quarterlyReportsEnabled, setQuarterlyReportsEnabled] = useState(true)
+  const [annualTaxPackageEnabled, setAnnualTaxPackageEnabled] = useState(false)
+  const [largeTransactionAlertsEnabled, setLargeTransactionAlertsEnabled] = useState(true)
+  const [lowBalanceAlertEnabled, setLowBalanceAlertEnabled] = useState(true)
+  const [duplicateTransactionWarningEnabled, setDuplicateTransactionWarningEnabled] = useState(true)
+  const [weeklySummaryEmailEnabled, setWeeklySummaryEmailEnabled] = useState(true)
+  const [budgetVarianceAlertsEnabled, setBudgetVarianceAlertsEnabled] = useState(true)
+  const [invoiceDueRemindersEnabled, setInvoiceDueRemindersEnabled] = useState(true)
+  const [automaticBackupsEnabled, setAutomaticBackupsEnabled] = useState(true)
+  const [auditTrailEnabled, setAuditTrailEnabled] = useState(true)
+  const [showBankAccountOptionsDialog, setShowBankAccountOptionsDialog] = useState(false)
+  const [selectedBankAccount, setSelectedBankAccount] = useState<BankAccount | null>(null)
+
   const { records, createRecord, updateRecord, deleteRecord, loading: creating, refetch } = useFinancial({})
   const displayRecords = records.length > 0 ? records : initialFinancial
   const [isProcessing, setIsProcessing] = useState(false)
@@ -502,6 +519,91 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
     } finally {
       setIsProcessing(false)
     }
+  }
+
+  // Toggle handler for settings switches
+  const handleToggleSetting = (
+    settingName: string,
+    currentValue: boolean,
+    setter: (value: boolean) => void
+  ) => {
+    const newValue = !currentValue
+    setter(newValue)
+    toast.success(`${settingName} ${newValue ? 'enabled' : 'disabled'}`, {
+      description: newValue
+        ? `${settingName} is now active.`
+        : `${settingName} has been turned off.`
+    })
+  }
+
+  // Export config handler
+  const handleExportConfig = async () => {
+    setIsProcessing(true)
+    toast.loading('Exporting configuration...', { id: 'export-config' })
+
+    try {
+      const config = {
+        companySettings: {
+          fiscalYearStart: 'January',
+          baseCurrency: 'USD',
+          numberFormat: '1,234.56',
+          dateFormat: 'MM/DD/YYYY'
+        },
+        accountingSettings: {
+          method: 'Accrual',
+          aiCategorizationEnabled,
+          learnFromCorrectionsEnabled
+        },
+        reportingSettings: {
+          monthlySummaryEnabled,
+          quarterlyReportsEnabled,
+          annualTaxPackageEnabled
+        },
+        notificationSettings: {
+          largeTransactionAlertsEnabled,
+          lowBalanceAlertEnabled,
+          duplicateTransactionWarningEnabled,
+          weeklySummaryEmailEnabled,
+          budgetVarianceAlertsEnabled,
+          invoiceDueRemindersEnabled
+        },
+        advancedSettings: {
+          automaticBackupsEnabled,
+          auditTrailEnabled,
+          dataRetentionPeriod: '7 years'
+        },
+        exportedAt: new Date().toISOString()
+      }
+
+      const blob = new Blob([JSON.stringify(config, null, 2)], { type: 'application/json' })
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `financial-config-${new Date().toISOString().split('T')[0]}.json`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      window.URL.revokeObjectURL(url)
+
+      toast.success('Configuration exported!', {
+        id: 'export-config',
+        description: 'Your financial settings have been saved to a file.'
+      })
+    } catch (error) {
+      toast.error('Export failed', {
+        id: 'export-config',
+        description: 'Please try again.'
+      })
+      console.error(error)
+    } finally {
+      setIsProcessing(false)
+    }
+  }
+
+  // Bank account options handler
+  const handleBankAccountOptions = (account: BankAccount) => {
+    setSelectedBankAccount(account)
+    setShowBankAccountOptionsDialog(true)
   }
 
   return (
@@ -1412,7 +1514,10 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                           Needs Attention
                         </span>
                       )}
-                      <button className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
+                      <button
+                        className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
+                        onClick={() => handleBankAccountOptions(account)}
+                      >
                         <MoreHorizontal className="w-4 h-4 text-gray-500" />
                       </button>
                     </div>
@@ -1558,7 +1663,12 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                 </div>
                 <div className="flex items-center gap-4">
                   <Badge className="bg-green-500/20 text-green-300 border-green-500/30">Configured</Badge>
-                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                  <Button
+                    variant="outline"
+                    className="border-white/20 text-white hover:bg-white/10"
+                    onClick={handleExportConfig}
+                    disabled={isProcessing}
+                  >
                     <Download className="h-4 w-4 mr-2" />
                     Export Config
                   </Button>
@@ -1739,8 +1849,11 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                             <p className="font-medium text-gray-900 dark:text-white">AI Categorization</p>
                             <p className="text-sm text-gray-500">Automatically categorize transactions using AI</p>
                           </div>
-                          <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-emerald-600">
-                            <span className="inline-block h-4 w-4 transform rounded-full bg-white transition translate-x-6" />
+                          <button
+                            className={`relative inline-flex h-6 w-11 items-center rounded-full ${aiCategorizationEnabled ? 'bg-emerald-600' : 'bg-gray-200 dark:bg-gray-700'}`}
+                            onClick={() => handleToggleSetting('AI Categorization', aiCategorizationEnabled, setAiCategorizationEnabled)}
+                          >
+                            <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${aiCategorizationEnabled ? 'translate-x-6' : 'translate-x-1'}`} />
                           </button>
                         </div>
                         <div className="flex items-center justify-between">
@@ -1748,8 +1861,11 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                             <p className="font-medium text-gray-900 dark:text-white">Learn from Corrections</p>
                             <p className="text-sm text-gray-500">Improve AI based on manual corrections</p>
                           </div>
-                          <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-emerald-600">
-                            <span className="inline-block h-4 w-4 transform rounded-full bg-white transition translate-x-6" />
+                          <button
+                            className={`relative inline-flex h-6 w-11 items-center rounded-full ${learnFromCorrectionsEnabled ? 'bg-emerald-600' : 'bg-gray-200 dark:bg-gray-700'}`}
+                            onClick={() => handleToggleSetting('Learn from Corrections', learnFromCorrectionsEnabled, setLearnFromCorrectionsEnabled)}
+                          >
+                            <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${learnFromCorrectionsEnabled ? 'translate-x-6' : 'translate-x-1'}`} />
                           </button>
                         </div>
                       </div>
@@ -1848,8 +1964,11 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                             <p className="font-medium text-gray-900 dark:text-white">Monthly Summary</p>
                             <p className="text-sm text-gray-500">Email monthly financial summary</p>
                           </div>
-                          <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-emerald-600">
-                            <span className="inline-block h-4 w-4 transform rounded-full bg-white transition translate-x-6" />
+                          <button
+                            className={`relative inline-flex h-6 w-11 items-center rounded-full ${monthlySummaryEnabled ? 'bg-emerald-600' : 'bg-gray-200 dark:bg-gray-700'}`}
+                            onClick={() => handleToggleSetting('Monthly Summary', monthlySummaryEnabled, setMonthlySummaryEnabled)}
+                          >
+                            <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${monthlySummaryEnabled ? 'translate-x-6' : 'translate-x-1'}`} />
                           </button>
                         </div>
                         <div className="flex items-center justify-between">
@@ -1857,8 +1976,11 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                             <p className="font-medium text-gray-900 dark:text-white">Quarterly Reports</p>
                             <p className="text-sm text-gray-500">Generate quarterly statements</p>
                           </div>
-                          <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-emerald-600">
-                            <span className="inline-block h-4 w-4 transform rounded-full bg-white transition translate-x-6" />
+                          <button
+                            className={`relative inline-flex h-6 w-11 items-center rounded-full ${quarterlyReportsEnabled ? 'bg-emerald-600' : 'bg-gray-200 dark:bg-gray-700'}`}
+                            onClick={() => handleToggleSetting('Quarterly Reports', quarterlyReportsEnabled, setQuarterlyReportsEnabled)}
+                          >
+                            <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${quarterlyReportsEnabled ? 'translate-x-6' : 'translate-x-1'}`} />
                           </button>
                         </div>
                         <div className="flex items-center justify-between">
@@ -1866,8 +1988,11 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                             <p className="font-medium text-gray-900 dark:text-white">Annual Tax Package</p>
                             <p className="text-sm text-gray-500">Prepare year-end tax documents</p>
                           </div>
-                          <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-gray-200 dark:bg-gray-700">
-                            <span className="inline-block h-4 w-4 transform rounded-full bg-white transition translate-x-1" />
+                          <button
+                            className={`relative inline-flex h-6 w-11 items-center rounded-full ${annualTaxPackageEnabled ? 'bg-emerald-600' : 'bg-gray-200 dark:bg-gray-700'}`}
+                            onClick={() => handleToggleSetting('Annual Tax Package', annualTaxPackageEnabled, setAnnualTaxPackageEnabled)}
+                          >
+                            <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${annualTaxPackageEnabled ? 'translate-x-6' : 'translate-x-1'}`} />
                           </button>
                         </div>
                       </div>
@@ -2009,8 +2134,11 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                           </div>
                           <div className="flex items-center gap-3">
                             <input type="text" defaultValue="$1,000" className="w-24 px-3 py-1 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-sm" />
-                            <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-emerald-600">
-                              <span className="inline-block h-4 w-4 transform rounded-full bg-white transition translate-x-6" />
+                            <button
+                              className={`relative inline-flex h-6 w-11 items-center rounded-full ${largeTransactionAlertsEnabled ? 'bg-emerald-600' : 'bg-gray-200 dark:bg-gray-700'}`}
+                              onClick={() => handleToggleSetting('Large Transaction Alerts', largeTransactionAlertsEnabled, setLargeTransactionAlertsEnabled)}
+                            >
+                              <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${largeTransactionAlertsEnabled ? 'translate-x-6' : 'translate-x-1'}`} />
                             </button>
                           </div>
                         </div>
@@ -2021,8 +2149,11 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                           </div>
                           <div className="flex items-center gap-3">
                             <input type="text" defaultValue="$5,000" className="w-24 px-3 py-1 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-sm" />
-                            <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-emerald-600">
-                              <span className="inline-block h-4 w-4 transform rounded-full bg-white transition translate-x-6" />
+                            <button
+                              className={`relative inline-flex h-6 w-11 items-center rounded-full ${lowBalanceAlertEnabled ? 'bg-emerald-600' : 'bg-gray-200 dark:bg-gray-700'}`}
+                              onClick={() => handleToggleSetting('Low Balance Alert', lowBalanceAlertEnabled, setLowBalanceAlertEnabled)}
+                            >
+                              <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${lowBalanceAlertEnabled ? 'translate-x-6' : 'translate-x-1'}`} />
                             </button>
                           </div>
                         </div>
@@ -2031,8 +2162,11 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                             <p className="font-medium text-gray-900 dark:text-white">Duplicate Transaction Warning</p>
                             <p className="text-sm text-gray-500">Alert for potential duplicate entries</p>
                           </div>
-                          <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-emerald-600">
-                            <span className="inline-block h-4 w-4 transform rounded-full bg-white transition translate-x-6" />
+                          <button
+                            className={`relative inline-flex h-6 w-11 items-center rounded-full ${duplicateTransactionWarningEnabled ? 'bg-emerald-600' : 'bg-gray-200 dark:bg-gray-700'}`}
+                            onClick={() => handleToggleSetting('Duplicate Transaction Warning', duplicateTransactionWarningEnabled, setDuplicateTransactionWarningEnabled)}
+                          >
+                            <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${duplicateTransactionWarningEnabled ? 'translate-x-6' : 'translate-x-1'}`} />
                           </button>
                         </div>
                       </div>
@@ -2045,8 +2179,11 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                             <p className="font-medium text-gray-900 dark:text-white">Weekly Summary Email</p>
                             <p className="text-sm text-gray-500">Receive weekly financial overview</p>
                           </div>
-                          <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-emerald-600">
-                            <span className="inline-block h-4 w-4 transform rounded-full bg-white transition translate-x-6" />
+                          <button
+                            className={`relative inline-flex h-6 w-11 items-center rounded-full ${weeklySummaryEmailEnabled ? 'bg-emerald-600' : 'bg-gray-200 dark:bg-gray-700'}`}
+                            onClick={() => handleToggleSetting('Weekly Summary Email', weeklySummaryEmailEnabled, setWeeklySummaryEmailEnabled)}
+                          >
+                            <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${weeklySummaryEmailEnabled ? 'translate-x-6' : 'translate-x-1'}`} />
                           </button>
                         </div>
                         <div className="flex items-center justify-between">
@@ -2054,8 +2191,11 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                             <p className="font-medium text-gray-900 dark:text-white">Budget Variance Alerts</p>
                             <p className="text-sm text-gray-500">Alert when budget exceeds threshold</p>
                           </div>
-                          <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-emerald-600">
-                            <span className="inline-block h-4 w-4 transform rounded-full bg-white transition translate-x-6" />
+                          <button
+                            className={`relative inline-flex h-6 w-11 items-center rounded-full ${budgetVarianceAlertsEnabled ? 'bg-emerald-600' : 'bg-gray-200 dark:bg-gray-700'}`}
+                            onClick={() => handleToggleSetting('Budget Variance Alerts', budgetVarianceAlertsEnabled, setBudgetVarianceAlertsEnabled)}
+                          >
+                            <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${budgetVarianceAlertsEnabled ? 'translate-x-6' : 'translate-x-1'}`} />
                           </button>
                         </div>
                         <div className="flex items-center justify-between">
@@ -2063,8 +2203,11 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                             <p className="font-medium text-gray-900 dark:text-white">Invoice Due Reminders</p>
                             <p className="text-sm text-gray-500">Remind about upcoming due dates</p>
                           </div>
-                          <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-emerald-600">
-                            <span className="inline-block h-4 w-4 transform rounded-full bg-white transition translate-x-6" />
+                          <button
+                            className={`relative inline-flex h-6 w-11 items-center rounded-full ${invoiceDueRemindersEnabled ? 'bg-emerald-600' : 'bg-gray-200 dark:bg-gray-700'}`}
+                            onClick={() => handleToggleSetting('Invoice Due Reminders', invoiceDueRemindersEnabled, setInvoiceDueRemindersEnabled)}
+                          >
+                            <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${invoiceDueRemindersEnabled ? 'translate-x-6' : 'translate-x-1'}`} />
                           </button>
                         </div>
                       </div>
@@ -2083,8 +2226,11 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                             <p className="font-medium text-gray-900 dark:text-white">Automatic Backups</p>
                             <p className="text-sm text-gray-500">Backup financial data daily</p>
                           </div>
-                          <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-emerald-600">
-                            <span className="inline-block h-4 w-4 transform rounded-full bg-white transition translate-x-6" />
+                          <button
+                            className={`relative inline-flex h-6 w-11 items-center rounded-full ${automaticBackupsEnabled ? 'bg-emerald-600' : 'bg-gray-200 dark:bg-gray-700'}`}
+                            onClick={() => handleToggleSetting('Automatic Backups', automaticBackupsEnabled, setAutomaticBackupsEnabled)}
+                          >
+                            <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${automaticBackupsEnabled ? 'translate-x-6' : 'translate-x-1'}`} />
                           </button>
                         </div>
                         <div className="flex items-center justify-between">
@@ -2103,8 +2249,11 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                             <p className="font-medium text-gray-900 dark:text-white">Audit Trail</p>
                             <p className="text-sm text-gray-500">Log all changes to financial records</p>
                           </div>
-                          <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-emerald-600">
-                            <span className="inline-block h-4 w-4 transform rounded-full bg-white transition translate-x-6" />
+                          <button
+                            className={`relative inline-flex h-6 w-11 items-center rounded-full ${auditTrailEnabled ? 'bg-emerald-600' : 'bg-gray-200 dark:bg-gray-700'}`}
+                            onClick={() => handleToggleSetting('Audit Trail', auditTrailEnabled, setAuditTrailEnabled)}
+                          >
+                            <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${auditTrailEnabled ? 'translate-x-6' : 'translate-x-1'}`} />
                           </button>
                         </div>
                       </div>
@@ -2440,6 +2589,117 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
 
         {/* Quick Actions Toolbar */}
         <QuickActionsToolbar actions={mockFinancialQuickActions} />
+
+        {/* Bank Account Options Dialog */}
+        <Dialog open={showBankAccountOptionsDialog} onOpenChange={setShowBankAccountOptionsDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Bank Account Options</DialogTitle>
+              <DialogDescription>
+                {selectedBankAccount ? `Manage "${selectedBankAccount.name}" account settings` : 'Manage account settings'}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              {selectedBankAccount && (
+                <>
+                  <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <p className="text-sm text-gray-500">Account</p>
+                    <p className="font-medium text-gray-900 dark:text-white">{selectedBankAccount.name}</p>
+                    <p className="text-sm text-gray-500 mt-1">{selectedBankAccount.institution} - {selectedBankAccount.accountNumber}</p>
+                    <p className="text-lg font-bold mt-2 text-gray-900 dark:text-white">{formatCurrency(selectedBankAccount.balance)}</p>
+                  </div>
+                  <div className="space-y-2">
+                    <button
+                      onClick={() => {
+                        handleSyncBankAccount(selectedBankAccount.id, selectedBankAccount.name)
+                        setShowBankAccountOptionsDialog(false)
+                      }}
+                      className="w-full flex items-center gap-3 p-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                    >
+                      <RefreshCw className="w-5 h-5 text-emerald-600" />
+                      <span className="text-gray-900 dark:text-white">Sync Transactions</span>
+                    </button>
+                    <button
+                      onClick={() => {
+                        handleReconcileAccount({
+                          id: selectedBankAccount.id,
+                          code: selectedBankAccount.accountNumber,
+                          name: selectedBankAccount.name,
+                          type: 'asset',
+                          subtype: selectedBankAccount.type,
+                          balance: selectedBankAccount.balance,
+                          isActive: true
+                        })
+                        setShowBankAccountOptionsDialog(false)
+                      }}
+                      className="w-full flex items-center gap-3 p-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                    >
+                      <CheckCircle className="w-5 h-5 text-blue-600" />
+                      <span className="text-gray-900 dark:text-white">Reconcile Account</span>
+                    </button>
+                    <button
+                      onClick={() => {
+                        toast.success('Opening transaction history...', {
+                          description: `Viewing all transactions for ${selectedBankAccount.name}`
+                        })
+                        setShowBankAccountOptionsDialog(false)
+                        setActiveTab('banking')
+                      }}
+                      className="w-full flex items-center gap-3 p-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                    >
+                      <FileText className="w-5 h-5 text-purple-600" />
+                      <span className="text-gray-900 dark:text-white">View Transaction History</span>
+                    </button>
+                    <button
+                      onClick={() => {
+                        toast.promise(
+                          new Promise(resolve => setTimeout(resolve, 1500)),
+                          {
+                            loading: 'Exporting transactions...',
+                            success: `Transactions for ${selectedBankAccount.name} exported!`,
+                            error: 'Failed to export transactions'
+                          }
+                        )
+                        setShowBankAccountOptionsDialog(false)
+                      }}
+                      className="w-full flex items-center gap-3 p-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                    >
+                      <Download className="w-5 h-5 text-orange-600" />
+                      <span className="text-gray-900 dark:text-white">Export Transactions</span>
+                    </button>
+                    <div className="border-t border-gray-200 dark:border-gray-700 my-2" />
+                    <button
+                      onClick={() => {
+                        toast.warning('Disconnect this bank account?', {
+                          description: 'You will no longer receive automatic transaction syncing.',
+                          action: {
+                            label: 'Disconnect',
+                            onClick: () => {
+                              toast.success(`${selectedBankAccount.name} disconnected`)
+                              setShowBankAccountOptionsDialog(false)
+                            }
+                          }
+                        })
+                      }}
+                      className="w-full flex items-center gap-3 p-3 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors text-red-600"
+                    >
+                      <AlertCircle className="w-5 h-5" />
+                      <span>Disconnect Account</span>
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+            <DialogFooter>
+              <button
+                onClick={() => setShowBankAccountOptionsDialog(false)}
+                className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+              >
+                Close
+              </button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   )

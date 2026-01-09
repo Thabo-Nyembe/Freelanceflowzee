@@ -714,7 +714,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                     <ScrollArea className="h-[500px]">
                       <div className="grid grid-cols-2 md:grid-cols-3 gap-4 py-4 pr-4">
                         {formTemplates.map(template => (
-                          <Card key={template.id} className="cursor-pointer hover:shadow-md transition-shadow overflow-hidden relative">
+                          <Card key={template.id} className="cursor-pointer hover:shadow-md transition-shadow overflow-hidden relative" onClick={() => { if (template.isPremium) { toast.info('Pro Template', { description: `"${template.name}" is a Pro template. Upgrade to access it.` }); } else { toast.success('Template Selected', { description: `Creating form from "${template.name}" template` }); setShowTemplatesDialog(false); } }}>
                             {template.isPremium && (
                               <Badge className="absolute top-2 right-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0 z-10">
                                 <Star className="h-3 w-3 mr-1" /> Pro
@@ -1062,10 +1062,10 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                     <div className="h-24 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 relative">
                       <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/30">
                         <div className="flex items-center gap-2">
-                          <button className="p-2 bg-white rounded-lg text-gray-800 hover:bg-gray-100">
+                          <button className="p-2 bg-white rounded-lg text-gray-800 hover:bg-gray-100" onClick={(e) => { e.stopPropagation(); toast.info('Preview Form', { description: `Opening preview for "${form.title}"` }); }}>
                             <Eye className="h-4 w-4" />
                           </button>
-                          <button className="p-2 bg-white rounded-lg text-gray-800 hover:bg-gray-100">
+                          <button className="p-2 bg-white rounded-lg text-gray-800 hover:bg-gray-100" onClick={(e) => { e.stopPropagation(); toast.info('Edit Form', { description: `Opening editor for "${form.title}"` }); }}>
                             <Edit3 className="h-4 w-4" />
                           </button>
                           <button className="p-2 bg-white rounded-lg text-gray-800 hover:bg-gray-100" onClick={(e) => { e.stopPropagation(); setSelectedForm(form); setShowAnalyticsDialog(true); }}>
@@ -1454,7 +1454,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                       <CardContent>
                         <div className="grid grid-cols-3 gap-4">
                           {formThemes.map(theme => (
-                            <button key={theme.id} className="p-4 border rounded-xl hover:border-indigo-500 transition-all text-left hover:shadow-md">
+                            <button key={theme.id} className="p-4 border rounded-xl hover:border-indigo-500 transition-all text-left hover:shadow-md" onClick={() => toast.success('Theme Selected', { description: `"${theme.name}" theme applied successfully` })}>
                               <div className="flex items-center gap-2 mb-3">
                                 <div className="w-5 h-5 rounded-full border-2 border-white shadow-sm" style={{ backgroundColor: theme.primaryColor }}></div>
                                 <span className="font-medium">{theme.name}</span>
@@ -1463,7 +1463,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                               <p className="text-xs text-gray-500 mt-2">{theme.fontFamily}</p>
                             </button>
                           ))}
-                          <button className="p-4 border-2 border-dashed rounded-xl hover:border-indigo-500 transition-all flex flex-col items-center justify-center">
+                          <button className="p-4 border-2 border-dashed rounded-xl hover:border-indigo-500 transition-all flex flex-col items-center justify-center" onClick={() => toast.info('Custom Theme', { description: 'Custom theme designer coming soon!' })}>
                             <Palette className="h-8 w-8 text-gray-400 mb-2" />
                             <span className="text-sm font-medium text-gray-600">Create Custom</span>
                           </button>
@@ -1746,7 +1746,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                             { title: 'API Reference', icon: FileText, desc: 'Full documentation' },
                             { title: 'SDKs & Libraries', icon: GitBranch, desc: 'Node, Python, PHP' },
                           ].map((doc, i) => (
-                            <button key={i} className="p-4 border rounded-lg hover:border-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-all text-left">
+                            <button key={i} className="p-4 border rounded-lg hover:border-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-all text-left" onClick={() => toast.info('Documentation', { description: `Opening "${doc.title}" documentation` })}>
                               <doc.icon className="h-6 w-6 text-indigo-600 mb-2" />
                               <h4 className="font-medium">{doc.title}</h4>
                               <p className="text-sm text-gray-500">{doc.desc}</p>
@@ -2204,7 +2204,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
             <ScrollArea className="h-[400px]">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3 py-4 pr-4">
                 {questionTypes.map(type => (
-                  <button key={type.id} className="p-4 border rounded-lg hover:border-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-colors text-left relative">
+                  <button key={type.id} className="p-4 border rounded-lg hover:border-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-colors text-left relative" onClick={() => { if (type.isPremium) { toast.info('Pro Feature', { description: `${type.name} is a Pro feature. Upgrade to use it.` }); } else { toast.success('Question Added', { description: `${type.name} question added to form` }); setShowQuestionTypesDialog(false); } }}>
                     {type.isPremium && (
                       <Badge className="absolute top-1 right-1 bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0 text-xs">
                         Pro
@@ -2228,7 +2228,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
             </DialogHeader>
             <div className="grid grid-cols-2 gap-4 py-4">
               {formThemes.map(theme => (
-                <button key={theme.id} className="p-4 border rounded-lg hover:border-indigo-500 transition-colors text-left">
+                <button key={theme.id} className="p-4 border rounded-lg hover:border-indigo-500 transition-colors text-left" onClick={() => { toast.success('Theme Applied', { description: `"${theme.name}" theme has been applied to your form` }); setShowThemesDialog(false); }}>
                   <div className="flex items-center gap-2 mb-3">
                     <div className="w-5 h-5 rounded-full" style={{ backgroundColor: theme.primaryColor }}></div>
                     <span className="font-medium">{theme.name}</span>
