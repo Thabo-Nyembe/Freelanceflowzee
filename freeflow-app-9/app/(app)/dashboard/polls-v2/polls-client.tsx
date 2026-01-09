@@ -1048,7 +1048,6 @@ export default function PollsClient() {
   const handleManageSubscription = () => {
     setActiveTab('settings')
     setSettingsTab('advanced')
-    toast.success('Subscription management opened')
   }
 
   // Handle upgrade plan

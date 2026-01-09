@@ -401,7 +401,6 @@ export default function VideoStudioClient() {
         const tabTrigger = document.querySelector('[value="templates"]') as HTMLButtonElement
         if (tabTrigger) {
           tabTrigger.click()
-          toast.success('Template library opened')
         }
       },
       variant: 'outline' as const
@@ -1972,7 +1971,7 @@ export default function VideoStudioClient() {
                         <Button
                           variant="outline"
                           className="w-full border-dashed"
-                          onClick={() => toast.success('Custom preset creator opened - configure your export settings')}
+                          onClick={() => { /* TODO: Implement custom preset creator dialog */ }}
                         >
                           <Plus className="w-4 h-4 mr-2" />
                           Create Custom Preset

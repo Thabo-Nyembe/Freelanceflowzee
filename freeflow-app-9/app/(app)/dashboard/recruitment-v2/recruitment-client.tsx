@@ -1449,7 +1449,7 @@ export default function RecruitmentClient() {
                             <Eye className="w-4 h-4 mr-1" />
                             View
                           </Button>
-                          <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); toast.success('Job editor opened') }}>
+                          <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); /* TODO: Implement job editor */ }}>
                             <Edit className="w-4 h-4 mr-1" />
                             Edit
                           </Button>
