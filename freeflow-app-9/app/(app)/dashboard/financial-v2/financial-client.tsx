@@ -1771,10 +1771,7 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => {
-                              handleGenerateReport('Profit & Loss')
-                              toast.info('Income Statement template ready for customization')
-                            }}
+                            onClick={() => handleGenerateReport('Profit & Loss')}
                           >
                             Customize
                           </Button>
@@ -1792,10 +1789,7 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => {
-                              handleGenerateReport('Balance Sheet')
-                              toast.info('Balance Sheet template ready for customization')
-                            }}
+                            onClick={() => handleGenerateReport('Balance Sheet')}
                           >
                             Customize
                           </Button>
@@ -1813,10 +1807,7 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => {
-                              handleGenerateReport('Cash Flow')
-                              toast.info('Cash Flow Statement template ready for customization')
-                            }}
+                            onClick={() => handleGenerateReport('Cash Flow')}
                           >
                             Customize
                           </Button>
@@ -1938,7 +1929,8 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                               if (!response.ok) throw new Error('Failed')
                               toast.success('Bank connection ready - follow the instructions to link your account', { id: 'plaid-connect' })
                             } catch {
-                              toast.info('Bank connection ready - Plaid integration coming soon', { id: 'plaid-connect' })
+                              toast.dismiss('plaid-connect')
+                              // Plaid integration coming soon
                             }
                           }}
                         >

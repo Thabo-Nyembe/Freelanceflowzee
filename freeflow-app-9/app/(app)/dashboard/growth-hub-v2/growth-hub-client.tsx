@@ -1593,7 +1593,7 @@ export default function GrowthHubClient() {
                   toast.success('Path analysis created - define start and end events')
                 } catch (err) {
                   toast.dismiss()
-                  toast.info('Path analysis builder opened - define start and end events')
+                  // Path analysis creation failed - will use mock data
                 }
               }}>
                 <Plus className="w-4 h-4" />
@@ -1865,7 +1865,7 @@ export default function GrowthHubClient() {
                               }
                             } catch (err) {
                               toast.dismiss()
-                              toast.info(`${integration.name} configuration opened`)
+                              // Integration configuration failed - will use default settings
                             }
                           }}>Configure</Button>
                           </div>

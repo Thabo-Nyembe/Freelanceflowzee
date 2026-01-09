@@ -198,8 +198,7 @@ const mockActivities = [
         console.log('[Navigation] Opening document: Q4 Marketing Strategy')
       } },
       { label: 'Reply', action: () => {
-        toast.info('Reply composer opened', { description: 'Type your response to Sarah Chen' })
-        // In production, this would open a reply modal or navigate to comments
+        // TODO: Implement reply modal - would open reply composer to Sarah Chen
         console.log('[Action] Opening reply composer for mention by Sarah Chen')
       } },
     ],
@@ -365,13 +364,11 @@ const mockQuickActions = [
     console.log('[Action] Opening global search')
   }, category: 'Navigate' },
   { id: '3', label: 'AI Assistant', icon: <Brain className="h-5 w-5" />, shortcut: '⌘J', action: () => {
-    toast.success('AI Assistant ready', { description: 'Ask me anything about your data' })
-    // In production, this would open AI chat modal or sidebar
+    // TODO: Implement AI chat modal or sidebar
     console.log('[Action] Launching AI Assistant')
   }, category: 'AI' },
   { id: '4', label: 'New Project', icon: <FileText className="h-5 w-5" />, shortcut: '⌘P', action: () => {
-    toast.success('Project template opened', { description: 'Choose a template or start from scratch' })
-    // In production, this would open project creation wizard
+    // TODO: Implement project creation wizard
     console.log('[Action] Creating new project')
   }, category: 'Create' },
   { id: '5', label: 'Edit', icon: <Edit className="h-5 w-5" />, shortcut: '⌘E', action: () => {
