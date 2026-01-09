@@ -337,6 +337,10 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
   const [isLoading, setIsLoading] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showCreateDialog, setShowCreateDialog] = useState(false)
+  const [showCreateTeamDialog, setShowCreateTeamDialog] = useState(false)
+  const [showCreateSegmentDialog, setShowCreateSegmentDialog] = useState(false)
+  const [newTeamName, setNewTeamName] = useState('')
+  const [newSegmentName, setNewSegmentName] = useState('')
   const [ticketForm, setTicketForm] = useState<TicketFormState>(initialTicketForm)
 
   // Fetch tickets from Supabase
@@ -2685,7 +2689,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
                 <Button variant="outline" size="sm">Manage</Button>
               </div>
             ))}
-            <Button variant="outline" className="w-full" onClick={() => toast.success('Create team dialog opened')}>+ Create New Team</Button>
+            <Button variant="outline" className="w-full" onClick={() => setShowCreateTeamDialog(true)}>+ Create New Team</Button>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowTeamsDialog(false)}>Close</Button>
@@ -2929,7 +2933,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
                 <Button variant="outline" size="sm">View</Button>
               </div>
             ))}
-            <Button variant="outline" className="w-full" onClick={() => toast.success('Create segment dialog opened')}>+ Create New Segment</Button>
+            <Button variant="outline" className="w-full" onClick={() => setShowCreateSegmentDialog(true)}>+ Create New Segment</Button>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowSegmentsDialog(false)}>Close</Button>
@@ -3776,6 +3780,119 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowWebhooksDialog(false)}>Cancel</Button>
             <Button onClick={() => { toast.success('Webhook configured'); setShowWebhooksDialog(false) }}>Save Webhook</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Team Dialog */}
+      <Dialog open={showCreateTeamDialog} onOpenChange={setShowCreateTeamDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Create New Team</DialogTitle>
+            <DialogDescription>Add a new support team to handle specific ticket types</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Team Name</Label>
+              <Input
+                placeholder="e.g., Technical Support"
+                value={newTeamName}
+                onChange={(e) => setNewTeamName(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Team Lead</Label>
+              <Select>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select team lead" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="john">John Smith</SelectItem>
+                  <SelectItem value="sarah">Sarah Johnson</SelectItem>
+                  <SelectItem value="mike">Mike Wilson</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Focus Area</Label>
+              <Select>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select focus area" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="technical">Technical Support</SelectItem>
+                  <SelectItem value="billing">Billing & Payments</SelectItem>
+                  <SelectItem value="general">General Inquiries</SelectItem>
+                  <SelectItem value="enterprise">Enterprise Clients</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setShowCreateTeamDialog(false); setNewTeamName(''); }}>Cancel</Button>
+            <Button onClick={() => {
+              if (!newTeamName.trim()) {
+                toast.error('Please enter a team name');
+                return;
+              }
+              toast.success('Team created', { description: `${newTeamName} team is now active` });
+              setShowCreateTeamDialog(false);
+              setNewTeamName('');
+            }}>Create Team</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Segment Dialog */}
+      <Dialog open={showCreateSegmentDialog} onOpenChange={setShowCreateSegmentDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Create New Segment</DialogTitle>
+            <DialogDescription>Define a customer segment for targeted support</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Segment Name</Label>
+              <Input
+                placeholder="e.g., Enterprise Customers"
+                value={newSegmentName}
+                onChange={(e) => setNewSegmentName(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Segment Color</Label>
+              <div className="flex gap-2">
+                {['bg-blue-500', 'bg-green-500', 'bg-purple-500', 'bg-orange-500', 'bg-pink-500'].map(color => (
+                  <div key={color} className={`w-8 h-8 rounded-full cursor-pointer ${color} hover:ring-2 ring-offset-2`} />
+                ))}
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Filter Criteria</Label>
+              <Select>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select criteria" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="plan">By Plan Type</SelectItem>
+                  <SelectItem value="revenue">By Revenue</SelectItem>
+                  <SelectItem value="activity">By Activity Level</SelectItem>
+                  <SelectItem value="tickets">By Ticket Volume</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setShowCreateSegmentDialog(false); setNewSegmentName(''); }}>Cancel</Button>
+            <Button onClick={() => {
+              if (!newSegmentName.trim()) {
+                toast.error('Please enter a segment name');
+                return;
+              }
+              toast.success('Segment created', { description: `${newSegmentName} segment is now active` });
+              setShowCreateSegmentDialog(false);
+              setNewSegmentName('');
+            }}>Create Segment</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

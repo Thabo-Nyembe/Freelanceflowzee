@@ -814,11 +814,10 @@ export default function WorkflowBuilderClient() {
   // Nodes Tab Handlers
   const handleCreateNode = () => {
     setShowNodeLibrary(true)
-    toast.success('Node creation wizard ready')
   }
 
   const handleImportNode = () => {
-    toast.success('Import node dialog ready')
+    setShowNodeLibrary(true)
   }
 
   const handleCustomCode = () => {
@@ -995,16 +994,14 @@ export default function WorkflowBuilderClient() {
   // Variables Tab Handlers
   const handleAddVariable = () => {
     setShowVariablesDialog(true)
-    toast.success('Create your variable')
   }
 
   const handleAddSecret = () => {
     setShowVariablesDialog(true)
-    toast.success('Create your secret securely')
   }
 
   const handleImportVariables = () => {
-    toast.success('Import variables dialog ready')
+    setShowVariablesDialog(true)
   }
 
   const handleExportVariables = async () => {

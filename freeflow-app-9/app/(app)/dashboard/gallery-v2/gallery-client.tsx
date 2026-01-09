@@ -502,20 +502,14 @@ export default function GalleryClient() {
       label: 'Upload',
       icon: 'Upload',
       shortcut: 'U',
-      action: () => {
-        setShowUploadDialog(true)
-        toast.success('Upload dialog opened', { description: 'Select files to upload to your gallery' })
-      }
+      action: () => setShowUploadDialog(true)
     },
     {
       id: '2',
       label: 'New Album',
       icon: 'FolderPlus',
       shortcut: 'A',
-      action: () => {
-        setShowCreateCollection(true)
-        toast.success('Create album dialog opened', { description: 'Enter details for your new album' })
-      }
+      action: () => setShowCreateCollection(true)
     },
     {
       id: '3',

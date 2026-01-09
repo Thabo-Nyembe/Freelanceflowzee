@@ -549,30 +549,21 @@ export default function TemplatesClient() {
       id: '1',
       label: 'New Template',
       icon: 'plus',
-      action: () => {
-        setIsCreateDialogOpen(true)
-        toast.success('Create Template dialog opened')
-      },
+      action: () => setIsCreateDialogOpen(true),
       variant: 'default' as const
     },
     {
       id: '2',
       label: 'Browse Gallery',
       icon: 'grid',
-      action: () => {
-        setActiveTab('gallery')
-        toast.success(`Template Gallery: ${stats.totalTemplates} templates in 8 categories`)
-      },
+      action: () => setActiveTab('gallery'),
       variant: 'default' as const
     },
     {
       id: '3',
       label: 'Export Assets',
       icon: 'download',
-      action: () => {
-        setShowExportDialog(true)
-        toast.success('Export dialog opened')
-      },
+      action: () => setShowExportDialog(true),
       variant: 'outline' as const
     },
   ], [stats.totalTemplates])
