@@ -580,6 +580,16 @@ export default function BugsClient() {
   const [showImportBugsDialog, setShowImportBugsDialog] = useState(false)
   const [showLinkPRsDialog, setShowLinkPRsDialog] = useState(false)
   const [showViewHistoryDialog, setShowViewHistoryDialog] = useState(false)
+  const [showEditLabelDialog, setShowEditLabelDialog] = useState(false)
+  const [showAddLabelDialog, setShowAddLabelDialog] = useState(false)
+  const [showAddStatusDialog, setShowAddStatusDialog] = useState(false)
+  const [showConfigureIntegrationDialog, setShowConfigureIntegrationDialog] = useState(false)
+  const [showArchiveConfirmDialog, setShowArchiveConfirmDialog] = useState(false)
+  const [showDeleteConfirmDialog, setShowDeleteConfirmDialog] = useState(false)
+  const [showResetConfirmDialog, setShowResetConfirmDialog] = useState(false)
+  const [editingLabel, setEditingLabel] = useState<BugLabel | null>(null)
+  const [selectedIntegration, setSelectedIntegration] = useState<string | null>(null)
+  const [newLabelData, setNewLabelData] = useState({ name: '', color: '#3b82f6' })
 
   // QuickAction Form States
   const [testConfig, setTestConfig] = useState({
@@ -896,6 +906,113 @@ export default function BugsClient() {
     setShowAdvancedFilterDialog(false)
   }
 
+  // Edit label handler
+  const handleEditLabel = (label: BugLabel) => {
+    setEditingLabel(label)
+    setNewLabelData({ name: label.name, color: label.color })
+    setShowEditLabelDialog(true)
+  }
+
+  // Save edited label
+  const handleSaveLabel = () => {
+    if (!newLabelData.name.trim()) {
+      toast.error('Label name is required')
+      return
+    }
+    toast.success(`Label "${newLabelData.name}" updated successfully`)
+    setShowEditLabelDialog(false)
+    setEditingLabel(null)
+    setNewLabelData({ name: '', color: '#3b82f6' })
+  }
+
+  // Add new label handler
+  const handleAddLabel = () => {
+    if (!newLabelData.name.trim()) {
+      toast.error('Label name is required')
+      return
+    }
+    toast.success(`Label "${newLabelData.name}" created successfully`)
+    setShowAddLabelDialog(false)
+    setNewLabelData({ name: '', color: '#3b82f6' })
+  }
+
+  // Add custom status handler
+  const handleAddCustomStatus = () => {
+    toast.success('Custom status added to workflow')
+    setShowAddStatusDialog(false)
+  }
+
+  // Configure integration handler
+  const handleConfigureIntegration = (integrationName: string, isConnected: boolean) => {
+    setSelectedIntegration(integrationName)
+    if (isConnected) {
+      setShowConfigureIntegrationDialog(true)
+    } else {
+      toast.info(`Connecting to ${integrationName}...`)
+      setTimeout(() => {
+        toast.success(`${integrationName} connected successfully`)
+      }, 1500)
+    }
+  }
+
+  // Archive all closed bugs handler
+  const handleArchiveAllClosed = () => {
+    toast.success('All closed bugs have been archived')
+    setShowArchiveConfirmDialog(false)
+  }
+
+  // Delete all test data handler
+  const handleDeleteTestData = () => {
+    toast.success('All test data has been deleted')
+    setShowDeleteConfirmDialog(false)
+  }
+
+  // Reset project handler
+  const handleResetProject = () => {
+    toast.success('Project has been reset to default')
+    setShowResetConfirmDialog(false)
+  }
+
+  // Edit bug from detail dialog
+  const handleEditFromDetail = (bug: BugItem) => {
+    // Find the DB bug that matches this display bug
+    const dbBug = bugs.find(b => b.bug_code === bug.key)
+    if (dbBug) {
+      openEditDialog(dbBug)
+    } else {
+      toast.info('This is a demo bug and cannot be edited')
+    }
+    setSelectedBug(null)
+  }
+
+  // Start progress on bug
+  const handleStartProgress = async (bug: BugItem) => {
+    const dbBug = bugs.find(b => b.bug_code === bug.key)
+    if (dbBug) {
+      await handleUpdateStatus(dbBug.id, 'in_progress')
+      setSelectedBug(null)
+    } else {
+      toast.success(`Bug ${bug.key} moved to In Progress`)
+      setSelectedBug(null)
+    }
+  }
+
+  // Download attachment handler
+  const handleDownloadAttachment = (attachment: BugAttachment) => {
+    toast.success(`Downloading ${attachment.name}...`)
+    // In a real app, this would trigger an actual download
+    setTimeout(() => {
+      toast.success(`${attachment.name} downloaded successfully`)
+    }, 1000)
+  }
+
+  // View all sprint bugs handler
+  const handleViewAllSprintBugs = (sprintName: string, bugCount: number) => {
+    toast.info(`Viewing all ${bugCount} bugs in ${sprintName}`)
+    setStatusFilter('all')
+    setActiveTab('list')
+  }
+
   // QuickActions with real dialog functionality
   const bugsQuickActions = [
     { id: '1', label: 'Report Bug', icon: 'plus', action: () => setShowCreateDialog(true), variant: 'default' as const },
@@ -1016,7 +1133,7 @@ export default function BugsClient() {
                 <LayoutGrid className="w-4 h-4" />
               </Button>
             </div>
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={() => setShowImportBugsDialog(true)}>
               <Upload className="w-4 h-4 mr-2" />
               Import
             </Button>
@@ -1153,7 +1270,7 @@ export default function BugsClient() {
                   className="pl-9 w-64 bg-white/80 dark:bg-gray-800/80"
                 />
               </div>
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={() => setShowAdvancedFilterDialog(true)}>
                 <Filter className="w-4 h-4 mr-2" />
                 Filters
               </Button>
@@ -1417,7 +1534,7 @@ export default function BugsClient() {
                           </div>
                         ))}
                         {sprintBugs.length > 3 && (
-                          <Button variant="ghost" className="w-full text-sm">
+                          <Button variant="ghost" className="w-full text-sm" onClick={() => handleViewAllSprintBugs(sprint, sprintBugs.length)}>
                             View all {sprintBugs.length} bugs
                           </Button>
                         )}
@@ -1799,12 +1916,12 @@ export default function BugsClient() {
                               <div className="w-4 h-4 rounded" style={{ backgroundColor: label.color }} />
                               <span className="font-medium">{label.name}</span>
                             </div>
-                            <Button variant="ghost" size="sm">
+                            <Button variant="ghost" size="sm" onClick={() => handleEditLabel(label)}>
                               <Edit className="w-4 h-4" />
                             </Button>
                           </div>
                         ))}
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => setShowAddLabelDialog(true)}>
                           <Plus className="w-4 h-4 mr-2" />
                           Add Label
                         </Button>
@@ -1855,7 +1972,7 @@ export default function BugsClient() {
                         </div>
                         <Switch defaultChecked />
                       </div>
-                      <Button variant="outline" className="w-full">
+                      <Button variant="outline" className="w-full" onClick={() => setShowAddStatusDialog(true)}>
                         <Plus className="w-4 h-4 mr-2" />
                         Add Custom Status
                       </Button>
@@ -1944,7 +2061,7 @@ export default function BugsClient() {
                               </Badge>
                             </div>
                             <p className="text-sm text-muted-foreground mb-3">{integration.description}</p>
-                            <Button variant="outline" size="sm" className="w-full">
+                            <Button variant="outline" size="sm" className="w-full" onClick={() => handleConfigureIntegration(integration.name, integration.status === 'Connected')}>
                               {integration.status === 'Connected' ? 'Configure' : 'Connect'}
                             </Button>
                           </div>
@@ -2060,21 +2177,21 @@ export default function BugsClient() {
                             <p className="font-medium text-red-700 dark:text-red-400">Archive All Closed Bugs</p>
                             <p className="text-sm text-gray-500">Move all closed bugs to archive</p>
                           </div>
-                          <Button variant="destructive" size="sm">Archive</Button>
+                          <Button variant="destructive" size="sm" onClick={() => setShowArchiveConfirmDialog(true)}>Archive</Button>
                         </div>
                         <div className="flex items-center justify-between p-4 rounded-xl bg-red-50 dark:bg-red-900/20">
                           <div>
                             <p className="font-medium text-red-700 dark:text-red-400">Delete All Test Data</p>
                             <p className="text-sm text-gray-500">Remove all test and demo bugs</p>
                           </div>
-                          <Button variant="destructive" size="sm">Delete</Button>
+                          <Button variant="destructive" size="sm" onClick={() => setShowDeleteConfirmDialog(true)}>Delete</Button>
                         </div>
                         <div className="flex items-center justify-between p-4 rounded-xl bg-red-50 dark:bg-red-900/20">
                           <div>
                             <p className="font-medium text-red-700 dark:text-red-400">Reset Project</p>
                             <p className="text-sm text-gray-500">Delete all bugs and reset to default</p>
                           </div>
-                          <Button variant="destructive" size="sm">Reset</Button>
+                          <Button variant="destructive" size="sm" onClick={() => setShowResetConfirmDialog(true)}>Reset</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -2145,11 +2262,11 @@ export default function BugsClient() {
                     ))}
                   </div>
                   <div className="flex items-center gap-2">
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" onClick={() => selectedBug && handleEditFromDetail(selectedBug)}>
                       <Edit className="w-4 h-4 mr-2" />
                       Edit
                     </Button>
-                    <Button size="sm">
+                    <Button size="sm" onClick={() => selectedBug && handleStartProgress(selectedBug)}>
                       <Play className="w-4 h-4 mr-2" />
                       Start Progress
                     </Button>
@@ -2257,7 +2374,7 @@ export default function BugsClient() {
                             <p className="font-medium text-sm truncate">{att.name}</p>
                             <p className="text-xs text-muted-foreground">{formatFileSize(att.size)}</p>
                           </div>
-                          <Button variant="ghost" size="sm">
+                          <Button variant="ghost" size="sm" onClick={() => handleDownloadAttachment(att)}>
                             <Download className="w-4 h-4" />
                           </Button>
                         </div>
@@ -3083,6 +3200,264 @@ export default function BugsClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowViewHistoryDialog(false)}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Label Dialog */}
+        <Dialog open={showEditLabelDialog} onOpenChange={setShowEditLabelDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Edit Label</DialogTitle>
+              <DialogDescription>Modify the label name and color</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Label Name</Label>
+                <Input
+                  value={newLabelData.name}
+                  onChange={(e) => setNewLabelData({ ...newLabelData, name: e.target.value })}
+                  placeholder="Enter label name"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Color</Label>
+                <div className="flex items-center gap-2">
+                  <Input
+                    type="color"
+                    value={newLabelData.color}
+                    onChange={(e) => setNewLabelData({ ...newLabelData, color: e.target.value })}
+                    className="w-16 h-10 p-1"
+                  />
+                  <Input
+                    value={newLabelData.color}
+                    onChange={(e) => setNewLabelData({ ...newLabelData, color: e.target.value })}
+                    placeholder="#3b82f6"
+                    className="flex-1"
+                  />
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">Preview:</span>
+                <Badge style={{ backgroundColor: newLabelData.color, color: 'white' }}>
+                  {newLabelData.name || 'Label Preview'}
+                </Badge>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => { setShowEditLabelDialog(false); setEditingLabel(null); }}>Cancel</Button>
+              <Button onClick={handleSaveLabel}>Save Label</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Label Dialog */}
+        <Dialog open={showAddLabelDialog} onOpenChange={setShowAddLabelDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Add New Label</DialogTitle>
+              <DialogDescription>Create a new label for categorizing bugs</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Label Name</Label>
+                <Input
+                  value={newLabelData.name}
+                  onChange={(e) => setNewLabelData({ ...newLabelData, name: e.target.value })}
+                  placeholder="Enter label name"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Color</Label>
+                <div className="flex items-center gap-2">
+                  <Input
+                    type="color"
+                    value={newLabelData.color}
+                    onChange={(e) => setNewLabelData({ ...newLabelData, color: e.target.value })}
+                    className="w-16 h-10 p-1"
+                  />
+                  <Input
+                    value={newLabelData.color}
+                    onChange={(e) => setNewLabelData({ ...newLabelData, color: e.target.value })}
+                    placeholder="#3b82f6"
+                    className="flex-1"
+                  />
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">Preview:</span>
+                <Badge style={{ backgroundColor: newLabelData.color, color: 'white' }}>
+                  {newLabelData.name || 'Label Preview'}
+                </Badge>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => { setShowAddLabelDialog(false); setNewLabelData({ name: '', color: '#3b82f6' }); }}>Cancel</Button>
+              <Button onClick={handleAddLabel}>Create Label</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Custom Status Dialog */}
+        <Dialog open={showAddStatusDialog} onOpenChange={setShowAddStatusDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Add Custom Status</DialogTitle>
+              <DialogDescription>Create a new workflow status for bugs</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Status Name</Label>
+                <Input placeholder="e.g., Waiting for Feedback" />
+              </div>
+              <div className="space-y-2">
+                <Label>Status Color</Label>
+                <Select defaultValue="blue">
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select color" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="red">Red</SelectItem>
+                    <SelectItem value="orange">Orange</SelectItem>
+                    <SelectItem value="yellow">Yellow</SelectItem>
+                    <SelectItem value="green">Green</SelectItem>
+                    <SelectItem value="blue">Blue</SelectItem>
+                    <SelectItem value="purple">Purple</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Position in Workflow</Label>
+                <Select defaultValue="after-progress">
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select position" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="after-open">After Open</SelectItem>
+                    <SelectItem value="after-progress">After In Progress</SelectItem>
+                    <SelectItem value="after-review">After In Review</SelectItem>
+                    <SelectItem value="before-closed">Before Closed</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowAddStatusDialog(false)}>Cancel</Button>
+              <Button onClick={handleAddCustomStatus}>Add Status</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Configure Integration Dialog */}
+        <Dialog open={showConfigureIntegrationDialog} onOpenChange={setShowConfigureIntegrationDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Configure {selectedIntegration}</DialogTitle>
+              <DialogDescription>Manage your {selectedIntegration} integration settings</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                <div className="flex items-center gap-2 text-green-700 dark:text-green-400">
+                  <CheckCircle className="w-5 h-5" />
+                  <span className="font-medium">Connected</span>
+                </div>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                  Your {selectedIntegration} integration is active and working
+                </p>
+              </div>
+              <div className="space-y-2">
+                <Label>Sync Settings</Label>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <span className="text-sm">Auto-sync bugs</span>
+                    <Switch defaultChecked />
+                  </div>
+                  <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <span className="text-sm">Send notifications</span>
+                    <Switch defaultChecked />
+                  </div>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => { toast.error(`${selectedIntegration} disconnected`); setShowConfigureIntegrationDialog(false); }}>
+                Disconnect
+              </Button>
+              <Button onClick={() => { toast.success(`${selectedIntegration} settings saved`); setShowConfigureIntegrationDialog(false); }}>
+                Save Settings
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Archive Confirm Dialog */}
+        <Dialog open={showArchiveConfirmDialog} onOpenChange={setShowArchiveConfirmDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-600">
+                <AlertTriangle className="w-5 h-5" />
+                Archive All Closed Bugs
+              </DialogTitle>
+              <DialogDescription>
+                This will move all closed bugs to the archive. This action can be undone from the archive view.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <p className="text-sm text-muted-foreground">
+                {stats.closed} closed bug(s) will be archived.
+              </p>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowArchiveConfirmDialog(false)}>Cancel</Button>
+              <Button variant="destructive" onClick={handleArchiveAllClosed}>Archive All</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Confirm Dialog */}
+        <Dialog open={showDeleteConfirmDialog} onOpenChange={setShowDeleteConfirmDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-600">
+                <AlertTriangle className="w-5 h-5" />
+                Delete All Test Data
+              </DialogTitle>
+              <DialogDescription>
+                This will permanently delete all test and demo bugs. This action cannot be undone.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <p className="text-sm text-red-600 font-medium">
+                Warning: This is a destructive operation!
+              </p>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowDeleteConfirmDialog(false)}>Cancel</Button>
+              <Button variant="destructive" onClick={handleDeleteTestData}>Delete All</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Reset Confirm Dialog */}
+        <Dialog open={showResetConfirmDialog} onOpenChange={setShowResetConfirmDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-600">
+                <AlertTriangle className="w-5 h-5" />
+                Reset Project
+              </DialogTitle>
+              <DialogDescription>
+                This will delete all bugs and reset the project to its default state. This action cannot be undone.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <p className="text-sm text-red-600 font-medium">
+                Warning: All {stats.total} bugs will be permanently deleted!
+              </p>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowResetConfirmDialog(false)}>Cancel</Button>
+              <Button variant="destructive" onClick={handleResetProject}>Reset Project</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

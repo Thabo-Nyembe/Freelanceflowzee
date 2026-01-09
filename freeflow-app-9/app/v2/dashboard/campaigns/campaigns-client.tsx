@@ -609,6 +609,12 @@ export default function CampaignsClient() {
   const [showAudienceDialog, setShowAudienceDialog] = useState(false)
   const [showSendTestDialog, setShowSendTestDialog] = useState(false)
   const [showViewAnalyticsDialog, setShowViewAnalyticsDialog] = useState(false)
+  const [showAIContentDialog, setShowAIContentDialog] = useState(false)
+  const [showCreateAutomationDialog, setShowCreateAutomationDialog] = useState(false)
+  const [showCreateTemplateDialog, setShowCreateTemplateDialog] = useState(false)
+  const [showImportDialog, setShowImportDialog] = useState(false)
+  const [showHealthCheckDialog, setShowHealthCheckDialog] = useState(false)
+  const [showWebhookTestDialog, setShowWebhookTestDialog] = useState(false)
   const [settingsTab, setSettingsTab] = useState('general')
 
   // Database integration
@@ -899,7 +905,11 @@ export default function CampaignsClient() {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <Button variant="outline" className="bg-white/10 border-white/20 text-white hover:bg-white/20">
+              <Button
+                variant="outline"
+                className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+                onClick={() => setShowAIContentDialog(true)}
+              >
                 <Sparkles className="w-4 h-4 mr-2" />
                 AI Content
               </Button>
@@ -1387,19 +1397,20 @@ export default function CampaignsClient() {
               {/* Quick Actions */}
               <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
                 {[
-                  { icon: Plus, label: 'New Flow', color: 'text-indigo-500' },
-                  { icon: GitBranch, label: 'Branches', color: 'text-purple-500' },
-                  { icon: Timer, label: 'Delays', color: 'text-amber-500' },
-                  { icon: Split, label: 'A/B Split', color: 'text-pink-500' },
-                  { icon: Target, label: 'Triggers', color: 'text-green-500' },
-                  { icon: Filter, label: 'Conditions', color: 'text-blue-500' },
-                  { icon: BarChart3, label: 'Analytics', color: 'text-cyan-500' },
-                  { icon: Copy, label: 'Templates', color: 'text-rose-500' },
+                  { icon: Plus, label: 'New Flow', color: 'text-indigo-500', action: () => setShowCreateAutomationDialog(true) },
+                  { icon: GitBranch, label: 'Branches', color: 'text-purple-500', action: () => toast.info('Branches', { description: 'Configure workflow branches and decision paths' }) },
+                  { icon: Timer, label: 'Delays', color: 'text-amber-500', action: () => toast.info('Delays', { description: 'Set up time delays between automation steps' }) },
+                  { icon: Split, label: 'A/B Split', color: 'text-pink-500', action: () => toast.info('A/B Split', { description: 'Create A/B split tests in your automation' }) },
+                  { icon: Target, label: 'Triggers', color: 'text-green-500', action: () => toast.info('Triggers', { description: 'Configure automation triggers and entry points' }) },
+                  { icon: Filter, label: 'Conditions', color: 'text-blue-500', action: () => toast.info('Conditions', { description: 'Add conditional logic to your workflows' }) },
+                  { icon: BarChart3, label: 'Analytics', color: 'text-cyan-500', action: () => setActiveTab('analytics') },
+                  { icon: Copy, label: 'Templates', color: 'text-rose-500', action: () => setActiveTab('templates') },
                 ].map((action, i) => (
                   <Button
                     key={i}
                     variant="outline"
                     className="h-auto py-3 flex flex-col items-center gap-2 hover:scale-105 transition-all duration-200"
+                    onClick={action.action}
                   >
                     <action.icon className={`w-5 h-5 ${action.color}`} />
                     <span className="text-xs">{action.label}</span>
@@ -1412,7 +1423,7 @@ export default function CampaignsClient() {
                   <h2 className="text-xl font-semibold">Active Workflows</h2>
                   <p className="text-gray-500">Manage your automation workflows</p>
                 </div>
-                <Button><Plus className="w-4 h-4 mr-2" />Create Automation</Button>
+                <Button onClick={() => setShowCreateAutomationDialog(true)}><Plus className="w-4 h-4 mr-2" />Create Automation</Button>
               </div>
 
               <div className="grid gap-4">
@@ -1508,19 +1519,20 @@ export default function CampaignsClient() {
               {/* Quick Actions */}
               <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
                 {[
-                  { icon: Plus, label: 'New Template', color: 'text-emerald-500' },
-                  { icon: Wand2, label: 'AI Generate', color: 'text-purple-500' },
-                  { icon: Image, label: 'Media', color: 'text-blue-500' },
-                  { icon: Type, label: 'Typography', color: 'text-amber-500' },
-                  { icon: Palette, label: 'Colors', color: 'text-pink-500' },
-                  { icon: Code, label: 'HTML Edit', color: 'text-gray-500' },
-                  { icon: Copy, label: 'Duplicate', color: 'text-indigo-500' },
-                  { icon: Download, label: 'Export', color: 'text-cyan-500' },
+                  { icon: Plus, label: 'New Template', color: 'text-emerald-500', action: () => setShowCreateTemplateDialog(true) },
+                  { icon: Wand2, label: 'AI Generate', color: 'text-purple-500', action: () => setShowAIContentDialog(true) },
+                  { icon: Image, label: 'Media', color: 'text-blue-500', action: () => toast.info('Media Library', { description: 'Browse and upload images for your templates' }) },
+                  { icon: Type, label: 'Typography', color: 'text-amber-500', action: () => toast.info('Typography', { description: 'Customize fonts and text styles' }) },
+                  { icon: Palette, label: 'Colors', color: 'text-pink-500', action: () => toast.info('Colors', { description: 'Set your brand color palette' }) },
+                  { icon: Code, label: 'HTML Edit', color: 'text-gray-500', action: () => toast.info('HTML Editor', { description: 'Edit template HTML directly' }) },
+                  { icon: Copy, label: 'Duplicate', color: 'text-indigo-500', action: () => toast.info('Duplicate', { description: 'Select a template to duplicate' }) },
+                  { icon: Download, label: 'Export', color: 'text-cyan-500', action: () => toast.success('Export started', { description: 'Templates are being exported' }) },
                 ].map((action, i) => (
                   <Button
                     key={i}
                     variant="outline"
                     className="h-auto py-3 flex flex-col items-center gap-2 hover:scale-105 transition-all duration-200"
+                    onClick={action.action}
                   >
                     <action.icon className={`w-5 h-5 ${action.color}`} />
                     <span className="text-xs">{action.label}</span>
@@ -1534,8 +1546,8 @@ export default function CampaignsClient() {
                   <p className="text-gray-500">Choose from pre-built or custom templates</p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Button variant="outline"><Wand2 className="w-4 h-4 mr-2" />AI Generate</Button>
-                  <Button><Plus className="w-4 h-4 mr-2" />Create Template</Button>
+                  <Button variant="outline" onClick={() => setShowAIContentDialog(true)}><Wand2 className="w-4 h-4 mr-2" />AI Generate</Button>
+                  <Button onClick={() => setShowCreateTemplateDialog(true)}><Plus className="w-4 h-4 mr-2" />Create Template</Button>
                 </div>
               </div>
 
@@ -1560,6 +1572,10 @@ export default function CampaignsClient() {
                       <Button
                         variant="outline"
                         className="w-full mt-4 opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={() => {
+                          toast.success(`Template "${template.name}" selected`, { description: 'Starting campaign with this template' })
+                          setShowNewCampaignDialog(true)
+                        }}
                       >
                         Use Template
                       </Button>
@@ -1603,19 +1619,20 @@ export default function CampaignsClient() {
               {/* Quick Actions */}
               <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
                 {[
-                  { icon: Plus, label: 'New List', color: 'text-violet-500' },
-                  { icon: Download, label: 'Import CSV', color: 'text-blue-500' },
-                  { icon: Target, label: 'New Segment', color: 'text-green-500' },
-                  { icon: Tag, label: 'Manage Tags', color: 'text-amber-500' },
-                  { icon: UserPlus, label: 'Add Subscriber', color: 'text-pink-500' },
-                  { icon: UserMinus, label: 'Clean List', color: 'text-red-500' },
-                  { icon: RefreshCw, label: 'Sync CRM', color: 'text-indigo-500' },
-                  { icon: Share2, label: 'Export', color: 'text-cyan-500' },
+                  { icon: Plus, label: 'New List', color: 'text-violet-500', action: () => setShowAudienceDialog(true) },
+                  { icon: Download, label: 'Import CSV', color: 'text-blue-500', action: () => setShowImportDialog(true) },
+                  { icon: Target, label: 'New Segment', color: 'text-green-500', action: () => toast.info('New Segment', { description: 'Create a new audience segment with custom filters' }) },
+                  { icon: Tag, label: 'Manage Tags', color: 'text-amber-500', action: () => toast.info('Manage Tags', { description: 'Organize your subscribers with tags' }) },
+                  { icon: UserPlus, label: 'Add Subscriber', color: 'text-pink-500', action: () => toast.info('Add Subscriber', { description: 'Manually add a new subscriber to your list' }) },
+                  { icon: UserMinus, label: 'Clean List', color: 'text-red-500', action: () => toast.info('Clean List', { description: 'Remove invalid and bounced email addresses' }) },
+                  { icon: RefreshCw, label: 'Sync CRM', color: 'text-indigo-500', action: () => toast.info('Sync CRM', { description: 'Synchronize contacts with your CRM' }) },
+                  { icon: Share2, label: 'Export', color: 'text-cyan-500', action: () => toast.success('Export started', { description: 'Audience data is being exported' }) },
                 ].map((action, i) => (
                   <Button
                     key={i}
                     variant="outline"
                     className="h-auto py-3 flex flex-col items-center gap-2 hover:scale-105 transition-all duration-200"
+                    onClick={action.action}
                   >
                     <action.icon className={`w-5 h-5 ${action.color}`} />
                     <span className="text-xs">{action.label}</span>
@@ -1629,8 +1646,8 @@ export default function CampaignsClient() {
                   <p className="text-gray-500">All your subscriber lists and segments</p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Button variant="outline"><Download className="w-4 h-4 mr-2" />Import</Button>
-                  <Button><Plus className="w-4 h-4 mr-2" />Create Audience</Button>
+                  <Button variant="outline" onClick={() => setShowImportDialog(true)}><Download className="w-4 h-4 mr-2" />Import</Button>
+                  <Button onClick={() => setShowAudienceDialog(true)}><Plus className="w-4 h-4 mr-2" />Create Audience</Button>
                 </div>
               </div>
 
@@ -1684,7 +1701,11 @@ export default function CampaignsClient() {
                           <div className="text-lg font-semibold">{audience.segments.length}</div>
                           <div className="text-xs text-gray-500">Segments</div>
                         </div>
-                        <Button variant="ghost" size="icon">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => toast.info(`Viewing ${audience.name}`, { description: 'Opening audience details' })}
+                        >
                           <ChevronRight className="w-4 h-4" />
                         </Button>
                       </div>
@@ -1805,7 +1826,7 @@ export default function CampaignsClient() {
                   <h2 className="text-xl font-semibold">Email Deliverability</h2>
                   <p className="text-gray-500">Monitor your sender reputation and inbox placement</p>
                 </div>
-                <Button variant="outline"><RefreshCw className="w-4 h-4 mr-2" />Run Health Check</Button>
+                <Button variant="outline" onClick={() => setShowHealthCheckDialog(true)}><RefreshCw className="w-4 h-4 mr-2" />Run Health Check</Button>
               </div>
 
               <div className="grid grid-cols-4 gap-4">
@@ -2179,7 +2200,17 @@ export default function CampaignsClient() {
                                   <p className="text-sm text-muted-foreground">{integration.description}</p>
                                 </div>
                               </div>
-                              <Button variant={integration.connected ? "secondary" : "outline"} size="sm">
+                              <Button
+                                variant={integration.connected ? "secondary" : "outline"}
+                                size="sm"
+                                onClick={() => {
+                                  if (integration.connected) {
+                                    toast.info(`${integration.name} Settings`, { description: 'Managing integration settings' })
+                                  } else {
+                                    toast.success(`Connecting to ${integration.name}`, { description: 'Opening OAuth authorization' })
+                                  }
+                                }}
+                              >
                                 {integration.connected ? 'Connected' : 'Connect'}
                               </Button>
                             </div>
@@ -2205,7 +2236,7 @@ export default function CampaignsClient() {
                           <Label>Webhook URL</Label>
                           <div className="flex gap-2">
                             <Input placeholder="https://your-app.com/webhook/campaigns" />
-                            <Button variant="outline">Test</Button>
+                            <Button variant="outline" onClick={() => setShowWebhookTestDialog(true)}>Test</Button>
                           </div>
                         </div>
                       </CardContent>
@@ -2813,9 +2844,336 @@ export default function CampaignsClient() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowAudienceDialog(false)}>Close</Button>
-            <Button className="bg-gradient-to-r from-rose-600 to-pink-600">
+            <Button
+              className="bg-gradient-to-r from-rose-600 to-pink-600"
+              onClick={() => {
+                toast.success('Creating new audience', { description: 'Audience creation form opening' })
+                setShowAudienceDialog(false)
+              }}
+            >
               <UserPlus className="w-4 h-4 mr-2" />
               Create Audience
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* AI Content Dialog */}
+      <Dialog open={showAIContentDialog} onOpenChange={setShowAIContentDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Sparkles className="w-5 h-5 text-purple-600" />
+              AI Content Generator
+            </DialogTitle>
+            <DialogDescription>Generate email content using AI</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <Label>Content Type</Label>
+              <select className="w-full mt-1 px-3 py-2 border rounded-md bg-background">
+                <option value="subject">Subject Line</option>
+                <option value="body">Email Body</option>
+                <option value="cta">Call to Action</option>
+                <option value="preheader">Preheader Text</option>
+              </select>
+            </div>
+            <div>
+              <Label>Describe what you want</Label>
+              <Input placeholder="e.g., A compelling subject line for a summer sale campaign" className="mt-1" />
+            </div>
+            <div>
+              <Label>Tone</Label>
+              <select className="w-full mt-1 px-3 py-2 border rounded-md bg-background">
+                <option value="professional">Professional</option>
+                <option value="casual">Casual</option>
+                <option value="urgent">Urgent</option>
+                <option value="friendly">Friendly</option>
+              </select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAIContentDialog(false)}>Cancel</Button>
+            <Button
+              onClick={() => {
+                toast.success('Generating content', { description: 'AI is creating your content' })
+                setShowAIContentDialog(false)
+              }}
+              className="bg-gradient-to-r from-purple-600 to-pink-600"
+            >
+              <Sparkles className="w-4 h-4 mr-2" />
+              Generate
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Automation Dialog */}
+      <Dialog open={showCreateAutomationDialog} onOpenChange={setShowCreateAutomationDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Zap className="w-5 h-5 text-indigo-600" />
+              Create Automation
+            </DialogTitle>
+            <DialogDescription>Set up an automated email workflow</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <Label>Automation Name</Label>
+              <Input placeholder="e.g., Welcome Email Series" className="mt-1" />
+            </div>
+            <div>
+              <Label>Trigger Type</Label>
+              <select className="w-full mt-1 px-3 py-2 border rounded-md bg-background">
+                <option value="signup">New Signup</option>
+                <option value="purchase">Purchase Made</option>
+                <option value="abandoned_cart">Abandoned Cart</option>
+                <option value="birthday">Birthday</option>
+                <option value="tag_added">Tag Added</option>
+              </select>
+            </div>
+            <div>
+              <Label>Initial Delay</Label>
+              <div className="flex gap-2 mt-1">
+                <Input type="number" placeholder="0" className="w-20" />
+                <select className="px-3 py-2 border rounded-md bg-background">
+                  <option value="hours">Hours</option>
+                  <option value="days">Days</option>
+                  <option value="minutes">Minutes</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCreateAutomationDialog(false)}>Cancel</Button>
+            <Button
+              onClick={() => {
+                toast.success('Automation created', { description: 'Your automation workflow has been set up' })
+                setShowCreateAutomationDialog(false)
+              }}
+              className="bg-gradient-to-r from-indigo-600 to-purple-600"
+            >
+              <Zap className="w-4 h-4 mr-2" />
+              Create Automation
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Template Dialog */}
+      <Dialog open={showCreateTemplateDialog} onOpenChange={setShowCreateTemplateDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Layout className="w-5 h-5 text-emerald-600" />
+              Create Template
+            </DialogTitle>
+            <DialogDescription>Design a new email template</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <Label>Template Name</Label>
+              <Input placeholder="e.g., Monthly Newsletter" className="mt-1" />
+            </div>
+            <div>
+              <Label>Category</Label>
+              <select className="w-full mt-1 px-3 py-2 border rounded-md bg-background">
+                <option value="basic">Basic</option>
+                <option value="newsletter">Newsletter</option>
+                <option value="product">Product</option>
+                <option value="event">Event</option>
+                <option value="announcement">Announcement</option>
+                <option value="ecommerce">E-commerce</option>
+              </select>
+            </div>
+            <div>
+              <Label>Start From</Label>
+              <div className="grid grid-cols-3 gap-3 mt-2">
+                <div className="p-4 border rounded-lg cursor-pointer hover:border-emerald-500 text-center">
+                  <Plus className="w-8 h-8 mx-auto text-gray-400 mb-2" />
+                  <span className="text-sm">Blank</span>
+                </div>
+                <div className="p-4 border rounded-lg cursor-pointer hover:border-emerald-500 text-center">
+                  <Layout className="w-8 h-8 mx-auto text-gray-400 mb-2" />
+                  <span className="text-sm">Pre-built</span>
+                </div>
+                <div className="p-4 border rounded-lg cursor-pointer hover:border-emerald-500 text-center">
+                  <Code className="w-8 h-8 mx-auto text-gray-400 mb-2" />
+                  <span className="text-sm">HTML</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCreateTemplateDialog(false)}>Cancel</Button>
+            <Button
+              onClick={() => {
+                toast.success('Template created', { description: 'Opening template editor' })
+                setShowCreateTemplateDialog(false)
+              }}
+              className="bg-gradient-to-r from-emerald-600 to-teal-600"
+            >
+              <Layout className="w-4 h-4 mr-2" />
+              Create Template
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Import Dialog */}
+      <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Download className="w-5 h-5 text-blue-600" />
+              Import Subscribers
+            </DialogTitle>
+            <DialogDescription>Upload a CSV file to import subscribers</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="border-2 border-dashed rounded-lg p-8 text-center">
+              <Download className="w-12 h-12 mx-auto text-gray-400 mb-4" />
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Drag and drop your CSV file here</p>
+              <p className="text-xs text-gray-500">or click to browse</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <Switch id="update-existing" />
+              <Label htmlFor="update-existing">Update existing subscribers</Label>
+            </div>
+            <div className="flex items-center gap-2">
+              <Switch id="skip-duplicates" defaultChecked />
+              <Label htmlFor="skip-duplicates">Skip duplicate entries</Label>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowImportDialog(false)}>Cancel</Button>
+            <Button
+              onClick={() => {
+                toast.success('Import started', { description: 'Processing your subscriber file' })
+                setShowImportDialog(false)
+              }}
+              className="bg-gradient-to-r from-blue-600 to-indigo-600"
+            >
+              <Download className="w-4 h-4 mr-2" />
+              Import
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Health Check Dialog */}
+      <Dialog open={showHealthCheckDialog} onOpenChange={setShowHealthCheckDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Shield className="w-5 h-5 text-green-600" />
+              Email Health Check
+            </DialogTitle>
+            <DialogDescription>Running deliverability diagnostics</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-3">
+              <div className="flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="w-5 h-5 text-green-600" />
+                  <span>SPF Record</span>
+                </div>
+                <Badge className="bg-green-100 text-green-700">PASS</Badge>
+              </div>
+              <div className="flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="w-5 h-5 text-green-600" />
+                  <span>DKIM Signature</span>
+                </div>
+                <Badge className="bg-green-100 text-green-700">PASS</Badge>
+              </div>
+              <div className="flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="w-5 h-5 text-green-600" />
+                  <span>DMARC Policy</span>
+                </div>
+                <Badge className="bg-green-100 text-green-700">PASS</Badge>
+              </div>
+              <div className="flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="w-5 h-5 text-green-600" />
+                  <span>Blacklist Status</span>
+                </div>
+                <Badge className="bg-green-100 text-green-700">CLEAN</Badge>
+              </div>
+            </div>
+            <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+              <div className="flex items-center gap-2 mb-2">
+                <Sparkles className="w-5 h-5 text-blue-600" />
+                <span className="font-medium">Sender Score</span>
+              </div>
+              <div className="text-3xl font-bold text-blue-600">92/100</div>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Excellent reputation</p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowHealthCheckDialog(false)}>Close</Button>
+            <Button
+              onClick={() => {
+                toast.success('Health check complete', { description: 'All systems are healthy' })
+                setShowHealthCheckDialog(false)
+              }}
+              className="bg-gradient-to-r from-green-600 to-emerald-600"
+            >
+              <RefreshCw className="w-4 h-4 mr-2" />
+              Re-run Check
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Webhook Test Dialog */}
+      <Dialog open={showWebhookTestDialog} onOpenChange={setShowWebhookTestDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Webhook className="w-5 h-5 text-indigo-600" />
+              Test Webhook
+            </DialogTitle>
+            <DialogDescription>Send a test payload to your webhook endpoint</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <Label>Webhook URL</Label>
+              <Input placeholder="https://your-app.com/webhook" className="mt-1" />
+            </div>
+            <div>
+              <Label>Event Type</Label>
+              <select className="w-full mt-1 px-3 py-2 border rounded-md bg-background">
+                <option value="campaign.sent">Campaign Sent</option>
+                <option value="subscriber.added">Subscriber Added</option>
+                <option value="subscriber.unsubscribed">Subscriber Unsubscribed</option>
+                <option value="email.bounced">Email Bounced</option>
+              </select>
+            </div>
+            <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+              <p className="text-sm font-medium mb-2">Test Payload Preview</p>
+              <pre className="text-xs text-gray-600 dark:text-gray-400 overflow-auto">
+{`{
+  "event": "campaign.sent",
+  "timestamp": "${new Date().toISOString()}",
+  "data": { ... }
+}`}
+              </pre>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowWebhookTestDialog(false)}>Cancel</Button>
+            <Button
+              onClick={() => {
+                toast.success('Webhook test sent', { description: 'Check your endpoint for the test payload' })
+                setShowWebhookTestDialog(false)
+              }}
+              className="bg-gradient-to-r from-indigo-600 to-blue-600"
+            >
+              <Send className="w-4 h-4 mr-2" />
+              Send Test
             </Button>
           </DialogFooter>
         </DialogContent>

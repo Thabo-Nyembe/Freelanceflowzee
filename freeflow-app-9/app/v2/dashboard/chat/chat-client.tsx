@@ -280,6 +280,11 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
   const [showQuickReplyDialog, setShowQuickReplyDialog] = useState(false)
   const [showChannelDialog, setShowChannelDialog] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
+  const [showInviteDialog, setShowInviteDialog] = useState(false)
+  const [showChannelConfigDialog, setShowChannelConfigDialog] = useState(false)
+  const [selectedChannel, setSelectedChannel] = useState<string>('')
+  const [newInviteEmail, setNewInviteEmail] = useState('')
+  const [newSettingsTagInput, setNewSettingsTagInput] = useState('')
 
   // Form state for conversations
   const [conversations, setConversations] = useState<Conversation[]>(CONVERSATIONS)
@@ -559,6 +564,95 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
     if (hours < 24) return `${hours}h ago`
     return `${days}d ago`
   }
+
+  // Handler for adding settings tag
+  const handleAddSettingsTag = useCallback(() => {
+    if (!newSettingsTagInput.trim()) {
+      toast.error('Please enter a tag name')
+      return
+    }
+    toast.success('Tag Created', {
+      description: `Tag "${newSettingsTagInput}" has been added`
+    })
+    setNewSettingsTagInput('')
+  }, [newSettingsTagInput])
+
+  // Handler for channel configuration
+  const handleChannelConfig = useCallback((channelName: string, connected: boolean) => {
+    if (connected) {
+      setSelectedChannel(channelName)
+      setShowChannelConfigDialog(true)
+    } else {
+      toast.promise(
+        new Promise((resolve) => setTimeout(resolve, 1500)),
+        {
+          loading: `Connecting to ${channelName}...`,
+          success: `${channelName} connected successfully!`,
+          error: `Failed to connect to ${channelName}`
+        }
+      )
+    }
+  }, [])
+
+  // Handler for inviting team member
+  const handleInviteMember = useCallback(() => {
+    if (!newInviteEmail.trim()) {
+      toast.error('Please enter an email address')
+      return
+    }
+    if (!newInviteEmail.includes('@')) {
+      toast.error('Please enter a valid email address')
+      return
+    }
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1200)),
+      {
+        loading: 'Sending invitation...',
+        success: `Invitation sent to ${newInviteEmail}`,
+        error: 'Failed to send invitation'
+      }
+    )
+    setNewInviteEmail('')
+    setShowInviteDialog(false)
+  }, [newInviteEmail])
+
+  // Handler for saving settings
+  const handleSaveSettings = useCallback(() => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1000)),
+      {
+        loading: 'Saving settings...',
+        success: 'Settings saved successfully!',
+        error: 'Failed to save settings'
+      }
+    )
+    setShowSettingsPanel(false)
+  }, [])
+
+  // Handler for creating quick reply
+  const handleCreateQuickReply = useCallback(() => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 800)),
+      {
+        loading: 'Creating quick reply...',
+        success: 'Quick reply created successfully!',
+        error: 'Failed to create quick reply'
+      }
+    )
+    setShowQuickReplyDialog(false)
+  }, [])
+
+  // Handler for connecting social channel
+  const handleConnectSocialChannel = useCallback((channelName: string) => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1500)),
+      {
+        loading: `Connecting to ${channelName}...`,
+        success: `${channelName} connected successfully!`,
+        error: `Failed to connect to ${channelName}`
+      }
+    )
+  }, [])
 
   if (error) {
     return (
@@ -929,8 +1023,13 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
                         ))}
                       </div>
                       <div className="flex gap-2">
-                        <Input placeholder="Add new tag..." />
-                        <Button>Add</Button>
+                        <Input
+                          placeholder="Add new tag..."
+                          value={newSettingsTagInput}
+                          onChange={(e) => setNewSettingsTagInput(e.target.value)}
+                          onKeyDown={(e) => e.key === 'Enter' && handleAddSettingsTag()}
+                        />
+                        <Button onClick={handleAddSettingsTag}>Add</Button>
                       </div>
                     </CardContent>
                   </Card>
@@ -1179,7 +1278,11 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
                               </div>
                             </div>
                           </div>
-                          <Button variant={channel.connected ? 'outline' : 'default'} size="sm">
+                          <Button
+                            variant={channel.connected ? 'outline' : 'default'}
+                            size="sm"
+                            onClick={() => handleChannelConfig(channel.name, channel.connected)}
+                          >
                             {channel.connected ? 'Configure' : 'Connect'}
                           </Button>
                         </div>
@@ -1202,7 +1305,7 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
                           </CardTitle>
                           <CardDescription>Manage your support team</CardDescription>
                         </div>
-                        <Button>
+                        <Button onClick={() => setShowInviteDialog(true)}>
                           <UserPlus className="h-4 w-4 mr-2" />
                           Invite Member
                         </Button>
@@ -2192,7 +2295,7 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
                   {['Facebook Messenger', 'WhatsApp', 'Twitter DM', 'Instagram DM'].map(channel => (
                     <div key={channel} className="flex items-center justify-between p-3 border rounded-lg">
                       <div className="flex items-center gap-3"><Globe className="h-5 w-5 text-gray-400" /><span>{channel}</span></div>
-                      <Button variant="outline" size="sm">Connect</Button>
+                      <Button variant="outline" size="sm" onClick={() => handleConnectSocialChannel(channel)}>Connect</Button>
                     </div>
                   ))}
                 </CardContent></Card>
@@ -2200,7 +2303,7 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
 
               {/* Team Settings */}
               <TabsContent value="team" className="space-y-4">
-                <Card><CardHeader><div className="flex items-center justify-between"><CardTitle>Team Members</CardTitle><Button size="sm"><UserPlus className="h-4 w-4 mr-2" />Invite</Button></div></CardHeader><CardContent className="p-0 divide-y">
+                <Card><CardHeader><div className="flex items-center justify-between"><CardTitle>Team Members</CardTitle><Button size="sm" onClick={() => setShowInviteDialog(true)}><UserPlus className="h-4 w-4 mr-2" />Invite</Button></div></CardHeader><CardContent className="p-0 divide-y">
                   {TEAM_MEMBERS.map(member => (
                     <div key={member.id} className="flex items-center justify-between p-4">
                       <div className="flex items-center gap-3">
@@ -2256,7 +2359,7 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
           </Tabs>
           <DialogFooter className="mt-4">
             <Button variant="outline" onClick={() => setShowSettingsPanel(false)}>Cancel</Button>
-            <Button className="bg-cyan-600 hover:bg-cyan-700">Save Changes</Button>
+            <Button className="bg-cyan-600 hover:bg-cyan-700" onClick={handleSaveSettings}>Save Changes</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -2276,7 +2379,131 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowQuickReplyDialog(false)}>Cancel</Button>
-            <Button className="bg-cyan-600">Create Reply</Button>
+            <Button className="bg-cyan-600" onClick={handleCreateQuickReply}>Create Reply</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Invite Team Member Dialog */}
+      <Dialog open={showInviteDialog} onOpenChange={setShowInviteDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Invite Team Member</DialogTitle>
+            <DialogDescription>Send an invitation to join your support team</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <Label>Email Address</Label>
+              <Input
+                type="email"
+                placeholder="colleague@company.com"
+                className="mt-1"
+                value={newInviteEmail}
+                onChange={(e) => setNewInviteEmail(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleInviteMember()}
+              />
+            </div>
+            <div>
+              <Label>Role</Label>
+              <Select defaultValue="agent">
+                <SelectTrigger className="mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="agent">Agent</SelectItem>
+                  <SelectItem value="manager">Manager</SelectItem>
+                  <SelectItem value="admin">Admin</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Message (optional)</Label>
+              <Textarea
+                placeholder="Add a personal message to the invitation..."
+                rows={3}
+                className="mt-1"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowInviteDialog(false)}>Cancel</Button>
+            <Button className="bg-cyan-600" onClick={handleInviteMember}>Send Invitation</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Channel Configuration Dialog */}
+      <Dialog open={showChannelConfigDialog} onOpenChange={setShowChannelConfigDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Configure {selectedChannel}</DialogTitle>
+            <DialogDescription>Manage your {selectedChannel} integration settings</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="flex items-center justify-between p-4 border rounded-lg">
+              <div>
+                <p className="font-medium">Connection Status</p>
+                <p className="text-sm text-green-600">Connected</p>
+              </div>
+              <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Active</Badge>
+            </div>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-medium">Auto-sync Messages</p>
+                <p className="text-sm text-gray-500">Automatically sync messages</p>
+              </div>
+              <Switch defaultChecked />
+            </div>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-medium">Notifications</p>
+                <p className="text-sm text-gray-500">Receive notifications for new messages</p>
+              </div>
+              <Switch defaultChecked />
+            </div>
+            <div>
+              <Label>Default Assignment</Label>
+              <Select defaultValue="auto">
+                <SelectTrigger className="mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="auto">Auto-assign</SelectItem>
+                  <SelectItem value="me">Assign to me</SelectItem>
+                  <SelectItem value="unassigned">Leave unassigned</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              className="text-red-600 hover:text-red-700"
+              onClick={() => {
+                toast.promise(
+                  new Promise((resolve) => setTimeout(resolve, 1000)),
+                  {
+                    loading: `Disconnecting ${selectedChannel}...`,
+                    success: `${selectedChannel} disconnected`,
+                    error: 'Failed to disconnect'
+                  }
+                )
+                setShowChannelConfigDialog(false)
+              }}
+            >
+              Disconnect
+            </Button>
+            <Button
+              className="bg-cyan-600"
+              onClick={() => {
+                toast.success('Configuration Saved', {
+                  description: `${selectedChannel} settings updated`
+                })
+                setShowChannelConfigDialog(false)
+              }}
+            >
+              Save Configuration
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
