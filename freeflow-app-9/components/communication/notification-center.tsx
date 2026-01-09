@@ -261,7 +261,7 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
                             size="sm"
                             variant="ghost"
                             className="w-full justify-start"
-                            onClick={() => console.log('Reply to notification')}
+                            onClick={() => { /* TODO: Implement reply to notification */ }}
                           >
                             <Reply className="w-4 h-4 mr-2" />
                             Reply
@@ -270,7 +270,7 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
                             size="sm"
                             variant="ghost"
                             className="w-full justify-start"
-                            onClick={() => console.log('Forward notification')}
+                            onClick={() => { /* TODO: Implement forward notification */ }}
                           >
                             <Forward className="w-4 h-4 mr-2" />
                             Forward
@@ -279,7 +279,7 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
                             size="sm"
                             variant="ghost"
                             className="w-full justify-start"
-                            onClick={() => console.log('Save notification')}
+                            onClick={() => { /* TODO: Implement save notification */ }}
                           >
                             <Bookmark className="w-4 h-4 mr-2" />
                             Save
