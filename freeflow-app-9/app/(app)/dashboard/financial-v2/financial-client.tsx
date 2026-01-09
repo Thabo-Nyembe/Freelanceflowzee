@@ -2145,7 +2145,8 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                                   window.open(data.authUrl, '_blank')
                                   toast.success('Opening Xero authorization page', { id: 'xero' })
                                 } else {
-                                  toast.success('Xero connection ready', { id: 'xero' })
+                                  toast.dismiss('xero')
+                                  setActiveTab('settings')
                                 }
                               } catch {
                                 toast.info('Xero integration - OAuth setup coming soon', { id: 'xero' })
@@ -2168,16 +2169,7 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={async () => {
-                              toast.loading('Loading API key management...', { id: 'api-keys' })
-                              try {
-                                const response = await fetch('/api/financial/api-keys')
-                                if (!response.ok) throw new Error('Failed')
-                                toast.success('API key management panel ready', { id: 'api-keys' })
-                              } catch {
-                                toast.info('Navigate to Settings > API Keys to manage access', { id: 'api-keys' })
-                              }
-                            }}
+                            onClick={() => setActiveTab('settings')}
                           >
                             Manage Keys
                           </Button>

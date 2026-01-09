@@ -1071,14 +1071,12 @@ export default function PluginsClient() {
         toast.success('Security scan completed - no issues found')
         break
       case 'Schedule':
-        toast.success('Update schedule settings opened')
         setActiveTab('settings')
         setSettingsTab('updates')
         break
       case 'Notifications':
         setActiveTab('settings')
         setSettingsTab('notifications')
-        toast.success('Notification settings opened')
         break
       case 'Changelogs':
         toast.success('Viewing all changelogs')
@@ -1086,7 +1084,6 @@ export default function PluginsClient() {
       case 'Settings':
         setActiveTab('settings')
         setSettingsTab('updates')
-        toast.success('Update settings opened')
         break
       default:
         toast.success(`${actionLabel} completed`)
@@ -1098,21 +1095,20 @@ export default function PluginsClient() {
     switch (actionLabel) {
       case 'CLI Tools':
         window.open('https://docs.example.com/cli', '_blank')
-        toast.success('CLI documentation opened')
         break
       case 'API Docs':
         window.open('https://docs.example.com/api', '_blank')
-        toast.success('API documentation opened')
         break
       case 'SDK':
         window.open('https://github.com/example/plugin-sdk', '_blank')
-        toast.success('SDK repository opened')
         break
       case 'Webhooks':
-        toast.success('Webhook configuration opened')
+        setActiveTab('settings')
+        setSettingsTab('developer')
         break
       case 'Database':
-        toast.success('Database manager opened')
+        setActiveTab('settings')
+        setSettingsTab('developer')
         break
       case 'Debug':
         setDeveloperSettings(prev => ({ ...prev, debugLogging: true }))
@@ -1120,14 +1116,12 @@ export default function PluginsClient() {
         break
       case 'Guides':
         window.open('https://docs.example.com/guides', '_blank')
-        toast.success('Developer guides opened')
         break
       case 'Support':
         window.open('https://support.example.com', '_blank')
-        toast.success('Support portal opened')
         break
       default:
-        toast.success(`${actionLabel} ready`)
+        toast.info(`${actionLabel} action triggered`)
     }
   }
 
@@ -1344,7 +1338,7 @@ export default function PluginsClient() {
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            <Button variant="outline" onClick={() => { setShowFiltersPanel(!showFiltersPanel); toast.success(showFiltersPanel ? 'Filters hidden' : 'Filter panel opened - select categories, pricing, and ratings') }}>
+            <Button variant="outline" onClick={() => setShowFiltersPanel(!showFiltersPanel)}>
               <Filter className="h-4 w-4 mr-2" />
               Filters
             </Button>
@@ -2158,7 +2152,7 @@ export default function PluginsClient() {
                             <p className="font-medium">API Documentation</p>
                             <p className="text-sm text-gray-500 dark:text-gray-400">View plugin API documentation</p>
                           </div>
-                          <Button variant="outline" size="sm" onClick={() => { window.open('https://docs.example.com/api', '_blank'); toast.success('API documentation opened in new tab') }}>View Docs</Button>
+                          <Button variant="outline" size="sm" onClick={() => window.open('https://docs.example.com/api', '_blank')}>View Docs</Button>
                         </div>
                       </div>
                       <div className="p-4 border rounded-lg dark:border-gray-700">
@@ -2444,7 +2438,7 @@ export default function PluginsClient() {
                           Install Now
                         </Button>
                         {selectedPlugin.hasProVersion && (
-                          <Button variant="outline" className="text-purple-600 border-purple-600" onClick={() => { window.open(`https://example.com/plugins/${selectedPlugin.slug}/pro`, '_blank'); toast.success(`Pro upgrade page opened for "${selectedPlugin.name}"`) }}>
+                          <Button variant="outline" className="text-purple-600 border-purple-600" onClick={() => window.open(`https://example.com/plugins/${selectedPlugin.slug}/pro`, '_blank')}>
                             <Crown className="h-4 w-4 mr-2" />
                             Get Pro Version
                           </Button>

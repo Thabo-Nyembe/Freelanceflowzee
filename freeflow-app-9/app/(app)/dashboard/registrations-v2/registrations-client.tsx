@@ -1668,7 +1668,6 @@ export default function RegistrationsClient() {
                           <Button variant="ghost" size="sm" onClick={(e) => {
                             e.stopPropagation()
                             window.location.href = `mailto:${registration.attendee.email}?subject=Regarding your registration ${registration.registrationNumber}`
-                            toast.success('Email client opened')
                           }}>
                             <Mail className="w-4 h-4" />
                           </Button>
@@ -1896,7 +1895,6 @@ export default function RegistrationsClient() {
                           <Button variant="outline" size="sm" onClick={() => {
                             const emails = registrations.map(r => r.attendee.email).join(',')
                             window.location.href = `mailto:${emails}?subject=${encodeURIComponent(template.name)}`
-                            toast.success('Email client opened', { description: `Sending "${template.name}" to ${registrations.length} recipients` })
                           }}>
                             <Send className="w-4 h-4 mr-2" />
                             Send
@@ -1936,7 +1934,6 @@ export default function RegistrationsClient() {
                     <Button variant="outline" className="w-full justify-start" onClick={() => {
                       const allEmails = registrations.map(r => r.attendee.email).join(',')
                       window.location.href = `mailto:${allEmails}?subject=${encodeURIComponent('Important Update for All Registrants')}`
-                      toast.success('Email client opened', { description: `Bulk email to ${registrations.length} registrants` })
                     }}>
                       <Mail className="w-4 h-4 mr-2" />
                       Send Bulk Email
@@ -1945,7 +1942,6 @@ export default function RegistrationsClient() {
                       const pendingEmails = registrations.filter(r => r.status === 'confirmed').map(r => r.attendee.email).join(',')
                       if (pendingEmails) {
                         window.location.href = `mailto:${pendingEmails}?subject=${encodeURIComponent('Reminder: Your Upcoming Event')}`
-                        toast.success('Email client opened', { description: 'Reminder email prepared for confirmed attendees' })
                       } else {
                         toast.info('No confirmed attendees', { description: 'No attendees to send reminders to' })
                       }
@@ -2618,7 +2614,6 @@ export default function RegistrationsClient() {
                   </Button>
                   <Button variant="outline" onClick={() => {
                     window.location.href = `mailto:${selectedRegistration.attendee.email}?subject=${encodeURIComponent(`Your registration: ${selectedRegistration.registrationNumber}`)}`
-                    toast.success('Email client opened')
                   }}>
                     <Mail className="w-4 h-4 mr-2" />
                     Send Email

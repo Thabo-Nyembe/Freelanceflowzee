@@ -1885,11 +1885,7 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
                           ))}
                         </div>
                         <button
-                          onClick={() => {
-                            toast.success('Custom parser dialog opened', {
-                              description: 'Configure your custom log parsing rules'
-                            })
-                          }}
+                          onClick={() => setShowParserDialog(true)}
                           className="w-full py-2 border-2 border-dashed rounded-lg text-muted-foreground hover:text-foreground hover:border-purple-300 transition-colors"
                         >
                           <Plus className="w-4 h-4 inline-block mr-2" />

@@ -858,10 +858,7 @@ export default function EmailMarketingClient({
       id: '1',
       label: 'New Campaign',
       icon: 'plus',
-      action: () => {
-        setShowCreateCampaignDialog(true)
-        toast.success('Campaign builder opened', { description: 'Design your email campaign' })
-      },
+      action: () => setShowCreateCampaignDialog(true),
       variant: 'default' as const
     },
     {
@@ -982,17 +979,11 @@ export default function EmailMarketingClient({
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="outline" size="sm" onClick={() => {
-              setActiveTab('settings')
-              toast.success('Settings opened', { description: 'Configure sender profiles, authentication, and preferences' })
-            }}>
+            <Button variant="outline" size="sm" onClick={() => setActiveTab('settings')}>
               <Settings className="w-4 h-4 mr-2" />
               Settings
             </Button>
-            <Button className="bg-gradient-to-r from-rose-500 to-pink-600 text-white" onClick={() => {
-              setShowCreateCampaignDialog(true)
-              toast.success('Campaign builder opened', { description: 'Design your email campaign' })
-            }}>
+            <Button className="bg-gradient-to-r from-rose-500 to-pink-600 text-white" onClick={() => setShowCreateCampaignDialog(true)}>
               <Plus className="w-4 h-4 mr-2" />
               New Campaign
             </Button>
@@ -1204,10 +1195,7 @@ export default function EmailMarketingClient({
                   <CardHeader>
                     <div className="flex items-center justify-between">
                       <CardTitle>Subscriber Lists</CardTitle>
-                      <Button size="sm" onClick={() => {
-                        setShowCreateListDialog(true)
-                        toast.success('List builder opened', { description: 'Create a new subscriber list' })
-                      }}>
+                      <Button size="sm" onClick={() => setShowCreateListDialog(true)}>
                         <Plus className="w-4 h-4 mr-2" />
                         Create List
                       </Button>
@@ -1314,10 +1302,7 @@ export default function EmailMarketingClient({
                         </div>
                       ))}
                     </div>
-                    <Button variant="outline" className="w-full mt-4" onClick={() => {
-                      setShowCreateSegmentDialog(true)
-                      toast.success('Segment builder opened', { description: 'Define your audience criteria' })
-                    }}>
+                    <Button variant="outline" className="w-full mt-4" onClick={() => setShowCreateSegmentDialog(true)}>
                       <Plus className="w-4 h-4 mr-2" />
                       Create Segment
                     </Button>
@@ -1380,10 +1365,7 @@ export default function EmailMarketingClient({
                 <h2 className="text-xl font-semibold">Email Automations</h2>
                 <p className="text-gray-500">Create automated email sequences triggered by user actions</p>
               </div>
-              <Button className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white" onClick={() => {
-                setShowCreateAutomationDialog(true)
-                toast.success('Automation builder opened', { description: 'Set up triggers and email sequences' })
-              }}>
+              <Button className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white" onClick={() => setShowCreateAutomationDialog(true)}>
                 <Plus className="w-4 h-4 mr-2" />
                 Create Automation
               </Button>
@@ -1464,10 +1446,7 @@ export default function EmailMarketingClient({
                 <h2 className="text-xl font-semibold">Email Templates</h2>
                 <p className="text-gray-500">Design beautiful email templates for your campaigns</p>
               </div>
-              <Button className="bg-gradient-to-r from-purple-500 to-pink-600 text-white" onClick={() => {
-                setShowCreateTemplateDialog(true)
-                toast.success('Template editor opened', { description: 'Design your email template' })
-              }}>
+              <Button className="bg-gradient-to-r from-purple-500 to-pink-600 text-white" onClick={() => setShowCreateTemplateDialog(true)}>
                 <Plus className="w-4 h-4 mr-2" />
                 Create Template
               </Button>
@@ -1785,7 +1764,7 @@ export default function EmailMarketingClient({
                       <span className="font-medium">{integration.name}</span>
                       <Button variant={integration.connected ? 'outline' : 'default'} size="sm" onClick={() => {
                         if (integration.connected) {
-                          toast.success(`${integration.name} settings opened`, { description: 'Manage your integration settings' })
+                          setActiveTab('settings')
                         } else {
                           toast.promise(
                             apiHelpers.connectIntegration(integration.name),
@@ -1916,14 +1895,8 @@ export default function EmailMarketingClient({
                   <div className="flex gap-3">
                     {selectedCampaign.status === 'draft' && (
                       <>
-                        <Button onClick={() => {
-                          setShowCampaignEditorDialog(true)
-                          toast.success('Campaign editor opened', { description: 'Make your changes to the campaign' })
-                        }}><Edit className="w-4 h-4 mr-2" />Edit</Button>
-                        <Button variant="outline" onClick={() => {
-                          setShowScheduleDialog(true)
-                          toast.success('Scheduler opened', { description: 'Schedule your campaign for optimal delivery time' })
-                        }}><Clock className="w-4 h-4 mr-2" />Schedule</Button>
+                        <Button onClick={() => setShowCampaignEditorDialog(true)}><Edit className="w-4 h-4 mr-2" />Edit</Button>
+                        <Button variant="outline" onClick={() => setShowScheduleDialog(true)}><Clock className="w-4 h-4 mr-2" />Schedule</Button>
                         <Button className="bg-gradient-to-r from-rose-500 to-pink-600" onClick={() => {
                           if (confirm(`Are you sure you want to send "${selectedCampaign.name}" now?`)) {
                             toast.promise(
@@ -1950,10 +1923,7 @@ export default function EmailMarketingClient({
                             }
                           )
                         }}><Copy className="w-4 h-4 mr-2" />Duplicate</Button>
-                        <Button variant="outline" onClick={() => {
-                          setShowReportDialog(true)
-                          toast.success('Report generated', { description: `Full analytics report for "${selectedCampaign.name}" ready` })
-                        }}><BarChart3 className="w-4 h-4 mr-2" />Full Report</Button>
+                        <Button variant="outline" onClick={() => setShowReportDialog(true)}><BarChart3 className="w-4 h-4 mr-2" />Full Report</Button>
                       </>
                     )}
                   </div>
@@ -2123,10 +2093,7 @@ export default function EmailMarketingClient({
                       )
                     }}><Play className="w-4 h-4 mr-2" />Activate</Button>
                   )}
-                  <Button variant="outline" onClick={() => {
-                    setShowAutomationEditorDialog(true)
-                    toast.success('Workflow editor opened', { description: 'Edit your automation steps and triggers' })
-                  }}><Edit className="w-4 h-4 mr-2" />Edit Steps</Button>
+                  <Button variant="outline" onClick={() => setShowAutomationEditorDialog(true)}><Edit className="w-4 h-4 mr-2" />Edit Steps</Button>
                   <Button variant="outline" onClick={() => {
                     setShowAnalyticsDialog(true)
                     toast.success('Analytics loaded', { description: `${selectedAutomation.stats.converted} conversions from "${selectedAutomation.name}"` })

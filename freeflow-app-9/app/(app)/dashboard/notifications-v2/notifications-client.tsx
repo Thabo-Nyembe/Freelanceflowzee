@@ -539,7 +539,6 @@ export default function NotificationsClient() {
 
   const handleCreateAutomation = () => {
     setShowCreateAutomation(true)
-    toast.success('Automation builder ready')
   }
 
   const handleToggleAutomation = async (automation: (typeof mockAutomations)[0]) => {
@@ -598,10 +597,7 @@ export default function NotificationsClient() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input placeholder="Search notifications..." className="w-72 pl-10" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
             </div>
-            <Button variant="outline" onClick={() => {
-              setShowFiltersPanel(!showFiltersPanel)
-              toast.success(showFiltersPanel ? 'Filters panel closed' : 'Filters panel opened')
-            }}><Filter className="h-4 w-4 mr-2" />Filters</Button>
+            <Button variant="outline" onClick={() => setShowFiltersPanel(!showFiltersPanel)}><Filter className="h-4 w-4 mr-2" />Filters</Button>
             <Button className="bg-gradient-to-r from-violet-600 to-purple-600" onClick={() => setShowCreateCampaign(true)}>
               <Plus className="h-4 w-4 mr-2" />New Campaign
             </Button>
@@ -955,10 +951,7 @@ export default function NotificationsClient() {
           {/* Webhooks Tab */}
           <TabsContent value="webhooks" className="mt-6">
             <div className="flex justify-end mb-4">
-              <Button onClick={() => {
-                setShowWebhookDialog(true)
-                toast.success('Webhook creator ready')
-              }}><Plus className="h-4 w-4 mr-2" />Add Webhook</Button>
+              <Button onClick={() => setShowWebhookDialog(true)}><Plus className="h-4 w-4 mr-2" />Add Webhook</Button>
             </div>
             <Card className="border-gray-200 dark:border-gray-700">
               <CardContent className="p-0">
@@ -1927,20 +1920,14 @@ export default function NotificationsClient() {
                               </p>
                             </div>
                             <div className="flex items-center gap-3">
-                              <Button variant="ghost" size="sm" onClick={() => {
-                                setShowCategoryEditor(category.name)
-                                toast.success(`"${category.name}" settings opened`)
-                              }}>
+                              <Button variant="ghost" size="sm" onClick={() => setShowCategoryEditor(category.name)}>
                                 <Edit className="h-4 w-4" />
                               </Button>
                               <Switch defaultChecked={category.default} />
                             </div>
                           </div>
                         ))}
-                        <Button variant="outline" className="w-full" onClick={() => {
-                          setShowCategoryEditor('new')
-                          toast.success('Category creator ready')
-                        }}>
+                        <Button variant="outline" className="w-full" onClick={() => setShowCategoryEditor('new')}>
                           <Plus className="h-4 w-4 mr-2" />
                           Add Category
                         </Button>
@@ -1980,7 +1967,6 @@ export default function NotificationsClient() {
                             <Button variant={platform.status === 'connected' ? 'outline' : 'default'} size="sm" onClick={async () => {
                               if (platform.status === 'connected') {
                                 router.push(`/dashboard/settings/integrations/${platform.name.toLowerCase().replace(/\s+/g, '-')}`)
-                                toast.success(`${platform.name} configuration opened`)
                               } else {
                                 await toast.promise(
                                   fetch(`/api/integrations/${platform.name.toLowerCase().replace(/\s+/g, '-')}/connect`, { method: 'POST' }).then(res => {
@@ -2025,7 +2011,6 @@ export default function NotificationsClient() {
                             <Button variant={crm.status === 'connected' ? 'outline' : 'default'} size="sm" onClick={async () => {
                               if (crm.status === 'connected') {
                                 router.push(`/dashboard/settings/integrations/${crm.name.toLowerCase()}`)
-                                toast.success(`${crm.name} management opened`)
                               } else {
                                 await toast.promise(
                                   fetch(`/api/integrations/${crm.name.toLowerCase()}/connect`, { method: 'POST' }).then(res => {
@@ -2115,10 +2100,7 @@ export default function NotificationsClient() {
                               <p className="text-sm text-gray-500">Events: {webhook.events.join(', ')}</p>
                             </div>
                             <div className="flex items-center gap-2">
-                              <Button variant="ghost" size="sm" onClick={() => {
-                                setShowWebhookDialog(true)
-                                toast.success('Webhook settings opened')
-                              }}>
+                              <Button variant="ghost" size="sm" onClick={() => setShowWebhookDialog(true)}>
                                 <Edit className="h-4 w-4" />
                               </Button>
                               <Button variant="ghost" size="sm" className="text-red-600" onClick={async () => {
@@ -2136,10 +2118,7 @@ export default function NotificationsClient() {
                             </div>
                           </div>
                         ))}
-                        <Button variant="outline" className="w-full" onClick={() => {
-                          setShowWebhookDialog(true)
-                          toast.success('Webhook creator ready')
-                        }}>
+                        <Button variant="outline" className="w-full" onClick={() => setShowWebhookDialog(true)}>
                           <Plus className="h-4 w-4 mr-2" />
                           Add Webhook
                         </Button>
@@ -2464,7 +2443,6 @@ export default function NotificationsClient() {
                       } else if (selectedNotification.actionUrl) {
                         window.open(selectedNotification.actionUrl, '_blank')
                       }
-                      toast.success('Link opened')
                     }}>
                       {selectedNotification.actionLabel || 'View Details'}
                       <ExternalLink className="h-4 w-4 ml-2" />

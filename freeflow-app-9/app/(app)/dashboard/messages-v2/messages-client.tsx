@@ -726,10 +726,10 @@ export default function MessagesClient() {
                 { icon: Hash, label: 'Browse', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', action: () => { setChannelFilter('all'); toast.success('Browse channels', { description: `${mockChannels.length} channels available` }) } },
                 { icon: UserPlus, label: 'Invite', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: () => { navigator.clipboard.writeText('https://freeflow.app/invite/workspace'); toast.success('Invite link copied!', { description: 'Share this link to invite people' }) } },
                 { icon: Star, label: 'Starred', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', action: () => { setChannelFilter('starred'); toast.success('Showing starred channels') } },
-                { icon: Bot, label: 'Apps', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', action: () => { window.open('/dashboard/integrations', '_blank'); toast.success('Apps marketplace opened') } },
-                { icon: Workflow, label: 'Workflows', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', action: () => { window.open('/dashboard/automations', '_blank'); toast.success('Workflows opened in new tab') } },
+                { icon: Bot, label: 'Apps', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', action: () => window.open('/dashboard/integrations', '_blank') },
+                { icon: Workflow, label: 'Workflows', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', action: () => window.open('/dashboard/automations', '_blank') },
                 { icon: Archive, label: 'Archive', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', action: () => { const archived = mockChannels.filter(c => c.isMuted); toast.success('Archived channels', { description: `${archived.length} channels in archive` }) } },
-                { icon: Settings, label: 'Settings', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400', action: () => { setSettingsTab('general'); const settingsTabEl = document.querySelector('[value="settings"]') as HTMLElement; if (settingsTabEl) settingsTabEl.click(); toast.success('Channel settings ready') } },
+                { icon: Settings, label: 'Settings', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400', action: () => { setSettingsTab('general'); const settingsTabEl = document.querySelector('[value="settings"]') as HTMLElement; if (settingsTabEl) settingsTabEl.click() } },
               ].map((action, idx) => (
                 <Button
                   key={idx}
@@ -868,17 +868,11 @@ export default function MessagesClient() {
                       <UserPlus className="w-4 h-4 mr-2" />
                       Invite People
                     </Button>
-                    <Button variant="outline" className="w-full justify-start" onClick={() => {
-                      window.open('/dashboard/integrations', '_blank')
-                      toast.success('Apps marketplace opened')
-                    }}>
+                    <Button variant="outline" className="w-full justify-start" onClick={() => window.open('/dashboard/integrations', '_blank')}>
                       <Bot className="w-4 h-4 mr-2" />
                       Add App
                     </Button>
-                    <Button variant="outline" className="w-full justify-start" onClick={() => {
-                      window.open('/dashboard/automations', '_blank')
-                      toast.success('Workflow builder opened')
-                    }}>
+                    <Button variant="outline" className="w-full justify-start" onClick={() => window.open('/dashboard/automations', '_blank')}>
                       <Workflow className="w-4 h-4 mr-2" />
                       Create Workflow
                     </Button>
@@ -950,13 +944,13 @@ export default function MessagesClient() {
             {/* Messages Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Plus, label: 'New DM', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', action: () => { setMessageInput(''); setSelectedChannel(directMessages[0] || null); toast.success('New DM ready', { description: 'Select a contact and start typing' }) } },
+                { icon: Plus, label: 'New DM', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', action: () => { setMessageInput(''); setSelectedChannel(directMessages[0] || null) } },
                 { icon: Send, label: 'Compose', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', action: () => { setMessageInput(''); toast.success('Ready to compose', { description: 'Enter your message below' }) } },
                 { icon: Reply, label: 'Reply All', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400', action: () => { setMessageInput('@all '); toast.success('Reply to all', { description: 'Message will be sent to all recipients' }) } },
                 { icon: Forward, label: 'Forward', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => { toast.success('Forward mode', { description: 'Select a message to forward' }) } },
                 { icon: Bookmark, label: 'Saved', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', action: () => { const saved = supabaseMessages?.filter(m => m.is_starred) || []; toast.success('Saved messages', { description: `${saved.length} saved messages` }) } },
                 { icon: Pin, label: 'Pinned', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', action: () => { const pinned = supabaseMessages?.filter(m => m.is_pinned) || []; toast.success('Pinned messages', { description: `${pinned.length} pinned messages` }) } },
-                { icon: Search, label: 'Search', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: () => { const searchTabEl = document.querySelector('[value="search"]') as HTMLElement; if (searchTabEl) searchTabEl.click(); toast.success('Search ready') } },
+                { icon: Search, label: 'Search', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: () => { const searchTabEl = document.querySelector('[value="search"]') as HTMLElement; if (searchTabEl) searchTabEl.click() } },
                 { icon: Filter, label: 'Filter', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', action: () => { setChannelFilter(channelFilter === 'all' ? 'unread' : 'all'); toast.success('Filter applied', { description: `Showing ${channelFilter === 'all' ? 'unread' : 'all'} messages` }) } },
               ].map((action, idx) => (
                 <Button
@@ -1122,8 +1116,8 @@ export default function MessagesClient() {
                 { icon: Reply, label: 'My Replies', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', action: () => setShowMyRepliesDialog(true) },
                 { icon: AtSign, label: 'Mentions', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', action: () => { const mentionsTabEl = document.querySelector('[value="mentions"]') as HTMLElement; if (mentionsTabEl) mentionsTabEl.click(); toast.success('Mentions', { description: `${stats.mentions} mentions found` }) } },
                 { icon: Archive, label: 'Archived', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400', action: () => setShowArchivedThreadsDialog(true) },
-                { icon: Search, label: 'Search', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => { setSearchQuery(''); const searchTabEl = document.querySelector('[value="search"]') as HTMLElement; if (searchTabEl) searchTabEl.click(); toast.success('Search ready') } },
-                { icon: Settings, label: 'Settings', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', action: () => { setSettingsTab('notifications'); const settingsTabEl = document.querySelector('[value="settings"]') as HTMLElement; if (settingsTabEl) settingsTabEl.click(); toast.success('Thread settings ready') } },
+                { icon: Search, label: 'Search', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => { setSearchQuery(''); const searchTabEl = document.querySelector('[value="search"]') as HTMLElement; if (searchTabEl) searchTabEl.click() } },
+                { icon: Settings, label: 'Settings', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', action: () => { setSettingsTab('notifications'); const settingsTabEl = document.querySelector('[value="settings"]') as HTMLElement; if (settingsTabEl) settingsTabEl.click() } },
               ].map((action, idx) => (
                 <Button
                   key={idx}
@@ -1209,11 +1203,11 @@ export default function MessagesClient() {
                 { icon: Phone, label: 'Start Call', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', action: () => { if (selectedChannel) { handleStartCall(selectedChannel.name) } else { toast.success('Select a contact', { description: 'Choose a contact from the list to call' }) } } },
                 { icon: Video, label: 'Video Call', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', action: () => { if (selectedChannel) { handleStartCall(selectedChannel.name) } else { toast.success('Select a contact', { description: 'Choose a contact for video call' }) } } },
                 { icon: Headphones, label: 'Huddle', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', action: () => { setActiveCall({ id: 'huddle-new', type: 'huddle', status: 'ongoing', channelId: 'huddle', channelName: 'Quick Huddle', participants: [currentUser as any], startTime: new Date().toISOString(), isRecorded: false }); toast.success('Huddle started', { description: 'Invite others to join your huddle' }) } },
-                { icon: ScreenShare, label: 'Share', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', action: () => { if (activeCall) { toast.success('Screen share ready', { description: 'Select a window or screen to share' }) } else { toast.warning('Start a call first', { description: 'You need to be in a call to share your screen' }) } } },
-                { icon: Calendar, label: 'Schedule', color: 'bg-sky-100 text-sky-600 dark:bg-sky-900/30 dark:text-sky-400', action: () => { window.open('/dashboard/calendar', '_blank'); toast.success('Calendar opened', { description: 'Schedule a new call meeting' }) } },
+                { icon: ScreenShare, label: 'Share', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', action: () => { if (!activeCall) { toast.warning('Start a call first', { description: 'You need to be in a call to share your screen' }) } } },
+                { icon: Calendar, label: 'Schedule', color: 'bg-sky-100 text-sky-600 dark:bg-sky-900/30 dark:text-sky-400', action: () => window.open('/dashboard/calendar', '_blank') },
                 { icon: PlayCircle, label: 'Recordings', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: () => { const recorded = mockCalls.filter(c => c.isRecorded); toast.success('Call recordings', { description: `${recorded.length} recorded calls available` }) } },
                 { icon: Clock, label: 'History', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', action: () => setShowCallHistoryDialog(true) },
-                { icon: Settings, label: 'Settings', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', action: () => { setSettingsTab('general'); const settingsTabEl = document.querySelector('[value="settings"]') as HTMLElement; if (settingsTabEl) settingsTabEl.click(); toast.success('Call settings ready') } },
+                { icon: Settings, label: 'Settings', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', action: () => { setSettingsTab('general'); const settingsTabEl = document.querySelector('[value="settings"]') as HTMLElement; if (settingsTabEl) settingsTabEl.click() } },
               ].map((action, idx) => (
                 <Button
                   key={idx}
@@ -1363,7 +1357,7 @@ export default function MessagesClient() {
                 { icon: FileText, label: 'Documents', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400', action: () => { const docs = mockFiles.filter(f => f.type.includes('pdf') || f.type.includes('doc')); toast.success('Documents', { description: `${docs.length} documents found` }) } },
                 { icon: Code, label: 'Code', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', action: () => setShowCodeFilesDialog(true) },
                 { icon: Search, label: 'Search', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', action: () => { setSearchQuery(''); const searchTabEl = document.querySelector('[value="search"]') as HTMLElement; if (searchTabEl) searchTabEl.click(); toast.success('Search files') } },
-                { icon: Settings, label: 'Settings', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', action: () => { setSettingsTab('advanced'); const settingsTabEl = document.querySelector('[value="settings"]') as HTMLElement; if (settingsTabEl) settingsTabEl.click(); toast.success('File settings ready') } },
+                { icon: Settings, label: 'Settings', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', action: () => { setSettingsTab('advanced'); const settingsTabEl = document.querySelector('[value="settings"]') as HTMLElement; if (settingsTabEl) settingsTabEl.click() } },
               ].map((action, idx) => (
                 <Button
                   key={idx}
@@ -1473,7 +1467,7 @@ export default function MessagesClient() {
                 { icon: Reply, label: 'Reply All', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400', action: () => { setMessageInput('@all '); toast.success('Reply to all', { description: 'Type your reply in the message input' }) } },
                 { icon: CheckCheck, label: 'Mark Read', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400', action: handleMarkAllAsRead },
                 { icon: Filter, label: 'Filter', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', action: () => { setChannelFilter(channelFilter === 'all' ? 'unread' : 'all'); toast.success('Filter applied', { description: `Showing ${channelFilter === 'all' ? 'unread' : 'all'} mentions` }) } },
-                { icon: Settings, label: 'Settings', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', action: () => { setSettingsTab('notifications'); const settingsTabEl = document.querySelector('[value="settings"]') as HTMLElement; if (settingsTabEl) settingsTabEl.click(); toast.success('Mention settings ready') } },
+                { icon: Settings, label: 'Settings', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', action: () => { setSettingsTab('notifications'); const settingsTabEl = document.querySelector('[value="settings"]') as HTMLElement; if (settingsTabEl) settingsTabEl.click() } },
               ].map((action, idx) => (
                 <Button
                   key={idx}
@@ -1998,10 +1992,7 @@ export default function MessagesClient() {
                             </SelectContent>
                           </Select>
                         </div>
-                        <Button variant="outline" className="w-full" onClick={() => {
-                          window.open('/dashboard/settings/sessions', '_blank')
-                          toast.success('Session manager opened', { description: 'View and manage your active sessions' })
-                        }}>
+                        <Button variant="outline" className="w-full" onClick={() => window.open('/dashboard/settings/sessions', '_blank')}>
                           <Key className="w-4 h-4 mr-2" />
                           Manage Active Sessions
                         </Button>
@@ -2102,15 +2093,9 @@ export default function MessagesClient() {
                               <div className="text-sm text-gray-500">3 active workflows</div>
                             </div>
                           </div>
-                          <Button variant="outline" size="sm" onClick={() => {
-                            window.open('/dashboard/automations', '_blank')
-                            toast.success('Workflow manager opened')
-                          }}>Manage</Button>
+                          <Button variant="outline" size="sm" onClick={() => window.open('/dashboard/automations', '_blank')}>Manage</Button>
                         </div>
-                        <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white" onClick={() => {
-                          window.open('/dashboard/integrations', '_blank')
-                          toast.success('App marketplace opened', { description: 'Browse and install apps' })
-                        }}>
+                        <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white" onClick={() => window.open('/dashboard/integrations', '_blank')}>
                           <Plus className="w-4 h-4 mr-2" />
                           Add App
                         </Button>
@@ -2184,17 +2169,11 @@ export default function MessagesClient() {
                         <CardDescription>Get help and support resources</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <Button variant="outline" className="w-full justify-start" onClick={() => {
-                          window.open('/docs', '_blank')
-                          toast.success('Documentation opened')
-                        }}>
+                        <Button variant="outline" className="w-full justify-start" onClick={() => window.open('/docs', '_blank')}>
                           <BookOpen className="w-4 h-4 mr-2" />
                           Documentation
                         </Button>
-                        <Button variant="outline" className="w-full justify-start" onClick={() => {
-                          window.open('/support', '_blank')
-                          toast.success('Support portal opened', { description: 'Connect with our support team' })
-                        }}>
+                        <Button variant="outline" className="w-full justify-start" onClick={() => window.open('/support', '_blank')}>
                           <MessageSquare className="w-4 h-4 mr-2" />
                           Contact Support
                         </Button>

@@ -682,7 +682,6 @@ export default function WorkflowBuilderClient() {
 
   const handleWorkflowSettings = () => {
     setActiveTab('settings')
-    toast.success('Workflow settings ready')
   }
 
   const handleFilter = () => setShowFilterDialog(true)
@@ -759,8 +758,6 @@ export default function WorkflowBuilderClient() {
   }
 
   const handleDebug = () => {
-    toast.success('Debug console opened')
-    // Open debug panel or navigate to debug view
     window.open('/dashboard/workflow-builder-v2/debug', '_blank')
   }
 
@@ -803,7 +800,6 @@ export default function WorkflowBuilderClient() {
   const handleExecutionSettings = () => {
     setActiveTab('settings')
     setSettingsTab('execution')
-    toast.success('Execution settings ready')
   }
 
   const handleViewExecution = (workflowName: string) => {
@@ -821,14 +817,12 @@ export default function WorkflowBuilderClient() {
   }
 
   const handleCustomCode = () => {
-    toast.success('Custom code editor ready')
     window.open('/dashboard/workflow-builder-v2/code-editor', '_blank')
   }
 
   const handleWebhooks = () => {
     setActiveTab('settings')
     setSettingsTab('integrations')
-    toast.success('Webhook configuration ready')
   }
 
   const handleDataNodes = () => {
@@ -853,40 +847,34 @@ export default function WorkflowBuilderClient() {
   // Templates Tab Handlers
   const handleFeaturedTemplates = () => {
     setActiveTab('templates')
-    toast.success('Featured templates ready')
   }
 
   const handlePopularTemplates = () => {
     setActiveTab('templates')
-    toast.success('Popular templates ready')
   }
 
   const handleRecentTemplates = () => {
     setActiveTab('templates')
-    toast.success('Recent templates ready')
   }
 
   const handleEmailTemplates = () => {
     setActiveTab('templates')
-    toast.success('Email templates ready')
   }
 
   const handleDataSyncTemplates = () => {
     setActiveTab('templates')
-    toast.success('Data sync templates ready')
   }
 
   const handleChatTemplates = () => {
     setActiveTab('templates')
-    toast.success('Chat templates ready')
   }
 
   const handleCreateTemplate = () => {
-    toast.success('Template creator ready')
+    setShowCreateWorkflowDialog(true)
   }
 
   const handleShareTemplate = () => {
-    toast.success('Share template options ready')
+    toast.info('Share options available in the template card menu')
   }
 
   const handleUseTemplate = async (templateName: string) => {
@@ -912,22 +900,19 @@ export default function WorkflowBuilderClient() {
 
   const handleApiKeys = () => {
     setActiveTab('credentials')
-    toast.success('API key credentials ready')
   }
 
   const handleOAuth = () => {
     setActiveTab('credentials')
-    toast.success('OAuth credentials ready')
   }
 
   const handleSecuritySettings = () => {
     setActiveTab('settings')
     setSettingsTab('security')
-    toast.success('Security settings ready')
   }
 
   const handleShareCredentials = () => {
-    toast.success('Sharing options ready')
+    toast.info('Select credentials to share from the list')
   }
 
   const handleRotateCredentials = async () => {
@@ -964,7 +949,6 @@ export default function WorkflowBuilderClient() {
   const handleCredentialSettings = () => {
     setActiveTab('settings')
     setSettingsTab('security')
-    toast.success('Credential settings ready')
   }
 
   const handleAddCredential = () => {
@@ -1045,7 +1029,6 @@ export default function WorkflowBuilderClient() {
 
   const handleVariableSettings = () => {
     setActiveTab('settings')
-    toast.success('Variable settings ready')
   }
 
   const handleVariableItemSettings = (varKey: string) => {
@@ -1056,37 +1039,31 @@ export default function WorkflowBuilderClient() {
   const handleGeneralSettings = () => {
     setActiveTab('settings')
     setSettingsTab('general')
-    toast.success('General settings ready')
   }
 
   const handleExecutionSettingsNav = () => {
     setActiveTab('settings')
     setSettingsTab('execution')
-    toast.success('Execution settings ready')
   }
 
   const handleAlertsSettings = () => {
     setActiveTab('settings')
     setSettingsTab('notifications')
-    toast.success('Alerts settings ready')
   }
 
   const handleSecuritySettingsNav = () => {
     setActiveTab('settings')
     setSettingsTab('security')
-    toast.success('Security settings ready')
   }
 
   const handleIntegrationsSettings = () => {
     setActiveTab('settings')
     setSettingsTab('integrations')
-    toast.success('Integration settings ready')
   }
 
   const handleAdvancedSettings = () => {
     setActiveTab('settings')
     setSettingsTab('advanced')
-    toast.success('Advanced settings ready')
   }
 
   const handleSaveAllSettings = async () => {
