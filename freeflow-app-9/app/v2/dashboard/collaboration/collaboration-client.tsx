@@ -488,6 +488,19 @@ export default function CollaborationClient() {
   const [showColorPickerDialog, setShowColorPickerDialog] = useState(false)
   const [colorPickerType, setColorPickerType] = useState<'workspace' | 'accent'>('workspace')
 
+  // New dialog states for replacing toast-only handlers
+  const [showChannelOptionsDialog, setShowChannelOptionsDialog] = useState(false)
+  const [showEmojiPickerDialog, setShowEmojiPickerDialog] = useState(false)
+  const [showMessageOptionsDialog, setShowMessageOptionsDialog] = useState(false)
+  const [showFileOptionsDialog, setShowFileOptionsDialog] = useState(false)
+  const [showChannelInfoDialog, setShowChannelInfoDialog] = useState(false)
+  const [showAutomationOptionsDialog, setShowAutomationOptionsDialog] = useState(false)
+  const [selectedMessage, setSelectedMessage] = useState<Message | null>(null)
+  const [selectedFile, setSelectedFile] = useState<SharedFile | null>(null)
+  const [selectedAutomation, setSelectedAutomation] = useState<Automation | null>(null)
+  const [emojiTarget, setEmojiTarget] = useState<'message' | 'chat'>('chat')
+  const [selectedEmoji, setSelectedEmoji] = useState<string>('')
+
   const filteredBoards = useMemo(() => {
     return mockBoards.filter(board => {
       return board.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -902,7 +915,7 @@ export default function CollaborationClient() {
                         );
                       }}><Search className="h-4 w-4" /></Button>
                       <Button variant="ghost" size="icon" onClick={() => {
-                        toast.info('Channel options', { description: 'More options menu opened' });
+                        setShowChannelOptionsDialog(true);
                       }}><MoreVertical className="h-4 w-4" /></Button>
                     </div>
                   </div>
@@ -942,22 +955,17 @@ export default function CollaborationClient() {
                           </div>
                           <div className="opacity-0 group-hover:opacity-100 flex items-start gap-1">
                             <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => {
-                              toast.promise(
-                                new Promise<void>((resolve) => {
-                                  setTimeout(() => {
-                                    toast.success('Emoji picker ready');
-                                    resolve();
-                                  }, 300);
-                                }),
-                                { loading: 'Opening emoji picker...', success: 'Emoji picker opened', error: 'Failed to open emoji picker' }
-                              );
+                              setSelectedMessage(message);
+                              setEmojiTarget('message');
+                              setShowEmojiPickerDialog(true);
                             }}><Smile className="h-4 w-4" /></Button>
                             <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => {
                               setMessageInput(`@${message.author.name} `);
                               toast.success('Reply mode activated');
                             }}><Reply className="h-4 w-4" /></Button>
                             <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => {
-                              toast.info('Message options', { description: 'Edit, delete, or share this message' });
+                              setSelectedMessage(message);
+                              setShowMessageOptionsDialog(true);
                             }}><MoreHorizontal className="h-4 w-4" /></Button>
                           </div>
                         </div>
@@ -985,15 +993,8 @@ export default function CollaborationClient() {
                     }}><Paperclip className="h-4 w-4" /></Button>
                     <Input placeholder="Type a message..." className="flex-1" value={messageInput} onChange={(e) => setMessageInput(e.target.value)} />
                     <Button variant="ghost" size="icon" onClick={() => {
-                      toast.promise(
-                        new Promise<void>((resolve) => {
-                          setTimeout(() => {
-                            toast.success('Emoji picker ready');
-                            resolve();
-                          }, 300);
-                        }),
-                        { loading: 'Opening emoji picker...', success: 'Emoji picker opened', error: 'Failed to open emoji picker' }
-                      );
+                      setEmojiTarget('chat');
+                      setShowEmojiPickerDialog(true);
                     }}><Smile className="h-4 w-4" /></Button>
                     <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => {
                       if (messageInput.trim()) {
@@ -1287,7 +1288,8 @@ export default function CollaborationClient() {
                             );
                           }}><Share2 className="h-4 w-4" /></Button>
                           <Button variant="ghost" size="icon" onClick={() => {
-                            toast.info('File options', { description: 'Edit, delete, move, or share this file' });
+                            setSelectedFile(file);
+                            setShowFileOptionsDialog(true);
                           }}><MoreHorizontal className="h-4 w-4" /></Button>
                         </div>
                       </div>
@@ -1471,7 +1473,8 @@ export default function CollaborationClient() {
                       <Badge variant="outline">{channel.memberCount} members</Badge>
                       {channel.unreadCount > 0 && <Badge className="bg-red-500">{channel.unreadCount}</Badge>}
                       <Button variant="ghost" size="icon" onClick={() => {
-                        toast.info(`Channel: ${channel.name}`, { description: 'View members, settings, notification preferences' });
+                        setSelectedChannel(channel);
+                        setShowChannelInfoDialog(true);
                       }}><MoreHorizontal className="h-4 w-4" /></Button>
                     </div>
                   ))}
@@ -1927,7 +1930,8 @@ export default function CollaborationClient() {
                           </div>
                           <Switch checked={automation.isActive} />
                           <Button variant="ghost" size="icon" onClick={() => {
-                            toast.info(`Automation: ${automation.name}`, { description: 'Edit trigger, actions, or delete this automation' });
+                            setSelectedAutomation(automation);
+                            setShowAutomationOptionsDialog(true);
                           }}><MoreHorizontal className="h-4 w-4" /></Button>
                         </div>
                       ))}
@@ -2760,7 +2764,8 @@ export default function CollaborationClient() {
                           <p className="text-sm text-gray-500">Modified {formatTimeAgo(file.modifiedAt)}</p>
                         </div>
                         <Button variant="ghost" size="sm" onClick={() => {
-                          toast.success('File opened');
+                          setSelectedFile(file);
+                          setShowFileOptionsDialog(true);
                         }}><ExternalLink className="h-4 w-4" /></Button>
                       </div>
                     );
@@ -2958,6 +2963,514 @@ export default function CollaborationClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowBrowseChannelsDialog(false)}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Channel Options Dialog */}
+        <Dialog open={showChannelOptionsDialog} onOpenChange={setShowChannelOptionsDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Hash className="h-5 w-5" />
+                Channel Options
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Button variant="outline" className="w-full justify-start" onClick={() => {
+                  if (selectedChannel) {
+                    selectedChannel.isPinned = !selectedChannel.isPinned;
+                    toast.success(selectedChannel.isPinned ? 'Channel pinned' : 'Channel unpinned');
+                  }
+                  setShowChannelOptionsDialog(false);
+                }}>
+                  <Pin className="h-4 w-4 mr-2" />
+                  {selectedChannel?.isPinned ? 'Unpin Channel' : 'Pin Channel'}
+                </Button>
+                <Button variant="outline" className="w-full justify-start" onClick={() => {
+                  if (selectedChannel) {
+                    selectedChannel.isMuted = !selectedChannel.isMuted;
+                    toast.success(selectedChannel.isMuted ? 'Notifications muted' : 'Notifications enabled');
+                  }
+                  setShowChannelOptionsDialog(false);
+                }}>
+                  {selectedChannel?.isMuted ? <Bell className="h-4 w-4 mr-2" /> : <BellOff className="h-4 w-4 mr-2" />}
+                  {selectedChannel?.isMuted ? 'Unmute Notifications' : 'Mute Notifications'}
+                </Button>
+                <Button variant="outline" className="w-full justify-start" onClick={() => {
+                  setShowChannelOptionsDialog(false);
+                  setShowChannelInfoDialog(true);
+                }}>
+                  <Users className="h-4 w-4 mr-2" />
+                  View Members
+                </Button>
+                <Button variant="outline" className="w-full justify-start" onClick={() => {
+                  const shareUrl = `https://app.example.com/channel/${selectedChannel?.id}`;
+                  navigator.clipboard.writeText(shareUrl);
+                  toast.success('Channel link copied to clipboard');
+                  setShowChannelOptionsDialog(false);
+                }}>
+                  <Share2 className="h-4 w-4 mr-2" />
+                  Copy Channel Link
+                </Button>
+                <Button variant="outline" className="w-full justify-start" onClick={() => {
+                  setShowChannelOptionsDialog(false);
+                  setShowInviteMemberDialog(true);
+                }}>
+                  <UserPlus className="h-4 w-4 mr-2" />
+                  Invite People
+                </Button>
+              </div>
+              <div className="pt-4 border-t">
+                <Button variant="outline" className="w-full justify-start text-red-600 hover:bg-red-50" onClick={() => {
+                  toast.promise(
+                    new Promise<void>((resolve) => {
+                      setTimeout(() => {
+                        setShowChannelOptionsDialog(false);
+                        resolve();
+                      }, 500);
+                    }),
+                    { loading: 'Leaving channel...', success: 'Left channel successfully', error: 'Failed to leave channel' }
+                  );
+                }}>
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Leave Channel
+                </Button>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowChannelOptionsDialog(false)}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Emoji Picker Dialog */}
+        <Dialog open={showEmojiPickerDialog} onOpenChange={setShowEmojiPickerDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Choose an Emoji</DialogTitle>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="grid grid-cols-8 gap-2">
+                {['😀', '😂', '😍', '🥰', '😎', '🤔', '😢', '😡', '👍', '👎', '❤️', '🔥', '⭐', '🎉', '🚀', '💯', '✅', '❌', '👀', '💪', '🙏', '🎯', '💡', '📌', '⏰', '📝', '🔔', '💬', '👏', '🤝', '💼', '📊'].map(emoji => (
+                  <button
+                    key={emoji}
+                    className="w-10 h-10 text-2xl hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                    onClick={() => {
+                      if (emojiTarget === 'message' && selectedMessage) {
+                        const existingReaction = selectedMessage.reactions.find(r => r.emoji === emoji);
+                        if (existingReaction) {
+                          existingReaction.count++;
+                          existingReaction.users.push('current-user');
+                        } else {
+                          selectedMessage.reactions.push({ emoji, count: 1, users: ['current-user'] });
+                        }
+                        toast.success(`Reacted with ${emoji}`);
+                      } else {
+                        setMessageInput(prev => prev + emoji);
+                        toast.success('Emoji added');
+                      }
+                      setShowEmojiPickerDialog(false);
+                    }}
+                  >
+                    {emoji}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowEmojiPickerDialog(false)}>Cancel</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Message Options Dialog */}
+        <Dialog open={showMessageOptionsDialog} onOpenChange={setShowMessageOptionsDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Message Options</DialogTitle>
+            </DialogHeader>
+            {selectedMessage && (
+              <div className="space-y-4 py-4">
+                <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Avatar className="w-6 h-6">
+                      <AvatarFallback style={{ backgroundColor: selectedMessage.author.cursorColor }} className="text-white text-xs">
+                        {selectedMessage.author.name.split(' ').map(n => n[0]).join('')}
+                      </AvatarFallback>
+                    </Avatar>
+                    <span className="font-medium text-sm">{selectedMessage.author.name}</span>
+                    <span className="text-xs text-gray-500">{formatTimeAgo(selectedMessage.timestamp)}</span>
+                  </div>
+                  <p className="text-sm">{selectedMessage.content}</p>
+                </div>
+                <div className="space-y-2">
+                  <Button variant="outline" className="w-full justify-start" onClick={() => {
+                    setMessageInput(`@${selectedMessage.author.name} `);
+                    setShowMessageOptionsDialog(false);
+                    toast.success('Reply mode activated');
+                  }}>
+                    <Reply className="h-4 w-4 mr-2" />
+                    Reply to Message
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start" onClick={() => {
+                    selectedMessage.isPinned = !selectedMessage.isPinned;
+                    toast.success(selectedMessage.isPinned ? 'Message pinned' : 'Message unpinned');
+                    setShowMessageOptionsDialog(false);
+                  }}>
+                    <Pin className="h-4 w-4 mr-2" />
+                    {selectedMessage.isPinned ? 'Unpin Message' : 'Pin Message'}
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start" onClick={() => {
+                    navigator.clipboard.writeText(selectedMessage.content);
+                    toast.success('Message copied to clipboard');
+                    setShowMessageOptionsDialog(false);
+                  }}>
+                    <FileText className="h-4 w-4 mr-2" />
+                    Copy Text
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start" onClick={() => {
+                    const shareUrl = `https://app.example.com/message/${selectedMessage.id}`;
+                    navigator.clipboard.writeText(shareUrl);
+                    toast.success('Message link copied');
+                    setShowMessageOptionsDialog(false);
+                  }}>
+                    <Share2 className="h-4 w-4 mr-2" />
+                    Share Message
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start" onClick={() => {
+                    setShowMessageOptionsDialog(false);
+                    setEmojiTarget('message');
+                    setShowEmojiPickerDialog(true);
+                  }}>
+                    <Smile className="h-4 w-4 mr-2" />
+                    Add Reaction
+                  </Button>
+                </div>
+                <div className="pt-4 border-t">
+                  <Button variant="outline" className="w-full justify-start text-red-600 hover:bg-red-50" onClick={() => {
+                    toast.promise(
+                      new Promise<void>((resolve) => {
+                        setTimeout(() => {
+                          const index = mockMessages.findIndex(m => m.id === selectedMessage.id);
+                          if (index > -1) {
+                            mockMessages.splice(index, 1);
+                          }
+                          setShowMessageOptionsDialog(false);
+                          resolve();
+                        }, 500);
+                      }),
+                      { loading: 'Deleting message...', success: 'Message deleted', error: 'Failed to delete message' }
+                    );
+                  }}>
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Delete Message
+                  </Button>
+                </div>
+              </div>
+            )}
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowMessageOptionsDialog(false)}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* File Options Dialog */}
+        <Dialog open={showFileOptionsDialog} onOpenChange={setShowFileOptionsDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>File Options</DialogTitle>
+            </DialogHeader>
+            {selectedFile && (
+              <div className="space-y-4 py-4">
+                <div className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div className="w-12 h-12 rounded-lg bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
+                    <FileText className="h-6 w-6 text-blue-600" />
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-medium">{selectedFile.name}</h4>
+                    <p className="text-sm text-gray-500">{formatSize(selectedFile.size)} - v{selectedFile.version}</p>
+                  </div>
+                  {selectedFile.isStarred && <Star className="h-5 w-5 text-amber-500 fill-amber-500" />}
+                </div>
+                <div className="space-y-2">
+                  <Button variant="outline" className="w-full justify-start" onClick={() => {
+                    toast.promise(
+                      new Promise<void>((resolve) => {
+                        setTimeout(() => {
+                          window.open(`https://app.example.com/preview/${selectedFile.id}`, '_blank');
+                          resolve();
+                        }, 300);
+                      }),
+                      { loading: 'Opening file...', success: 'File opened in new tab', error: 'Failed to open file' }
+                    );
+                    setShowFileOptionsDialog(false);
+                  }}>
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    Open File
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start" onClick={() => {
+                    toast.promise(
+                      new Promise<void>((resolve) => {
+                        setTimeout(() => {
+                          selectedFile.downloadCount++;
+                          resolve();
+                        }, 800);
+                      }),
+                      { loading: 'Downloading...', success: 'Download started', error: 'Download failed' }
+                    );
+                    setShowFileOptionsDialog(false);
+                  }}>
+                    <Download className="h-4 w-4 mr-2" />
+                    Download
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start" onClick={() => {
+                    selectedFile.isStarred = !selectedFile.isStarred;
+                    toast.success(selectedFile.isStarred ? 'File starred' : 'File unstarred');
+                    setShowFileOptionsDialog(false);
+                  }}>
+                    <Star className={`h-4 w-4 mr-2 ${selectedFile.isStarred ? 'fill-amber-500 text-amber-500' : ''}`} />
+                    {selectedFile.isStarred ? 'Remove from Starred' : 'Add to Starred'}
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start" onClick={() => {
+                    const shareUrl = `https://app.example.com/share/${selectedFile.id}`;
+                    navigator.clipboard.writeText(shareUrl);
+                    toast.success('Share link copied to clipboard');
+                    setShowFileOptionsDialog(false);
+                  }}>
+                    <Share2 className="h-4 w-4 mr-2" />
+                    Copy Share Link
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start" onClick={() => {
+                    toast.info('File renaming', { description: 'Opening rename dialog...' });
+                    setShowFileOptionsDialog(false);
+                  }}>
+                    <FileText className="h-4 w-4 mr-2" />
+                    Rename File
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start" onClick={() => {
+                    toast.info('Move file', { description: 'Opening folder picker...' });
+                    setShowFileOptionsDialog(false);
+                  }}>
+                    <FolderOpen className="h-4 w-4 mr-2" />
+                    Move to Folder
+                  </Button>
+                </div>
+                <div className="pt-4 border-t">
+                  <Button variant="outline" className="w-full justify-start text-red-600 hover:bg-red-50" onClick={() => {
+                    toast.promise(
+                      new Promise<void>((resolve) => {
+                        setTimeout(() => {
+                          const index = mockFiles.findIndex(f => f.id === selectedFile.id);
+                          if (index > -1) {
+                            mockFiles.splice(index, 1);
+                          }
+                          setShowFileOptionsDialog(false);
+                          resolve();
+                        }, 500);
+                      }),
+                      { loading: 'Deleting file...', success: 'File deleted', error: 'Failed to delete file' }
+                    );
+                  }}>
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Delete File
+                  </Button>
+                </div>
+              </div>
+            )}
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowFileOptionsDialog(false)}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Channel Info Dialog */}
+        <Dialog open={showChannelInfoDialog} onOpenChange={setShowChannelInfoDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                {selectedChannel?.type === 'private' ? <Lock className="h-5 w-5" /> : <Hash className="h-5 w-5" />}
+                {selectedChannel?.name}
+              </DialogTitle>
+            </DialogHeader>
+            {selectedChannel && (
+              <div className="space-y-6 py-4">
+                <div>
+                  <h4 className="font-medium mb-2">Description</h4>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">{selectedChannel.description || 'No description set'}</p>
+                </div>
+                <div>
+                  <h4 className="font-medium mb-2">Channel Details</h4>
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                      <p className="text-gray-500">Type</p>
+                      <p className="font-medium capitalize">{selectedChannel.type}</p>
+                    </div>
+                    <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                      <p className="text-gray-500">Members</p>
+                      <p className="font-medium">{selectedChannel.memberCount}</p>
+                    </div>
+                    <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                      <p className="text-gray-500">Created</p>
+                      <p className="font-medium">{new Date(selectedChannel.createdAt).toLocaleDateString()}</p>
+                    </div>
+                    <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                      <p className="text-gray-500">Status</p>
+                      <p className="font-medium flex items-center gap-1">
+                        {selectedChannel.isPinned && <Pin className="h-3 w-3 text-amber-500" />}
+                        {selectedChannel.isMuted && <BellOff className="h-3 w-3 text-gray-400" />}
+                        {!selectedChannel.isPinned && !selectedChannel.isMuted && 'Active'}
+                        {selectedChannel.isPinned && 'Pinned'}
+                        {selectedChannel.isMuted && ', Muted'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <h4 className="font-medium mb-2">Members ({selectedChannel.memberCount})</h4>
+                  <ScrollArea className="h-[150px]">
+                    <div className="space-y-2">
+                      {mockMembers.map(member => (
+                        <div key={member.id} className="flex items-center gap-3 p-2 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg">
+                          <div className="relative">
+                            <Avatar className="w-8 h-8">
+                              <AvatarFallback style={{ backgroundColor: member.cursorColor }} className="text-white text-xs">
+                                {member.name.split(' ').map(n => n[0]).join('')}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-white ${getPresenceColor(member.presence)}`} />
+                          </div>
+                          <div className="flex-1">
+                            <p className="text-sm font-medium">{member.name}</p>
+                            <p className="text-xs text-gray-500">{member.title}</p>
+                          </div>
+                          <Badge variant="outline" className="text-xs capitalize">{member.role}</Badge>
+                        </div>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                </div>
+                <div>
+                  <h4 className="font-medium mb-2">Notification Preferences</h4>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div><p className="text-sm font-medium">Mute notifications</p><p className="text-xs text-gray-500">Silence all channel notifications</p></div>
+                      <Switch checked={selectedChannel.isMuted} onCheckedChange={(checked) => { selectedChannel.isMuted = checked; }} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowChannelInfoDialog(false)}>Close</Button>
+              <Button onClick={() => {
+                setShowChannelInfoDialog(false);
+                setActiveTab('chat');
+                toast.success(`Opened #${selectedChannel?.name}`);
+              }}>Open Channel</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Automation Options Dialog */}
+        <Dialog open={showAutomationOptionsDialog} onOpenChange={setShowAutomationOptionsDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Zap className="h-5 w-5 text-purple-600" />
+                Automation Settings
+              </DialogTitle>
+            </DialogHeader>
+            {selectedAutomation && (
+              <div className="space-y-6 py-4">
+                <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                  <h4 className="font-medium">{selectedAutomation.name}</h4>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Trigger: {selectedAutomation.trigger}</p>
+                </div>
+                <div>
+                  <Label>Automation Name</Label>
+                  <Input defaultValue={selectedAutomation.name} className="mt-1" />
+                </div>
+                <div>
+                  <Label>Trigger</Label>
+                  <Select defaultValue={selectedAutomation.trigger.toLowerCase().replace(/ /g, '_')}>
+                    <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="when_task_is_created">When task is created</SelectItem>
+                      <SelectItem value="when_task_is_completed">When task is completed</SelectItem>
+                      <SelectItem value="when_meeting_starts">When meeting starts</SelectItem>
+                      <SelectItem value="when_file_is_uploaded">When file is uploaded</SelectItem>
+                      <SelectItem value="daily_at_specific_time">Daily at specific time</SelectItem>
+                      <SelectItem value="weekly_on_specific_day">Weekly on specific day</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>Actions</Label>
+                  <div className="space-y-2 mt-2">
+                    {selectedAutomation.actions.map((action, i) => (
+                      <div key={i} className="flex items-center gap-2 p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                        <Zap className="h-4 w-4 text-purple-500" />
+                        <span className="text-sm flex-1">{action}</span>
+                        <Button variant="ghost" size="sm" onClick={() => {
+                          selectedAutomation.actions.splice(i, 1);
+                          toast.success('Action removed');
+                        }}><Trash2 className="h-4 w-4" /></Button>
+                      </div>
+                    ))}
+                    <Button variant="outline" size="sm" className="w-full" onClick={() => {
+                      selectedAutomation.actions.push('Send notification');
+                      toast.success('Action added');
+                    }}><Plus className="h-4 w-4 mr-2" />Add Action</Button>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between">
+                  <div><p className="font-medium">Enable Automation</p><p className="text-sm text-gray-500">Run this automation automatically</p></div>
+                  <Switch checked={selectedAutomation.isActive} onCheckedChange={(checked) => { selectedAutomation.isActive = checked; }} />
+                </div>
+                <div className="pt-4 border-t flex gap-2">
+                  <Button variant="outline" className="flex-1" onClick={() => {
+                    toast.promise(
+                      new Promise<void>((resolve) => {
+                        setTimeout(() => {
+                          selectedAutomation.lastTriggered = new Date().toISOString();
+                          resolve();
+                        }, 1000);
+                      }),
+                      { loading: 'Running automation...', success: 'Automation ran successfully', error: 'Automation failed' }
+                    );
+                  }}>
+                    <Play className="h-4 w-4 mr-2" />
+                    Run Now
+                  </Button>
+                  <Button variant="outline" className="text-red-600 hover:bg-red-50" onClick={() => {
+                    toast.promise(
+                      new Promise<void>((resolve) => {
+                        setTimeout(() => {
+                          const index = mockAutomations.findIndex(a => a.id === selectedAutomation.id);
+                          if (index > -1) {
+                            mockAutomations.splice(index, 1);
+                          }
+                          setShowAutomationOptionsDialog(false);
+                          resolve();
+                        }, 500);
+                      }),
+                      { loading: 'Deleting automation...', success: 'Automation deleted', error: 'Failed to delete' }
+                    );
+                  }}>
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Delete
+                  </Button>
+                </div>
+              </div>
+            )}
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowAutomationOptionsDialog(false)}>Cancel</Button>
+              <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => {
+                toast.success('Automation settings saved');
+                setShowAutomationOptionsDialog(false);
+              }}>Save Changes</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

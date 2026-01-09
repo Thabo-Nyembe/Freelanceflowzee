@@ -223,6 +223,37 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
   const [showConnectIntegrationDialog, setShowConnectIntegrationDialog] = useState(false)
   const [selectedIntegration, setSelectedIntegration] = useState<string | null>(null)
 
+  // Additional dialog states for full functionality
+  const [showEditWebhookDialog, setShowEditWebhookDialog] = useState(false)
+  const [selectedWebhook, setSelectedWebhook] = useState<WebhookEndpoint | null>(null)
+  const [showEditTaxRateDialog, setShowEditTaxRateDialog] = useState(false)
+  const [selectedTaxRate, setSelectedTaxRate] = useState<TaxRate | null>(null)
+  const [showRotateApiKeysDialog, setShowRotateApiKeysDialog] = useState(false)
+  const [showGenerateTaxReportDialog, setShowGenerateTaxReportDialog] = useState(false)
+  const [secretKeyVisible, setSecretKeyVisible] = useState(false)
+
+  // Form states for edit dialogs
+  const [editWebhookForm, setEditWebhookForm] = useState({
+    url: '',
+    description: '',
+    events: [] as string[],
+    status: 'enabled' as 'enabled' | 'disabled'
+  })
+  const [editTaxRateForm, setEditTaxRateForm] = useState({
+    name: '',
+    percentage: '',
+    country: 'us',
+    jurisdiction: '',
+    inclusive: false,
+    active: true
+  })
+  const [taxReportForm, setTaxReportForm] = useState({
+    startDate: '',
+    endDate: '',
+    format: 'csv' as 'csv' | 'pdf' | 'json',
+    includeDetails: true
+  })
+
   const { transactions, loading, error, refetch: refetchTransactions } = useBilling({ status: statusFilter })
   const display = transactions.length > 0 ? transactions : initialBilling
 
@@ -1841,7 +1872,16 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
                                 {wh.events.length} events • {wh.success_rate}% success rate
                               </div>
                             </div>
-                            <Button variant="ghost" size="sm" onClick={() => toast.success('Webhook editor opened')}><Edit className="h-4 w-4" /></Button>
+                            <Button variant="ghost" size="sm" onClick={() => {
+                              setSelectedWebhook(wh)
+                              setEditWebhookForm({
+                                url: wh.url,
+                                description: '',
+                                events: wh.events,
+                                status: wh.status
+                              })
+                              setShowEditWebhookDialog(true)
+                            }}><Edit className="h-4 w-4" /></Button>
                           </div>
                         ))}
                         <Button variant="outline" className="w-full" onClick={() => setShowAddWebhookDialog(true)}>
@@ -1872,9 +1912,21 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
                       <div className="space-y-2">
                         <Label className="text-sm font-medium">Secret Key</Label>
                         <div className="flex gap-2">
-                          <Input value="STRIPE_KEY_PLACEHOLDER" readOnly className="flex-1 font-mono text-sm" type="password" />
-                          <Button variant="outline" size="icon" onClick={() => toast.success('Secret key revealed')}>
-                            <Eye className="h-4 w-4" />
+                          <Input
+                            value={secretKeyVisible ? "sk_live_xxxxxxxxxxxxxxxxxxxxx" : "STRIPE_KEY_PLACEHOLDER"}
+                            readOnly
+                            className="flex-1 font-mono text-sm"
+                            type={secretKeyVisible ? "text" : "password"}
+                          />
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            onClick={() => {
+                              setSecretKeyVisible(!secretKeyVisible)
+                              toast.success(secretKeyVisible ? 'Secret key hidden' : 'Secret key revealed')
+                            }}
+                          >
+                            {secretKeyVisible ? <Lock className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                           </Button>
                           <Button variant="outline" size="icon" onClick={() => { navigator.clipboard.writeText('sk_live_xxxxxxxxxxxxxxxxxxxxx'); toast.success('Secret key copied'); }}>
                             <Copy className="h-4 w-4" />
@@ -1886,7 +1938,7 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
                           <strong>Warning:</strong> Never share your secret key in public repositories or client-side code.
                         </p>
                       </div>
-                      <Button variant="outline" className="w-full" onClick={() => { toast.info('Rotating API keys...'); setTimeout(() => toast.success('API keys rotated successfully'), 1500); }}>
+                      <Button variant="outline" className="w-full" onClick={() => setShowRotateApiKeysDialog(true)}>
                         <RefreshCw className="h-4 w-4 mr-2" />
                         Rotate API Keys
                       </Button>
@@ -1926,7 +1978,18 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
                                 {tax.inclusive ? 'Inclusive' : 'Exclusive'}
                               </Badge>
                               <Switch checked={tax.active} />
-                              <Button variant="ghost" size="sm" onClick={() => toast.success('Tax rate editor opened')}><Edit className="h-4 w-4" /></Button>
+                              <Button variant="ghost" size="sm" onClick={() => {
+                                setSelectedTaxRate(tax)
+                                setEditTaxRateForm({
+                                  name: tax.name,
+                                  percentage: tax.percentage.toString(),
+                                  country: tax.country.toLowerCase(),
+                                  jurisdiction: tax.jurisdiction,
+                                  inclusive: tax.inclusive,
+                                  active: tax.active
+                                })
+                                setShowEditTaxRateDialog(true)
+                              }}><Edit className="h-4 w-4" /></Button>
                             </div>
                           </div>
                         ))}
@@ -2131,7 +2194,7 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
                         <Download className="h-4 w-4 mr-2" />
                         Export All Billing Data
                       </Button>
-                      <Button variant="outline" className="w-full" onClick={() => { toast.info('Generating tax report...'); setTimeout(() => toast.success('Tax report generated and downloaded'), 2000); }}>
+                      <Button variant="outline" className="w-full" onClick={() => setShowGenerateTaxReportDialog(true)}>
                         <FileText className="h-4 w-4 mr-2" />
                         Generate Tax Report
                       </Button>
@@ -2852,6 +2915,439 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
             <Button variant="outline" onClick={() => setShowConfirmDisableBillingDialog(false)}>Cancel</Button>
             <Button variant="destructive" onClick={() => { toast.warning('Billing module has been disabled'); setShowConfirmDisableBillingDialog(false); }}>
               Disable Billing
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Webhook Dialog */}
+      <Dialog open={showEditWebhookDialog} onOpenChange={setShowEditWebhookDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              <div className="p-2 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg">
+                <Webhook className="h-5 w-5 text-white" />
+              </div>
+              Edit Webhook Endpoint
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <Label className="text-sm font-medium">Endpoint URL *</Label>
+              <Input
+                placeholder="https://your-domain.com/webhooks/billing"
+                className="mt-1"
+                value={editWebhookForm.url}
+                onChange={(e) => setEditWebhookForm(prev => ({ ...prev, url: e.target.value }))}
+              />
+            </div>
+            <div>
+              <Label className="text-sm font-medium">Description</Label>
+              <Input
+                placeholder="Billing webhook for production"
+                className="mt-1"
+                value={editWebhookForm.description}
+                onChange={(e) => setEditWebhookForm(prev => ({ ...prev, description: e.target.value }))}
+              />
+            </div>
+            <div>
+              <Label className="text-sm font-medium">Status</Label>
+              <Select
+                value={editWebhookForm.status}
+                onValueChange={(value: 'enabled' | 'disabled') => setEditWebhookForm(prev => ({ ...prev, status: value }))}
+              >
+                <SelectTrigger className="mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="enabled">Enabled</SelectItem>
+                  <SelectItem value="disabled">Disabled</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label className="text-sm font-medium">Events to Listen</Label>
+              <div className="mt-2 grid grid-cols-2 gap-2">
+                {['invoice.paid', 'invoice.payment_failed', 'subscription.created', 'subscription.updated', 'subscription.deleted', 'customer.created'].map(event => (
+                  <label key={event} className="flex items-center gap-2 text-sm">
+                    <input
+                      type="checkbox"
+                      className="rounded"
+                      checked={editWebhookForm.events.includes(event)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setEditWebhookForm(prev => ({ ...prev, events: [...prev.events, event] }))
+                        } else {
+                          setEditWebhookForm(prev => ({ ...prev, events: prev.events.filter(ev => ev !== event) }))
+                        }
+                      }}
+                    />
+                    <span className="text-gray-600 dark:text-gray-400">{event}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+            {selectedWebhook && (
+              <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-gray-500">Webhook ID</span>
+                  <code className="text-gray-700 dark:text-gray-300">{selectedWebhook.id}</code>
+                </div>
+                <div className="flex items-center justify-between text-sm mt-2">
+                  <span className="text-gray-500">Success Rate</span>
+                  <span className="text-green-600">{selectedWebhook.success_rate}%</span>
+                </div>
+                <div className="flex items-center justify-between text-sm mt-2">
+                  <span className="text-gray-500">Last Delivery</span>
+                  <span className="text-gray-700 dark:text-gray-300">
+                    {selectedWebhook.last_delivery ? new Date(selectedWebhook.last_delivery).toLocaleString() : 'Never'}
+                  </span>
+                </div>
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowEditWebhookDialog(false)}>Cancel</Button>
+            <Button
+              onClick={() => {
+                toast.success('Webhook endpoint updated successfully')
+                setShowEditWebhookDialog(false)
+                setSelectedWebhook(null)
+              }}
+              disabled={!editWebhookForm.url}
+            >
+              Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Tax Rate Dialog */}
+      <Dialog open={showEditTaxRateDialog} onOpenChange={setShowEditTaxRateDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              <div className="p-2 bg-gradient-to-br from-green-500 to-emerald-500 rounded-lg">
+                <Percent className="h-5 w-5 text-white" />
+              </div>
+              Edit Tax Rate
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <Label className="text-sm font-medium">Tax Name *</Label>
+              <Input
+                placeholder="e.g., State Sales Tax"
+                className="mt-1"
+                value={editTaxRateForm.name}
+                onChange={(e) => setEditTaxRateForm(prev => ({ ...prev, name: e.target.value }))}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label className="text-sm font-medium">Percentage *</Label>
+                <Input
+                  type="number"
+                  placeholder="8.25"
+                  className="mt-1"
+                  value={editTaxRateForm.percentage}
+                  onChange={(e) => setEditTaxRateForm(prev => ({ ...prev, percentage: e.target.value }))}
+                />
+              </div>
+              <div>
+                <Label className="text-sm font-medium">Country</Label>
+                <Select
+                  value={editTaxRateForm.country}
+                  onValueChange={(value) => setEditTaxRateForm(prev => ({ ...prev, country: value }))}
+                >
+                  <SelectTrigger className="mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="us">United States</SelectItem>
+                    <SelectItem value="uk">United Kingdom</SelectItem>
+                    <SelectItem value="de">Germany</SelectItem>
+                    <SelectItem value="fr">France</SelectItem>
+                    <SelectItem value="eu">European Union</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div>
+              <Label className="text-sm font-medium">Jurisdiction</Label>
+              <Input
+                placeholder="e.g., California"
+                className="mt-1"
+                value={editTaxRateForm.jurisdiction}
+                onChange={(e) => setEditTaxRateForm(prev => ({ ...prev, jurisdiction: e.target.value }))}
+              />
+            </div>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-medium text-gray-900 dark:text-white">Tax Inclusive</p>
+                <p className="text-sm text-gray-500">Include tax in displayed prices</p>
+              </div>
+              <Switch
+                checked={editTaxRateForm.inclusive}
+                onCheckedChange={(checked) => setEditTaxRateForm(prev => ({ ...prev, inclusive: checked }))}
+              />
+            </div>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-medium text-gray-900 dark:text-white">Active</p>
+                <p className="text-sm text-gray-500">Apply this tax rate to transactions</p>
+              </div>
+              <Switch
+                checked={editTaxRateForm.active}
+                onCheckedChange={(checked) => setEditTaxRateForm(prev => ({ ...prev, active: checked }))}
+              />
+            </div>
+            {selectedTaxRate && (
+              <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-gray-500">Tax Rate ID</span>
+                  <code className="text-gray-700 dark:text-gray-300">{selectedTaxRate.id}</code>
+                </div>
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              className="text-red-600 border-red-200 hover:bg-red-50"
+              onClick={() => {
+                toast.success('Tax rate deleted')
+                setShowEditTaxRateDialog(false)
+                setSelectedTaxRate(null)
+              }}
+            >
+              Delete
+            </Button>
+            <Button variant="outline" onClick={() => setShowEditTaxRateDialog(false)}>Cancel</Button>
+            <Button
+              onClick={() => {
+                toast.success('Tax rate updated successfully')
+                setShowEditTaxRateDialog(false)
+                setSelectedTaxRate(null)
+              }}
+              disabled={!editTaxRateForm.name || !editTaxRateForm.percentage}
+            >
+              Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Rotate API Keys Dialog */}
+      <Dialog open={showRotateApiKeysDialog} onOpenChange={setShowRotateApiKeysDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              <div className="p-2 bg-gradient-to-br from-orange-500 to-amber-500 rounded-lg">
+                <RefreshCw className="h-5 w-5 text-white" />
+              </div>
+              Rotate API Keys
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+              <div className="flex items-center gap-2 mb-2">
+                <AlertTriangle className="h-5 w-5 text-yellow-600" />
+                <p className="font-medium text-yellow-800 dark:text-yellow-200">Important Notice</p>
+              </div>
+              <p className="text-sm text-yellow-700 dark:text-yellow-300">
+                Rotating your API keys will invalidate your current keys. You will need to update all applications using the current keys.
+              </p>
+            </div>
+            <div className="space-y-3">
+              <div className="flex items-start gap-3">
+                <div className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-sm font-medium text-indigo-600">1</div>
+                <div>
+                  <p className="font-medium text-gray-900 dark:text-white">New keys will be generated</p>
+                  <p className="text-sm text-gray-500">Fresh API keys will be created immediately</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <div className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-sm font-medium text-indigo-600">2</div>
+                <div>
+                  <p className="font-medium text-gray-900 dark:text-white">Current keys will be revoked</p>
+                  <p className="text-sm text-gray-500">Existing keys will stop working after 24 hours</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <div className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-sm font-medium text-indigo-600">3</div>
+                <div>
+                  <p className="font-medium text-gray-900 dark:text-white">Update your applications</p>
+                  <p className="text-sm text-gray-500">Replace old keys with new ones in all your apps</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowRotateApiKeysDialog(false)}>Cancel</Button>
+            <Button
+              className="bg-gradient-to-r from-orange-600 to-amber-600"
+              onClick={() => {
+                toast.info('Rotating API keys...')
+                setTimeout(() => {
+                  toast.success('API keys rotated successfully. Check your email for the new keys.')
+                  setShowRotateApiKeysDialog(false)
+                }, 1500)
+              }}
+            >
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Rotate Keys
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Generate Tax Report Dialog */}
+      <Dialog open={showGenerateTaxReportDialog} onOpenChange={setShowGenerateTaxReportDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              <div className="p-2 bg-gradient-to-br from-purple-500 to-indigo-500 rounded-lg">
+                <FileText className="h-5 w-5 text-white" />
+              </div>
+              Generate Tax Report
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label className="text-sm font-medium">Start Date</Label>
+                <Input
+                  type="date"
+                  className="mt-1"
+                  value={taxReportForm.startDate}
+                  onChange={(e) => setTaxReportForm(prev => ({ ...prev, startDate: e.target.value }))}
+                />
+              </div>
+              <div>
+                <Label className="text-sm font-medium">End Date</Label>
+                <Input
+                  type="date"
+                  className="mt-1"
+                  value={taxReportForm.endDate}
+                  onChange={(e) => setTaxReportForm(prev => ({ ...prev, endDate: e.target.value }))}
+                />
+              </div>
+            </div>
+            <div>
+              <Label className="text-sm font-medium">Report Format</Label>
+              <Select
+                value={taxReportForm.format}
+                onValueChange={(value: 'csv' | 'pdf' | 'json') => setTaxReportForm(prev => ({ ...prev, format: value }))}
+              >
+                <SelectTrigger className="mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="csv">CSV (Spreadsheet)</SelectItem>
+                  <SelectItem value="pdf">PDF (Document)</SelectItem>
+                  <SelectItem value="json">JSON (Data Export)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-medium text-gray-900 dark:text-white">Include Transaction Details</p>
+                <p className="text-sm text-gray-500">Add line-item breakdown for each transaction</p>
+              </div>
+              <Switch
+                checked={taxReportForm.includeDetails}
+                onCheckedChange={(checked) => setTaxReportForm(prev => ({ ...prev, includeDetails: checked }))}
+              />
+            </div>
+            <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+              <h4 className="font-medium text-gray-900 dark:text-white mb-2">Report Contents:</h4>
+              <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
+                <li className="flex items-center gap-2">
+                  <ShieldCheck className="h-4 w-4 text-green-500" />
+                  Tax collected by jurisdiction
+                </li>
+                <li className="flex items-center gap-2">
+                  <ShieldCheck className="h-4 w-4 text-green-500" />
+                  Taxable vs non-taxable revenue
+                </li>
+                <li className="flex items-center gap-2">
+                  <ShieldCheck className="h-4 w-4 text-green-500" />
+                  Tax remittance summary
+                </li>
+                {taxReportForm.includeDetails && (
+                  <li className="flex items-center gap-2">
+                    <ShieldCheck className="h-4 w-4 text-green-500" />
+                    Individual transaction details
+                  </li>
+                )}
+              </ul>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowGenerateTaxReportDialog(false)}>Cancel</Button>
+            <Button
+              onClick={() => {
+                toast.info('Generating tax report...')
+                setTimeout(() => {
+                  // Create a sample tax report
+                  const reportData = {
+                    report_type: 'Tax Summary',
+                    period: {
+                      start: taxReportForm.startDate || '2024-01-01',
+                      end: taxReportForm.endDate || new Date().toISOString().split('T')[0]
+                    },
+                    generated_at: new Date().toISOString(),
+                    summary: {
+                      total_revenue: 125000,
+                      taxable_revenue: 100000,
+                      tax_collected: 8250,
+                      jurisdictions: [
+                        { name: 'California', rate: 8.25, collected: 6187.5 },
+                        { name: 'European Union', rate: 20, collected: 2062.5 }
+                      ]
+                    }
+                  }
+
+                  if (taxReportForm.format === 'json') {
+                    const blob = new Blob([JSON.stringify(reportData, null, 2)], { type: 'application/json' })
+                    const url = URL.createObjectURL(blob)
+                    const a = document.createElement('a')
+                    a.href = url
+                    a.download = `tax-report-${reportData.period.start}-to-${reportData.period.end}.json`
+                    document.body.appendChild(a)
+                    a.click()
+                    document.body.removeChild(a)
+                    URL.revokeObjectURL(url)
+                  } else if (taxReportForm.format === 'csv') {
+                    const csv = [
+                      'Jurisdiction,Tax Rate,Tax Collected',
+                      ...reportData.summary.jurisdictions.map(j => `${j.name},${j.rate}%,$${j.collected}`)
+                    ].join('\n')
+                    const blob = new Blob([csv], { type: 'text/csv' })
+                    const url = URL.createObjectURL(blob)
+                    const a = document.createElement('a')
+                    a.href = url
+                    a.download = `tax-report-${reportData.period.start}-to-${reportData.period.end}.csv`
+                    document.body.appendChild(a)
+                    a.click()
+                    document.body.removeChild(a)
+                    URL.revokeObjectURL(url)
+                  }
+
+                  toast.success('Tax report generated and downloaded')
+                  setShowGenerateTaxReportDialog(false)
+                  setTaxReportForm({
+                    startDate: '',
+                    endDate: '',
+                    format: 'csv',
+                    includeDetails: true
+                  })
+                }, 2000)
+              }}
+            >
+              <Download className="h-4 w-4 mr-2" />
+              Generate Report
             </Button>
           </DialogFooter>
         </DialogContent>

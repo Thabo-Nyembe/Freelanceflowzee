@@ -167,6 +167,13 @@ export default function AnalyticsClient() {
   const [showDeleteTracking, setShowDeleteTracking] = useState(false)
   const [showRevokeApiKeys, setShowRevokeApiKeys] = useState(false)
 
+  // Metric action dialogs
+  const [showDuplicateMetric, setShowDuplicateMetric] = useState(false)
+  const [showSetAlertDialog, setShowSetAlertDialog] = useState(false)
+  const [showShareMetric, setShowShareMetric] = useState(false)
+  const [showDeleteMetric, setShowDeleteMetric] = useState(false)
+  const [selectedMetricForAction, setSelectedMetricForAction] = useState<string | null>(null)
+
   // Database state
   const [dbFunnels, setDbFunnels] = useState<any[]>([])
   const [dbReports, setDbReports] = useState<any[]>([])
@@ -226,6 +233,20 @@ export default function AnalyticsClient() {
     properties: '',
     description: ''
   })
+
+  // Form state for metric alert
+  const [alertForm, setAlertForm] = useState({
+    thresholdType: 'above' as 'above' | 'below',
+    thresholdValue: '',
+    notifyEmail: true,
+    notifyInApp: true
+  })
+
+  // Form state for duplicate metric
+  const [duplicateMetricName, setDuplicateMetricName] = useState('')
+
+  // Form state for share metric
+  const [shareEmails, setShareEmails] = useState('')
 
   // Fetch user ID on mount
   useEffect(() => {
@@ -912,6 +933,157 @@ Add this code to the <head> section of your HTML.`)
       setShowRevokeApiKeys(false)
     } catch (err: any) {
       toast.error('Error revoking keys', { description: err.message })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // Handler for duplicating a metric
+  const handleDuplicateMetric = async () => {
+    if (!userId || !selectedMetricForAction) {
+      toast.error('Error', { description: 'You must be logged in to duplicate a metric' })
+      return
+    }
+    const originalMetric = mockMetrics.find(m => m.id === selectedMetricForAction)
+    if (!originalMetric) {
+      toast.error('Error', { description: 'Metric not found' })
+      return
+    }
+    const newName = duplicateMetricName.trim() || `${originalMetric.name} (Copy)`
+    setIsLoading(true)
+    try {
+      const { error } = await supabase
+        .from('analytics_metrics')
+        .insert({
+          user_id: userId,
+          name: newName,
+          category: originalMetric.category,
+          type: originalMetric.type,
+          value: originalMetric.value,
+          previous_value: originalMetric.previousValue,
+          change_percent: originalMetric.changePercent,
+          status: originalMetric.status,
+          alert_threshold: originalMetric.alertThreshold || null
+        })
+      if (error) throw error
+      toast.success('Metric duplicated', { description: `"${newName}" has been created` })
+      setDuplicateMetricName('')
+      setShowDuplicateMetric(false)
+      setSelectedMetricForAction(null)
+      setShowMetricOptions(null)
+      fetchMetrics()
+    } catch (err: any) {
+      toast.error('Error duplicating metric', { description: err.message })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // Handler for setting an alert on a metric
+  const handleSetMetricAlert = async () => {
+    if (!userId || !selectedMetricForAction) {
+      toast.error('Error', { description: 'You must be logged in to set an alert' })
+      return
+    }
+    if (!alertForm.thresholdValue) {
+      toast.error('Error', { description: 'Threshold value is required' })
+      return
+    }
+    const metric = mockMetrics.find(m => m.id === selectedMetricForAction)
+    if (!metric) {
+      toast.error('Error', { description: 'Metric not found' })
+      return
+    }
+    setIsLoading(true)
+    try {
+      const notificationChannels = []
+      if (alertForm.notifyEmail) notificationChannels.push('email')
+      if (alertForm.notifyInApp) notificationChannels.push('in_app')
+
+      const { error } = await supabase
+        .from('analytics_alerts')
+        .insert({
+          user_id: userId,
+          metric_name: metric.name,
+          metric_type: metric.type,
+          threshold_type: alertForm.thresholdType,
+          threshold_value: parseFloat(alertForm.thresholdValue),
+          is_active: true,
+          notification_channels: notificationChannels
+        })
+      if (error) throw error
+      toast.success('Alert created', { description: `Alert set for "${metric.name}" when value goes ${alertForm.thresholdType} ${alertForm.thresholdValue}` })
+      setAlertForm({ thresholdType: 'above', thresholdValue: '', notifyEmail: true, notifyInApp: true })
+      setShowSetAlertDialog(false)
+      setSelectedMetricForAction(null)
+      setShowMetricOptions(null)
+    } catch (err: any) {
+      toast.error('Error creating alert', { description: err.message })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // Handler for sharing a metric
+  const handleShareMetric = async () => {
+    if (!selectedMetricForAction) {
+      toast.error('Error', { description: 'No metric selected' })
+      return
+    }
+    const metric = mockMetrics.find(m => m.id === selectedMetricForAction)
+    if (!metric) {
+      toast.error('Error', { description: 'Metric not found' })
+      return
+    }
+    setIsLoading(true)
+    try {
+      const shareLink = `${window.location.origin}/dashboard/analytics-v2?metric=${selectedMetricForAction}`
+
+      if (shareEmails.trim()) {
+        // Send email with metric details
+        const emails = shareEmails.split(',').map(e => e.trim()).filter(Boolean)
+        const subject = encodeURIComponent(`Check out this metric: ${metric.name}`)
+        const body = encodeURIComponent(`I wanted to share this analytics metric with you:\n\nMetric: ${metric.name}\nCurrent Value: ${formatValue(metric.value, metric.type)}\nChange: ${metric.changePercent >= 0 ? '+' : ''}${metric.changePercent.toFixed(1)}%\n\nView the full analytics here: ${shareLink}`)
+        window.open(`mailto:${emails.join(',')}?subject=${subject}&body=${body}`)
+        toast.success('Email opened', { description: `Share metric "${metric.name}" with ${emails.length} recipient(s)` })
+      } else {
+        // Copy link to clipboard
+        await navigator.clipboard.writeText(shareLink)
+        toast.success('Link copied', { description: `Share link for "${metric.name}" copied to clipboard` })
+      }
+      setShareEmails('')
+      setShowShareMetric(false)
+      setSelectedMetricForAction(null)
+      setShowMetricOptions(null)
+    } catch (err: any) {
+      toast.error('Error sharing metric', { description: err.message })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // Handler for deleting a metric
+  const handleDeleteMetric = async () => {
+    if (!userId || !selectedMetricForAction) {
+      toast.error('Error', { description: 'You must be logged in to delete a metric' })
+      return
+    }
+    const metric = mockMetrics.find(m => m.id === selectedMetricForAction)
+    setIsLoading(true)
+    try {
+      const { error } = await supabase
+        .from('analytics_metrics')
+        .delete()
+        .eq('id', selectedMetricForAction)
+        .eq('user_id', userId)
+      if (error) throw error
+      toast.success('Metric deleted', { description: `"${metric?.name || 'Metric'}" has been removed` })
+      setShowDeleteMetric(false)
+      setSelectedMetricForAction(null)
+      setShowMetricOptions(null)
+      fetchMetrics()
+    } catch (err: any) {
+      toast.error('Error deleting metric', { description: err.message })
     } finally {
       setIsLoading(false)
     }
@@ -2835,22 +3007,272 @@ Add this code to the <head> section of your HTML.`)
               <DialogTitle>Metric Options</DialogTitle>
             </DialogHeader>
             <div className="space-y-2 mt-4">
-              <Button variant="outline" className="w-full justify-start" onClick={() => { setShowMetricOptions(null); toast.success('Metric duplicated'); }}>
+              <Button variant="outline" className="w-full justify-start" onClick={() => {
+                setSelectedMetricForAction(showMetricOptions);
+                const metric = mockMetrics.find(m => m.id === showMetricOptions);
+                setDuplicateMetricName(metric ? `${metric.name} (Copy)` : '');
+                setShowDuplicateMetric(true);
+              }}>
                 <Copy className="h-4 w-4 mr-2" />
                 Duplicate Metric
               </Button>
-              <Button variant="outline" className="w-full justify-start" onClick={() => { setShowMetricOptions(null); toast.success('Alert created'); }}>
+              <Button variant="outline" className="w-full justify-start" onClick={() => {
+                setSelectedMetricForAction(showMetricOptions);
+                setShowSetAlertDialog(true);
+              }}>
                 <Bell className="h-4 w-4 mr-2" />
                 Set Alert
               </Button>
-              <Button variant="outline" className="w-full justify-start" onClick={() => { setShowMetricOptions(null); toast.success('Link copied'); }}>
+              <Button variant="outline" className="w-full justify-start" onClick={() => {
+                setSelectedMetricForAction(showMetricOptions);
+                setShowShareMetric(true);
+              }}>
                 <Share2 className="h-4 w-4 mr-2" />
                 Share Metric
               </Button>
-              <Button variant="outline" className="w-full justify-start text-red-600 hover:bg-red-50" onClick={() => { setShowMetricOptions(null); toast.success('Metric deleted'); }}>
+              <Button variant="outline" className="w-full justify-start text-red-600 hover:bg-red-50" onClick={() => {
+                setSelectedMetricForAction(showMetricOptions);
+                setShowDeleteMetric(true);
+              }}>
                 <Trash2 className="h-4 w-4 mr-2" />
                 Delete Metric
               </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Duplicate Metric Dialog */}
+        <Dialog open={showDuplicateMetric} onOpenChange={(open) => {
+          if (!open) {
+            setShowDuplicateMetric(false);
+            setDuplicateMetricName('');
+          }
+        }}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Duplicate Metric</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 mt-4">
+              <p className="text-sm text-gray-500">
+                Create a copy of this metric with a new name. The duplicated metric will have the same configuration and initial values.
+              </p>
+              <div>
+                <Label htmlFor="duplicate-metric-name">New Metric Name</Label>
+                <Input
+                  id="duplicate-metric-name"
+                  placeholder="e.g., Active Users (Copy)"
+                  value={duplicateMetricName}
+                  onChange={(e) => setDuplicateMetricName(e.target.value)}
+                  className="mt-1"
+                />
+              </div>
+              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <h4 className="text-sm font-medium mb-2">Original Metric Details</h4>
+                {selectedMetricForAction && (() => {
+                  const metric = mockMetrics.find(m => m.id === selectedMetricForAction);
+                  return metric ? (
+                    <div className="space-y-1 text-sm text-gray-600 dark:text-gray-400">
+                      <p>Name: {metric.name}</p>
+                      <p>Category: {metric.category}</p>
+                      <p>Type: {metric.type}</p>
+                      <p>Current Value: {formatValue(metric.value, metric.type)}</p>
+                    </div>
+                  ) : null;
+                })()}
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => {
+                  setShowDuplicateMetric(false);
+                  setDuplicateMetricName('');
+                }}>
+                  Cancel
+                </Button>
+                <Button onClick={handleDuplicateMetric} disabled={isLoading}>
+                  {isLoading ? 'Duplicating...' : 'Duplicate Metric'}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Set Alert Dialog */}
+        <Dialog open={showSetAlertDialog} onOpenChange={(open) => {
+          if (!open) {
+            setShowSetAlertDialog(false);
+            setAlertForm({ thresholdType: 'above', thresholdValue: '', notifyEmail: true, notifyInApp: true });
+          }
+        }}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Set Metric Alert</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 mt-4">
+              <p className="text-sm text-gray-500">
+                Get notified when this metric crosses your specified threshold.
+              </p>
+              {selectedMetricForAction && (() => {
+                const metric = mockMetrics.find(m => m.id === selectedMetricForAction);
+                return metric ? (
+                  <div className="p-4 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg">
+                    <h4 className="font-medium text-indigo-900 dark:text-indigo-100">{metric.name}</h4>
+                    <p className="text-sm text-indigo-700 dark:text-indigo-300">
+                      Current value: {formatValue(metric.value, metric.type)}
+                    </p>
+                  </div>
+                ) : null;
+              })()}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Alert Condition</Label>
+                  <Select
+                    value={alertForm.thresholdType}
+                    onValueChange={(v: 'above' | 'below') => setAlertForm({ ...alertForm, thresholdType: v })}
+                  >
+                    <SelectTrigger className="mt-1">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="above">Goes above</SelectItem>
+                      <SelectItem value="below">Goes below</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="alert-threshold-value">Threshold Value</Label>
+                  <Input
+                    id="alert-threshold-value"
+                    type="number"
+                    placeholder="e.g., 1000"
+                    value={alertForm.thresholdValue}
+                    onChange={(e) => setAlertForm({ ...alertForm, thresholdValue: e.target.value })}
+                    className="mt-1"
+                  />
+                </div>
+              </div>
+              <div className="space-y-3">
+                <Label>Notification Channels</Label>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Mail className="h-4 w-4 text-gray-500" />
+                    <span className="text-sm">Email notifications</span>
+                  </div>
+                  <Switch
+                    checked={alertForm.notifyEmail}
+                    onCheckedChange={(checked) => setAlertForm({ ...alertForm, notifyEmail: checked })}
+                  />
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Bell className="h-4 w-4 text-gray-500" />
+                    <span className="text-sm">In-app notifications</span>
+                  </div>
+                  <Switch
+                    checked={alertForm.notifyInApp}
+                    onCheckedChange={(checked) => setAlertForm({ ...alertForm, notifyInApp: checked })}
+                  />
+                </div>
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => {
+                  setShowSetAlertDialog(false);
+                  setAlertForm({ thresholdType: 'above', thresholdValue: '', notifyEmail: true, notifyInApp: true });
+                }}>
+                  Cancel
+                </Button>
+                <Button onClick={handleSetMetricAlert} disabled={isLoading || !alertForm.thresholdValue}>
+                  {isLoading ? 'Creating...' : 'Create Alert'}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Share Metric Dialog */}
+        <Dialog open={showShareMetric} onOpenChange={(open) => {
+          if (!open) {
+            setShowShareMetric(false);
+            setShareEmails('');
+          }
+        }}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Share Metric</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 mt-4">
+              {selectedMetricForAction && (() => {
+                const metric = mockMetrics.find(m => m.id === selectedMetricForAction);
+                return metric ? (
+                  <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <h4 className="font-medium">{metric.name}</h4>
+                    <p className="text-2xl font-bold mt-1">{formatValue(metric.value, metric.type)}</p>
+                    <p className={`text-sm ${getStatusColor(metric.status)}`}>
+                      {metric.changePercent >= 0 ? '+' : ''}{metric.changePercent.toFixed(1)}% from previous period
+                    </p>
+                  </div>
+                ) : null;
+              })()}
+              <div>
+                <Label htmlFor="share-emails">Share via Email (optional)</Label>
+                <Input
+                  id="share-emails"
+                  placeholder="email@example.com, another@example.com"
+                  value={shareEmails}
+                  onChange={(e) => setShareEmails(e.target.value)}
+                  className="mt-1"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Enter email addresses separated by commas, or leave empty to copy link
+                </p>
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => {
+                  setShowShareMetric(false);
+                  setShareEmails('');
+                }}>
+                  Cancel
+                </Button>
+                <Button onClick={handleShareMetric} disabled={isLoading}>
+                  {isLoading ? 'Sharing...' : shareEmails.trim() ? 'Send Email' : 'Copy Link'}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Metric Dialog */}
+        <Dialog open={showDeleteMetric} onOpenChange={setShowDeleteMetric}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="text-red-600">Delete Metric</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 mt-4">
+              {selectedMetricForAction && (() => {
+                const metric = mockMetrics.find(m => m.id === selectedMetricForAction);
+                return metric ? (
+                  <>
+                    <p className="text-sm text-gray-500">
+                      Are you sure you want to delete the metric "{metric.name}"? This action cannot be undone.
+                    </p>
+                    <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                      <h4 className="font-medium text-red-900 dark:text-red-100">{metric.name}</h4>
+                      <p className="text-sm text-red-700 dark:text-red-300">
+                        Current value: {formatValue(metric.value, metric.type)}
+                      </p>
+                      <p className="text-xs text-red-600 dark:text-red-400 mt-2">
+                        All historical data for this metric will be permanently deleted.
+                      </p>
+                    </div>
+                  </>
+                ) : null;
+              })()}
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setShowDeleteMetric(false)}>
+                  Cancel
+                </Button>
+                <Button variant="destructive" onClick={handleDeleteMetric} disabled={isLoading}>
+                  {isLoading ? 'Deleting...' : 'Delete Metric'}
+                </Button>
+              </div>
             </div>
           </DialogContent>
         </Dialog>

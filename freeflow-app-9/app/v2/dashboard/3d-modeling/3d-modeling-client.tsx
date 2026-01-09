@@ -375,6 +375,11 @@ export default function ThreeDModelingClient() {
   const [previewRenderJob, setPreviewRenderJob] = useState<RenderJob | null>(null)
   const [downloadRenderJob, setDownloadRenderJob] = useState<RenderJob | null>(null)
 
+  // File browser states
+  const [showFileBrowserDialog, setShowFileBrowserDialog] = useState(false)
+  const [fileBrowserMode, setFileBrowserMode] = useState<'import-model' | 'upload-texture' | 'install-plugin'>('import-model')
+  const [selectedFile, setSelectedFile] = useState<{ name: string; size: string; type: string } | null>(null)
+
   // Scene hierarchy state
   const [sceneHierarchy, setSceneHierarchy] = useState<SceneObject[]>(mockSceneHierarchy)
   const [showSceneNodePropertiesDialog, setShowSceneNodePropertiesDialog] = useState(false)
@@ -2229,11 +2234,27 @@ export default function ThreeDModelingClient() {
                 Supports: OBJ, FBX, GLTF, GLB, STL, BLEND, DAE
               </p>
               <Button variant="outline" onClick={() => {
-                toast.info('File browser opened')
+                setFileBrowserMode('import-model')
+                setSelectedFile(null)
+                setShowFileBrowserDialog(true)
               }}>
                 Browse Files
               </Button>
             </div>
+            {selectedFile && fileBrowserMode === 'import-model' && (
+              <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                <div className="flex items-center gap-3">
+                  <File className="w-8 h-8 text-blue-500" />
+                  <div className="flex-1">
+                    <p className="font-medium text-sm">{selectedFile.name}</p>
+                    <p className="text-xs text-gray-500">{selectedFile.size} - {selectedFile.type}</p>
+                  </div>
+                  <Button variant="ghost" size="sm" onClick={() => setSelectedFile(null)}>
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+            )}
             <div className="space-y-2">
               <Label>Import Options</Label>
               <div className="flex items-center justify-between">
@@ -2355,11 +2376,27 @@ export default function ThreeDModelingClient() {
                 Supports: PNG, JPG, EXR, HDR, TIFF
               </p>
               <Button variant="outline" onClick={() => {
-                toast.info('File browser opened')
+                setFileBrowserMode('upload-texture')
+                setSelectedFile(null)
+                setShowFileBrowserDialog(true)
               }}>
                 Browse Files
               </Button>
             </div>
+            {selectedFile && fileBrowserMode === 'upload-texture' && (
+              <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                <div className="flex items-center gap-3">
+                  <Image className="w-8 h-8 text-green-500" />
+                  <div className="flex-1">
+                    <p className="font-medium text-sm">{selectedFile.name}</p>
+                    <p className="text-xs text-gray-500">{selectedFile.size} - {selectedFile.type}</p>
+                  </div>
+                  <Button variant="ghost" size="sm" onClick={() => setSelectedFile(null)}>
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+            )}
             <div className="space-y-2">
               <Label>Texture Type</Label>
               <Select defaultValue="diffuse">
@@ -2563,9 +2600,33 @@ export default function ThreeDModelingClient() {
             <div className="border-t pt-4">
               <Label>Install from File</Label>
               <div className="flex gap-2 mt-2">
-                <Input placeholder="Select plugin file..." readOnly className="flex-1" />
-                <Button variant="outline" onClick={() => toast.info('File browser opened')}>Browse</Button>
+                <Input
+                  placeholder="Select plugin file..."
+                  readOnly
+                  className="flex-1"
+                  value={selectedFile && fileBrowserMode === 'install-plugin' ? selectedFile.name : ''}
+                />
+                <Button variant="outline" onClick={() => {
+                  setFileBrowserMode('install-plugin')
+                  setSelectedFile(null)
+                  setShowFileBrowserDialog(true)
+                }}>Browse</Button>
               </div>
+              {selectedFile && fileBrowserMode === 'install-plugin' && (
+                <div className="mt-2 p-2 bg-purple-50 dark:bg-purple-900/20 rounded-lg flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Package className="w-4 h-4 text-purple-500" />
+                    <span className="text-sm">{selectedFile.name}</span>
+                    <span className="text-xs text-gray-500">({selectedFile.size})</span>
+                  </div>
+                  <Button size="sm" onClick={() => {
+                    toast.success('Plugin installed', { description: `${selectedFile.name} has been installed from file` })
+                    setSelectedFile(null)
+                  }}>
+                    Install
+                  </Button>
+                </div>
+              )}
             </div>
             <div className="flex gap-2 pt-2">
               <Button variant="outline" className="flex-1" onClick={() => setShowInstallPluginDialog(false)}>
@@ -3007,6 +3068,173 @@ export default function ThreeDModelingClient() {
               </div>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* File Browser Dialog */}
+      <Dialog open={showFileBrowserDialog} onOpenChange={setShowFileBrowserDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Folder className="w-5 h-5" />
+              {fileBrowserMode === 'import-model' && 'Select 3D Model File'}
+              {fileBrowserMode === 'upload-texture' && 'Select Texture File'}
+              {fileBrowserMode === 'install-plugin' && 'Select Plugin File'}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            {/* Breadcrumb navigation */}
+            <div className="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-400 p-2 bg-gray-50 dark:bg-gray-800 rounded-lg">
+              <Folder className="w-4 h-4" />
+              <span>/</span>
+              <button className="hover:text-blue-500">Users</button>
+              <span>/</span>
+              <button className="hover:text-blue-500">Documents</button>
+              <span>/</span>
+              <span className="text-gray-900 dark:text-white">
+                {fileBrowserMode === 'import-model' && '3D Models'}
+                {fileBrowserMode === 'upload-texture' && 'Textures'}
+                {fileBrowserMode === 'install-plugin' && 'Plugins'}
+              </span>
+            </div>
+
+            {/* File list */}
+            <div className="border rounded-lg max-h-64 overflow-y-auto">
+              {/* Folders */}
+              {['Recent', 'Downloads', 'Project Assets'].map((folder) => (
+                <button
+                  key={folder}
+                  className="w-full flex items-center gap-3 p-3 hover:bg-gray-50 dark:hover:bg-gray-800 text-left border-b dark:border-gray-700 last:border-b-0"
+                >
+                  <Folder className="w-5 h-5 text-blue-500" />
+                  <span className="flex-1">{folder}</span>
+                  <ChevronRight className="w-4 h-4 text-gray-400" />
+                </button>
+              ))}
+
+              {/* Files based on mode */}
+              {fileBrowserMode === 'import-model' && (
+                <>
+                  {[
+                    { name: 'character_model.fbx', size: '24.5 MB', type: 'FBX' },
+                    { name: 'environment_scene.gltf', size: '156.2 MB', type: 'GLTF' },
+                    { name: 'product_showcase.obj', size: '12.8 MB', type: 'OBJ' },
+                    { name: 'vehicle_concept.blend', size: '89.4 MB', type: 'BLEND' },
+                    { name: 'architecture_model.stl', size: '45.6 MB', type: 'STL' }
+                  ].map((file) => (
+                    <button
+                      key={file.name}
+                      className={`w-full flex items-center gap-3 p-3 hover:bg-blue-50 dark:hover:bg-blue-900/20 text-left border-b dark:border-gray-700 last:border-b-0 ${
+                        selectedFile?.name === file.name ? 'bg-blue-100 dark:bg-blue-900/30' : ''
+                      }`}
+                      onClick={() => setSelectedFile(file)}
+                    >
+                      <Box className="w-5 h-5 text-slate-500" />
+                      <div className="flex-1">
+                        <p className="font-medium text-sm">{file.name}</p>
+                        <p className="text-xs text-gray-500">{file.size}</p>
+                      </div>
+                      <Badge variant="outline" className="text-xs">{file.type}</Badge>
+                    </button>
+                  ))}
+                </>
+              )}
+
+              {fileBrowserMode === 'upload-texture' && (
+                <>
+                  {[
+                    { name: 'wood_diffuse_4k.png', size: '12.4 MB', type: 'PNG' },
+                    { name: 'metal_normal.png', size: '8.2 MB', type: 'PNG' },
+                    { name: 'concrete_roughness.jpg', size: '3.1 MB', type: 'JPG' },
+                    { name: 'studio_hdri.hdr', size: '45.6 MB', type: 'HDR' },
+                    { name: 'fabric_ao.exr', size: '6.8 MB', type: 'EXR' }
+                  ].map((file) => (
+                    <button
+                      key={file.name}
+                      className={`w-full flex items-center gap-3 p-3 hover:bg-green-50 dark:hover:bg-green-900/20 text-left border-b dark:border-gray-700 last:border-b-0 ${
+                        selectedFile?.name === file.name ? 'bg-green-100 dark:bg-green-900/30' : ''
+                      }`}
+                      onClick={() => setSelectedFile(file)}
+                    >
+                      <Image className="w-5 h-5 text-green-500" />
+                      <div className="flex-1">
+                        <p className="font-medium text-sm">{file.name}</p>
+                        <p className="text-xs text-gray-500">{file.size}</p>
+                      </div>
+                      <Badge variant="outline" className="text-xs">{file.type}</Badge>
+                    </button>
+                  ))}
+                </>
+              )}
+
+              {fileBrowserMode === 'install-plugin' && (
+                <>
+                  {[
+                    { name: 'mesh_optimizer_v2.1.zip', size: '4.2 MB', type: 'ZIP' },
+                    { name: 'uv_toolkit_pro.zip', size: '8.6 MB', type: 'ZIP' },
+                    { name: 'procedural_materials.zip', size: '12.4 MB', type: 'ZIP' },
+                    { name: 'animation_tools.zip', size: '6.8 MB', type: 'ZIP' }
+                  ].map((file) => (
+                    <button
+                      key={file.name}
+                      className={`w-full flex items-center gap-3 p-3 hover:bg-purple-50 dark:hover:bg-purple-900/20 text-left border-b dark:border-gray-700 last:border-b-0 ${
+                        selectedFile?.name === file.name ? 'bg-purple-100 dark:bg-purple-900/30' : ''
+                      }`}
+                      onClick={() => setSelectedFile(file)}
+                    >
+                      <Package className="w-5 h-5 text-purple-500" />
+                      <div className="flex-1">
+                        <p className="font-medium text-sm">{file.name}</p>
+                        <p className="text-xs text-gray-500">{file.size}</p>
+                      </div>
+                      <Badge variant="outline" className="text-xs">{file.type}</Badge>
+                    </button>
+                  ))}
+                </>
+              )}
+            </div>
+
+            {/* Selected file preview */}
+            {selectedFile && (
+              <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div className="flex items-center gap-3">
+                  {fileBrowserMode === 'import-model' && <Box className="w-8 h-8 text-blue-500" />}
+                  {fileBrowserMode === 'upload-texture' && <Image className="w-8 h-8 text-green-500" />}
+                  {fileBrowserMode === 'install-plugin' && <Package className="w-8 h-8 text-purple-500" />}
+                  <div className="flex-1">
+                    <p className="font-medium">{selectedFile.name}</p>
+                    <p className="text-sm text-gray-500">{selectedFile.size} - {selectedFile.type}</p>
+                  </div>
+                  <CheckCircle2 className="w-5 h-5 text-green-500" />
+                </div>
+              </div>
+            )}
+
+            <div className="flex gap-2 pt-4">
+              <Button variant="outline" className="flex-1" onClick={() => {
+                setSelectedFile(null)
+                setShowFileBrowserDialog(false)
+              }}>
+                Cancel
+              </Button>
+              <Button
+                className="flex-1 gap-2"
+                disabled={!selectedFile}
+                onClick={() => {
+                  if (selectedFile) {
+                    toast.success('File selected', { description: `${selectedFile.name} ready for ${
+                      fileBrowserMode === 'import-model' ? 'import' :
+                      fileBrowserMode === 'upload-texture' ? 'upload' : 'installation'
+                    }` })
+                    setShowFileBrowserDialog(false)
+                  }
+                }}
+              >
+                <CheckCircle2 className="w-4 h-4" />
+                Select File
+              </Button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

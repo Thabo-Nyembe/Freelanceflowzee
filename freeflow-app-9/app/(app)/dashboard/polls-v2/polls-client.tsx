@@ -576,6 +576,25 @@ export default function PollsClient() {
   // Selected theme
   const [selectedTheme, setSelectedTheme] = useState<string>(mockThemes[0].id)
 
+  // Dialog states for functionality
+  const [showWebhookDialog, setShowWebhookDialog] = useState(false)
+  const [showUpgradeDialog, setShowUpgradeDialog] = useState(false)
+  const [showResponseDetailDialog, setShowResponseDetailDialog] = useState(false)
+  const [selectedResponseDetail, setSelectedResponseDetail] = useState<{formTitle: string, responseNum: number} | null>(null)
+
+  // Webhook form state
+  const [webhookForm, setWebhookForm] = useState({
+    url: '',
+    triggerEvent: 'submit',
+    dataFormat: 'json',
+    secret: '',
+    isActive: true
+  })
+  const [savedWebhooks, setSavedWebhooks] = useState<Array<{id: string, url: string, triggerEvent: string, isActive: boolean}>>([])
+
+  // Plan selection state
+  const [selectedPlan, setSelectedPlan] = useState<string>('')
+
   // Quick actions with real functionality
   const pollsQuickActions = useMemo(() => [
     {
@@ -585,7 +604,6 @@ export default function PollsClient() {
       shortcut: 'N',
       action: () => {
         setShowCreateDialog(true)
-        toast.success('Survey builder opened')
       }
     },
     {
@@ -595,7 +613,6 @@ export default function PollsClient() {
       shortcut: 'R',
       action: () => {
         setActiveTab('responses')
-        toast.success('Viewing survey results')
       }
     },
     {
@@ -605,7 +622,6 @@ export default function PollsClient() {
       shortcut: 'T',
       action: () => {
         setShowTemplateDialog(true)
-        toast.success('Template library opened')
       }
     },
     {
@@ -949,8 +965,8 @@ export default function PollsClient() {
 
   // Handle view response details
   const handleViewResponseDetails = (formTitle: string, responseNum: number) => {
-    toast.success(`Viewing response #${responseNum} for ${formTitle}`)
-    setActiveTab('analytics')
+    setSelectedResponseDetail({ formTitle, responseNum })
+    setShowResponseDetailDialog(true)
   }
 
   // Integration connection state
@@ -1002,7 +1018,30 @@ export default function PollsClient() {
 
   // Handle add webhook
   const handleAddWebhook = () => {
-    toast.success('Webhook endpoint created')
+    setShowWebhookDialog(true)
+  }
+
+  // Handle save webhook
+  const handleSaveWebhook = () => {
+    if (!webhookForm.url.trim()) {
+      toast.error('Please enter a webhook URL')
+      return
+    }
+    const newWebhook = {
+      id: `webhook-${Date.now()}`,
+      url: webhookForm.url,
+      triggerEvent: webhookForm.triggerEvent,
+      isActive: webhookForm.isActive
+    }
+    setSavedWebhooks(prev => [...prev, newWebhook])
+    setWebhookForm({ url: '', triggerEvent: 'submit', dataFormat: 'json', secret: '', isActive: true })
+    toast.success('Webhook endpoint created successfully')
+  }
+
+  // Handle delete webhook
+  const handleDeleteWebhook = (webhookId: string) => {
+    setSavedWebhooks(prev => prev.filter(w => w.id !== webhookId))
+    toast.success('Webhook deleted')
   }
 
   // Handle manage subscription
@@ -1014,7 +1053,28 @@ export default function PollsClient() {
 
   // Handle upgrade plan
   const handleUpgradePlan = () => {
-    toast.success('Upgrade options available - contact sales for enterprise plans')
+    setShowUpgradeDialog(true)
+  }
+
+  // Handle plan selection and upgrade
+  const handleSelectPlan = (planId: string) => {
+    setSelectedPlan(planId)
+  }
+
+  // Handle confirm upgrade
+  const handleConfirmUpgrade = () => {
+    if (!selectedPlan) {
+      toast.error('Please select a plan')
+      return
+    }
+    const planNames: Record<string, string> = {
+      'basic': 'Basic',
+      'professional': 'Professional',
+      'enterprise': 'Enterprise'
+    }
+    toast.success(`Successfully upgraded to ${planNames[selectedPlan]} plan!`)
+    setShowUpgradeDialog(false)
+    setSelectedPlan('')
   }
 
   // Handle delete all responses
@@ -2622,6 +2682,408 @@ export default function PollsClient() {
                 </div>
               ))}
             </div>
+          </ScrollArea>
+        </DialogContent>
+      </Dialog>
+
+      {/* Webhook Management Dialog */}
+      <Dialog open={showWebhookDialog} onOpenChange={setShowWebhookDialog}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Webhook className="w-5 h-5 text-orange-600" />
+              Webhook Management
+            </DialogTitle>
+          </DialogHeader>
+          <ScrollArea className="max-h-[calc(90vh-120px)]">
+            <div className="space-y-6 p-1">
+              {/* Existing Webhooks */}
+              {savedWebhooks.length > 0 && (
+                <div className="space-y-3">
+                  <Label className="text-sm font-medium">Active Webhooks</Label>
+                  {savedWebhooks.map(webhook => (
+                    <div key={webhook.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-2 h-2 rounded-full ${webhook.isActive ? 'bg-green-500' : 'bg-gray-400'}`} />
+                        <div>
+                          <p className="text-sm font-medium truncate max-w-[300px]">{webhook.url}</p>
+                          <p className="text-xs text-gray-500">Trigger: {webhook.triggerEvent}</p>
+                        </div>
+                      </div>
+                      <Button variant="ghost" size="sm" onClick={() => handleDeleteWebhook(webhook.id)}>
+                        <Trash2 className="w-4 h-4 text-red-500" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Add New Webhook Form */}
+              <div className="space-y-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <h4 className="font-medium">Add New Webhook</h4>
+
+                <div className="space-y-2">
+                  <Label>Webhook URL *</Label>
+                  <Input
+                    value={webhookForm.url}
+                    onChange={(e) => setWebhookForm(prev => ({ ...prev, url: e.target.value }))}
+                    placeholder="https://your-service.com/webhook"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Trigger Event</Label>
+                    <Select
+                      value={webhookForm.triggerEvent}
+                      onValueChange={(v) => setWebhookForm(prev => ({ ...prev, triggerEvent: v }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="submit">On Form Submit</SelectItem>
+                        <SelectItem value="start">On Form Start</SelectItem>
+                        <SelectItem value="complete">On Form Complete</SelectItem>
+                        <SelectItem value="abandon">On Form Abandon</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Data Format</Label>
+                    <Select
+                      value={webhookForm.dataFormat}
+                      onValueChange={(v) => setWebhookForm(prev => ({ ...prev, dataFormat: v }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="json">JSON</SelectItem>
+                        <SelectItem value="form">Form Data</SelectItem>
+                        <SelectItem value="xml">XML</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Secret Key (Optional)</Label>
+                  <Input
+                    type="password"
+                    value={webhookForm.secret}
+                    onChange={(e) => setWebhookForm(prev => ({ ...prev, secret: e.target.value }))}
+                    placeholder="Used for request signing"
+                  />
+                  <p className="text-xs text-gray-500">This key will be used to sign webhook payloads</p>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <Switch
+                    checked={webhookForm.isActive}
+                    onCheckedChange={(checked) => setWebhookForm(prev => ({ ...prev, isActive: checked }))}
+                  />
+                  <Label>Enable webhook immediately</Label>
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <Button variant="outline" onClick={() => setShowWebhookDialog(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={handleSaveWebhook} className="bg-orange-600 hover:bg-orange-700">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Webhook
+                </Button>
+              </div>
+            </div>
+          </ScrollArea>
+        </DialogContent>
+      </Dialog>
+
+      {/* Upgrade Plan Dialog */}
+      <Dialog open={showUpgradeDialog} onOpenChange={setShowUpgradeDialog}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <CreditCard className="w-5 h-5 text-indigo-600" />
+              Upgrade Your Plan
+            </DialogTitle>
+          </DialogHeader>
+          <ScrollArea className="max-h-[calc(90vh-120px)]">
+            <div className="space-y-6 p-1">
+              <p className="text-gray-500">Choose the plan that best fits your needs</p>
+
+              <div className="grid grid-cols-3 gap-4">
+                {/* Basic Plan */}
+                <div
+                  className={`relative p-6 border-2 rounded-xl cursor-pointer transition-all ${
+                    selectedPlan === 'basic'
+                      ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20'
+                      : 'border-gray-200 dark:border-gray-700 hover:border-emerald-300'
+                  }`}
+                  onClick={() => handleSelectPlan('basic')}
+                >
+                  <div className="text-center mb-4">
+                    <h3 className="text-lg font-semibold">Basic</h3>
+                    <div className="mt-2">
+                      <span className="text-3xl font-bold">$19</span>
+                      <span className="text-gray-500">/month</span>
+                    </div>
+                  </div>
+                  <ul className="space-y-3 text-sm">
+                    <li className="flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                      <span>Up to 5 forms</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                      <span>1,000 responses/month</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                      <span>Basic analytics</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                      <span>Email support</span>
+                    </li>
+                  </ul>
+                </div>
+
+                {/* Professional Plan */}
+                <div
+                  className={`relative p-6 border-2 rounded-xl cursor-pointer transition-all ${
+                    selectedPlan === 'professional'
+                      ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20'
+                      : 'border-gray-200 dark:border-gray-700 hover:border-emerald-300'
+                  }`}
+                  onClick={() => handleSelectPlan('professional')}
+                >
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                    <Badge className="bg-emerald-600">Most Popular</Badge>
+                  </div>
+                  <div className="text-center mb-4">
+                    <h3 className="text-lg font-semibold">Professional</h3>
+                    <div className="mt-2">
+                      <span className="text-3xl font-bold">$49</span>
+                      <span className="text-gray-500">/month</span>
+                    </div>
+                  </div>
+                  <ul className="space-y-3 text-sm">
+                    <li className="flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                      <span>Unlimited forms</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                      <span>10,000 responses/month</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                      <span>Advanced analytics</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                      <span>Custom branding</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                      <span>Priority support</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                      <span>Webhooks & API access</span>
+                    </li>
+                  </ul>
+                </div>
+
+                {/* Enterprise Plan */}
+                <div
+                  className={`relative p-6 border-2 rounded-xl cursor-pointer transition-all ${
+                    selectedPlan === 'enterprise'
+                      ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20'
+                      : 'border-gray-200 dark:border-gray-700 hover:border-emerald-300'
+                  }`}
+                  onClick={() => handleSelectPlan('enterprise')}
+                >
+                  <div className="text-center mb-4">
+                    <h3 className="text-lg font-semibold">Enterprise</h3>
+                    <div className="mt-2">
+                      <span className="text-3xl font-bold">$149</span>
+                      <span className="text-gray-500">/month</span>
+                    </div>
+                  </div>
+                  <ul className="space-y-3 text-sm">
+                    <li className="flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                      <span>Everything in Pro</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                      <span>Unlimited responses</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                      <span>Custom domain</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                      <span>SSO/SAML</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                      <span>Dedicated support</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                      <span>SLA guarantee</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              {/* Payment Method */}
+              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <h4 className="font-medium mb-3">Payment Method</h4>
+                <div className="flex items-center gap-4">
+                  <div className="flex-1">
+                    <Label>Card Number</Label>
+                    <Input placeholder="4242 4242 4242 4242" className="mt-1" />
+                  </div>
+                  <div className="w-24">
+                    <Label>Expiry</Label>
+                    <Input placeholder="MM/YY" className="mt-1" />
+                  </div>
+                  <div className="w-20">
+                    <Label>CVC</Label>
+                    <Input placeholder="123" className="mt-1" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <Button variant="outline" onClick={() => { setShowUpgradeDialog(false); setSelectedPlan(''); }}>
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleConfirmUpgrade}
+                  disabled={!selectedPlan}
+                  className="bg-emerald-600 hover:bg-emerald-700"
+                >
+                  <CreditCard className="w-4 h-4 mr-2" />
+                  Upgrade Now
+                </Button>
+              </div>
+            </div>
+          </ScrollArea>
+        </DialogContent>
+      </Dialog>
+
+      {/* Response Details Dialog */}
+      <Dialog open={showResponseDetailDialog} onOpenChange={setShowResponseDetailDialog}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <UserCheck className="w-5 h-5 text-emerald-600" />
+              Response Details
+            </DialogTitle>
+          </DialogHeader>
+          <ScrollArea className="max-h-[calc(90vh-120px)]">
+            {selectedResponseDetail && (
+              <div className="space-y-6 p-1">
+                {/* Response Header */}
+                <div className="flex items-center justify-between p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg">
+                  <div>
+                    <h3 className="font-semibold">{selectedResponseDetail.formTitle}</h3>
+                    <p className="text-sm text-gray-500">Response #{selectedResponseDetail.responseNum}</p>
+                  </div>
+                  <Badge className="bg-emerald-600">Completed</Badge>
+                </div>
+
+                {/* Response Meta */}
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                    <Clock className="w-5 h-5 text-gray-400 mx-auto mb-1" />
+                    <p className="text-sm font-medium">3m 24s</p>
+                    <p className="text-xs text-gray-500">Duration</p>
+                  </div>
+                  <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                    <Globe className="w-5 h-5 text-gray-400 mx-auto mb-1" />
+                    <p className="text-sm font-medium">Desktop</p>
+                    <p className="text-xs text-gray-500">Device</p>
+                  </div>
+                  <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                    <Calendar className="w-5 h-5 text-gray-400 mx-auto mb-1" />
+                    <p className="text-sm font-medium">Today</p>
+                    <p className="text-xs text-gray-500">Submitted</p>
+                  </div>
+                </div>
+
+                {/* Response Answers */}
+                <div className="space-y-4">
+                  <h4 className="font-medium">Answers</h4>
+
+                  <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                    <p className="text-sm text-gray-500 mb-1">What is your name?</p>
+                    <p className="font-medium">John Smith</p>
+                  </div>
+
+                  <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                    <p className="text-sm text-gray-500 mb-1">What is your email address?</p>
+                    <p className="font-medium">john.smith@example.com</p>
+                  </div>
+
+                  <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                    <p className="text-sm text-gray-500 mb-1">How did you hear about us?</p>
+                    <p className="font-medium">Social Media</p>
+                  </div>
+
+                  <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                    <p className="text-sm text-gray-500 mb-1">How likely are you to recommend us? (NPS)</p>
+                    <div className="flex items-center gap-2">
+                      <span className="text-2xl font-bold text-emerald-600">9</span>
+                      <span className="text-sm text-gray-500">/ 10</span>
+                      <Badge className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 ml-2">Promoter</Badge>
+                    </div>
+                  </div>
+
+                  <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                    <p className="text-sm text-gray-500 mb-1">Overall experience rating</p>
+                    <div className="flex items-center gap-1">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <Star key={star} className={`w-5 h-5 ${star <= 4 ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}`} />
+                      ))}
+                      <span className="ml-2 text-sm font-medium">4/5</span>
+                    </div>
+                  </div>
+
+                  <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                    <p className="text-sm text-gray-500 mb-1">Additional feedback</p>
+                    <p className="font-medium">Great service, really enjoyed the experience. Would definitely recommend to friends and family!</p>
+                  </div>
+                </div>
+
+                {/* Actions */}
+                <div className="flex justify-between gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm">
+                      <Download className="w-4 h-4 mr-2" />
+                      Export
+                    </Button>
+                    <Button variant="outline" size="sm">
+                      <Mail className="w-4 h-4 mr-2" />
+                      Send Copy
+                    </Button>
+                  </div>
+                  <Button variant="outline" onClick={() => setShowResponseDetailDialog(false)}>
+                    Close
+                  </Button>
+                </div>
+              </div>
+            )}
           </ScrollArea>
         </DialogContent>
       </Dialog>

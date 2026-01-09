@@ -550,6 +550,25 @@ export default function DeploymentsClient() {
   const [selectedEdgeConfig, setSelectedEdgeConfig] = useState<EdgeConfig | null>(null)
   const [inspectedDeployment, setInspectedDeployment] = useState<Deployment | null>(null)
 
+  // Function dialog states
+  const [showFunctionTerminalDialog, setShowFunctionTerminalDialog] = useState(false)
+  const [showFunctionMetricsDialog, setShowFunctionMetricsDialog] = useState(false)
+  const [showFunctionSettingsDialog, setShowFunctionSettingsDialog] = useState(false)
+  const [selectedFunction, setSelectedFunction] = useState<ServerlessFunction | null>(null)
+
+  // Integration dialog states
+  const [showIntegrationSettingsDialog, setShowIntegrationSettingsDialog] = useState(false)
+  const [selectedIntegration, setSelectedIntegration] = useState<Integration | null>(null)
+
+  // Terminal output state for function terminal
+  const [terminalOutput, setTerminalOutput] = useState<string[]>([
+    '$ connecting to function runtime...',
+    'Connected to Node.js 20 runtime',
+    'Ready for commands',
+    ''
+  ])
+  const [terminalCommand, setTerminalCommand] = useState('')
+
   // Form states for new dialogs
   const [newFunctionForm, setNewFunctionForm] = useState({ name: '', runtime: 'Node.js 20', region: 'iad1', memory: '256' })
   const [newEdgeConfigForm, setNewEdgeConfigForm] = useState({ name: '' })
@@ -1130,9 +1149,9 @@ export default function DeploymentsClient() {
                         <div><p className={`font-medium ${fn.errors > 20 ? 'text-red-600' : 'text-green-600'}`}>{fn.errors}</p><p className="text-xs text-gray-500">errors</p></div>
                       </div>
                       <div className="flex gap-1">
-                        <Button variant="ghost" size="sm" onClick={() => toast.success('Terminal opened', { description: `Terminal for ${fn.name}` })} title="Open terminal"><Terminal className="h-4 w-4" /></Button>
-                        <Button variant="ghost" size="sm" onClick={() => toast.success('Metrics loaded', { description: `${fn.avgDuration}ms avg, ${fn.errors} errors` })} title="View metrics"><BarChart3 className="h-4 w-4" /></Button>
-                        <Button variant="ghost" size="sm" onClick={() => toast.info('Opening settings for ' + fn.name)} title="Open settings"><Settings className="h-4 w-4" /></Button>
+                        <Button variant="ghost" size="sm" onClick={() => { setSelectedFunction(fn); setShowFunctionTerminalDialog(true); }} title="Open terminal"><Terminal className="h-4 w-4" /></Button>
+                        <Button variant="ghost" size="sm" onClick={() => { setSelectedFunction(fn); setShowFunctionMetricsDialog(true); }} title="View metrics"><BarChart3 className="h-4 w-4" /></Button>
+                        <Button variant="ghost" size="sm" onClick={() => { setSelectedFunction(fn); setShowFunctionSettingsDialog(true); }} title="Open settings"><Settings className="h-4 w-4" /></Button>
                       </div>
                     </div>
                   ))}
@@ -2007,7 +2026,7 @@ export default function DeploymentsClient() {
                             </div>
                             <div><h4 className="font-medium">{integration.name}</h4><p className="text-sm text-gray-500">Last sync: {integration.lastSync}</p></div>
                           </div>
-                          <div className="flex items-center gap-3"><Badge className={integration.status === 'connected' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}>{integration.status}</Badge><Button variant="ghost" size="sm" onClick={() => toast.info(`Opening settings for ${integration.name}`)} title="Open settings"><Settings className="h-4 w-4" /></Button></div>
+                          <div className="flex items-center gap-3"><Badge className={integration.status === 'connected' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}>{integration.status}</Badge><Button variant="ghost" size="sm" onClick={() => { setSelectedIntegration(integration); setShowIntegrationSettingsDialog(true); }} title="Open settings"><Settings className="h-4 w-4" /></Button></div>
                         </div>
                       ))}
                     </CardContent>
@@ -3656,6 +3675,542 @@ export default function DeploymentsClient() {
               <Button variant="outline" onClick={() => setShowDeleteProjectDialog(false)}>Cancel</Button>
               <Button className="bg-red-600 hover:bg-red-700" onClick={() => { toast.success('Project deleted'); setShowDeleteProjectDialog(false); }}>
                 <Trash2 className="h-4 w-4 mr-2" />Delete Project
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Function Terminal Dialog */}
+        <Dialog open={showFunctionTerminalDialog} onOpenChange={setShowFunctionTerminalDialog}>
+          <DialogContent className="max-w-3xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Terminal className="h-5 w-5 text-green-600" />
+                Function Terminal - {selectedFunction?.name}
+              </DialogTitle>
+              <DialogDescription>
+                Execute commands in the function runtime environment
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              {/* Function Info */}
+              <div className="flex items-center gap-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <Badge variant="outline">{selectedFunction?.runtime}</Badge>
+                <Badge variant="outline">{selectedFunction?.region}</Badge>
+                <Badge variant="outline">{selectedFunction?.memory}MB</Badge>
+              </div>
+
+              {/* Terminal Output */}
+              <div className="bg-gray-900 rounded-lg p-4 font-mono text-sm text-green-400 h-64 overflow-y-auto">
+                {terminalOutput.map((line, i) => (
+                  <div key={i} className={line.startsWith('$') ? 'text-white' : line.includes('error') || line.includes('Error') ? 'text-red-400' : line.includes('success') || line.includes('Success') ? 'text-green-400' : 'text-gray-300'}>
+                    {line}
+                  </div>
+                ))}
+                <div className="flex items-center gap-2 mt-2">
+                  <span className="text-white">$</span>
+                  <Input
+                    value={terminalCommand}
+                    onChange={(e) => setTerminalCommand(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && terminalCommand.trim()) {
+                        const cmd = terminalCommand.trim()
+                        setTerminalOutput(prev => [...prev, `$ ${cmd}`])
+                        // Simulate command execution
+                        setTimeout(() => {
+                          if (cmd === 'help') {
+                            setTerminalOutput(prev => [...prev, 'Available commands:', '  logs - View recent logs', '  env - Show environment variables', '  stats - Show function statistics', '  clear - Clear terminal', '  exit - Close terminal'])
+                          } else if (cmd === 'logs') {
+                            setTerminalOutput(prev => [...prev, `[${new Date().toISOString()}] Function invoked`, `[${new Date().toISOString()}] Processing request...`, `[${new Date().toISOString()}] Response sent (${selectedFunction?.avgDuration}ms)`])
+                          } else if (cmd === 'env') {
+                            setTerminalOutput(prev => [...prev, 'NODE_ENV=production', 'RUNTIME=nodejs20', `REGION=${selectedFunction?.region}`, `MEMORY_LIMIT=${selectedFunction?.memory}MB`])
+                          } else if (cmd === 'stats') {
+                            setTerminalOutput(prev => [...prev, `Invocations: ${selectedFunction?.invocations?.toLocaleString()}`, `Avg Duration: ${selectedFunction?.avgDuration}ms`, `Errors: ${selectedFunction?.errors}`, `Memory: ${selectedFunction?.memory}MB`])
+                          } else if (cmd === 'clear') {
+                            setTerminalOutput(['$ clear', 'Terminal cleared', ''])
+                          } else {
+                            setTerminalOutput(prev => [...prev, `Command executed: ${cmd}`, 'Success'])
+                          }
+                        }, 300)
+                        setTerminalCommand('')
+                      }
+                    }}
+                    className="flex-1 bg-transparent border-none text-green-400 focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto"
+                    placeholder="Type command... (try 'help')"
+                  />
+                </div>
+              </div>
+
+              {/* Quick Commands */}
+              <div className="flex flex-wrap gap-2">
+                <Button variant="outline" size="sm" onClick={() => { setTerminalOutput(prev => [...prev, '$ logs', `[${new Date().toISOString()}] Function invoked`, `[${new Date().toISOString()}] Processing...`, `[${new Date().toISOString()}] Done (${selectedFunction?.avgDuration}ms)`]); }}>
+                  <FileText className="h-3 w-3 mr-1" />View Logs
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => { setTerminalOutput(prev => [...prev, '$ env', 'NODE_ENV=production', `REGION=${selectedFunction?.region}`, `MEMORY=${selectedFunction?.memory}MB`]); }}>
+                  <Lock className="h-3 w-3 mr-1" />Show Env
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => { setTerminalOutput(prev => [...prev, '$ stats', `Invocations: ${selectedFunction?.invocations?.toLocaleString()}`, `Avg Duration: ${selectedFunction?.avgDuration}ms`]); }}>
+                  <BarChart3 className="h-3 w-3 mr-1" />Stats
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => setTerminalOutput(['$ clear', 'Terminal cleared', ''])}>
+                  <X className="h-3 w-3 mr-1" />Clear
+                </Button>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowFunctionTerminalDialog(false)}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Function Metrics Dialog */}
+        <Dialog open={showFunctionMetricsDialog} onOpenChange={setShowFunctionMetricsDialog}>
+          <DialogContent className="max-w-4xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <BarChart3 className="h-5 w-5 text-blue-600" />
+                Function Metrics - {selectedFunction?.name}
+              </DialogTitle>
+              <DialogDescription>
+                Performance metrics and analytics for this function
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-6">
+              {/* Key Metrics */}
+              <div className="grid grid-cols-4 gap-4">
+                <Card className="border-gray-200 dark:border-gray-700">
+                  <CardContent className="p-4 text-center">
+                    <p className="text-2xl font-bold text-blue-600">{selectedFunction?.invocations?.toLocaleString()}</p>
+                    <p className="text-sm text-gray-500">Total Invocations</p>
+                  </CardContent>
+                </Card>
+                <Card className="border-gray-200 dark:border-gray-700">
+                  <CardContent className="p-4 text-center">
+                    <p className="text-2xl font-bold text-green-600">{selectedFunction?.avgDuration}ms</p>
+                    <p className="text-sm text-gray-500">Avg Duration</p>
+                  </CardContent>
+                </Card>
+                <Card className="border-gray-200 dark:border-gray-700">
+                  <CardContent className="p-4 text-center">
+                    <p className={`text-2xl font-bold ${(selectedFunction?.errors || 0) > 20 ? 'text-red-600' : 'text-green-600'}`}>{selectedFunction?.errors}</p>
+                    <p className="text-sm text-gray-500">Errors</p>
+                  </CardContent>
+                </Card>
+                <Card className="border-gray-200 dark:border-gray-700">
+                  <CardContent className="p-4 text-center">
+                    <p className="text-2xl font-bold text-purple-600">{selectedFunction?.memory}MB</p>
+                    <p className="text-sm text-gray-500">Memory</p>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Performance Chart Placeholder */}
+              <Card className="border-gray-200 dark:border-gray-700">
+                <CardHeader>
+                  <CardTitle className="text-sm">Invocations Over Time (Last 24h)</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-48 flex items-end gap-1">
+                    {Array.from({ length: 24 }, (_, i) => {
+                      const height = Math.random() * 80 + 20
+                      return (
+                        <div key={i} className="flex-1 flex flex-col items-center gap-1">
+                          <div
+                            className="w-full bg-gradient-to-t from-blue-500 to-blue-400 rounded-t"
+                            style={{ height: `${height}%` }}
+                          />
+                          {i % 4 === 0 && <span className="text-xs text-gray-400">{i}h</span>}
+                        </div>
+                      )
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Error Rate & Duration Distribution */}
+              <div className="grid grid-cols-2 gap-4">
+                <Card className="border-gray-200 dark:border-gray-700">
+                  <CardHeader>
+                    <CardTitle className="text-sm">Error Rate</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex items-center gap-4">
+                      <div className="relative w-24 h-24">
+                        <svg className="w-24 h-24 transform -rotate-90">
+                          <circle cx="48" cy="48" r="40" className="stroke-gray-200 dark:stroke-gray-700" strokeWidth="8" fill="none" />
+                          <circle
+                            cx="48" cy="48" r="40"
+                            className="stroke-green-500"
+                            strokeWidth="8"
+                            fill="none"
+                            strokeDasharray={`${251 * (1 - (selectedFunction?.errors || 0) / (selectedFunction?.invocations || 1))} 251`}
+                          />
+                        </svg>
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <span className="text-lg font-bold">{((selectedFunction?.errors || 0) / (selectedFunction?.invocations || 1) * 100).toFixed(2)}%</span>
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2">
+                          <div className="w-3 h-3 rounded-full bg-green-500" />
+                          <span className="text-sm">Success: {((selectedFunction?.invocations || 0) - (selectedFunction?.errors || 0)).toLocaleString()}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <div className="w-3 h-3 rounded-full bg-red-500" />
+                          <span className="text-sm">Errors: {selectedFunction?.errors}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card className="border-gray-200 dark:border-gray-700">
+                  <CardHeader>
+                    <CardTitle className="text-sm">Duration Distribution</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs w-16">0-50ms</span>
+                        <Progress value={45} className="flex-1 h-2" />
+                        <span className="text-xs w-12 text-right">45%</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs w-16">50-100ms</span>
+                        <Progress value={30} className="flex-1 h-2" />
+                        <span className="text-xs w-12 text-right">30%</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs w-16">100-200ms</span>
+                        <Progress value={15} className="flex-1 h-2" />
+                        <span className="text-xs w-12 text-right">15%</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs w-16">200ms+</span>
+                        <Progress value={10} className="flex-1 h-2" />
+                        <span className="text-xs w-12 text-right">10%</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => {
+                toast.success('Metrics exported', { description: `${selectedFunction?.name} metrics exported to CSV` })
+              }}>
+                <Download className="h-4 w-4 mr-2" />Export Metrics
+              </Button>
+              <Button variant="outline" onClick={() => setShowFunctionMetricsDialog(false)}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Function Settings Dialog */}
+        <Dialog open={showFunctionSettingsDialog} onOpenChange={setShowFunctionSettingsDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Settings className="h-5 w-5 text-gray-600" />
+                Function Settings - {selectedFunction?.name}
+              </DialogTitle>
+              <DialogDescription>
+                Configure runtime, memory, and other function settings
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-6">
+              {/* Runtime Configuration */}
+              <div className="space-y-4">
+                <h4 className="font-medium text-sm">Runtime Configuration</h4>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Runtime</Label>
+                    <Select defaultValue={selectedFunction?.runtime}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select runtime" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Node.js 20">Node.js 20</SelectItem>
+                        <SelectItem value="Node.js 18">Node.js 18</SelectItem>
+                        <SelectItem value="Python 3.11">Python 3.11</SelectItem>
+                        <SelectItem value="Go 1.21">Go 1.21</SelectItem>
+                        <SelectItem value="Ruby 3.2">Ruby 3.2</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Region</Label>
+                    <Select defaultValue={selectedFunction?.region}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select region" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="iad1">US East (iad1)</SelectItem>
+                        <SelectItem value="sfo1">US West (sfo1)</SelectItem>
+                        <SelectItem value="dub1">Europe (dub1)</SelectItem>
+                        <SelectItem value="hnd1">Asia Pacific (hnd1)</SelectItem>
+                        <SelectItem value="syd1">Australia (syd1)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </div>
+
+              {/* Memory & Timeout */}
+              <div className="space-y-4">
+                <h4 className="font-medium text-sm">Resources</h4>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Memory (MB)</Label>
+                    <Select defaultValue={selectedFunction?.memory?.toString()}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select memory" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="128">128 MB</SelectItem>
+                        <SelectItem value="256">256 MB</SelectItem>
+                        <SelectItem value="512">512 MB</SelectItem>
+                        <SelectItem value="1024">1024 MB</SelectItem>
+                        <SelectItem value="2048">2048 MB</SelectItem>
+                        <SelectItem value="3072">3072 MB</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Timeout (seconds)</Label>
+                    <Input type="number" defaultValue={10} min={1} max={900} />
+                  </div>
+                </div>
+              </div>
+
+              {/* Environment Variables */}
+              <div className="space-y-4">
+                <h4 className="font-medium text-sm">Environment Variables</h4>
+                <div className="space-y-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div className="flex items-center gap-2 text-sm">
+                    <Badge variant="outline">NODE_ENV</Badge>
+                    <span className="text-gray-500">=</span>
+                    <span className="font-mono">production</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <Badge variant="outline">API_KEY</Badge>
+                    <span className="text-gray-500">=</span>
+                    <span className="font-mono text-gray-400">••••••••••••</span>
+                  </div>
+                </div>
+                <Button variant="outline" size="sm" onClick={() => setShowEnvDialog(true)}>
+                  <Plus className="h-3 w-3 mr-1" />Add Variable
+                </Button>
+              </div>
+
+              {/* Advanced Settings */}
+              <div className="space-y-4">
+                <h4 className="font-medium text-sm">Advanced</h4>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium">Enable Caching</p>
+                      <p className="text-xs text-gray-500">Cache function responses for improved performance</p>
+                    </div>
+                    <Switch defaultChecked />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium">Enable Logging</p>
+                      <p className="text-xs text-gray-500">Log all function invocations and errors</p>
+                    </div>
+                    <Switch defaultChecked />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium">Cold Start Optimization</p>
+                      <p className="text-xs text-gray-500">Keep function warm to reduce cold starts</p>
+                    </div>
+                    <Switch />
+                  </div>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowFunctionSettingsDialog(false)}>Cancel</Button>
+              <Button onClick={() => {
+                toast.success('Function settings saved', { description: `${selectedFunction?.name} configuration updated` })
+                setShowFunctionSettingsDialog(false)
+              }}>
+                Save Changes
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Integration Settings Dialog */}
+        <Dialog open={showIntegrationSettingsDialog} onOpenChange={setShowIntegrationSettingsDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Settings className="h-5 w-5 text-gray-600" />
+                {selectedIntegration?.name} Settings
+              </DialogTitle>
+              <DialogDescription>
+                Configure integration settings and permissions
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-6">
+              {/* Status & Info */}
+              <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div className="flex items-center gap-4">
+                  <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${selectedIntegration?.status === 'connected' ? 'bg-green-100' : 'bg-gray-100'}`}>
+                    {selectedIntegration?.type === 'ci_cd' && <GitBranch className="h-6 w-6 text-purple-600" />}
+                    {selectedIntegration?.type === 'monitoring' && <Activity className="h-6 w-6 text-blue-600" />}
+                    {selectedIntegration?.type === 'notification' && <MessageSquare className="h-6 w-6 text-pink-600" />}
+                    {selectedIntegration?.type === 'logging' && <Terminal className="h-6 w-6 text-green-600" />}
+                    {selectedIntegration?.type === 'analytics' && <BarChart3 className="h-6 w-6 text-amber-600" />}
+                  </div>
+                  <div>
+                    <h4 className="font-semibold">{selectedIntegration?.name}</h4>
+                    <p className="text-sm text-gray-500">Last synced: {selectedIntegration?.lastSync}</p>
+                  </div>
+                </div>
+                <Badge className={selectedIntegration?.status === 'connected' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}>
+                  {selectedIntegration?.status}
+                </Badge>
+              </div>
+
+              {/* Configuration */}
+              <div className="space-y-4">
+                <h4 className="font-medium text-sm">Configuration</h4>
+                {selectedIntegration?.type === 'ci_cd' && (
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label>Repository</Label>
+                      <Input defaultValue={selectedIntegration?.config?.repo || ''} placeholder="owner/repository" />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Default Branch</Label>
+                      <Input defaultValue={selectedIntegration?.config?.branch || 'main'} placeholder="main" />
+                    </div>
+                  </div>
+                )}
+                {selectedIntegration?.type === 'notification' && (
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label>Channel</Label>
+                      <Input defaultValue={selectedIntegration?.config?.channel || ''} placeholder="#channel-name" />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Notification Events</Label>
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2">
+                          <input type="checkbox" id="deploy_success" defaultChecked className="rounded" />
+                          <label htmlFor="deploy_success" className="text-sm">Deployment Success</label>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <input type="checkbox" id="deploy_failed" defaultChecked className="rounded" />
+                          <label htmlFor="deploy_failed" className="text-sm">Deployment Failed</label>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <input type="checkbox" id="deploy_rollback" defaultChecked className="rounded" />
+                          <label htmlFor="deploy_rollback" className="text-sm">Rollback Triggered</label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                {(selectedIntegration?.type === 'monitoring' || selectedIntegration?.type === 'analytics') && (
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label>API Key</Label>
+                      <Input type="password" defaultValue="••••••••••••" />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Organization</Label>
+                      <Input defaultValue={selectedIntegration?.config?.org || ''} placeholder="organization-name" />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Project</Label>
+                      <Input defaultValue={selectedIntegration?.config?.project || ''} placeholder="project-name" />
+                    </div>
+                  </div>
+                )}
+                {selectedIntegration?.type === 'logging' && (
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label>Ingestion URL</Label>
+                      <Input defaultValue="https://logs.logdna.com/ingest" placeholder="https://..." />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>API Key</Label>
+                      <Input type="password" defaultValue="••••••••••••" />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Log Level</Label>
+                      <Select defaultValue="info">
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="debug">Debug</SelectItem>
+                          <SelectItem value="info">Info</SelectItem>
+                          <SelectItem value="warn">Warning</SelectItem>
+                          <SelectItem value="error">Error</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Permissions */}
+              <div className="space-y-4">
+                <h4 className="font-medium text-sm">Permissions</h4>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium">Read Deployments</p>
+                      <p className="text-xs text-gray-500">Access deployment history and logs</p>
+                    </div>
+                    <Switch defaultChecked />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium">Write Deployments</p>
+                      <p className="text-xs text-gray-500">Trigger new deployments</p>
+                    </div>
+                    <Switch defaultChecked />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium">Access Environment Variables</p>
+                      <p className="text-xs text-gray-500">Read and modify environment variables</p>
+                    </div>
+                    <Switch />
+                  </div>
+                </div>
+              </div>
+
+              {/* Danger Zone */}
+              <div className="space-y-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <h4 className="font-medium text-sm text-red-600">Danger Zone</h4>
+                <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                  <div>
+                    <p className="text-sm font-medium text-red-800 dark:text-red-200">Disconnect Integration</p>
+                    <p className="text-xs text-red-600 dark:text-red-300">This will remove the integration and revoke all permissions</p>
+                  </div>
+                  <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-100" onClick={() => {
+                    toast.success('Integration disconnected', { description: `${selectedIntegration?.name} has been removed` })
+                    setShowIntegrationSettingsDialog(false)
+                  }}>
+                    <Trash2 className="h-4 w-4 mr-2" />Disconnect
+                  </Button>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowIntegrationSettingsDialog(false)}>Cancel</Button>
+              <Button onClick={() => {
+                toast.success('Integration settings saved', { description: `${selectedIntegration?.name} configuration updated` })
+                setShowIntegrationSettingsDialog(false)
+              }}>
+                Save Changes
               </Button>
             </DialogFooter>
           </DialogContent>
