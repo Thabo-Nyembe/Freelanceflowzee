@@ -2692,7 +2692,7 @@ docker run -d --name kazi-agent \\
                 <Button variant="outline" onClick={() => setShowLogsDialog(false)}>
                   Close
                 </Button>
-                <Button variant="outline" onClick={() => toast.success('Logs exported')}>
+                <Button variant="outline" onClick={() => { /* TODO: Implement export logs functionality */ }}>
                   <Download className="h-4 w-4 mr-2" />
                   Export Logs
                 </Button>
@@ -2778,7 +2778,7 @@ docker run -d --name kazi-agent \\
                   <RefreshCw className="h-4 w-4 mr-2" />
                   Refresh
                 </Button>
-                <Button variant="outline" onClick={() => toast.success('Metrics exported')}>
+                <Button variant="outline" onClick={() => { /* TODO: Implement export metrics functionality */ }}>
                   <Download className="h-4 w-4 mr-2" />
                   Export
                 </Button>
@@ -3234,7 +3234,10 @@ kazi_apm.init(
                 <Button variant="outline" onClick={() => setShowAPMAgentDocsDialog(false)}>
                   Close
                 </Button>
-                <Button variant="outline" onClick={() => toast.success('Documentation link copied')}>
+                <Button variant="outline" onClick={() => {
+                  navigator.clipboard.writeText('https://docs.example.com/system-insights')
+                  toast.success('Documentation link copied')
+                }}>
                   <ExternalLink className="h-4 w-4 mr-2" />
                   Open Full Docs
                 </Button>
@@ -3554,19 +3557,19 @@ kazi_apm.init(
             </DialogHeader>
             <div className="space-y-4 py-4">
               <div className="grid grid-cols-2 gap-4">
-                <div className="p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer" onClick={() => toast.info('Opening Quick Start Guide')}>
+                <div className="p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer" onClick={() => { /* TODO: Navigate to Quick Start Guide */ }}>
                   <h3 className="font-medium mb-1">Quick Start Guide</h3>
                   <p className="text-sm text-gray-500">Get up and running in 5 minutes</p>
                 </div>
-                <div className="p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer" onClick={() => toast.info('Opening Configuration Reference')}>
+                <div className="p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer" onClick={() => { /* TODO: Navigate to Configuration Reference */ }}>
                   <h3 className="font-medium mb-1">Configuration Reference</h3>
                   <p className="text-sm text-gray-500">All agent configuration options</p>
                 </div>
-                <div className="p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer" onClick={() => toast.info('Opening Troubleshooting Guide')}>
+                <div className="p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer" onClick={() => { /* TODO: Navigate to Troubleshooting Guide */ }}>
                   <h3 className="font-medium mb-1">Troubleshooting</h3>
                   <p className="text-sm text-gray-500">Common issues and solutions</p>
                 </div>
-                <div className="p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer" onClick={() => toast.info('Opening API Reference')}>
+                <div className="p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer" onClick={() => { /* TODO: Navigate to API Reference */ }}>
                   <h3 className="font-medium mb-1">API Reference</h3>
                   <p className="text-sm text-gray-500">REST API documentation</p>
                 </div>

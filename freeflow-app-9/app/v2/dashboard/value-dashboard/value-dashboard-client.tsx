@@ -681,7 +681,7 @@ export default function ValueDashboardClient() {
                     onClick={() => {
                       setSelectedPeriod(period)
                       logger.info('Period changed', { period })
-                      toast.success(`Showing ${period === 'all' ? 'all' : period} data`)
+                      /* TODO: Fetch data for selected period */
                     }}
                   >
                     {period === '3m' ? '3 Months' : period === '6m' ? '6 Months' : period === '12m' ? '12 Months' : 'All Time'}
@@ -1072,7 +1072,7 @@ export default function ValueDashboardClient() {
                   className="h-20 flex flex-col"
                   onClick={() => {
                     setSelectedExportFormat('pdf')
-                    toast.info('PDF format selected')
+                    /* TODO: Update export preview for PDF format */
                   }}
                 >
                   <FileText className="h-5 w-5 mb-1" />
@@ -1084,7 +1084,7 @@ export default function ValueDashboardClient() {
                   className="h-20 flex flex-col"
                   onClick={() => {
                     setSelectedExportFormat('csv')
-                    toast.info('CSV format selected')
+                    /* TODO: Update export preview for CSV format */
                   }}
                 >
                   <FileSpreadsheet className="h-5 w-5 mb-1" />
@@ -1096,7 +1096,7 @@ export default function ValueDashboardClient() {
                   className="h-20 flex flex-col"
                   onClick={() => {
                     setSelectedExportFormat('json')
-                    toast.info('JSON format selected')
+                    /* TODO: Update export preview for JSON format */
                   }}
                 >
                   <FileCode className="h-5 w-5 mb-1" />
@@ -1113,7 +1113,7 @@ export default function ValueDashboardClient() {
                   size="sm"
                   onClick={() => {
                     setExportDateRange('3m')
-                    toast.info('3 month range selected')
+                    /* TODO: Update export preview for 3 month range */
                   }}
                 >
                   3 Months
@@ -1123,7 +1123,7 @@ export default function ValueDashboardClient() {
                   size="sm"
                   onClick={() => {
                     setExportDateRange('6m')
-                    toast.info('6 month range selected')
+                    /* TODO: Update export preview for 6 month range */
                   }}
                 >
                   6 Months
@@ -1133,7 +1133,7 @@ export default function ValueDashboardClient() {
                   size="sm"
                   onClick={() => {
                     setExportDateRange('12m')
-                    toast.info('12 month range selected')
+                    /* TODO: Update export preview for 12 month range */
                   }}
                 >
                   12 Months
@@ -1269,7 +1269,7 @@ export default function ValueDashboardClient() {
                   size="sm"
                   onClick={() => {
                     setSharePermission('view')
-                    toast.info('View-only access selected')
+                    /* TODO: Update share preview for view-only access */
                   }}
                 >
                   <Eye className="h-4 w-4 mr-1" />
@@ -1280,7 +1280,7 @@ export default function ValueDashboardClient() {
                   size="sm"
                   onClick={() => {
                     setSharePermission('edit')
-                    toast.info('Edit access selected')
+                    /* TODO: Update share preview for edit access */
                   }}
                 >
                   <Edit className="h-4 w-4 mr-1" />
@@ -1305,9 +1305,7 @@ export default function ValueDashboardClient() {
                   variant="outline"
                   size="sm"
                   onClick={() => {
-                    toast.success('Generating shareable PDF...', {
-                      description: 'Download will start shortly'
-                    })
+                    /* TODO: Generate shareable PDF and trigger download */
                   }}
                 >
                   Export PDF
@@ -1348,7 +1346,7 @@ export default function ValueDashboardClient() {
                     variant="outline"
                     className="h-16 flex flex-col"
                     onClick={() => {
-                      toast.success('Compact layout applied')
+                      /* TODO: Apply compact layout style */
                     }}
                   >
                     <Grid3X3 className="h-4 w-4 mb-1" />
@@ -1358,7 +1356,7 @@ export default function ValueDashboardClient() {
                     variant="default"
                     className="h-16 flex flex-col"
                     onClick={() => {
-                      toast.success('Standard layout applied')
+                      /* TODO: Apply standard layout style */
                     }}
                   >
                     <Layout className="h-4 w-4 mb-1" />
@@ -1368,7 +1366,7 @@ export default function ValueDashboardClient() {
                     variant="outline"
                     className="h-16 flex flex-col"
                     onClick={() => {
-                      toast.success('Expanded layout applied')
+                      /* TODO: Apply expanded layout style */
                     }}
                   >
                     <BarChart3 className="h-4 w-4 mb-1" />
@@ -1383,7 +1381,7 @@ export default function ValueDashboardClient() {
                     variant="outline"
                     size="sm"
                     className="bg-blue-500 text-white hover:bg-blue-600"
-                    onClick={() => toast.success('Blue theme applied')}
+                    onClick={() => { /* TODO: Apply blue color theme */ }}
                   >
                     Blue
                   </Button>
@@ -1391,7 +1389,7 @@ export default function ValueDashboardClient() {
                     variant="outline"
                     size="sm"
                     className="bg-purple-500 text-white hover:bg-purple-600"
-                    onClick={() => toast.success('Purple theme applied')}
+                    onClick={() => { /* TODO: Apply purple color theme */ }}
                   >
                     Purple
                   </Button>
@@ -1399,7 +1397,7 @@ export default function ValueDashboardClient() {
                     variant="outline"
                     size="sm"
                     className="bg-green-500 text-white hover:bg-green-600"
-                    onClick={() => toast.success('Green theme applied')}
+                    onClick={() => { /* TODO: Apply green color theme */ }}
                   >
                     Green
                   </Button>
@@ -1407,7 +1405,7 @@ export default function ValueDashboardClient() {
                     variant="outline"
                     size="sm"
                     className="bg-gray-700 text-white hover:bg-gray-800"
-                    onClick={() => toast.success('Dark theme applied')}
+                    onClick={() => { /* TODO: Apply dark color theme */ }}
                   >
                     Dark
                   </Button>
@@ -1419,21 +1417,21 @@ export default function ValueDashboardClient() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => toast.success('Low density mode set')}
+                    onClick={() => { /* TODO: Set low data density mode */ }}
                   >
                     Low
                   </Button>
                   <Button
                     variant="default"
                     size="sm"
-                    onClick={() => toast.success('Medium density mode set')}
+                    onClick={() => { /* TODO: Set medium data density mode */ }}
                   >
                     Medium
                   </Button>
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => toast.success('High density mode set')}
+                    onClick={() => { /* TODO: Set high data density mode */ }}
                   >
                     High
                   </Button>

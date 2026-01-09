@@ -1189,7 +1189,7 @@ export default function OrdersClient() {
                               <Package className="w-3 h-3 mr-1" />
                               Fulfill
                             </Button>
-                            <Button variant="outline" size="sm" onClick={() => toast.info('Print Label', { description: `Generating shipping label for ${order.order_number}` })}>
+                            <Button variant="outline" size="sm" onClick={() => { /* TODO: Implement print shipping label for order */ }}>
                               <Printer className="w-3 h-3 mr-1" />
                               Print Label
                             </Button>
@@ -1315,24 +1315,24 @@ export default function OrdersClient() {
                       <div className="flex items-center gap-2 pt-3 border-t">
                         {ret.status === 'requested' && (
                           <>
-                            <Button size="sm" className="bg-green-600" onClick={() => toast.success('Return Approved', { description: `Return for ${ret.order_number} has been approved. Shipping label will be sent to customer.` })}>
+                            <Button size="sm" className="bg-green-600" onClick={() => { /* TODO: Implement approve return request */ }}>
                               <CheckCircle className="w-3 h-3 mr-1" />
                               Approve
                             </Button>
-                            <Button variant="outline" size="sm" className="text-red-600" onClick={() => toast.error('Return Rejected', { description: `Return for ${ret.order_number} has been rejected.` })}>
+                            <Button variant="outline" size="sm" className="text-red-600" onClick={() => { if (confirm(`Are you sure you want to reject the return for ${ret.order_number}?`)) { /* TODO: Implement reject return request */ } }}>
                               <XCircle className="w-3 h-3 mr-1" />
                               Reject
                             </Button>
                           </>
                         )}
                         {ret.shipping_label && (
-                          <Button variant="outline" size="sm" onClick={() => toast.info('Print Label', { description: 'Opening shipping label for printing...' })}>
+                          <Button variant="outline" size="sm" onClick={() => { /* TODO: Implement print return shipping label */ }}>
                             <Printer className="w-3 h-3 mr-1" />
                             Label
                           </Button>
                         )}
                         {ret.tracking_number && (
-                          <Button variant="outline" size="sm" onClick={() => toast.info('Tracking', { description: `Tracking number: ${ret.tracking_number}` })}>
+                          <Button variant="outline" size="sm" onClick={() => { navigator.clipboard.writeText(ret.tracking_number || ''); toast.success('Tracking number copied to clipboard'); }}>
                             <Truck className="w-3 h-3 mr-1" />
                             Track
                           </Button>
@@ -1855,7 +1855,7 @@ export default function OrdersClient() {
                             <p className="font-medium text-red-700 dark:text-red-400">Archive Old Orders</p>
                             <p className="text-sm text-red-600 dark:text-red-400/80">Archive orders older than 1 year</p>
                           </div>
-                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-100" onClick={() => toast.success('Orders Archived', { description: '0 orders older than 1 year have been archived' })}>
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-100" onClick={() => { if (confirm('Are you sure you want to archive all orders older than 1 year? This action cannot be undone.')) { /* TODO: Implement archive old orders */ } }}>
                             <History className="w-4 h-4 mr-2" />
                             Archive
                           </Button>
@@ -1865,7 +1865,7 @@ export default function OrdersClient() {
                             <p className="font-medium text-red-700 dark:text-red-400">Delete Test Orders</p>
                             <p className="text-sm text-red-600 dark:text-red-400/80">Remove all test/sandbox orders</p>
                           </div>
-                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-100" onClick={() => toast.success('Test Orders Deleted', { description: 'All test/sandbox orders have been removed' })}>
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-100" onClick={() => { if (confirm('Are you sure you want to delete all test/sandbox orders? This action cannot be undone.')) { /* TODO: Implement delete test orders */ } }}>
                             <Trash2 className="w-4 h-4 mr-2" />
                             Delete
                           </Button>
@@ -2553,15 +2553,15 @@ export default function OrdersClient() {
                   )}
 
                   <div className="flex items-center gap-3 pt-4 border-t">
-                    <Button variant="outline" className="flex-1" onClick={() => toast.info('Edit Order', { description: `Editing ${selectedOrder.order_number}` })}>
+                    <Button variant="outline" className="flex-1" onClick={() => { /* TODO: Implement edit order functionality */ }}>
                       <Edit className="w-4 h-4 mr-2" />
                       Edit Order
                     </Button>
-                    <Button variant="outline" className="flex-1" onClick={() => toast.info('Print Order', { description: `Printing order details for ${selectedOrder.order_number}` })}>
+                    <Button variant="outline" className="flex-1" onClick={() => { /* TODO: Implement print order functionality */ }}>
                       <Printer className="w-4 h-4 mr-2" />
                       Print
                     </Button>
-                    <Button className="flex-1 bg-gradient-to-r from-blue-500 to-indigo-600 text-white" onClick={() => toast.success('Update Sent', { description: `Order status update sent to ${selectedOrder.customer_email}` })}>
+                    <Button className="flex-1 bg-gradient-to-r from-blue-500 to-indigo-600 text-white" onClick={() => { /* TODO: Implement send order status update to customer */ }}>
                       <Send className="w-4 h-4 mr-2" />
                       Send Update
                     </Button>

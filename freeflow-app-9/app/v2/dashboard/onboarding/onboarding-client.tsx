@@ -1524,7 +1524,7 @@ export default function OnboardingClient() {
                           </td>
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-2">
-                              <Button variant="ghost" size="sm" onClick={() => toast.success(`Viewing ${user.userName}`, { description: `Email: ${user.userEmail}, Flows: ${user.flowsCompleted}/${user.totalFlows}, Progress: ${user.checklistProgress}%` })}>
+                              <Button variant="ghost" size="sm" onClick={() => { /* TODO: Implement view user details modal */ }}>
                                 <Eye className="w-4 h-4" />
                               </Button>
                               <Button variant="ghost" size="sm" onClick={() => { navigator.clipboard.writeText(user.userEmail); toast.success('Email copied', { description: user.userEmail }) }}>
@@ -1784,7 +1784,7 @@ export default function OnboardingClient() {
                         </div>
                         <Switch defaultChecked />
                       </div>
-                      <Button className="w-full" onClick={() => toast.success('Branding saved', { description: 'Your branding settings have been updated' })}>Save Branding</Button>
+                      <Button className="w-full" onClick={() => { /* TODO: Implement save branding settings to backend */ }}>Save Branding</Button>
                     </CardContent>
                   </Card>
                 )}
@@ -1840,7 +1840,7 @@ export default function OnboardingClient() {
                             <p className="font-medium text-gray-900 dark:text-white">{integration.name}</p>
                             <p className="text-sm text-gray-500">{integration.description}</p>
                           </div>
-                          <Button variant={integration.connected ? 'outline' : 'default'} size="sm" onClick={() => toast.success(integration.connected ? 'Integration settings' : 'Connecting...', { description: integration.connected ? `${integration.name} is connected and active` : `Setting up ${integration.name} integration` })}>
+                          <Button variant={integration.connected ? 'outline' : 'default'} size="sm" onClick={() => { /* TODO: Implement integration connect/settings action */ }}>
                             {integration.connected ? 'Connected' : 'Connect'}
                           </Button>
                         </div>
@@ -1884,7 +1884,7 @@ export default function OnboardingClient() {
                         <Label>API Key</Label>
                         <div className="flex items-center gap-2 mt-2">
                           <Input type="password" value="ob_live_************************" readOnly className="font-mono dark:bg-gray-900" />
-                          <Button variant="outline" size="sm" onClick={() => toast.success('API key regenerated', { description: 'Your new API key has been generated. Please update your integrations.' })}>Regenerate</Button>
+                          <Button variant="outline" size="sm" onClick={() => { if (confirm('Are you sure you want to regenerate your API key? Your existing integrations will stop working until updated.')) { /* TODO: Implement API key regeneration */ } }}>Regenerate</Button>
                         </div>
                       </div>
                     </CardContent>
@@ -1946,7 +1946,7 @@ export default function OnboardingClient() {
                               <p className="text-sm text-gray-500">156,234 recorded</p>
                             </div>
                           </div>
-                          <Button variant="outline" size="sm" onClick={() => toast.info('Session management', { description: 'Opening session management panel...' })}>Manage</Button>
+                          <Button variant="outline" size="sm" onClick={() => { /* TODO: Implement session management panel */ }}>Manage</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -2185,7 +2185,7 @@ export default function OnboardingClient() {
                           {item.isRequired && (
                             <Badge variant="outline" className="text-xs">Required</Badge>
                           )}
-                          <Button variant="ghost" size="sm" onClick={() => toast.success('Edit item', { description: `Editing "${item.title}"` })}>
+                          <Button variant="ghost" size="sm" onClick={() => { /* TODO: Implement edit checklist item modal */ }}>
                             <Edit className="w-4 h-4" />
                           </Button>
                         </div>

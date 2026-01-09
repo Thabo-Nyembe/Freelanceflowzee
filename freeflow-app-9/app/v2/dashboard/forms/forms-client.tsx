@@ -1454,7 +1454,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                       <CardContent>
                         <div className="grid grid-cols-3 gap-4">
                           {formThemes.map(theme => (
-                            <button key={theme.id} className="p-4 border rounded-xl hover:border-indigo-500 transition-all text-left hover:shadow-md" onClick={() => toast.success('Theme Selected', { description: `"${theme.name}" theme applied successfully` })}>
+                            <button key={theme.id} className="p-4 border rounded-xl hover:border-indigo-500 transition-all text-left hover:shadow-md" onClick={() => { /* TODO: Apply theme to forms - save theme preference to user settings */ }}>
                               <div className="flex items-center gap-2 mb-3">
                                 <div className="w-5 h-5 rounded-full border-2 border-white shadow-sm" style={{ backgroundColor: theme.primaryColor }}></div>
                                 <span className="font-medium">{theme.name}</span>
@@ -1463,7 +1463,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                               <p className="text-xs text-gray-500 mt-2">{theme.fontFamily}</p>
                             </button>
                           ))}
-                          <button className="p-4 border-2 border-dashed rounded-xl hover:border-indigo-500 transition-all flex flex-col items-center justify-center" onClick={() => toast.info('Custom Theme', { description: 'Custom theme designer coming soon!' })}>
+                          <button className="p-4 border-2 border-dashed rounded-xl hover:border-indigo-500 transition-all flex flex-col items-center justify-center" onClick={() => { /* TODO: Open custom theme designer dialog */ }}>
                             <Palette className="h-8 w-8 text-gray-400 mb-2" />
                             <span className="text-sm font-medium text-gray-600">Create Custom</span>
                           </button>
@@ -1720,7 +1720,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                                 <Badge className="bg-green-100 text-green-700 dark:bg-green-900/30">
                                   {webhook.status}
                                 </Badge>
-                                <Button variant="ghost" size="sm" onClick={() => toast.info('Webhook Options', { description: `Configure or delete ${webhook.url}` })}>
+                                <Button variant="ghost" size="sm" onClick={() => { /* TODO: Show webhook options menu - configure or delete webhook */ }}>
                                   <MoreVertical className="h-4 w-4" />
                                 </Button>
                               </div>
@@ -1746,7 +1746,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                             { title: 'API Reference', icon: FileText, desc: 'Full documentation' },
                             { title: 'SDKs & Libraries', icon: GitBranch, desc: 'Node, Python, PHP' },
                           ].map((doc, i) => (
-                            <button key={i} className="p-4 border rounded-lg hover:border-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-all text-left" onClick={() => toast.info('Documentation', { description: `Opening "${doc.title}" documentation` })}>
+                            <button key={i} className="p-4 border rounded-lg hover:border-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-all text-left" onClick={() => { /* TODO: Open documentation link for doc.title */ }}>
                               <doc.icon className="h-6 w-6 text-indigo-600 mb-2" />
                               <h4 className="font-medium">{doc.title}</h4>
                               <p className="text-sm text-gray-500">{doc.desc}</p>
@@ -2170,7 +2170,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                   <Link2 className="h-5 w-5 mx-auto mb-1" />
                   <span className="text-xs">Link</span>
                 </button>
-                <button className="p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 text-center" onClick={() => toast.info('Embed Code', { description: 'Embed code copied to clipboard' })}>
+                <button className="p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 text-center" onClick={async () => { const embedCode = `<iframe src="https://freeflow.io/form/${selectedForm?.id || 'abc123'}" width="100%" height="500" frameborder="0"></iframe>`; await navigator.clipboard.writeText(embedCode); toast.info('Embed Code', { description: 'Embed code copied to clipboard' }); }}>
                   <Code className="h-5 w-5 mx-auto mb-1" />
                   <span className="text-xs">Embed</span>
                 </button>
@@ -2178,7 +2178,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                   <Mail className="h-5 w-5 mx-auto mb-1" />
                   <span className="text-xs">Email</span>
                 </button>
-                <button className="p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 text-center" onClick={() => toast.info('QR Code', { description: 'QR code generated for your form' })}>
+                <button className="p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 text-center" onClick={() => { /* TODO: Generate and display QR code for form URL */ }}>
                   <ExternalLink className="h-5 w-5 mx-auto mb-1" />
                   <span className="text-xs">QR Code</span>
                 </button>
@@ -2228,7 +2228,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
             </DialogHeader>
             <div className="grid grid-cols-2 gap-4 py-4">
               {formThemes.map(theme => (
-                <button key={theme.id} className="p-4 border rounded-lg hover:border-indigo-500 transition-colors text-left" onClick={() => { toast.success('Theme Applied', { description: `"${theme.name}" theme has been applied to your form` }); setShowThemesDialog(false); }}>
+                <button key={theme.id} className="p-4 border rounded-lg hover:border-indigo-500 transition-colors text-left" onClick={() => { /* TODO: Apply theme to selected form */ setShowThemesDialog(false); }}>
                   <div className="flex items-center gap-2 mb-3">
                     <div className="w-5 h-5 rounded-full" style={{ backgroundColor: theme.primaryColor }}></div>
                     <span className="font-medium">{theme.name}</span>
@@ -2484,7 +2484,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowIntegrationDialog(false)}>Cancel</Button>
               {selectedIntegration?.connected ? (
-                <Button variant="destructive" onClick={() => { toast.success('Disconnected', { description: `${selectedIntegration.name} has been disconnected` }); setShowIntegrationDialog(false); }}>
+                <Button variant="destructive" onClick={() => { if (confirm(`Are you sure you want to disconnect ${selectedIntegration.name}? This will stop all data syncing.`)) { /* TODO: Disconnect integration via API */ setShowIntegrationDialog(false); } }}>
                   Disconnect
                 </Button>
               ) : (
@@ -2768,7 +2768,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
             </ScrollArea>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowApiLogsDialog(false)}>Close</Button>
-              <Button variant="outline" onClick={() => toast.success('Logs Exported', { description: 'API logs have been downloaded' })}>
+              <Button variant="outline" onClick={() => { /* TODO: Export API logs as CSV/JSON file */ }}>
                 <Download className="h-4 w-4 mr-2" />
                 Export Logs
               </Button>

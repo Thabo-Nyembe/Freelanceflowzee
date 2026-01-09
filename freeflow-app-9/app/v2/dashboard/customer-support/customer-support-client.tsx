@@ -2791,7 +2791,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowAssignDialog(false)}>Cancel</Button>
-            <Button onClick={() => { toast.success('Ticket assigned successfully'); setShowAssignDialog(false); }} className="bg-purple-600 hover:bg-purple-700">Assign</Button>
+            <Button onClick={() => { /* TODO: Implement ticket assignment */ setShowAssignDialog(false); }} className="bg-purple-600 hover:bg-purple-700">Assign</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -2815,7 +2815,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
               <Label>Add New Tag</Label>
               <div className="flex gap-2 mt-1">
                 <Input placeholder="Enter tag name" />
-                <Button onClick={() => toast.success('Tag added')}>Add</Button>
+                <Button onClick={() => { /* TODO: Implement add tag functionality */ }}>Add</Button>
               </div>
             </div>
           </div>
@@ -2850,7 +2850,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowArchiveDialog(false)}>Cancel</Button>
-            <Button onClick={() => { toast.success('Selected tickets archived'); setShowArchiveDialog(false); }}>Archive Selected</Button>
+            <Button onClick={() => { /* TODO: Implement archive selected tickets */ setShowArchiveDialog(false); }}>Archive Selected</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -2922,7 +2922,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowAddAgentDialog(false)}>Cancel</Button>
-            <Button onClick={() => { toast.success('Agent invited successfully'); setShowAddAgentDialog(false); setNewAgentForm({ name: '', email: '', role: 'agent', skills: [] }); }} className="bg-green-600 hover:bg-green-700">Send Invite</Button>
+            <Button onClick={() => { /* TODO: Implement send agent invite */ setShowAddAgentDialog(false); setNewAgentForm({ name: '', email: '', role: 'agent', skills: [] }); }} className="bg-green-600 hover:bg-green-700">Send Invite</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -2950,7 +2950,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
                 <Button variant="outline" size="sm">Manage</Button>
               </div>
             ))}
-            <Button variant="outline" className="w-full" onClick={() => toast.success('Team creation dialog opened')}>
+            <Button variant="outline" className="w-full" onClick={() => { /* TODO: Implement open team creation dialog */ }}>
               <Users className="h-4 w-4 mr-2" />
               Create New Team
             </Button>
@@ -2992,7 +2992,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowScheduleDialog(false)}>Close</Button>
-            <Button onClick={() => toast.success('Opening schedule editor')}>Edit Schedules</Button>
+            <Button onClick={() => { /* TODO: Implement open schedule editor */ }}>Edit Schedules</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -3024,7 +3024,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowGoalsDialog(false)}>Close</Button>
-            <Button onClick={() => toast.success('Goals updated')}>Update Goals</Button>
+            <Button onClick={() => { /* TODO: Implement update goals */ }}>Update Goals</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -3063,7 +3063,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowReportsDialog(false)}>Close</Button>
-            <Button onClick={() => { toast.success('Exporting agent reports'); setShowReportsDialog(false); }}>Export</Button>
+            <Button onClick={() => { /* TODO: Implement export agent reports */ setShowReportsDialog(false); }}>Export</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -3126,7 +3126,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowTrainingDialog(false)}>Close</Button>
-            <Button onClick={() => toast.success('Opening training portal')}>Manage Training</Button>
+            <Button onClick={() => { /* TODO: Implement open training portal */ }}>Manage Training</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -3165,7 +3165,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowAgentSettingsDialog(false)}>Cancel</Button>
-            <Button onClick={() => { toast.success('Settings saved'); setShowAgentSettingsDialog(false); }}>Save Settings</Button>
+            <Button onClick={() => { /* TODO: Implement save agent settings */ setShowAgentSettingsDialog(false); }}>Save Settings</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -3206,7 +3206,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowAddCustomerDialog(false)}>Cancel</Button>
-            <Button onClick={() => { toast.success('Customer added successfully'); setShowAddCustomerDialog(false); setNewCustomerForm({ name: '', email: '', company: '', tier: 'basic' }); }} className="bg-purple-600 hover:bg-purple-700">Add Customer</Button>
+            <Button onClick={() => { /* TODO: Implement add customer */ setShowAddCustomerDialog(false); setNewCustomerForm({ name: '', email: '', company: '', tier: 'basic' }); }} className="bg-purple-600 hover:bg-purple-700">Add Customer</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -3235,7 +3235,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowEmailAllDialog(false)}>Cancel</Button>
-            <Button onClick={() => { toast.success('Emails queued for delivery'); setShowEmailAllDialog(false); setEmailAllForm({ subject: '', message: '' }); }} className="bg-violet-600 hover:bg-violet-700">Send to All</Button>
+            <Button onClick={() => { /* TODO: Implement send email to all customers */ setShowEmailAllDialog(false); setEmailAllForm({ subject: '', message: '' }); }} className="bg-violet-600 hover:bg-violet-700">Send to All</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -3267,7 +3267,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowSegmentsDialog(false)}>Close</Button>
-            <Button onClick={() => toast.success('Creating new segment')}>Create Segment</Button>
+            <Button onClick={() => { /* TODO: Implement create segment */ }}>Create Segment</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -3295,7 +3295,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowVIPDialog(false)}>Close</Button>
-            <Button onClick={() => toast.success('Opening VIP management')}>Manage VIP List</Button>
+            <Button onClick={() => { /* TODO: Implement open VIP management */ }}>Manage VIP List</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -3362,7 +3362,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowExportCustomersDialog(false)}>Cancel</Button>
-            <Button onClick={() => { toast.success('Export started'); setShowExportCustomersDialog(false); }} className="bg-teal-600 hover:bg-teal-700">Export</Button>
+            <Button onClick={() => { /* TODO: Implement export customers */ setShowExportCustomersDialog(false); }} className="bg-teal-600 hover:bg-teal-700">Export</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -3387,7 +3387,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowImportCustomersDialog(false)}>Cancel</Button>
-            <Button onClick={() => { toast.success('Import started'); setShowImportCustomersDialog(false); }} className="bg-green-600 hover:bg-green-700">Import</Button>
+            <Button onClick={() => { /* TODO: Implement import customers */ setShowImportCustomersDialog(false); }} className="bg-green-600 hover:bg-green-700">Import</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -3419,7 +3419,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowCustomerSettingsDialog(false)}>Cancel</Button>
-            <Button onClick={() => { toast.success('Settings saved'); setShowCustomerSettingsDialog(false); }}>Save Settings</Button>
+            <Button onClick={() => { /* TODO: Implement save customer settings */ setShowCustomerSettingsDialog(false); }}>Save Settings</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -3469,7 +3469,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowCustomerFilterDialog(false)}>Clear</Button>
-            <Button onClick={() => { toast.success('Filters applied'); setShowCustomerFilterDialog(false); }}>Apply Filters</Button>
+            <Button onClick={() => { /* TODO: Implement apply customer filters */ setShowCustomerFilterDialog(false); }}>Apply Filters</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -3512,7 +3512,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
           )}
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowCustomerProfileDialog(false)}>Close</Button>
-            <Button onClick={() => toast.success('Opening customer editor')}>Edit Customer</Button>
+            <Button onClick={() => { /* TODO: Implement open customer editor */ }}>Edit Customer</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -3578,7 +3578,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
             <div><Label>Date Range</Label><Select defaultValue="30"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="7">Last 7 days</SelectItem><SelectItem value="30">Last 30 days</SelectItem><SelectItem value="90">Last 90 days</SelectItem></SelectContent></Select></div>
             <div><Label>Format</Label><Select defaultValue="pdf"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="pdf">PDF Report</SelectItem><SelectItem value="csv">CSV Data</SelectItem><SelectItem value="xlsx">Excel</SelectItem></SelectContent></Select></div>
           </div>
-          <DialogFooter><Button variant="outline" onClick={() => setShowExportAnalyticsDialog(false)}>Cancel</Button><Button onClick={() => { toast.success('Export started'); setShowExportAnalyticsDialog(false); }}>Export</Button></DialogFooter>
+          <DialogFooter><Button variant="outline" onClick={() => setShowExportAnalyticsDialog(false)}>Cancel</Button><Button onClick={() => { /* TODO: Implement export analytics */ setShowExportAnalyticsDialog(false); }}>Export</Button></DialogFooter>
         </DialogContent>
       </Dialog>
 
@@ -3589,7 +3589,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
             <div><Label>Report Type</Label><Select defaultValue="weekly"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="daily">Daily Summary</SelectItem><SelectItem value="weekly">Weekly Report</SelectItem><SelectItem value="monthly">Monthly Report</SelectItem></SelectContent></Select></div>
             <div><Label>Recipients</Label><Input placeholder="email@example.com" className="mt-1" /></div>
           </div>
-          <DialogFooter><Button variant="outline" onClick={() => setShowScheduleReportDialog(false)}>Cancel</Button><Button onClick={() => { toast.success('Report scheduled'); setShowScheduleReportDialog(false); }}>Schedule</Button></DialogFooter>
+          <DialogFooter><Button variant="outline" onClick={() => setShowScheduleReportDialog(false)}>Cancel</Button><Button onClick={() => { /* TODO: Implement schedule report */ setShowScheduleReportDialog(false); }}>Schedule</Button></DialogFooter>
         </DialogContent>
       </Dialog>
 
@@ -3602,7 +3602,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
             <div><Label>First Response Target (minutes)</Label><Input type="number" defaultValue={selectedSLA.firstResponseTarget} className="mt-1" /></div>
             <div><Label>Resolution Target (minutes)</Label><Input type="number" defaultValue={selectedSLA.resolutionTarget} className="mt-1" /></div>
           </div>)}
-          <DialogFooter><Button variant="outline" onClick={() => setShowEditSLADialog(false)}>Cancel</Button><Button onClick={() => { toast.success('SLA policy updated'); setShowEditSLADialog(false); }}>Save Changes</Button></DialogFooter>
+          <DialogFooter><Button variant="outline" onClick={() => setShowEditSLADialog(false)}>Cancel</Button><Button onClick={() => { /* TODO: Implement update SLA policy */ setShowEditSLADialog(false); }}>Save Changes</Button></DialogFooter>
         </DialogContent>
       </Dialog>
 
@@ -3615,7 +3615,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
             <div><Label>First Response Target (minutes)</Label><Input type="number" value={newSLAForm.firstResponseTarget} onChange={(e) => setNewSLAForm({...newSLAForm, firstResponseTarget: parseInt(e.target.value)})} className="mt-1" /></div>
             <div><Label>Resolution Target (minutes)</Label><Input type="number" value={newSLAForm.resolutionTarget} onChange={(e) => setNewSLAForm({...newSLAForm, resolutionTarget: parseInt(e.target.value)})} className="mt-1" /></div>
           </div>
-          <DialogFooter><Button variant="outline" onClick={() => setShowAddSLADialog(false)}>Cancel</Button><Button onClick={() => { toast.success('SLA policy created'); setShowAddSLADialog(false); setNewSLAForm({ name: '', priority: 'normal', firstResponseTarget: 60, resolutionTarget: 240 }); }}>Create Policy</Button></DialogFooter>
+          <DialogFooter><Button variant="outline" onClick={() => setShowAddSLADialog(false)}>Cancel</Button><Button onClick={() => { /* TODO: Implement create SLA policy */ setShowAddSLADialog(false); setNewSLAForm({ name: '', priority: 'normal', firstResponseTarget: 60, resolutionTarget: 240 }); }}>Create Policy</Button></DialogFooter>
         </DialogContent>
       </Dialog>
 
@@ -3628,7 +3628,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
             <div><Label>Actions</Label><textarea defaultValue={selectedAutomation.actions.join('\n')} className="mt-1 w-full p-3 border rounded-lg text-sm h-24" /></div>
             <div className="flex items-center gap-2"><Switch defaultChecked={selectedAutomation.status === 'active'} /><Label>Active</Label></div>
           </div>)}
-          <DialogFooter><Button variant="outline" onClick={() => setShowEditAutomationDialog(false)}>Cancel</Button><Button onClick={() => { toast.success('Automation updated'); setShowEditAutomationDialog(false); }}>Save Changes</Button></DialogFooter>
+          <DialogFooter><Button variant="outline" onClick={() => setShowEditAutomationDialog(false)}>Cancel</Button><Button onClick={() => { /* TODO: Implement update automation */ setShowEditAutomationDialog(false); }}>Save Changes</Button></DialogFooter>
         </DialogContent>
       </Dialog>
 
@@ -3640,7 +3640,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
             <div><Label>Trigger Condition *</Label><Input placeholder="e.g., When priority = urgent" value={newAutomationForm.trigger} onChange={(e) => setNewAutomationForm({...newAutomationForm, trigger: e.target.value})} className="mt-1" /></div>
             <div><Label>Actions (one per line)</Label><textarea placeholder="e.g., Assign to senior agent&#10;Send Slack notification" value={newAutomationForm.actions} onChange={(e) => setNewAutomationForm({...newAutomationForm, actions: e.target.value})} className="mt-1 w-full p-3 border rounded-lg text-sm h-24" /></div>
           </div>
-          <DialogFooter><Button variant="outline" onClick={() => setShowCreateAutomationDialog(false)}>Cancel</Button><Button onClick={() => { toast.success('Automation created'); setShowCreateAutomationDialog(false); setNewAutomationForm({ name: '', trigger: '', actions: '' }); }}>Create</Button></DialogFooter>
+          <DialogFooter><Button variant="outline" onClick={() => setShowCreateAutomationDialog(false)}>Cancel</Button><Button onClick={() => { /* TODO: Implement create automation */ setShowCreateAutomationDialog(false); setNewAutomationForm({ name: '', trigger: '', actions: '' }); }}>Create</Button></DialogFooter>
         </DialogContent>
       </Dialog>
 
@@ -3666,7 +3666,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
             <div><Label>Category</Label><Select defaultValue={selectedCannedResponse.category}><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="General">General</SelectItem><SelectItem value="Account">Account</SelectItem><SelectItem value="Billing">Billing</SelectItem><SelectItem value="Technical">Technical</SelectItem></SelectContent></Select></div>
             <div><Label>Content</Label><textarea defaultValue={selectedCannedResponse.content} className="mt-1 w-full p-3 border rounded-lg text-sm h-32" /></div>
           </div>)}
-          <DialogFooter><Button variant="outline" onClick={() => setShowEditCannedResponseDialog(false)}>Cancel</Button><Button onClick={() => { toast.success('Response updated'); setShowEditCannedResponseDialog(false); }}>Save Changes</Button></DialogFooter>
+          <DialogFooter><Button variant="outline" onClick={() => setShowEditCannedResponseDialog(false)}>Cancel</Button><Button onClick={() => { /* TODO: Implement update canned response */ setShowEditCannedResponseDialog(false); }}>Save Changes</Button></DialogFooter>
         </DialogContent>
       </Dialog>
 
@@ -3678,7 +3678,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
             <div><Label>Category</Label><Select value={newCannedResponseForm.category} onValueChange={(v) => setNewCannedResponseForm({...newCannedResponseForm, category: v})}><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="General">General</SelectItem><SelectItem value="Account">Account</SelectItem><SelectItem value="Billing">Billing</SelectItem><SelectItem value="Technical">Technical</SelectItem></SelectContent></Select></div>
             <div><Label>Content *</Label><textarea placeholder="Response content..." value={newCannedResponseForm.content} onChange={(e) => setNewCannedResponseForm({...newCannedResponseForm, content: e.target.value})} className="mt-1 w-full p-3 border rounded-lg text-sm h-32" /></div>
           </div>
-          <DialogFooter><Button variant="outline" onClick={() => setShowAddCannedResponseDialog(false)}>Cancel</Button><Button onClick={() => { toast.success('Response created'); setShowAddCannedResponseDialog(false); setNewCannedResponseForm({ title: '', content: '', category: 'General' }); }}>Create</Button></DialogFooter>
+          <DialogFooter><Button variant="outline" onClick={() => setShowAddCannedResponseDialog(false)}>Cancel</Button><Button onClick={() => { /* TODO: Implement create canned response */ setShowAddCannedResponseDialog(false); setNewCannedResponseForm({ title: '', content: '', category: 'General' }); }}>Create</Button></DialogFooter>
         </DialogContent>
       </Dialog>
 
@@ -3691,7 +3691,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
               <p className="text-sm">You will be redirected to {selectedIntegration.name} to authorize the connection.</p>
             </div>
           </div>)}
-          <DialogFooter><Button variant="outline" onClick={() => setShowConnectIntegrationDialog(false)}>Cancel</Button><Button onClick={() => { toast.success(`Connecting to ${selectedIntegration?.name}...`); setShowConnectIntegrationDialog(false); }} className="bg-green-600 hover:bg-green-700">Connect</Button></DialogFooter>
+          <DialogFooter><Button variant="outline" onClick={() => setShowConnectIntegrationDialog(false)}>Cancel</Button><Button onClick={() => { /* TODO: Implement connect integration */ setShowConnectIntegrationDialog(false); }} className="bg-green-600 hover:bg-green-700">Connect</Button></DialogFooter>
         </DialogContent>
       </Dialog>
 
@@ -3703,7 +3703,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
               <p className="text-sm text-amber-800">Warning: Regenerating your API key will invalidate the current key. Any applications using the old key will stop working.</p>
             </div>
           </div>
-          <DialogFooter><Button variant="outline" onClick={() => setShowRegenerateAPIKeyDialog(false)}>Cancel</Button><Button onClick={() => { toast.success('New API key generated'); setShowRegenerateAPIKeyDialog(false); }} variant="destructive">Regenerate Key</Button></DialogFooter>
+          <DialogFooter><Button variant="outline" onClick={() => setShowRegenerateAPIKeyDialog(false)}>Cancel</Button><Button onClick={() => { if (confirm('Are you sure you want to regenerate the API key? Any applications using the old key will stop working.')) { /* TODO: Implement regenerate API key */ setShowRegenerateAPIKeyDialog(false); } }} variant="destructive">Regenerate Key</Button></DialogFooter>
         </DialogContent>
       </Dialog>
 
@@ -3734,7 +3734,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
               <div className="mt-2 space-y-2">{['ticket.created', 'ticket.updated', 'ticket.resolved', 'agent.assigned'].map(event => (<div key={event} className="flex items-center gap-2"><input type="checkbox" defaultChecked className="rounded" /><span className="text-sm">{event}</span></div>))}</div>
             </div>
           </div>
-          <DialogFooter><Button variant="outline" onClick={() => setShowWebhooksDialog(false)}>Cancel</Button><Button onClick={() => { toast.success('Webhook saved'); setShowWebhooksDialog(false); }}>Save Webhook</Button></DialogFooter>
+          <DialogFooter><Button variant="outline" onClick={() => setShowWebhooksDialog(false)}>Cancel</Button><Button onClick={() => { /* TODO: Implement save webhook */ setShowWebhooksDialog(false); }}>Save Webhook</Button></DialogFooter>
         </DialogContent>
       </Dialog>
 
@@ -3747,7 +3747,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
             </div>
             <div><Label>Type "DELETE" to confirm</Label><Input placeholder="DELETE" className="mt-1" /></div>
           </div>
-          <DialogFooter><Button variant="outline" onClick={() => setShowDeleteClosedTicketsDialog(false)}>Cancel</Button><Button onClick={() => { toast.success('Closed tickets deleted'); setShowDeleteClosedTicketsDialog(false); }} variant="destructive">Delete All</Button></DialogFooter>
+          <DialogFooter><Button variant="outline" onClick={() => setShowDeleteClosedTicketsDialog(false)}>Cancel</Button><Button onClick={() => { if (confirm('Are you sure you want to delete all closed tickets? This action cannot be undone.')) { /* TODO: Implement delete closed tickets */ setShowDeleteClosedTicketsDialog(false); } }} variant="destructive">Delete All</Button></DialogFooter>
         </DialogContent>
       </Dialog>
 
@@ -3760,7 +3760,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
             </div>
             <div><Label>Type "RESET" to confirm</Label><Input placeholder="RESET" className="mt-1" /></div>
           </div>
-          <DialogFooter><Button variant="outline" onClick={() => setShowResetAllSettingsDialog(false)}>Cancel</Button><Button onClick={() => { toast.success('Settings reset to defaults'); setShowResetAllSettingsDialog(false); }} variant="destructive">Reset Settings</Button></DialogFooter>
+          <DialogFooter><Button variant="outline" onClick={() => setShowResetAllSettingsDialog(false)}>Cancel</Button><Button onClick={() => { if (confirm('Are you sure you want to reset all settings to defaults?')) { /* TODO: Implement reset all settings */ setShowResetAllSettingsDialog(false); } }} variant="destructive">Reset Settings</Button></DialogFooter>
         </DialogContent>
       </Dialog>
 
@@ -3771,7 +3771,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
             <p className="text-gray-500">Choose which settings to reset:</p>
             <div className="space-y-2">{['General Settings', 'Channel Settings', 'SLA Policies', 'Automation Rules', 'Integrations'].map(setting => (<div key={setting} className="flex items-center gap-2"><input type="checkbox" className="rounded" /><span>{setting}</span></div>))}</div>
           </div>
-          <DialogFooter><Button variant="outline" onClick={() => setShowResetSettingsDialog(false)}>Cancel</Button><Button onClick={() => { toast.success('Selected settings reset'); setShowResetSettingsDialog(false); }} variant="destructive">Reset Selected</Button></DialogFooter>
+          <DialogFooter><Button variant="outline" onClick={() => setShowResetSettingsDialog(false)}>Cancel</Button><Button onClick={() => { if (confirm('Are you sure you want to reset the selected settings?')) { /* TODO: Implement reset selected settings */ setShowResetSettingsDialog(false); } }} variant="destructive">Reset Selected</Button></DialogFooter>
         </DialogContent>
       </Dialog>
 
@@ -3786,7 +3786,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
               <p className="text-sm text-gray-400 mt-2">Max file size: 10MB</p>
             </div>
           </div>
-          <DialogFooter><Button variant="outline" onClick={() => setShowAttachFileDialog(false)}>Cancel</Button><Button onClick={() => { toast.success('File attached'); setShowAttachFileDialog(false); }}>Attach</Button></DialogFooter>
+          <DialogFooter><Button variant="outline" onClick={() => setShowAttachFileDialog(false)}>Cancel</Button><Button onClick={() => { /* TODO: Implement attach file */ setShowAttachFileDialog(false); }}>Attach</Button></DialogFooter>
         </DialogContent>
       </Dialog>
 
@@ -3819,9 +3819,9 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
           <DialogHeader><DialogTitle className="flex items-center gap-2"><Tag className="h-5 w-5 text-pink-600" />Add Tag</DialogTitle></DialogHeader>
           <div className="space-y-4">
             <div><Label>Tag Name</Label><Input placeholder="Enter tag name" value={newTagValue} onChange={(e) => setNewTagValue(e.target.value)} className="mt-1" /></div>
-            <div><Label>Or select existing:</Label><div className="flex flex-wrap gap-2 mt-2">{['bug', 'feature', 'billing', 'urgent'].map(tag => (<Badge key={tag} variant="outline" className="cursor-pointer hover:bg-gray-100" onClick={() => { toast.success(`Tag "${tag}" added`); setShowAddTagDialog(false); }}>{tag}</Badge>))}</div></div>
+            <div><Label>Or select existing:</Label><div className="flex flex-wrap gap-2 mt-2">{['bug', 'feature', 'billing', 'urgent'].map(tag => (<Badge key={tag} variant="outline" className="cursor-pointer hover:bg-gray-100" onClick={() => { /* TODO: Implement add existing tag */ setShowAddTagDialog(false); }}>{tag}</Badge>))}</div></div>
           </div>
-          <DialogFooter><Button variant="outline" onClick={() => setShowAddTagDialog(false)}>Cancel</Button><Button onClick={() => { toast.success(`Tag "${newTagValue}" added`); setNewTagValue(''); setShowAddTagDialog(false); }}>Add Tag</Button></DialogFooter>
+          <DialogFooter><Button variant="outline" onClick={() => setShowAddTagDialog(false)}>Cancel</Button><Button onClick={() => { /* TODO: Implement add new tag */ setNewTagValue(''); setShowAddTagDialog(false); }}>Add Tag</Button></DialogFooter>
         </DialogContent>
       </Dialog>
 
@@ -3834,7 +3834,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
             <div className="grid grid-cols-7 gap-2 text-center text-sm">{['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(day => <div key={day} className="font-medium text-gray-500">{day}</div>)}</div>
             <div className="grid grid-cols-7 gap-2">{[1,2,3,4,5,6,7].map(day => <div key={day} className={`h-16 rounded flex items-center justify-center text-sm ${day <= 5 ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-400'}`}>{day <= 5 ? '9AM-5PM' : 'Off'}</div>)}</div>
           </div>)}
-          <DialogFooter><Button variant="outline" onClick={() => setShowAgentScheduleDialog(false)}>Close</Button><Button onClick={() => toast.success('Opening schedule editor')}>Edit Schedule</Button></DialogFooter>
+          <DialogFooter><Button variant="outline" onClick={() => setShowAgentScheduleDialog(false)}>Close</Button><Button onClick={() => { /* TODO: Implement open schedule editor */ }}>Edit Schedule</Button></DialogFooter>
         </DialogContent>
       </Dialog>
 
@@ -3851,7 +3851,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
             </div>
             <div className="h-48 flex items-center justify-center bg-gray-50 rounded-lg"><BarChart3 className="h-16 w-16 text-gray-300" /></div>
           </div>)}
-          <DialogFooter><Button variant="outline" onClick={() => setShowAgentFullReportDialog(false)}>Close</Button><Button onClick={() => { toast.success('Exporting report'); setShowAgentFullReportDialog(false); }}>Export Report</Button></DialogFooter>
+          <DialogFooter><Button variant="outline" onClick={() => setShowAgentFullReportDialog(false)}>Close</Button><Button onClick={() => { /* TODO: Implement export agent report */ setShowAgentFullReportDialog(false); }}>Export Report</Button></DialogFooter>
         </DialogContent>
       </Dialog>
 
@@ -3862,7 +3862,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
             <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg"><Avatar><AvatarFallback>{selectedAgent.name[0]}</AvatarFallback></Avatar><div><p className="font-medium">{selectedAgent.name}</p><p className="text-sm text-gray-500 capitalize">{selectedAgent.status}</p></div></div>
             <div><Label>Message</Label><textarea placeholder="Type your message..." value={agentMessageForm} onChange={(e) => setAgentMessageForm(e.target.value)} className="mt-1 w-full p-3 border rounded-lg text-sm h-32" /></div>
           </div>)}
-          <DialogFooter><Button variant="outline" onClick={() => setShowSendAgentMessageDialog(false)}>Cancel</Button><Button onClick={() => { toast.success('Message sent'); setAgentMessageForm(''); setShowSendAgentMessageDialog(false); }} className="bg-emerald-600 hover:bg-emerald-700">Send Message</Button></DialogFooter>
+          <DialogFooter><Button variant="outline" onClick={() => setShowSendAgentMessageDialog(false)}>Cancel</Button><Button onClick={() => { /* TODO: Implement send agent message */ setAgentMessageForm(''); setShowSendAgentMessageDialog(false); }} className="bg-emerald-600 hover:bg-emerald-700">Send Message</Button></DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
