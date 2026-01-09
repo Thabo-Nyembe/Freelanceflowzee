@@ -952,7 +952,7 @@ export default function MessagesClient() {
                 className="pl-10 w-72"
               />
             </div>
-            <Button variant="outline" size="icon" onClick={() => toast.info('Filter Messages', { description: 'Opening filter options...' })}>
+            <Button variant="outline" size="icon" onClick={() => { /* TODO: Implement filter messages dialog/popover */ }}>
               <Filter className="w-4 h-4" />
             </Button>
             <Button variant="outline" size="sm" onClick={handleMarkAllAsRead} disabled={mutating}>
@@ -1369,7 +1369,7 @@ export default function MessagesClient() {
                               {message.reactions.length > 0 && (
                                 <div className="flex gap-1 mt-2">
                                   {message.reactions.map((reaction, idx) => (
-                                    <Button key={idx} variant="outline" size="sm" className="h-6 px-2 text-xs" onClick={() => toast.info('Reaction', { description: `${reaction.count} people reacted with ${getReactionIcon(reaction.type)}` })}>
+                                    <Button key={idx} variant="outline" size="sm" className="h-6 px-2 text-xs" onClick={() => { /* TODO: Implement toggle reaction or show reaction details */ }}>
                                       {getReactionIcon(reaction.type)} {reaction.count}
                                     </Button>
                                   ))}
@@ -2165,7 +2165,7 @@ export default function MessagesClient() {
                                 key={color}
                                 className="w-8 h-8 rounded-full border-2 border-white shadow-sm hover:scale-110 transition-transform"
                                 style={{ backgroundColor: color }}
-                                onClick={() => toast.success('Theme Updated', { description: `Sidebar color set to ${color}` })}
+                                onClick={() => { /* TODO: Implement sidebar theme color persistence */ }}
                               />
                             ))}
                           </div>

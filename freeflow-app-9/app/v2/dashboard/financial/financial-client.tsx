@@ -2639,9 +2639,7 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                     </button>
                     <button
                       onClick={() => {
-                        toast.success('Opening transaction history...', {
-                          description: `Viewing all transactions for ${selectedBankAccount.name}`
-                        })
+                        /* TODO: Filter transactions by selectedBankAccount.id when implementing */
                         setShowBankAccountOptionsDialog(false)
                         setActiveTab('banking')
                       }}
@@ -2670,16 +2668,11 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                     <div className="border-t border-gray-200 dark:border-gray-700 my-2" />
                     <button
                       onClick={() => {
-                        toast.warning('Disconnect this bank account?', {
-                          description: 'You will no longer receive automatic transaction syncing.',
-                          action: {
-                            label: 'Disconnect',
-                            onClick: () => {
-                              toast.success(`${selectedBankAccount.name} disconnected`)
-                              setShowBankAccountOptionsDialog(false)
-                            }
-                          }
-                        })
+                        if (confirm(`Disconnect ${selectedBankAccount?.name}? You will no longer receive automatic transaction syncing.`)) {
+                          /* TODO: Implement bank account disconnect API call */
+                          toast.success(`${selectedBankAccount?.name} disconnected`)
+                          setShowBankAccountOptionsDialog(false)
+                        }
                       }}
                       className="w-full flex items-center gap-3 p-3 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors text-red-600"
                     >

@@ -2323,7 +2323,7 @@ export default function WorkflowsClient() {
                   <SelectItem value="error">Error</SelectItem>
                 </SelectContent>
               </Select>
-              <Button variant="outline" size="icon" onClick={() => toast.info('Logs refreshed')}>
+              <Button variant="outline" size="icon" onClick={() => { /* TODO: Implement refresh logs functionality */ }}>
                 <RefreshCw className="w-4 h-4" />
               </Button>
             </div>
@@ -2361,7 +2361,7 @@ export default function WorkflowsClient() {
             <Button variant="outline" onClick={() => setShowViewLogsDialog(false)}>
               Close
             </Button>
-            <Button variant="outline" onClick={() => toast.success('Logs exported', { description: 'Downloaded as workflow-logs.json' })}>
+            <Button variant="outline" onClick={() => { /* TODO: Implement export logs functionality */ }}>
               <Download className="w-4 h-4 mr-2" />
               Export Logs
             </Button>

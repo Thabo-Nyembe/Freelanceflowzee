@@ -3276,7 +3276,7 @@ export default function SurveysClient() {
                     <div className="flex items-center gap-3">
                       <span className="font-semibold">{invoice.amount}</span>
                       <Badge className="bg-green-100 text-green-700">{invoice.status}</Badge>
-                      <Button variant="ghost" size="sm" onClick={() => toast.success(`Downloading ${invoice.id}...`)}>
+                      <Button variant="ghost" size="sm" onClick={() => { /* TODO: Implement invoice download */ }}>
                         <Download className="w-4 h-4" />
                       </Button>
                     </div>
@@ -3335,7 +3335,7 @@ export default function SurveysClient() {
                     <li>SSO & advanced security</li>
                     <li>API access</li>
                   </ul>
-                  <Button className="w-full mt-4" onClick={() => { toast.success('Upgrade request submitted!'); setShowUpgradeDialog(false); }}>
+                  <Button className="w-full mt-4" onClick={() => { /* TODO: Implement plan upgrade */ setShowUpgradeDialog(false); }}>
                     Upgrade
                   </Button>
                 </div>
@@ -3497,11 +3497,15 @@ export default function SurveysClient() {
                 {sharingSurvey?.title || 'Survey QR Code'}
               </p>
               <div className="flex gap-2 justify-center">
-                <Button variant="outline" onClick={() => toast.success('QR Code downloaded!')}>
+                <Button variant="outline" onClick={() => { /* TODO: Implement QR code download as PNG */ }}>
                   <Download className="w-4 h-4 mr-2" />
                   Download PNG
                 </Button>
-                <Button variant="outline" onClick={() => toast.success('QR Code copied!')}>
+                <Button variant="outline" onClick={() => {
+                  const qrCodeUrl = `https://freeflow.app/survey/${sharingSurvey?.id || ''}`;
+                  navigator.clipboard.writeText(qrCodeUrl);
+                  toast.success('QR Code URL copied to clipboard!');
+                }}>
                   <Copy className="w-4 h-4 mr-2" />
                   Copy to Clipboard
                 </Button>

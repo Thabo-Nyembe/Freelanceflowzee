@@ -2365,7 +2365,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                       <div className="flex items-center gap-3">
                         <span className="text-sm text-gray-500">{connection.usageCount} uses</span>
                         <Badge className={getConnectionColor(connection.status)}>{connection.status}</Badge>
-                        <Button variant="ghost" size="sm" onClick={() => toast.success(`Managing ${connection.name}`, { description: 'Connection settings opened' })}>
+                        <Button variant="ghost" size="sm" onClick={() => { /* TODO: Implement connection settings management */ }}>
                           <MoreVertical className="h-4 w-4" />
                         </Button>
                       </div>
@@ -2781,7 +2781,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                             </div>
                             <div className="flex items-center gap-3">
                               <Badge className={getConnectionColor(connection.status)}>{connection.status}</Badge>
-                              <Button variant="ghost" size="sm" onClick={() => toast.success(`Managing ${connection.name}`, { description: 'Connection settings opened' })}>
+                              <Button variant="ghost" size="sm" onClick={() => { /* TODO: Implement connection settings management */ }}>
                                 <MoreVertical className="h-4 w-4" />
                               </Button>
                             </div>
@@ -3969,7 +3969,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
               <div className="p-4 border-2 border-dashed rounded-lg text-center">
                 <Key className="h-8 w-8 mx-auto text-gray-400 mb-2" />
                 <p className="text-sm text-gray-500">Need another API key?</p>
-                <Button variant="outline" className="mt-2" onClick={() => toast.success('New API key created')}>
+                <Button variant="outline" className="mt-2" onClick={() => { /* TODO: Implement API key creation */ }}>
                   <Plus className="h-4 w-4 mr-2" />
                   Create New Key
                 </Button>
@@ -4156,7 +4156,12 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
               <Button variant="outline" onClick={() => setShowDeleteAccountDialog(false)}>
                 Cancel
               </Button>
-              <Button variant="destructive" onClick={() => { toast.error('Account deletion requires email verification', { description: 'Check your email for confirmation link' }); setShowDeleteAccountDialog(false); }}>
+              <Button variant="destructive" onClick={() => {
+                if (confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+                  /* TODO: Implement account deletion API call */
+                  setShowDeleteAccountDialog(false);
+                }
+              }}>
                 Delete Account
               </Button>
             </DialogFooter>
