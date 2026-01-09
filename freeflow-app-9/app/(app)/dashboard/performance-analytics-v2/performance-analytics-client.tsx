@@ -3070,7 +3070,7 @@ export default function PerformanceAnalyticsClient() {
                   </div>
                   <div className="flex items-center gap-2">
                     <Badge className="bg-green-100 text-green-700">Active</Badge>
-                    <Button variant="ghost" size="sm" onClick={() => toast.info('Key copied to clipboard')}>
+                    <Button variant="ghost" size="sm" onClick={() => { navigator.clipboard.writeText('pk_live_xxxxx'); toast.success('Key copied to clipboard'); }}>
                       Copy
                     </Button>
                   </div>
@@ -3082,13 +3082,13 @@ export default function PerformanceAnalyticsClient() {
                   </div>
                   <div className="flex items-center gap-2">
                     <Badge className="bg-green-100 text-green-700">Active</Badge>
-                    <Button variant="ghost" size="sm" onClick={() => toast.info('Key copied to clipboard')}>
+                    <Button variant="ghost" size="sm" onClick={() => { navigator.clipboard.writeText('pk_dev_xxxxx'); toast.success('Key copied to clipboard'); }}>
                       Copy
                     </Button>
                   </div>
                 </div>
               </div>
-              <Button variant="outline" className="w-full" onClick={() => toast.success('New API key generated')}>
+              <Button variant="outline" className="w-full" onClick={() => { /* TODO: Implement API key generation */ }}>
                 <Plus className="w-4 h-4 mr-2" />
                 Generate New Key
               </Button>

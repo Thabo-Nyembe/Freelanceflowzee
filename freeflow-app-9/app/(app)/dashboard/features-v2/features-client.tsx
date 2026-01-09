@@ -1141,7 +1141,7 @@ export default function FeaturesClient() {
 
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold">User Segments</h2>
-              <Button onClick={() => toast.info('Create Segment', { description: 'Define user targeting rules to control feature rollout to specific user groups' })}>
+              <Button onClick={() => { /* TODO: Implement segment creation dialog */ }}>
                 <Plus className="h-4 w-4 mr-2" />
                 Create Segment
               </Button>
@@ -1204,7 +1204,7 @@ export default function FeaturesClient() {
 
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold">A/B Experiments</h2>
-              <Button onClick={() => toast.info('New Experiment', { description: 'Create a new A/B test to compare feature variants with your users' })}>
+              <Button onClick={() => { /* TODO: Implement A/B experiment creation dialog */ }}>
                 <Plus className="h-4 w-4 mr-2" />
                 New Experiment
               </Button>
@@ -1917,7 +1917,7 @@ export default function FeaturesClient() {
                       <div className="text-center py-8 text-gray-500">
                         <Flag className="h-12 w-12 mx-auto mb-4 text-gray-300" />
                         <p>No rollout configured yet</p>
-                        <Button className="mt-4" onClick={() => toast.info('Configure Rollout', { description: 'Set up rollout percentage, target segments, and deployment schedule for this feature' })}>Configure Rollout</Button>
+                        <Button className="mt-4" onClick={() => { /* TODO: Implement rollout configuration dialog */ }}>Configure Rollout</Button>
                       </div>
                     )}
                   </TabsContent>

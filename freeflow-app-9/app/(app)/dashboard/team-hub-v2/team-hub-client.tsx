@@ -2162,8 +2162,8 @@ export default function TeamHubClient() {
                 )}
 
                 <div className="flex gap-2 pt-4 border-t">
-                  <Button className="flex-1" onClick={() => toast.success(`Opening #${selectedChannel.name}`, { description: `${selectedChannel.memberCount} members` })}>Open Channel</Button>
-                  <Button variant="outline" size="icon" onClick={() => toast.success(selectedChannel.isStarred ? 'Star removed' : 'Channel starred', { description: `#${selectedChannel.name}` })}>
+                  <Button className="flex-1" onClick={() => { /* TODO: Implement open channel navigation */ }}>Open Channel</Button>
+                  <Button variant="outline" size="icon" onClick={() => { /* TODO: Implement channel star toggle */ }}>
                     {selectedChannel.isStarred ? <Star className="w-4 h-4 fill-current text-yellow-500" /> : <Star className="w-4 h-4" />}
                   </Button>
                   <Button variant="outline" size="icon" onClick={() => { navigator.clipboard.writeText(`#${selectedChannel.name}`); toast.success('Copied!', { description: 'Channel name copied' }) }}>
@@ -2499,7 +2499,7 @@ export default function TeamHubClient() {
                         <h4 className="font-medium text-sm">{app.name}</h4>
                         <p className="text-xs text-gray-500 truncate">{app.description}</p>
                       </div>
-                      <Button size="sm" variant={app.isInstalled ? 'secondary' : 'default'} onClick={() => toast.success(app.isInstalled ? 'Already installed' : `${app.name} installed`, { description: app.isInstalled ? 'This app is already in your workspace' : 'App added successfully' })}>
+                      <Button size="sm" variant={app.isInstalled ? 'secondary' : 'default'} onClick={() => { /* TODO: Implement app installation */ }}>
                         {app.isInstalled ? 'Installed' : 'Add'}
                       </Button>
                     </div>

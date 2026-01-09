@@ -1483,7 +1483,7 @@ export default function StockClient() {
                       </div>
                     </div>
 
-                    <Button variant="outline" size="sm" className="w-full mt-4" onClick={() => toast.info(`Warehouse: ${warehouse.name}`, { description: `${warehouse.productCount} products | ${warehouse.zones} zones | ${warehouse.bins} bins` })}>
+                    <Button variant="outline" size="sm" className="w-full mt-4" onClick={() => { /* TODO: Implement warehouse details dialog */ }}>
                       <Eye className="w-4 h-4 mr-2" />
                       View Details
                     </Button>
@@ -2092,11 +2092,11 @@ export default function StockClient() {
                     <RefreshCw className="w-4 h-4 mr-2" />
                     Transfer
                   </Button>
-                  <Button variant="outline" onClick={() => toast.info('Movement History', { description: `Viewing movement history for ${selectedProduct.name}` })}>
+                  <Button variant="outline" onClick={() => { /* TODO: Implement movement history dialog */ }}>
                     <History className="w-4 h-4 mr-2" />
                     History
                   </Button>
-                  <Button variant="outline" onClick={() => toast.info('Edit Product', { description: `Opening editor for ${selectedProduct.name}` })}>
+                  <Button variant="outline" onClick={() => { /* TODO: Implement product editor dialog */ }}>
                     <Edit className="w-4 h-4 mr-2" />
                     Edit
                   </Button>

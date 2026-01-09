@@ -1752,7 +1752,7 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
                               <span className="font-medium">{dept}</span>
                               <div className="flex items-center gap-2">
                                 <Badge variant="secondary">Active</Badge>
-                                <Button variant="ghost" size="sm" onClick={() => toast.info(`Editing ${dept}`, { description: 'Opening department settings...' })}>Edit</Button>
+                                <Button variant="ghost" size="sm" onClick={() => { /* TODO: Implement department settings dialog */ }}>Edit</Button>
                               </div>
                             </div>
                           ))}
@@ -1857,7 +1857,7 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
                                 <div className={`w-3 h-3 rounded-full bg-${status.color}-500`} />
                                 <span className="font-medium">{status.name}</span>
                               </div>
-                              <Button variant="ghost" size="sm" onClick={() => toast.info(`Editing ${status.name} status`, { description: 'Opening status configuration...' })}>Edit</Button>
+                              <Button variant="ghost" size="sm" onClick={() => { /* TODO: Implement status configuration dialog */ }}>Edit</Button>
                             </div>
                           ))}
                         </div>
@@ -2038,7 +2038,7 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
                             <Download className="w-4 h-4" />
                             Export Data
                           </Button>
-                          <Button variant="outline" className="flex items-center gap-2" onClick={() => toast.info('Import Data', { description: 'Select a file to import capacity data' })}>
+                          <Button variant="outline" className="flex items-center gap-2" onClick={() => { /* TODO: Implement data import dialog */ }}>
                             <Upload className="w-4 h-4" />
                             Import Data
                           </Button>

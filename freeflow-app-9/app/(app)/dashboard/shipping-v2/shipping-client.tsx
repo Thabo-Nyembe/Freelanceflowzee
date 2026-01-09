@@ -3241,7 +3241,7 @@ export default function ShippingClient() {
             </div>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setShowTrackNumberDialog(false)}>Close</Button>
-              <Button onClick={() => toast.success('Tracking refreshed')}>Track</Button>
+              <Button onClick={() => { /* TODO: Implement tracking refresh */ }}>Track</Button>
             </div>
           </DialogContent>
         </Dialog>
@@ -3600,7 +3600,7 @@ export default function ShippingClient() {
             </div>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setShowViewLabelDialog(false)}>Close</Button>
-              <Button onClick={() => toast.success('Opening label...')}>Open Full Size</Button>
+              <Button onClick={() => window.open(selectedLabel?.url || '#', '_blank')}>Open Full Size</Button>
             </div>
           </DialogContent>
         </Dialog>
@@ -3730,7 +3730,7 @@ export default function ShippingClient() {
             </div>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setShowCompareRatesDialog(false)}>Cancel</Button>
-              <Button onClick={() => toast.success('Fetching rates...')}>Get Rates</Button>
+              <Button onClick={() => { /* TODO: Implement rate comparison fetch */ }}>Get Rates</Button>
             </div>
           </DialogContent>
         </Dialog>
