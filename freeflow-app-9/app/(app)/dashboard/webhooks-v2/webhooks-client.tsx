@@ -1003,7 +1003,6 @@ export default function WebhooksClient({
       shortcut: 'N',
       action: () => {
         openCreateDialog()
-        toast.success('Webhook builder opened', { description: 'Configure URL, events, and authentication' })
       }
     },
     {

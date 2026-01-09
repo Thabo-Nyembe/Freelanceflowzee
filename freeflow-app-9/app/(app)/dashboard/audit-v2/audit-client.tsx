@@ -628,7 +628,6 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
   }
   const handleSettings = () => {
     setActiveTab('settings')
-    toast.success('Settings panel opened')
   }
   const handleSearch = () => {
     const results = auditEvents.filter(e =>
@@ -647,7 +646,6 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
   }
   const handleCreateReport = () => {
     setShowCreateSearch(true)
-    toast.success('Report builder opened')
   }
   const handleDownloadReport = (reportName: string) => {
     const data = JSON.stringify({ report: reportName, events: auditEvents, generatedAt: new Date().toISOString() }, null, 2)

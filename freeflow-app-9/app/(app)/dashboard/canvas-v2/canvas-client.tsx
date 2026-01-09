@@ -629,7 +629,6 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
   const handleOpenSettings = useCallback(() => {
     // Navigate to settings tab
     setActiveTab('settings')
-    toast.success('Settings opened')
   }, [])
 
   const handleMemberOptions = useCallback((memberName: string) => {
