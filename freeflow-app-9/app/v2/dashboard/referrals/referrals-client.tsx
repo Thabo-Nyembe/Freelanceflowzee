@@ -1267,6 +1267,653 @@ export default function ReferralsClient() {
           </CardContent>
         </Card>
       </motion.div>
+
+      {/* ============================================================================ */}
+      {/* DIALOG: CREATE REFERRAL */}
+      {/* ============================================================================ */}
+      <Dialog open={isCreateReferralDialogOpen} onOpenChange={setIsCreateReferralDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Plus className="h-5 w-5 text-green-600" />
+              Create New Referral
+            </DialogTitle>
+            <DialogDescription>
+              Send a referral invitation to a potential client. They will receive an email with your unique referral link.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="referral-name">Contact Name *</Label>
+              <Input
+                id="referral-name"
+                placeholder="John Smith"
+                value={newReferralData.name}
+                onChange={(e) => setNewReferralData(prev => ({ ...prev, name: e.target.value }))}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="referral-email">Email Address *</Label>
+              <Input
+                id="referral-email"
+                type="email"
+                placeholder="john@company.com"
+                value={newReferralData.email}
+                onChange={(e) => setNewReferralData(prev => ({ ...prev, email: e.target.value }))}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="referral-company">Company Name</Label>
+              <Input
+                id="referral-company"
+                placeholder="Acme Corporation"
+                value={newReferralData.company}
+                onChange={(e) => setNewReferralData(prev => ({ ...prev, company: e.target.value }))}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="referral-notes">Personal Message (Optional)</Label>
+              <Textarea
+                id="referral-notes"
+                placeholder="Add a personal note to your referral invitation..."
+                value={newReferralData.notes}
+                onChange={(e) => setNewReferralData(prev => ({ ...prev, notes: e.target.value }))}
+                rows={3}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setIsCreateReferralDialogOpen(false)}
+              disabled={isProcessing}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleCreateReferral}
+              disabled={isProcessing}
+              className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600"
+            >
+              {isProcessing ? (
+                <>
+                  <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                  Sending...
+                </>
+              ) : (
+                <>
+                  <Send className="h-4 w-4 mr-2" />
+                  Send Invitation
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ============================================================================ */}
+      {/* DIALOG: REDEEM POINTS */}
+      {/* ============================================================================ */}
+      <Dialog open={isRedeemPointsDialogOpen} onOpenChange={setIsRedeemPointsDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Wallet className="h-5 w-5 text-purple-600" />
+              Redeem Loyalty Points
+            </DialogTitle>
+            <DialogDescription>
+              Convert your loyalty points to account credits. Current balance: <span className="font-bold">{loyaltyPoints} points</span>
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="grid grid-cols-3 gap-3">
+              <Button
+                variant="outline"
+                className="flex-col h-auto py-4"
+                onClick={() => handleRedeemPoints(500)}
+                disabled={loyaltyPoints < 500}
+              >
+                <span className="text-lg font-bold">$5</span>
+                <span className="text-xs text-gray-600">500 points</span>
+              </Button>
+              <Button
+                variant="outline"
+                className="flex-col h-auto py-4"
+                onClick={() => handleRedeemPoints(1000)}
+                disabled={loyaltyPoints < 1000}
+              >
+                <span className="text-lg font-bold">$12</span>
+                <span className="text-xs text-gray-600">1,000 points</span>
+              </Button>
+              <Button
+                variant="outline"
+                className="flex-col h-auto py-4"
+                onClick={() => handleRedeemPoints(2000)}
+                disabled={loyaltyPoints < 2000}
+              >
+                <span className="text-lg font-bold">$30</span>
+                <span className="text-xs text-gray-600">2,000 points</span>
+              </Button>
+            </div>
+            <div className="p-4 rounded-lg bg-purple-50 border border-purple-200">
+              <h4 className="font-semibold text-gray-900 mb-2">Redemption Benefits</h4>
+              <ul className="text-sm text-gray-600 space-y-1">
+                <li>- Credits applied instantly to your account</li>
+                <li>- Use for project fees or premium features</li>
+                <li>- No expiration on redeemed credits</li>
+              </ul>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setIsRedeemPointsDialogOpen(false)}
+            >
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ============================================================================ */}
+      {/* DIALOG: VIEW REFERRALS */}
+      {/* ============================================================================ */}
+      <Dialog open={isViewReferralsDialogOpen} onOpenChange={setIsViewReferralsDialogOpen}>
+        <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Users className="h-5 w-5 text-blue-600" />
+              All Referrals ({referrals.length})
+            </DialogTitle>
+            <DialogDescription>
+              Manage and track all your referrals in one place.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 py-4">
+            {referrals.map((referral) => (
+              <div
+                key={referral.id}
+                className="p-4 rounded-lg border border-gray-200 hover:shadow-md transition-shadow"
+              >
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-4 flex-1">
+                    <Avatar className="h-10 w-10">
+                      <AvatarImage src={referral.avatar} alt={referral.name} />
+                      <AvatarFallback>{referral.name.substring(0, 2).toUpperCase()}</AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1">
+                      <p className="font-medium text-gray-900">{referral.name}</p>
+                      <p className="text-sm text-gray-600">{referral.email}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge className={
+                      referral.status === 'earned' ? 'bg-green-100 text-green-800' :
+                      referral.status === 'completed' ? 'bg-blue-100 text-blue-800' :
+                      'bg-yellow-100 text-yellow-800'
+                    }>
+                      {referral.status}
+                    </Badge>
+                    {referral.status === 'pending' && (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => handleSendReminder(referral.id)}
+                      >
+                        <Send className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+          <DialogFooter className="flex justify-between">
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleExportReferralData('csv')}
+              >
+                <Download className="h-4 w-4 mr-2" />
+                Export CSV
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleExportReferralData('pdf')}
+              >
+                <Download className="h-4 w-4 mr-2" />
+                Export PDF
+              </Button>
+            </div>
+            <Button
+              variant="outline"
+              onClick={() => setIsViewReferralsDialogOpen(false)}
+            >
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ============================================================================ */}
+      {/* DIALOG: VIEW EARNINGS */}
+      {/* ============================================================================ */}
+      <Dialog open={isViewEarningsDialogOpen} onOpenChange={setIsViewEarningsDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <DollarSign className="h-5 w-5 text-green-600" />
+              Earnings Summary
+            </DialogTitle>
+            <DialogDescription>
+              View your referral commission earnings and history.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="p-4 rounded-lg bg-green-50 border border-green-200">
+                <p className="text-sm text-gray-600">Total Earned</p>
+                <p className="text-2xl font-bold text-green-600">${totalCommission.toLocaleString()}</p>
+              </div>
+              <div className="p-4 rounded-lg bg-blue-50 border border-blue-200">
+                <p className="text-sm text-gray-600">Pending</p>
+                <p className="text-2xl font-bold text-blue-600">
+                  ${referrals.filter(r => r.status === 'completed').reduce((acc, r) => acc + (r.commissionEarned || 0), 0).toLocaleString()}
+                </p>
+              </div>
+            </div>
+            <div className="space-y-3">
+              <h4 className="font-semibold text-gray-900">Recent Earnings</h4>
+              {referrals
+                .filter(r => r.commissionEarned && r.commissionEarned > 0)
+                .map((referral) => (
+                  <div
+                    key={referral.id}
+                    className="flex items-center justify-between p-3 rounded-lg border border-gray-200"
+                  >
+                    <div>
+                      <p className="font-medium text-gray-900">{referral.name}</p>
+                      <p className="text-xs text-gray-500">{new Date(referral.referralDate).toLocaleDateString()}</p>
+                    </div>
+                    <span className="font-bold text-green-600">+${referral.commissionEarned}</span>
+                  </div>
+                ))}
+            </div>
+          </div>
+          <DialogFooter className="flex justify-between">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setIsViewEarningsDialogOpen(false)
+                setIsPayoutDialogOpen(true)
+              }}
+            >
+              <CreditCard className="h-4 w-4 mr-2" />
+              Request Payout
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => setIsViewEarningsDialogOpen(false)}
+            >
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ============================================================================ */}
+      {/* DIALOG: TRACK PROGRESS */}
+      {/* ============================================================================ */}
+      <Dialog open={isTrackProgressDialogOpen} onOpenChange={setIsTrackProgressDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Target className="h-5 w-5 text-orange-600" />
+              Referral Progress
+            </DialogTitle>
+            <DialogDescription>
+              Track your progress towards referral milestones and rewards.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-3">
+              <div className="p-4 rounded-lg bg-gray-50 border border-gray-200">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-medium text-gray-900">Referrals This Month</span>
+                  <span className="text-sm text-gray-600">{referrals.filter(r => {
+                    const date = new Date(r.referralDate)
+                    const now = new Date()
+                    return date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear()
+                  }).length} / 5</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div
+                    className="bg-gradient-to-r from-green-500 to-emerald-500 h-2 rounded-full"
+                    style={{ width: `${Math.min((referrals.filter(r => {
+                      const date = new Date(r.referralDate)
+                      const now = new Date()
+                      return date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear()
+                    }).length / 5) * 100, 100)}%` }}
+                  />
+                </div>
+              </div>
+              <div className="p-4 rounded-lg bg-gray-50 border border-gray-200">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-medium text-gray-900">Commission Goal</span>
+                  <span className="text-sm text-gray-600">${totalCommission} / $5,000</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div
+                    className="bg-gradient-to-r from-blue-500 to-indigo-500 h-2 rounded-full"
+                    style={{ width: `${Math.min((totalCommission / 5000) * 100, 100)}%` }}
+                  />
+                </div>
+              </div>
+              <div className="p-4 rounded-lg bg-gray-50 border border-gray-200">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-medium text-gray-900">Loyalty Points</span>
+                  <span className="text-sm text-gray-600">{loyaltyPoints} / 5,000</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div
+                    className="bg-gradient-to-r from-purple-500 to-pink-500 h-2 rounded-full"
+                    style={{ width: `${Math.min((loyaltyPoints / 5000) * 100, 100)}%` }}
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="p-4 rounded-lg bg-yellow-50 border border-yellow-200">
+              <h4 className="font-semibold text-gray-900 mb-2">Next Milestone</h4>
+              <p className="text-sm text-gray-600">
+                Refer 1 more client this month to unlock the Power Promoter badge and earn 2,500 bonus points!
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setIsTrackProgressDialogOpen(false)}
+            >
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ============================================================================ */}
+      {/* DIALOG: REQUEST PAYOUT */}
+      {/* ============================================================================ */}
+      <Dialog open={isPayoutDialogOpen} onOpenChange={setIsPayoutDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <CreditCard className="h-5 w-5 text-green-600" />
+              Request Payout
+            </DialogTitle>
+            <DialogDescription>
+              Withdraw your referral earnings. Available balance: <span className="font-bold">${totalCommission.toLocaleString()}</span>
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="payout-amount">Amount ($)</Label>
+              <Input
+                id="payout-amount"
+                type="number"
+                placeholder="Enter amount"
+                min={0}
+                max={totalCommission}
+                value={payoutAmount || ''}
+                onChange={(e) => setPayoutAmount(Number(e.target.value))}
+              />
+              <p className="text-xs text-gray-500">Minimum payout: $50</p>
+            </div>
+            <div className="space-y-2">
+              <Label>Payout Method</Label>
+              <Select
+                value={payoutMethod}
+                onValueChange={(value: 'bank' | 'paypal' | 'crypto') => setPayoutMethod(value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select payout method" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="bank">Bank Transfer (3-5 business days)</SelectItem>
+                  <SelectItem value="paypal">PayPal (1-2 business days)</SelectItem>
+                  <SelectItem value="crypto">Cryptocurrency (Same day)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPayoutAmount(Math.min(100, totalCommission))}
+              >
+                $100
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPayoutAmount(Math.min(500, totalCommission))}
+              >
+                $500
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPayoutAmount(totalCommission)}
+              >
+                Max
+              </Button>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setIsPayoutDialogOpen(false)}
+              disabled={isProcessing}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleRequestPayout}
+              disabled={isProcessing || payoutAmount < 50}
+              className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600"
+            >
+              {isProcessing ? (
+                <>
+                  <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                  Processing...
+                </>
+              ) : (
+                <>
+                  <DollarSign className="h-4 w-4 mr-2" />
+                  Request Payout
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ============================================================================ */}
+      {/* DIALOG: SETTINGS */}
+      {/* ============================================================================ */}
+      <Dialog open={isSettingsDialogOpen} onOpenChange={setIsSettingsDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Settings className="h-5 w-5 text-gray-600" />
+              Referral Program Settings
+            </DialogTitle>
+            <DialogDescription>
+              Configure your referral program preferences and notifications.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="flex items-center justify-between p-3 rounded-lg border border-gray-200">
+              <div>
+                <p className="font-medium text-gray-900">Email Notifications</p>
+                <p className="text-sm text-gray-500">Receive updates about your referrals</p>
+              </div>
+              <Button
+                variant={settingsData.emailNotifications ? "default" : "outline"}
+                size="sm"
+                onClick={() => setSettingsData(prev => ({ ...prev, emailNotifications: !prev.emailNotifications }))}
+              >
+                {settingsData.emailNotifications ? 'On' : 'Off'}
+              </Button>
+            </div>
+            <div className="flex items-center justify-between p-3 rounded-lg border border-gray-200">
+              <div>
+                <p className="font-medium text-gray-900">Auto Payouts</p>
+                <p className="text-sm text-gray-500">Automatically request payout at threshold</p>
+              </div>
+              <Button
+                variant={settingsData.autoPayouts ? "default" : "outline"}
+                size="sm"
+                onClick={() => setSettingsData(prev => ({ ...prev, autoPayouts: !prev.autoPayouts }))}
+              >
+                {settingsData.autoPayouts ? 'On' : 'Off'}
+              </Button>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="min-payout">Minimum Payout Threshold ($)</Label>
+              <Input
+                id="min-payout"
+                type="number"
+                value={settingsData.minPayoutAmount}
+                onChange={(e) => setSettingsData(prev => ({ ...prev, minPayoutAmount: Number(e.target.value) }))}
+                min={50}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="referral-bonus">Referral Bonus (%)</Label>
+              <Select
+                value={String(settingsData.referralBonus)}
+                onValueChange={(value) => setSettingsData(prev => ({ ...prev, referralBonus: Number(value) }))}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="10">10% (Standard)</SelectItem>
+                  <SelectItem value="15">15% (Silver)</SelectItem>
+                  <SelectItem value="20">20% (Gold)</SelectItem>
+                  <SelectItem value="25">25% (Platinum)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setIsSettingsDialogOpen(false)}
+              disabled={isProcessing}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSaveSettings}
+              disabled={isProcessing}
+            >
+              {isProcessing ? (
+                <>
+                  <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                'Save Settings'
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ============================================================================ */}
+      {/* DIALOG: REFERRAL DETAILS */}
+      {/* ============================================================================ */}
+      <Dialog open={isReferralDetailsDialogOpen} onOpenChange={setIsReferralDetailsDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Eye className="h-5 w-5 text-blue-600" />
+              Referral Details
+            </DialogTitle>
+            <DialogDescription>
+              View detailed information about this referral.
+            </DialogDescription>
+          </DialogHeader>
+          {selectedReferral && (
+            <div className="space-y-4 py-4">
+              <div className="flex items-center gap-4 p-4 rounded-lg bg-gray-50">
+                <Avatar className="h-16 w-16">
+                  <AvatarImage src={selectedReferral.avatar} alt={selectedReferral.name} />
+                  <AvatarFallback className="text-lg">{selectedReferral.name.substring(0, 2).toUpperCase()}</AvatarFallback>
+                </Avatar>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">{selectedReferral.name}</h3>
+                  <p className="text-sm text-gray-600">{selectedReferral.email}</p>
+                  <Badge className={
+                    selectedReferral.status === 'earned' ? 'bg-green-100 text-green-800' :
+                    selectedReferral.status === 'completed' ? 'bg-blue-100 text-blue-800' :
+                    'bg-yellow-100 text-yellow-800'
+                  }>
+                    {selectedReferral.status}
+                  </Badge>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-3 rounded-lg bg-gray-50 border border-gray-200">
+                  <p className="text-sm text-gray-600">Referral Date</p>
+                  <p className="font-semibold text-gray-900">
+                    {new Date(selectedReferral.referralDate).toLocaleDateString()}
+                  </p>
+                </div>
+                <div className="p-3 rounded-lg bg-gray-50 border border-gray-200">
+                  <p className="text-sm text-gray-600">Projects Completed</p>
+                  <p className="font-semibold text-gray-900">{selectedReferral.projectsCompleted || 0}</p>
+                </div>
+                <div className="p-3 rounded-lg bg-green-50 border border-green-200 col-span-2">
+                  <p className="text-sm text-gray-600">Commission Earned</p>
+                  <p className="text-xl font-bold text-green-600">${selectedReferral.commissionEarned || 0}</p>
+                </div>
+              </div>
+              {selectedReferral.status === 'pending' && (
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    className="flex-1"
+                    onClick={() => handleSendReminder(selectedReferral.id)}
+                  >
+                    <Send className="h-4 w-4 mr-2" />
+                    Send Reminder
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="flex-1"
+                    onClick={() => handleShareReferral('email')}
+                  >
+                    <Mail className="h-4 w-4 mr-2" />
+                    Share Again
+                  </Button>
+                </div>
+              )}
+            </div>
+          )}
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setIsReferralDetailsDialogOpen(false)}
+            >
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

@@ -3001,6 +3001,325 @@ export default function DesktopAppClient() {
             </div>
           </DialogContent>
         </Dialog>
+
+        {/* Settings Dialog */}
+        <Dialog open={showSettingsDialog} onOpenChange={setShowSettingsDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Settings className="w-5 h-5" />
+                Quick Settings
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label>Application Name</Label>
+                <Input defaultValue="MyApp Desktop" className="mt-1" />
+              </div>
+              <div>
+                <Label>Application ID</Label>
+                <Input defaultValue="com.myapp.desktop" className="mt-1 font-mono" />
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div>
+                  <p className="font-medium">Auto Updates</p>
+                  <p className="text-sm text-muted-foreground">Enable automatic updates</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div>
+                  <p className="font-medium">Crash Reporting</p>
+                  <p className="text-sm text-muted-foreground">Send crash reports</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div>
+                  <p className="font-medium">Hardware Acceleration</p>
+                  <p className="text-sm text-muted-foreground">Use GPU rendering</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setShowSettingsDialog(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleSaveSettings}>
+                <Settings className="w-4 h-4 mr-2" />
+                Save Settings
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Download Dialog */}
+        <Dialog open={showDownloadDialog} onOpenChange={setShowDownloadDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Download className="w-5 h-5" />
+                Download Artifact
+              </DialogTitle>
+            </DialogHeader>
+            {selectedDownload && (
+              <div className="space-y-4 py-4">
+                <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+                  <div className="flex items-center gap-3 mb-3">
+                    <Archive className="w-8 h-8 text-gray-500" />
+                    <div>
+                      <p className="font-medium">{selectedDownload.version}</p>
+                      <p className="text-sm text-muted-foreground capitalize">Platform: {selectedDownload.platform}</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                  <Shield className="w-4 h-4 text-blue-600" />
+                  <span className="text-sm text-blue-700 dark:text-blue-300">Code signed and verified</span>
+                </div>
+              </div>
+            )}
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setShowDownloadDialog(false)}>
+                Cancel
+              </Button>
+              <Button onClick={executeDownload}>
+                <Download className="w-4 h-4 mr-2" />
+                Download Now
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Certificate Details Dialog */}
+        <Dialog open={showCertificateDialog} onOpenChange={setShowCertificateDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Key className="w-5 h-5" />
+                Certificate Details
+              </DialogTitle>
+            </DialogHeader>
+            {selectedCertificate && (
+              <div className="space-y-4 py-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3">
+                    <p className="text-sm text-muted-foreground">Name</p>
+                    <p className="font-medium">{selectedCertificate.name}</p>
+                  </div>
+                  <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3">
+                    <p className="text-sm text-muted-foreground">Type</p>
+                    <p className="font-medium capitalize">{selectedCertificate.type}</p>
+                  </div>
+                  <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3">
+                    <p className="text-sm text-muted-foreground">Platform</p>
+                    <p className="font-medium capitalize">{selectedCertificate.platform}</p>
+                  </div>
+                  <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3">
+                    <p className="text-sm text-muted-foreground">Status</p>
+                    <Badge className={getCertStatusColor(selectedCertificate.status)}>
+                      {selectedCertificate.status}
+                    </Badge>
+                  </div>
+                </div>
+                <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3">
+                  <p className="text-sm text-muted-foreground">Issuer</p>
+                  <p className="font-medium">{selectedCertificate.issuer}</p>
+                </div>
+                <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3">
+                  <p className="text-sm text-muted-foreground">Expires</p>
+                  <p className="font-medium">{new Date(selectedCertificate.expiresAt).toLocaleDateString()}</p>
+                </div>
+                <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3">
+                  <p className="text-sm text-muted-foreground">Fingerprint</p>
+                  <p className="font-mono text-sm">{selectedCertificate.fingerprint}</p>
+                </div>
+              </div>
+            )}
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setShowCertificateDialog(false)}>
+                Close
+              </Button>
+              {selectedCertificate && (
+                <Button onClick={() => {
+                  handleRenewCertificate(selectedCertificate)
+                  setShowCertificateDialog(false)
+                }}>
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                  Renew Certificate
+                </Button>
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Certificate Dialog */}
+        <Dialog open={showAddCertificateDialog} onOpenChange={setShowAddCertificateDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Key className="w-5 h-5" />
+                Add {addCertificateType === 'apple' ? 'Apple Developer ID' : addCertificateType === 'windows' ? 'Windows EV Certificate' : 'GPG Key'}
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              {addCertificateType === 'apple' && (
+                <>
+                  <div>
+                    <Label>Apple Developer ID</Label>
+                    <Input placeholder="TEAM_ID" className="mt-1 font-mono" />
+                  </div>
+                  <div>
+                    <Label>Certificate Path</Label>
+                    <Input placeholder="/path/to/certificate.p12" className="mt-1 font-mono" />
+                  </div>
+                  <div>
+                    <Label>Certificate Password</Label>
+                    <Input type="password" placeholder="Enter password" className="mt-1" />
+                  </div>
+                </>
+              )}
+              {addCertificateType === 'windows' && (
+                <>
+                  <div>
+                    <Label>Certificate Subject Name</Label>
+                    <Input placeholder="Your Company Name" className="mt-1" />
+                  </div>
+                  <div>
+                    <Label>Certificate File (.pfx)</Label>
+                    <Input placeholder="/path/to/certificate.pfx" className="mt-1 font-mono" />
+                  </div>
+                  <div>
+                    <Label>Certificate Password</Label>
+                    <Input type="password" placeholder="Enter password" className="mt-1" />
+                  </div>
+                </>
+              )}
+              {addCertificateType === 'gpg' && (
+                <>
+                  <div>
+                    <Label>GPG Key ID</Label>
+                    <Input placeholder="ABCD1234" className="mt-1 font-mono" />
+                  </div>
+                  <div>
+                    <Label>GPG Key Passphrase</Label>
+                    <Input type="password" placeholder="Enter passphrase" className="mt-1" />
+                  </div>
+                </>
+              )}
+              <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3">
+                <div className="flex items-center gap-2 text-blue-700 dark:text-blue-300 text-sm">
+                  <Shield className="w-4 h-4" />
+                  <span>Certificate credentials are stored securely and encrypted</span>
+                </div>
+              </div>
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setShowAddCertificateDialog(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleSubmitCertificate}>
+                <Key className="w-4 h-4 mr-2" />
+                Add Certificate
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* CI/CD Configuration Dialog */}
+        <Dialog open={showCICDDialog} onOpenChange={setShowCICDDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <GitBranch className="w-5 h-5" />
+                Configure CI/CD
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <p className="text-sm text-muted-foreground">
+                Select a CI/CD provider to configure automated builds:
+              </p>
+              <div className="space-y-3">
+                <Button
+                  variant="outline"
+                  className="w-full justify-start h-auto p-4"
+                  onClick={() => handleSaveCICDConfig('GitHub Actions')}
+                >
+                  <div className="flex items-center gap-3">
+                    <GitBranch className="w-6 h-6" />
+                    <div className="text-left">
+                      <p className="font-medium">GitHub Actions</p>
+                      <p className="text-xs text-muted-foreground">Automate builds with GitHub</p>
+                    </div>
+                  </div>
+                </Button>
+                <Button
+                  variant="outline"
+                  className="w-full justify-start h-auto p-4"
+                  onClick={() => handleSaveCICDConfig('GitLab CI')}
+                >
+                  <div className="flex items-center gap-3">
+                    <GitBranch className="w-6 h-6" />
+                    <div className="text-left">
+                      <p className="font-medium">GitLab CI</p>
+                      <p className="text-xs text-muted-foreground">Build with GitLab pipelines</p>
+                    </div>
+                  </div>
+                </Button>
+                <Button
+                  variant="outline"
+                  className="w-full justify-start h-auto p-4"
+                  onClick={() => handleSaveCICDConfig('Azure Pipelines')}
+                >
+                  <div className="flex items-center gap-3">
+                    <GitBranch className="w-6 h-6" />
+                    <div className="text-left">
+                      <p className="font-medium">Azure Pipelines</p>
+                      <p className="text-xs text-muted-foreground">Microsoft Azure DevOps</p>
+                    </div>
+                  </div>
+                </Button>
+              </div>
+            </div>
+            <div className="flex justify-end">
+              <Button variant="outline" onClick={() => setShowCICDDialog(false)}>
+                Cancel
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Confirmation Dialog */}
+        <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-600">
+                <XCircle className="w-5 h-5" />
+                {confirmAction?.title || 'Confirm Action'}
+              </DialogTitle>
+            </DialogHeader>
+            <div className="py-4">
+              <p className="text-muted-foreground">
+                {confirmAction?.description || 'Are you sure you want to proceed?'}
+              </p>
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => {
+                setShowConfirmDialog(false)
+                setConfirmAction(null)
+              }}>
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={() => confirmAction?.action()}
+              >
+                Confirm
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   )

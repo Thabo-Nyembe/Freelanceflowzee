@@ -20,6 +20,22 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogDescription,
+} from '@/components/ui/dialog'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import {
   FileText,
   Download,
@@ -34,8 +50,29 @@ import {
   Copy,
   Shield,
   Lock,
-  DollarSign
+  DollarSign,
+  FolderPlus,
+  Edit,
+  Move,
+  MoreHorizontal,
+  RefreshCw,
+  Archive,
+  Star,
+  StarOff,
+  AlertTriangle,
+  Users,
+  Link,
+  Mail,
+  CheckCircle,
+  Loader2
 } from 'lucide-react'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 
 // A+++ UTILITIES
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
@@ -259,6 +296,24 @@ export default function FilesClient() {
   const [showEscrowDialog, setShowEscrowDialog] = useState(false)
   const [selectedSecureFile, setSelectedSecureFile] = useState<FileItem | null>(null)
   const [viewMode, setViewMode] = useState<'legacy' | 'secure'>('legacy')
+
+  // DIALOG STATES
+  const [showCreateFolderDialog, setShowCreateFolderDialog] = useState(false)
+  const [showRenameDialog, setShowRenameDialog] = useState(false)
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [showShareDialog, setShowShareDialog] = useState(false)
+  const [showMoveDialog, setShowMoveDialog] = useState(false)
+
+  // FORM STATES
+  const [newFolderName, setNewFolderName] = useState('')
+  const [renameValue, setRenameValue] = useState('')
+  const [shareEmail, setShareEmail] = useState('')
+  const [sharePermission, setSharePermission] = useState<'view' | 'edit' | 'admin'>('view')
+  const [moveDestination, setMoveDestination] = useState('')
+  const [actionLoading, setActionLoading] = useState(false)
+
+  // STARRED FILES
+  const [starredFiles, setStarredFiles] = useState<number[]>([])
 
   // A+++ LOAD FILE DATA
   useEffect(() => {
@@ -830,6 +885,422 @@ export default function FilesClient() {
     window.location.reload()
   }, [])
 
+  // ============================================================================
+  // HANDLER 10: CREATE FOLDER - POST to /api/folders
+  // ============================================================================
+
+  const handleCreateFolder = useCallback(async () => {
+    if (!newFolderName.trim()) {
+      toast.error('Please enter a folder name')
+      return
+    }
+
+    setActionLoading(true)
+    toast.promise(
+      (async () => {
+        logger.info('Creating folder', { folderName: newFolderName })
+
+        const response = await fetch('/api/folders', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: newFolderName,
+            parentId: null
+          })
+        })
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}))
+          throw new Error(errorData.error || 'Failed to create folder')
+        }
+
+        const result = await response.json()
+        logger.info('Folder created successfully', { folderId: result.id })
+
+        setShowCreateFolderDialog(false)
+        setNewFolderName('')
+        return newFolderName
+      })(),
+      {
+        loading: `Creating folder "${newFolderName}"...`,
+        success: (name) => `Folder "${name}" created successfully`,
+        error: (err) => err.message || 'Failed to create folder'
+      }
+    ).finally(() => setActionLoading(false))
+  }, [newFolderName])
+
+  // ============================================================================
+  // HANDLER 11: RENAME FILE (DIALOG VERSION) - PUT to /api/files/{id}
+  // ============================================================================
+
+  const handleOpenRenameDialog = useCallback((file: ExtendedFile) => {
+    setSelectedFile(file)
+    setRenameValue(file.name)
+    setShowRenameDialog(true)
+  }, [])
+
+  const handleSubmitRename = useCallback(async () => {
+    if (!selectedFile || !renameValue.trim() || renameValue === selectedFile.name) {
+      if (!renameValue.trim()) toast.error('Please enter a file name')
+      return
+    }
+
+    setActionLoading(true)
+    toast.promise(
+      (async () => {
+        logger.info('Renaming file', { fileId: selectedFile.id, oldName: selectedFile.name, newName: renameValue })
+
+        const response = await fetch(`/api/files/${selectedFile.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: renameValue })
+        })
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}))
+          throw new Error(errorData.error || 'Failed to rename file')
+        }
+
+        logger.info('File renamed successfully', { fileId: selectedFile.id, newName: renameValue })
+
+        // Update file in state
+        setFiles(prevFiles => prevFiles.map(f =>
+          f.id === selectedFile.id ? { ...f, name: renameValue } : f
+        ))
+
+        setShowRenameDialog(false)
+        setRenameValue('')
+        return { oldName: selectedFile.name, newName: renameValue }
+      })(),
+      {
+        loading: `Renaming "${selectedFile.name}"...`,
+        success: (data) => `Renamed "${data.oldName}" to "${data.newName}"`,
+        error: (err) => err.message || 'Failed to rename file'
+      }
+    ).finally(() => setActionLoading(false))
+  }, [selectedFile, renameValue])
+
+  // ============================================================================
+  // HANDLER 12: DELETE FILE (DIALOG VERSION) - DELETE to /api/files/{id}
+  // ============================================================================
+
+  const handleOpenDeleteDialog = useCallback((file: ExtendedFile) => {
+    setSelectedFile(file)
+    setShowDeleteDialog(true)
+  }, [])
+
+  const handleConfirmDelete = useCallback(async () => {
+    if (!selectedFile) return
+
+    setActionLoading(true)
+    toast.promise(
+      (async () => {
+        logger.info('Deleting file', { fileId: selectedFile.id, fileName: selectedFile.name })
+
+        const response = await fetch(`/api/files/${selectedFile.id}`, {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' }
+        })
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}))
+          throw new Error(errorData.error || 'Failed to delete file')
+        }
+
+        logger.info('File deleted successfully', { fileId: selectedFile.id })
+
+        // Remove file from state
+        setFiles(prevFiles => prevFiles.filter(f => f.id !== selectedFile.id))
+        setShowDeleteDialog(false)
+        setSelectedFile(null)
+
+        return selectedFile.name
+      })(),
+      {
+        loading: `Deleting "${selectedFile.name}"...`,
+        success: (name) => `"${name}" deleted successfully`,
+        error: (err) => err.message || 'Failed to delete file'
+      }
+    ).finally(() => setActionLoading(false))
+  }, [selectedFile])
+
+  // ============================================================================
+  // HANDLER 13: SHARE FILE (DIALOG VERSION) - POST to /api/files/{id}/share
+  // ============================================================================
+
+  const handleOpenShareDialog = useCallback((file: ExtendedFile) => {
+    setSelectedFile(file)
+    setShareEmail('')
+    setSharePermission('view')
+    setShowShareDialog(true)
+  }, [])
+
+  const handleSubmitShare = useCallback(async () => {
+    if (!selectedFile) return
+
+    if (!shareEmail.trim()) {
+      toast.error('Please enter an email address')
+      return
+    }
+
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(shareEmail)) {
+      toast.error('Please enter a valid email address')
+      return
+    }
+
+    setActionLoading(true)
+    toast.promise(
+      (async () => {
+        logger.info('Sharing file', { fileId: selectedFile.id, email: shareEmail, permission: sharePermission })
+
+        const response = await fetch(`/api/files/${selectedFile.id}/share`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: shareEmail,
+            permission: sharePermission
+          })
+        })
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}))
+          throw new Error(errorData.error || 'Failed to share file')
+        }
+
+        logger.info('File shared successfully', { fileId: selectedFile.id, email: shareEmail })
+
+        // Update shared status and sharedWith
+        setFiles(prevFiles => prevFiles.map(f =>
+          f.id === selectedFile.id
+            ? {
+                ...f,
+                shared: true,
+                sharedWith: [...(f.sharedWith || []), shareEmail]
+              }
+            : f
+        ))
+
+        setShowShareDialog(false)
+        setShareEmail('')
+        setSharePermission('view')
+        return { fileName: selectedFile.name, email: shareEmail }
+      })(),
+      {
+        loading: `Sharing "${selectedFile.name}" with ${shareEmail}...`,
+        success: (data) => `"${data.fileName}" shared with ${data.email}`,
+        error: (err) => err.message || 'Failed to share file'
+      }
+    ).finally(() => setActionLoading(false))
+  }, [selectedFile, shareEmail, sharePermission])
+
+  // ============================================================================
+  // HANDLER 14: MOVE FILE (DIALOG VERSION) - PUT to /api/files/{id}/move
+  // ============================================================================
+
+  const handleOpenMoveDialog = useCallback((file: ExtendedFile) => {
+    setSelectedFile(file)
+    setMoveDestination(file.project)
+    setShowMoveDialog(true)
+  }, [])
+
+  const handleSubmitMove = useCallback(async () => {
+    if (!selectedFile || !moveDestination.trim() || moveDestination === selectedFile.project) {
+      if (!moveDestination.trim()) toast.error('Please select a destination')
+      return
+    }
+
+    setActionLoading(true)
+    toast.promise(
+      (async () => {
+        logger.info('Moving file', { fileId: selectedFile.id, from: selectedFile.project, to: moveDestination })
+
+        const response = await fetch(`/api/files/${selectedFile.id}/move`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ destination: moveDestination })
+        })
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}))
+          throw new Error(errorData.error || 'Failed to move file')
+        }
+
+        logger.info('File moved successfully', { fileId: selectedFile.id, destination: moveDestination })
+
+        // Update file in state
+        setFiles(prevFiles => prevFiles.map(f =>
+          f.id === selectedFile.id ? { ...f, project: moveDestination } : f
+        ))
+
+        setShowMoveDialog(false)
+        setMoveDestination('')
+        return { fileName: selectedFile.name, destination: moveDestination }
+      })(),
+      {
+        loading: `Moving "${selectedFile.name}"...`,
+        success: (data) => `Moved "${data.fileName}" to "${data.destination}"`,
+        error: (err) => err.message || 'Failed to move file'
+      }
+    ).finally(() => setActionLoading(false))
+  }, [selectedFile, moveDestination])
+
+  // ============================================================================
+  // HANDLER 15: TOGGLE STAR FILE
+  // ============================================================================
+
+  const handleToggleStar = useCallback(async (file: ExtendedFile) => {
+    const isStarred = starredFiles.includes(file.id)
+
+    toast.promise(
+      (async () => {
+        logger.info(`${isStarred ? 'Unstarring' : 'Starring'} file`, { fileId: file.id })
+
+        const response = await fetch(`/api/files/${file.id}/star`, {
+          method: isStarred ? 'DELETE' : 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        })
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}))
+          throw new Error(errorData.error || `Failed to ${isStarred ? 'unstar' : 'star'} file`)
+        }
+
+        // Update starred files
+        if (isStarred) {
+          setStarredFiles(prev => prev.filter(id => id !== file.id))
+        } else {
+          setStarredFiles(prev => [...prev, file.id])
+        }
+
+        return { fileName: file.name, starred: !isStarred }
+      })(),
+      {
+        loading: `${isStarred ? 'Removing from' : 'Adding to'} favorites...`,
+        success: (data) => data.starred ? `"${data.fileName}" added to favorites` : `"${data.fileName}" removed from favorites`,
+        error: (err) => err.message
+      }
+    )
+  }, [starredFiles])
+
+  // ============================================================================
+  // HANDLER 16: ARCHIVE FILE
+  // ============================================================================
+
+  const handleArchiveFile = useCallback(async (file: ExtendedFile) => {
+    toast.promise(
+      (async () => {
+        logger.info('Archiving file', { fileId: file.id, fileName: file.name })
+
+        const response = await fetch(`/api/files/${file.id}/archive`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        })
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}))
+          throw new Error(errorData.error || 'Failed to archive file')
+        }
+
+        logger.info('File archived successfully', { fileId: file.id })
+
+        // Remove from active list (archived files typically go to a separate view)
+        setFiles(prevFiles => prevFiles.filter(f => f.id !== file.id))
+        setSelectedFile(null)
+
+        return file.name
+      })(),
+      {
+        loading: `Archiving "${file.name}"...`,
+        success: (name) => `"${name}" archived successfully`,
+        error: (err) => err.message || 'Failed to archive file'
+      }
+    )
+  }, [])
+
+  // ============================================================================
+  // HANDLER 17: DUPLICATE FILE
+  // ============================================================================
+
+  const handleDuplicateFile = useCallback(async (file: ExtendedFile) => {
+    toast.promise(
+      (async () => {
+        logger.info('Duplicating file', { fileId: file.id, fileName: file.name })
+
+        const response = await fetch(`/api/files/${file.id}/duplicate`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        })
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}))
+          throw new Error(errorData.error || 'Failed to duplicate file')
+        }
+
+        const result = await response.json()
+        logger.info('File duplicated successfully', { originalId: file.id, newId: result.id })
+
+        // Add duplicated file to list
+        const duplicatedFile: ExtendedFile = {
+          ...file,
+          id: result.id || Date.now(),
+          name: `${file.name.replace(/(\.[^.]+)$/, '')} (copy)${file.name.match(/\.[^.]+$/)?.[0] || ''}`,
+          uploadDate: new Date().toISOString().split('T')[0],
+          downloads: 0,
+          views: 0,
+          shared: false,
+          sharedWith: []
+        }
+
+        setFiles(prevFiles => [duplicatedFile, ...prevFiles])
+        return file.name
+      })(),
+      {
+        loading: `Duplicating "${file.name}"...`,
+        success: (name) => `"${name}" duplicated successfully`,
+        error: (err) => err.message || 'Failed to duplicate file'
+      }
+    )
+  }, [])
+
+  // ============================================================================
+  // HANDLER 18: REFRESH FILES LIST
+  // ============================================================================
+
+  const handleRefreshFiles = useCallback(async () => {
+    setIsLoading(true)
+    toast.promise(
+      (async () => {
+        logger.info('Refreshing files list')
+
+        const response = await fetch('/api/files', {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' }
+        })
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}))
+          throw new Error(errorData.error || 'Failed to refresh files')
+        }
+
+        const result = await response.json()
+
+        if (result.files) {
+          setFiles(result.files)
+        }
+
+        logger.info('Files refreshed', { count: result.files?.length || 0 })
+        return result.files?.length || 0
+      })(),
+      {
+        loading: 'Refreshing files...',
+        success: (count) => `Loaded ${count} files`,
+        error: (err) => err.message || 'Failed to refresh files'
+      }
+    ).finally(() => setIsLoading(false))
+  }, [])
+
   // A+++ LOADING STATE
   if (isLoading) {
     return (
@@ -900,6 +1371,25 @@ export default function FilesClient() {
                 Secure
               </Button>
             </div>
+
+            {/* Refresh Button */}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleRefreshFiles}
+              disabled={isLoading}
+            >
+              <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+            </Button>
+
+            {/* Create Folder Button */}
+            <Button
+              variant="outline"
+              onClick={() => setShowCreateFolderDialog(true)}
+            >
+              <FolderPlus className="h-4 w-4 mr-2" />
+              New Folder
+            </Button>
 
             {/* Upload Button */}
             <Button
@@ -1057,6 +1547,24 @@ export default function FilesClient() {
                           </div>
 
                           <div className="flex items-center gap-2 flex-shrink-0">
+                            {/* Star Button */}
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleToggleStar(file)
+                              }}
+                              title={starredFiles.includes(file.id) ? 'Remove from favorites' : 'Add to favorites'}
+                            >
+                              {starredFiles.includes(file.id) ? (
+                                <Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />
+                              ) : (
+                                <Star className="h-3 w-3" />
+                              )}
+                            </Button>
+
+                            {/* Download Button */}
                             <Button
                               size="sm"
                               variant="outline"
@@ -1064,9 +1572,12 @@ export default function FilesClient() {
                                 e.stopPropagation()
                                 handleDownloadFile(file)
                               }}
+                              title="Download file"
                             >
                               <Download className="h-3 w-3" />
                             </Button>
+
+                            {/* View Button */}
                             <Button
                               size="sm"
                               variant="outline"
@@ -1074,9 +1585,75 @@ export default function FilesClient() {
                                 e.stopPropagation()
                                 handleViewFile(file)
                               }}
+                              title="Preview file"
                             >
                               <Eye className="h-3 w-3" />
                             </Button>
+
+                            {/* More Actions Dropdown */}
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                                <Button size="sm" variant="ghost" title="More actions">
+                                  <MoreHorizontal className="h-3 w-3" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end" className="w-48">
+                                <DropdownMenuItem onClick={(e) => {
+                                  e.stopPropagation()
+                                  handleOpenShareDialog(file)
+                                }}>
+                                  <Share2 className="h-4 w-4 mr-2" />
+                                  Share
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={(e) => {
+                                  e.stopPropagation()
+                                  handleCopyLink(file)
+                                }}>
+                                  <Link className="h-4 w-4 mr-2" />
+                                  Copy Link
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem onClick={(e) => {
+                                  e.stopPropagation()
+                                  handleOpenRenameDialog(file)
+                                }}>
+                                  <Edit className="h-4 w-4 mr-2" />
+                                  Rename
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={(e) => {
+                                  e.stopPropagation()
+                                  handleOpenMoveDialog(file)
+                                }}>
+                                  <Move className="h-4 w-4 mr-2" />
+                                  Move
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={(e) => {
+                                  e.stopPropagation()
+                                  handleDuplicateFile(file)
+                                }}>
+                                  <Copy className="h-4 w-4 mr-2" />
+                                  Duplicate
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem onClick={(e) => {
+                                  e.stopPropagation()
+                                  handleArchiveFile(file)
+                                }}>
+                                  <Archive className="h-4 w-4 mr-2" />
+                                  Archive
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  className="text-red-600 focus:text-red-600"
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    handleOpenDeleteDialog(file)
+                                  }}
+                                >
+                                  <Trash2 className="h-4 w-4 mr-2" />
+                                  Delete
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
                           </div>
                         </div>
                       </motion.div>
@@ -1158,6 +1735,7 @@ export default function FilesClient() {
                     </div>
 
                     <div className="space-y-2">
+                      {/* Primary Actions */}
                       <Button
                         className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white"
                         onClick={() => handleDownloadFile(selectedFile)}
@@ -1168,29 +1746,98 @@ export default function FilesClient() {
                       <Button
                         variant="outline"
                         className="w-full"
-                        onClick={() => handleShareFile(selectedFile)}
+                        onClick={() => handleViewFile(selectedFile)}
                       >
-                        <Share2 className="h-4 w-4 mr-2" />
-                        Share
+                        <Eye className="h-4 w-4 mr-2" />
+                        Preview
                       </Button>
-                      <Button
-                        variant="outline"
-                        className="w-full"
-                        onClick={() => handleCopyLink(selectedFile)}
-                      >
-                        <Copy className="h-4 w-4 mr-2" />
-                        Copy Link
-                      </Button>
-                      <Button
-                        variant="outline"
-                        className="w-full text-red-600 hover:text-red-700"
-                        onClick={() =>
-                          handleDeleteFile(selectedFile.id, selectedFile.name)
-                        }
-                      >
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        Delete
-                      </Button>
+
+                      {/* Secondary Actions */}
+                      <div className="grid grid-cols-2 gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleOpenShareDialog(selectedFile)}
+                        >
+                          <Share2 className="h-4 w-4 mr-1" />
+                          Share
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleCopyLink(selectedFile)}
+                        >
+                          <Link className="h-4 w-4 mr-1" />
+                          Copy Link
+                        </Button>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleOpenRenameDialog(selectedFile)}
+                        >
+                          <Edit className="h-4 w-4 mr-1" />
+                          Rename
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleOpenMoveDialog(selectedFile)}
+                        >
+                          <Move className="h-4 w-4 mr-1" />
+                          Move
+                        </Button>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleDuplicateFile(selectedFile)}
+                        >
+                          <Copy className="h-4 w-4 mr-1" />
+                          Duplicate
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleToggleStar(selectedFile)}
+                        >
+                          {starredFiles.includes(selectedFile.id) ? (
+                            <>
+                              <StarOff className="h-4 w-4 mr-1" />
+                              Unstar
+                            </>
+                          ) : (
+                            <>
+                              <Star className="h-4 w-4 mr-1" />
+                              Star
+                            </>
+                          )}
+                        </Button>
+                      </div>
+
+                      {/* Danger Zone */}
+                      <div className="pt-2 border-t space-y-2">
+                        <Button
+                          variant="outline"
+                          className="w-full text-orange-600 hover:text-orange-700 hover:border-orange-300"
+                          onClick={() => handleArchiveFile(selectedFile)}
+                        >
+                          <Archive className="h-4 w-4 mr-2" />
+                          Archive
+                        </Button>
+                        <Button
+                          variant="outline"
+                          className="w-full text-red-600 hover:text-red-700 hover:border-red-300"
+                          onClick={() => handleOpenDeleteDialog(selectedFile)}
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Delete
+                        </Button>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
@@ -1267,6 +1914,418 @@ export default function FilesClient() {
             }}
           />
         )}
+
+        {/* ================================================================ */}
+        {/* CREATE FOLDER DIALOG */}
+        {/* ================================================================ */}
+        <Dialog open={showCreateFolderDialog} onOpenChange={setShowCreateFolderDialog}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <FolderPlus className="h-5 w-5 text-blue-600" />
+                Create New Folder
+              </DialogTitle>
+              <DialogDescription>
+                Enter a name for your new folder.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="folderName">Folder Name</Label>
+                <Input
+                  id="folderName"
+                  placeholder="Enter folder name..."
+                  value={newFolderName}
+                  onChange={(e) => setNewFolderName(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !actionLoading) {
+                      handleCreateFolder()
+                    }
+                  }}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowCreateFolderDialog(false)
+                  setNewFolderName('')
+                }}
+                disabled={actionLoading}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleCreateFolder}
+                disabled={actionLoading || !newFolderName.trim()}
+                className="bg-blue-600 hover:bg-blue-700"
+              >
+                {actionLoading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Creating...
+                  </>
+                ) : (
+                  <>
+                    <FolderPlus className="h-4 w-4 mr-2" />
+                    Create Folder
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* ================================================================ */}
+        {/* RENAME FILE DIALOG */}
+        {/* ================================================================ */}
+        <Dialog open={showRenameDialog} onOpenChange={setShowRenameDialog}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Edit className="h-5 w-5 text-blue-600" />
+                Rename File
+              </DialogTitle>
+              <DialogDescription>
+                Enter a new name for "{selectedFile?.name}".
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="fileName">File Name</Label>
+                <Input
+                  id="fileName"
+                  placeholder="Enter new file name..."
+                  value={renameValue}
+                  onChange={(e) => setRenameValue(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !actionLoading) {
+                      handleSubmitRename()
+                    }
+                  }}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowRenameDialog(false)
+                  setRenameValue('')
+                }}
+                disabled={actionLoading}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleSubmitRename}
+                disabled={actionLoading || !renameValue.trim() || renameValue === selectedFile?.name}
+                className="bg-blue-600 hover:bg-blue-700"
+              >
+                {actionLoading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Renaming...
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle className="h-4 w-4 mr-2" />
+                    Rename
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* ================================================================ */}
+        {/* DELETE FILE DIALOG */}
+        {/* ================================================================ */}
+        <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-600">
+                <AlertTriangle className="h-5 w-5" />
+                Delete File
+              </DialogTitle>
+              <DialogDescription>
+                Are you sure you want to delete "{selectedFile?.name}"? This action cannot be undone.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                <div className="flex items-start gap-3">
+                  <Trash2 className="h-5 w-5 text-red-600 mt-0.5" />
+                  <div>
+                    <p className="font-medium text-red-800">{selectedFile?.name}</p>
+                    <p className="text-sm text-red-600 mt-1">
+                      Size: {selectedFile?.size} | Type: {selectedFile?.type}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setShowDeleteDialog(false)}
+                disabled={actionLoading}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={handleConfirmDelete}
+                disabled={actionLoading}
+              >
+                {actionLoading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Deleting...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Delete File
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* ================================================================ */}
+        {/* SHARE FILE DIALOG */}
+        {/* ================================================================ */}
+        <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>
+          <DialogContent className="sm:max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Share2 className="h-5 w-5 text-blue-600" />
+                Share File
+              </DialogTitle>
+              <DialogDescription>
+                Share "{selectedFile?.name}" with others.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="shareEmail">Email Address</Label>
+                <div className="flex items-center gap-2">
+                  <Mail className="h-4 w-4 text-gray-400" />
+                  <Input
+                    id="shareEmail"
+                    type="email"
+                    placeholder="Enter email address..."
+                    value={shareEmail}
+                    onChange={(e) => setShareEmail(e.target.value)}
+                    className="flex-1"
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="permission">Permission Level</Label>
+                <Select
+                  value={sharePermission}
+                  onValueChange={(value: 'view' | 'edit' | 'admin') => setSharePermission(value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select permission" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="view">
+                      <div className="flex items-center gap-2">
+                        <Eye className="h-4 w-4" />
+                        View Only
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="edit">
+                      <div className="flex items-center gap-2">
+                        <Edit className="h-4 w-4" />
+                        Can Edit
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="admin">
+                      <div className="flex items-center gap-2">
+                        <Users className="h-4 w-4" />
+                        Full Access
+                      </div>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Current Shares */}
+              {selectedFile?.sharedWith && selectedFile.sharedWith.length > 0 && (
+                <div className="space-y-2 pt-2 border-t">
+                  <Label>Currently Shared With</Label>
+                  <div className="space-y-2">
+                    {selectedFile.sharedWith.map((email, index) => (
+                      <div key={index} className="flex items-center justify-between bg-gray-50 p-2 rounded-lg">
+                        <div className="flex items-center gap-2">
+                          <Users className="h-4 w-4 text-gray-400" />
+                          <span className="text-sm">{email}</span>
+                        </div>
+                        <Badge variant="secondary" className="text-xs">Shared</Badge>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Copy Link Section */}
+              <div className="pt-2 border-t">
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => {
+                    if (selectedFile) {
+                      handleCopyLink(selectedFile)
+                    }
+                  }}
+                >
+                  <Link className="h-4 w-4 mr-2" />
+                  Copy Shareable Link
+                </Button>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowShareDialog(false)
+                  setShareEmail('')
+                  setSharePermission('view')
+                }}
+                disabled={actionLoading}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleSubmitShare}
+                disabled={actionLoading || !shareEmail.trim()}
+                className="bg-blue-600 hover:bg-blue-700"
+              >
+                {actionLoading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Sharing...
+                  </>
+                ) : (
+                  <>
+                    <Share2 className="h-4 w-4 mr-2" />
+                    Share
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* ================================================================ */}
+        {/* MOVE FILE DIALOG */}
+        {/* ================================================================ */}
+        <Dialog open={showMoveDialog} onOpenChange={setShowMoveDialog}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Move className="h-5 w-5 text-blue-600" />
+                Move File
+              </DialogTitle>
+              <DialogDescription>
+                Move "{selectedFile?.name}" to a different project or folder.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Current Location</Label>
+                <div className="flex items-center gap-2 bg-gray-50 p-3 rounded-lg">
+                  <FolderOpen className="h-4 w-4 text-gray-400" />
+                  <span className="text-sm">{selectedFile?.project}</span>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="destination">Destination</Label>
+                <Select
+                  value={moveDestination}
+                  onValueChange={setMoveDestination}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select destination" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Brand Identity Redesign">
+                      <div className="flex items-center gap-2">
+                        <FolderOpen className="h-4 w-4" />
+                        Brand Identity Redesign
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="Website Development">
+                      <div className="flex items-center gap-2">
+                        <FolderOpen className="h-4 w-4" />
+                        Website Development
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="Mobile App">
+                      <div className="flex items-center gap-2">
+                        <FolderOpen className="h-4 w-4" />
+                        Mobile App
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="Marketing Materials">
+                      <div className="flex items-center gap-2">
+                        <FolderOpen className="h-4 w-4" />
+                        Marketing Materials
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="Recent Upload">
+                      <div className="flex items-center gap-2">
+                        <FolderOpen className="h-4 w-4" />
+                        Recent Upload
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="Archive">
+                      <div className="flex items-center gap-2">
+                        <Archive className="h-4 w-4" />
+                        Archive
+                      </div>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowMoveDialog(false)
+                  setMoveDestination('')
+                }}
+                disabled={actionLoading}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleSubmitMove}
+                disabled={actionLoading || !moveDestination.trim() || moveDestination === selectedFile?.project}
+                className="bg-blue-600 hover:bg-blue-700"
+              >
+                {actionLoading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Moving...
+                  </>
+                ) : (
+                  <>
+                    <Move className="h-4 w-4 mr-2" />
+                    Move File
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   )

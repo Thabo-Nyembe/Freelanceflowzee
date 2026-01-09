@@ -58,7 +58,16 @@ import {
   FolderOpen,
   DollarSign,
   FileUp,
-  CheckCircle2
+  CheckCircle2,
+  Trash2,
+  Copy,
+  Edit,
+  Link,
+  Lock,
+  Calendar,
+  X,
+  ExternalLink,
+  AlertTriangle
 } from 'lucide-react'
 
 // A+++ UTILITIES
@@ -178,6 +187,14 @@ export default function ResourceLibraryClient() {
   const [showNewResourceDialog, setShowNewResourceDialog] = useState(false)
   const [showExportDialog, setShowExportDialog] = useState(false)
   const [showSettingsDialog, setShowSettingsDialog] = useState(false)
+  const [showUploadDialog, setShowUploadDialog] = useState(false)
+  const [showFiltersDialog, setShowFiltersDialog] = useState(false)
+  const [showPreviewDialog, setShowPreviewDialog] = useState(false)
+  const [showShareDialog, setShowShareDialog] = useState(false)
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [showResourceMenuDialog, setShowResourceMenuDialog] = useState(false)
+  const [selectedResource, setSelectedResource] = useState<any>(null)
+  const [bookmarkedIds, setBookmarkedIds] = useState<Set<number>>(new Set([2, 4, 6]))
 
   // New Resource form state
   const [newResourceData, setNewResourceData] = useState({
@@ -207,6 +224,34 @@ export default function ResourceLibraryClient() {
     autoSaveEnabled: true,
     notificationsEnabled: true,
     defaultSortBy: 'date'
+  })
+
+  // Filter form state
+  const [filterOptions, setFilterOptions] = useState({
+    priceRange: 'all',
+    ratingMin: '0',
+    sortBy: 'date',
+    licenseType: 'all',
+    dateRange: 'all',
+    showFeaturedOnly: false,
+    showPremiumOnly: false
+  })
+
+  // Upload form state
+  const [uploadData, setUploadData] = useState({
+    files: [] as File[],
+    title: '',
+    description: '',
+    category: 'design'
+  })
+
+  // Share form state
+  const [shareOptions, setShareOptions] = useState({
+    shareType: 'link',
+    allowDownload: true,
+    expiresIn: '7',
+    password: '',
+    usePassword: false
   })
 
   // Handler functions for dialogs
@@ -283,6 +328,235 @@ export default function ResourceLibraryClient() {
     } catch (error) {
       toast.error('Error', { description: 'Failed to save settings' })
     }
+  }
+
+  // Upload handler
+  const handleUpload = async () => {
+    try {
+      if (!uploadData.title.trim()) {
+        toast.error('Title Required', { description: 'Please enter a title for your upload' })
+        return
+      }
+
+      toast.promise(
+        new Promise((resolve) => setTimeout(resolve, 2500)),
+        {
+          loading: 'Uploading resource files...',
+          success: () => {
+            setShowUploadDialog(false)
+            setUploadData({
+              files: [],
+              title: '',
+              description: '',
+              category: 'design'
+            })
+            return `Resource "${uploadData.title}" uploaded successfully`
+          },
+          error: 'Failed to upload resource'
+        }
+      )
+    } catch (error) {
+      toast.error('Upload Failed', { description: 'An error occurred during upload' })
+    }
+  }
+
+  // Apply filters handler
+  const handleApplyFilters = () => {
+    toast.success('Filters Applied', {
+      description: `Showing ${filterOptions.showPremiumOnly ? 'premium ' : ''}${filterOptions.showFeaturedOnly ? 'featured ' : ''}resources sorted by ${filterOptions.sortBy}`
+    })
+    setShowFiltersDialog(false)
+  }
+
+  // Reset filters handler
+  const handleResetFilters = () => {
+    setFilterOptions({
+      priceRange: 'all',
+      ratingMin: '0',
+      sortBy: 'date',
+      licenseType: 'all',
+      dateRange: 'all',
+      showFeaturedOnly: false,
+      showPremiumOnly: false
+    })
+    toast.info('Filters Reset', { description: 'All filters have been cleared' })
+  }
+
+  // Preview resource handler
+  const handlePreviewResource = (resource: any) => {
+    setSelectedResource(resource)
+    setShowPreviewDialog(true)
+    toast.info('Preview', { description: `Viewing "${resource.title}"` })
+  }
+
+  // Bookmark toggle handler
+  const handleToggleBookmark = (resourceId: number, resourceTitle: string) => {
+    setBookmarkedIds(prev => {
+      const newSet = new Set(prev)
+      if (newSet.has(resourceId)) {
+        newSet.delete(resourceId)
+        toast.success('Bookmark Removed', { description: `"${resourceTitle}" removed from bookmarks` })
+      } else {
+        newSet.add(resourceId)
+        toast.success('Bookmarked', { description: `"${resourceTitle}" added to bookmarks` })
+      }
+      return newSet
+    })
+  }
+
+  // Download/Purchase handler
+  const handleDownload = (resource: any) => {
+    if (resource.isPremium && resource.price > 0) {
+      toast.promise(
+        new Promise((resolve) => setTimeout(resolve, 1500)),
+        {
+          loading: 'Processing purchase...',
+          success: () => `"${resource.title}" purchased for $${resource.price}. Download starting...`,
+          error: 'Purchase failed. Please try again.'
+        }
+      )
+    } else {
+      toast.promise(
+        new Promise((resolve) => setTimeout(resolve, 1000)),
+        {
+          loading: `Downloading "${resource.title}"...`,
+          success: () => `"${resource.title}" downloaded successfully`,
+          error: 'Download failed. Please try again.'
+        }
+      )
+    }
+  }
+
+  // Share resource handler
+  const handleShareResource = (resource: any) => {
+    setSelectedResource(resource)
+    setShowShareDialog(true)
+  }
+
+  // Execute share handler
+  const handleShare = async () => {
+    if (!selectedResource) return
+
+    try {
+      toast.promise(
+        new Promise((resolve) => setTimeout(resolve, 1000)),
+        {
+          loading: 'Creating share link...',
+          success: () => {
+            const shareUrl = `https://freeflow.app/resources/${selectedResource.id}`
+            navigator.clipboard.writeText(shareUrl)
+            setShowShareDialog(false)
+            return `Share link copied to clipboard! Expires in ${shareOptions.expiresIn} days.`
+          },
+          error: 'Failed to create share link'
+        }
+      )
+    } catch (error) {
+      toast.error('Share Failed', { description: 'An error occurred while creating share link' })
+    }
+  }
+
+  // Resource menu handler
+  const handleResourceMenu = (resource: any) => {
+    setSelectedResource(resource)
+    setShowResourceMenuDialog(true)
+  }
+
+  // Delete resource handler
+  const handleDeleteResource = (resource: any) => {
+    setSelectedResource(resource)
+    setShowDeleteDialog(true)
+  }
+
+  // Confirm delete handler
+  const handleConfirmDelete = async () => {
+    if (!selectedResource) return
+
+    try {
+      toast.promise(
+        new Promise((resolve) => setTimeout(resolve, 1500)),
+        {
+          loading: 'Deleting resource...',
+          success: () => {
+            setShowDeleteDialog(false)
+            setShowResourceMenuDialog(false)
+            setSelectedResource(null)
+            return `"${selectedResource.title}" has been deleted`
+          },
+          error: 'Failed to delete resource'
+        }
+      )
+    } catch (error) {
+      toast.error('Delete Failed', { description: 'An error occurred while deleting the resource' })
+    }
+  }
+
+  // Edit resource handler
+  const handleEditResource = () => {
+    if (!selectedResource) return
+
+    setNewResourceData({
+      title: selectedResource.title,
+      description: selectedResource.description,
+      category: selectedResource.category,
+      type: selectedResource.type,
+      tags: selectedResource.tags?.join(', ') || '',
+      license: selectedResource.license,
+      price: selectedResource.price?.toString() || '0',
+      isPremium: selectedResource.isPremium || false
+    })
+    setShowResourceMenuDialog(false)
+    setShowNewResourceDialog(true)
+    toast.info('Edit Mode', { description: `Editing "${selectedResource.title}"` })
+  }
+
+  // Duplicate resource handler
+  const handleDuplicateResource = () => {
+    if (!selectedResource) return
+
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1000)),
+      {
+        loading: 'Duplicating resource...',
+        success: () => {
+          setShowResourceMenuDialog(false)
+          return `"${selectedResource.title}" has been duplicated`
+        },
+        error: 'Failed to duplicate resource'
+      }
+    )
+  }
+
+  // Archive resource handler
+  const handleArchiveResource = () => {
+    if (!selectedResource) return
+
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1000)),
+      {
+        loading: 'Archiving resource...',
+        success: () => {
+          setShowResourceMenuDialog(false)
+          return `"${selectedResource.title}" has been archived`
+        },
+        error: 'Failed to archive resource'
+      }
+    )
+  }
+
+  // Browse files handler
+  const handleBrowseFiles = () => {
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.multiple = true
+    input.accept = '.zip,.figma,.ai,.psd,.pdf,.jpg,.png,.mp4,.mov'
+    input.onchange = (e) => {
+      const files = (e.target as HTMLInputElement).files
+      if (files && files.length > 0) {
+        toast.success('Files Selected', { description: `${files.length} file(s) ready to upload` })
+      }
+    }
+    input.click()
   }
 
   // Quick actions with real dialog functionality
@@ -539,11 +813,14 @@ export default function ResourceLibraryClient() {
             </div>
           </div>
           <div className="flex items-center space-x-4">
-            <Button className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white">
+            <Button
+              className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white"
+              onClick={() => setShowNewResourceDialog(true)}
+            >
               <Plus className="h-4 w-4 mr-2" />
               Add Resource
             </Button>
-            <Button variant="outline">
+            <Button variant="outline" onClick={() => setShowUploadDialog(true)}>
               <Upload className="h-4 w-4 mr-2" />
               Upload
             </Button>
@@ -636,7 +913,7 @@ export default function ResourceLibraryClient() {
                 </option>
               ))}
             </select>
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={() => setShowFiltersDialog(true)}>
               <Filter className="h-4 w-4 mr-2" />
               More Filters
             </Button>
@@ -731,13 +1008,22 @@ export default function ResourceLibraryClient() {
                             </div>
                           </div>
                           <div className="flex items-center space-x-2">
-                            <Button size="sm" variant="outline">
+                            <Button size="sm" variant="outline" onClick={() => handlePreviewResource(resource)}>
                               <Eye className="h-3 w-3" />
                             </Button>
-                            <Button size="sm" variant="outline">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className={bookmarkedIds.has(resource.id) ? 'text-yellow-500 border-yellow-500' : ''}
+                              onClick={() => handleToggleBookmark(resource.id, resource.title)}
+                            >
                               <Bookmark className="h-3 w-3" />
                             </Button>
-                            <Button size="sm" className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white">
+                            <Button
+                              size="sm"
+                              className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white"
+                              onClick={() => handleDownload(resource)}
+                            >
                               <Download className="h-3 w-3 mr-1" />
                               {resource.isPremium ? `$${resource.price}` : 'Free'}
                             </Button>
@@ -770,14 +1056,20 @@ export default function ResourceLibraryClient() {
                     )}
                   </div>
                   <div className="absolute top-4 right-4 flex gap-2">
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      className={`opacity-0 group-hover:opacity-100 transition-opacity ${resource.isBookmarked ? 'text-yellow-500' : ''}`}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className={`opacity-0 group-hover:opacity-100 transition-opacity ${bookmarkedIds.has(resource.id) ? 'text-yellow-500' : ''}`}
+                      onClick={() => handleToggleBookmark(resource.id, resource.title)}
                     >
                       <Bookmark className="h-4 w-4" />
                     </Button>
-                    <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="opacity-0 group-hover:opacity-100 transition-opacity"
+                      onClick={() => handleResourceMenu(resource)}
+                    >
                       <MoreHorizontal className="h-4 w-4" />
                     </Button>
                   </div>
@@ -839,14 +1131,17 @@ export default function ResourceLibraryClient() {
                   </div>
 
                   <div className="flex items-center space-x-2 pt-2">
-                    <Button className="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white">
+                    <Button
+                      className="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white"
+                      onClick={() => handleDownload(resource)}
+                    >
                       <Download className="h-3 w-3 mr-1" />
                       {resource.isPremium ? `$${resource.price}` : 'Free'}
                     </Button>
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" onClick={() => handlePreviewResource(resource)}>
                       <Eye className="h-3 w-3" />
                     </Button>
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" onClick={() => handleShareResource(resource)}>
                       <Share2 className="h-3 w-3" />
                     </Button>
                   </div>
@@ -986,7 +1281,7 @@ export default function ResourceLibraryClient() {
                 <p className="text-sm font-medium text-gray-700">Upload Resource File</p>
                 <p className="text-xs text-gray-500">Drag and drop or click to browse</p>
               </div>
-              <Button variant="outline" size="sm">Browse</Button>
+              <Button variant="outline" size="sm" onClick={handleBrowseFiles}>Browse</Button>
             </div>
           </div>
           <DialogFooter>
@@ -1202,6 +1497,561 @@ export default function ResourceLibraryClient() {
             >
               <CheckCircle2 className="h-4 w-4 mr-2" />
               Save Settings
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Upload Dialog */}
+      <Dialog open={showUploadDialog} onOpenChange={setShowUploadDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Upload className="h-5 w-5 text-blue-600" />
+              Upload Resources
+            </DialogTitle>
+            <DialogDescription>
+              Upload new resources to your library. Supported formats: ZIP, Figma, AI, PSD, PDF, images, and video.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="upload-title">Resource Title</Label>
+              <Input
+                id="upload-title"
+                placeholder="Enter a title for your upload..."
+                value={uploadData.title}
+                onChange={(e) => setUploadData({ ...uploadData, title: e.target.value })}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="upload-description">Description</Label>
+              <Textarea
+                id="upload-description"
+                placeholder="Describe your resource..."
+                rows={2}
+                value={uploadData.description}
+                onChange={(e) => setUploadData({ ...uploadData, description: e.target.value })}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="upload-category">Category</Label>
+              <select
+                id="upload-category"
+                className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white text-gray-900"
+                value={uploadData.category}
+                onChange={(e) => setUploadData({ ...uploadData, category: e.target.value })}
+              >
+                <option value="design">Design</option>
+                <option value="development">Development</option>
+                <option value="branding">Branding</option>
+                <option value="photography">Photography</option>
+                <option value="motion">Motion Graphics</option>
+                <option value="templates">Templates</option>
+              </select>
+            </div>
+            <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-indigo-400 transition-colors cursor-pointer" onClick={handleBrowseFiles}>
+              <Upload className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <p className="text-sm font-medium text-gray-700 mb-1">Drag and drop files here</p>
+              <p className="text-xs text-gray-500 mb-3">or click to browse</p>
+              <Button variant="outline" size="sm" type="button">
+                Select Files
+              </Button>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowUploadDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white"
+              onClick={handleUpload}
+            >
+              <Upload className="h-4 w-4 mr-2" />
+              Upload
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Filters Dialog */}
+      <Dialog open={showFiltersDialog} onOpenChange={setShowFiltersDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Filter className="h-5 w-5 text-indigo-600" />
+              Advanced Filters
+            </DialogTitle>
+            <DialogDescription>
+              Refine your search with advanced filtering options.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="filter-price">Price Range</Label>
+                <select
+                  id="filter-price"
+                  className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white text-gray-900"
+                  value={filterOptions.priceRange}
+                  onChange={(e) => setFilterOptions({ ...filterOptions, priceRange: e.target.value })}
+                >
+                  <option value="all">All Prices</option>
+                  <option value="free">Free Only</option>
+                  <option value="paid">Paid Only</option>
+                  <option value="under10">Under $10</option>
+                  <option value="under50">Under $50</option>
+                  <option value="over50">$50+</option>
+                </select>
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="filter-rating">Minimum Rating</Label>
+                <select
+                  id="filter-rating"
+                  className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white text-gray-900"
+                  value={filterOptions.ratingMin}
+                  onChange={(e) => setFilterOptions({ ...filterOptions, ratingMin: e.target.value })}
+                >
+                  <option value="0">Any Rating</option>
+                  <option value="3">3+ Stars</option>
+                  <option value="4">4+ Stars</option>
+                  <option value="4.5">4.5+ Stars</option>
+                </select>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="filter-license">License Type</Label>
+                <select
+                  id="filter-license"
+                  className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white text-gray-900"
+                  value={filterOptions.licenseType}
+                  onChange={(e) => setFilterOptions({ ...filterOptions, licenseType: e.target.value })}
+                >
+                  <option value="all">All Licenses</option>
+                  <option value="MIT">MIT</option>
+                  <option value="CC0">CC0 (Public Domain)</option>
+                  <option value="Commercial">Commercial</option>
+                  <option value="CC-BY">CC BY 4.0</option>
+                </select>
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="filter-date">Date Added</Label>
+                <select
+                  id="filter-date"
+                  className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white text-gray-900"
+                  value={filterOptions.dateRange}
+                  onChange={(e) => setFilterOptions({ ...filterOptions, dateRange: e.target.value })}
+                >
+                  <option value="all">Any Time</option>
+                  <option value="today">Today</option>
+                  <option value="week">This Week</option>
+                  <option value="month">This Month</option>
+                  <option value="year">This Year</option>
+                </select>
+              </div>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="filter-sort">Sort By</Label>
+              <select
+                id="filter-sort"
+                className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white text-gray-900"
+                value={filterOptions.sortBy}
+                onChange={(e) => setFilterOptions({ ...filterOptions, sortBy: e.target.value })}
+              >
+                <option value="date">Date Added (Newest)</option>
+                <option value="date-asc">Date Added (Oldest)</option>
+                <option value="name">Name (A-Z)</option>
+                <option value="name-desc">Name (Z-A)</option>
+                <option value="rating">Rating (Highest)</option>
+                <option value="downloads">Downloads (Most)</option>
+                <option value="price">Price (Lowest)</option>
+                <option value="price-desc">Price (Highest)</option>
+              </select>
+            </div>
+            <div className="space-y-3">
+              <Label>Additional Filters</Label>
+              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div>
+                  <p className="text-sm font-medium text-gray-700">Featured Only</p>
+                  <p className="text-xs text-gray-500">Show only featured resources</p>
+                </div>
+                <input
+                  type="checkbox"
+                  className="h-4 w-4 text-indigo-600 rounded"
+                  checked={filterOptions.showFeaturedOnly}
+                  onChange={(e) => setFilterOptions({ ...filterOptions, showFeaturedOnly: e.target.checked })}
+                />
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div>
+                  <p className="text-sm font-medium text-gray-700">Premium Only</p>
+                  <p className="text-xs text-gray-500">Show only premium resources</p>
+                </div>
+                <input
+                  type="checkbox"
+                  className="h-4 w-4 text-indigo-600 rounded"
+                  checked={filterOptions.showPremiumOnly}
+                  onChange={(e) => setFilterOptions({ ...filterOptions, showPremiumOnly: e.target.checked })}
+                />
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={handleResetFilters}>
+              Reset
+            </Button>
+            <Button
+              className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white"
+              onClick={handleApplyFilters}
+            >
+              <Filter className="h-4 w-4 mr-2" />
+              Apply Filters
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Preview Dialog */}
+      <Dialog open={showPreviewDialog} onOpenChange={setShowPreviewDialog}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Eye className="h-5 w-5 text-blue-600" />
+              Resource Preview
+            </DialogTitle>
+            <DialogDescription>
+              {selectedResource?.title || 'Preview resource details'}
+            </DialogDescription>
+          </DialogHeader>
+          {selectedResource && (
+            <div className="grid gap-4 py-4">
+              <div className="h-64 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 rounded-lg flex items-center justify-center">
+                <Database className="h-16 w-16 text-gray-400" />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{selectedResource.title}</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-300 mt-2">{selectedResource.description}</p>
+                  <div className="flex items-center gap-2 mt-3">
+                    <Badge className="bg-indigo-100 text-indigo-800">{selectedResource.type}</Badge>
+                    <Badge variant="outline">{selectedResource.format?.toUpperCase()}</Badge>
+                    {selectedResource.isPremium && (
+                      <Badge className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white">Premium</Badge>
+                    )}
+                  </div>
+                </div>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Author:</span>
+                    <span className="font-medium">{selectedResource.author}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Size:</span>
+                    <span className="font-medium">{selectedResource.size}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Downloads:</span>
+                    <span className="font-medium">{selectedResource.downloads?.toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Rating:</span>
+                    <span className="font-medium flex items-center gap-1">
+                      <Star className="h-4 w-4 text-yellow-500" />
+                      {selectedResource.rating}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">License:</span>
+                    <span className="font-medium">{selectedResource.license}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Price:</span>
+                    <span className="font-medium text-green-600">
+                      {selectedResource.isPremium ? `$${selectedResource.price}` : 'Free'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div className="flex flex-wrap gap-1">
+                {selectedResource.tags?.map((tag: string) => (
+                  <Badge key={tag} variant="secondary" className="text-xs">{tag}</Badge>
+                ))}
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowPreviewDialog(false)}>
+              Close
+            </Button>
+            <Button variant="outline" onClick={() => {
+              setShowPreviewDialog(false)
+              if (selectedResource) handleShareResource(selectedResource)
+            }}>
+              <Share2 className="h-4 w-4 mr-2" />
+              Share
+            </Button>
+            <Button
+              className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white"
+              onClick={() => {
+                if (selectedResource) handleDownload(selectedResource)
+                setShowPreviewDialog(false)
+              }}
+            >
+              <Download className="h-4 w-4 mr-2" />
+              {selectedResource?.isPremium ? `Buy $${selectedResource.price}` : 'Download'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Share Dialog */}
+      <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Share2 className="h-5 w-5 text-blue-600" />
+              Share Resource
+            </DialogTitle>
+            <DialogDescription>
+              {selectedResource ? `Share "${selectedResource.title}" with others` : 'Share resource'}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="share-type">Share Type</Label>
+              <select
+                id="share-type"
+                className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white text-gray-900"
+                value={shareOptions.shareType}
+                onChange={(e) => setShareOptions({ ...shareOptions, shareType: e.target.value })}
+              >
+                <option value="link">Public Link</option>
+                <option value="email">Email Invite</option>
+                <option value="team">Team Share</option>
+              </select>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="share-expires">Link Expires In</Label>
+              <select
+                id="share-expires"
+                className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white text-gray-900"
+                value={shareOptions.expiresIn}
+                onChange={(e) => setShareOptions({ ...shareOptions, expiresIn: e.target.value })}
+              >
+                <option value="1">1 Day</option>
+                <option value="7">7 Days</option>
+                <option value="30">30 Days</option>
+                <option value="never">Never</option>
+              </select>
+            </div>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div>
+                  <p className="text-sm font-medium text-gray-700">Allow Download</p>
+                  <p className="text-xs text-gray-500">Recipients can download the resource</p>
+                </div>
+                <input
+                  type="checkbox"
+                  className="h-4 w-4 text-indigo-600 rounded"
+                  checked={shareOptions.allowDownload}
+                  onChange={(e) => setShareOptions({ ...shareOptions, allowDownload: e.target.checked })}
+                />
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div>
+                  <p className="text-sm font-medium text-gray-700">Password Protection</p>
+                  <p className="text-xs text-gray-500">Require password to access</p>
+                </div>
+                <input
+                  type="checkbox"
+                  className="h-4 w-4 text-indigo-600 rounded"
+                  checked={shareOptions.usePassword}
+                  onChange={(e) => setShareOptions({ ...shareOptions, usePassword: e.target.checked })}
+                />
+              </div>
+              {shareOptions.usePassword && (
+                <div className="grid gap-2">
+                  <Label htmlFor="share-password">Password</Label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <Input
+                      id="share-password"
+                      type="password"
+                      placeholder="Enter password..."
+                      className="pl-10"
+                      value={shareOptions.password}
+                      onChange={(e) => setShareOptions({ ...shareOptions, password: e.target.value })}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+            <div className="p-4 bg-blue-50 rounded-lg">
+              <div className="flex items-center gap-2 text-blue-700">
+                <Link className="h-5 w-5" />
+                <span className="font-medium">Share Link Preview</span>
+              </div>
+              <p className="text-sm text-blue-600 mt-1 font-mono truncate">
+                https://freeflow.app/resources/{selectedResource?.id || 'xxx'}
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowShareDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white"
+              onClick={handleShare}
+            >
+              <Link className="h-4 w-4 mr-2" />
+              Copy Link
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Resource Menu Dialog */}
+      <Dialog open={showResourceMenuDialog} onOpenChange={setShowResourceMenuDialog}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <MoreHorizontal className="h-5 w-5 text-gray-600" />
+              Resource Options
+            </DialogTitle>
+            <DialogDescription>
+              {selectedResource?.title || 'Resource options'}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-2 py-4">
+            <Button
+              variant="outline"
+              className="justify-start"
+              onClick={handleEditResource}
+            >
+              <Edit className="h-4 w-4 mr-3" />
+              Edit Resource
+            </Button>
+            <Button
+              variant="outline"
+              className="justify-start"
+              onClick={handleDuplicateResource}
+            >
+              <Copy className="h-4 w-4 mr-3" />
+              Duplicate
+            </Button>
+            <Button
+              variant="outline"
+              className="justify-start"
+              onClick={() => {
+                setShowResourceMenuDialog(false)
+                if (selectedResource) handleShareResource(selectedResource)
+              }}
+            >
+              <Share2 className="h-4 w-4 mr-3" />
+              Share
+            </Button>
+            <Button
+              variant="outline"
+              className="justify-start"
+              onClick={() => {
+                if (selectedResource) handleDownload(selectedResource)
+                setShowResourceMenuDialog(false)
+              }}
+            >
+              <Download className="h-4 w-4 mr-3" />
+              Download
+            </Button>
+            <Button
+              variant="outline"
+              className="justify-start"
+              onClick={() => {
+                if (selectedResource) handleToggleBookmark(selectedResource.id, selectedResource.title)
+                setShowResourceMenuDialog(false)
+              }}
+            >
+              <Bookmark className="h-4 w-4 mr-3" />
+              {selectedResource && bookmarkedIds.has(selectedResource.id) ? 'Remove Bookmark' : 'Add Bookmark'}
+            </Button>
+            <Button
+              variant="outline"
+              className="justify-start"
+              onClick={handleArchiveResource}
+            >
+              <Archive className="h-4 w-4 mr-3" />
+              Archive
+            </Button>
+            <Button
+              variant="outline"
+              className="justify-start"
+              onClick={() => {
+                if (selectedResource) {
+                  const url = `https://freeflow.app/resources/${selectedResource.id}`
+                  window.open(url, '_blank')
+                  toast.info('Opening in new tab', { description: 'Resource page opened' })
+                }
+                setShowResourceMenuDialog(false)
+              }}
+            >
+              <ExternalLink className="h-4 w-4 mr-3" />
+              Open in New Tab
+            </Button>
+            <div className="border-t my-2" />
+            <Button
+              variant="outline"
+              className="justify-start text-red-600 hover:text-red-700 hover:bg-red-50"
+              onClick={() => {
+                setShowResourceMenuDialog(false)
+                if (selectedResource) handleDeleteResource(selectedResource)
+              }}
+            >
+              <Trash2 className="h-4 w-4 mr-3" />
+              Delete Resource
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-600">
+              <AlertTriangle className="h-5 w-5" />
+              Delete Resource
+            </DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this resource? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          {selectedResource && (
+            <div className="py-4">
+              <div className="p-4 bg-red-50 rounded-lg border border-red-200">
+                <div className="flex items-center gap-3">
+                  <Database className="h-10 w-10 text-red-400" />
+                  <div>
+                    <p className="font-medium text-gray-900">{selectedResource.title}</p>
+                    <p className="text-sm text-gray-500">{selectedResource.type} - {selectedResource.size}</p>
+                  </div>
+                </div>
+              </div>
+              <p className="text-sm text-gray-500 mt-4">
+                This will permanently delete the resource and all associated files. All download links will become invalid.
+              </p>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowDeleteDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              className="bg-red-600 hover:bg-red-700"
+              onClick={handleConfirmDelete}
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              Delete Permanently
             </Button>
           </DialogFooter>
         </DialogContent>

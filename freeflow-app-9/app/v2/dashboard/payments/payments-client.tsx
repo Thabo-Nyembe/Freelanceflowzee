@@ -29,7 +29,15 @@ import {
   Flag,
   TrendingUp,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  Plus,
+  Settings,
+  RefreshCcw,
+  FileText,
+  Filter,
+  Search,
+  MoreHorizontal,
+  RotateCcw
 } from 'lucide-react'
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState, NoDataEmptyState } from '@/components/ui/empty-state'
@@ -315,6 +323,38 @@ export default function PaymentsClient() {
     notes: ''
   })
 
+  // Refund dialog state
+  const [showRefundDialog, setShowRefundDialog] = useState(false)
+  const [refundPayment, setRefundPayment] = useState<PaymentHistory | null>(null)
+  const [refundData, setRefundData] = useState({
+    amount: '',
+    reason: '',
+    fullRefund: true
+  })
+
+  // Export dialog state
+  const [showExportDialog, setShowExportDialog] = useState(false)
+  const [exportOptions, setExportOptions] = useState({
+    format: 'csv' as 'csv' | 'pdf' | 'excel',
+    dateRange: 'all' as 'all' | '30days' | '90days' | 'custom',
+    includeDetails: true
+  })
+
+  // Settings dialog state
+  const [showSettingsDialog, setShowSettingsDialog] = useState(false)
+  const [paymentSettings, setPaymentSettings] = useState({
+    autoRelease: false,
+    releaseDelay: '24',
+    emailNotifications: true,
+    smsNotifications: false,
+    defaultCurrency: 'USD'
+  })
+
+  // Filter state
+  const [searchQuery, setSearchQuery] = useState('')
+  const [statusFilter, setStatusFilter] = useState<string>('all')
+  const [showFilterDropdown, setShowFilterDropdown] = useState(false)
+
   // Get quick actions with current state
   const paymentsQuickActions = getPaymentsQuickActions(
     router,
@@ -386,6 +426,320 @@ export default function PaymentsClient() {
         description: error.message || 'Please try again later'
       })
     }
+  }
+
+  // Handle Process Refund
+  const handleProcessRefund = (payment: PaymentHistory) => {
+    logger.info('Refund process initiated', {
+      paymentId: payment.id,
+      transactionId: payment.transactionId
+    })
+    setRefundPayment(payment)
+    setRefundData({
+      amount: payment.amount.toString(),
+      reason: '',
+      fullRefund: true
+    })
+    setShowRefundDialog(true)
+  }
+
+  // Confirm Process Refund
+  const confirmProcessRefund = async () => {
+    if (!refundPayment) return
+
+    const refundAmount = refundData.fullRefund
+      ? refundPayment.amount
+      : parseFloat(refundData.amount)
+
+    if (!refundData.fullRefund && (isNaN(refundAmount) || refundAmount <= 0 || refundAmount > refundPayment.amount)) {
+      toast.error('Please enter a valid refund amount')
+      return
+    }
+
+    if (!refundData.reason.trim()) {
+      toast.error('Please provide a reason for the refund')
+      return
+    }
+
+    try {
+      const response = await fetch('/api/payments/refund', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          paymentId: refundPayment.id,
+          transactionId: refundPayment.transactionId,
+          amount: refundAmount,
+          reason: refundData.reason.trim(),
+          fullRefund: refundData.fullRefund,
+          timestamp: new Date().toISOString()
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to process refund')
+      }
+
+      const data = await response.json()
+
+      // Add refund to payment history
+      const refundRecord: PaymentHistory = {
+        id: paymentHistory.length + 1,
+        date: new Date().toISOString().split('T')[0],
+        milestone: `Refund: ${refundPayment.milestone}`,
+        amount: refundAmount,
+        type: 'return',
+        status: 'completed',
+        transactionId: data.transactionId || `REF-${Date.now()}`
+      }
+
+      setPaymentHistory([refundRecord, ...paymentHistory])
+
+      logger.info('Refund processed successfully', {
+        originalTransactionId: refundPayment.transactionId,
+        refundTransactionId: refundRecord.transactionId,
+        amount: refundAmount
+      })
+
+      toast.success('Refund processed!', {
+        description: `${formatCurrency(refundAmount)} has been refunded successfully`
+      })
+
+      setShowRefundDialog(false)
+      setRefundPayment(null)
+      setRefundData({ amount: '', reason: '', fullRefund: true })
+    } catch (error: any) {
+      logger.error('Failed to process refund', { error, paymentId: refundPayment.id })
+      toast.error('Failed to process refund', {
+        description: error.message || 'Please try again later'
+      })
+    }
+  }
+
+  // Handle Export Payments
+  const handleExportPayments = async () => {
+    try {
+      logger.info('Export payments initiated', { options: exportOptions })
+
+      // Filter payments based on date range
+      let filteredPayments = [...paymentHistory]
+      const now = new Date()
+
+      if (exportOptions.dateRange === '30days') {
+        const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
+        filteredPayments = filteredPayments.filter(p => new Date(p.date) >= thirtyDaysAgo)
+      } else if (exportOptions.dateRange === '90days') {
+        const ninetyDaysAgo = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000)
+        filteredPayments = filteredPayments.filter(p => new Date(p.date) >= ninetyDaysAgo)
+      }
+
+      if (exportOptions.format === 'csv') {
+        const headers = exportOptions.includeDetails
+          ? ['Date', 'Milestone', 'Amount', 'Type', 'Transaction ID', 'Status']
+          : ['Date', 'Milestone', 'Amount', 'Status']
+
+        const csvRows = [
+          headers.join(','),
+          ...filteredPayments.map(payment => {
+            const row = exportOptions.includeDetails
+              ? [
+                  new Date(payment.date).toLocaleDateString(),
+                  `"${payment.milestone}"`,
+                  payment.amount,
+                  payment.type,
+                  payment.transactionId,
+                  payment.status
+                ]
+              : [
+                  new Date(payment.date).toLocaleDateString(),
+                  `"${payment.milestone}"`,
+                  payment.amount,
+                  payment.status
+                ]
+            return row.join(',')
+          })
+        ]
+        const csvContent = csvRows.join('\n')
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+        const url = window.URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = url
+        link.download = `payments-export-${exportOptions.dateRange}-${new Date().toISOString().split('T')[0]}.csv`
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        window.URL.revokeObjectURL(url)
+      } else if (exportOptions.format === 'pdf') {
+        // Trigger PDF generation via API
+        const response = await fetch('/api/payments/export', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            format: 'pdf',
+            payments: filteredPayments,
+            includeDetails: exportOptions.includeDetails
+          })
+        })
+
+        if (!response.ok) throw new Error('Failed to generate PDF')
+
+        const blob = await response.blob()
+        const url = window.URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = url
+        link.download = `payments-export-${new Date().toISOString().split('T')[0]}.pdf`
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        window.URL.revokeObjectURL(url)
+      } else {
+        // Excel format
+        const response = await fetch('/api/payments/export', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            format: 'excel',
+            payments: filteredPayments,
+            includeDetails: exportOptions.includeDetails
+          })
+        })
+
+        if (!response.ok) throw new Error('Failed to generate Excel file')
+
+        const blob = await response.blob()
+        const url = window.URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = url
+        link.download = `payments-export-${new Date().toISOString().split('T')[0]}.xlsx`
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        window.URL.revokeObjectURL(url)
+      }
+
+      logger.info('Export completed', {
+        format: exportOptions.format,
+        recordCount: filteredPayments.length
+      })
+
+      toast.success('Export completed!', {
+        description: `${filteredPayments.length} payment records exported as ${exportOptions.format.toUpperCase()}`
+      })
+
+      setShowExportDialog(false)
+    } catch (error: any) {
+      logger.error('Failed to export payments', { error })
+      toast.error('Failed to export payments', {
+        description: error.message || 'Please try again later'
+      })
+    }
+  }
+
+  // Handle Save Payment Settings
+  const handleSavePaymentSettings = async () => {
+    try {
+      logger.info('Saving payment settings', { settings: paymentSettings })
+
+      const response = await fetch('/api/payments/settings', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...paymentSettings,
+          updatedAt: new Date().toISOString()
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to save settings')
+      }
+
+      logger.info('Payment settings saved successfully')
+
+      toast.success('Settings saved!', {
+        description: 'Your payment preferences have been updated'
+      })
+
+      setShowSettingsDialog(false)
+    } catch (error: any) {
+      logger.error('Failed to save payment settings', { error })
+      toast.error('Failed to save settings', {
+        description: error.message || 'Please try again later'
+      })
+    }
+  }
+
+  // Handle Refresh Payments
+  const handleRefreshPayments = async () => {
+    try {
+      setIsLoading(true)
+      logger.info('Refreshing payments data')
+
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 800))
+
+      setMilestones(MILESTONES)
+      setPaymentHistory(PAYMENT_HISTORY)
+      setIsLoading(false)
+
+      toast.success('Payments refreshed', {
+        description: 'All payment data has been updated'
+      })
+      announce('Payments data refreshed', 'polite')
+    } catch (error: any) {
+      setIsLoading(false)
+      logger.error('Failed to refresh payments', { error })
+      toast.error('Failed to refresh payments', {
+        description: 'Please try again later'
+      })
+    }
+  }
+
+  // Handle Search
+  const handleSearch = (query: string) => {
+    setSearchQuery(query)
+    if (query.trim()) {
+      toast.info(`Searching for "${query}"`, {
+        description: 'Filtering payment records...'
+      })
+    }
+  }
+
+  // Handle Filter Change
+  const handleFilterChange = (filter: string) => {
+    setStatusFilter(filter)
+    setShowFilterDropdown(false)
+    toast.info(`Filter applied: ${filter === 'all' ? 'All payments' : filter}`, {
+      description: 'Payment list updated'
+    })
+  }
+
+  // Filtered milestones based on search and status
+  const filteredMilestones = milestones.filter(milestone => {
+    const matchesSearch = searchQuery.trim() === '' ||
+      milestone.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      milestone.project.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      milestone.description.toLowerCase().includes(searchQuery.toLowerCase())
+
+    const matchesStatus = statusFilter === 'all' || milestone.status === statusFilter
+
+    return matchesSearch && matchesStatus
+  })
+
+  // Filtered payment history based on search
+  const filteredPaymentHistory = paymentHistory.filter(payment => {
+    const matchesSearch = searchQuery.trim() === '' ||
+      payment.milestone.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      payment.transactionId.toLowerCase().includes(searchQuery.toLowerCase())
+
+    return matchesSearch
+  })
+
+  // Handle View Transaction Details
+  const handleViewTransactionDetails = (payment: PaymentHistory) => {
+    logger.info('Viewing transaction details', { transactionId: payment.transactionId })
+    toast.info(`Transaction: ${payment.transactionId}`, {
+      description: `${payment.type.charAt(0).toUpperCase() + payment.type.slice(1)} of ${formatCurrency(payment.amount)} on ${new Date(payment.date).toLocaleDateString()}`
+    })
   }
 
   // Load Payments Data
@@ -652,7 +1006,7 @@ export default function PaymentsClient() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex items-center justify-between"
+          className="flex flex-col lg:flex-row lg:items-center justify-between gap-4"
         >
           <div className="flex items-center space-x-4">
             <Button
@@ -665,11 +1019,95 @@ export default function PaymentsClient() {
               Back
             </Button>
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Secure Payments & Escrow</h1>
-              <p className="text-gray-600 mt-1">
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Secure Payments & Escrow</h1>
+              <p className="text-gray-600 dark:text-gray-400 mt-1">
                 Manage milestone payments and track release security
               </p>
             </div>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleRefreshPayments}
+              className="gap-2"
+              disabled={isLoading}
+            >
+              <RefreshCcw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+              Refresh
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowExportDialog(true)}
+              className="gap-2"
+            >
+              <Download className="h-4 w-4" />
+              Export
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowSettingsDialog(true)}
+              className="gap-2"
+            >
+              <Settings className="h-4 w-4" />
+              Settings
+            </Button>
+            <Button
+              size="sm"
+              onClick={() => setShowRecordPaymentDialog(true)}
+              className="gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white"
+            >
+              <Plus className="h-4 w-4" />
+              Add Payment
+            </Button>
+          </div>
+        </motion.div>
+
+        {/* Search and Filter Bar */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.05 }}
+          className="flex flex-col sm:flex-row gap-3"
+        >
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Input
+              placeholder="Search payments, milestones, transactions..."
+              value={searchQuery}
+              onChange={(e) => handleSearch(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+          <div className="relative">
+            <Button
+              variant="outline"
+              onClick={() => setShowFilterDropdown(!showFilterDropdown)}
+              className="gap-2 min-w-[140px] justify-between"
+            >
+              <Filter className="h-4 w-4" />
+              {statusFilter === 'all' ? 'All Status' : statusFilter.replace(/-/g, ' ')}
+              <ChevronDown className="h-4 w-4" />
+            </Button>
+            {showFilterDropdown && (
+              <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg border z-50">
+                <div className="py-1">
+                  {['all', 'in-escrow', 'released', 'completed', 'disputed'].map((filter) => (
+                    <button
+                      key={filter}
+                      onClick={() => handleFilterChange(filter)}
+                      className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 ${
+                        statusFilter === filter ? 'bg-blue-50 dark:bg-blue-900 text-blue-600 dark:text-blue-300' : ''
+                      }`}
+                    >
+                      {filter === 'all' ? 'All Status' : filter.replace(/-/g, ' ').charAt(0).toUpperCase() + filter.replace(/-/g, ' ').slice(1)}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </motion.div>
 
@@ -780,26 +1218,33 @@ export default function PaymentsClient() {
           transition={{ delay: 0.3 }}
           className="space-y-4"
         >
-          <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-            <TrendingUp className="h-6 w-6 text-purple-600" />
-            Milestone Payments
-          </h2>
+          <div className="flex items-center justify-between">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+              <TrendingUp className="h-6 w-6 text-purple-600" />
+              Milestone Payments
+            </h2>
+            <span className="text-sm text-gray-500">
+              {filteredMilestones.length} of {milestones.length} milestone(s)
+            </span>
+          </div>
 
-          {milestones.length === 0 ? (
+          {filteredMilestones.length === 0 ? (
             <NoDataEmptyState
               title="No milestones found"
-              description="Milestone payments will appear here as your projects progress."
+              description={searchQuery || statusFilter !== 'all'
+                ? "No milestones match your search or filter criteria. Try adjusting your filters."
+                : "Milestone payments will appear here as your projects progress."}
             />
           ) : (
             <div className="space-y-3">
-              {milestones.map((milestone) => (
+              {filteredMilestones.map((milestone) => (
                 <motion.div
                   key={milestone.id}
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   whileHover={{ x: 4 }}
                 >
-                  <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg hover:shadow-xl transition-shadow">
+                  <Card className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border-white/40 dark:border-gray-700/40 shadow-lg hover:shadow-xl transition-shadow">
                     <div
                       className="p-6 cursor-pointer"
                       onClick={() =>
@@ -811,31 +1256,31 @@ export default function PaymentsClient() {
                       <div className="flex items-start justify-between gap-4">
                         <div className="flex-1">
                           <div className="flex items-center gap-3 mb-2">
-                            <h3 className="text-lg font-semibold text-gray-900">
+                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                               {milestone.name}
                             </h3>
                             <Badge className={getStatusColor(milestone.status)}>
                               {milestone.status.replace(/-/g, ' ')}
                             </Badge>
                           </div>
-                          <p className="text-gray-600 text-sm mb-3">
+                          <p className="text-gray-600 dark:text-gray-400 text-sm mb-3">
                             {milestone.description}
                           </p>
 
                           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                             <div>
-                              <p className="text-gray-600 text-xs">Project</p>
-                              <p className="font-medium">{milestone.project}</p>
+                              <p className="text-gray-600 dark:text-gray-400 text-xs">Project</p>
+                              <p className="font-medium dark:text-gray-200">{milestone.project}</p>
                             </div>
                             <div>
-                              <p className="text-gray-600 text-xs">Amount</p>
-                              <p className="font-bold text-lg text-blue-600">
+                              <p className="text-gray-600 dark:text-gray-400 text-xs">Amount</p>
+                              <p className="font-bold text-lg text-blue-600 dark:text-blue-400">
                                 {formatCurrency(milestone.amount)}
                               </p>
                             </div>
                             <div>
-                              <p className="text-gray-600 text-xs">Due Date</p>
-                              <p className="font-medium">
+                              <p className="text-gray-600 dark:text-gray-400 text-xs">Due Date</p>
+                              <p className="font-medium dark:text-gray-200">
                                 {new Date(milestone.dueDate).toLocaleDateString()}
                               </p>
                             </div>
@@ -846,6 +1291,12 @@ export default function PaymentsClient() {
                           variant="ghost"
                           size="sm"
                           className="flex-shrink-0"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            setExpandedMilestone(
+                              expandedMilestone === milestone.id ? null : milestone.id
+                            )
+                          }}
                         >
                           {expandedMilestone === milestone.id ? (
                             <ChevronUp className="h-5 w-5" />
@@ -951,56 +1402,71 @@ export default function PaymentsClient() {
           transition={{ delay: 0.4 }}
           className="space-y-4"
         >
-          <h2 className="text-2xl font-bold text-gray-900">Payment History</h2>
+          <div className="flex items-center justify-between">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+              <FileText className="h-6 w-6 text-blue-600" />
+              Payment History
+            </h2>
+            <span className="text-sm text-gray-500">
+              {filteredPaymentHistory.length} of {paymentHistory.length} transaction(s)
+            </span>
+          </div>
 
-          {paymentHistory.length === 0 ? (
+          {filteredPaymentHistory.length === 0 ? (
             <NoDataEmptyState
               title="No payment history"
-              description="Payment transactions will appear here."
+              description={searchQuery
+                ? "No transactions match your search. Try a different query."
+                : "Payment transactions will appear here."}
             />
           ) : (
-            <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg">
+            <Card className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border-white/40 dark:border-gray-700/40 shadow-lg">
               <CardContent className="p-0">
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
                       <tr className="border-b bg-gray-50 dark:bg-slate-800">
-                        <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
+                        <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">
                           Date
                         </th>
-                        <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
+                        <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">
                           Milestone
                         </th>
-                        <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
+                        <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">
                           Amount
                         </th>
-                        <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
+                        <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">
                           Type
                         </th>
-                        <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
+                        <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">
                           Transaction ID
                         </th>
-                        <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
+                        <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">
                           Status
                         </th>
-                        <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
-                          Action
+                        <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">
+                          Actions
                         </th>
                       </tr>
                     </thead>
                     <tbody>
-                      {paymentHistory.map((payment) => (
+                      {filteredPaymentHistory.map((payment) => (
                         <tr
                           key={payment.id}
-                          className="border-b hover:bg-gray-50/50 transition-colors"
+                          className="border-b hover:bg-gray-50/50 dark:hover:bg-gray-700/50 transition-colors"
                         >
-                          <td className="px-6 py-4 text-sm text-gray-900">
+                          <td className="px-6 py-4 text-sm text-gray-900 dark:text-gray-100">
                             {new Date(payment.date).toLocaleDateString()}
                           </td>
-                          <td className="px-6 py-4 text-sm text-gray-900">
-                            {payment.milestone}
+                          <td className="px-6 py-4 text-sm text-gray-900 dark:text-gray-100">
+                            <button
+                              onClick={() => handleViewTransactionDetails(payment)}
+                              className="hover:text-blue-600 dark:hover:text-blue-400 hover:underline text-left"
+                            >
+                              {payment.milestone}
+                            </button>
                           </td>
-                          <td className="px-6 py-4 text-sm font-semibold">
+                          <td className="px-6 py-4 text-sm font-semibold dark:text-gray-100">
                             {formatCurrency(payment.amount)}
                           </td>
                           <td className="px-6 py-4 text-sm">
@@ -1008,25 +1474,36 @@ export default function PaymentsClient() {
                               variant="outline"
                               className={
                                 payment.type === 'release'
-                                  ? 'bg-green-50 text-green-800 border-green-200'
+                                  ? 'bg-green-50 text-green-800 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-700'
                                   : payment.type === 'hold'
-                                    ? 'bg-yellow-50 text-yellow-800 border-yellow-200'
-                                    : 'bg-red-50 text-red-800 border-red-200'
+                                    ? 'bg-yellow-50 text-yellow-800 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-300 dark:border-yellow-700'
+                                    : 'bg-red-50 text-red-800 border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-700'
                               }
                             >
                               {payment.type.charAt(0).toUpperCase() +
                                 payment.type.slice(1)}
                             </Badge>
                           </td>
-                          <td className="px-6 py-4 text-sm font-mono text-gray-600">
-                            {payment.transactionId}
+                          <td className="px-6 py-4 text-sm font-mono text-gray-600 dark:text-gray-400">
+                            <button
+                              onClick={() => {
+                                navigator.clipboard.writeText(payment.transactionId)
+                                toast.success('Transaction ID copied', {
+                                  description: payment.transactionId
+                                })
+                              }}
+                              className="hover:text-blue-600 dark:hover:text-blue-400"
+                              title="Click to copy"
+                            >
+                              {payment.transactionId}
+                            </button>
                           </td>
                           <td className="px-6 py-4 text-sm">
                             <Badge
                               className={
                                 payment.status === 'completed'
-                                  ? 'bg-green-100 text-green-800'
-                                  : 'bg-yellow-100 text-yellow-800'
+                                  ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
+                                  : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300'
                               }
                             >
                               {payment.status.charAt(0).toUpperCase() +
@@ -1034,15 +1511,37 @@ export default function PaymentsClient() {
                             </Badge>
                           </td>
                           <td className="px-6 py-4 text-sm">
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={() => handleDownloadReceipt(payment)}
-                              className="gap-1"
-                            >
-                              <Download className="h-4 w-4" />
-                              Receipt
-                            </Button>
+                            <div className="flex items-center gap-1">
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => handleDownloadReceipt(payment)}
+                                className="gap-1"
+                                title="Download receipt"
+                              >
+                                <Download className="h-4 w-4" />
+                              </Button>
+                              {payment.type !== 'return' && payment.status === 'completed' && (
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => handleProcessRefund(payment)}
+                                  className="gap-1 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
+                                  title="Process refund"
+                                >
+                                  <RotateCcw className="h-4 w-4" />
+                                </Button>
+                              )}
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => handleViewTransactionDetails(payment)}
+                                className="gap-1"
+                                title="View details"
+                              >
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </div>
                           </td>
                         </tr>
                       ))}
@@ -1211,6 +1710,270 @@ export default function PaymentsClient() {
                 className="bg-blue-600 hover:bg-blue-700 text-white"
               >
                 Record Payment
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Refund Dialog */}
+        <Dialog open={showRefundDialog} onOpenChange={setShowRefundDialog}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <RotateCcw className="h-5 w-5 text-red-500" />
+                Process Refund
+              </DialogTitle>
+              <DialogDescription>
+                {refundPayment && (
+                  <>Process a refund for "{refundPayment.milestone}" ({formatCurrency(refundPayment.amount)})</>
+                )}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg text-sm text-amber-800 dark:text-amber-300">
+                <strong>Warning:</strong> This action will initiate a refund process. The refund may take 3-5 business days to process.
+              </div>
+              <div className="space-y-2">
+                <Label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={refundData.fullRefund}
+                    onChange={(e) => setRefundData({ ...refundData, fullRefund: e.target.checked })}
+                    className="rounded border-gray-300"
+                  />
+                  Full refund ({refundPayment && formatCurrency(refundPayment.amount)})
+                </Label>
+              </div>
+              {!refundData.fullRefund && (
+                <div className="space-y-2">
+                  <Label htmlFor="refundAmount">Refund Amount *</Label>
+                  <Input
+                    id="refundAmount"
+                    type="number"
+                    min="0"
+                    max={refundPayment?.amount || 0}
+                    step="0.01"
+                    value={refundData.amount}
+                    onChange={(e) => setRefundData({ ...refundData, amount: e.target.value })}
+                    placeholder="0.00"
+                  />
+                  {refundPayment && (
+                    <p className="text-xs text-gray-500">
+                      Maximum: {formatCurrency(refundPayment.amount)}
+                    </p>
+                  )}
+                </div>
+              )}
+              <div className="space-y-2">
+                <Label htmlFor="refundReason">Reason for Refund *</Label>
+                <Textarea
+                  id="refundReason"
+                  value={refundData.reason}
+                  onChange={(e) => setRefundData({ ...refundData, reason: e.target.value })}
+                  placeholder="Please provide a reason for this refund..."
+                  rows={3}
+                  className="resize-none"
+                />
+              </div>
+            </div>
+            <DialogFooter className="gap-2">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowRefundDialog(false)
+                  setRefundPayment(null)
+                  setRefundData({ amount: '', reason: '', fullRefund: true })
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={confirmProcessRefund}
+                disabled={!refundData.reason.trim()}
+                className="bg-red-600 hover:bg-red-700 text-white"
+              >
+                Process Refund
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Export Dialog */}
+        <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Download className="h-5 w-5 text-blue-500" />
+                Export Payments
+              </DialogTitle>
+              <DialogDescription>
+                Export your payment data in your preferred format.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="exportFormat">Export Format</Label>
+                <select
+                  id="exportFormat"
+                  value={exportOptions.format}
+                  onChange={(e) => setExportOptions({ ...exportOptions, format: e.target.value as 'csv' | 'pdf' | 'excel' })}
+                  className="w-full h-10 px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-800 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="csv">CSV (Spreadsheet)</option>
+                  <option value="pdf">PDF (Document)</option>
+                  <option value="excel">Excel (.xlsx)</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="exportDateRange">Date Range</Label>
+                <select
+                  id="exportDateRange"
+                  value={exportOptions.dateRange}
+                  onChange={(e) => setExportOptions({ ...exportOptions, dateRange: e.target.value as 'all' | '30days' | '90days' | 'custom' })}
+                  className="w-full h-10 px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-800 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="all">All Time</option>
+                  <option value="30days">Last 30 Days</option>
+                  <option value="90days">Last 90 Days</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={exportOptions.includeDetails}
+                    onChange={(e) => setExportOptions({ ...exportOptions, includeDetails: e.target.checked })}
+                    className="rounded border-gray-300"
+                  />
+                  Include transaction details (IDs, types)
+                </Label>
+              </div>
+              <div className="p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg text-sm text-blue-800 dark:text-blue-300">
+                <strong>Preview:</strong> {paymentHistory.length} payment record(s) will be exported.
+              </div>
+            </div>
+            <DialogFooter className="gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setShowExportDialog(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleExportPayments}
+                className="bg-blue-600 hover:bg-blue-700 text-white gap-2"
+              >
+                <Download className="h-4 w-4" />
+                Export
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Settings Dialog */}
+        <Dialog open={showSettingsDialog} onOpenChange={setShowSettingsDialog}>
+          <DialogContent className="sm:max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Settings className="h-5 w-5 text-gray-500" />
+                Payment Settings
+              </DialogTitle>
+              <DialogDescription>
+                Configure your payment preferences and notifications.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-6 py-4">
+              {/* Auto Release Settings */}
+              <div className="space-y-4">
+                <h4 className="text-sm font-semibold text-gray-900 dark:text-white">Release Settings</h4>
+                <div className="space-y-3">
+                  <Label className="flex items-center justify-between">
+                    <span className="text-sm">Auto-release after approval</span>
+                    <input
+                      type="checkbox"
+                      checked={paymentSettings.autoRelease}
+                      onChange={(e) => setPaymentSettings({ ...paymentSettings, autoRelease: e.target.checked })}
+                      className="rounded border-gray-300"
+                    />
+                  </Label>
+                  {paymentSettings.autoRelease && (
+                    <div className="space-y-2 ml-4">
+                      <Label htmlFor="releaseDelay">Release delay (hours)</Label>
+                      <select
+                        id="releaseDelay"
+                        value={paymentSettings.releaseDelay}
+                        onChange={(e) => setPaymentSettings({ ...paymentSettings, releaseDelay: e.target.value })}
+                        className="w-full h-10 px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-800 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        <option value="0">Immediately</option>
+                        <option value="24">24 hours</option>
+                        <option value="48">48 hours</option>
+                        <option value="72">72 hours</option>
+                      </select>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Notification Settings */}
+              <div className="space-y-4">
+                <h4 className="text-sm font-semibold text-gray-900 dark:text-white">Notifications</h4>
+                <div className="space-y-3">
+                  <Label className="flex items-center justify-between">
+                    <span className="text-sm">Email notifications</span>
+                    <input
+                      type="checkbox"
+                      checked={paymentSettings.emailNotifications}
+                      onChange={(e) => setPaymentSettings({ ...paymentSettings, emailNotifications: e.target.checked })}
+                      className="rounded border-gray-300"
+                    />
+                  </Label>
+                  <Label className="flex items-center justify-between">
+                    <span className="text-sm">SMS notifications</span>
+                    <input
+                      type="checkbox"
+                      checked={paymentSettings.smsNotifications}
+                      onChange={(e) => setPaymentSettings({ ...paymentSettings, smsNotifications: e.target.checked })}
+                      className="rounded border-gray-300"
+                    />
+                  </Label>
+                </div>
+              </div>
+
+              {/* Currency Settings */}
+              <div className="space-y-4">
+                <h4 className="text-sm font-semibold text-gray-900 dark:text-white">Currency</h4>
+                <div className="space-y-2">
+                  <Label htmlFor="defaultCurrency">Default Currency</Label>
+                  <select
+                    id="defaultCurrency"
+                    value={paymentSettings.defaultCurrency}
+                    onChange={(e) => setPaymentSettings({ ...paymentSettings, defaultCurrency: e.target.value })}
+                    className="w-full h-10 px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-800 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="USD">USD - US Dollar</option>
+                    <option value="EUR">EUR - Euro</option>
+                    <option value="GBP">GBP - British Pound</option>
+                    <option value="ZAR">ZAR - South African Rand</option>
+                    <option value="AUD">AUD - Australian Dollar</option>
+                    <option value="CAD">CAD - Canadian Dollar</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <DialogFooter className="gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setShowSettingsDialog(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleSavePaymentSettings}
+                className="bg-blue-600 hover:bg-blue-700 text-white gap-2"
+              >
+                <Settings className="h-4 w-4" />
+                Save Settings
               </Button>
             </DialogFooter>
           </DialogContent>

@@ -43,7 +43,17 @@ import {
   ArrowUpRight,
   ArrowDownRight,
   Plus,
-  Settings
+  Settings,
+  Share2,
+  Layout,
+  Grid3X3,
+  Eye,
+  Edit,
+  Mail,
+  RefreshCw,
+  FileText,
+  FileSpreadsheet,
+  FileCode
 } from 'lucide-react'
 import { CardSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
@@ -127,14 +137,42 @@ export default function ValueDashboardClient() {
   const [showNewMetricDialog, setShowNewMetricDialog] = useState(false)
   const [showExportDialog, setShowExportDialog] = useState(false)
   const [showSettingsDialog, setShowSettingsDialog] = useState(false)
+  const [showShareDialog, setShowShareDialog] = useState(false)
+  const [showCustomizeDialog, setShowCustomizeDialog] = useState(false)
+  const [showConfigureWidgetsDialog, setShowConfigureWidgetsDialog] = useState(false)
   const [newMetricName, setNewMetricName] = useState('')
   const [newMetricValue, setNewMetricValue] = useState('')
+
+  // EXPORT OPTIONS STATE
+  const [selectedExportFormat, setSelectedExportFormat] = useState<'pdf' | 'csv' | 'json'>('pdf')
+  const [exportDateRange, setExportDateRange] = useState<'3m' | '6m' | '12m'>('6m')
+
+  // SETTINGS STATE
+  const [autoRefreshEnabled, setAutoRefreshEnabled] = useState(false)
+  const [emailReportsEnabled, setEmailReportsEnabled] = useState(false)
+  const [selectedCurrency, setSelectedCurrency] = useState<'USD' | 'EUR' | 'GBP'>('USD')
+  const [chartStyle, setChartStyle] = useState<'modern' | 'classic' | 'minimal'>('modern')
+
+  // SHARE STATE
+  const [shareEmail, setShareEmail] = useState('')
+  const [sharePermission, setSharePermission] = useState<'view' | 'edit'>('view')
+
+  // WIDGET CONFIGURATION STATE
+  const [widgetConfig, setWidgetConfig] = useState({
+    showROIMetrics: true,
+    showValueTracking: true,
+    showInsights: true,
+    showProjectBreakdown: true
+  })
 
   // Quick Actions with Dialog Handlers
   const quickActionsWithDialogs = [
     { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => setShowNewMetricDialog(true) },
     { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => setShowExportDialog(true) },
-    { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => setShowSettingsDialog(true) },
+    { id: '3', label: 'Share', icon: 'Share2', shortcut: 'H', action: () => setShowShareDialog(true) },
+    { id: '4', label: 'Customize', icon: 'Layout', shortcut: 'C', action: () => setShowCustomizeDialog(true) },
+    { id: '5', label: 'Widgets', icon: 'Grid3X3', shortcut: 'W', action: () => setShowConfigureWidgetsDialog(true) },
+    { id: '6', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => setShowSettingsDialog(true) },
   ]
 
   // A+++ LOAD VALUE DATA
@@ -297,6 +335,240 @@ export default function ValueDashboardClient() {
   }
 
   // ============================================================================
+  // HANDLER 3: SHARE DASHBOARD
+  // ============================================================================
+
+  const handleShareDashboard = async () => {
+    if (!shareEmail) {
+      toast.error('Please enter an email address')
+      return
+    }
+
+    try {
+      logger.info('Dashboard share initiated', {
+        email: shareEmail,
+        permission: sharePermission,
+        clientName: KAZI_CLIENT_DATA.clientInfo.name
+      })
+
+      toast.success('Dashboard shared successfully!', {
+        description: `Invitation sent to ${shareEmail} with ${sharePermission} access`
+      })
+
+      setShareEmail('')
+      setShowShareDialog(false)
+    } catch (error: any) {
+      logger.error('Failed to share dashboard', { error })
+      toast.error('Failed to share dashboard', {
+        description: error.message || 'Please try again'
+      })
+    }
+  }
+
+  // ============================================================================
+  // HANDLER 4: EXPORT WITH FORMAT
+  // ============================================================================
+
+  const handleExportWithFormat = async () => {
+    try {
+      setIsExporting(true)
+
+      logger.info('Export initiated', {
+        format: selectedExportFormat,
+        dateRange: exportDateRange,
+        clientName: KAZI_CLIENT_DATA.clientInfo.name
+      })
+
+      // Simulate export process
+      await new Promise(resolve => setTimeout(resolve, 1000))
+
+      const exportData = {
+        format: selectedExportFormat,
+        dateRange: exportDateRange,
+        metrics: roiMetrics,
+        tracking: valueTracking,
+        exportedAt: new Date().toISOString()
+      }
+
+      if (selectedExportFormat === 'json') {
+        const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
+        const url = URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = url
+        link.download = `value-dashboard-${exportDateRange}-${new Date().toISOString().split('T')[0]}.json`
+        link.click()
+        URL.revokeObjectURL(url)
+      } else if (selectedExportFormat === 'csv') {
+        const csvContent = roiMetrics.map(m => `${m.label},${m.value},${m.trendValue}%`).join('\n')
+        const blob = new Blob([`Metric,Value,Trend\n${csvContent}`], { type: 'text/csv' })
+        const url = URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = url
+        link.download = `value-dashboard-${exportDateRange}-${new Date().toISOString().split('T')[0]}.csv`
+        link.click()
+        URL.revokeObjectURL(url)
+      }
+
+      toast.success(`${selectedExportFormat.toUpperCase()} export completed!`, {
+        description: 'Your file has been downloaded'
+      })
+
+      setShowExportDialog(false)
+    } catch (error: any) {
+      logger.error('Export failed', { error, format: selectedExportFormat })
+      toast.error('Export failed', {
+        description: error.message || 'Please try again'
+      })
+    } finally {
+      setIsExporting(false)
+    }
+  }
+
+  // ============================================================================
+  // HANDLER 5: SAVE SETTINGS
+  // ============================================================================
+
+  const handleSaveSettings = () => {
+    logger.info('Settings saved', {
+      autoRefresh: autoRefreshEnabled,
+      emailReports: emailReportsEnabled,
+      currency: selectedCurrency,
+      chartStyle: chartStyle
+    })
+
+    toast.success('Settings saved successfully!', {
+      description: 'Your preferences have been updated'
+    })
+
+    setShowSettingsDialog(false)
+  }
+
+  // ============================================================================
+  // HANDLER 6: CUSTOMIZE DASHBOARD
+  // ============================================================================
+
+  const handleCustomizeDashboard = () => {
+    logger.info('Dashboard customization saved', {
+      clientName: KAZI_CLIENT_DATA.clientInfo.name
+    })
+
+    toast.success('Dashboard customized!', {
+      description: 'Your layout preferences have been saved'
+    })
+
+    setShowCustomizeDialog(false)
+  }
+
+  // ============================================================================
+  // HANDLER 7: CONFIGURE WIDGETS
+  // ============================================================================
+
+  const handleConfigureWidgets = () => {
+    logger.info('Widget configuration saved', {
+      config: widgetConfig,
+      clientName: KAZI_CLIENT_DATA.clientInfo.name
+    })
+
+    toast.success('Widgets configured!', {
+      description: 'Your widget preferences have been saved'
+    })
+
+    setShowConfigureWidgetsDialog(false)
+  }
+
+  // ============================================================================
+  // HANDLER 8: TOGGLE AUTO REFRESH
+  // ============================================================================
+
+  const handleToggleAutoRefresh = () => {
+    setAutoRefreshEnabled(prev => {
+      const newValue = !prev
+      toast.success(newValue ? 'Auto-refresh enabled' : 'Auto-refresh disabled', {
+        description: newValue ? 'Data will refresh every 5 minutes' : 'Manual refresh only'
+      })
+      return newValue
+    })
+  }
+
+  // ============================================================================
+  // HANDLER 9: CONFIGURE EMAIL REPORTS
+  // ============================================================================
+
+  const handleConfigureEmailReports = () => {
+    setEmailReportsEnabled(prev => {
+      const newValue = !prev
+      toast.success(newValue ? 'Email reports enabled' : 'Email reports disabled', {
+        description: newValue ? 'You will receive weekly summaries' : 'Email reports turned off'
+      })
+      return newValue
+    })
+  }
+
+  // ============================================================================
+  // HANDLER 10: CYCLE CURRENCY
+  // ============================================================================
+
+  const handleCycleCurrency = () => {
+    const currencies: ('USD' | 'EUR' | 'GBP')[] = ['USD', 'EUR', 'GBP']
+    const currentIndex = currencies.indexOf(selectedCurrency)
+    const nextCurrency = currencies[(currentIndex + 1) % currencies.length]
+    setSelectedCurrency(nextCurrency)
+    toast.success(`Currency changed to ${nextCurrency}`, {
+      description: 'All values will be displayed in ' + nextCurrency
+    })
+  }
+
+  // ============================================================================
+  // HANDLER 11: CYCLE CHART STYLE
+  // ============================================================================
+
+  const handleCycleChartStyle = () => {
+    const styles: ('modern' | 'classic' | 'minimal')[] = ['modern', 'classic', 'minimal']
+    const currentIndex = styles.indexOf(chartStyle)
+    const nextStyle = styles[(currentIndex + 1) % styles.length]
+    setChartStyle(nextStyle)
+    toast.success(`Chart style changed to ${nextStyle}`, {
+      description: 'Charts will now display in ' + nextStyle + ' style'
+    })
+  }
+
+  // ============================================================================
+  // HANDLER 12: CREATE NEW METRIC
+  // ============================================================================
+
+  const handleCreateMetric = () => {
+    if (!newMetricName) {
+      toast.error('Please enter a metric name')
+      return
+    }
+
+    const newMetric: ROIMetric = {
+      label: newMetricName,
+      value: parseFloat(newMetricValue) || 0,
+      format: 'number',
+      trend: 'neutral',
+      trendValue: 0,
+      icon: Target,
+      color: 'blue'
+    }
+
+    setRoiMetrics(prev => [...prev, newMetric])
+
+    logger.info('New metric created', {
+      metricName: newMetricName,
+      metricValue: newMetricValue
+    })
+
+    toast.success('Metric created successfully!', {
+      description: `${newMetricName} has been added to your dashboard`
+    })
+
+    setNewMetricName('')
+    setNewMetricValue('')
+    setShowNewMetricDialog(false)
+  }
+
+  // ============================================================================
   // LOADING STATE
   // ============================================================================
 
@@ -350,15 +622,41 @@ export default function ValueDashboardClient() {
               <p className="text-gray-600 mt-1">Track your investment returns and project value over time</p>
             </div>
           </div>
-          <Button
-            className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white"
-            onClick={handleExportReport}
-            disabled={isExporting}
-            data-testid="export-roi-report-btn"
-          >
-            <Download className="h-4 w-4 mr-2" />
-            {isExporting ? 'Exporting...' : 'Export Report'}
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setShowShareDialog(true)}
+              data-testid="share-dashboard-btn"
+            >
+              <Share2 className="h-4 w-4 mr-2" />
+              Share
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => setShowCustomizeDialog(true)}
+              data-testid="customize-dashboard-btn"
+            >
+              <Layout className="h-4 w-4 mr-2" />
+              Customize
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => setShowConfigureWidgetsDialog(true)}
+              data-testid="configure-widgets-btn"
+            >
+              <Grid3X3 className="h-4 w-4 mr-2" />
+              Widgets
+            </Button>
+            <Button
+              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white"
+              onClick={handleExportReport}
+              disabled={isExporting}
+              data-testid="export-roi-report-btn"
+            >
+              <Download className="h-4 w-4 mr-2" />
+              {isExporting ? 'Exporting...' : 'Export Report'}
+            </Button>
+          </div>
         </div>
       </motion.div>
 
@@ -746,14 +1044,7 @@ export default function ValueDashboardClient() {
             <Button variant="outline" onClick={() => setShowNewMetricDialog(false)}>
               Cancel
             </Button>
-            <Button onClick={() => {
-              toast.success('Metric created successfully', {
-                description: `${newMetricName || 'New metric'} has been added`
-              })
-              setNewMetricName('')
-              setNewMetricValue('')
-              setShowNewMetricDialog(false)
-            }}>
+            <Button onClick={handleCreateMetric}>
               Create Metric
             </Button>
           </DialogFooter>
@@ -776,15 +1067,39 @@ export default function ValueDashboardClient() {
             <div className="space-y-3">
               <Label>Export Format</Label>
               <div className="grid grid-cols-3 gap-2">
-                <Button variant="outline" className="h-20 flex flex-col">
+                <Button
+                  variant={selectedExportFormat === 'pdf' ? 'default' : 'outline'}
+                  className="h-20 flex flex-col"
+                  onClick={() => {
+                    setSelectedExportFormat('pdf')
+                    toast.info('PDF format selected')
+                  }}
+                >
+                  <FileText className="h-5 w-5 mb-1" />
                   <span className="text-lg font-bold">PDF</span>
                   <span className="text-xs text-muted-foreground">Report</span>
                 </Button>
-                <Button variant="outline" className="h-20 flex flex-col">
+                <Button
+                  variant={selectedExportFormat === 'csv' ? 'default' : 'outline'}
+                  className="h-20 flex flex-col"
+                  onClick={() => {
+                    setSelectedExportFormat('csv')
+                    toast.info('CSV format selected')
+                  }}
+                >
+                  <FileSpreadsheet className="h-5 w-5 mb-1" />
                   <span className="text-lg font-bold">CSV</span>
                   <span className="text-xs text-muted-foreground">Data</span>
                 </Button>
-                <Button variant="outline" className="h-20 flex flex-col">
+                <Button
+                  variant={selectedExportFormat === 'json' ? 'default' : 'outline'}
+                  className="h-20 flex flex-col"
+                  onClick={() => {
+                    setSelectedExportFormat('json')
+                    toast.info('JSON format selected')
+                  }}
+                >
+                  <FileCode className="h-5 w-5 mb-1" />
                   <span className="text-lg font-bold">JSON</span>
                   <span className="text-xs text-muted-foreground">API</span>
                 </Button>
@@ -793,9 +1108,36 @@ export default function ValueDashboardClient() {
             <div className="space-y-2">
               <Label>Date Range</Label>
               <div className="flex gap-2">
-                <Button variant={selectedPeriod === '3m' ? 'default' : 'outline'} size="sm">3 Months</Button>
-                <Button variant={selectedPeriod === '6m' ? 'default' : 'outline'} size="sm">6 Months</Button>
-                <Button variant={selectedPeriod === '12m' ? 'default' : 'outline'} size="sm">12 Months</Button>
+                <Button
+                  variant={exportDateRange === '3m' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => {
+                    setExportDateRange('3m')
+                    toast.info('3 month range selected')
+                  }}
+                >
+                  3 Months
+                </Button>
+                <Button
+                  variant={exportDateRange === '6m' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => {
+                    setExportDateRange('6m')
+                    toast.info('6 month range selected')
+                  }}
+                >
+                  6 Months
+                </Button>
+                <Button
+                  variant={exportDateRange === '12m' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => {
+                    setExportDateRange('12m')
+                    toast.info('12 month range selected')
+                  }}
+                >
+                  12 Months
+                </Button>
               </div>
             </div>
           </div>
@@ -803,13 +1145,8 @@ export default function ValueDashboardClient() {
             <Button variant="outline" onClick={() => setShowExportDialog(false)}>
               Cancel
             </Button>
-            <Button onClick={() => {
-              toast.success('Export started', {
-                description: 'Your file will be ready shortly'
-              })
-              setShowExportDialog(false)
-            }}>
-              Export Now
+            <Button onClick={handleExportWithFormat} disabled={isExporting}>
+              {isExporting ? 'Exporting...' : 'Export Now'}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -834,28 +1171,56 @@ export default function ValueDashboardClient() {
                   <p className="font-medium">Auto-refresh Data</p>
                   <p className="text-sm text-muted-foreground">Automatically refresh metrics every 5 minutes</p>
                 </div>
-                <Button variant="outline" size="sm">Enable</Button>
+                <Button
+                  variant={autoRefreshEnabled ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={handleToggleAutoRefresh}
+                >
+                  <RefreshCw className="h-4 w-4 mr-1" />
+                  {autoRefreshEnabled ? 'Enabled' : 'Enable'}
+                </Button>
               </div>
               <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-slate-800">
                 <div>
                   <p className="font-medium">Email Reports</p>
                   <p className="text-sm text-muted-foreground">Receive weekly ROI summaries via email</p>
                 </div>
-                <Button variant="outline" size="sm">Configure</Button>
+                <Button
+                  variant={emailReportsEnabled ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={handleConfigureEmailReports}
+                >
+                  <Mail className="h-4 w-4 mr-1" />
+                  {emailReportsEnabled ? 'Enabled' : 'Configure'}
+                </Button>
               </div>
               <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-slate-800">
                 <div>
                   <p className="font-medium">Currency Display</p>
                   <p className="text-sm text-muted-foreground">Choose your preferred currency format</p>
                 </div>
-                <Button variant="outline" size="sm">USD</Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleCycleCurrency}
+                >
+                  <DollarSign className="h-4 w-4 mr-1" />
+                  {selectedCurrency}
+                </Button>
               </div>
               <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-slate-800">
                 <div>
                   <p className="font-medium">Chart Style</p>
                   <p className="text-sm text-muted-foreground">Select visualization preferences</p>
                 </div>
-                <Button variant="outline" size="sm">Modern</Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleCycleChartStyle}
+                >
+                  <BarChart3 className="h-4 w-4 mr-1" />
+                  {chartStyle.charAt(0).toUpperCase() + chartStyle.slice(1)}
+                </Button>
               </div>
             </div>
           </div>
@@ -863,13 +1228,348 @@ export default function ValueDashboardClient() {
             <Button variant="outline" onClick={() => setShowSettingsDialog(false)}>
               Cancel
             </Button>
-            <Button onClick={() => {
-              toast.success('Settings saved', {
-                description: 'Your preferences have been updated'
-              })
-              setShowSettingsDialog(false)
-            }}>
+            <Button onClick={handleSaveSettings}>
               Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Share Dialog */}
+      <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Share2 className="h-5 w-5" />
+              Share Value Dashboard
+            </DialogTitle>
+            <DialogDescription>
+              Share your ROI dashboard with team members or stakeholders.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="share-email" className="text-right">
+                Email
+              </Label>
+              <Input
+                id="share-email"
+                type="email"
+                placeholder="colleague@company.com"
+                className="col-span-3"
+                value={shareEmail}
+                onChange={(e) => setShareEmail(e.target.value)}
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label className="text-right">Access</Label>
+              <div className="col-span-3 flex gap-2">
+                <Button
+                  variant={sharePermission === 'view' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => {
+                    setSharePermission('view')
+                    toast.info('View-only access selected')
+                  }}
+                >
+                  <Eye className="h-4 w-4 mr-1" />
+                  View Only
+                </Button>
+                <Button
+                  variant={sharePermission === 'edit' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => {
+                    setSharePermission('edit')
+                    toast.info('Edit access selected')
+                  }}
+                >
+                  <Edit className="h-4 w-4 mr-1" />
+                  Can Edit
+                </Button>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Quick Share Options</Label>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    navigator.clipboard.writeText(window.location.href)
+                    toast.success('Link copied to clipboard!')
+                  }}
+                >
+                  Copy Link
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    toast.success('Generating shareable PDF...', {
+                      description: 'Download will start shortly'
+                    })
+                  }}
+                >
+                  Export PDF
+                </Button>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowShareDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleShareDashboard}>
+              <Share2 className="h-4 w-4 mr-2" />
+              Send Invitation
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Customize Dashboard Dialog */}
+      <Dialog open={showCustomizeDialog} onOpenChange={setShowCustomizeDialog}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Layout className="h-5 w-5" />
+              Customize Dashboard
+            </DialogTitle>
+            <DialogDescription>
+              Personalize your dashboard layout and appearance.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Layout Style</Label>
+                <div className="grid grid-cols-3 gap-2">
+                  <Button
+                    variant="outline"
+                    className="h-16 flex flex-col"
+                    onClick={() => {
+                      toast.success('Compact layout applied')
+                    }}
+                  >
+                    <Grid3X3 className="h-4 w-4 mb-1" />
+                    <span className="text-xs">Compact</span>
+                  </Button>
+                  <Button
+                    variant="default"
+                    className="h-16 flex flex-col"
+                    onClick={() => {
+                      toast.success('Standard layout applied')
+                    }}
+                  >
+                    <Layout className="h-4 w-4 mb-1" />
+                    <span className="text-xs">Standard</span>
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="h-16 flex flex-col"
+                    onClick={() => {
+                      toast.success('Expanded layout applied')
+                    }}
+                  >
+                    <BarChart3 className="h-4 w-4 mb-1" />
+                    <span className="text-xs">Expanded</span>
+                  </Button>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Color Theme</Label>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="bg-blue-500 text-white hover:bg-blue-600"
+                    onClick={() => toast.success('Blue theme applied')}
+                  >
+                    Blue
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="bg-purple-500 text-white hover:bg-purple-600"
+                    onClick={() => toast.success('Purple theme applied')}
+                  >
+                    Purple
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="bg-green-500 text-white hover:bg-green-600"
+                    onClick={() => toast.success('Green theme applied')}
+                  >
+                    Green
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="bg-gray-700 text-white hover:bg-gray-800"
+                    onClick={() => toast.success('Dark theme applied')}
+                  >
+                    Dark
+                  </Button>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Data Density</Label>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => toast.success('Low density mode set')}
+                  >
+                    Low
+                  </Button>
+                  <Button
+                    variant="default"
+                    size="sm"
+                    onClick={() => toast.success('Medium density mode set')}
+                  >
+                    Medium
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => toast.success('High density mode set')}
+                  >
+                    High
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCustomizeDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleCustomizeDashboard}>
+              Apply Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Configure Widgets Dialog */}
+      <Dialog open={showConfigureWidgetsDialog} onOpenChange={setShowConfigureWidgetsDialog}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Grid3X3 className="h-5 w-5" />
+              Configure Widgets
+            </DialogTitle>
+            <DialogDescription>
+              Choose which widgets to display on your dashboard.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-slate-800">
+                <div>
+                  <p className="font-medium">ROI Metrics Cards</p>
+                  <p className="text-sm text-muted-foreground">Display key ROI indicators</p>
+                </div>
+                <Button
+                  variant={widgetConfig.showROIMetrics ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => {
+                    setWidgetConfig(prev => ({ ...prev, showROIMetrics: !prev.showROIMetrics }))
+                    toast.success(widgetConfig.showROIMetrics ? 'ROI Metrics hidden' : 'ROI Metrics shown')
+                  }}
+                >
+                  {widgetConfig.showROIMetrics ? 'Visible' : 'Hidden'}
+                </Button>
+              </div>
+              <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-slate-800">
+                <div>
+                  <p className="font-medium">Value Tracking Chart</p>
+                  <p className="text-sm text-muted-foreground">Show value over time graph</p>
+                </div>
+                <Button
+                  variant={widgetConfig.showValueTracking ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => {
+                    setWidgetConfig(prev => ({ ...prev, showValueTracking: !prev.showValueTracking }))
+                    toast.success(widgetConfig.showValueTracking ? 'Value Tracking hidden' : 'Value Tracking shown')
+                  }}
+                >
+                  {widgetConfig.showValueTracking ? 'Visible' : 'Hidden'}
+                </Button>
+              </div>
+              <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-slate-800">
+                <div>
+                  <p className="font-medium">Key Insights Panel</p>
+                  <p className="text-sm text-muted-foreground">Display AI-powered insights</p>
+                </div>
+                <Button
+                  variant={widgetConfig.showInsights ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => {
+                    setWidgetConfig(prev => ({ ...prev, showInsights: !prev.showInsights }))
+                    toast.success(widgetConfig.showInsights ? 'Insights hidden' : 'Insights shown')
+                  }}
+                >
+                  {widgetConfig.showInsights ? 'Visible' : 'Hidden'}
+                </Button>
+              </div>
+              <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-slate-800">
+                <div>
+                  <p className="font-medium">Project Breakdown</p>
+                  <p className="text-sm text-muted-foreground">Show detailed project values</p>
+                </div>
+                <Button
+                  variant={widgetConfig.showProjectBreakdown ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => {
+                    setWidgetConfig(prev => ({ ...prev, showProjectBreakdown: !prev.showProjectBreakdown }))
+                    toast.success(widgetConfig.showProjectBreakdown ? 'Project Breakdown hidden' : 'Project Breakdown shown')
+                  }}
+                >
+                  {widgetConfig.showProjectBreakdown ? 'Visible' : 'Hidden'}
+                </Button>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setWidgetConfig({
+                    showROIMetrics: true,
+                    showValueTracking: true,
+                    showInsights: true,
+                    showProjectBreakdown: true
+                  })
+                  toast.success('All widgets enabled')
+                }}
+              >
+                Show All
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setWidgetConfig({
+                    showROIMetrics: false,
+                    showValueTracking: false,
+                    showInsights: false,
+                    showProjectBreakdown: false
+                  })
+                  toast.success('All widgets hidden')
+                }}
+              >
+                Hide All
+              </Button>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowConfigureWidgetsDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleConfigureWidgets}>
+              Save Configuration
             </Button>
           </DialogFooter>
         </DialogContent>

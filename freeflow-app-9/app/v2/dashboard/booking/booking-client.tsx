@@ -76,45 +76,12 @@ const bookingActivities = [
   { id: '3', user: 'System', action: 'generated', target: 'weekly report', timestamp: '1h ago', type: 'info' as const },
 ]
 
-const bookingQuickActions = [
-  { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => {
-    toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 800)),
-      {
-        loading: 'Creating new booking item...',
-        success: 'New booking item created successfully',
-        error: 'Failed to create booking item'
-      }
-    )
-  }},
-  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => {
-    toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 1200)),
-      {
-        loading: 'Exporting booking data...',
-        success: 'Booking data exported successfully',
-        error: 'Failed to export booking data'
-      }
-    )
-  }},
-  { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => {
-    toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 600)),
-      {
-        loading: 'Loading booking settings...',
-        success: 'Booking settings loaded',
-        error: 'Failed to load settings'
-      }
-    )
-  }},
-]
-
 export default function BookingClient() {
   // A+++ STATE MANAGEMENT
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { announce } = useAnnouncer()
-  const { userId, loading: userLoading } = useCurrentUser()
+  const { userId: _userId, loading: _userLoading } = useCurrentUser()
 
   // Dialog states
   const [showNewBookingDialog, setShowNewBookingDialog] = useState(false)

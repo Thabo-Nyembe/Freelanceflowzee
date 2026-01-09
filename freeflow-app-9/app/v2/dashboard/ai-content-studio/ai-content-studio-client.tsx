@@ -16,7 +16,7 @@ export const dynamic = 'force-dynamic';
 
 import React, { useEffect } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Mail, FileText, Sparkles, Brain, Instagram, Twitter, Linkedin, Facebook, Copy, RefreshCw, Check, Wand2, Plus, Download, Settings, Save, Share2, Edit3, Trash2, History, Star, StarOff, Filter, Search, MoreVertical, Bookmark, BookmarkCheck, Send, Eye, EyeOff, Palette, Zap, MessageSquare, TrendingUp, Clock, Calendar, Users, Target, BarChart2 } from 'lucide-react'
+import { Mail, FileText, Sparkles, Brain, Instagram, Twitter, Linkedin, Facebook, Copy, RefreshCw, Check, Wand2, Plus, Download, Settings, Save, Share2, Edit3, Trash2, History, Star, StarOff, Filter, Search, Bookmark, BookmarkCheck, Send, Eye, EyeOff, Palette, Zap, TrendingUp, Clock, Calendar, Users, Target, BarChart2 } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -65,7 +65,7 @@ const aiContentStudioActivities = [
 ]
 
 export default function AiContentStudioClient() {
-  const { userId, loading: userLoading } = useCurrentUser()
+  const { userId, loading: _userLoading } = useCurrentUser()
   const { announce } = useAnnouncer()
 
   // Dialog states for quick actions
@@ -1350,6 +1350,16 @@ function MarketingContentGenerator({ aiContentStudioQuickActions }: MarketingCon
                 {platformIcons[platform]}
                 <span className="capitalize">{platform}</span>
               </Badge>
+              <Button variant="ghost" size="sm" onClick={handleToggleFavorite}>
+                {isFavorited ? (
+                  <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+                ) : (
+                  <StarOff className="w-4 h-4" />
+                )}
+              </Button>
+              <Button variant="ghost" size="sm" onClick={handleTogglePreview}>
+                {showPreview ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </Button>
               <Button variant="outline" size="sm" onClick={handleCopy}>
                 {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
               </Button>
@@ -1359,14 +1369,85 @@ function MarketingContentGenerator({ aiContentStudioQuickActions }: MarketingCon
 
         {generatedContent ? (
           <div className="space-y-4">
-            <div className="p-4 bg-gray-50 rounded-lg whitespace-pre-wrap text-sm">
-              {generatedContent}
+            {showPreview && (
+              <>
+                {isEditing ? (
+                  <div className="space-y-2">
+                    <Textarea
+                      value={editedContent}
+                      onChange={(e) => setEditedContent(e.target.value)}
+                      rows={8}
+                      className="w-full"
+                    />
+                    <div className="flex gap-2">
+                      <Button size="sm" onClick={handleSaveEdit}>
+                        <Check className="w-4 h-4 mr-2" />
+                        Save Changes
+                      </Button>
+                      <Button variant="outline" size="sm" onClick={handleCancelEdit}>
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="p-4 bg-gray-50 rounded-lg whitespace-pre-wrap text-sm">
+                    {generatedContent}
+                  </div>
+                )}
+              </>
+            )}
+
+            {/* Tone Selection */}
+            <div className="flex items-center gap-2">
+              <Palette className="w-4 h-4 text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">Tone:</span>
+              <div className="flex gap-1">
+                {['professional', 'casual', 'friendly', 'persuasive'].map((t) => (
+                  <Button
+                    key={t}
+                    variant={tone === t ? 'default' : 'ghost'}
+                    size="sm"
+                    className="text-xs h-7 px-2"
+                    onClick={() => handleToneChange(t)}
+                  >
+                    {t.charAt(0).toUpperCase() + t.slice(1)}
+                  </Button>
+                ))}
+              </div>
             </div>
-            <div className="flex gap-2">
+
+            {/* Action Buttons */}
+            <div className="flex flex-wrap gap-2">
               <Button variant="outline" size="sm" onClick={handleGenerate} disabled={isGenerating}>
                 <RefreshCw className="w-4 h-4 mr-2" />
                 Regenerate
               </Button>
+              <Button variant="outline" size="sm" onClick={handleStartEdit} disabled={isEditing}>
+                <Edit3 className="w-4 h-4 mr-2" />
+                Edit
+              </Button>
+              <Button variant="outline" size="sm" onClick={handleSaveDraft}>
+                {savedDraft ? <Check className="w-4 h-4 mr-2" /> : <Save className="w-4 h-4 mr-2" />}
+                {savedDraft ? 'Saved!' : 'Save Draft'}
+              </Button>
+              <Button variant="outline" size="sm" onClick={handleDownload}>
+                <Download className="w-4 h-4 mr-2" />
+                Download
+              </Button>
+              <Button variant="outline" size="sm" onClick={handleShareToPlatform}>
+                <Share2 className="w-4 h-4 mr-2" />
+                Share
+              </Button>
+              <Button variant="outline" size="sm" onClick={handleClearContent}>
+                <Trash2 className="w-4 h-4 mr-2" />
+                Clear
+              </Button>
+            </div>
+
+            {/* Character Count */}
+            <div className="flex items-center justify-between text-xs text-muted-foreground">
+              <span>{generatedContent.length} characters</span>
+              <span>{generatedContent.split(/\s+/).filter(Boolean).length} words</span>
             </div>
           </div>
         ) : (
@@ -1374,6 +1455,7 @@ function MarketingContentGenerator({ aiContentStudioQuickActions }: MarketingCon
             <div className="text-center">
               <Sparkles className="w-12 h-12 mx-auto mb-3 opacity-50" />
               <p>Your generated content will appear here</p>
+              <p className="text-sm mt-2">Enter a topic and click Generate Content to start</p>
             </div>
           </div>
         )}

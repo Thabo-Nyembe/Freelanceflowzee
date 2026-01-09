@@ -136,6 +136,7 @@ const enhancedActivities = [
     user: { id: '1', name: 'Alexandra Chen', avatar: '/avatars/alex.jpg' },
     timestamp: new Date(Date.now() - 5 * 60000),
     isRead: false,
+    isPinned: false,
   },
   {
     id: '2',
@@ -144,6 +145,7 @@ const enhancedActivities = [
     user: { id: '2', name: 'Marcus Johnson', avatar: '/avatars/marcus.jpg' },
     timestamp: new Date(Date.now() - 15 * 60000),
     isRead: false,
+    isPinned: true,
   },
   {
     id: '3',
@@ -152,6 +154,7 @@ const enhancedActivities = [
     user: { id: '0', name: 'System' },
     timestamp: new Date(Date.now() - 60 * 60000),
     isRead: true,
+    isPinned: false,
   },
   {
     id: '4',
@@ -161,6 +164,7 @@ const enhancedActivities = [
     user: { id: '3', name: 'Sarah Williams', avatar: '/avatars/sarah.jpg' },
     timestamp: new Date(Date.now() - 2 * 60 * 60000),
     isRead: true,
+    isPinned: false,
   },
 ]
 
@@ -521,8 +525,156 @@ export default function EnhancedClient() {
   ]
 
   return (
-    <div className="container mx-auto py-6">
+    <div className="container mx-auto py-6 space-y-6">
+      {/* Header with Quick Actions */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Enhanced Dashboard</h1>
+          <p className="text-muted-foreground">AI-powered insights and real-time collaboration</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={() => setNotificationsDialogOpen(true)}>
+            <Bell className="h-4 w-4 mr-2" />
+            Notifications
+          </Button>
+          <Button variant="outline" onClick={() => setRefreshDialogOpen(true)}>
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Refresh
+          </Button>
+          <Button onClick={() => setSettingsDialogOpen(true)}>
+            <Settings className="h-4 w-4 mr-2" />
+            Settings
+          </Button>
+        </div>
+      </div>
+
+      {/* Collaboration Indicator */}
+      <Card>
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Users className="h-5 w-5 text-blue-600" />
+              <CardTitle className="text-lg">Active Collaborators</CardTitle>
+            </div>
+            <Button variant="outline" size="sm" onClick={() => setCollaborationDialogOpen(true)}>
+              <Settings className="h-4 w-4 mr-2" />
+              Configure
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-between">
+            <CollaborationIndicator collaborators={enhancedCollaborators} maxVisible={4} showTyping={true} />
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" onClick={() => setMessageDialogOpen(true)}>
+                <MessageSquare className="h-4 w-4 mr-2" />
+                Message
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => setCallDialogOpen(true)}>
+                <Video className="h-4 w-4 mr-2" />
+                Start Call
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Main Content Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* AI Insights Panel */}
+        <Card className="lg:col-span-1">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Brain className="h-5 w-5 text-purple-600" />
+                <CardTitle className="text-lg">AI Insights</CardTitle>
+                <Badge variant="secondary">
+                  <Sparkles className="h-3 w-3 mr-1" />
+                  Powered by AI
+                </Badge>
+              </div>
+              <Button variant="ghost" size="icon" onClick={() => setAiSettingsDialogOpen(true)}>
+                <Settings className="h-4 w-4" />
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <AIInsightsPanel
+              insights={enhancedAIInsights}
+              onQuery={handleAIQuery}
+            />
+          </CardContent>
+        </Card>
+
+        {/* Predictive Analytics */}
+        <Card className="lg:col-span-1">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <TrendingUp className="h-5 w-5 text-green-600" />
+                <CardTitle className="text-lg">Predictive Analytics</CardTitle>
+              </div>
+              <div className="flex gap-2">
+                <Button variant="ghost" size="icon" onClick={handleRefreshPredictions}>
+                  <RefreshCw className="h-4 w-4" />
+                </Button>
+                <Button variant="ghost" size="icon" onClick={() => setAnalyticsConfigDialogOpen(true)}>
+                  <Settings className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <PredictiveAnalytics
+              predictions={enhancedPredictions}
+              onRefresh={handleRefreshPredictions}
+            />
+          </CardContent>
+        </Card>
+
+        {/* Activity Feed */}
+        <Card className="lg:col-span-2">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Activity className="h-5 w-5 text-orange-600" />
+                <CardTitle className="text-lg">Activity Feed</CardTitle>
+                <Badge variant="secondary">{activities.filter(a => !a.isRead).length} unread</Badge>
+              </div>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" onClick={handleMarkAllRead}>
+                  Mark All Read
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => setExportDialogOpen(true)}>
+                  <Download className="h-4 w-4 mr-2" />
+                  Export
+                </Button>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <ActivityFeed
+              activities={activities}
+              onMarkRead={handleMarkActivityRead}
+              onMarkAllRead={handleMarkAllRead}
+              onPin={handlePinActivity}
+              onArchive={handleArchiveActivity}
+            />
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Quick Actions Toolbar */}
+      <QuickActionsToolbar
+        actions={enhancedQuickActions}
+        variant="grid"
+        className="mt-6"
+      />
+
+      {/* Team Collaboration Hub */}
       <TeamCollaborationHub />
+
+      {/* ===== DIALOGS ===== */}
 
       {/* New Item Dialog */}
       <Dialog open={newItemDialogOpen} onOpenChange={setNewItemDialogOpen}>
@@ -678,7 +830,10 @@ export default function EnhancedClient() {
             <Button variant="outline" onClick={() => setExportDialogOpen(false)}>
               Cancel
             </Button>
-            <Button onClick={handleExport}>Export Data</Button>
+            <Button onClick={handleExport}>
+              <Download className="h-4 w-4 mr-2" />
+              Export Data
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -787,6 +942,754 @@ export default function EnhancedClient() {
               Cancel
             </Button>
             <Button onClick={handleSaveSettings}>Save Settings</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* AI Settings Dialog */}
+      <Dialog open={aiSettingsDialogOpen} onOpenChange={setAiSettingsDialogOpen}>
+        <DialogContent className="sm:max-w-[550px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Brain className="h-5 w-5 text-purple-600" />
+              AI Configuration
+            </DialogTitle>
+            <DialogDescription>
+              Configure AI-powered features and preferences.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-6 py-4">
+            <div className="space-y-4">
+              <h4 className="text-sm font-medium">Core Features</h4>
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label htmlFor="ai-enabled">Enable AI Features</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Master toggle for all AI capabilities
+                  </p>
+                </div>
+                <Switch
+                  id="ai-enabled"
+                  checked={aiSettingsForm.aiEnabled}
+                  onCheckedChange={(checked) =>
+                    setAiSettingsForm({ ...aiSettingsForm, aiEnabled: checked })
+                  }
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label htmlFor="nlp-queries">Natural Language Queries</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Ask questions in plain language
+                  </p>
+                </div>
+                <Switch
+                  id="nlp-queries"
+                  checked={aiSettingsForm.naturalLanguageQueries}
+                  onCheckedChange={(checked) =>
+                    setAiSettingsForm({ ...aiSettingsForm, naturalLanguageQueries: checked })
+                  }
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label htmlFor="predictive">Predictive Analytics</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Generate forecasts and predictions
+                  </p>
+                </div>
+                <Switch
+                  id="predictive"
+                  checked={aiSettingsForm.predictiveAnalytics}
+                  onCheckedChange={(checked) =>
+                    setAiSettingsForm({ ...aiSettingsForm, predictiveAnalytics: checked })
+                  }
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label htmlFor="auto-insights">Auto-Generate Insights</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Automatically surface important insights
+                  </p>
+                </div>
+                <Switch
+                  id="auto-insights"
+                  checked={aiSettingsForm.autoInsights}
+                  onCheckedChange={(checked) =>
+                    setAiSettingsForm({ ...aiSettingsForm, autoInsights: checked })
+                  }
+                />
+              </div>
+            </div>
+            <div className="space-y-4">
+              <h4 className="text-sm font-medium">Advanced Settings</h4>
+              <div className="grid gap-2">
+                <Label htmlFor="confidence-threshold">
+                  Confidence Threshold: {aiSettingsForm.confidenceThreshold}%
+                </Label>
+                <Slider
+                  id="confidence-threshold"
+                  value={[aiSettingsForm.confidenceThreshold]}
+                  onValueChange={([value]) =>
+                    setAiSettingsForm({ ...aiSettingsForm, confidenceThreshold: value })
+                  }
+                  min={50}
+                  max={100}
+                  step={5}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Minimum confidence level for AI predictions
+                </p>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="refresh-interval">Data Refresh</Label>
+                  <Select
+                    value={aiSettingsForm.dataRefreshInterval}
+                    onValueChange={(value) =>
+                      setAiSettingsForm({ ...aiSettingsForm, dataRefreshInterval: value })
+                    }
+                  >
+                    <SelectTrigger id="refresh-interval">
+                      <SelectValue placeholder="Select interval" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="5m">Every 5 minutes</SelectItem>
+                      <SelectItem value="15m">Every 15 minutes</SelectItem>
+                      <SelectItem value="30m">Every 30 minutes</SelectItem>
+                      <SelectItem value="1h">Every hour</SelectItem>
+                      <SelectItem value="manual">Manual only</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="ai-model">AI Model</Label>
+                  <Select
+                    value={aiSettingsForm.aiModel}
+                    onValueChange={(value) =>
+                      setAiSettingsForm({ ...aiSettingsForm, aiModel: value })
+                    }
+                  >
+                    <SelectTrigger id="ai-model">
+                      <SelectValue placeholder="Select model" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="fast">Fast (Lower accuracy)</SelectItem>
+                      <SelectItem value="balanced">Balanced</SelectItem>
+                      <SelectItem value="advanced">Advanced (Highest accuracy)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setAiSettingsDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSaveAiSettings}>
+              <Sparkles className="h-4 w-4 mr-2" />
+              Save AI Settings
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Analytics Config Dialog */}
+      <Dialog open={analyticsConfigDialogOpen} onOpenChange={setAnalyticsConfigDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <BarChart3 className="h-5 w-5 text-blue-600" />
+              Analytics Configuration
+            </DialogTitle>
+            <DialogDescription>
+              Configure predictive analytics and forecasting settings.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-6 py-4">
+            <div className="space-y-4">
+              <h4 className="text-sm font-medium">Display Options</h4>
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label htmlFor="enable-predictions">Enable Predictions</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Show AI-generated forecasts
+                  </p>
+                </div>
+                <Switch
+                  id="enable-predictions"
+                  checked={analyticsConfigForm.enablePredictions}
+                  onCheckedChange={(checked) =>
+                    setAnalyticsConfigForm({ ...analyticsConfigForm, enablePredictions: checked })
+                  }
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label htmlFor="confidence-scores">Show Confidence Scores</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Display prediction confidence levels
+                  </p>
+                </div>
+                <Switch
+                  id="confidence-scores"
+                  checked={analyticsConfigForm.showConfidenceScores}
+                  onCheckedChange={(checked) =>
+                    setAnalyticsConfigForm({ ...analyticsConfigForm, showConfidenceScores: checked })
+                  }
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label htmlFor="factor-analysis">Factor Analysis</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Show contributing factors for predictions
+                  </p>
+                </div>
+                <Switch
+                  id="factor-analysis"
+                  checked={analyticsConfigForm.factorAnalysis}
+                  onCheckedChange={(checked) =>
+                    setAnalyticsConfigForm({ ...analyticsConfigForm, factorAnalysis: checked })
+                  }
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label htmlFor="trend-analysis">Trend Analysis</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Display historical trend indicators
+                  </p>
+                </div>
+                <Switch
+                  id="trend-analysis"
+                  checked={analyticsConfigForm.trendAnalysis}
+                  onCheckedChange={(checked) =>
+                    setAnalyticsConfigForm({ ...analyticsConfigForm, trendAnalysis: checked })
+                  }
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="prediction-timeframe">Prediction Timeframe</Label>
+                <Select
+                  value={analyticsConfigForm.predictionTimeframe}
+                  onValueChange={(value) =>
+                    setAnalyticsConfigForm({ ...analyticsConfigForm, predictionTimeframe: value })
+                  }
+                >
+                  <SelectTrigger id="prediction-timeframe">
+                    <SelectValue placeholder="Select timeframe" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="7d">7 Days</SelectItem>
+                    <SelectItem value="30d">30 Days</SelectItem>
+                    <SelectItem value="90d">90 Days</SelectItem>
+                    <SelectItem value="1y">1 Year</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="data-source">Data Source</Label>
+                <Select
+                  value={analyticsConfigForm.dataSource}
+                  onValueChange={(value) =>
+                    setAnalyticsConfigForm({ ...analyticsConfigForm, dataSource: value })
+                  }
+                >
+                  <SelectTrigger id="data-source">
+                    <SelectValue placeholder="Select source" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Sources</SelectItem>
+                    <SelectItem value="projects">Projects Only</SelectItem>
+                    <SelectItem value="tasks">Tasks Only</SelectItem>
+                    <SelectItem value="team">Team Metrics</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setAnalyticsConfigDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSaveAnalyticsConfig}>
+              <Target className="h-4 w-4 mr-2" />
+              Save Configuration
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Collaboration Settings Dialog */}
+      <Dialog open={collaborationDialogOpen} onOpenChange={setCollaborationDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Users className="h-5 w-5 text-green-600" />
+              Collaboration Settings
+            </DialogTitle>
+            <DialogDescription>
+              Configure real-time collaboration features.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-6 py-4">
+            <div className="space-y-4">
+              <h4 className="text-sm font-medium">Real-Time Features</h4>
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label htmlFor="realtime-sync">Real-Time Sync</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Sync changes instantly with collaborators
+                  </p>
+                </div>
+                <Switch
+                  id="realtime-sync"
+                  checked={collaborationForm.realTimeSync}
+                  onCheckedChange={(checked) =>
+                    setCollaborationForm({ ...collaborationForm, realTimeSync: checked })
+                  }
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label htmlFor="show-presence">Show Presence</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Display online/offline status
+                  </p>
+                </div>
+                <Switch
+                  id="show-presence"
+                  checked={collaborationForm.showPresence}
+                  onCheckedChange={(checked) =>
+                    setCollaborationForm({ ...collaborationForm, showPresence: checked })
+                  }
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label htmlFor="typing-indicators">Typing Indicators</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Show when others are typing
+                  </p>
+                </div>
+                <Switch
+                  id="typing-indicators"
+                  checked={collaborationForm.typingIndicators}
+                  onCheckedChange={(checked) =>
+                    setCollaborationForm({ ...collaborationForm, typingIndicators: checked })
+                  }
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label htmlFor="cursor-sharing">Cursor Sharing</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Show collaborator cursor positions
+                  </p>
+                </div>
+                <Switch
+                  id="cursor-sharing"
+                  checked={collaborationForm.cursorSharing}
+                  onCheckedChange={(checked) =>
+                    setCollaborationForm({ ...collaborationForm, cursorSharing: checked })
+                  }
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label htmlFor="session-recording">Session Recording</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Record collaboration sessions
+                  </p>
+                </div>
+                <Switch
+                  id="session-recording"
+                  checked={collaborationForm.sessionRecording}
+                  onCheckedChange={(checked) =>
+                    setCollaborationForm({ ...collaborationForm, sessionRecording: checked })
+                  }
+                />
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setCollaborationDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSaveCollaborationSettings}>
+              <Users className="h-4 w-4 mr-2" />
+              Save Settings
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Message Dialog */}
+      <Dialog open={messageDialogOpen} onOpenChange={setMessageDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <MessageSquare className="h-5 w-5 text-blue-600" />
+              Send Message
+            </DialogTitle>
+            <DialogDescription>
+              Send a message to a team member.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="recipient">Recipient</Label>
+              <Select
+                value={selectedRecipient}
+                onValueChange={setSelectedRecipient}
+              >
+                <SelectTrigger id="recipient">
+                  <SelectValue placeholder="Select recipient" />
+                </SelectTrigger>
+                <SelectContent>
+                  {enhancedCollaborators.map((collaborator) => (
+                    <SelectItem key={collaborator.id} value={collaborator.name}>
+                      {collaborator.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="message-content">Message</Label>
+              <Textarea
+                id="message-content"
+                placeholder="Type your message..."
+                value={messageContent}
+                onChange={(e) => setMessageContent(e.target.value)}
+                rows={4}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setMessageDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSendMessage}>
+              <Send className="h-4 w-4 mr-2" />
+              Send Message
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Call Dialog */}
+      <Dialog open={callDialogOpen} onOpenChange={setCallDialogOpen}>
+        <DialogContent className="sm:max-w-[450px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Video className="h-5 w-5 text-green-600" />
+              Start Call
+            </DialogTitle>
+            <DialogDescription>
+              Start an audio or video call with a team member.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="call-recipient">Select Contact</Label>
+              <Select
+                value={selectedRecipient}
+                onValueChange={setSelectedRecipient}
+              >
+                <SelectTrigger id="call-recipient">
+                  <SelectValue placeholder="Select contact" />
+                </SelectTrigger>
+                <SelectContent>
+                  {enhancedCollaborators
+                    .filter((c) => c.status === 'online')
+                    .map((collaborator) => (
+                      <SelectItem key={collaborator.id} value={collaborator.name}>
+                        <div className="flex items-center gap-2">
+                          <span className="w-2 h-2 bg-green-500 rounded-full" />
+                          {collaborator.name}
+                        </div>
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex gap-3 justify-center pt-4">
+              <Button
+                variant="outline"
+                size="lg"
+                className="flex-1"
+                onClick={() => handleStartCall('audio')}
+              >
+                <Phone className="h-5 w-5 mr-2" />
+                Audio Call
+              </Button>
+              <Button
+                size="lg"
+                className="flex-1"
+                onClick={() => handleStartCall('video')}
+              >
+                <Video className="h-5 w-5 mr-2" />
+                Video Call
+              </Button>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setCallDialogOpen(false)}>
+              Cancel
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Share Dialog */}
+      <Dialog open={shareDialogOpen} onOpenChange={setShareDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Share2 className="h-5 w-5 text-purple-600" />
+              Share Dashboard
+            </DialogTitle>
+            <DialogDescription>
+              Share your dashboard with others.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="share-type">Share Type</Label>
+              <Select
+                value={shareForm.shareType}
+                onValueChange={(value) => setShareForm({ ...shareForm, shareType: value })}
+              >
+                <SelectTrigger id="share-type">
+                  <SelectValue placeholder="Select type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="link">Share Link</SelectItem>
+                  <SelectItem value="email">Email Invite</SelectItem>
+                  <SelectItem value="embed">Embed Code</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="access-level">Access Level</Label>
+              <Select
+                value={shareForm.accessLevel}
+                onValueChange={(value) => setShareForm({ ...shareForm, accessLevel: value })}
+              >
+                <SelectTrigger id="access-level">
+                  <SelectValue placeholder="Select access" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="view">View Only</SelectItem>
+                  <SelectItem value="comment">Can Comment</SelectItem>
+                  <SelectItem value="edit">Can Edit</SelectItem>
+                  <SelectItem value="admin">Full Access</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="expires">Link Expiration</Label>
+                <Select
+                  value={shareForm.expiresIn}
+                  onValueChange={(value) => setShareForm({ ...shareForm, expiresIn: value })}
+                >
+                  <SelectTrigger id="expires">
+                    <SelectValue placeholder="Select expiration" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1h">1 Hour</SelectItem>
+                    <SelectItem value="24h">24 Hours</SelectItem>
+                    <SelectItem value="7d">7 Days</SelectItem>
+                    <SelectItem value="30d">30 Days</SelectItem>
+                    <SelectItem value="never">Never</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="password">Password (Optional)</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="Set password"
+                  value={shareForm.password}
+                  onChange={(e) => setShareForm({ ...shareForm, password: e.target.value })}
+                />
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShareDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleShare}>
+              <Share2 className="h-4 w-4 mr-2" />
+              Generate Link
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Notifications Dialog */}
+      <Dialog open={notificationsDialogOpen} onOpenChange={setNotificationsDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Bell className="h-5 w-5 text-orange-600" />
+              Notification Preferences
+            </DialogTitle>
+            <DialogDescription>
+              Customize what notifications you receive.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-6 py-4">
+            <div className="space-y-4">
+              <h4 className="text-sm font-medium">Activity Notifications</h4>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="activity-updates">Activity Updates</Label>
+                <Switch
+                  id="activity-updates"
+                  checked={notificationPrefs.activityUpdates}
+                  onCheckedChange={(checked) =>
+                    setNotificationPrefs({ ...notificationPrefs, activityUpdates: checked })
+                  }
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="mentions">Mentions</Label>
+                <Switch
+                  id="mentions"
+                  checked={notificationPrefs.mentions}
+                  onCheckedChange={(checked) =>
+                    setNotificationPrefs({ ...notificationPrefs, mentions: checked })
+                  }
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="comments">Comments</Label>
+                <Switch
+                  id="comments"
+                  checked={notificationPrefs.comments}
+                  onCheckedChange={(checked) =>
+                    setNotificationPrefs({ ...notificationPrefs, comments: checked })
+                  }
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="status-changes">Status Changes</Label>
+                <Switch
+                  id="status-changes"
+                  checked={notificationPrefs.statusChanges}
+                  onCheckedChange={(checked) =>
+                    setNotificationPrefs({ ...notificationPrefs, statusChanges: checked })
+                  }
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="ai-insights">AI Insights</Label>
+                <Switch
+                  id="ai-insights"
+                  checked={notificationPrefs.aiInsights}
+                  onCheckedChange={(checked) =>
+                    setNotificationPrefs({ ...notificationPrefs, aiInsights: checked })
+                  }
+                />
+              </div>
+            </div>
+            <div className="space-y-4">
+              <h4 className="text-sm font-medium">Delivery Methods</h4>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="push-notifications">Push Notifications</Label>
+                <Switch
+                  id="push-notifications"
+                  checked={notificationPrefs.pushNotifications}
+                  onCheckedChange={(checked) =>
+                    setNotificationPrefs({ ...notificationPrefs, pushNotifications: checked })
+                  }
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="sound-alerts">Sound Alerts</Label>
+                <Switch
+                  id="sound-alerts"
+                  checked={notificationPrefs.soundAlerts}
+                  onCheckedChange={(checked) =>
+                    setNotificationPrefs({ ...notificationPrefs, soundAlerts: checked })
+                  }
+                />
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setNotificationsDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSaveNotificationPrefs}>
+              <Bell className="h-4 w-4 mr-2" />
+              Save Preferences
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Refresh Data Dialog */}
+      <Dialog open={refreshDialogOpen} onOpenChange={setRefreshDialogOpen}>
+        <DialogContent className="sm:max-w-[400px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <RefreshCw className="h-5 w-5 text-blue-600" />
+              Refresh Data
+            </DialogTitle>
+            <DialogDescription>
+              Refresh all dashboard data sources.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-6">
+            <div className="space-y-4">
+              <div className="flex items-center gap-3 p-3 bg-muted rounded-lg">
+                <Brain className="h-5 w-5 text-purple-600" />
+                <div>
+                  <p className="font-medium text-sm">AI Insights</p>
+                  <p className="text-xs text-muted-foreground">Last updated 5 minutes ago</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 p-3 bg-muted rounded-lg">
+                <TrendingUp className="h-5 w-5 text-green-600" />
+                <div>
+                  <p className="font-medium text-sm">Predictive Analytics</p>
+                  <p className="text-xs text-muted-foreground">Last updated 15 minutes ago</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 p-3 bg-muted rounded-lg">
+                <Activity className="h-5 w-5 text-orange-600" />
+                <div>
+                  <p className="font-medium text-sm">Activity Feed</p>
+                  <p className="text-xs text-muted-foreground">Real-time sync active</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 p-3 bg-muted rounded-lg">
+                <Users className="h-5 w-5 text-blue-600" />
+                <div>
+                  <p className="font-medium text-sm">Collaboration Status</p>
+                  <p className="text-xs text-muted-foreground">4 active collaborators</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setRefreshDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleRefreshData}>
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Refresh All
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
