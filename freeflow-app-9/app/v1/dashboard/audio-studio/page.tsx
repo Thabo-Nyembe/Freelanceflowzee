@@ -371,7 +371,7 @@ export default function AudioStudioPage() {
                             <h3 className="font-semibold text-white mb-1">{project.name}</h3>
                             <p className="text-sm text-gray-400">{project.description}</p>
                           </div>
-                          <Button variant="ghost" size="icon" onClick={() => toast.success('Menu opened')}>
+                          <Button variant="ghost" size="icon" onClick={() => { /* TODO: Open project menu dropdown */ }}>
                             <MoreVertical className="w-4 h-4" />
                           </Button>
                         </div>
@@ -407,10 +407,10 @@ export default function AudioStudioPage() {
                             <Play className="w-4 h-4 mr-1" />
                             Open
                           </Button>
-                          <Button variant="outline" size="icon" className="border-gray-700 hover:bg-slate-800" onClick={() => toast.success('Shared successfully')}>
+                          <Button variant="outline" size="icon" className="border-gray-700 hover:bg-slate-800" onClick={() => { /* TODO: Open share dialog for project */ }}>
                             <Share2 className="w-4 h-4" />
                           </Button>
-                          <Button variant="outline" size="icon" className="border-gray-700 hover:bg-slate-800" onClick={() => toast.success('Download started')}>
+                          <Button variant="outline" size="icon" className="border-gray-700 hover:bg-slate-800" onClick={() => { /* TODO: Download project audio file */ }}>
                             <Download className="w-4 h-4" />
                           </Button>
                         </div>
@@ -574,10 +574,10 @@ export default function AudioStudioPage() {
                       </div>
 
                       <div className="flex items-center gap-2">
-                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => toast.success('Playback started')}>
+                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => { /* TODO: Play audio file */ }}>
                           <Play className="w-4 h-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => toast.success('Download started')}>
+                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => { /* TODO: Download audio file */ }}>
                           <Download className="w-4 h-4" />
                         </Button>
                       </div>
@@ -597,7 +597,7 @@ export default function AudioStudioPage() {
                     placeholder="Search audio files..."
                     className="w-64 bg-slate-900/50 border-gray-700"
                   />
-                  <Button variant="outline" size="icon" className="border-gray-700 hover:bg-slate-800" onClick={() => toast.success('Filters opened')}>
+                  <Button variant="outline" size="icon" className="border-gray-700 hover:bg-slate-800" onClick={() => { /* TODO: Open filter options panel */ }}>
                     <Filter className="w-4 h-4" />
                   </Button>
                 </div>

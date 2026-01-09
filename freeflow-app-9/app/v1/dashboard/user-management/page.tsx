@@ -888,7 +888,7 @@ export default function UserManagementPage() {
                   <Button
                     variant="outline"
                     className="gap-2"
-                    onClick={() => toast.success('Create Department', { description: 'Department form opened' })}
+                    onClick={() => { /* TODO: Implement create department form/modal */ }}
                   >
                     <UserPlus className="w-4 h-4" />
                     Create Department
@@ -905,7 +905,7 @@ export default function UserManagementPage() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => toast.success(`${dept.name}`, { description: 'Department details opened' })}
+                          onClick={() => { /* TODO: Implement view department details */ }}
                         >
                           View
                         </Button>

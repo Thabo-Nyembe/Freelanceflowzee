@@ -1816,7 +1816,7 @@ export default function SalesClient() {
                             <div className="w-24">
                               <Input defaultValue={`${(idx + 1) * 15}%`} className="text-center" />
                             </div>
-                            <Button variant="ghost" size="icon" onClick={() => { toast.success('Stage Editor', { description: `Editing "${stage}" stage settings` }) }} title="Edit stage">
+                            <Button variant="ghost" size="icon" onClick={() => { /* TODO: Implement stage editor modal */ }} title="Edit stage">
                               <Edit className="w-4 h-4" />
                             </Button>
                           </div>
@@ -2099,7 +2099,7 @@ export default function SalesClient() {
                               <div className="text-sm text-gray-500">Not connected</div>
                             </div>
                           </div>
-                          <Button variant="outline" size="sm" onClick={() => { toast.info('HubSpot Integration', { description: 'HubSpot integration requires API configuration in settings' }) }}>Connect</Button>
+                          <Button variant="outline" size="sm" onClick={() => { /* TODO: Implement HubSpot integration flow */ }}>Connect</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -2118,7 +2118,7 @@ export default function SalesClient() {
                           <div className="flex gap-2">
                             <Input type="password" value="sk_live_xxxxxxxxxxxx" readOnly className="font-mono" />
                             <Button variant="outline" onClick={() => toast.promise(navigator.clipboard.writeText('sk_live_xxxxxxxxxxxx'), { loading: 'Copying API key...', success: 'API key copied to clipboard!', error: 'Failed to copy API key' })}>Copy</Button>
-                            <Button variant="outline" onClick={() => { if (confirm('Are you sure you want to regenerate the API key? This will invalidate your current key.')) { toast.success('API Key Regenerated') } }}>Regenerate</Button>
+                            <Button variant="outline" onClick={() => { if (confirm('Are you sure you want to regenerate the API key? This will invalidate your current key.')) { /* TODO: Implement API key regeneration */ } }}>Regenerate</Button>
                           </div>
                         </div>
                         <div className="space-y-2">
@@ -2222,7 +2222,7 @@ export default function SalesClient() {
                             <div className="font-medium text-red-700 dark:text-red-400">Clear All Pipeline</div>
                             <div className="text-sm text-red-600 dark:text-red-500">Permanently delete all deals</div>
                           </div>
-                          <Button variant="destructive" size="sm" onClick={() => { if (confirm('DANGER: This will permanently delete all pipeline deals. Are you absolutely sure?')) { toast.warning('Contact Support', { description: 'Please contact support@freeflow.com to perform this dangerous action' }) } }}>
+                          <Button variant="destructive" size="sm" onClick={() => { if (confirm('DANGER: This will permanently delete all pipeline deals. Are you absolutely sure?')) { /* TODO: Implement clear all pipeline deals */ } }}>
                             <Trash2 className="w-4 h-4 mr-2" />
                             Clear
                           </Button>
@@ -2232,7 +2232,7 @@ export default function SalesClient() {
                             <div className="font-medium text-red-700 dark:text-red-400">Reset CRM</div>
                             <div className="text-sm text-red-600 dark:text-red-500">Reset all CRM settings and data</div>
                           </div>
-                          <Button variant="destructive" size="sm" onClick={() => { if (confirm('DANGER: This will reset all CRM settings and data. Are you absolutely sure?')) { toast.warning('Contact Support', { description: 'Please contact support@freeflow.com to perform this CRM reset action' }) } }}>
+                          <Button variant="destructive" size="sm" onClick={() => { if (confirm('DANGER: This will reset all CRM settings and data. Are you absolutely sure?')) { /* TODO: Implement CRM reset */ } }}>
                             <RefreshCw className="w-4 h-4 mr-2" />
                             Reset
                           </Button>
@@ -2409,7 +2409,7 @@ export default function SalesClient() {
               </div>
 
               <div className="flex gap-2">
-                <Button className="flex-1" onClick={() => { toast.success('Quote Sent', { description: 'Quote has been sent to the customer!' }) }}><Send className="w-4 h-4 mr-2" />Send to Customer</Button>
+                <Button className="flex-1" onClick={() => { /* TODO: Implement send quote to customer */ }}><Send className="w-4 h-4 mr-2" />Send to Customer</Button>
                 <Button variant="outline" onClick={() => { /* TODO: Implement PDF download */ }}><Download className="w-4 h-4 mr-2" />Download PDF</Button>
                 <Button variant="outline" onClick={() => { navigator.clipboard.writeText(selectedQuote.quoteNumber).then(() => toast.success('Copied', { description: 'Quote number copied to clipboard!' })).catch(() => toast.error('Failed to copy quote number')) }}><Copy className="w-4 h-4" /></Button>
               </div>
