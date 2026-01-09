@@ -1197,11 +1197,59 @@ export default function CanvasCollaborationClient() {
   }
 
   const toggleLayer = (layerId: string, property: 'visible' | 'locked') => {
-    setLayers(layers.map(layer => 
-      layer.id === layerId 
+    setLayers(layers.map(layer =>
+      layer.id === layerId
         ? { ...layer, [property]: !layer[property] }
         : layer
     ))
+  }
+
+  const handleAddLayer = () => {
+    const newLayer: CanvasLayer = {
+      id: (layers.length + 1).toString(),
+      name: `Layer ${layers.length + 1}`,
+      visible: true,
+      locked: false,
+      opacity: 100,
+      type: 'drawing'
+    }
+
+    setLayers([...layers, newLayer])
+
+    logger.info('New layer added', {
+      layerId: newLayer.id,
+      layerName: newLayer.name,
+      totalLayers: layers.length + 1,
+      canvasName
+    })
+
+    toast.success('Layer Added', {
+      description: `${newLayer.name} created - ${layers.length + 1} layers total`
+    })
+    announce('New layer added', 'polite')
+  }
+
+  const handleDeleteLayer = (layerId: string, layerName: string) => {
+    if (layers.length <= 1) {
+      toast.error('Cannot Delete', {
+        description: 'At least one layer is required'
+      })
+      return
+    }
+
+    setLayers(layers.filter(layer => layer.id !== layerId))
+
+    logger.info('Layer deleted', {
+      layerId,
+      layerName,
+      remainingLayers: layers.length - 1,
+      canvasName
+    })
+
+    toast.success('Layer Deleted', {
+      description: `${layerName} removed - ${layers.length - 1} layers remaining`
+    })
+    announce('Layer deleted', 'polite')
   }
 
   const startVideoCall = () => {
@@ -1256,7 +1304,7 @@ export default function CanvasCollaborationClient() {
                   </div>
                 ))}
               </div>
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={handleInviteCollaborator}>
                 <Plus className="w-4 h-4 mr-1" />
                 Invite
               </Button>
@@ -1293,7 +1341,7 @@ export default function CanvasCollaborationClient() {
             </div>
 
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={handleShareCanvas}>
                 <Share2 className="w-4 h-4 mr-1" />
                 Share
               </Button>
@@ -1525,7 +1573,7 @@ export default function CanvasCollaborationClient() {
             <TabsContent value="layers" className="p-4 space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="font-semibold">Layers</h3>
-                <Button size="sm" variant="outline">
+                <Button size="sm" variant="outline" onClick={handleAddLayer}>
                   <Plus className="w-4 h-4" />
                 </Button>
               </div>
@@ -1550,7 +1598,7 @@ export default function CanvasCollaborationClient() {
                       {layer.locked ? <Lock className="w-3 h-3" /> : <Unlock className="w-3 h-3" />}
                     </Button>
                     <span className="flex-1 text-sm">{layer.name}</span>
-                    <Button variant="ghost" size="sm" className="p-0 w-6 h-6">
+                    <Button variant="ghost" size="sm" className="p-0 w-6 h-6" onClick={() => handleDeleteLayer(layer.id, layer.name)}>
                       <Trash2 className="w-3 h-3" />
                     </Button>
                   </div>
@@ -1561,7 +1609,7 @@ export default function CanvasCollaborationClient() {
             <TabsContent value="projects" className="p-4 space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="font-semibold">Recent Projects</h3>
-                <Button size="sm">
+                <Button size="sm" onClick={handleCreateCanvas}>
                   <Plus className="w-4 h-4 mr-1" />
                   New
                 </Button>

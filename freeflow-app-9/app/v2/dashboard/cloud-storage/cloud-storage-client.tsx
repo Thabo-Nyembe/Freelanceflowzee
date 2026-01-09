@@ -1348,6 +1348,10 @@ export default function CloudStorageClient() {
                     <button
                       key={folder.id}
                       className="w-full px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-3 text-left transition-colors"
+                      onClick={() => {
+                        setCurrentPath(['Home', folder.name])
+                        toast.info('Folder Opened', { description: `Navigated to "${folder.name}"` })
+                      }}
                     >
                       <span className="text-xl">{folder.icon}</span>
                       <div className="flex-1 min-w-0">
@@ -1368,7 +1372,15 @@ export default function CloudStorageClient() {
                     {currentPath.map((path, index) => (
                       <div key={index} className="flex items-center">
                         {index > 0 && <ChevronRight className="w-4 h-4 text-gray-400 mx-1" />}
-                        <button className="text-sm text-gray-600 dark:text-gray-400 hover:text-sky-600">
+                        <button
+                          className="text-sm text-gray-600 dark:text-gray-400 hover:text-sky-600"
+                          onClick={() => {
+                            // Navigate to the clicked path segment
+                            const newPath = currentPath.slice(0, index + 1)
+                            setCurrentPath(newPath)
+                            toast.info('Navigation', { description: `Navigated to "${path}"` })
+                          }}
+                        >
                           {path}
                         </button>
                       </div>

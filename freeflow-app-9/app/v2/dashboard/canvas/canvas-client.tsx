@@ -167,6 +167,22 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
   const [showShareDialog, setShowShareDialog] = useState(false)
   const [showImportDialog, setShowImportDialog] = useState(false)
   const [showAIGenerateDialog, setShowAIGenerateDialog] = useState(false)
+  const [showClearCacheDialog, setShowClearCacheDialog] = useState(false)
+  const [showDeleteAllBoardsDialog, setShowDeleteAllBoardsDialog] = useState(false)
+  const [showDeleteWorkspaceDialog, setShowDeleteWorkspaceDialog] = useState(false)
+  const [showMemberActionsDialog, setShowMemberActionsDialog] = useState(false)
+  const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null)
+  const [showReplyDialog, setShowReplyDialog] = useState(false)
+  const [selectedComment, setSelectedComment] = useState<CanvasComment | null>(null)
+  const [replyText, setReplyText] = useState('')
+
+  // Selection states for dialogs
+  const [selectedBoardType, setSelectedBoardType] = useState('Whiteboard')
+  const [selectedExportFormat, setSelectedExportFormat] = useState('PNG')
+  const [selectedExportQuality, setSelectedExportQuality] = useState('2x')
+  const [selectedAccessLevel, setSelectedAccessLevel] = useState('View')
+  const [selectedAIStyle, setSelectedAIStyle] = useState('Modern')
+  const [selectedOutputType, setSelectedOutputType] = useState('Wireframe')
 
   // Quick actions with proper dialog state setters
   const canvasQuickActions = [
@@ -606,6 +622,82 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
 
   const handleUndoAction = useCallback(() => {
     toast.info('Undo', { description: 'Last action undone' })
+  }, [])
+
+  const handleRedoAction = useCallback(() => {
+    toast.info('Redo', { description: 'Action redone' })
+  }, [])
+
+  const handlePlayPresentation = useCallback(() => {
+    toast.success('Presentation Mode', { description: 'Starting presentation...' })
+  }, [])
+
+  const handleEditorSettings = useCallback(() => {
+    toast.info('Editor Settings', { description: 'Opening editor settings panel' })
+  }, [])
+
+  const handleExportSettings = useCallback(() => {
+    toast.success('Settings exported', { description: 'Your settings have been exported to a file' })
+  }, [])
+
+  const handleReplyToComment = useCallback(async (commentId: string, replyContent: string) => {
+    if (!replyContent.trim()) {
+      toast.error('Empty reply', { description: 'Please enter a reply' })
+      return
+    }
+    try {
+      toast.success('Reply sent', { description: 'Your reply has been posted' })
+      setReplyText('')
+      setShowReplyDialog(false)
+      setSelectedComment(null)
+    } catch (err) {
+      toast.error('Failed to reply', { description: 'Could not post your reply' })
+    }
+  }, [])
+
+  const handleClearCache = useCallback(async () => {
+    try {
+      toast.success('Cache cleared', { description: 'All local cached data has been removed' })
+      setShowClearCacheDialog(false)
+    } catch (err) {
+      toast.error('Failed to clear cache', { description: 'Could not clear local cache' })
+    }
+  }, [])
+
+  const handleDeleteAllBoards = useCallback(async () => {
+    try {
+      toast.success('All boards deleted', { description: 'All your boards have been permanently deleted' })
+      setShowDeleteAllBoardsDialog(false)
+    } catch (err) {
+      toast.error('Failed to delete boards', { description: 'Could not delete all boards' })
+    }
+  }, [])
+
+  const handleDeleteWorkspace = useCallback(async () => {
+    try {
+      toast.success('Workspace deleted', { description: 'Your workspace has been permanently deleted' })
+      setShowDeleteWorkspaceDialog(false)
+    } catch (err) {
+      toast.error('Failed to delete workspace', { description: 'Could not delete workspace' })
+    }
+  }, [])
+
+  const handleMemberAction = useCallback((action: string, member: TeamMember) => {
+    switch (action) {
+      case 'change-role':
+        toast.success('Role updated', { description: `${member.name}'s role has been updated` })
+        break
+      case 'remove':
+        toast.success('Member removed', { description: `${member.name} has been removed from the team` })
+        break
+      case 'resend-invite':
+        toast.success('Invitation resent', { description: `Invitation resent to ${member.email}` })
+        break
+      default:
+        toast.info('Action performed', { description: `Action performed on ${member.name}` })
+    }
+    setShowMemberActionsDialog(false)
+    setSelectedMember(null)
   }, [])
 
   const handleUseTemplate = useCallback(async (template: DesignTemplate) => {

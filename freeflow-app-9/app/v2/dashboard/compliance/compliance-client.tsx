@@ -3336,7 +3336,7 @@ export default function ComplianceClient() {
                     <Badge className={v.status === 'published' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}>
                       {v.status}
                     </Badge>
-                    <Button variant="ghost" size="sm">
+                    <Button variant="ghost" size="sm" onClick={() => toast.success(`Viewing version ${v.version}`, { description: `${v.changes} - Last modified by ${v.author}` })}>
                       <Eye className="w-4 h-4" />
                     </Button>
                   </div>

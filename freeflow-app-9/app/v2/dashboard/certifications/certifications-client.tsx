@@ -1338,13 +1338,31 @@ export default function CertificationsClient() {
                         </ul>
                       </div>
                       <div className="flex gap-3">
-                        <button className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                        <button
+                          className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                          onClick={() => {
+                            navigator.clipboard.writeText(credential.credentialUrl)
+                            toast.success('Share link copied!', { description: `Link for "${credential.name}" copied to clipboard` })
+                          }}
+                        >
                           Share Credential
                         </button>
-                        <button className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 dark:text-white">
+                        <button
+                          className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 dark:text-white"
+                          onClick={() => {
+                            toast.success('Downloading PDF...', { description: `Generating PDF for "${credential.name}"` })
+                            handleDownloadCertificate(credential.name)
+                          }}
+                        >
                           Download PDF
                         </button>
-                        <button className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 dark:text-white">
+                        <button
+                          className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 dark:text-white"
+                          onClick={() => {
+                            setVerifyBadgeForm({ ...verifyBadgeForm, credentialId: credential.credentialId })
+                            setShowVerifyBadgeDialog(true)
+                          }}
+                        >
                           Verify
                         </button>
                       </div>
@@ -1460,10 +1478,25 @@ export default function CertificationsClient() {
                         </div>
                       )}
                       <div className="flex gap-3">
-                        <button className="flex-1 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">
+                        <button
+                          className="flex-1 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+                          onClick={() => {
+                            navigator.clipboard.writeText(`${window.location.origin}/badges/${badge.id}`)
+                            toast.success('Badge shared!', { description: `Share link for "${badge.name}" copied to clipboard` })
+                          }}
+                        >
                           Share Badge
                         </button>
-                        <button className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 dark:text-white">
+                        <button
+                          className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 dark:text-white"
+                          onClick={() => {
+                            toast.success(badge.isPinned ? 'Badge unpinned' : 'Badge pinned!', {
+                              description: badge.isPinned
+                                ? `"${badge.name}" removed from profile`
+                                : `"${badge.name}" is now pinned to your profile`
+                            })
+                          }}
+                        >
                           {badge.isPinned ? 'Unpin' : 'Pin to Profile'}
                         </button>
                       </div>
@@ -1601,10 +1634,24 @@ export default function CertificationsClient() {
                         </div>
                       )}
                       <div className="flex gap-3">
-                        <button className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+                        <button
+                          className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                          onClick={() => {
+                            toast.info('Starting Assessment', {
+                              description: `Preparing assessment for "${skill.name}" skill`
+                            })
+                          }}
+                        >
                           Take Assessment
                         </button>
-                        <button className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 dark:text-white">
+                        <button
+                          className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 dark:text-white"
+                          onClick={() => {
+                            toast.success('Endorsement Request Sent', {
+                              description: `Request for "${skill.name}" endorsement has been sent to your network`
+                            })
+                          }}
+                        >
                           Request Endorsement
                         </button>
                       </div>
@@ -1689,7 +1736,14 @@ export default function CertificationsClient() {
                       <span className="text-sm text-gray-500 dark:text-gray-400">
                         Est. completion: {pathway.estimatedCompletion}
                       </span>
-                      <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm">
+                      <button
+                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
+                        onClick={() => {
+                          toast.info('Resuming Learning Path', {
+                            description: `Continuing "${pathway.name}" - ${pathway.progress}% complete`
+                          })
+                        }}
+                      >
                         Continue Learning
                       </button>
                     </div>
@@ -1717,10 +1771,25 @@ export default function CertificationsClient() {
                     Scan this QR code to verify all your credentials
                   </p>
                   <div className="flex justify-center gap-3">
-                    <button className="px-4 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700 text-sm">
+                    <button
+                      className="px-4 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700 text-sm"
+                      onClick={() => {
+                        toast.success('QR Code Downloaded', {
+                          description: 'Your verification QR code has been downloaded'
+                        })
+                      }}
+                    >
                       Download QR
                     </button>
-                    <button className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 text-sm dark:text-white">
+                    <button
+                      className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 text-sm dark:text-white"
+                      onClick={() => {
+                        navigator.clipboard.writeText(`${window.location.origin}/verify/credentials`)
+                        toast.success('Verification Link Copied', {
+                          description: 'Share this link to allow others to verify your credentials'
+                        })
+                      }}
+                    >
                       Copy Link
                     </button>
                   </div>

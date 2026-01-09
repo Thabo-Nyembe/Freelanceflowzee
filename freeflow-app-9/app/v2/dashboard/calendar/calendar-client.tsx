@@ -563,7 +563,10 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
                           <label className="block text-sm font-medium mb-1">Location</label>
                           <div className="flex items-center gap-2">
                             <Input placeholder="Add location or video link" className="flex-1" value={newEventForm.location} onChange={(e) => setNewEventForm(prev => ({ ...prev, location: e.target.value }))} />
-                            <Button variant="outline" size="sm">
+                            <Button variant="outline" size="sm" onClick={() => {
+                              setNewEventForm(prev => ({ ...prev, location: 'https://meet.freeflow.com/meeting-' + Date.now() }))
+                              toast.success('Video meeting link added')
+                            }}>
                               <Video className="h-4 w-4" />
                             </Button>
                           </div>
@@ -580,10 +583,10 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
                     </ScrollArea>
                   </DialogContent>
                 </Dialog>
-                <Button variant="ghost" className="text-white hover:bg-white/20">
+                <Button variant="ghost" className="text-white hover:bg-white/20" onClick={handleExportCalendar}>
                   <Download className="h-5 w-5" />
                 </Button>
-                <Button variant="ghost" className="text-white hover:bg-white/20">
+                <Button variant="ghost" className="text-white hover:bg-white/20" onClick={() => setActiveTab('settings')}>
                   <Settings className="h-5 w-5" />
                 </Button>
               </div>
@@ -768,7 +771,7 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
                   <CardTitle className="text-lg font-semibold">Upcoming</CardTitle>
-                  <Button variant="ghost" size="sm">View All</Button>
+                  <Button variant="ghost" size="sm" onClick={() => setActiveTab('events')}>View All</Button>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   {upcomingEvents.slice(0, 5).map(event => (
@@ -812,7 +815,7 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
                   <CardTitle className="text-lg font-semibold">Scheduling Links</CardTitle>
-                  <Button variant="ghost" size="sm">Manage</Button>
+                  <Button variant="ghost" size="sm" onClick={() => setActiveTab('scheduling')}>Manage</Button>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   {mockSchedulingLinks.filter(l => l.isActive).slice(0, 3).map(link => (
@@ -828,7 +831,10 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
                       </div>
                       <div className="flex items-center gap-2 mt-2">
                         <Input value={link.url} readOnly className="text-xs h-8" />
-                        <Button variant="outline" size="sm" className="h-8 w-8 p-0">
+                        <Button variant="outline" size="sm" className="h-8 w-8 p-0" onClick={() => {
+                          navigator.clipboard.writeText(link.url)
+                          toast.success('Scheduling link copied to clipboard')
+                        }}>
                           <Copy className="h-3 w-3" />
                         </Button>
                       </div>
