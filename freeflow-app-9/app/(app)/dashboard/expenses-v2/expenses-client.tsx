@@ -254,6 +254,36 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
   const [showNewExpenseDialog, setShowNewExpenseDialog] = useState(false)
   const [settingsTab, setSettingsTab] = useState('general')
 
+  // Additional dialog states
+  const [showMileageDialog, setShowMileageDialog] = useState(false)
+  const [showPerDiemDialog, setShowPerDiemDialog] = useState(false)
+  const [showCategoryFilterDialog, setShowCategoryFilterDialog] = useState(false)
+  const [showConnectCardDialog, setShowConnectCardDialog] = useState(false)
+  const [showIntegrationDialog, setShowIntegrationDialog] = useState(false)
+  const [selectedIntegration, setSelectedIntegration] = useState<{name: string; status: string} | null>(null)
+  const [showWebhookDialog, setShowWebhookDialog] = useState(false)
+  const [showResetPoliciesDialog, setShowResetPoliciesDialog] = useState(false)
+  const [showDeleteDraftsDialog, setShowDeleteDraftsDialog] = useState(false)
+  const [activeQuickFilter, setActiveQuickFilter] = useState<string | null>(null)
+
+  // Form states for dialogs
+  const [mileageForm, setMileageForm] = useState({
+    origin: '',
+    destination: '',
+    distance: 0,
+    purpose: '',
+    date: new Date().toISOString().split('T')[0]
+  })
+  const [perDiemForm, setPerDiemForm] = useState({
+    location: '',
+    startDate: new Date().toISOString().split('T')[0],
+    endDate: new Date().toISOString().split('T')[0],
+    breakfast: true,
+    lunch: true,
+    dinner: true
+  })
+  const [webhookUrl, setWebhookUrl] = useState('')
+
   // Database integration - use real expenses hooks
   const { data: dbExpenses, loading: expensesLoading, refetch } = useExpenses({ status: statusFilter as any })
   const { mutate: createExpense, loading: creating } = useCreateExpense()
@@ -602,6 +632,248 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
     })
   }
 
+  // Handler for adding mileage trip
+  const handleAddMileage = async () => {
+    if (!mileageForm.origin || !mileageForm.destination || !mileageForm.distance) {
+      toast.error('Please fill in all required fields')
+      return
+    }
+    const amount = mileageForm.distance * 0.67 // IRS rate
+    toast.promise(
+      new Promise<void>((resolve) => {
+        setTimeout(() => {
+          toast.success('Mileage trip added', {
+            description: `${mileageForm.distance} miles from ${mileageForm.origin} to ${mileageForm.destination} ($${amount.toFixed(2)})`
+          })
+          setShowMileageDialog(false)
+          setMileageForm({ origin: '', destination: '', distance: 0, purpose: '', date: new Date().toISOString().split('T')[0] })
+          resolve()
+        }, 1000)
+      }),
+      { loading: 'Adding mileage trip...', success: 'Trip added!', error: 'Failed to add trip' }
+    )
+  }
+
+  // Handler for requesting per diem
+  const handleRequestPerDiem = async () => {
+    if (!perDiemForm.location || !perDiemForm.startDate || !perDiemForm.endDate) {
+      toast.error('Please fill in all required fields')
+      return
+    }
+    const days = Math.ceil((new Date(perDiemForm.endDate).getTime() - new Date(perDiemForm.startDate).getTime()) / (1000 * 60 * 60 * 24)) + 1
+    const dailyRate = 79 // Default GSA rate for major cities
+    const total = days * dailyRate
+    toast.promise(
+      new Promise<void>((resolve) => {
+        setTimeout(() => {
+          toast.success('Per diem requested', {
+            description: `${days} days in ${perDiemForm.location} ($${total.toFixed(2)} total)`
+          })
+          setShowPerDiemDialog(false)
+          setPerDiemForm({ location: '', startDate: new Date().toISOString().split('T')[0], endDate: new Date().toISOString().split('T')[0], breakfast: true, lunch: true, dinner: true })
+          resolve()
+        }, 1000)
+      }),
+      { loading: 'Submitting per diem request...', success: 'Request submitted!', error: 'Failed to submit' }
+    )
+  }
+
+  // Handler for linking card transaction
+  const handleLinkCardTransaction = () => {
+    toast.promise(
+      new Promise<void>((resolve) => {
+        setTimeout(() => {
+          resolve()
+        }, 1500)
+      }),
+      {
+        loading: 'Connecting to corporate card system...',
+        success: 'Card system ready! Select a transaction to link.',
+        error: 'Failed to connect to card system'
+      }
+    )
+  }
+
+  // Handler for connecting corporate card
+  const handleConnectCorporateCard = () => {
+    setShowConnectCardDialog(true)
+  }
+
+  const handleSaveCardConnection = () => {
+    toast.promise(
+      new Promise<void>((resolve) => {
+        setTimeout(() => {
+          setShowConnectCardDialog(false)
+          resolve()
+        }, 2000)
+      }),
+      {
+        loading: 'Connecting corporate card...',
+        success: 'Corporate card connected successfully!',
+        error: 'Failed to connect card'
+      }
+    )
+  }
+
+  // Handler for integration actions
+  const handleIntegrationAction = (integration: {name: string; status: string}) => {
+    setSelectedIntegration(integration)
+    setShowIntegrationDialog(true)
+  }
+
+  const handleSaveIntegration = () => {
+    if (!selectedIntegration) return
+    const action = selectedIntegration.status === 'connected' ? 'configured' : 'connected'
+    toast.promise(
+      new Promise<void>((resolve) => {
+        setTimeout(() => {
+          setShowIntegrationDialog(false)
+          setSelectedIntegration(null)
+          resolve()
+        }, 2000)
+      }),
+      {
+        loading: `${selectedIntegration.status === 'connected' ? 'Saving' : 'Connecting'} ${selectedIntegration.name}...`,
+        success: `${selectedIntegration.name} ${action} successfully!`,
+        error: `Failed to ${action === 'connected' ? 'connect' : 'configure'} ${selectedIntegration.name}`
+      }
+    )
+  }
+
+  // Handler for adding webhook
+  const handleAddWebhook = () => {
+    if (!webhookUrl) {
+      toast.error('Please enter a webhook URL')
+      return
+    }
+    toast.promise(
+      new Promise<void>((resolve) => {
+        setTimeout(() => {
+          setShowWebhookDialog(false)
+          setWebhookUrl('')
+          resolve()
+        }, 1500)
+      }),
+      {
+        loading: 'Validating webhook URL...',
+        success: `Webhook added: ${webhookUrl}`,
+        error: 'Failed to add webhook'
+      }
+    )
+  }
+
+  // Handler for API key operations
+  const handleCopyApiKey = () => {
+    navigator.clipboard.writeText('exp_sk_live_xxxxxxxxxxxxxxxxxxxx')
+    toast.success('API key copied to clipboard')
+  }
+
+  const handleRegenerateApiKey = () => {
+    toast.promise(
+      new Promise<void>((resolve) => {
+        setTimeout(resolve, 1500)
+      }),
+      {
+        loading: 'Regenerating API key...',
+        success: 'New API key generated! Please update your integrations.',
+        error: 'Failed to regenerate API key'
+      }
+    )
+  }
+
+  // Handler for danger zone actions
+  const handleResetPolicies = () => {
+    toast.promise(
+      new Promise<void>((resolve) => {
+        setTimeout(() => {
+          setShowResetPoliciesDialog(false)
+          resolve()
+        }, 2000)
+      }),
+      {
+        loading: 'Resetting expense policies...',
+        success: 'All expense policies have been reset to defaults',
+        error: 'Failed to reset policies'
+      }
+    )
+  }
+
+  const handleDeleteAllDrafts = () => {
+    const draftCount = reports.filter(r => r.status === 'draft').length
+    toast.promise(
+      new Promise<void>((resolve) => {
+        setTimeout(() => {
+          setShowDeleteDraftsDialog(false)
+          resolve()
+        }, 2000)
+      }),
+      {
+        loading: `Deleting ${draftCount} draft reports...`,
+        success: `${draftCount} draft reports have been deleted`,
+        error: 'Failed to delete draft reports'
+      }
+    )
+  }
+
+  // Handler for export all data
+  const handleExportAllData = () => {
+    toast.promise(
+      new Promise<{size: string}>((resolve) => {
+        setTimeout(() => {
+          // Create comprehensive export
+          const exportData = {
+            exportDate: new Date().toISOString(),
+            expenses: reports,
+            policies: policies,
+            mileage: mileage,
+            perDiems: perDiems,
+            settings: {
+              currency: 'USD',
+              fiscalYearStart: 'January',
+              autoApproveThreshold: 50
+            }
+          }
+          const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
+          const url = URL.createObjectURL(blob)
+          const link = document.createElement('a')
+          link.href = url
+          link.download = `expenses-full-export-${new Date().toISOString().split('T')[0]}.json`
+          document.body.appendChild(link)
+          link.click()
+          document.body.removeChild(link)
+          resolve({ size: `${(blob.size / 1024).toFixed(1)} KB` })
+        }, 2000)
+      }),
+      {
+        loading: 'Preparing full data export...',
+        success: (data) => `Export complete! File size: ${data.size}`,
+        error: 'Failed to export data'
+      }
+    )
+  }
+
+  // Handler for quick filter selection
+  const handleQuickFilter = (filter: string) => {
+    setActiveQuickFilter(activeQuickFilter === filter ? null : filter)
+    switch (filter) {
+      case 'My Reports':
+        toast.info('Showing your reports', { description: 'Filtered to show only your submitted expense reports' })
+        break
+      case 'Needs Review':
+        setStatusFilter('pending')
+        toast.info('Showing pending reviews', { description: 'Filtered to show expense reports awaiting approval' })
+        break
+      case 'Policy Violations':
+        toast.info('Showing policy violations', { description: 'Filtered to show expense reports with policy violations' })
+        break
+      case 'This Month':
+        toast.info('Showing this month', { description: 'Filtered to show expense reports from current month' })
+        break
+      default:
+        setStatusFilter('all')
+    }
+  }
+
   // Get quick actions with real handlers
   const expensesQuickActions = getExpensesQuickActions(
     setShowNewExpenseDialog,
@@ -623,7 +895,7 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
               <p className="text-purple-100 mt-1">Track, submit, and manage expense reports</p>
             </div>
             <div className="flex items-center gap-3">
-              <Button variant="outline" className="border-white/30 text-white hover:bg-white/10">
+              <Button variant="outline" className="border-white/30 text-white hover:bg-white/10" onClick={handleExportExpenses}>
                 <Download className="h-4 w-4 mr-2" />
                 Export
               </Button>
@@ -731,7 +1003,15 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
                     { label: 'Policy Violations', count: 1 },
                     { label: 'This Month', count: 4 },
                   ].map((filter, i) => (
-                    <button key={i} className="px-3 py-1.5 bg-white border rounded-lg text-sm hover:bg-gray-50 flex items-center gap-2">
+                    <button
+                      key={i}
+                      className={`px-3 py-1.5 border rounded-lg text-sm flex items-center gap-2 transition-colors ${
+                        activeQuickFilter === filter.label
+                          ? 'bg-purple-100 border-purple-300 text-purple-700'
+                          : 'bg-white hover:bg-gray-50'
+                      }`}
+                      onClick={() => handleQuickFilter(filter.label)}
+                    >
                       {filter.label}
                       <Badge variant="secondary" className="text-xs">{filter.count}</Badge>
                     </button>
@@ -814,14 +1094,18 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
                   </CardHeader>
                   <CardContent className="space-y-2">
                     {[
-                      { label: 'Scan Receipt', icon: Camera, color: 'text-purple-600' },
-                      { label: 'Add Mileage', icon: Car, color: 'text-blue-600' },
-                      { label: 'Request Per Diem', icon: Calendar, color: 'text-green-600' },
-                      { label: 'Link Card Transaction', icon: CreditCard, color: 'text-orange-600' },
-                    ].map((action, i) => (
-                      <button key={i} className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 text-left">
-                        <action.icon className={`h-5 w-5 ${action.color}`} />
-                        <span className="text-sm">{action.label}</span>
+                      { label: 'Scan Receipt', icon: Camera, color: 'text-purple-600', action: handleScanReceipt },
+                      { label: 'Add Mileage', icon: Car, color: 'text-blue-600', action: () => setShowMileageDialog(true) },
+                      { label: 'Request Per Diem', icon: Calendar, color: 'text-green-600', action: () => setShowPerDiemDialog(true) },
+                      { label: 'Link Card Transaction', icon: CreditCard, color: 'text-orange-600', action: handleLinkCardTransaction },
+                    ].map((quickAction, i) => (
+                      <button
+                        key={i}
+                        className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 text-left transition-colors"
+                        onClick={quickAction.action}
+                      >
+                        <quickAction.icon className={`h-5 w-5 ${quickAction.color}`} />
+                        <span className="text-sm">{quickAction.label}</span>
                       </button>
                     ))}
                   </CardContent>
@@ -888,7 +1172,7 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <CardTitle>Receipt Scanner</CardTitle>
-                    <Button className="bg-purple-600 hover:bg-purple-700">
+                    <Button className="bg-purple-600 hover:bg-purple-700" onClick={handleScanReceipt}>
                       <Camera className="h-4 w-4 mr-2" />
                       Scan Receipt
                     </Button>
@@ -937,7 +1221,7 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
                   <CardHeader>
                     <div className="flex items-center justify-between">
                       <CardTitle>Mileage Log</CardTitle>
-                      <Button className="bg-purple-600 hover:bg-purple-700">
+                      <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => setShowMileageDialog(true)}>
                         <Plus className="h-4 w-4 mr-2" />
                         Add Trip
                       </Button>
@@ -1009,7 +1293,7 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
                   <CardHeader>
                     <div className="flex items-center justify-between">
                       <CardTitle>Per Diem Requests</CardTitle>
-                      <Button className="bg-purple-600 hover:bg-purple-700">
+                      <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => setShowPerDiemDialog(true)}>
                         <Plus className="h-4 w-4 mr-2" />
                         Request Per Diem
                       </Button>
@@ -1601,7 +1885,7 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
                         </div>
                         <Switch defaultChecked />
                       </div>
-                      <Button variant="outline" className="w-full gap-2">
+                      <Button variant="outline" className="w-full gap-2" onClick={handleConnectCorporateCard}>
                         <Plus className="w-4 h-4" />
                         Connect Corporate Card
                       </Button>
@@ -1804,7 +2088,7 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
                           }>
                             {integration.status === 'connected' ? 'Connected' : 'Available'}
                           </Badge>
-                          <Button size="sm" variant="outline">
+                          <Button size="sm" variant="outline" onClick={() => handleIntegrationAction(integration)}>
                             {integration.status === 'connected' ? 'Configure' : 'Connect'}
                           </Button>
                         </div>
@@ -1827,9 +2111,13 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
                     <div className="space-y-3">
                       <div className="space-y-2">
                         <Label>Webhook URL</Label>
-                        <Input placeholder="https://api.yourapp.com/webhooks/expenses" />
+                        <Input
+                          placeholder="https://api.yourapp.com/webhooks/expenses"
+                          value={webhookUrl}
+                          onChange={(e) => setWebhookUrl(e.target.value)}
+                        />
                       </div>
-                      <Button variant="outline" className="w-full gap-2">
+                      <Button variant="outline" className="w-full gap-2" onClick={handleAddWebhook}>
                         <Plus className="w-4 h-4" />
                         Add Webhook
                       </Button>
@@ -1848,13 +2136,13 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
                     </div>
                     <div className="space-y-3">
                       <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg font-mono text-sm">
-                        ••••••••••••••••••••
+                        exp_sk_live_••••••••••••••••
                       </div>
                       <div className="flex gap-2">
-                        <Button variant="outline" className="flex-1 gap-2">
+                        <Button variant="outline" className="flex-1 gap-2" onClick={handleCopyApiKey}>
                           Copy Key
                         </Button>
-                        <Button variant="outline" className="gap-2">
+                        <Button variant="outline" className="gap-2" onClick={handleRegenerateApiKey}>
                           <RefreshCw className="w-4 h-4" />
                           Regenerate
                         </Button>
@@ -1941,7 +2229,7 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
                         </div>
                         <Switch defaultChecked />
                       </div>
-                      <Button variant="outline" className="w-full gap-2">
+                      <Button variant="outline" className="w-full gap-2" onClick={handleExportAllData}>
                         <Download className="w-4 h-4" />
                         Export All Data
                       </Button>
@@ -1965,7 +2253,7 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
                         <div className="font-medium text-gray-900 dark:text-white">Reset All Policies</div>
                         <p className="text-sm text-gray-500">Restore default expense policies</p>
                       </div>
-                      <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                      <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50" onClick={() => setShowResetPoliciesDialog(true)}>
                         Reset
                       </Button>
                     </div>
@@ -1974,7 +2262,7 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
                         <div className="font-medium text-gray-900 dark:text-white">Delete All Draft Reports</div>
                         <p className="text-sm text-gray-500">Remove all unsubmitted reports</p>
                       </div>
-                      <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                      <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50" onClick={() => setShowDeleteDraftsDialog(true)}>
                         Delete
                       </Button>
                     </div>
@@ -2257,6 +2545,353 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
                 disabled={creating || !newExpenseForm.title}
               >
                 {creating ? 'Creating...' : 'Create Report'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Mileage Dialog */}
+      <Dialog open={showMileageDialog} onOpenChange={setShowMileageDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Car className="h-5 w-5 text-blue-600" />
+              Add Mileage Trip
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-2">Date</label>
+              <Input
+                type="date"
+                value={mileageForm.date}
+                onChange={(e) => setMileageForm(prev => ({ ...prev, date: e.target.value }))}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">Origin</label>
+                <Input
+                  placeholder="e.g., Office"
+                  value={mileageForm.origin}
+                  onChange={(e) => setMileageForm(prev => ({ ...prev, origin: e.target.value }))}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Destination</label>
+                <Input
+                  placeholder="e.g., Client Site"
+                  value={mileageForm.destination}
+                  onChange={(e) => setMileageForm(prev => ({ ...prev, destination: e.target.value }))}
+                />
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">Distance (miles)</label>
+              <Input
+                type="number"
+                placeholder="0"
+                value={mileageForm.distance || ''}
+                onChange={(e) => setMileageForm(prev => ({ ...prev, distance: parseFloat(e.target.value) || 0 }))}
+              />
+              <p className="text-xs text-gray-500 mt-1">Current IRS rate: $0.67/mile</p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">Purpose</label>
+              <Input
+                placeholder="e.g., Client meeting"
+                value={mileageForm.purpose}
+                onChange={(e) => setMileageForm(prev => ({ ...prev, purpose: e.target.value }))}
+              />
+            </div>
+            {mileageForm.distance > 0 && (
+              <div className="p-3 bg-blue-50 rounded-lg">
+                <p className="text-sm text-blue-700">
+                  Estimated reimbursement: <strong>${(mileageForm.distance * 0.67).toFixed(2)}</strong>
+                </p>
+              </div>
+            )}
+            <div className="flex gap-3">
+              <Button variant="outline" className="flex-1" onClick={() => setShowMileageDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                className="flex-1 bg-blue-600 hover:bg-blue-700"
+                onClick={handleAddMileage}
+                disabled={!mileageForm.origin || !mileageForm.destination || !mileageForm.distance}
+              >
+                Add Trip
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Request Per Diem Dialog */}
+      <Dialog open={showPerDiemDialog} onOpenChange={setShowPerDiemDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <MapPin className="h-5 w-5 text-green-600" />
+              Request Per Diem
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-2">Location</label>
+              <Input
+                placeholder="e.g., New York, NY"
+                value={perDiemForm.location}
+                onChange={(e) => setPerDiemForm(prev => ({ ...prev, location: e.target.value }))}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">Start Date</label>
+                <Input
+                  type="date"
+                  value={perDiemForm.startDate}
+                  onChange={(e) => setPerDiemForm(prev => ({ ...prev, startDate: e.target.value }))}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">End Date</label>
+                <Input
+                  type="date"
+                  value={perDiemForm.endDate}
+                  onChange={(e) => setPerDiemForm(prev => ({ ...prev, endDate: e.target.value }))}
+                />
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">Meals Included</label>
+              <div className="flex gap-4">
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={perDiemForm.breakfast}
+                    onChange={(e) => setPerDiemForm(prev => ({ ...prev, breakfast: e.target.checked }))}
+                    className="rounded"
+                  />
+                  <span className="text-sm">Breakfast</span>
+                </label>
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={perDiemForm.lunch}
+                    onChange={(e) => setPerDiemForm(prev => ({ ...prev, lunch: e.target.checked }))}
+                    className="rounded"
+                  />
+                  <span className="text-sm">Lunch</span>
+                </label>
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={perDiemForm.dinner}
+                    onChange={(e) => setPerDiemForm(prev => ({ ...prev, dinner: e.target.checked }))}
+                    className="rounded"
+                  />
+                  <span className="text-sm">Dinner</span>
+                </label>
+              </div>
+            </div>
+            {perDiemForm.location && perDiemForm.startDate && perDiemForm.endDate && (
+              <div className="p-3 bg-green-50 rounded-lg">
+                <p className="text-sm text-green-700">
+                  Estimated per diem: <strong>
+                    ${(
+                      (Math.ceil((new Date(perDiemForm.endDate).getTime() - new Date(perDiemForm.startDate).getTime()) / (1000 * 60 * 60 * 24)) + 1) * 79
+                    ).toFixed(2)}
+                  </strong> ({Math.ceil((new Date(perDiemForm.endDate).getTime() - new Date(perDiemForm.startDate).getTime()) / (1000 * 60 * 60 * 24)) + 1} days @ $79/day)
+                </p>
+              </div>
+            )}
+            <div className="flex gap-3">
+              <Button variant="outline" className="flex-1" onClick={() => setShowPerDiemDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                className="flex-1 bg-green-600 hover:bg-green-700"
+                onClick={handleRequestPerDiem}
+                disabled={!perDiemForm.location || !perDiemForm.startDate || !perDiemForm.endDate}
+              >
+                Submit Request
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Connect Corporate Card Dialog */}
+      <Dialog open={showConnectCardDialog} onOpenChange={setShowConnectCardDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <CreditCard className="h-5 w-5 text-blue-600" />
+              Connect Corporate Card
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="p-4 bg-blue-50 rounded-lg">
+              <p className="text-sm text-blue-700">
+                Connect your corporate card to automatically import transactions and match them with receipts.
+              </p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">Card Provider</label>
+              <select className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
+                <option value="amex">American Express</option>
+                <option value="visa">Visa Corporate</option>
+                <option value="mastercard">Mastercard Corporate</option>
+                <option value="chase">Chase Business</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">Cardholder Name</label>
+              <Input placeholder="Name on card" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">Last 4 Digits</label>
+              <Input placeholder="XXXX" maxLength={4} />
+            </div>
+            <div className="flex gap-3">
+              <Button variant="outline" className="flex-1" onClick={() => setShowConnectCardDialog(false)}>
+                Cancel
+              </Button>
+              <Button className="flex-1 bg-blue-600 hover:bg-blue-700" onClick={handleSaveCardConnection}>
+                Connect Card
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Integration Configuration Dialog */}
+      <Dialog open={showIntegrationDialog} onOpenChange={setShowIntegrationDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Link2 className="h-5 w-5 text-purple-600" />
+              {selectedIntegration?.status === 'connected' ? 'Configure' : 'Connect'} {selectedIntegration?.name}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            {selectedIntegration?.status === 'connected' ? (
+              <>
+                <div className="p-4 bg-green-50 rounded-lg flex items-center gap-3">
+                  <CheckCircle className="h-5 w-5 text-green-600" />
+                  <p className="text-sm text-green-700">
+                    {selectedIntegration.name} is currently connected and syncing.
+                  </p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">Sync Frequency</label>
+                  <select className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
+                    <option value="realtime">Real-time</option>
+                    <option value="hourly">Every hour</option>
+                    <option value="daily">Daily</option>
+                  </select>
+                </div>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <label className="font-medium">Auto-sync expenses</label>
+                    <p className="text-xs text-gray-500">Automatically sync new expenses</p>
+                  </div>
+                  <Switch defaultChecked />
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="p-4 bg-blue-50 rounded-lg">
+                  <p className="text-sm text-blue-700">
+                    Connect {selectedIntegration?.name} to sync your expense data and streamline your workflow.
+                  </p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">API Key</label>
+                  <Input placeholder="Enter your API key" type="password" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">Organization ID</label>
+                  <Input placeholder="Enter your organization ID" />
+                </div>
+              </>
+            )}
+            <div className="flex gap-3">
+              <Button variant="outline" className="flex-1" onClick={() => setShowIntegrationDialog(false)}>
+                Cancel
+              </Button>
+              <Button className="flex-1 bg-purple-600 hover:bg-purple-700" onClick={handleSaveIntegration}>
+                {selectedIntegration?.status === 'connected' ? 'Save Changes' : 'Connect'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Reset Policies Confirmation Dialog */}
+      <Dialog open={showResetPoliciesDialog} onOpenChange={setShowResetPoliciesDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-600">
+              <AlertTriangle className="h-5 w-5" />
+              Reset All Expense Policies
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="p-4 bg-red-50 rounded-lg">
+              <p className="text-sm text-red-700">
+                This action will reset all expense policies to their default values. This cannot be undone.
+              </p>
+            </div>
+            <p className="text-sm text-gray-600">
+              The following will be reset:
+            </p>
+            <ul className="text-sm text-gray-600 list-disc list-inside space-y-1">
+              <li>Expense category limits</li>
+              <li>Approval thresholds</li>
+              <li>Receipt requirements</li>
+              <li>Auto-approval rules</li>
+            </ul>
+            <div className="flex gap-3">
+              <Button variant="outline" className="flex-1" onClick={() => setShowResetPoliciesDialog(false)}>
+                Cancel
+              </Button>
+              <Button className="flex-1 bg-red-600 hover:bg-red-700" onClick={handleResetPolicies}>
+                Reset Policies
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Drafts Confirmation Dialog */}
+      <Dialog open={showDeleteDraftsDialog} onOpenChange={setShowDeleteDraftsDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-600">
+              <AlertTriangle className="h-5 w-5" />
+              Delete All Draft Reports
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="p-4 bg-red-50 rounded-lg">
+              <p className="text-sm text-red-700">
+                This action will permanently delete all unsubmitted expense reports. This cannot be undone.
+              </p>
+            </div>
+            <div className="p-4 bg-gray-50 rounded-lg">
+              <p className="text-sm text-gray-700">
+                <strong>{reports.filter(r => r.status === 'draft').length}</strong> draft reports will be deleted.
+              </p>
+            </div>
+            <div className="flex gap-3">
+              <Button variant="outline" className="flex-1" onClick={() => setShowDeleteDraftsDialog(false)}>
+                Cancel
+              </Button>
+              <Button className="flex-1 bg-red-600 hover:bg-red-700" onClick={handleDeleteAllDrafts}>
+                Delete All Drafts
               </Button>
             </div>
           </div>

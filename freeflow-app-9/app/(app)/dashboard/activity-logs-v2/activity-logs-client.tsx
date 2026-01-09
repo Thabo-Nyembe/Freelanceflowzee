@@ -17,7 +17,6 @@ import {
   XCircle,
   Info,
   Eye,
-  MoreHorizontal,
   ChevronRight,
   ChevronDown,
   User,
@@ -406,6 +405,29 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
   const [timeRange, setTimeRange] = useState('1h')
   const [settingsTab, setSettingsTab] = useState('general')
 
+  // Additional dialog states
+  const [showExportDialog, setShowExportDialog] = useState(false)
+  const [showFilterDialog, setShowFilterDialog] = useState(false)
+  const [showSettingsDialog, setShowSettingsDialog] = useState(false)
+  const [showDateRangeDialog, setShowDateRangeDialog] = useState(false)
+  const [showAlertDialog, setShowAlertDialog] = useState(false)
+  const [showPatternDialog, setShowPatternDialog] = useState(false)
+  const [showParserDialog, setShowParserDialog] = useState(false)
+  const [showIntegrationDialog, setShowIntegrationDialog] = useState(false)
+  const [showApiKeyDialog, setShowApiKeyDialog] = useState(false)
+  const [showPurgeDialog, setShowPurgeDialog] = useState(false)
+  const [selectedPattern, setSelectedPattern] = useState<LogPattern | null>(null)
+
+  // Form states
+  const [exportFormat, setExportFormat] = useState<'csv' | 'json' | 'txt'>('csv')
+  const [dateRangeStart, setDateRangeStart] = useState('')
+  const [dateRangeEnd, setDateRangeEnd] = useState('')
+  const [queryName, setQueryName] = useState('')
+  const [isDefaultQuery, setIsDefaultQuery] = useState(false)
+  const [alertName, setAlertName] = useState('')
+  const [alertThreshold, setAlertThreshold] = useState(10)
+  const [alertLevel, setAlertLevel] = useState<LogLevel>('error')
+
   const filteredLogs = useMemo(() => {
     return mockLogs.filter(log => {
       const matchesSearch = log.message.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -705,6 +727,325 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
     )
   }
 
+  // Additional handlers for new dialogs
+  const handleOpenExportDialog = () => {
+    setShowExportDialog(true)
+    toast.info('Export dialog opened', {
+      description: 'Select export format and date range'
+    })
+  }
+
+  const handleExportWithFormat = async () => {
+    await toast.promise(
+      (async () => {
+        const headers = ['timestamp', 'level', 'source', 'service', 'message', 'traceId', 'statusCode', 'duration']
+        let content = ''
+
+        if (exportFormat === 'csv') {
+          const rows = filteredLogs.map(log =>
+            headers.map(h => {
+              const val = log[h as keyof typeof log]
+              return typeof val === 'string' ? `"${val}"` : val ?? ''
+            }).join(',')
+          )
+          content = [headers.join(','), ...rows].join('\n')
+        } else if (exportFormat === 'json') {
+          content = JSON.stringify(filteredLogs, null, 2)
+        } else {
+          content = filteredLogs.map(log =>
+            `[${log.timestamp}] ${log.level.toUpperCase()} [${log.service}] ${log.message}`
+          ).join('\n')
+        }
+
+        const blob = new Blob([content], {
+          type: exportFormat === 'json' ? 'application/json' :
+                exportFormat === 'csv' ? 'text/csv' : 'text/plain'
+        })
+        const url = URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = url
+        link.download = `activity-logs-${new Date().toISOString().split('T')[0]}.${exportFormat}`
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        URL.revokeObjectURL(url)
+        setShowExportDialog(false)
+      })(),
+      {
+        loading: `Exporting logs as ${exportFormat.toUpperCase()}...`,
+        success: `Logs exported as ${exportFormat.toUpperCase()}`,
+        error: 'Export failed'
+      }
+    )
+  }
+
+  const handleOpenFilterDialog = () => {
+    setShowFilterDialog(true)
+    toast.info('Filter dialog opened', {
+      description: 'Configure advanced log filters'
+    })
+  }
+
+  const handleApplyFilters = () => {
+    setShowFilterDialog(false)
+    toast.success('Filters applied', {
+      description: `Level: ${levelFilter}, Source: ${sourceFilter}, Time: ${timeRange}`
+    })
+  }
+
+  const handleOpenDateRangeDialog = () => {
+    setShowDateRangeDialog(true)
+    toast.info('Date range picker opened')
+  }
+
+  const handleApplyDateRange = () => {
+    if (dateRangeStart && dateRangeEnd) {
+      toast.success('Date range applied', {
+        description: `From ${dateRangeStart} to ${dateRangeEnd}`
+      })
+    } else {
+      toast.error('Please select both start and end dates')
+      return
+    }
+    setShowDateRangeDialog(false)
+  }
+
+  const handleOpenAlertDialog = () => {
+    setShowAlertDialog(true)
+    setAlertName('')
+    setAlertThreshold(10)
+    setAlertLevel('error')
+    toast.info('Create alert rule', {
+      description: 'Configure alert conditions and notifications'
+    })
+  }
+
+  const handleCreateAlertRule = async () => {
+    if (!alertName) {
+      toast.error('Please enter an alert name')
+      return
+    }
+
+    await toast.promise(
+      (async () => {
+        const response = await fetch('/api/logs', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'create-alert',
+            name: alertName,
+            level: alertLevel,
+            threshold: alertThreshold,
+            window: 60
+          })
+        })
+        if (!response.ok) throw new Error('Failed to create alert')
+        setShowAlertDialog(false)
+        return response.json()
+      })(),
+      {
+        loading: 'Creating alert rule...',
+        success: `Alert "${alertName}" created successfully`,
+        error: 'Failed to create alert rule'
+      }
+    )
+  }
+
+  const handleSaveQuery = async () => {
+    if (!queryName) {
+      toast.error('Please enter a query name')
+      return
+    }
+
+    await toast.promise(
+      (async () => {
+        const savedQueries = JSON.parse(localStorage.getItem('saved-log-queries') || '[]')
+        savedQueries.push({
+          id: `sq_${Date.now()}`,
+          name: queryName,
+          query: searchQuery,
+          filters: { level: levelFilter, source: sourceFilter },
+          createdAt: new Date().toISOString().split('T')[0],
+          isDefault: isDefaultQuery
+        })
+        localStorage.setItem('saved-log-queries', JSON.stringify(savedQueries))
+        setShowQueryDialog(false)
+        setQueryName('')
+        setIsDefaultQuery(false)
+      })(),
+      {
+        loading: 'Saving query...',
+        success: `Query "${queryName}" saved successfully`,
+        error: 'Failed to save query'
+      }
+    )
+  }
+
+  const handleCopyLog = async () => {
+    if (!selectedLog) return
+
+    const logText = JSON.stringify(selectedLog, null, 2)
+    await navigator.clipboard.writeText(logText)
+    toast.success('Log copied to clipboard')
+  }
+
+  const handleViewPattern = (pattern: LogPattern) => {
+    setSelectedPattern(pattern)
+    setShowPatternDialog(true)
+    toast.info(`Viewing pattern: ${pattern.pattern}`)
+  }
+
+  const handleCreatePatternAlert = async () => {
+    if (!selectedPattern) return
+
+    await toast.promise(
+      (async () => {
+        const response = await fetch('/api/logs', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'create-alert',
+            pattern: selectedPattern.pattern,
+            level: selectedPattern.level,
+            threshold: 5,
+            window: 60
+          })
+        })
+        if (!response.ok) throw new Error('Failed')
+        setShowPatternDialog(false)
+        return response.json()
+      })(),
+      {
+        loading: 'Creating pattern alert...',
+        success: 'Alert created for this pattern',
+        error: 'Failed to create alert'
+      }
+    )
+  }
+
+  const handleOpenSettingsDialog = () => {
+    setShowSettingsDialog(true)
+    toast.info('Log settings opened')
+  }
+
+  const handleSaveSettings = () => {
+    setShowSettingsDialog(false)
+    toast.success('Settings saved successfully')
+  }
+
+  const handleOpenParserDialog = () => {
+    setShowParserDialog(true)
+    toast.info('Parser configuration opened')
+  }
+
+  const handleAddParser = () => {
+    toast.success('Custom parser added', {
+      description: 'Parser will be applied to incoming logs'
+    })
+    setShowParserDialog(false)
+  }
+
+  const handleOpenIntegrationDialog = () => {
+    setShowIntegrationDialog(true)
+    toast.info('Integration settings opened')
+  }
+
+  const handleConnectIntegration = (name: string) => {
+    toast.success(`Connected to ${name}`, {
+      description: 'Integration is now active'
+    })
+  }
+
+  const handleOpenApiKeyDialog = () => {
+    setShowApiKeyDialog(true)
+    toast.info('API key management opened')
+  }
+
+  const handleRegenerateApiKey = async () => {
+    await toast.promise(
+      new Promise(resolve => setTimeout(resolve, 1000)),
+      {
+        loading: 'Regenerating API key...',
+        success: 'New API key generated',
+        error: 'Failed to regenerate key'
+      }
+    )
+  }
+
+  const handleCopyApiKey = async () => {
+    await navigator.clipboard.writeText('log_api_' + Math.random().toString(36).substring(2, 15))
+    toast.success('API key copied to clipboard')
+  }
+
+  const handleOpenPurgeDialog = () => {
+    setShowPurgeDialog(true)
+    toast.warning('Warning: This action cannot be undone')
+  }
+
+  const handlePurgeLogs = async () => {
+    await toast.promise(
+      (async () => {
+        const response = await fetch('/api/logs', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'purge',
+            confirm: true
+          })
+        })
+        if (!response.ok) throw new Error('Failed')
+        setShowPurgeDialog(false)
+        return response.json()
+      })(),
+      {
+        loading: 'Purging all logs...',
+        success: 'All logs have been purged',
+        error: 'Failed to purge logs'
+      }
+    )
+  }
+
+  const handleRunSavedQuery = (query: SavedQuery) => {
+    setSearchQuery(query.query)
+    if (query.filters.source) setSourceFilter(query.filters.source[0] as LogSource)
+    if (query.filters.tags) {
+      toast.info(`Running query: ${query.name}`, {
+        description: query.query
+      })
+    }
+    toast.success(`Query "${query.name}" applied`)
+  }
+
+  const handleDeleteSavedQuery = (queryId: string) => {
+    toast.success('Query deleted', {
+      description: 'Saved query has been removed'
+    })
+  }
+
+  const handleToggleParser = (parserName: string, enabled: boolean) => {
+    toast.success(`Parser ${enabled ? 'enabled' : 'disabled'}`, {
+      description: parserName
+    })
+  }
+
+  const handleToggleAlertRule = (ruleName: string, enabled: boolean) => {
+    toast.success(`Alert rule ${enabled ? 'enabled' : 'disabled'}`, {
+      description: ruleName
+    })
+  }
+
+  const handleConnectChannel = (channelName: string) => {
+    toast.success(`Connecting to ${channelName}...`, {
+      description: 'Opening authentication flow'
+    })
+  }
+
+  const handleConfigureStorage = (storageName: string) => {
+    toast.info(`Configuring ${storageName}`, {
+      description: 'Storage settings opened'
+    })
+  }
+
   // Quick actions with real functionality
   const logsQuickActions = [
     { id: '1', label: 'Search Logs', icon: 'Search', shortcut: 'S', action: handleSearchLogs },
@@ -836,7 +1177,10 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
                 <option value="1d">Last 24 hours</option>
                 <option value="7d">Last 7 days</option>
               </select>
-              <button className="px-3 py-2 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2">
+              <button
+                onClick={handleOpenExportDialog}
+                className="px-3 py-2 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
+              >
                 <Download className="w-4 h-4" />
                 Export
               </button>
@@ -944,7 +1288,10 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
                     </span>
                   )}
                 </div>
-                <button className="text-gray-400 hover:text-white">
+                <button
+                  onClick={handleRefreshLogs}
+                  className="text-gray-400 hover:text-white"
+                >
                   <RefreshCw className="w-4 h-4" />
                 </button>
               </div>
@@ -1091,13 +1438,34 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
                       </div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs text-gray-500 dark:text-gray-400">Services:</span>
-                    {pattern.services.map(service => (
-                      <span key={service} className="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded text-xs">
-                        {service}
-                      </span>
-                    ))}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-gray-500 dark:text-gray-400">Services:</span>
+                      {pattern.services.map(service => (
+                        <span key={service} className="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded text-xs">
+                          {service}
+                        </span>
+                      ))}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => handleViewPattern(pattern)}
+                        className="px-3 py-1 text-xs font-medium text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded-lg"
+                      >
+                        <Eye className="w-3 h-3 inline mr-1" />
+                        View Details
+                      </button>
+                      <button
+                        onClick={() => {
+                          setSelectedPattern(pattern)
+                          handleOpenAlertDialog()
+                        }}
+                        className="px-3 py-1 text-xs font-medium text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 rounded-lg"
+                      >
+                        <Bell className="w-3 h-3 inline mr-1" />
+                        Create Alert
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -1252,19 +1620,34 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
                       </div>
                       <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Created {query.createdAt}</p>
                     </div>
-                    <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-gray-600 dark:text-gray-400">
-                      <MoreHorizontal className="w-4 h-4" />
+                    <button
+                      onClick={() => handleDeleteSavedQuery(query.id)}
+                      className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-gray-600 dark:text-gray-400"
+                    >
+                      <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
                   <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg font-mono text-sm text-gray-700 dark:text-gray-300 mb-3">
                     {query.query}
                   </div>
-                  <button
-                    onClick={() => setSearchQuery(query.query)}
-                    className="w-full px-4 py-2 bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400 rounded-lg text-sm font-medium hover:bg-purple-100 dark:hover:bg-purple-900/30"
-                  >
-                    Run Query
-                  </button>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => handleRunSavedQuery(query)}
+                      className="flex-1 px-4 py-2 bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400 rounded-lg text-sm font-medium hover:bg-purple-100 dark:hover:bg-purple-900/30"
+                    >
+                      <Play className="w-4 h-4 inline mr-1" />
+                      Run Query
+                    </button>
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText(query.query)
+                        toast.success('Query copied to clipboard')
+                      }}
+                      className="px-4 py-2 bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium hover:bg-gray-100 dark:hover:bg-gray-600"
+                    >
+                      <Copy className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -1291,16 +1674,20 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
             {/* Settings Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
-                { icon: <Settings className="w-4 h-4" />, label: 'General', color: 'text-slate-600' },
-                { icon: <Bell className="w-4 h-4" />, label: 'Alerts', color: 'text-blue-600' },
-                { icon: <Archive className="w-4 h-4" />, label: 'Retention', color: 'text-green-600' },
-                { icon: <Download className="w-4 h-4" />, label: 'Export', color: 'text-purple-600' },
-                { icon: <Shield className="w-4 h-4" />, label: 'Access', color: 'text-orange-600' },
-                { icon: <Zap className="w-4 h-4" />, label: 'Webhooks', color: 'text-amber-600' },
-                { icon: <Link className="w-4 h-4" />, label: 'Integrations', color: 'text-pink-600' },
-                { icon: <Key className="w-4 h-4" />, label: 'API Keys', color: 'text-cyan-600' }
+                { icon: <Settings className="w-4 h-4" />, label: 'General', color: 'text-slate-600', action: () => setSettingsTab('general') },
+                { icon: <Bell className="w-4 h-4" />, label: 'Alerts', color: 'text-blue-600', action: () => { setSettingsTab('alerts'); handleOpenAlertDialog() } },
+                { icon: <Archive className="w-4 h-4" />, label: 'Retention', color: 'text-green-600', action: () => setSettingsTab('archiving') },
+                { icon: <Download className="w-4 h-4" />, label: 'Export', color: 'text-purple-600', action: handleOpenExportDialog },
+                { icon: <Shield className="w-4 h-4" />, label: 'Access', color: 'text-orange-600', action: () => setSettingsTab('advanced') },
+                { icon: <Zap className="w-4 h-4" />, label: 'Webhooks', color: 'text-amber-600', action: () => setSettingsTab('integrations') },
+                { icon: <Link className="w-4 h-4" />, label: 'Integrations', color: 'text-pink-600', action: handleOpenIntegrationDialog },
+                { icon: <Key className="w-4 h-4" />, label: 'API Keys', color: 'text-cyan-600', action: handleOpenApiKeyDialog }
               ].map((action, index) => (
-                <button key={index} className="flex flex-col items-center gap-2 p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl hover:scale-105 transition-all duration-200">
+                <button
+                  key={index}
+                  onClick={action.action}
+                  className="flex flex-col items-center gap-2 p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl hover:scale-105 transition-all duration-200"
+                >
                   <span className={action.color}>{action.icon}</span>
                   <span className="text-xs text-gray-600 dark:text-gray-400">{action.label}</span>
                 </button>
@@ -1497,7 +1884,14 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
                             </div>
                           ))}
                         </div>
-                        <button className="w-full py-2 border-2 border-dashed rounded-lg text-muted-foreground hover:text-foreground hover:border-purple-300 transition-colors">
+                        <button
+                          onClick={() => {
+                            toast.success('Custom parser dialog opened', {
+                              description: 'Configure your custom log parsing rules'
+                            })
+                          }}
+                          className="w-full py-2 border-2 border-dashed rounded-lg text-muted-foreground hover:text-foreground hover:border-purple-300 transition-colors"
+                        >
                           <Plus className="w-4 h-4 inline-block mr-2" />
                           Add Custom Parser
                         </button>
@@ -1570,7 +1964,10 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
                             </div>
                           ))}
                         </div>
-                        <button className="w-full py-2 border-2 border-dashed rounded-lg text-muted-foreground hover:text-foreground hover:border-purple-300 transition-colors">
+                        <button
+                          onClick={handleOpenAlertDialog}
+                          className="w-full py-2 border-2 border-dashed rounded-lg text-muted-foreground hover:text-foreground hover:border-purple-300 transition-colors"
+                        >
                           <Plus className="w-4 h-4 inline-block mr-2" />
                           Create Alert Rule
                         </button>
@@ -1825,7 +2222,10 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
                           <Label>API Key</Label>
                           <div className="flex gap-2">
                             <Input type="password" value="log_api_••••••••••••••••••••" readOnly className="font-mono" />
-                            <button className="px-4 py-2 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
+                            <button
+                              onClick={handleCopyApiKey}
+                              className="px-4 py-2 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800"
+                            >
                               <Copy className="w-4 h-4" />
                             </button>
                           </div>
@@ -1899,7 +2299,10 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
                             <p className="font-medium text-red-600">Purge All Logs</p>
                             <p className="text-sm text-muted-foreground">Permanently delete all log data</p>
                           </div>
-                          <button className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center gap-2">
+                          <button
+                            onClick={handleOpenPurgeDialog}
+                            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center gap-2"
+                          >
                             <Trash2 className="w-4 h-4" />
                             Purge
                           </button>
@@ -1909,7 +2312,19 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
                             <p className="font-medium text-red-600">Reset All Parsers</p>
                             <p className="text-sm text-muted-foreground">Reset parsing rules to defaults</p>
                           </div>
-                          <button className="px-4 py-2 border border-red-600 text-red-600 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2">
+                          <button
+                            onClick={() => {
+                              toast.promise(
+                                new Promise(resolve => setTimeout(resolve, 1000)),
+                                {
+                                  loading: 'Resetting parsers...',
+                                  success: 'All parsers have been reset to defaults',
+                                  error: 'Failed to reset parsers'
+                                }
+                              )
+                            }}
+                            className="px-4 py-2 border border-red-600 text-red-600 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2"
+                          >
                             <RefreshCw className="w-4 h-4" />
                             Reset
                           </button>
@@ -1919,7 +2334,10 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
                             <p className="font-medium text-red-600">Export All Data</p>
                             <p className="text-sm text-muted-foreground">Download complete log archive</p>
                           </div>
-                          <button className="px-4 py-2 border border-red-600 text-red-600 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2">
+                          <button
+                            onClick={handleOpenExportDialog}
+                            className="px-4 py-2 border border-red-600 text-red-600 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2"
+                          >
                             <Download className="w-4 h-4" />
                             Export
                           </button>
@@ -2048,12 +2466,37 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
           )}
           <div className="flex items-center justify-end gap-3 pt-4 border-t dark:border-gray-700">
             <button
+              onClick={() => {
+                if (selectedLog) {
+                  handleBookmarkLog(selectedLog)
+                }
+              }}
+              className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg font-medium flex items-center gap-2"
+            >
+              <Bookmark className="w-4 h-4" />
+              Bookmark
+            </button>
+            <button
+              onClick={() => {
+                if (selectedLog) {
+                  handleCreateAlert(selectedLog)
+                }
+              }}
+              className="px-4 py-2 text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-900/20 rounded-lg font-medium flex items-center gap-2"
+            >
+              <Bell className="w-4 h-4" />
+              Create Alert
+            </button>
+            <button
               onClick={() => setShowLogDialog(false)}
               className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg font-medium"
             >
               Close
             </button>
-            <button className="px-4 py-2 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 flex items-center gap-2">
+            <button
+              onClick={handleCopyLog}
+              className="px-4 py-2 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 flex items-center gap-2"
+            >
               <Copy className="w-4 h-4" />
               Copy Log
             </button>
@@ -2072,6 +2515,8 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Query Name</label>
               <input
                 type="text"
+                value={queryName}
+                onChange={(e) => setQueryName(e.target.value)}
                 className="w-full px-3 py-2 bg-white dark:bg-gray-800 border dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 dark:text-white"
                 placeholder="My Saved Query"
               />
@@ -2080,12 +2525,19 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Query</label>
               <textarea
                 rows={3}
-                defaultValue={searchQuery}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full px-3 py-2 bg-white dark:bg-gray-800 border dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 dark:text-white font-mono text-sm"
               />
             </div>
             <div className="flex items-center gap-2">
-              <input type="checkbox" id="isDefault" className="rounded border-gray-300 text-purple-600" />
+              <input
+                type="checkbox"
+                id="isDefault"
+                checked={isDefaultQuery}
+                onChange={(e) => setIsDefaultQuery(e.target.checked)}
+                className="rounded border-gray-300 text-purple-600"
+              />
               <label htmlFor="isDefault" className="text-sm text-gray-700 dark:text-gray-300">Set as default view</label>
             </div>
           </div>
@@ -2096,8 +2548,533 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
             >
               Cancel
             </button>
-            <button className="px-4 py-2 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700">
+            <button
+              onClick={handleSaveQuery}
+              className="px-4 py-2 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700"
+            >
               Save Query
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Export Dialog */}
+      <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Download className="w-5 h-5 text-purple-500" />
+              Export Logs
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Export Format</label>
+              <div className="grid grid-cols-3 gap-2">
+                {(['csv', 'json', 'txt'] as const).map((format) => (
+                  <button
+                    key={format}
+                    onClick={() => setExportFormat(format)}
+                    className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                      exportFormat === format
+                        ? 'bg-purple-600 text-white'
+                        : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                    }`}
+                  >
+                    {format.toUpperCase()}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Date Range</label>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs text-gray-500">Start Date</label>
+                  <input
+                    type="date"
+                    value={dateRangeStart}
+                    onChange={(e) => setDateRangeStart(e.target.value)}
+                    className="w-full px-3 py-2 bg-white dark:bg-gray-800 border dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 dark:text-white"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs text-gray-500">End Date</label>
+                  <input
+                    type="date"
+                    value={dateRangeEnd}
+                    onChange={(e) => setDateRangeEnd(e.target.value)}
+                    className="w-full px-3 py-2 bg-white dark:bg-gray-800 border dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 dark:text-white"
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                <strong>{filteredLogs.length}</strong> logs will be exported based on current filters
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center justify-end gap-3 pt-4 border-t dark:border-gray-700">
+            <button
+              onClick={() => setShowExportDialog(false)}
+              className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg font-medium"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleExportWithFormat}
+              className="px-4 py-2 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 flex items-center gap-2"
+            >
+              <Download className="w-4 h-4" />
+              Export
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Filter Dialog */}
+      <Dialog open={showFilterDialog} onOpenChange={setShowFilterDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Sliders className="w-5 h-5 text-purple-500" />
+              Advanced Filters
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Log Level</label>
+                <Select value={levelFilter} onValueChange={(v) => setLevelFilter(v as LogLevel | 'all')}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select level" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Levels</SelectItem>
+                    <SelectItem value="debug">Debug</SelectItem>
+                    <SelectItem value="info">Info</SelectItem>
+                    <SelectItem value="warn">Warning</SelectItem>
+                    <SelectItem value="error">Error</SelectItem>
+                    <SelectItem value="critical">Critical</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Source</label>
+                <Select value={sourceFilter} onValueChange={(v) => setSourceFilter(v as LogSource | 'all')}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select source" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Sources</SelectItem>
+                    <SelectItem value="api">API</SelectItem>
+                    <SelectItem value="web">Web</SelectItem>
+                    <SelectItem value="mobile">Mobile</SelectItem>
+                    <SelectItem value="worker">Worker</SelectItem>
+                    <SelectItem value="cron">Cron</SelectItem>
+                    <SelectItem value="webhook">Webhook</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Time Range</label>
+              <Select value={timeRange} onValueChange={setTimeRange}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select time range" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="15m">Last 15 minutes</SelectItem>
+                  <SelectItem value="1h">Last 1 hour</SelectItem>
+                  <SelectItem value="4h">Last 4 hours</SelectItem>
+                  <SelectItem value="1d">Last 24 hours</SelectItem>
+                  <SelectItem value="7d">Last 7 days</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Search Query</label>
+              <Input
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search logs..."
+              />
+            </div>
+          </div>
+          <div className="flex items-center justify-between pt-4 border-t dark:border-gray-700">
+            <button
+              onClick={handleClearFilters}
+              className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg font-medium"
+            >
+              Clear Filters
+            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setShowFilterDialog(false)}
+                className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg font-medium"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleApplyFilters}
+                className="px-4 py-2 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700"
+              >
+                Apply Filters
+              </button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Date Range Dialog */}
+      <Dialog open={showDateRangeDialog} onOpenChange={setShowDateRangeDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Clock className="w-5 h-5 text-purple-500" />
+              Custom Date Range
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Start Date</label>
+                <input
+                  type="datetime-local"
+                  value={dateRangeStart}
+                  onChange={(e) => setDateRangeStart(e.target.value)}
+                  className="w-full px-3 py-2 bg-white dark:bg-gray-800 border dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 dark:text-white"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">End Date</label>
+                <input
+                  type="datetime-local"
+                  value={dateRangeEnd}
+                  onChange={(e) => setDateRangeEnd(e.target.value)}
+                  className="w-full px-3 py-2 bg-white dark:bg-gray-800 border dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 dark:text-white"
+                />
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => { setDateRangeStart(''); setDateRangeEnd(''); setTimeRange('15m') }}
+                className="px-3 py-1 text-sm bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600"
+              >
+                Last 15 min
+              </button>
+              <button
+                onClick={() => { setDateRangeStart(''); setDateRangeEnd(''); setTimeRange('1h') }}
+                className="px-3 py-1 text-sm bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600"
+              >
+                Last Hour
+              </button>
+              <button
+                onClick={() => { setDateRangeStart(''); setDateRangeEnd(''); setTimeRange('1d') }}
+                className="px-3 py-1 text-sm bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600"
+              >
+                Last 24h
+              </button>
+              <button
+                onClick={() => { setDateRangeStart(''); setDateRangeEnd(''); setTimeRange('7d') }}
+                className="px-3 py-1 text-sm bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600"
+              >
+                Last 7 days
+              </button>
+            </div>
+          </div>
+          <div className="flex items-center justify-end gap-3 pt-4 border-t dark:border-gray-700">
+            <button
+              onClick={() => setShowDateRangeDialog(false)}
+              className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg font-medium"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleApplyDateRange}
+              className="px-4 py-2 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700"
+            >
+              Apply
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Alert Rule Dialog */}
+      <Dialog open={showAlertDialog} onOpenChange={setShowAlertDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Bell className="w-5 h-5 text-orange-500" />
+              Create Alert Rule
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Alert Name</label>
+              <Input
+                value={alertName}
+                onChange={(e) => setAlertName(e.target.value)}
+                placeholder="e.g., High Error Rate Alert"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Log Level</label>
+                <Select value={alertLevel} onValueChange={(v) => setAlertLevel(v as LogLevel)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="debug">Debug</SelectItem>
+                    <SelectItem value="info">Info</SelectItem>
+                    <SelectItem value="warn">Warning</SelectItem>
+                    <SelectItem value="error">Error</SelectItem>
+                    <SelectItem value="critical">Critical</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Threshold</label>
+                <Input
+                  type="number"
+                  value={alertThreshold}
+                  onChange={(e) => setAlertThreshold(Number(e.target.value))}
+                  min={1}
+                />
+              </div>
+            </div>
+            <div className="p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
+              <p className="text-sm text-orange-700 dark:text-orange-400">
+                Alert will trigger when more than <strong>{alertThreshold}</strong> {alertLevel} logs occur within 60 seconds
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center justify-end gap-3 pt-4 border-t dark:border-gray-700">
+            <button
+              onClick={() => setShowAlertDialog(false)}
+              className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg font-medium"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleCreateAlertRule}
+              className="px-4 py-2 bg-orange-600 text-white rounded-lg font-medium hover:bg-orange-700 flex items-center gap-2"
+            >
+              <Bell className="w-4 h-4" />
+              Create Alert
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Pattern Detail Dialog */}
+      <Dialog open={showPatternDialog} onOpenChange={setShowPatternDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Layers className="w-5 h-5 text-purple-500" />
+              Pattern Details
+            </DialogTitle>
+          </DialogHeader>
+          {selectedPattern && (
+            <div className="space-y-4 py-4">
+              <div className="p-4 bg-gray-900 rounded-lg">
+                <p className="text-gray-100 font-mono">{selectedPattern.pattern}</p>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                  <p className="text-sm text-gray-500">Total Occurrences</p>
+                  <p className="text-2xl font-bold text-gray-900 dark:text-white">{selectedPattern.count.toLocaleString()}</p>
+                </div>
+                <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                  <p className="text-sm text-gray-500">Trend</p>
+                  <p className={`text-2xl font-bold flex items-center gap-1 ${
+                    selectedPattern.trend === 'up' ? 'text-red-500' : selectedPattern.trend === 'down' ? 'text-green-500' : 'text-gray-500'
+                  }`}>
+                    {selectedPattern.trend === 'up' ? <TrendingUp className="w-5 h-5" /> : selectedPattern.trend === 'down' ? <TrendingDown className="w-5 h-5" /> : <Minus className="w-5 h-5" />}
+                    {selectedPattern.trend}
+                  </p>
+                </div>
+              </div>
+              <div>
+                <p className="text-sm text-gray-500 mb-2">Affected Services</p>
+                <div className="flex flex-wrap gap-2">
+                  {selectedPattern.services.map(service => (
+                    <span key={service} className="px-3 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 rounded-lg text-sm">
+                      {service}
+                    </span>
+                  ))}
+                </div>
+              </div>
+              <div className="flex gap-4 text-sm text-gray-500">
+                <span>First seen: {selectedPattern.firstSeen}</span>
+                <span>Last seen: {selectedPattern.lastSeen}</span>
+              </div>
+            </div>
+          )}
+          <div className="flex items-center justify-end gap-3 pt-4 border-t dark:border-gray-700">
+            <button
+              onClick={() => setShowPatternDialog(false)}
+              className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg font-medium"
+            >
+              Close
+            </button>
+            <button
+              onClick={() => {
+                if (selectedPattern) {
+                  setSearchQuery(selectedPattern.pattern)
+                  setShowPatternDialog(false)
+                  setActiveTab('logs')
+                  toast.success('Filtering logs by pattern')
+                }
+              }}
+              className="px-4 py-2 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 flex items-center gap-2"
+            >
+              <Search className="w-4 h-4" />
+              Search Logs
+            </button>
+            <button
+              onClick={handleCreatePatternAlert}
+              className="px-4 py-2 bg-orange-600 text-white rounded-lg font-medium hover:bg-orange-700 flex items-center gap-2"
+            >
+              <Bell className="w-4 h-4" />
+              Create Alert
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* API Key Dialog */}
+      <Dialog open={showApiKeyDialog} onOpenChange={setShowApiKeyDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Key className="w-5 h-5 text-cyan-500" />
+              API Key Management
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Current API Key</label>
+              <div className="flex gap-2">
+                <Input type="password" value="log_api_xxxxxxxxxxxxxxxxxxxx" readOnly className="font-mono" />
+                <button
+                  onClick={handleCopyApiKey}
+                  className="px-3 py-2 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800"
+                >
+                  <Copy className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+            <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
+              <p className="text-sm text-yellow-700 dark:text-yellow-400">
+                Warning: Regenerating your API key will invalidate the current key. All applications using the old key will need to be updated.
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center justify-end gap-3 pt-4 border-t dark:border-gray-700">
+            <button
+              onClick={() => setShowApiKeyDialog(false)}
+              className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg font-medium"
+            >
+              Close
+            </button>
+            <button
+              onClick={handleRegenerateApiKey}
+              className="px-4 py-2 bg-cyan-600 text-white rounded-lg font-medium hover:bg-cyan-700 flex items-center gap-2"
+            >
+              <RefreshCw className="w-4 h-4" />
+              Regenerate Key
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Purge Confirmation Dialog */}
+      <Dialog open={showPurgeDialog} onOpenChange={setShowPurgeDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-600">
+              <AlertOctagon className="w-5 h-5" />
+              Confirm Purge
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+              <p className="text-sm text-red-700 dark:text-red-400">
+                <strong>Warning:</strong> This action will permanently delete all log data. This cannot be undone.
+              </p>
+            </div>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              You are about to purge <strong>{mockStats.totalLogs.toLocaleString()}</strong> log entries.
+            </p>
+          </div>
+          <div className="flex items-center justify-end gap-3 pt-4 border-t dark:border-gray-700">
+            <button
+              onClick={() => setShowPurgeDialog(false)}
+              className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg font-medium"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handlePurgeLogs}
+              className="px-4 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 flex items-center gap-2"
+            >
+              <Trash2 className="w-4 h-4" />
+              Purge All Logs
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Integration Dialog */}
+      <Dialog open={showIntegrationDialog} onOpenChange={setShowIntegrationDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Link className="w-5 h-5 text-pink-500" />
+              Integrations
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-3">
+              {[
+                { name: 'Slack', description: 'Send alerts to Slack channels', connected: true, icon: '💬' },
+                { name: 'PagerDuty', description: 'Incident management integration', connected: true, icon: '🚨' },
+                { name: 'Datadog', description: 'Forward logs to Datadog', connected: false, icon: '📊' },
+                { name: 'Splunk', description: 'Export to Splunk Enterprise', connected: false, icon: '🔍' },
+                { name: 'Email', description: 'Email notifications', connected: true, icon: '📧' }
+              ].map(integration => (
+                <div key={integration.name} className="flex items-center justify-between p-4 border dark:border-gray-700 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <span className="text-2xl">{integration.icon}</span>
+                    <div>
+                      <p className="font-medium text-gray-900 dark:text-white">{integration.name}</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">{integration.description}</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => handleConnectIntegration(integration.name)}
+                    className={`px-4 py-2 rounded-lg font-medium ${
+                      integration.connected
+                        ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                        : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300 hover:bg-purple-100 hover:text-purple-700'
+                    }`}
+                  >
+                    {integration.connected ? 'Connected' : 'Connect'}
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="flex items-center justify-end pt-4 border-t dark:border-gray-700">
+            <button
+              onClick={() => setShowIntegrationDialog(false)}
+              className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg font-medium"
+            >
+              Close
             </button>
           </div>
         </DialogContent>

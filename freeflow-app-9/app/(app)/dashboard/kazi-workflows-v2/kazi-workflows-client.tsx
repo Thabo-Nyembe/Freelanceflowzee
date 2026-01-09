@@ -19,7 +19,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
-import { useToast } from '@/hooks/use-toast'
+import { toast } from 'sonner'
 import { useKaziWorkflows, Workflow as KaziWorkflow } from '@/hooks/use-kazi-workflows'
 import {
   Workflow as WorkflowIcon,
@@ -54,7 +54,16 @@ import {
   Globe,
   FileText,
   Users,
-  Save
+  Save,
+  Archive,
+  RotateCcw,
+  AlertTriangle,
+  Share2,
+  Filter,
+  RefreshCw,
+  PauseCircle,
+  StopCircle,
+  ExternalLink
 } from 'lucide-react'
 import {
   DropdownMenu,
@@ -65,18 +74,23 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { cn } from '@/lib/utils'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { Progress } from '@/components/ui/progress'
 
 // Types - KaziWorkflow is imported from the hook
 
 interface WorkflowExecution {
   id: string
   workflow_id: string
+  workflow_name: string
   status: 'pending' | 'running' | 'success' | 'failed' | 'cancelled'
   started_at: string
   completed_at?: string
   execution_time_ms?: number
   error_message?: string
   trigger_type: string
+  actions_completed: number
+  actions_total: number
 }
 
 interface WorkflowTemplate {
@@ -231,6 +245,68 @@ const mockTemplates: WorkflowTemplate[] = [
   }
 ]
 
+const mockExecutionHistory: WorkflowExecution[] = [
+  {
+    id: 'exec-1',
+    workflow_id: '1',
+    workflow_name: 'New Client Onboarding',
+    status: 'success',
+    started_at: new Date(Date.now() - 3600000).toISOString(),
+    completed_at: new Date(Date.now() - 3598000).toISOString(),
+    execution_time_ms: 2000,
+    trigger_type: 'event',
+    actions_completed: 3,
+    actions_total: 3
+  },
+  {
+    id: 'exec-2',
+    workflow_id: '2',
+    workflow_name: 'Invoice Reminder',
+    status: 'success',
+    started_at: new Date(Date.now() - 7200000).toISOString(),
+    completed_at: new Date(Date.now() - 7197500).toISOString(),
+    execution_time_ms: 2500,
+    trigger_type: 'schedule',
+    actions_completed: 2,
+    actions_total: 2
+  },
+  {
+    id: 'exec-3',
+    workflow_id: '3',
+    workflow_name: 'Project Milestone Notification',
+    status: 'failed',
+    started_at: new Date(Date.now() - 86400000).toISOString(),
+    completed_at: new Date(Date.now() - 86398000).toISOString(),
+    execution_time_ms: 2000,
+    error_message: 'Failed to send Slack message: Channel not found',
+    trigger_type: 'event',
+    actions_completed: 1,
+    actions_total: 3
+  },
+  {
+    id: 'exec-4',
+    workflow_id: '1',
+    workflow_name: 'New Client Onboarding',
+    status: 'success',
+    started_at: new Date(Date.now() - 172800000).toISOString(),
+    completed_at: new Date(Date.now() - 172797000).toISOString(),
+    execution_time_ms: 3000,
+    trigger_type: 'event',
+    actions_completed: 3,
+    actions_total: 3
+  },
+  {
+    id: 'exec-5',
+    workflow_id: '4',
+    workflow_name: 'Weekly Report Generation',
+    status: 'cancelled',
+    started_at: new Date(Date.now() - 604800000).toISOString(),
+    trigger_type: 'schedule',
+    actions_completed: 1,
+    actions_total: 3
+  }
+]
+
 const mockStats: WorkflowStats = {
   totalWorkflows: 24,
   activeWorkflows: 18,
@@ -266,6 +342,15 @@ const categoryColors: Record<string, string> = {
   custom: 'bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400'
 }
 
+// Execution status colors
+const executionStatusColors: Record<string, string> = {
+  pending: 'bg-gray-100 text-gray-600',
+  running: 'bg-blue-100 text-blue-600',
+  success: 'bg-green-100 text-green-600',
+  failed: 'bg-red-100 text-red-600',
+  cancelled: 'bg-amber-100 text-amber-600'
+}
+
 export default function KaziWorkflowsClient() {
   // Use the Kazi Workflows hook with mock data fallback
   const {
@@ -282,20 +367,49 @@ export default function KaziWorkflowsClient() {
   } = useKaziWorkflows({ useMockData: true })
 
   const [templates] = useState<WorkflowTemplate[]>(mockTemplates)
+  const [executionHistory, setExecutionHistory] = useState<WorkflowExecution[]>(mockExecutionHistory)
   const [searchQuery, setSearchQuery] = useState('')
   const [filterCategory, setFilterCategory] = useState<string>('all')
   const [filterStatus, setFilterStatus] = useState<string>('all')
   const [activeTab, setActiveTab] = useState('workflows')
   const [selectedWorkflow, setSelectedWorkflow] = useState<KaziWorkflow | null>(null)
+  const [selectedExecution, setSelectedExecution] = useState<WorkflowExecution | null>(null)
+  const [selectedTemplate, setSelectedTemplate] = useState<WorkflowTemplate | null>(null)
+
+  // Dialog states
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [isSettingsDialogOpen, setIsSettingsDialogOpen] = useState(false)
+  const [isRunDialogOpen, setIsRunDialogOpen] = useState(false)
+  const [isHistoryDialogOpen, setIsHistoryDialogOpen] = useState(false)
+  const [isExportDialogOpen, setIsExportDialogOpen] = useState(false)
+  const [isImportDialogOpen, setIsImportDialogOpen] = useState(false)
+  const [isDuplicateDialogOpen, setIsDuplicateDialogOpen] = useState(false)
+  const [isArchiveDialogOpen, setIsArchiveDialogOpen] = useState(false)
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+  const [isTemplateDialogOpen, setIsTemplateDialogOpen] = useState(false)
+  const [isExecutionDetailsDialogOpen, setIsExecutionDetailsDialogOpen] = useState(false)
+  const [isShareDialogOpen, setIsShareDialogOpen] = useState(false)
+  const [isGlobalSettingsDialogOpen, setIsGlobalSettingsDialogOpen] = useState(false)
+
+  // Form states
   const [newWorkflow, setNewWorkflow] = useState({
     name: '',
     description: '',
     trigger_type: 'manual' as const,
     category: 'operations'
   })
-  const { toast } = useToast()
+  const [duplicateName, setDuplicateName] = useState('')
+  const [exportFormat, setExportFormat] = useState('json')
+  const [importFile, setImportFile] = useState<File | null>(null)
+  const [shareEmail, setShareEmail] = useState('')
+  const [globalSettings, setGlobalSettings] = useState({
+    notifications: true,
+    autoRetry: true,
+    retryAttempts: 3,
+    timeout: 30,
+    logging: true
+  })
 
   // Compute display stats
   const stats: WorkflowStats = useMemo(() => ({
@@ -306,12 +420,6 @@ export default function KaziWorkflowsClient() {
     avgExecutionTime: 2.4, // Would come from real metrics
     timeSaved: `${Math.round(apiStats.totalRuns * 5 / 60)} hours`
   }), [apiStats])
-
-  // Open settings
-  const openSettings = useCallback((workflow: KaziWorkflow) => {
-    setSelectedWorkflow(workflow)
-    setIsSettingsDialogOpen(true)
-  }, [])
 
   // Filter workflows
   const filteredWorkflows = workflows.filter(workflow => {
@@ -325,20 +433,113 @@ export default function KaziWorkflowsClient() {
     return matchesSearch && matchesCategory && matchesStatus
   })
 
+  // Get workflow execution history
+  const getWorkflowHistory = useCallback((workflowId: string) => {
+    return executionHistory.filter(exec => exec.workflow_id === workflowId)
+  }, [executionHistory])
+
+  // Open settings
+  const openSettings = useCallback((workflow: KaziWorkflow) => {
+    setSelectedWorkflow(workflow)
+    setIsSettingsDialogOpen(true)
+  }, [])
+
+  // Open edit dialog
+  const openEditDialog = useCallback((workflow: KaziWorkflow) => {
+    setSelectedWorkflow(workflow)
+    setIsEditDialogOpen(true)
+  }, [])
+
+  // Open run dialog
+  const openRunDialog = useCallback((workflow: KaziWorkflow) => {
+    setSelectedWorkflow(workflow)
+    setIsRunDialogOpen(true)
+  }, [])
+
+  // Open history dialog
+  const openHistoryDialog = useCallback((workflow: KaziWorkflow) => {
+    setSelectedWorkflow(workflow)
+    setIsHistoryDialogOpen(true)
+  }, [])
+
+  // Open export dialog
+  const openExportDialog = useCallback((workflow: KaziWorkflow) => {
+    setSelectedWorkflow(workflow)
+    setIsExportDialogOpen(true)
+  }, [])
+
+  // Open duplicate dialog
+  const openDuplicateDialog = useCallback((workflow: KaziWorkflow) => {
+    setSelectedWorkflow(workflow)
+    setDuplicateName(`${workflow.name} (Copy)`)
+    setIsDuplicateDialogOpen(true)
+  }, [])
+
+  // Open archive dialog
+  const openArchiveDialog = useCallback((workflow: KaziWorkflow) => {
+    setSelectedWorkflow(workflow)
+    setIsArchiveDialogOpen(true)
+  }, [])
+
+  // Open delete dialog
+  const openDeleteDialog = useCallback((workflow: KaziWorkflow) => {
+    setSelectedWorkflow(workflow)
+    setIsDeleteDialogOpen(true)
+  }, [])
+
+  // Open template dialog
+  const openTemplateDialog = useCallback((template: WorkflowTemplate) => {
+    setSelectedTemplate(template)
+    setIsTemplateDialogOpen(true)
+  }, [])
+
+  // Open execution details dialog
+  const openExecutionDetailsDialog = useCallback((execution: WorkflowExecution) => {
+    setSelectedExecution(execution)
+    setIsExecutionDetailsDialogOpen(true)
+  }, [])
+
+  // Open share dialog
+  const openShareDialog = useCallback((workflow: KaziWorkflow) => {
+    setSelectedWorkflow(workflow)
+    setShareEmail('')
+    setIsShareDialogOpen(true)
+  }, [])
+
   // Run workflow wrapper
   const runWorkflow = useCallback((id: string) => {
     executeWorkflow(id)
+    toast.success('Workflow started', {
+      description: 'The workflow is now running.'
+    })
   }, [executeWorkflow])
 
+  // Handle run workflow from dialog
+  const handleRunWorkflow = useCallback(() => {
+    if (!selectedWorkflow) return
+    executeWorkflow(selectedWorkflow.id)
+    setIsRunDialogOpen(false)
+    toast.success('Workflow started', {
+      description: `"${selectedWorkflow.name}" is now running.`
+    })
+  }, [selectedWorkflow, executeWorkflow])
+
   // Delete workflow wrapper
-  const deleteWorkflow = useCallback((id: string) => {
-    removeWorkflow(id)
-  }, [removeWorkflow])
+  const handleDeleteWorkflow = useCallback(() => {
+    if (!selectedWorkflow) return
+    removeWorkflow(selectedWorkflow.id)
+    setIsDeleteDialogOpen(false)
+    toast.success('Workflow deleted', {
+      description: `"${selectedWorkflow.name}" has been deleted.`
+    })
+  }, [selectedWorkflow, removeWorkflow])
 
   // Handle create workflow
   const handleCreateWorkflow = useCallback(async () => {
     if (!newWorkflow.name) {
-      toast({ title: 'Error', description: 'Name is required', variant: 'destructive' })
+      toast.error('Validation error', {
+        description: 'Workflow name is required.'
+      })
       return
     }
     await createWorkflow({
@@ -350,14 +551,156 @@ export default function KaziWorkflowsClient() {
     })
     setIsCreateDialogOpen(false)
     setNewWorkflow({ name: '', description: '', trigger_type: 'manual', category: 'operations' })
-  }, [newWorkflow, createWorkflow, toast])
+    toast.success('Workflow created', {
+      description: 'Opening workflow builder...'
+    })
+  }, [newWorkflow, createWorkflow])
+
+  // Handle edit workflow
+  const handleEditWorkflow = useCallback(async () => {
+    if (!selectedWorkflow) return
+    await updateWorkflow(selectedWorkflow.id, selectedWorkflow)
+    setIsEditDialogOpen(false)
+    toast.success('Workflow updated', {
+      description: 'Your changes have been saved.'
+    })
+  }, [selectedWorkflow, updateWorkflow])
 
   // Handle save settings
   const handleSaveSettings = useCallback(async () => {
     if (!selectedWorkflow) return
     await updateWorkflow(selectedWorkflow.id, selectedWorkflow)
     setIsSettingsDialogOpen(false)
+    toast.success('Settings saved', {
+      description: 'Workflow settings have been updated.'
+    })
   }, [selectedWorkflow, updateWorkflow])
+
+  // Handle export
+  const handleExport = useCallback(() => {
+    if (!selectedWorkflow) return
+    const exportData = {
+      ...selectedWorkflow,
+      exportedAt: new Date().toISOString(),
+      format: exportFormat
+    }
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${selectedWorkflow.name.toLowerCase().replace(/\s+/g, '-')}-workflow.${exportFormat}`
+    a.click()
+    URL.revokeObjectURL(url)
+    setIsExportDialogOpen(false)
+    toast.success('Workflow exported', {
+      description: `Exported as ${exportFormat.toUpperCase()} file.`
+    })
+  }, [selectedWorkflow, exportFormat])
+
+  // Handle import
+  const handleImport = useCallback(async () => {
+    if (!importFile) {
+      toast.error('No file selected', {
+        description: 'Please select a workflow file to import.'
+      })
+      return
+    }
+    try {
+      const text = await importFile.text()
+      const data = JSON.parse(text)
+      await createWorkflow({
+        name: data.name || 'Imported Workflow',
+        description: data.description || '',
+        trigger_type: data.trigger_type || 'manual',
+        category: data.category || 'custom',
+        status: 'draft'
+      })
+      setIsImportDialogOpen(false)
+      setImportFile(null)
+      toast.success('Workflow imported', {
+        description: `"${data.name}" has been imported successfully.`
+      })
+    } catch (error) {
+      toast.error('Import failed', {
+        description: 'Invalid workflow file format.'
+      })
+    }
+  }, [importFile, createWorkflow])
+
+  // Handle duplicate
+  const handleDuplicate = useCallback(() => {
+    if (!selectedWorkflow) return
+    duplicateWorkflow(selectedWorkflow.id)
+    setIsDuplicateDialogOpen(false)
+    toast.success('Workflow duplicated', {
+      description: `"${duplicateName}" has been created.`
+    })
+  }, [selectedWorkflow, duplicateName, duplicateWorkflow])
+
+  // Handle archive
+  const handleArchive = useCallback(async () => {
+    if (!selectedWorkflow) return
+    await updateWorkflow(selectedWorkflow.id, { ...selectedWorkflow, status: 'archived' as any })
+    setIsArchiveDialogOpen(false)
+    toast.success('Workflow archived', {
+      description: `"${selectedWorkflow.name}" has been archived.`
+    })
+  }, [selectedWorkflow, updateWorkflow])
+
+  // Handle use template
+  const handleUseTemplate = useCallback(async () => {
+    if (!selectedTemplate) return
+    await createWorkflow({
+      name: `${selectedTemplate.name} (New)`,
+      description: selectedTemplate.description,
+      trigger_type: selectedTemplate.trigger_type as any,
+      category: selectedTemplate.category,
+      status: 'draft'
+    })
+    setIsTemplateDialogOpen(false)
+    toast.success('Workflow created from template', {
+      description: 'Opening workflow builder...'
+    })
+  }, [selectedTemplate, createWorkflow])
+
+  // Handle share
+  const handleShare = useCallback(() => {
+    if (!selectedWorkflow || !shareEmail) {
+      toast.error('Missing information', {
+        description: 'Please enter an email address.'
+      })
+      return
+    }
+    // Simulate sharing
+    setIsShareDialogOpen(false)
+    toast.success('Workflow shared', {
+      description: `Invitation sent to ${shareEmail}.`
+    })
+  }, [selectedWorkflow, shareEmail])
+
+  // Handle save global settings
+  const handleSaveGlobalSettings = useCallback(() => {
+    setIsGlobalSettingsDialogOpen(false)
+    toast.success('Global settings saved', {
+      description: 'Your workflow preferences have been updated.'
+    })
+  }, [globalSettings])
+
+  // Handle retry execution
+  const handleRetryExecution = useCallback((execution: WorkflowExecution) => {
+    setIsExecutionDetailsDialogOpen(false)
+    executeWorkflow(execution.workflow_id)
+    toast.success('Workflow restarted', {
+      description: `Retrying "${execution.workflow_name}".`
+    })
+  }, [executeWorkflow])
+
+  // Handle refresh workflows
+  const handleRefreshWorkflows = useCallback(() => {
+    toast.success('Workflows refreshed', {
+      description: 'All workflow data has been updated.'
+    })
+  }, [])
 
   // Format time ago
   const formatTimeAgo = (dateString?: string) => {
@@ -373,6 +716,13 @@ export default function KaziWorkflowsClient() {
     if (diffMins < 60) return `${diffMins}m ago`
     if (diffHours < 24) return `${diffHours}h ago`
     return `${diffDays}d ago`
+  }
+
+  // Format duration
+  const formatDuration = (ms?: number) => {
+    if (!ms) return '-'
+    if (ms < 1000) return `${ms}ms`
+    return `${(ms / 1000).toFixed(2)}s`
   }
 
   return (
@@ -393,9 +743,29 @@ export default function KaziWorkflowsClient() {
           </div>
 
           <div className="flex items-center gap-3">
-            <Button variant="outline" size="sm">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleRefreshWorkflows}
+            >
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Refresh
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsImportDialogOpen(true)}
+            >
               <Upload className="h-4 w-4 mr-2" />
               Import
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsGlobalSettingsDialogOpen(true)}
+            >
+              <Settings className="h-4 w-4 mr-2" />
+              Settings
             </Button>
             <Button
               onClick={() => setIsCreateDialogOpen(true)}
@@ -673,13 +1043,18 @@ export default function KaziWorkflowsClient() {
                             <div className="flex items-center gap-2">
                               <Switch
                                 checked={workflow.status === "active"}
-                                onCheckedChange={() => toggleWorkflowStatus(workflow.id)}
+                                onCheckedChange={() => {
+                                  toggleWorkflowStatus(workflow.id)
+                                  toast.success(workflow.status === 'active' ? 'Workflow paused' : 'Workflow activated', {
+                                    description: `"${workflow.name}" has been ${workflow.status === 'active' ? 'paused' : 'activated'}.`
+                                  })
+                                }}
                               />
 
                               <Button
                                 size="sm"
                                 variant="outline"
-                                onClick={() => runWorkflow(workflow.id)}
+                                onClick={() => openRunDialog(workflow)}
                                 disabled={runningWorkflows.has(workflow.id)}
                                 title="Run Now"
                               >
@@ -706,32 +1081,34 @@ export default function KaziWorkflowsClient() {
                                   </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
-                                  <DropdownMenuItem onClick={() => openSettings(workflow)}>
+                                  <DropdownMenuItem onClick={() => openEditDialog(workflow)}>
                                     <Edit className="h-4 w-4 mr-2" />
                                     Edit
                                   </DropdownMenuItem>
-                                  <DropdownMenuItem onClick={() => {
-                                    const newWorkflow = { ...workflow, id: `copy-${workflow.id}`, name: `${workflow.name} (Copy)` }
-                                    setWorkflows(prev => [...prev, newWorkflow])
-                                    toast({ title: 'Duplicated', description: 'Workflow duplicated successfully.' })
-                                  }}>
+                                  <DropdownMenuItem onClick={() => openDuplicateDialog(workflow)}>
                                     <Copy className="h-4 w-4 mr-2" />
                                     Duplicate
                                   </DropdownMenuItem>
-                                  <DropdownMenuItem onClick={() => setActiveTab('history')}>
+                                  <DropdownMenuItem onClick={() => openHistoryDialog(workflow)}>
                                     <History className="h-4 w-4 mr-2" />
                                     View History
                                   </DropdownMenuItem>
-                                  <DropdownMenuItem onClick={() => {
-                                    toast({ title: 'Exported', description: 'Workflow exported to JSON.' })
-                                  }}>
+                                  <DropdownMenuItem onClick={() => openExportDialog(workflow)}>
                                     <Download className="h-4 w-4 mr-2" />
                                     Export
                                   </DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => openShareDialog(workflow)}>
+                                    <Share2 className="h-4 w-4 mr-2" />
+                                    Share
+                                  </DropdownMenuItem>
                                   <DropdownMenuSeparator />
+                                  <DropdownMenuItem onClick={() => openArchiveDialog(workflow)}>
+                                    <Archive className="h-4 w-4 mr-2" />
+                                    Archive
+                                  </DropdownMenuItem>
                                   <DropdownMenuItem
                                     className="text-red-600"
-                                    onClick={() => deleteWorkflow(workflow.id)}
+                                    onClick={() => openDeleteDialog(workflow)}
                                   >
                                     <Trash2 className="h-4 w-4 mr-2" />
                                     Delete
@@ -787,7 +1164,11 @@ export default function KaziWorkflowsClient() {
                             {template.trigger_type} trigger
                           </span>
                         </div>
-                        <Button size="sm" className="opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Button
+                          size="sm"
+                          className="opacity-0 group-hover:opacity-100 transition-opacity"
+                          onClick={() => openTemplateDialog(template)}
+                        >
                           Use Template
                           <ArrowRight className="h-4 w-4 ml-2" />
                         </Button>
@@ -803,47 +1184,65 @@ export default function KaziWorkflowsClient() {
           <TabsContent value="history" className="mt-0">
             <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
               <CardHeader>
-                <CardTitle>Execution History</CardTitle>
-                <CardDescription>View recent workflow executions and their results</CardDescription>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>Execution History</CardTitle>
+                    <CardDescription>View recent workflow executions and their results</CardDescription>
+                  </div>
+                  <Button variant="outline" size="sm" onClick={() => {
+                    toast.success('History refreshed', {
+                      description: 'Execution history has been updated.'
+                    })
+                  }}>
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                    Refresh
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {[...Array(5)].map((_, i) => (
+                  {executionHistory.map((execution) => (
                     <div
-                      key={i}
-                      className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg"
+                      key={execution.id}
+                      className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800/50 transition-colors cursor-pointer"
+                      onClick={() => openExecutionDetailsDialog(execution)}
                     >
                       <div className="flex items-center gap-4">
                         <div className={cn(
                           "p-2 rounded-lg",
-                          i % 2 === 0 ? "bg-green-100 dark:bg-green-900/30" : "bg-red-100 dark:bg-red-900/30"
+                          executionStatusColors[execution.status]
                         )}>
-                          {i % 2 === 0 ? (
-                            <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400" />
-                          ) : (
-                            <XCircle className="h-5 w-5 text-red-600 dark:text-red-400" />
-                          )}
+                          {execution.status === 'success' && <CheckCircle2 className="h-5 w-5" />}
+                          {execution.status === 'failed' && <XCircle className="h-5 w-5" />}
+                          {execution.status === 'running' && <Loader2 className="h-5 w-5 animate-spin" />}
+                          {execution.status === 'pending' && <Clock className="h-5 w-5" />}
+                          {execution.status === 'cancelled' && <StopCircle className="h-5 w-5" />}
                         </div>
                         <div>
                           <p className="font-medium text-gray-900 dark:text-white">
-                            {mockWorkflows[i % mockWorkflows.length].name}
+                            {execution.workflow_name}
                           </p>
                           <p className="text-sm text-gray-500">
-                            {formatTimeAgo(new Date(Date.now() - i * 3600000).toISOString())}
+                            {formatTimeAgo(execution.started_at)} - {execution.actions_completed}/{execution.actions_total} actions
                           </p>
                         </div>
                       </div>
                       <div className="flex items-center gap-4">
                         <div className="text-right">
                           <p className={cn(
-                            "text-sm font-medium",
-                            i % 2 === 0 ? "text-green-600" : "text-red-600"
+                            "text-sm font-medium capitalize",
+                            execution.status === 'success' ? "text-green-600" :
+                            execution.status === 'failed' ? "text-red-600" :
+                            execution.status === 'cancelled' ? "text-amber-600" : "text-blue-600"
                           )}>
-                            {i % 2 === 0 ? 'Success' : 'Failed'}
+                            {execution.status}
                           </p>
-                          <p className="text-xs text-gray-500">{(Math.random() * 3 + 0.5).toFixed(2)}s</p>
+                          <p className="text-xs text-gray-500">{formatDuration(execution.execution_time_ms)}</p>
                         </div>
-                        <Button size="sm" variant="ghost">
+                        <Button size="sm" variant="ghost" onClick={(e) => {
+                          e.stopPropagation()
+                          openExecutionDetailsDialog(execution)
+                        }}>
                           <Eye className="h-4 w-4" />
                         </Button>
                       </div>
@@ -868,18 +1267,30 @@ export default function KaziWorkflowsClient() {
             <div className="space-y-6 py-4">
               <div className="space-y-2">
                 <Label>Workflow Name</Label>
-                <Input placeholder="e.g., New Client Onboarding" />
+                <Input
+                  placeholder="e.g., New Client Onboarding"
+                  value={newWorkflow.name}
+                  onChange={(e) => setNewWorkflow(prev => ({ ...prev, name: e.target.value }))}
+                />
               </div>
 
               <div className="space-y-2">
                 <Label>Description</Label>
-                <Textarea placeholder="Describe what this workflow does..." rows={3} />
+                <Textarea
+                  placeholder="Describe what this workflow does..."
+                  rows={3}
+                  value={newWorkflow.description}
+                  onChange={(e) => setNewWorkflow(prev => ({ ...prev, description: e.target.value }))}
+                />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Trigger Type</Label>
-                  <Select>
+                  <Select
+                    value={newWorkflow.trigger_type}
+                    onValueChange={(value) => setNewWorkflow(prev => ({ ...prev, trigger_type: value as any }))}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Select trigger" />
                     </SelectTrigger>
@@ -914,7 +1325,10 @@ export default function KaziWorkflowsClient() {
 
                 <div className="space-y-2">
                   <Label>Category</Label>
-                  <Select>
+                  <Select
+                    value={newWorkflow.category}
+                    onValueChange={(value) => setNewWorkflow(prev => ({ ...prev, category: value }))}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Select category" />
                     </SelectTrigger>
@@ -936,17 +1350,619 @@ export default function KaziWorkflowsClient() {
                 Cancel
               </Button>
               <Button
-                onClick={() => {
-                  setIsCreateDialogOpen(false)
-                  toast({
-                    title: 'Workflow Created',
-                    description: 'Opening workflow builder...'
-                  })
-                }}
+                onClick={handleCreateWorkflow}
                 className="bg-gradient-to-r from-indigo-500 to-purple-600"
               >
                 Create & Open Builder
                 <ArrowRight className="h-4 w-4 ml-2" />
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Workflow Dialog */}
+        <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Edit className="h-5 w-5" />
+                Edit Workflow
+              </DialogTitle>
+              <DialogDescription>
+                Modify the workflow details and configuration
+              </DialogDescription>
+            </DialogHeader>
+
+            {selectedWorkflow && (
+              <div className="space-y-6 py-4">
+                <div className="space-y-2">
+                  <Label>Workflow Name</Label>
+                  <Input
+                    value={selectedWorkflow.name}
+                    onChange={(e) => setSelectedWorkflow(prev => prev ? { ...prev, name: e.target.value } : null)}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Description</Label>
+                  <Textarea
+                    value={selectedWorkflow.description || ''}
+                    onChange={(e) => setSelectedWorkflow(prev => prev ? { ...prev, description: e.target.value } : null)}
+                    rows={3}
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Trigger Type</Label>
+                    <Select
+                      value={selectedWorkflow.trigger_type}
+                      onValueChange={(value) => setSelectedWorkflow(prev => prev ? { ...prev, trigger_type: value as any } : null)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="manual">Manual Trigger</SelectItem>
+                        <SelectItem value="schedule">Schedule</SelectItem>
+                        <SelectItem value="webhook">Webhook</SelectItem>
+                        <SelectItem value="event">Event</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Category</Label>
+                    <Select
+                      value={selectedWorkflow.category}
+                      onValueChange={(value) => setSelectedWorkflow(prev => prev ? { ...prev, category: value } : null)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="sales">Sales</SelectItem>
+                        <SelectItem value="marketing">Marketing</SelectItem>
+                        <SelectItem value="operations">Operations</SelectItem>
+                        <SelectItem value="finance">Finance</SelectItem>
+                        <SelectItem value="support">Support</SelectItem>
+                        <SelectItem value="custom">Custom</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Actions ({selectedWorkflow.actions.length})</Label>
+                  <div className="space-y-2">
+                    {selectedWorkflow.actions.map((action, i) => (
+                      <div key={i} className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
+                        <div className="p-2 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg">
+                          <WorkflowIcon className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+                        </div>
+                        <div className="flex-1">
+                          <p className="font-medium text-sm text-gray-900 dark:text-white">{action.name}</p>
+                          <p className="text-xs text-gray-500">{action.type}</p>
+                        </div>
+                        <Button size="sm" variant="ghost" onClick={() => {
+                          toast.info('Edit action', {
+                            description: 'Action editor coming soon.'
+                          })
+                        }}>
+                          <Edit className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    ))}
+                    <Button variant="outline" size="sm" className="w-full" onClick={() => {
+                      toast.info('Add action', {
+                        description: 'Action builder coming soon.'
+                      })
+                    }}>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Action
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleEditWorkflow} className="bg-gradient-to-r from-indigo-500 to-purple-600">
+                <Save className="h-4 w-4 mr-2" />
+                Save Changes
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Run Workflow Dialog */}
+        <Dialog open={isRunDialogOpen} onOpenChange={setIsRunDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <PlayCircle className="h-5 w-5 text-green-600" />
+                Run Workflow
+              </DialogTitle>
+              <DialogDescription>
+                Execute "{selectedWorkflow?.name}" manually
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="py-4 space-y-4">
+              <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                <div className="flex items-start gap-3">
+                  <Zap className="h-5 w-5 text-blue-600 mt-0.5" />
+                  <div>
+                    <p className="font-medium text-blue-900 dark:text-blue-100">Ready to execute</p>
+                    <p className="text-sm text-blue-700 dark:text-blue-200">
+                      This workflow will execute {selectedWorkflow?.actions.length || 0} actions.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {selectedWorkflow && (
+                <div className="space-y-2">
+                  <Label>Actions to be executed:</Label>
+                  <div className="space-y-1">
+                    {selectedWorkflow.actions.map((action, i) => (
+                      <div key={i} className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                        <div className="h-1.5 w-1.5 rounded-full bg-indigo-500" />
+                        {action.name}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsRunDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleRunWorkflow} className="bg-green-600 hover:bg-green-700">
+                <Play className="h-4 w-4 mr-2" />
+                Run Now
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Workflow History Dialog */}
+        <Dialog open={isHistoryDialogOpen} onOpenChange={setIsHistoryDialogOpen}>
+          <DialogContent className="max-w-2xl max-h-[80vh]">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <History className="h-5 w-5" />
+                Execution History
+              </DialogTitle>
+              <DialogDescription>
+                Recent executions for "{selectedWorkflow?.name}"
+              </DialogDescription>
+            </DialogHeader>
+
+            <ScrollArea className="h-[400px] pr-4">
+              <div className="space-y-3">
+                {selectedWorkflow && getWorkflowHistory(selectedWorkflow.id).length > 0 ? (
+                  getWorkflowHistory(selectedWorkflow.id).map((execution) => (
+                    <div
+                      key={execution.id}
+                      className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className={cn(
+                          "p-1.5 rounded",
+                          executionStatusColors[execution.status]
+                        )}>
+                          {execution.status === 'success' && <CheckCircle2 className="h-4 w-4" />}
+                          {execution.status === 'failed' && <XCircle className="h-4 w-4" />}
+                          {execution.status === 'cancelled' && <StopCircle className="h-4 w-4" />}
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-gray-900 dark:text-white capitalize">
+                            {execution.status}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            {formatTimeAgo(execution.started_at)}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm text-gray-700 dark:text-gray-300">
+                          {execution.actions_completed}/{execution.actions_total} actions
+                        </p>
+                        <p className="text-xs text-gray-500">{formatDuration(execution.execution_time_ms)}</p>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    No execution history found for this workflow.
+                  </div>
+                )}
+              </div>
+            </ScrollArea>
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsHistoryDialogOpen(false)}>
+                Close
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Export Dialog */}
+        <Dialog open={isExportDialogOpen} onOpenChange={setIsExportDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Download className="h-5 w-5" />
+                Export Workflow
+              </DialogTitle>
+              <DialogDescription>
+                Export "{selectedWorkflow?.name}" to a file
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="py-4 space-y-4">
+              <div className="space-y-2">
+                <Label>Export Format</Label>
+                <Select value={exportFormat} onValueChange={setExportFormat}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="json">JSON</SelectItem>
+                    <SelectItem value="yaml">YAML</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="p-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  The exported file will include all workflow configuration, actions, and settings.
+                </p>
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsExportDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleExport}>
+                <Download className="h-4 w-4 mr-2" />
+                Export
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Import Dialog */}
+        <Dialog open={isImportDialogOpen} onOpenChange={setIsImportDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Upload className="h-5 w-5" />
+                Import Workflow
+              </DialogTitle>
+              <DialogDescription>
+                Import a workflow from a JSON or YAML file
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="py-4 space-y-4">
+              <div className="space-y-2">
+                <Label>Select File</Label>
+                <Input
+                  type="file"
+                  accept=".json,.yaml,.yml"
+                  onChange={(e) => setImportFile(e.target.files?.[0] || null)}
+                />
+              </div>
+
+              {importFile && (
+                <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <FileText className="h-4 w-4 text-green-600" />
+                    <span className="text-sm text-green-700 dark:text-green-300">{importFile.name}</span>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => {
+                setIsImportDialogOpen(false)
+                setImportFile(null)
+              }}>
+                Cancel
+              </Button>
+              <Button onClick={handleImport} disabled={!importFile}>
+                <Upload className="h-4 w-4 mr-2" />
+                Import
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Duplicate Dialog */}
+        <Dialog open={isDuplicateDialogOpen} onOpenChange={setIsDuplicateDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Copy className="h-5 w-5" />
+                Duplicate Workflow
+              </DialogTitle>
+              <DialogDescription>
+                Create a copy of "{selectedWorkflow?.name}"
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="py-4 space-y-4">
+              <div className="space-y-2">
+                <Label>New Workflow Name</Label>
+                <Input
+                  value={duplicateName}
+                  onChange={(e) => setDuplicateName(e.target.value)}
+                  placeholder="Enter a name for the copy"
+                />
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsDuplicateDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleDuplicate} disabled={!duplicateName}>
+                <Copy className="h-4 w-4 mr-2" />
+                Duplicate
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Archive Dialog */}
+        <Dialog open={isArchiveDialogOpen} onOpenChange={setIsArchiveDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Archive className="h-5 w-5 text-amber-600" />
+                Archive Workflow
+              </DialogTitle>
+              <DialogDescription>
+                Are you sure you want to archive "{selectedWorkflow?.name}"?
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="py-4">
+              <div className="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
+                <div className="flex items-start gap-3">
+                  <AlertTriangle className="h-5 w-5 text-amber-600 mt-0.5" />
+                  <div>
+                    <p className="font-medium text-amber-900 dark:text-amber-100">This workflow will be archived</p>
+                    <p className="text-sm text-amber-700 dark:text-amber-200">
+                      Archived workflows are hidden from the main list but can be restored later.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsArchiveDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleArchive} className="bg-amber-600 hover:bg-amber-700">
+                <Archive className="h-4 w-4 mr-2" />
+                Archive
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Dialog */}
+        <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Trash2 className="h-5 w-5 text-red-600" />
+                Delete Workflow
+              </DialogTitle>
+              <DialogDescription>
+                Are you sure you want to delete "{selectedWorkflow?.name}"?
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="py-4">
+              <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                <div className="flex items-start gap-3">
+                  <AlertTriangle className="h-5 w-5 text-red-600 mt-0.5" />
+                  <div>
+                    <p className="font-medium text-red-900 dark:text-red-100">This action cannot be undone</p>
+                    <p className="text-sm text-red-700 dark:text-red-200">
+                      The workflow and all its execution history will be permanently deleted.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleDeleteWorkflow} variant="destructive">
+                <Trash2 className="h-4 w-4 mr-2" />
+                Delete
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Template Dialog */}
+        <Dialog open={isTemplateDialogOpen} onOpenChange={setIsTemplateDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Star className="h-5 w-5 text-amber-500" />
+                Use Template
+              </DialogTitle>
+              <DialogDescription>
+                Create a new workflow from "{selectedTemplate?.name}"
+              </DialogDescription>
+            </DialogHeader>
+
+            {selectedTemplate && (
+              <div className="py-4 space-y-4">
+                <div className="p-4 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg">
+                  <h4 className="font-medium text-indigo-900 dark:text-indigo-100">{selectedTemplate.name}</h4>
+                  <p className="text-sm text-indigo-700 dark:text-indigo-200 mt-1">
+                    {selectedTemplate.description}
+                  </p>
+                  <div className="flex items-center gap-4 mt-3">
+                    <Badge variant="secondary">{selectedTemplate.category}</Badge>
+                    <span className="text-xs text-indigo-600 dark:text-indigo-300">
+                      {selectedTemplate.usage_count.toLocaleString()} uses
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsTemplateDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleUseTemplate} className="bg-gradient-to-r from-indigo-500 to-purple-600">
+                Use This Template
+                <ArrowRight className="h-4 w-4 ml-2" />
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Execution Details Dialog */}
+        <Dialog open={isExecutionDetailsDialogOpen} onOpenChange={setIsExecutionDetailsDialogOpen}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Eye className="h-5 w-5" />
+                Execution Details
+              </DialogTitle>
+              <DialogDescription>
+                {selectedExecution?.workflow_name} - {formatTimeAgo(selectedExecution?.started_at)}
+              </DialogDescription>
+            </DialogHeader>
+
+            {selectedExecution && (
+              <div className="py-4 space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="p-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
+                    <p className="text-xs text-gray-500 mb-1">Status</p>
+                    <Badge className={executionStatusColors[selectedExecution.status]}>
+                      {selectedExecution.status}
+                    </Badge>
+                  </div>
+                  <div className="p-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
+                    <p className="text-xs text-gray-500 mb-1">Duration</p>
+                    <p className="font-medium text-gray-900 dark:text-white">
+                      {formatDuration(selectedExecution.execution_time_ms)}
+                    </p>
+                  </div>
+                  <div className="p-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
+                    <p className="text-xs text-gray-500 mb-1">Actions Completed</p>
+                    <p className="font-medium text-gray-900 dark:text-white">
+                      {selectedExecution.actions_completed} / {selectedExecution.actions_total}
+                    </p>
+                  </div>
+                  <div className="p-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
+                    <p className="text-xs text-gray-500 mb-1">Trigger</p>
+                    <p className="font-medium text-gray-900 dark:text-white capitalize">
+                      {selectedExecution.trigger_type}
+                    </p>
+                  </div>
+                </div>
+
+                {selectedExecution.status === 'success' && (
+                  <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                    <Progress value={100} className="h-2 bg-green-200" />
+                    <p className="text-sm text-green-700 dark:text-green-300 mt-2">
+                      All actions completed successfully
+                    </p>
+                  </div>
+                )}
+
+                {selectedExecution.error_message && (
+                  <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                    <div className="flex items-start gap-3">
+                      <XCircle className="h-5 w-5 text-red-600 mt-0.5" />
+                      <div>
+                        <p className="font-medium text-red-900 dark:text-red-100">Error</p>
+                        <p className="text-sm text-red-700 dark:text-red-200">
+                          {selectedExecution.error_message}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsExecutionDetailsDialogOpen(false)}>
+                Close
+              </Button>
+              {selectedExecution?.status === 'failed' && (
+                <Button onClick={() => handleRetryExecution(selectedExecution)}>
+                  <RotateCcw className="h-4 w-4 mr-2" />
+                  Retry
+                </Button>
+              )}
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Share Dialog */}
+        <Dialog open={isShareDialogOpen} onOpenChange={setIsShareDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Share2 className="h-5 w-5" />
+                Share Workflow
+              </DialogTitle>
+              <DialogDescription>
+                Share "{selectedWorkflow?.name}" with team members
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="py-4 space-y-4">
+              <div className="space-y-2">
+                <Label>Email Address</Label>
+                <Input
+                  type="email"
+                  placeholder="colleague@company.com"
+                  value={shareEmail}
+                  onChange={(e) => setShareEmail(e.target.value)}
+                />
+              </div>
+
+              <div className="p-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  The recipient will receive an email with access to view and run this workflow.
+                </p>
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsShareDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleShare} disabled={!shareEmail}>
+                <Share2 className="h-4 w-4 mr-2" />
+                Send Invitation
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -969,18 +1985,28 @@ export default function KaziWorkflowsClient() {
               <div className="space-y-6 py-4">
                 <div className="space-y-2">
                   <Label>Workflow Name</Label>
-                  <Input defaultValue={selectedWorkflow.name} />
+                  <Input
+                    value={selectedWorkflow.name}
+                    onChange={(e) => setSelectedWorkflow(prev => prev ? { ...prev, name: e.target.value } : null)}
+                  />
                 </div>
 
                 <div className="space-y-2">
                   <Label>Description</Label>
-                  <Textarea defaultValue={selectedWorkflow.description} rows={2} />
+                  <Textarea
+                    value={selectedWorkflow.description || ''}
+                    onChange={(e) => setSelectedWorkflow(prev => prev ? { ...prev, description: e.target.value } : null)}
+                    rows={2}
+                  />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>Trigger Type</Label>
-                    <Select defaultValue={selectedWorkflow.trigger_type}>
+                    <Select
+                      value={selectedWorkflow.trigger_type}
+                      onValueChange={(value) => setSelectedWorkflow(prev => prev ? { ...prev, trigger_type: value as any } : null)}
+                    >
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
@@ -1015,7 +2041,10 @@ export default function KaziWorkflowsClient() {
 
                   <div className="space-y-2">
                     <Label>Category</Label>
-                    <Select defaultValue={selectedWorkflow.category}>
+                    <Select
+                      value={selectedWorkflow.category}
+                      onValueChange={(value) => setSelectedWorkflow(prev => prev ? { ...prev, category: value } : null)}
+                    >
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
@@ -1084,12 +2113,20 @@ export default function KaziWorkflowsClient() {
                           <p className="font-medium text-sm text-gray-900 dark:text-white">{action.name}</p>
                           <p className="text-xs text-gray-500">{action.type}</p>
                         </div>
-                        <Button size="sm" variant="ghost">
+                        <Button size="sm" variant="ghost" onClick={() => {
+                          toast.info('Edit action', {
+                            description: 'Action editor coming soon.'
+                          })
+                        }}>
                           <Edit className="h-3 w-3" />
                         </Button>
                       </div>
                     ))}
-                    <Button variant="outline" size="sm" className="w-full">
+                    <Button variant="outline" size="sm" className="w-full" onClick={() => {
+                      toast.info('Add action', {
+                        description: 'Action builder coming soon.'
+                      })
+                    }}>
                       <Plus className="h-4 w-4 mr-2" />
                       Add Action
                     </Button>
@@ -1134,15 +2171,107 @@ export default function KaziWorkflowsClient() {
                 Cancel
               </Button>
               <Button
-                onClick={() => {
-                  setIsSettingsDialogOpen(false)
-                  toast({
-                    title: 'Settings Saved',
-                    description: 'Workflow settings have been updated.'
-                  })
-                }}
+                onClick={handleSaveSettings}
                 className="bg-gradient-to-r from-indigo-500 to-purple-600"
               >
+                <Save className="h-4 w-4 mr-2" />
+                Save Settings
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Global Settings Dialog */}
+        <Dialog open={isGlobalSettingsDialogOpen} onOpenChange={setIsGlobalSettingsDialogOpen}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Settings className="h-5 w-5" />
+                Global Workflow Settings
+              </DialogTitle>
+              <DialogDescription>
+                Configure default settings for all workflows
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="py-4 space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium text-gray-900 dark:text-white">Email Notifications</p>
+                  <p className="text-sm text-gray-500">Receive notifications for workflow events</p>
+                </div>
+                <Switch
+                  checked={globalSettings.notifications}
+                  onCheckedChange={(checked) => setGlobalSettings(prev => ({ ...prev, notifications: checked }))}
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium text-gray-900 dark:text-white">Auto-Retry on Failure</p>
+                  <p className="text-sm text-gray-500">Automatically retry failed workflows</p>
+                </div>
+                <Switch
+                  checked={globalSettings.autoRetry}
+                  onCheckedChange={(checked) => setGlobalSettings(prev => ({ ...prev, autoRetry: checked }))}
+                />
+              </div>
+
+              {globalSettings.autoRetry && (
+                <div className="space-y-2">
+                  <Label>Retry Attempts</Label>
+                  <Select
+                    value={String(globalSettings.retryAttempts)}
+                    onValueChange={(value) => setGlobalSettings(prev => ({ ...prev, retryAttempts: Number(value) }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="1">1 attempt</SelectItem>
+                      <SelectItem value="2">2 attempts</SelectItem>
+                      <SelectItem value="3">3 attempts</SelectItem>
+                      <SelectItem value="5">5 attempts</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
+              <div className="space-y-2">
+                <Label>Default Timeout (seconds)</Label>
+                <Select
+                  value={String(globalSettings.timeout)}
+                  onValueChange={(value) => setGlobalSettings(prev => ({ ...prev, timeout: Number(value) }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="15">15 seconds</SelectItem>
+                    <SelectItem value="30">30 seconds</SelectItem>
+                    <SelectItem value="60">60 seconds</SelectItem>
+                    <SelectItem value="120">120 seconds</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium text-gray-900 dark:text-white">Detailed Logging</p>
+                  <p className="text-sm text-gray-500">Log detailed execution information</p>
+                </div>
+                <Switch
+                  checked={globalSettings.logging}
+                  onCheckedChange={(checked) => setGlobalSettings(prev => ({ ...prev, logging: checked }))}
+                />
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsGlobalSettingsDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleSaveGlobalSettings}>
                 <Save className="h-4 w-4 mr-2" />
                 Save Settings
               </Button>

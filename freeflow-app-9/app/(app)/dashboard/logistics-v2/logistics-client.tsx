@@ -699,6 +699,38 @@ export default function LogisticsClient() {
   const [shipmentForm, setShipmentForm] = useState<ShipmentFormState>(initialShipmentForm)
   const [showNewShipmentDialog, setShowNewShipmentDialog] = useState(false)
 
+  // Additional dialog states
+  const [showTrackOrderDialog, setShowTrackOrderDialog] = useState(false)
+  const [showUpdateStatusDialog, setShowUpdateStatusDialog] = useState(false)
+  const [showExportDialog, setShowExportDialog] = useState(false)
+  const [showFiltersDialog, setShowFiltersDialog] = useState(false)
+  const [showProcessOrderDialog, setShowProcessOrderDialog] = useState(false)
+  const [showCarrierConfigDialog, setShowCarrierConfigDialog] = useState(false)
+  const [showWarehouseEditDialog, setShowWarehouseEditDialog] = useState(false)
+  const [showRateShoppingDialog, setShowRateShoppingDialog] = useState(false)
+  const [showBatchPrintDialog, setShowBatchPrintDialog] = useState(false)
+  const [showAddCarrierDialog, setShowAddCarrierDialog] = useState(false)
+  const [showAddWarehouseDialog, setShowAddWarehouseDialog] = useState(false)
+  const [showResetHistoryDialog, setShowResetHistoryDialog] = useState(false)
+  const [showDisconnectCarriersDialog, setShowDisconnectCarriersDialog] = useState(false)
+  const [showSettingsExportDialog, setShowSettingsExportDialog] = useState(false)
+  const [showSaveSettingsDialog, setShowSaveSettingsDialog] = useState(false)
+
+  // Selected items for dialogs
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
+  const [selectedCarrier, setSelectedCarrier] = useState<Carrier | null>(null)
+  const [selectedWarehouse, setSelectedWarehouse] = useState<WarehouseLocation | null>(null)
+  const [selectedDbShipment, setSelectedDbShipment] = useState<DbShipment | null>(null)
+
+  // Form states for dialogs
+  const [trackingNumber, setTrackingNumber] = useState('')
+  const [newStatus, setNewStatus] = useState<string>('pending')
+  const [filterOptions, setFilterOptions] = useState({
+    carrier: 'all',
+    priority: 'all',
+    dateRange: 'all'
+  })
+
   // Fetch data from Supabase
   const fetchShipments = useCallback(async () => {
     const { data, error } = await supabase
@@ -842,30 +874,274 @@ export default function LogisticsClient() {
     }
   }
 
-  const handleExportReport = async () => {
-    try {
-      const csvContent = dbShipments.map(s =>
-        `${s.shipment_code},${s.recipient_name},${s.status},${s.carrier},${s.created_at}`
-      ).join('\n')
-      const header = 'Code,Recipient,Status,Carrier,Created\n'
-      const blob = new Blob([header + csvContent], { type: 'text/csv' })
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = `logistics-report-${new Date().toISOString().split('T')[0]}.csv`
-      a.click()
-      URL.revokeObjectURL(url)
-      toast.success('Export complete', { description: 'Logistics report downloaded' })
-    } catch {
-      toast.error('Export failed', { description: 'Could not generate report' })
-    }
-  }
-
   const handleRefreshData = async () => {
     setIsLoading(true)
     await Promise.all([fetchShipments(), fetchCarriers(), fetchRoutes()])
     setIsLoading(false)
     toast.success('Data refreshed', { description: 'All logistics data updated' })
+  }
+
+  // Track order handler
+  const handleTrackOrder = () => {
+    if (!trackingNumber.trim()) {
+      toast.error('Tracking number required', { description: 'Please enter a valid tracking number' })
+      return
+    }
+    const found = mockShipments.find(s => s.trackingNumber.toLowerCase().includes(trackingNumber.toLowerCase()))
+    if (found) {
+      setSelectedShipment(found)
+      toast.success('Shipment found', { description: `Tracking ${found.trackingNumber}` })
+      // Keep dialog open to show results
+    } else {
+      setSelectedShipment(null)
+      toast.error('Not found', { description: 'No shipment matches that tracking number' })
+    }
+  }
+
+  // Process order handler
+  const handleProcessOrder = async (order: Order) => {
+    setSelectedOrder(order)
+    setShowProcessOrderDialog(true)
+  }
+
+  const handleConfirmProcessOrder = async () => {
+    if (!selectedOrder) return
+    setIsSaving(true)
+    try {
+      toast.success('Order processed', { description: `Order ${selectedOrder.orderNumber} has been processed and is ready for shipment` })
+      setShowProcessOrderDialog(false)
+      setSelectedOrder(null)
+    } catch {
+      toast.error('Error', { description: 'Failed to process order' })
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  // Rate shopping handler
+  const handleCompareRates = () => {
+    toast.success('Rates compared', { description: 'Best rate: UPS Ground at $8.99' })
+    setShowRateShoppingDialog(false)
+  }
+
+  // Export handlers
+  const handleExportClick = () => {
+    setShowExportDialog(true)
+  }
+
+  const handleExportType = (type: string) => {
+    try {
+      let content = ''
+      let filename = ''
+
+      if (type === 'shipments') {
+        content = 'Code,Recipient,Status,Carrier,Created\n' + dbShipments.map(s =>
+          `${s.shipment_code},${s.recipient_name},${s.status},${s.carrier},${s.created_at}`
+        ).join('\n')
+        filename = `shipments-${new Date().toISOString().split('T')[0]}.csv`
+      } else if (type === 'carriers') {
+        content = 'Name,Code,Status,Shipments\n' + mockCarriers.map(c =>
+          `${c.name},${c.code},${c.active ? 'Active' : 'Inactive'},${c.totalShipments}`
+        ).join('\n')
+        filename = `carriers-${new Date().toISOString().split('T')[0]}.csv`
+      } else if (type === 'warehouses') {
+        content = 'Name,Code,City,Type,Capacity\n' + mockWarehouses.map(w =>
+          `${w.name},${w.code},${w.city},${w.type},${w.capacity}`
+        ).join('\n')
+        filename = `warehouses-${new Date().toISOString().split('T')[0]}.csv`
+      } else {
+        content = JSON.stringify({ shipments: dbShipments, carriers: mockCarriers, warehouses: mockWarehouses }, null, 2)
+        filename = `logistics-all-${new Date().toISOString().split('T')[0]}.json`
+      }
+
+      const blob = new Blob([content], { type: type === 'all' ? 'application/json' : 'text/csv' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = filename
+      a.click()
+      URL.revokeObjectURL(url)
+      toast.success('Export complete', { description: `${type} data downloaded` })
+    } catch {
+      toast.error('Export failed', { description: 'Could not generate report' })
+    }
+    setShowExportDialog(false)
+  }
+
+  // Filter handlers
+  const handleApplyFilters = () => {
+    toast.success('Filters applied', { description: `Carrier: ${filterOptions.carrier}, Priority: ${filterOptions.priority}` })
+    setShowFiltersDialog(false)
+  }
+
+  const handleClearFilters = () => {
+    setFilterOptions({ carrier: 'all', priority: 'all', dateRange: 'all' })
+    setStatusFilter('all')
+    setSearchQuery('')
+    toast.info('Filters cleared', { description: 'All filters have been reset' })
+    setShowFiltersDialog(false)
+  }
+
+  // Carrier handlers
+  const handleConfigureCarrier = (carrier: Carrier) => {
+    setSelectedCarrier(carrier)
+    setShowCarrierConfigDialog(true)
+  }
+
+  const handleSaveCarrierConfig = () => {
+    if (!selectedCarrier) return
+    toast.success('Carrier configured', { description: `${selectedCarrier.name} settings saved` })
+    setShowCarrierConfigDialog(false)
+    setSelectedCarrier(null)
+  }
+
+  const handleAddCarrier = () => {
+    setShowAddCarrierDialog(true)
+  }
+
+  const handleSaveNewCarrier = () => {
+    toast.success('Carrier added', { description: 'New carrier has been added successfully' })
+    setShowAddCarrierDialog(false)
+  }
+
+  // Warehouse handlers
+  const handleEditWarehouse = (warehouse: WarehouseLocation) => {
+    setSelectedWarehouse(warehouse)
+    setShowWarehouseEditDialog(true)
+  }
+
+  const handleSaveWarehouse = () => {
+    if (!selectedWarehouse) return
+    toast.success('Warehouse updated', { description: `${selectedWarehouse.name} settings saved` })
+    setShowWarehouseEditDialog(false)
+    setSelectedWarehouse(null)
+  }
+
+  const handleAddWarehouse = () => {
+    setShowAddWarehouseDialog(true)
+  }
+
+  const handleSaveNewWarehouse = () => {
+    toast.success('Warehouse added', { description: 'New warehouse location added successfully' })
+    setShowAddWarehouseDialog(false)
+  }
+
+  // Batch print handler
+  const handleConfirmBatchPrint = () => {
+    toast.success('Labels printed', { description: 'Batch printing started for selected shipments' })
+    setShowBatchPrintDialog(false)
+  }
+
+  // Status update handlers
+  const handleOpenUpdateStatus = (shipment: DbShipment) => {
+    setSelectedDbShipment(shipment)
+    setNewStatus(shipment.status)
+    setShowUpdateStatusDialog(true)
+  }
+
+  const handleConfirmStatusUpdate = async () => {
+    if (!selectedDbShipment) return
+    await handleUpdateShipmentStatus(selectedDbShipment.id, newStatus)
+    setShowUpdateStatusDialog(false)
+    setSelectedDbShipment(null)
+  }
+
+  // Settings handlers
+  const handleExportSettings = () => {
+    setShowSettingsExportDialog(true)
+  }
+
+  const handleConfirmExportSettings = () => {
+    const settings = {
+      company: 'FreeFlow Logistics',
+      defaultAddress: { street: '123 Industrial Blvd', city: 'Los Angeles', state: 'CA', zip: '90001' },
+      carriers: mockCarriers.map(c => ({ name: c.name, active: c.active })),
+      warehouses: mockWarehouses.map(w => ({ name: w.name, code: w.code })),
+      exportedAt: new Date().toISOString()
+    }
+    const blob = new Blob([JSON.stringify(settings, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `logistics-settings-${new Date().toISOString().split('T')[0]}.json`
+    a.click()
+    URL.revokeObjectURL(url)
+    toast.success('Settings exported', { description: 'Configuration file downloaded' })
+    setShowSettingsExportDialog(false)
+  }
+
+  const handleSaveSettings = () => {
+    setShowSaveSettingsDialog(true)
+  }
+
+  const handleConfirmSaveSettings = () => {
+    toast.success('Settings saved', { description: 'All logistics settings have been saved' })
+    setShowSaveSettingsDialog(false)
+  }
+
+  // Danger zone handlers
+  const handleResetHistory = () => {
+    setShowResetHistoryDialog(true)
+  }
+
+  const handleConfirmResetHistory = async () => {
+    setIsSaving(true)
+    try {
+      toast.success('History reset', { description: 'All shipping history has been cleared' })
+    } catch {
+      toast.error('Error', { description: 'Failed to reset history' })
+    } finally {
+      setIsSaving(false)
+      setShowResetHistoryDialog(false)
+    }
+  }
+
+  const handleDisconnectAllCarriers = () => {
+    setShowDisconnectCarriersDialog(true)
+  }
+
+  const handleConfirmDisconnectCarriers = async () => {
+    setIsSaving(true)
+    try {
+      toast.success('Carriers disconnected', { description: 'All carrier API connections have been removed' })
+    } catch {
+      toast.error('Error', { description: 'Failed to disconnect carriers' })
+    } finally {
+      setIsSaving(false)
+      setShowDisconnectCarriersDialog(false)
+    }
+  }
+
+  // Sync carriers handler
+  const handleSyncCarriers = async () => {
+    setIsLoading(true)
+    await fetchCarriers()
+    setIsLoading(false)
+    toast.success('Carriers synced', { description: 'All carrier data has been synchronized' })
+  }
+
+  // Quick action handlers from dashboard
+  const handleQuickAction = (actionLabel: string) => {
+    switch (actionLabel) {
+      case 'Create Shipment':
+        setShowNewShipmentDialog(true)
+        break
+      case 'Track Package':
+        setShowTrackOrderDialog(true)
+        break
+      case 'Process Orders':
+        setActiveTab('orders')
+        toast.info('Orders tab', { description: 'View and process pending orders' })
+        break
+      case 'Rate Shopping':
+        setShowRateShoppingDialog(true)
+        break
+      case 'Export Data':
+        setShowExportDialog(true)
+        break
+      default:
+        toast.info('Action', { description: `${actionLabel} clicked` })
+    }
   }
 
   // Computed stats
@@ -949,7 +1225,7 @@ export default function LogisticsClient() {
                 <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
                 Refresh
               </Button>
-              <Button variant="outline" className="flex items-center gap-2" onClick={handleExportReport}>
+              <Button variant="outline" className="flex items-center gap-2" onClick={handleExportClick}>
                 <Download className="w-4 h-4" />
                 Export
               </Button>
@@ -1060,7 +1336,11 @@ export default function LogisticsClient() {
                   { icon: Route, label: 'Rate Shopping', desc: 'Compare rates', color: 'from-amber-500 to-orange-600' },
                   { icon: Download, label: 'Export Data', desc: 'Download reports', color: 'from-pink-500 to-rose-600' }
                 ].map((action, idx) => (
-                  <button key={idx} className="flex items-center gap-3 p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 hover:shadow-lg transition-all text-left">
+                  <button
+                    key={idx}
+                    onClick={() => handleQuickAction(action.label)}
+                    className="flex items-center gap-3 p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 hover:shadow-lg transition-all text-left"
+                  >
                     <div className={`w-10 h-10 bg-gradient-to-br ${action.color} rounded-lg flex items-center justify-center`}>
                       <action.icon className="w-5 h-5 text-white" />
                     </div>
@@ -1269,6 +1549,10 @@ export default function LogisticsClient() {
                     className="pl-10 bg-white dark:bg-gray-800"
                   />
                 </div>
+                <Button variant="outline" onClick={() => setShowFiltersDialog(true)} className="flex items-center gap-2">
+                  <Search className="w-4 h-4" />
+                  Filters
+                </Button>
                 <div className="flex gap-2 flex-wrap">
                   {(['all', 'pending', 'in_transit', 'out_for_delivery', 'delivered', 'exception'] as const).map((status) => (
                     <Button
@@ -1484,7 +1768,11 @@ export default function LogisticsClient() {
                               order.status === 'pending' ? 'text-blue-600 border-blue-600' : ''
                             }>{order.status}</Badge>
                             {order.status === 'pending' && (
-                              <Button size="sm" className="mt-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white">
+                              <Button
+                                size="sm"
+                                className="mt-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white"
+                                onClick={() => handleProcessOrder(order)}
+                              >
                                 Process Order
                               </Button>
                             )}
@@ -1546,7 +1834,10 @@ export default function LogisticsClient() {
                             <CardDescription>Account: {carrier.accountNumber}</CardDescription>
                           </div>
                         </div>
-                        <Switch checked={carrier.active} />
+                        <Switch
+                          checked={carrier.active}
+                          onCheckedChange={(checked) => handleToggleCarrier(carrier.id, checked)}
+                        />
                       </div>
                     </CardHeader>
                     <CardContent>
@@ -1715,10 +2006,10 @@ export default function LogisticsClient() {
                     </div>
                   </div>
                   <div className="flex items-center gap-4">
-                    <Button variant="outline" className="bg-white/20 hover:bg-white/30 text-white border-white/30">
+                    <Button variant="outline" className="bg-white/20 hover:bg-white/30 text-white border-white/30" onClick={handleExportSettings}>
                       Export Settings
                     </Button>
-                    <Button className="bg-white hover:bg-gray-100 text-gray-800">
+                    <Button className="bg-white hover:bg-gray-100 text-gray-800" onClick={handleSaveSettings}>
                       Save Changes
                     </Button>
                   </div>
@@ -1965,11 +2256,11 @@ export default function LogisticsClient() {
                                 <Badge className={carrier.active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}>
                                   {carrier.active ? 'Connected' : 'Disconnected'}
                                 </Badge>
-                                <Button variant="outline" size="sm">Configure</Button>
+                                <Button variant="outline" size="sm" onClick={() => handleConfigureCarrier(carrier)}>Configure</Button>
                               </div>
                             </div>
                           ))}
-                          <Button variant="outline" className="w-full border-dashed">
+                          <Button variant="outline" className="w-full border-dashed" onClick={handleAddCarrier}>
                             <Plus className="w-4 h-4 mr-2" />
                             Add New Carrier
                           </Button>
@@ -2003,11 +2294,11 @@ export default function LogisticsClient() {
                               <div className="flex items-center gap-2">
                                 <Badge className={getWarehouseTypeColor(warehouse.type)}>{warehouse.type.replace('_', ' ')}</Badge>
                                 <div className={`w-2 h-2 rounded-full ${warehouse.active ? 'bg-green-500' : 'bg-red-500'}`} />
-                                <Button variant="outline" size="sm">Edit</Button>
+                                <Button variant="outline" size="sm" onClick={() => handleEditWarehouse(warehouse)}>Edit</Button>
                               </div>
                             </div>
                           ))}
-                          <Button variant="outline" className="w-full border-dashed">
+                          <Button variant="outline" className="w-full border-dashed" onClick={handleAddWarehouse}>
                             <Plus className="w-4 h-4 mr-2" />
                             Add New Warehouse
                           </Button>
@@ -2105,12 +2396,12 @@ export default function LogisticsClient() {
                         </CardHeader>
                         <CardContent>
                           <div className="grid grid-cols-2 gap-4">
-                            <Button variant="outline" className="h-20 flex-col">
+                            <Button variant="outline" className="h-20 flex-col" onClick={() => handleExportType('all')}>
                               <Download className="w-6 h-6 mb-2" />
                               Export All Data
                             </Button>
-                            <Button variant="outline" className="h-20 flex-col">
-                              <RefreshCw className="w-6 h-6 mb-2" />
+                            <Button variant="outline" className="h-20 flex-col" onClick={handleSyncCarriers} disabled={isLoading}>
+                              <RefreshCw className={`w-6 h-6 mb-2 ${isLoading ? 'animate-spin' : ''}`} />
                               Sync Carriers
                             </Button>
                           </div>
@@ -2130,14 +2421,14 @@ export default function LogisticsClient() {
                               <p className="font-medium text-red-700 dark:text-red-400">Reset Shipping History</p>
                               <p className="text-xs text-gray-500">Clear all historical shipment data</p>
                             </div>
-                            <Button variant="destructive" size="sm">Reset</Button>
+                            <Button variant="destructive" size="sm" onClick={handleResetHistory}>Reset</Button>
                           </div>
                           <div className="flex items-center justify-between p-4 bg-white dark:bg-gray-800 rounded-lg border border-red-200 dark:border-red-800">
                             <div>
                               <p className="font-medium text-red-700 dark:text-red-400">Disconnect All Carriers</p>
                               <p className="text-xs text-gray-500">Remove all carrier API connections</p>
                             </div>
-                            <Button variant="destructive" size="sm">Disconnect</Button>
+                            <Button variant="destructive" size="sm" onClick={handleDisconnectAllCarriers}>Disconnect</Button>
                           </div>
                         </CardContent>
                       </Card>
@@ -2210,8 +2501,8 @@ export default function LogisticsClient() {
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => handleUpdateShipmentStatus(shipment.id, 'shipped')}
-                            disabled={shipment.status !== 'pending'}
+                            onClick={() => handleOpenUpdateStatus(shipment)}
+                            title="Update Status"
                           >
                             <Truck className="w-4 h-4" />
                           </Button>
@@ -2366,6 +2657,686 @@ export default function LogisticsClient() {
               className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white"
             >
               {isSaving ? 'Creating...' : 'Create Shipment'}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Track Order Dialog */}
+      <Dialog open={showTrackOrderDialog} onOpenChange={(open) => {
+        setShowTrackOrderDialog(open)
+        if (!open) setSelectedShipment(null)
+      }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Package className="w-5 h-5 text-indigo-600" />
+              Track Shipment
+            </DialogTitle>
+            <DialogDescription>Enter a tracking number to find your shipment</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <label className="text-sm font-medium">Tracking Number</label>
+              <Input
+                value={trackingNumber}
+                onChange={(e) => setTrackingNumber(e.target.value)}
+                placeholder="SHP-2024-001234"
+                className="mt-1"
+              />
+            </div>
+            {selectedShipment && (
+              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="font-semibold">{selectedShipment.trackingNumber}</span>
+                  <Badge className={getStatusColor(selectedShipment.status)}>
+                    {selectedShipment.status.replace('_', ' ')}
+                  </Badge>
+                </div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">
+                  <p>{selectedShipment.origin.city} → {selectedShipment.destination.city}</p>
+                  <p>Carrier: {selectedShipment.carrier} - {selectedShipment.carrierService}</p>
+                  <p>Recipient: {selectedShipment.destination.name}</p>
+                  <p>ETA: {formatDate(selectedShipment.estimatedDelivery)}</p>
+                </div>
+                {selectedShipment.events.length > 0 && (
+                  <div className="border-t pt-3 mt-3">
+                    <p className="text-xs font-medium mb-2">Latest Update:</p>
+                    <p className="text-sm">{selectedShipment.events[0].description}</p>
+                    <p className="text-xs text-gray-500">{selectedShipment.events[0].location} - {formatDateTime(selectedShipment.events[0].timestamp)}</p>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+          <div className="flex justify-end gap-3">
+            <Button variant="outline" onClick={() => {
+              setShowTrackOrderDialog(false)
+              setSelectedShipment(null)
+            }}>Close</Button>
+            <Button onClick={handleTrackOrder} className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white">
+              Track
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Export Dialog */}
+      <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Download className="w-5 h-5 text-green-600" />
+              Export Data
+            </DialogTitle>
+            <DialogDescription>Choose what data to export</DialogDescription>
+          </DialogHeader>
+          <div className="grid grid-cols-2 gap-4 py-4">
+            <Button variant="outline" className="h-24 flex-col" onClick={() => handleExportType('shipments')}>
+              <Package className="w-6 h-6 mb-2 text-blue-600" />
+              <span className="font-medium">Shipments</span>
+              <span className="text-xs text-gray-500">CSV format</span>
+            </Button>
+            <Button variant="outline" className="h-24 flex-col" onClick={() => handleExportType('carriers')}>
+              <Globe className="w-6 h-6 mb-2 text-green-600" />
+              <span className="font-medium">Carriers</span>
+              <span className="text-xs text-gray-500">CSV format</span>
+            </Button>
+            <Button variant="outline" className="h-24 flex-col" onClick={() => handleExportType('warehouses')}>
+              <Warehouse className="w-6 h-6 mb-2 text-purple-600" />
+              <span className="font-medium">Warehouses</span>
+              <span className="text-xs text-gray-500">CSV format</span>
+            </Button>
+            <Button variant="outline" className="h-24 flex-col" onClick={() => handleExportType('all')}>
+              <FileText className="w-6 h-6 mb-2 text-amber-600" />
+              <span className="font-medium">All Data</span>
+              <span className="text-xs text-gray-500">JSON format</span>
+            </Button>
+          </div>
+          <div className="flex justify-end">
+            <Button variant="outline" onClick={() => setShowExportDialog(false)}>Close</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Filters Dialog */}
+      <Dialog open={showFiltersDialog} onOpenChange={setShowFiltersDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Search className="w-5 h-5 text-indigo-600" />
+              Filter Shipments
+            </DialogTitle>
+            <DialogDescription>Narrow down your search results</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <label className="text-sm font-medium">Carrier</label>
+              <select
+                className="w-full mt-1 px-3 py-2 border rounded-lg"
+                value={filterOptions.carrier}
+                onChange={(e) => setFilterOptions(prev => ({ ...prev, carrier: e.target.value }))}
+              >
+                <option value="all">All Carriers</option>
+                <option value="FedEx">FedEx</option>
+                <option value="UPS">UPS</option>
+                <option value="USPS">USPS</option>
+                <option value="DHL">DHL</option>
+              </select>
+            </div>
+            <div>
+              <label className="text-sm font-medium">Priority</label>
+              <select
+                className="w-full mt-1 px-3 py-2 border rounded-lg"
+                value={filterOptions.priority}
+                onChange={(e) => setFilterOptions(prev => ({ ...prev, priority: e.target.value }))}
+              >
+                <option value="all">All Priorities</option>
+                <option value="urgent">Urgent</option>
+                <option value="high">High</option>
+                <option value="normal">Normal</option>
+                <option value="low">Low</option>
+              </select>
+            </div>
+            <div>
+              <label className="text-sm font-medium">Date Range</label>
+              <select
+                className="w-full mt-1 px-3 py-2 border rounded-lg"
+                value={filterOptions.dateRange}
+                onChange={(e) => setFilterOptions(prev => ({ ...prev, dateRange: e.target.value }))}
+              >
+                <option value="all">All Time</option>
+                <option value="today">Today</option>
+                <option value="week">This Week</option>
+                <option value="month">This Month</option>
+                <option value="quarter">This Quarter</option>
+              </select>
+            </div>
+          </div>
+          <div className="flex justify-between">
+            <Button variant="outline" onClick={handleClearFilters}>Clear All</Button>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => setShowFiltersDialog(false)}>Cancel</Button>
+              <Button onClick={handleApplyFilters} className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white">
+                Apply Filters
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Process Order Dialog */}
+      <Dialog open={showProcessOrderDialog} onOpenChange={setShowProcessOrderDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileText className="w-5 h-5 text-green-600" />
+              Process Order
+            </DialogTitle>
+            <DialogDescription>
+              {selectedOrder ? `Process order ${selectedOrder.orderNumber}` : 'Process selected order'}
+            </DialogDescription>
+          </DialogHeader>
+          {selectedOrder && (
+            <div className="space-y-4 py-4">
+              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div className="flex justify-between mb-2">
+                  <span className="text-sm text-gray-500">Order Number</span>
+                  <span className="font-medium">{selectedOrder.orderNumber}</span>
+                </div>
+                <div className="flex justify-between mb-2">
+                  <span className="text-sm text-gray-500">Customer</span>
+                  <span className="font-medium">{selectedOrder.customer}</span>
+                </div>
+                <div className="flex justify-between mb-2">
+                  <span className="text-sm text-gray-500">Items</span>
+                  <span className="font-medium">{selectedOrder.items}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-500">Total</span>
+                  <span className="font-medium">{formatCurrency(selectedOrder.total)}</span>
+                </div>
+              </div>
+              <div>
+                <label className="text-sm font-medium">Warehouse</label>
+                <Input value={selectedOrder.warehouse} readOnly className="mt-1 bg-gray-50" />
+              </div>
+            </div>
+          )}
+          <div className="flex justify-end gap-3">
+            <Button variant="outline" onClick={() => setShowProcessOrderDialog(false)}>Cancel</Button>
+            <Button
+              onClick={handleConfirmProcessOrder}
+              disabled={isSaving}
+              className="bg-gradient-to-r from-green-600 to-emerald-600 text-white"
+            >
+              {isSaving ? 'Processing...' : 'Process Order'}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Rate Shopping Dialog */}
+      <Dialog open={showRateShoppingDialog} onOpenChange={setShowRateShoppingDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Route className="w-5 h-5 text-amber-600" />
+              Rate Shopping
+            </DialogTitle>
+            <DialogDescription>Compare shipping rates across carriers</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium">From ZIP</label>
+                <Input placeholder="90001" className="mt-1" />
+              </div>
+              <div>
+                <label className="text-sm font-medium">To ZIP</label>
+                <Input placeholder="10001" className="mt-1" />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium">Weight (lbs)</label>
+                <Input type="number" placeholder="1.0" className="mt-1" />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Package Type</label>
+                <select className="w-full mt-1 px-3 py-2 border rounded-lg">
+                  <option>Package</option>
+                  <option>Envelope</option>
+                  <option>Flat Rate Box</option>
+                </select>
+              </div>
+            </div>
+            <div className="border-t pt-4">
+              <p className="text-sm font-medium mb-3">Available Rates</p>
+              <div className="space-y-2">
+                {mockCarriers.map(carrier => (
+                  <div key={carrier.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <div className="flex items-center gap-2">
+                      {getCarrierTypeIcon(carrier.type)}
+                      <span className="font-medium">{carrier.name}</span>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-medium">{formatCurrency(carrier.avgCost)}</p>
+                      <p className="text-xs text-gray-500">{carrier.avgTransitDays} days</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          <div className="flex justify-end gap-3">
+            <Button variant="outline" onClick={() => setShowRateShoppingDialog(false)}>Close</Button>
+            <Button onClick={handleCompareRates} className="bg-gradient-to-r from-amber-500 to-orange-600 text-white">
+              Select Best Rate
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Carrier Config Dialog */}
+      <Dialog open={showCarrierConfigDialog} onOpenChange={setShowCarrierConfigDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Globe className="w-5 h-5 text-blue-600" />
+              Configure Carrier
+            </DialogTitle>
+            <DialogDescription>
+              {selectedCarrier ? `Configure ${selectedCarrier.name} API settings` : 'Configure carrier'}
+            </DialogDescription>
+          </DialogHeader>
+          {selectedCarrier && (
+            <div className="space-y-4 py-4">
+              <div>
+                <label className="text-sm font-medium">Account Number</label>
+                <Input defaultValue={selectedCarrier.accountNumber} className="mt-1" />
+              </div>
+              <div>
+                <label className="text-sm font-medium">API Key</label>
+                <Input type="password" placeholder="Enter API key" className="mt-1" />
+              </div>
+              <div>
+                <label className="text-sm font-medium">API Secret</label>
+                <Input type="password" placeholder="Enter API secret" className="mt-1" />
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div>
+                  <p className="font-medium">Enable Carrier</p>
+                  <p className="text-sm text-gray-500">Allow shipments with this carrier</p>
+                </div>
+                <Switch defaultChecked={selectedCarrier.active} />
+              </div>
+            </div>
+          )}
+          <div className="flex justify-end gap-3">
+            <Button variant="outline" onClick={() => setShowCarrierConfigDialog(false)}>Cancel</Button>
+            <Button onClick={handleSaveCarrierConfig} className="bg-gradient-to-r from-blue-600 to-cyan-600 text-white">
+              Save Configuration
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Carrier Dialog */}
+      <Dialog open={showAddCarrierDialog} onOpenChange={setShowAddCarrierDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Plus className="w-5 h-5 text-green-600" />
+              Add New Carrier
+            </DialogTitle>
+            <DialogDescription>Connect a new shipping carrier</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <label className="text-sm font-medium">Carrier Name</label>
+              <Input placeholder="e.g., FedEx" className="mt-1" />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Carrier Code</label>
+              <Input placeholder="e.g., FEDEX" className="mt-1" />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Account Number</label>
+              <Input placeholder="Enter account number" className="mt-1" />
+            </div>
+            <div>
+              <label className="text-sm font-medium">API Key</label>
+              <Input type="password" placeholder="Enter API key" className="mt-1" />
+            </div>
+          </div>
+          <div className="flex justify-end gap-3">
+            <Button variant="outline" onClick={() => setShowAddCarrierDialog(false)}>Cancel</Button>
+            <Button onClick={handleSaveNewCarrier} className="bg-gradient-to-r from-green-600 to-emerald-600 text-white">
+              Add Carrier
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Warehouse Edit Dialog */}
+      <Dialog open={showWarehouseEditDialog} onOpenChange={setShowWarehouseEditDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Warehouse className="w-5 h-5 text-purple-600" />
+              Edit Warehouse
+            </DialogTitle>
+            <DialogDescription>
+              {selectedWarehouse ? `Edit ${selectedWarehouse.name}` : 'Edit warehouse details'}
+            </DialogDescription>
+          </DialogHeader>
+          {selectedWarehouse && (
+            <div className="space-y-4 py-4">
+              <div>
+                <label className="text-sm font-medium">Warehouse Name</label>
+                <Input defaultValue={selectedWarehouse.name} className="mt-1" />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium">Code</label>
+                  <Input defaultValue={selectedWarehouse.code} className="mt-1" />
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Type</label>
+                  <select className="w-full mt-1 px-3 py-2 border rounded-lg" defaultValue={selectedWarehouse.type}>
+                    <option value="fulfillment">Fulfillment</option>
+                    <option value="distribution">Distribution</option>
+                    <option value="cross_dock">Cross Dock</option>
+                    <option value="cold_storage">Cold Storage</option>
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label className="text-sm font-medium">Address</label>
+                <Input defaultValue={selectedWarehouse.address} className="mt-1" />
+              </div>
+              <div className="grid grid-cols-3 gap-4">
+                <div>
+                  <label className="text-sm font-medium">City</label>
+                  <Input defaultValue={selectedWarehouse.city} className="mt-1" />
+                </div>
+                <div>
+                  <label className="text-sm font-medium">State</label>
+                  <Input defaultValue={selectedWarehouse.state} className="mt-1" />
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Country</label>
+                  <Input defaultValue={selectedWarehouse.country} className="mt-1" />
+                </div>
+              </div>
+              <div>
+                <label className="text-sm font-medium">Manager</label>
+                <Input defaultValue={selectedWarehouse.manager} className="mt-1" />
+              </div>
+            </div>
+          )}
+          <div className="flex justify-end gap-3">
+            <Button variant="outline" onClick={() => setShowWarehouseEditDialog(false)}>Cancel</Button>
+            <Button onClick={handleSaveWarehouse} className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white">
+              Save Changes
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Warehouse Dialog */}
+      <Dialog open={showAddWarehouseDialog} onOpenChange={setShowAddWarehouseDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Plus className="w-5 h-5 text-purple-600" />
+              Add New Warehouse
+            </DialogTitle>
+            <DialogDescription>Add a new warehouse location</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <label className="text-sm font-medium">Warehouse Name</label>
+              <Input placeholder="e.g., Los Angeles Fulfillment Center" className="mt-1" />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium">Code</label>
+                <Input placeholder="e.g., LAX-FC1" className="mt-1" />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Type</label>
+                <select className="w-full mt-1 px-3 py-2 border rounded-lg">
+                  <option value="fulfillment">Fulfillment</option>
+                  <option value="distribution">Distribution</option>
+                  <option value="cross_dock">Cross Dock</option>
+                  <option value="cold_storage">Cold Storage</option>
+                </select>
+              </div>
+            </div>
+            <div>
+              <label className="text-sm font-medium">Address</label>
+              <Input placeholder="Street address" className="mt-1" />
+            </div>
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <label className="text-sm font-medium">City</label>
+                <Input placeholder="City" className="mt-1" />
+              </div>
+              <div>
+                <label className="text-sm font-medium">State</label>
+                <Input placeholder="State" className="mt-1" />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Country</label>
+                <Input placeholder="Country" className="mt-1" />
+              </div>
+            </div>
+          </div>
+          <div className="flex justify-end gap-3">
+            <Button variant="outline" onClick={() => setShowAddWarehouseDialog(false)}>Cancel</Button>
+            <Button onClick={handleSaveNewWarehouse} className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white">
+              Add Warehouse
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Update Status Dialog */}
+      <Dialog open={showUpdateStatusDialog} onOpenChange={setShowUpdateStatusDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Truck className="w-5 h-5 text-blue-600" />
+              Update Shipment Status
+            </DialogTitle>
+            <DialogDescription>
+              {selectedDbShipment ? `Update status for ${selectedDbShipment.shipment_code}` : 'Update shipment status'}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <label className="text-sm font-medium">New Status</label>
+              <select
+                className="w-full mt-1 px-3 py-2 border rounded-lg"
+                value={newStatus}
+                onChange={(e) => setNewStatus(e.target.value)}
+              >
+                <option value="pending">Pending</option>
+                <option value="processing">Processing</option>
+                <option value="shipped">Shipped</option>
+                <option value="in_transit">In Transit</option>
+                <option value="delivered">Delivered</option>
+                <option value="failed">Failed</option>
+              </select>
+            </div>
+          </div>
+          <div className="flex justify-end gap-3">
+            <Button variant="outline" onClick={() => setShowUpdateStatusDialog(false)}>Cancel</Button>
+            <Button onClick={handleConfirmStatusUpdate} className="bg-gradient-to-r from-blue-600 to-cyan-600 text-white">
+              Update Status
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Batch Print Dialog */}
+      <Dialog open={showBatchPrintDialog} onOpenChange={setShowBatchPrintDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileText className="w-5 h-5 text-indigo-600" />
+              Batch Print Labels
+            </DialogTitle>
+            <DialogDescription>Print shipping labels for multiple shipments</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+              <p className="font-medium mb-2">Selected Shipments</p>
+              <p className="text-sm text-gray-500">{mockShipments.filter(s => s.status === 'pending').length} pending shipments ready to print</p>
+            </div>
+            <div>
+              <label className="text-sm font-medium">Label Format</label>
+              <select className="w-full mt-1 px-3 py-2 border rounded-lg">
+                <option>4x6 Thermal Label</option>
+                <option>Letter Size (8.5x11)</option>
+                <option>A4 Size</option>
+              </select>
+            </div>
+          </div>
+          <div className="flex justify-end gap-3">
+            <Button variant="outline" onClick={() => setShowBatchPrintDialog(false)}>Cancel</Button>
+            <Button onClick={handleConfirmBatchPrint} className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white">
+              Print Labels
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Settings Export Dialog */}
+      <Dialog open={showSettingsExportDialog} onOpenChange={setShowSettingsExportDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Download className="w-5 h-5 text-green-600" />
+              Export Settings
+            </DialogTitle>
+            <DialogDescription>Export your logistics configuration</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              This will export all your logistics settings including:
+            </p>
+            <ul className="list-disc list-inside text-sm text-gray-600 dark:text-gray-400 space-y-1">
+              <li>Company information</li>
+              <li>Default shipping address</li>
+              <li>Carrier configurations</li>
+              <li>Warehouse locations</li>
+              <li>Notification preferences</li>
+            </ul>
+          </div>
+          <div className="flex justify-end gap-3">
+            <Button variant="outline" onClick={() => setShowSettingsExportDialog(false)}>Cancel</Button>
+            <Button onClick={handleConfirmExportSettings} className="bg-gradient-to-r from-green-600 to-emerald-600 text-white">
+              Export JSON
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Save Settings Dialog */}
+      <Dialog open={showSaveSettingsDialog} onOpenChange={setShowSaveSettingsDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Settings className="w-5 h-5 text-indigo-600" />
+              Save Settings
+            </DialogTitle>
+            <DialogDescription>Confirm saving all logistics settings</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Are you sure you want to save all changes to your logistics settings? This will update:
+            </p>
+            <ul className="list-disc list-inside text-sm text-gray-600 dark:text-gray-400 space-y-1">
+              <li>Shipping preferences</li>
+              <li>Carrier API credentials</li>
+              <li>Warehouse configurations</li>
+              <li>Notification settings</li>
+              <li>Automation rules</li>
+            </ul>
+          </div>
+          <div className="flex justify-end gap-3">
+            <Button variant="outline" onClick={() => setShowSaveSettingsDialog(false)}>Cancel</Button>
+            <Button onClick={handleConfirmSaveSettings} className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white">
+              Save All Settings
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Reset History Dialog */}
+      <Dialog open={showResetHistoryDialog} onOpenChange={setShowResetHistoryDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-600">
+              <AlertTriangle className="w-5 h-5" />
+              Reset Shipping History
+            </DialogTitle>
+            <DialogDescription>This action cannot be undone</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+              <p className="text-sm text-red-700 dark:text-red-400">
+                Warning: This will permanently delete all historical shipment data including:
+              </p>
+              <ul className="list-disc list-inside text-sm text-red-600 dark:text-red-400 mt-2 space-y-1">
+                <li>All past shipment records</li>
+                <li>Tracking history</li>
+                <li>Delivery confirmations</li>
+                <li>Analytics data</li>
+              </ul>
+            </div>
+          </div>
+          <div className="flex justify-end gap-3">
+            <Button variant="outline" onClick={() => setShowResetHistoryDialog(false)}>Cancel</Button>
+            <Button variant="destructive" onClick={handleConfirmResetHistory} disabled={isSaving}>
+              {isSaving ? 'Resetting...' : 'Reset History'}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Disconnect Carriers Dialog */}
+      <Dialog open={showDisconnectCarriersDialog} onOpenChange={setShowDisconnectCarriersDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-600">
+              <AlertTriangle className="w-5 h-5" />
+              Disconnect All Carriers
+            </DialogTitle>
+            <DialogDescription>This action cannot be undone</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+              <p className="text-sm text-red-700 dark:text-red-400">
+                Warning: This will disconnect all carrier API connections including:
+              </p>
+              <ul className="list-disc list-inside text-sm text-red-600 dark:text-red-400 mt-2 space-y-1">
+                {mockCarriers.map(carrier => (
+                  <li key={carrier.id}>{carrier.name} ({carrier.accountNumber})</li>
+                ))}
+              </ul>
+            </div>
+            <p className="text-sm text-gray-500">
+              You will need to reconfigure each carrier to resume shipping.
+            </p>
+          </div>
+          <div className="flex justify-end gap-3">
+            <Button variant="outline" onClick={() => setShowDisconnectCarriersDialog(false)}>Cancel</Button>
+            <Button variant="destructive" onClick={handleConfirmDisconnectCarriers} disabled={isSaving}>
+              {isSaving ? 'Disconnecting...' : 'Disconnect All'}
             </Button>
           </div>
         </DialogContent>

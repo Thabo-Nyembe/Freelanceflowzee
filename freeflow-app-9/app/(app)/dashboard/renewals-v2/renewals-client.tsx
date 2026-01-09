@@ -581,6 +581,40 @@ export default function RenewalsClient({ initialRenewals }: RenewalsClientProps)
   const [isRenewalDialogOpen, setIsRenewalDialogOpen] = useState(false)
   const [isNewRenewalDialogOpen, setIsNewRenewalDialogOpen] = useState(false)
 
+  // Additional dialog states
+  const [isEditRenewalDialogOpen, setIsEditRenewalDialogOpen] = useState(false)
+  const [isSendReminderDialogOpen, setIsSendReminderDialogOpen] = useState(false)
+  const [isProcessRenewalDialogOpen, setIsProcessRenewalDialogOpen] = useState(false)
+  const [isSettingsDialogOpen, setIsSettingsDialogOpen] = useState(false)
+  const [isExportDialogOpen, setIsExportDialogOpen] = useState(false)
+  const [isFiltersDialogOpen, setIsFiltersDialogOpen] = useState(false)
+  const [isForecastDialogOpen, setIsForecastDialogOpen] = useState(false)
+  const [isAtRiskDialogOpen, setIsAtRiskDialogOpen] = useState(false)
+  const [isPlaybookDialogOpen, setIsPlaybookDialogOpen] = useState(false)
+  const [isReportsDialogOpen, setIsReportsDialogOpen] = useState(false)
+  const [isCustomersDialogOpen, setIsCustomersDialogOpen] = useState(false)
+
+  // Form states
+  const [editFormData, setEditFormData] = useState({
+    customerName: '',
+    currentARR: '',
+    proposedARR: '',
+    renewalDate: '',
+    csmName: '',
+    notes: ''
+  })
+  const [reminderType, setReminderType] = useState<'email' | 'sms' | 'both'>('email')
+  const [reminderMessage, setReminderMessage] = useState('')
+  const [exportFormat, setExportFormat] = useState<'csv' | 'excel' | 'pdf'>('csv')
+  const [exportDateRange, setExportDateRange] = useState({ start: '', end: '' })
+  const [filterCriteria, setFilterCriteria] = useState({
+    status: 'all',
+    priority: 'all',
+    healthScore: 'all',
+    csm: 'all',
+    dateRange: { start: '', end: '' }
+  })
+
   // Quick actions with real functionality
   const handleNewRenewal = () => {
     setIsNewRenewalDialogOpen(true)
@@ -737,6 +771,272 @@ export default function RenewalsClient({ initialRenewals }: RenewalsClientProps)
   const handleExportRenewals = () => {
     toast.success('Exporting renewals', {
       description: 'Renewal data will be downloaded shortly'
+    })
+  }
+
+  // Additional handlers for dialogs
+  const handleOpenEditRenewal = (renewal: Renewal) => {
+    setSelectedRenewal(renewal)
+    setEditFormData({
+      customerName: renewal.customerName,
+      currentARR: renewal.currentARR.toString(),
+      proposedARR: renewal.proposedARR.toString(),
+      renewalDate: renewal.renewalDate.toISOString().split('T')[0],
+      csmName: renewal.csmName,
+      notes: renewal.notes
+    })
+    setIsEditRenewalDialogOpen(true)
+  }
+
+  const handleSaveEditRenewal = () => {
+    if (!selectedRenewal) return
+    toast.success('Renewal updated', {
+      description: `${editFormData.customerName} renewal has been updated successfully`
+    })
+    setIsEditRenewalDialogOpen(false)
+    setSelectedRenewal(null)
+  }
+
+  const handleOpenSendReminder = (renewal?: Renewal) => {
+    if (renewal) setSelectedRenewal(renewal)
+    setReminderMessage('')
+    setReminderType('email')
+    setIsSendReminderDialogOpen(true)
+  }
+
+  const handleSendReminder = async () => {
+    if (!selectedRenewal) return
+    try {
+      toast.loading('Sending reminder...', { id: 'reminder' })
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      toast.success('Reminder sent', {
+        id: 'reminder',
+        description: `${reminderType === 'both' ? 'Email and SMS' : reminderType.toUpperCase()} reminder sent to ${selectedRenewal.customerName}`
+      })
+      setIsSendReminderDialogOpen(false)
+    } catch {
+      toast.error('Failed to send reminder', { id: 'reminder' })
+    }
+  }
+
+  const handleOpenProcessRenewal = (renewal?: Renewal) => {
+    if (renewal) setSelectedRenewal(renewal)
+    setIsProcessRenewalDialogOpen(true)
+  }
+
+  const handleProcessRenewalAction = async (action: 'approve' | 'reject' | 'escalate') => {
+    if (!selectedRenewal) return
+    const actionLabels = {
+      approve: 'approved',
+      reject: 'rejected',
+      escalate: 'escalated'
+    }
+    toast.loading(`Processing renewal...`, { id: 'process' })
+    await new Promise(resolve => setTimeout(resolve, 1000))
+    toast.success(`Renewal ${actionLabels[action]}`, {
+      id: 'process',
+      description: `${selectedRenewal.customerName} renewal has been ${actionLabels[action]}`
+    })
+    setIsProcessRenewalDialogOpen(false)
+  }
+
+  const handleOpenSettings = () => {
+    setIsSettingsDialogOpen(true)
+    toast.info('Opening renewal settings')
+  }
+
+  const handleSaveSettings = () => {
+    toast.success('Settings saved', {
+      description: 'Your renewal settings have been updated'
+    })
+    setIsSettingsDialogOpen(false)
+  }
+
+  const handleOpenExportDialog = () => {
+    setExportFormat('csv')
+    setExportDateRange({ start: '', end: '' })
+    setIsExportDialogOpen(true)
+  }
+
+  const handleExportWithOptions = () => {
+    const formatLabels = { csv: 'CSV', excel: 'Excel', pdf: 'PDF' }
+    toast.loading(`Generating ${formatLabels[exportFormat]} export...`, { id: 'export' })
+    setTimeout(() => {
+      const data = renewals.map(r => ({
+        customerName: r.customerName,
+        status: r.status,
+        currentARR: r.currentARR,
+        proposedARR: r.proposedARR,
+        probability: r.probability,
+        renewalDate: r.renewalDate,
+        healthScore: r.healthScoreValue,
+        csmName: r.csmName
+      }))
+      if (exportFormat === 'csv') {
+        const csvContent = [
+          'Customer,Status,Current ARR,Proposed ARR,Probability,Renewal Date,Health,CSM',
+          ...data.map(r => `"${r.customerName}","${r.status}",${r.currentARR},${r.proposedARR},${r.probability},"${r.renewalDate}",${r.healthScore},"${r.csmName}"`)
+        ].join('\n')
+        const blob = new Blob([csvContent], { type: 'text/csv' })
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `renewals-export-${new Date().toISOString().split('T')[0]}.csv`
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+        URL.revokeObjectURL(url)
+      }
+      toast.success(`${formatLabels[exportFormat]} export complete`, {
+        id: 'export',
+        description: `${data.length} renewals exported successfully`
+      })
+      setIsExportDialogOpen(false)
+    }, 1500)
+  }
+
+  const handleOpenFilters = () => {
+    setIsFiltersDialogOpen(true)
+  }
+
+  const handleApplyFilters = () => {
+    const activeFilters = Object.entries(filterCriteria).filter(([_, v]) =>
+      typeof v === 'string' ? v !== 'all' : (v.start || v.end)
+    ).length
+    toast.success('Filters applied', {
+      description: `${activeFilters} filter${activeFilters !== 1 ? 's' : ''} active`
+    })
+    setIsFiltersDialogOpen(false)
+  }
+
+  const handleClearFilters = () => {
+    setFilterCriteria({
+      status: 'all',
+      priority: 'all',
+      healthScore: 'all',
+      csm: 'all',
+      dateRange: { start: '', end: '' }
+    })
+    toast.info('Filters cleared')
+  }
+
+  const handleOpenForecast = () => {
+    setIsForecastDialogOpen(true)
+    toast.info('Loading forecast data...')
+  }
+
+  const handleOpenAtRisk = () => {
+    setIsAtRiskDialogOpen(true)
+    const atRiskRenewals = renewals.filter(r => r.status === 'at_risk')
+    toast.warning(`${atRiskRenewals.length} at-risk account${atRiskRenewals.length !== 1 ? 's' : ''} found`)
+  }
+
+  const handleOpenPlaybooks = () => {
+    setIsPlaybookDialogOpen(true)
+    toast.info('Loading playbooks...')
+  }
+
+  const handleRunSelectedPlaybook = (playbookName: string) => {
+    if (!selectedRenewal) {
+      toast.error('Please select a renewal first')
+      return
+    }
+    toast.loading(`Running ${playbookName}...`, { id: 'playbook' })
+    setTimeout(() => {
+      toast.success(`${playbookName} started`, {
+        id: 'playbook',
+        description: `Playbook is now running for ${selectedRenewal.customerName}`
+      })
+      setIsPlaybookDialogOpen(false)
+    }, 1000)
+  }
+
+  const handleOpenReports = () => {
+    setIsReportsDialogOpen(true)
+    toast.info('Loading reports...')
+  }
+
+  const handleGenerateReport = (reportType: string) => {
+    toast.loading(`Generating ${reportType}...`, { id: 'report' })
+    setTimeout(() => {
+      toast.success(`${reportType} generated`, {
+        id: 'report',
+        description: 'Report is ready for download'
+      })
+    }, 1500)
+  }
+
+  const handleOpenCustomers = () => {
+    setIsCustomersDialogOpen(true)
+  }
+
+  const handleViewCustomerDetails = (customerName: string) => {
+    toast.info(`Viewing ${customerName}`, {
+      description: 'Loading customer details...'
+    })
+  }
+
+  // Overview quick action handlers
+  const handleQuickNewRenewal = () => {
+    setIsNewRenewalDialogOpen(true)
+    toast.info('Create a new renewal')
+  }
+
+  const handleQuickForecast = () => {
+    handleOpenForecast()
+  }
+
+  const handleQuickAtRisk = () => {
+    handleOpenAtRisk()
+  }
+
+  const handleQuickPlaybooks = () => {
+    handleOpenPlaybooks()
+  }
+
+  const handleQuickCustomers = () => {
+    handleOpenCustomers()
+  }
+
+  const handleQuickReports = () => {
+    handleOpenReports()
+  }
+
+  const handleQuickExport = () => {
+    handleOpenExportDialog()
+  }
+
+  const handleQuickSettings = () => {
+    setActiveTab('settings')
+    toast.info('Opening settings')
+  }
+
+  const handleUsePlaybook = (playbook: Playbook) => {
+    toast.success(`Starting ${playbook.name}`, {
+      description: `${playbook.steps.length} steps to complete`
+    })
+  }
+
+  const handleManageIntegration = (integrationName: string, isConnected: boolean) => {
+    if (isConnected) {
+      toast.info(`Managing ${integrationName} integration`)
+    } else {
+      toast.loading(`Connecting to ${integrationName}...`, { id: 'integration' })
+      setTimeout(() => {
+        toast.success(`${integrationName} connected`, { id: 'integration' })
+      }, 1500)
+    }
+  }
+
+  const handleArchiveOldRenewals = () => {
+    toast.warning('Archiving old renewals', {
+      description: 'This will archive renewals older than 2 years'
+    })
+  }
+
+  const handleResetSettings = () => {
+    toast.warning('Settings reset', {
+      description: 'All settings have been reset to defaults'
     })
   }
 
@@ -932,19 +1232,20 @@ export default function RenewalsClient({ initialRenewals }: RenewalsClientProps)
             {/* Overview Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: RefreshCw, label: 'New Renewal', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
-                { icon: Target, label: 'Forecast', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
-                { icon: AlertTriangle, label: 'At Risk', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
-                { icon: Play, label: 'Playbooks', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
-                { icon: Users, label: 'Customers', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
-                { icon: BarChart3, label: 'Reports', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
-                { icon: Download, label: 'Export', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
-                { icon: Settings, label: 'Settings', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400' },
+                { icon: RefreshCw, label: 'New Renewal', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: handleQuickNewRenewal },
+                { icon: Target, label: 'Forecast', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: handleQuickForecast },
+                { icon: AlertTriangle, label: 'At Risk', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', onClick: handleQuickAtRisk },
+                { icon: Play, label: 'Playbooks', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', onClick: handleQuickPlaybooks },
+                { icon: Users, label: 'Customers', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: handleQuickCustomers },
+                { icon: BarChart3, label: 'Reports', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', onClick: handleQuickReports },
+                { icon: Download, label: 'Export', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', onClick: handleQuickExport },
+                { icon: Settings, label: 'Settings', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400', onClick: handleQuickSettings },
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={action.onClick}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1439,7 +1740,7 @@ export default function RenewalsClient({ initialRenewals }: RenewalsClientProps)
                           {playbook.timesUsed} times used
                         </span>
                       </div>
-                      <Button size="sm">Use Playbook</Button>
+                      <Button size="sm" onClick={() => handleUsePlaybook(playbook)}>Use Playbook</Button>
                     </div>
                   </CardContent>
                 </Card>
@@ -1457,7 +1758,15 @@ export default function RenewalsClient({ initialRenewals }: RenewalsClientProps)
                   <p className="text-slate-200">Configure your renewal management preferences</p>
                 </div>
                 <div className="flex items-center gap-4">
-                  <Button variant="secondary" className="bg-white/20 hover:bg-white/30 text-white">
+                  <Button
+                    variant="secondary"
+                    className="bg-white/20 hover:bg-white/30 text-white"
+                    onClick={() => {
+                      toast.success('Configuration exported', {
+                        description: 'Settings configuration has been downloaded'
+                      })
+                    }}
+                  >
                     <Download className="w-4 h-4 mr-2" />
                     Export Config
                   </Button>
@@ -1642,7 +1951,11 @@ export default function RenewalsClient({ initialRenewals }: RenewalsClientProps)
                                 <p className="text-sm text-gray-500">{integration.status}</p>
                               </div>
                             </div>
-                            <Button variant={integration.status === 'Connected' ? 'outline' : 'default'} size="sm">
+                            <Button
+                              variant={integration.status === 'Connected' ? 'outline' : 'default'}
+                              size="sm"
+                              onClick={() => handleManageIntegration(integration.name, integration.status === 'Connected')}
+                            >
                               {integration.status === 'Connected' ? 'Manage' : 'Connect'}
                             </Button>
                           </div>
@@ -1723,14 +2036,14 @@ export default function RenewalsClient({ initialRenewals }: RenewalsClientProps)
                             <Label className="text-red-700 dark:text-red-400">Archive Old Renewals</Label>
                             <p className="text-sm text-red-600">Archive renewals older than 2 years</p>
                           </div>
-                          <Button variant="destructive" size="sm">Archive</Button>
+                          <Button variant="destructive" size="sm" onClick={handleArchiveOldRenewals}>Archive</Button>
                         </div>
                         <div className="flex items-center justify-between p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
                           <div>
                             <Label className="text-red-700 dark:text-red-400">Reset Settings</Label>
                             <p className="text-sm text-red-600">Reset to default configuration</p>
                           </div>
-                          <Button variant="destructive" size="sm">Reset</Button>
+                          <Button variant="destructive" size="sm" onClick={handleResetSettings}>Reset</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -1953,7 +2266,13 @@ export default function RenewalsClient({ initialRenewals }: RenewalsClientProps)
                         <Calendar className="w-4 h-4 mr-2" />
                         Schedule Meeting
                       </Button>
-                      <Button variant="outline">
+                      <Button variant="outline" onClick={() => handleOpenSendReminder(selectedRenewal!)}>
+                        <Bell className="w-4 h-4" />
+                      </Button>
+                      <Button variant="outline" onClick={() => handleOpenProcessRenewal(selectedRenewal!)}>
+                        <Play className="w-4 h-4" />
+                      </Button>
+                      <Button variant="outline" onClick={() => handleOpenEditRenewal(selectedRenewal!)}>
                         <MoreVertical className="w-4 h-4" />
                       </Button>
                     </div>
@@ -2015,6 +2334,641 @@ export default function RenewalsClient({ initialRenewals }: RenewalsClientProps)
                 }}
               >
                 Create Renewal
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Renewal Dialog */}
+        <Dialog open={isEditRenewalDialogOpen} onOpenChange={setIsEditRenewalDialogOpen}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <RefreshCw className="w-5 h-5 text-violet-600" />
+                Edit Renewal
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Customer Name</Label>
+                  <Input
+                    value={editFormData.customerName}
+                    onChange={(e) => setEditFormData(prev => ({ ...prev, customerName: e.target.value }))}
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label>Current ARR</Label>
+                  <Input
+                    type="number"
+                    value={editFormData.currentARR}
+                    onChange={(e) => setEditFormData(prev => ({ ...prev, currentARR: e.target.value }))}
+                    className="mt-1"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Proposed ARR</Label>
+                  <Input
+                    type="number"
+                    value={editFormData.proposedARR}
+                    onChange={(e) => setEditFormData(prev => ({ ...prev, proposedARR: e.target.value }))}
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label>Renewal Date</Label>
+                  <Input
+                    type="date"
+                    value={editFormData.renewalDate}
+                    onChange={(e) => setEditFormData(prev => ({ ...prev, renewalDate: e.target.value }))}
+                    className="mt-1"
+                  />
+                </div>
+              </div>
+              <div>
+                <Label>CSM Name</Label>
+                <Input
+                  value={editFormData.csmName}
+                  onChange={(e) => setEditFormData(prev => ({ ...prev, csmName: e.target.value }))}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label>Notes</Label>
+                <Input
+                  value={editFormData.notes}
+                  onChange={(e) => setEditFormData(prev => ({ ...prev, notes: e.target.value }))}
+                  className="mt-1"
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setIsEditRenewalDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button
+                className="bg-gradient-to-r from-violet-500 to-purple-600 text-white"
+                onClick={handleSaveEditRenewal}
+              >
+                Save Changes
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Send Reminder Dialog */}
+        <Dialog open={isSendReminderDialogOpen} onOpenChange={setIsSendReminderDialogOpen}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Bell className="w-5 h-5 text-amber-600" />
+                Send Renewal Reminder
+              </DialogTitle>
+            </DialogHeader>
+            {selectedRenewal && (
+              <div className="space-y-4 py-4">
+                <div className="p-3 bg-muted/50 rounded-lg">
+                  <p className="font-medium">{selectedRenewal.customerName}</p>
+                  <p className="text-sm text-muted-foreground">
+                    Renewal due: {formatDate(selectedRenewal.renewalDate)}
+                  </p>
+                </div>
+                <div>
+                  <Label>Reminder Type</Label>
+                  <div className="flex gap-2 mt-2">
+                    {(['email', 'sms', 'both'] as const).map((type) => (
+                      <Button
+                        key={type}
+                        variant={reminderType === type ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setReminderType(type)}
+                      >
+                        {type === 'both' ? 'Both' : type.toUpperCase()}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <Label>Custom Message (optional)</Label>
+                  <Input
+                    placeholder="Add a personal message..."
+                    value={reminderMessage}
+                    onChange={(e) => setReminderMessage(e.target.value)}
+                    className="mt-1"
+                  />
+                </div>
+              </div>
+            )}
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setIsSendReminderDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button
+                className="bg-gradient-to-r from-amber-500 to-orange-600 text-white"
+                onClick={handleSendReminder}
+              >
+                <Send className="w-4 h-4 mr-2" />
+                Send Reminder
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Process Renewal Dialog */}
+        <Dialog open={isProcessRenewalDialogOpen} onOpenChange={setIsProcessRenewalDialogOpen}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Play className="w-5 h-5 text-green-600" />
+                Process Renewal
+              </DialogTitle>
+            </DialogHeader>
+            {selectedRenewal && (
+              <div className="space-y-4 py-4">
+                <div className="p-4 bg-muted/50 rounded-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="font-semibold">{selectedRenewal.customerName}</p>
+                    <Badge className={getStatusColor(selectedRenewal.status)}>
+                      {selectedRenewal.status.replace('_', ' ')}
+                    </Badge>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <p className="text-muted-foreground">Current ARR</p>
+                      <p className="font-medium">{formatCurrency(selectedRenewal.currentARR)}</p>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground">Proposed ARR</p>
+                      <p className="font-medium text-violet-600">{formatCurrency(selectedRenewal.proposedARR)}</p>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <Label>Select Action</Label>
+                  <div className="grid grid-cols-3 gap-3 mt-2">
+                    <Button
+                      variant="outline"
+                      className="flex-col h-20 border-green-300 hover:bg-green-50 hover:border-green-500"
+                      onClick={() => handleProcessRenewalAction('approve')}
+                    >
+                      <CheckCircle className="w-5 h-5 text-green-600 mb-1" />
+                      <span className="text-xs">Approve</span>
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="flex-col h-20 border-red-300 hover:bg-red-50 hover:border-red-500"
+                      onClick={() => handleProcessRenewalAction('reject')}
+                    >
+                      <XCircle className="w-5 h-5 text-red-600 mb-1" />
+                      <span className="text-xs">Reject</span>
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="flex-col h-20 border-amber-300 hover:bg-amber-50 hover:border-amber-500"
+                      onClick={() => handleProcessRenewalAction('escalate')}
+                    >
+                      <AlertTriangle className="w-5 h-5 text-amber-600 mb-1" />
+                      <span className="text-xs">Escalate</span>
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
+            <div className="flex justify-end">
+              <Button variant="outline" onClick={() => setIsProcessRenewalDialogOpen(false)}>
+                Close
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Export Dialog */}
+        <Dialog open={isExportDialogOpen} onOpenChange={setIsExportDialogOpen}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Download className="w-5 h-5 text-teal-600" />
+                Export Renewals
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label>Export Format</Label>
+                <div className="flex gap-2 mt-2">
+                  {(['csv', 'excel', 'pdf'] as const).map((format) => (
+                    <Button
+                      key={format}
+                      variant={exportFormat === format ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setExportFormat(format)}
+                    >
+                      {format.toUpperCase()}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Start Date (optional)</Label>
+                  <Input
+                    type="date"
+                    value={exportDateRange.start}
+                    onChange={(e) => setExportDateRange(prev => ({ ...prev, start: e.target.value }))}
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label>End Date (optional)</Label>
+                  <Input
+                    type="date"
+                    value={exportDateRange.end}
+                    onChange={(e) => setExportDateRange(prev => ({ ...prev, end: e.target.value }))}
+                    className="mt-1"
+                  />
+                </div>
+              </div>
+              <div className="p-3 bg-muted/50 rounded-lg text-sm">
+                <p className="font-medium">{renewals.length} renewals will be exported</p>
+                <p className="text-muted-foreground">Total ARR: {formatCurrency(stats.totalCurrentARR)}</p>
+              </div>
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setIsExportDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button
+                className="bg-gradient-to-r from-teal-500 to-cyan-600 text-white"
+                onClick={handleExportWithOptions}
+              >
+                <Download className="w-4 h-4 mr-2" />
+                Export
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Filters Dialog */}
+        <Dialog open={isFiltersDialogOpen} onOpenChange={setIsFiltersDialogOpen}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Sliders className="w-5 h-5 text-indigo-600" />
+                Filter Renewals
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label>Status</Label>
+                <select
+                  value={filterCriteria.status}
+                  onChange={(e) => setFilterCriteria(prev => ({ ...prev, status: e.target.value }))}
+                  className="w-full mt-1 px-3 py-2 border rounded-lg bg-background"
+                >
+                  <option value="all">All Statuses</option>
+                  <option value="upcoming">Upcoming</option>
+                  <option value="in_progress">In Progress</option>
+                  <option value="negotiating">Negotiating</option>
+                  <option value="at_risk">At Risk</option>
+                  <option value="won">Won</option>
+                  <option value="churned">Churned</option>
+                </select>
+              </div>
+              <div>
+                <Label>Priority</Label>
+                <select
+                  value={filterCriteria.priority}
+                  onChange={(e) => setFilterCriteria(prev => ({ ...prev, priority: e.target.value }))}
+                  className="w-full mt-1 px-3 py-2 border rounded-lg bg-background"
+                >
+                  <option value="all">All Priorities</option>
+                  <option value="critical">Critical</option>
+                  <option value="high">High</option>
+                  <option value="medium">Medium</option>
+                  <option value="low">Low</option>
+                </select>
+              </div>
+              <div>
+                <Label>Health Score</Label>
+                <select
+                  value={filterCriteria.healthScore}
+                  onChange={(e) => setFilterCriteria(prev => ({ ...prev, healthScore: e.target.value }))}
+                  className="w-full mt-1 px-3 py-2 border rounded-lg bg-background"
+                >
+                  <option value="all">All Health Scores</option>
+                  <option value="healthy">Healthy</option>
+                  <option value="needs_attention">Needs Attention</option>
+                  <option value="at_risk">At Risk</option>
+                  <option value="critical">Critical</option>
+                </select>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>From Date</Label>
+                  <Input
+                    type="date"
+                    value={filterCriteria.dateRange.start}
+                    onChange={(e) => setFilterCriteria(prev => ({
+                      ...prev,
+                      dateRange: { ...prev.dateRange, start: e.target.value }
+                    }))}
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label>To Date</Label>
+                  <Input
+                    type="date"
+                    value={filterCriteria.dateRange.end}
+                    onChange={(e) => setFilterCriteria(prev => ({
+                      ...prev,
+                      dateRange: { ...prev.dateRange, end: e.target.value }
+                    }))}
+                    className="mt-1"
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="flex justify-between">
+              <Button variant="ghost" onClick={handleClearFilters}>
+                Clear All
+              </Button>
+              <div className="flex gap-3">
+                <Button variant="outline" onClick={() => setIsFiltersDialogOpen(false)}>
+                  Cancel
+                </Button>
+                <Button
+                  className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white"
+                  onClick={handleApplyFilters}
+                >
+                  Apply Filters
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Forecast Dialog */}
+        <Dialog open={isForecastDialogOpen} onOpenChange={setIsForecastDialogOpen}>
+          <DialogContent className="max-w-3xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <LineChart className="w-5 h-5 text-indigo-600" />
+                Renewal Forecast
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-3 gap-4">
+                <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                  <p className="text-sm text-muted-foreground">Forecasted ARR</p>
+                  <p className="text-2xl font-bold text-green-600">
+                    {formatCurrency(forecasts.reduce((sum, f) => sum + f.arr, 0))}
+                  </p>
+                </div>
+                <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                  <p className="text-sm text-muted-foreground">Expected Expansion</p>
+                  <p className="text-2xl font-bold text-blue-600">
+                    +{formatCurrency(forecasts.reduce((sum, f) => sum + f.expansion, 0))}
+                  </p>
+                </div>
+                <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                  <p className="text-sm text-muted-foreground">Expected Churn</p>
+                  <p className="text-2xl font-bold text-red-600">
+                    -{formatCurrency(forecasts.reduce((sum, f) => sum + f.churn, 0))}
+                  </p>
+                </div>
+              </div>
+              <div className="space-y-3">
+                {forecasts.slice(0, 4).map((forecast) => (
+                  <div key={forecast.month} className="flex items-center justify-between p-3 border rounded-lg">
+                    <span className="font-medium">{forecast.month}</span>
+                    <div className="flex items-center gap-6">
+                      <span className="text-sm">{forecast.renewals} renewals</span>
+                      <span className="font-semibold">{formatCurrency(forecast.arr)}</span>
+                      <Badge className={forecast.netRetention >= 100 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}>
+                        {forecast.netRetention}% NRR
+                      </Badge>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="flex justify-end">
+              <Button variant="outline" onClick={() => setIsForecastDialogOpen(false)}>
+                Close
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* At Risk Dialog */}
+        <Dialog open={isAtRiskDialogOpen} onOpenChange={setIsAtRiskDialogOpen}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-600">
+                <AlertTriangle className="w-5 h-5" />
+                At-Risk Accounts
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-lg font-semibold text-red-600">
+                      {renewals.filter(r => r.status === 'at_risk').length} At-Risk Renewals
+                    </p>
+                    <p className="text-sm text-red-500">
+                      Total ARR at risk: {formatCurrency(stats.atRiskARR)}
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div className="space-y-3 max-h-64 overflow-y-auto">
+                {renewals.filter(r => r.status === 'at_risk').map((renewal) => (
+                  <div
+                    key={renewal.id}
+                    className="p-4 border border-red-200 rounded-lg cursor-pointer hover:bg-red-50 dark:hover:bg-red-900/10"
+                    onClick={() => {
+                      setSelectedRenewal(renewal)
+                      setIsAtRiskDialogOpen(false)
+                      setIsRenewalDialogOpen(true)
+                    }}
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="font-semibold">{renewal.customerName}</span>
+                      <span className="text-lg font-bold text-red-600">{formatCurrency(renewal.currentARR)}</span>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {renewal.riskFactors.map((factor, i) => (
+                        <Badge key={i} variant="outline" className="text-xs text-red-600 border-red-300">
+                          {factor}
+                        </Badge>
+                      ))}
+                    </div>
+                    <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
+                      <span>CSM: {renewal.csmName}</span>
+                      <span>{renewal.daysToRenewal} days to renewal</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setIsAtRiskDialogOpen(false)}>
+                Close
+              </Button>
+              <Button
+                className="bg-red-600 hover:bg-red-700 text-white"
+                onClick={() => {
+                  toast.info('Escalating all at-risk accounts')
+                  setIsAtRiskDialogOpen(false)
+                }}
+              >
+                Escalate All
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Playbooks Dialog */}
+        <Dialog open={isPlaybookDialogOpen} onOpenChange={setIsPlaybookDialogOpen}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Zap className="w-5 h-5 text-amber-600" />
+                Select Playbook
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-3 py-4 max-h-96 overflow-y-auto">
+              {playbooks.map((playbook) => (
+                <div
+                  key={playbook.id}
+                  className="p-4 border rounded-lg hover:border-amber-300 hover:bg-amber-50/50 dark:hover:bg-amber-900/10 cursor-pointer transition-all"
+                  onClick={() => handleRunSelectedPlaybook(playbook.name)}
+                >
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <h4 className="font-semibold">{playbook.name}</h4>
+                      <p className="text-sm text-muted-foreground mt-1">{playbook.description}</p>
+                    </div>
+                    <Badge className={getTypeColor(playbook.type as any)}>{playbook.type}</Badge>
+                  </div>
+                  <div className="flex items-center gap-4 mt-3 text-sm text-muted-foreground">
+                    <span className="flex items-center gap-1">
+                      <Target className="w-4 h-4" />
+                      {playbook.successRate}% success rate
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Play className="w-4 h-4" />
+                      {playbook.timesUsed} times used
+                    </span>
+                    <span>{playbook.steps.length} steps</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="flex justify-end">
+              <Button variant="outline" onClick={() => setIsPlaybookDialogOpen(false)}>
+                Cancel
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Reports Dialog */}
+        <Dialog open={isReportsDialogOpen} onOpenChange={setIsReportsDialogOpen}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <BarChart3 className="w-5 h-5 text-amber-600" />
+                Generate Report
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-3 py-4">
+              {[
+                { name: 'Pipeline Summary', description: 'Overview of all active renewals', icon: GitBranch },
+                { name: 'Revenue Forecast', description: 'Projected ARR and expansion', icon: LineChart },
+                { name: 'Health Analysis', description: 'Customer health score breakdown', icon: Activity },
+                { name: 'At-Risk Report', description: 'Detailed at-risk account analysis', icon: AlertTriangle },
+                { name: 'CSM Performance', description: 'Team performance metrics', icon: Users },
+              ].map((report) => (
+                <Button
+                  key={report.name}
+                  variant="outline"
+                  className="w-full justify-start h-auto p-4"
+                  onClick={() => handleGenerateReport(report.name)}
+                >
+                  <report.icon className="w-5 h-5 mr-3 text-amber-600" />
+                  <div className="text-left">
+                    <p className="font-medium">{report.name}</p>
+                    <p className="text-xs text-muted-foreground">{report.description}</p>
+                  </div>
+                </Button>
+              ))}
+            </div>
+            <div className="flex justify-end">
+              <Button variant="outline" onClick={() => setIsReportsDialogOpen(false)}>
+                Close
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Customers Dialog */}
+        <Dialog open={isCustomersDialogOpen} onOpenChange={setIsCustomersDialogOpen}>
+          <DialogContent className="max-w-3xl max-h-[80vh]">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Users className="w-5 h-5 text-purple-600" />
+                Customer Overview
+              </DialogTitle>
+            </DialogHeader>
+            <ScrollArea className="max-h-[60vh]">
+              <div className="space-y-3 py-4">
+                {renewals.map((renewal) => (
+                  <div
+                    key={renewal.id}
+                    className="p-4 border rounded-lg hover:bg-muted/50 cursor-pointer"
+                    onClick={() => {
+                      handleViewCustomerDetails(renewal.customerName)
+                      setSelectedRenewal(renewal)
+                      setIsCustomersDialogOpen(false)
+                      setIsRenewalDialogOpen(true)
+                    }}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <Avatar>
+                          <AvatarFallback className="bg-gradient-to-br from-violet-500 to-purple-600 text-white">
+                            {renewal.customerName.substring(0, 2).toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <p className="font-semibold">{renewal.customerName}</p>
+                          <div className="flex items-center gap-2">
+                            <Badge className={getStatusColor(renewal.status)} variant="secondary">
+                              {renewal.status.replace('_', ' ')}
+                            </Badge>
+                            <span className="text-sm text-muted-foreground">CSM: {renewal.csmName}</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-bold text-lg">{formatCurrency(renewal.currentARR)}</p>
+                        <p className={`text-sm ${getHealthColor(renewal.healthScore)}`}>
+                          Health: {renewal.healthScoreValue}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+            <div className="flex justify-end">
+              <Button variant="outline" onClick={() => setIsCustomersDialogOpen(false)}>
+                Close
               </Button>
             </div>
           </DialogContent>

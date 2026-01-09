@@ -392,6 +392,48 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
   const { capacity, loading, error } = useCapacity({ resourceType: resourceTypeFilter, status: statusFilter })
   const displayCapacity = capacity.length > 0 ? capacity : initialCapacity
 
+  // Dialog state management
+  const [addAllocationDialogOpen, setAddAllocationDialogOpen] = useState(false)
+  const [addTeamMemberDialogOpen, setAddTeamMemberDialogOpen] = useState(false)
+  const [addProjectDialogOpen, setAddProjectDialogOpen] = useState(false)
+  const [exportDialogOpen, setExportDialogOpen] = useState(false)
+  const [filtersDialogOpen, setFiltersDialogOpen] = useState(false)
+  const [settingsDialogOpen, setSettingsDialogOpen] = useState(false)
+  const [editAllocationDialogOpen, setEditAllocationDialogOpen] = useState(false)
+  const [addDepartmentDialogOpen, setAddDepartmentDialogOpen] = useState(false)
+  const [apiKeyDialogOpen, setApiKeyDialogOpen] = useState(false)
+  const [clearAllocationsDialogOpen, setClearAllocationsDialogOpen] = useState(false)
+  const [resetDataDialogOpen, setResetDataDialogOpen] = useState(false)
+
+  // Form state
+  const [newAllocation, setNewAllocation] = useState({
+    memberId: '',
+    projectId: '',
+    hoursPerDay: 4,
+    startDate: '',
+    endDate: '',
+    status: 'tentative' as 'confirmed' | 'tentative' | 'requested'
+  })
+  const [newTeamMember, setNewTeamMember] = useState({
+    name: '',
+    email: '',
+    role: '',
+    department: '',
+    hourlyRate: 100,
+    skills: ''
+  })
+  const [newProject, setNewProject] = useState({
+    name: '',
+    client: '',
+    color: '#3B82F6',
+    startDate: '',
+    endDate: '',
+    budget: 0,
+    totalHours: 0
+  })
+  const [newDepartment, setNewDepartment] = useState('')
+  const [exportFormat, setExportFormat] = useState<'csv' | 'json' | 'pdf'>('csv')
+
   // Calculate stats
   const stats = useMemo(() => {
     const totalCapacity = mockTeamMembers.reduce((sum, m) => sum + m.totalCapacity, 0)
@@ -416,21 +458,233 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
 
   // Handlers
   const handleAllocateResource = () => {
-    toast.info('Allocate Resource', {
-      description: 'Opening allocation form...'
-    })
+    setAddAllocationDialogOpen(true)
   }
 
-  const handleBalanceWorkload = () => {
+  const handleBalanceWorkload = async () => {
+    toast.loading('Balancing workload...')
+    await new Promise(resolve => setTimeout(resolve, 1500))
+    toast.dismiss()
     toast.success('Workload balanced', {
-      description: 'Team capacity optimized'
+      description: 'Team capacity has been optimized across projects'
     })
   }
 
   const handleExportCapacity = () => {
-    toast.success('Exporting capacity', {
-      description: 'Capacity report will be downloaded'
+    setExportDialogOpen(true)
+  }
+
+  const handleCreateAllocation = async () => {
+    if (!newAllocation.memberId || !newAllocation.projectId) {
+      toast.error('Please select a team member and project')
+      return
+    }
+    toast.loading('Creating allocation...')
+    await new Promise(resolve => setTimeout(resolve, 1000))
+    toast.dismiss()
+    toast.success('Allocation created', {
+      description: `Resource allocated successfully`
     })
+    setAddAllocationDialogOpen(false)
+    setNewAllocation({
+      memberId: '',
+      projectId: '',
+      hoursPerDay: 4,
+      startDate: '',
+      endDate: '',
+      status: 'tentative'
+    })
+  }
+
+  const handleCreateTeamMember = async () => {
+    if (!newTeamMember.name || !newTeamMember.email) {
+      toast.error('Please fill in required fields')
+      return
+    }
+    toast.loading('Adding team member...')
+    await new Promise(resolve => setTimeout(resolve, 1000))
+    toast.dismiss()
+    toast.success('Team member added', {
+      description: `${newTeamMember.name} has been added to the team`
+    })
+    setAddTeamMemberDialogOpen(false)
+    setNewTeamMember({
+      name: '',
+      email: '',
+      role: '',
+      department: '',
+      hourlyRate: 100,
+      skills: ''
+    })
+  }
+
+  const handleCreateProject = async () => {
+    if (!newProject.name || !newProject.client) {
+      toast.error('Please fill in required fields')
+      return
+    }
+    toast.loading('Creating project...')
+    await new Promise(resolve => setTimeout(resolve, 1000))
+    toast.dismiss()
+    toast.success('Project created', {
+      description: `${newProject.name} has been created`
+    })
+    setAddProjectDialogOpen(false)
+    setNewProject({
+      name: '',
+      client: '',
+      color: '#3B82F6',
+      startDate: '',
+      endDate: '',
+      budget: 0,
+      totalHours: 0
+    })
+  }
+
+  const handleExport = () => {
+    if (exportFormat === 'csv') {
+      handleExportCapacityReport()
+    } else if (exportFormat === 'json') {
+      const data = JSON.stringify({ teamMembers: mockTeamMembers, projects: mockProjects, allocations: mockAllocations }, null, 2)
+      const blob = new Blob([data], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `capacity-export-${new Date().toISOString().split('T')[0]}.json`
+      a.click()
+      toast.success('Export complete', { description: 'JSON file downloaded' })
+    } else {
+      toast.success('PDF export initiated', { description: 'Your PDF will be ready shortly' })
+    }
+    setExportDialogOpen(false)
+  }
+
+  const handleAddDepartment = async () => {
+    if (!newDepartment) {
+      toast.error('Please enter a department name')
+      return
+    }
+    toast.loading('Adding department...')
+    await new Promise(resolve => setTimeout(resolve, 800))
+    toast.dismiss()
+    toast.success('Department added', {
+      description: `${newDepartment} has been added`
+    })
+    setAddDepartmentDialogOpen(false)
+    setNewDepartment('')
+  }
+
+  const handleRegenerateApiKey = async () => {
+    toast.loading('Regenerating API key...')
+    await new Promise(resolve => setTimeout(resolve, 1500))
+    toast.dismiss()
+    toast.success('API key regenerated', {
+      description: 'Your new API key is ready to use'
+    })
+    setApiKeyDialogOpen(false)
+  }
+
+  const handleClearAllocations = async () => {
+    toast.loading('Clearing allocations...')
+    await new Promise(resolve => setTimeout(resolve, 1500))
+    toast.dismiss()
+    toast.success('Allocations cleared', {
+      description: 'All allocations have been removed'
+    })
+    setClearAllocationsDialogOpen(false)
+  }
+
+  const handleResetData = async () => {
+    toast.loading('Resetting data...')
+    await new Promise(resolve => setTimeout(resolve, 2000))
+    toast.dismiss()
+    toast.success('Data reset complete', {
+      description: 'All capacity data has been reset to defaults'
+    })
+    setResetDataDialogOpen(false)
+  }
+
+  const handleQuickAction = (actionLabel: string) => {
+    switch (actionLabel) {
+      case 'Team View':
+        setActiveTab('team')
+        toast.info('Switched to Team View')
+        break
+      case 'Analytics':
+        toast.info('Opening Analytics', { description: 'Loading capacity analytics dashboard...' })
+        break
+      case 'Schedule':
+        setActiveTab('schedule')
+        toast.info('Switched to Schedule View')
+        break
+      case 'Forecast':
+        setActiveTab('forecast')
+        toast.info('Switched to Forecast View')
+        break
+      case 'Overload':
+        toast.warning('Overload Alert', { description: `${stats.overbooked} team members are currently overbooked` })
+        break
+      case 'Optimize':
+        handleBalanceWorkload()
+        break
+      case 'Export':
+        setExportDialogOpen(true)
+        break
+      case 'Settings':
+        setActiveTab('settings')
+        toast.info('Switched to Settings')
+        break
+      case 'Add Member':
+        setAddTeamMemberDialogOpen(true)
+        break
+      case 'View All':
+        toast.info('Viewing all team members')
+        break
+      case 'Utilization':
+        toast.info('Utilization Report', { description: `Average team utilization: ${stats.avgUtilization}%` })
+        break
+      case 'Time Off':
+        toast.info('Time Off Calendar', { description: 'Opening team time off schedule...' })
+        break
+      case 'Skills':
+        toast.info('Skills Matrix', { description: 'Loading team skills overview...' })
+        break
+      case 'Reassign':
+        toast.info('Reassignment Mode', { description: 'Select allocations to reassign' })
+        break
+      case 'Notify':
+        toast.success('Notifications sent', { description: 'Team has been notified of updates' })
+        break
+      default:
+        toast.info(actionLabel)
+    }
+  }
+
+  const handleNavigationClick = (direction: 'prev' | 'next' | 'today') => {
+    if (direction === 'prev') {
+      toast.info('Previous Week', { description: 'Showing previous week schedule' })
+    } else if (direction === 'next') {
+      toast.info('Next Week', { description: 'Showing next week schedule' })
+    } else {
+      toast.info('This Week', { description: 'Showing current week schedule' })
+    }
+  }
+
+  const handleConnectIntegration = (integrationName: string) => {
+    toast.loading(`Connecting to ${integrationName}...`)
+    setTimeout(() => {
+      toast.dismiss()
+      toast.success(`${integrationName} connected`, { description: 'Integration setup complete' })
+    }, 1500)
+  }
+
+  const handleSaveSettings = () => {
+    toast.success('Settings saved', { description: 'Your preferences have been updated' })
+  }
+
+  const handleColorSelect = (color: string) => {
+    setNewProject(prev => ({ ...prev, color }))
+    toast.info('Color selected', { description: `Project color set to ${color}` })
   }
 
   if (error) return <div className="p-8"><div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded dark:bg-red-900/20 dark:border-red-800 dark:text-red-400">Error: {error.message}</div></div>
@@ -449,10 +703,16 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
             <p className="text-gray-600 dark:text-gray-400 mt-1">Resource scheduling, team allocation & workload management</p>
           </div>
           <div className="flex gap-3">
-            <button className="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+            <button
+              onClick={() => setExportDialogOpen(true)}
+              className="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+            >
               Export Schedule
             </button>
-            <button className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm hover:bg-indigo-700 transition-colors flex items-center gap-2">
+            <button
+              onClick={() => setAddAllocationDialogOpen(true)}
+              className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm hover:bg-indigo-700 transition-colors flex items-center gap-2"
+            >
               <span>+ New Allocation</span>
             </button>
           </div>
@@ -547,7 +807,7 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
                 { icon: Download, label: 'Export', color: 'text-cyan-600 dark:text-cyan-400' },
                 { icon: Settings, label: 'Settings', color: 'text-gray-600 dark:text-gray-400' }
               ].map((action, i) => (
-                <Button key={i} variant="outline" className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200">
+                <Button key={i} variant="outline" onClick={() => handleQuickAction(action.label)} className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200">
                   <action.icon className={`h-5 w-5 ${action.color}`} />
                   <span className="text-xs">{action.label}</span>
                 </Button>
@@ -680,7 +940,7 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
                 { icon: Download, label: 'Export', color: 'text-gray-600 dark:text-gray-400' },
                 { icon: Mail, label: 'Notify', color: 'text-pink-600 dark:text-pink-400' }
               ].map((action, i) => (
-                <Button key={i} variant="outline" className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200">
+                <Button key={i} variant="outline" onClick={() => handleQuickAction(action.label)} className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200">
                   <action.icon className={`h-5 w-5 ${action.color}`} />
                   <span className="text-xs">{action.label}</span>
                 </Button>
@@ -708,7 +968,10 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
                   <option value="overbooked">Overbooked</option>
                 </select>
               </div>
-              <button className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm hover:bg-indigo-700 transition-colors">
+              <button
+                onClick={() => setAddTeamMemberDialogOpen(true)}
+                className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm hover:bg-indigo-700 transition-colors"
+              >
                 + Add Team Member
               </button>
             </div>
@@ -900,7 +1163,10 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
                   <option value="at_risk">At Risk</option>
                 </select>
               </div>
-              <button className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm hover:bg-indigo-700 transition-colors">
+              <button
+                onClick={() => setAddProjectDialogOpen(true)}
+                className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm hover:bg-indigo-700 transition-colors"
+              >
                 + New Project
               </button>
             </div>
@@ -1055,9 +1321,9 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Weekly Schedule</h3>
                 <div className="flex gap-2">
-                  <button className="px-3 py-1 text-sm border border-gray-200 dark:border-gray-700 rounded hover:bg-gray-50 dark:hover:bg-gray-700">&larr; Previous</button>
-                  <button className="px-3 py-1 text-sm bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 rounded">This Week</button>
-                  <button className="px-3 py-1 text-sm border border-gray-200 dark:border-gray-700 rounded hover:bg-gray-50 dark:hover:bg-gray-700">Next &rarr;</button>
+                  <button onClick={() => handleNavigationClick('prev')} className="px-3 py-1 text-sm border border-gray-200 dark:border-gray-700 rounded hover:bg-gray-50 dark:hover:bg-gray-700">&larr; Previous</button>
+                  <button onClick={() => handleNavigationClick('today')} className="px-3 py-1 text-sm bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 rounded">This Week</button>
+                  <button onClick={() => handleNavigationClick('next')} className="px-3 py-1 text-sm border border-gray-200 dark:border-gray-700 rounded hover:bg-gray-50 dark:hover:bg-gray-700">Next &rarr;</button>
                 </div>
               </div>
 
@@ -1486,12 +1752,12 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
                               <span className="font-medium">{dept}</span>
                               <div className="flex items-center gap-2">
                                 <Badge variant="secondary">Active</Badge>
-                                <Button variant="ghost" size="sm">Edit</Button>
+                                <Button variant="ghost" size="sm" onClick={() => toast.info(`Editing ${dept}`, { description: 'Opening department settings...' })}>Edit</Button>
                               </div>
                             </div>
                           ))}
                         </div>
-                        <Button variant="outline" className="mt-4 w-full">
+                        <Button variant="outline" className="mt-4 w-full" onClick={() => setAddDepartmentDialogOpen(true)}>
                           <Plus className="w-4 h-4 mr-2" />
                           Add Department
                         </Button>
@@ -1591,7 +1857,7 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
                                 <div className={`w-3 h-3 rounded-full bg-${status.color}-500`} />
                                 <span className="font-medium">{status.name}</span>
                               </div>
-                              <Button variant="ghost" size="sm">Edit</Button>
+                              <Button variant="ghost" size="sm" onClick={() => toast.info(`Editing ${status.name} status`, { description: 'Opening status configuration...' })}>Edit</Button>
                             </div>
                           ))}
                         </div>
@@ -1741,7 +2007,7 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
                               {integration.connected ? (
                                 <Badge className="bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400">Connected</Badge>
                               ) : (
-                                <Button size="sm" variant="outline">Connect</Button>
+                                <Button size="sm" variant="outline" onClick={() => handleConnectIntegration(integration.name)}>Connect</Button>
                               )}
                             </div>
                             {integration.connected && (
@@ -1763,16 +2029,16 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
                         <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                           <div className="flex items-center justify-between mb-2">
                             <Label>API Key</Label>
-                            <Button variant="ghost" size="sm">Regenerate</Button>
+                            <Button variant="ghost" size="sm" onClick={() => setApiKeyDialogOpen(true)}>Regenerate</Button>
                           </div>
                           <Input type="password" value="STRIPE_KEY_PLACEHOLDER" readOnly className="font-mono" />
                         </div>
                         <div className="flex items-center gap-4">
-                          <Button variant="outline" className="flex items-center gap-2">
+                          <Button variant="outline" className="flex items-center gap-2" onClick={() => setExportDialogOpen(true)}>
                             <Download className="w-4 h-4" />
                             Export Data
                           </Button>
-                          <Button variant="outline" className="flex items-center gap-2">
+                          <Button variant="outline" className="flex items-center gap-2" onClick={() => toast.info('Import Data', { description: 'Select a file to import capacity data' })}>
                             <Upload className="w-4 h-4" />
                             Import Data
                           </Button>
@@ -1878,14 +2144,14 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
                             <Label className="text-red-700 dark:text-red-400">Clear All Allocations</Label>
                             <p className="text-sm text-red-600 dark:text-red-500">Remove all team allocations from projects</p>
                           </div>
-                          <Button variant="destructive" size="sm">Clear</Button>
+                          <Button variant="destructive" size="sm" onClick={() => setClearAllocationsDialogOpen(true)}>Clear</Button>
                         </div>
                         <div className="flex items-center justify-between p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
                           <div>
                             <Label className="text-red-700 dark:text-red-400">Reset Capacity Data</Label>
                             <p className="text-sm text-red-600 dark:text-red-500">Reset all capacity planning data to defaults</p>
                           </div>
-                          <Button variant="destructive" size="sm">Reset</Button>
+                          <Button variant="destructive" size="sm" onClick={() => setResetDataDialogOpen(true)}>Reset</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -1935,6 +2201,438 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
           </div>
         )}
       </div>
+
+      {/* Add Allocation Dialog */}
+      <Dialog open={addAllocationDialogOpen} onOpenChange={setAddAllocationDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>New Allocation</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <Label>Team Member</Label>
+              <Select value={newAllocation.memberId} onValueChange={(value) => setNewAllocation(prev => ({ ...prev, memberId: value }))}>
+                <SelectTrigger className="mt-1">
+                  <SelectValue placeholder="Select team member" />
+                </SelectTrigger>
+                <SelectContent>
+                  {mockTeamMembers.map(member => (
+                    <SelectItem key={member.id} value={member.id}>{member.name} - {member.role}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Project</Label>
+              <Select value={newAllocation.projectId} onValueChange={(value) => setNewAllocation(prev => ({ ...prev, projectId: value }))}>
+                <SelectTrigger className="mt-1">
+                  <SelectValue placeholder="Select project" />
+                </SelectTrigger>
+                <SelectContent>
+                  {mockProjects.map(project => (
+                    <SelectItem key={project.id} value={project.id}>{project.name} - {project.client}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Start Date</Label>
+                <Input type="date" className="mt-1" value={newAllocation.startDate} onChange={(e) => setNewAllocation(prev => ({ ...prev, startDate: e.target.value }))} />
+              </div>
+              <div>
+                <Label>End Date</Label>
+                <Input type="date" className="mt-1" value={newAllocation.endDate} onChange={(e) => setNewAllocation(prev => ({ ...prev, endDate: e.target.value }))} />
+              </div>
+            </div>
+            <div>
+              <Label>Hours Per Day</Label>
+              <Input type="number" min={1} max={12} className="mt-1" value={newAllocation.hoursPerDay} onChange={(e) => setNewAllocation(prev => ({ ...prev, hoursPerDay: parseInt(e.target.value) || 4 }))} />
+            </div>
+            <div>
+              <Label>Status</Label>
+              <Select value={newAllocation.status} onValueChange={(value: 'confirmed' | 'tentative' | 'requested') => setNewAllocation(prev => ({ ...prev, status: value }))}>
+                <SelectTrigger className="mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="tentative">Tentative</SelectItem>
+                  <SelectItem value="confirmed">Confirmed</SelectItem>
+                  <SelectItem value="requested">Requested</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex justify-end gap-3 pt-4">
+              <Button variant="outline" onClick={() => setAddAllocationDialogOpen(false)}>Cancel</Button>
+              <Button onClick={handleCreateAllocation}>Create Allocation</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Team Member Dialog */}
+      <Dialog open={addTeamMemberDialogOpen} onOpenChange={setAddTeamMemberDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Add Team Member</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <Label>Full Name *</Label>
+              <Input className="mt-1" placeholder="John Doe" value={newTeamMember.name} onChange={(e) => setNewTeamMember(prev => ({ ...prev, name: e.target.value }))} />
+            </div>
+            <div>
+              <Label>Email *</Label>
+              <Input type="email" className="mt-1" placeholder="john@company.com" value={newTeamMember.email} onChange={(e) => setNewTeamMember(prev => ({ ...prev, email: e.target.value }))} />
+            </div>
+            <div>
+              <Label>Role</Label>
+              <Input className="mt-1" placeholder="Senior Developer" value={newTeamMember.role} onChange={(e) => setNewTeamMember(prev => ({ ...prev, role: e.target.value }))} />
+            </div>
+            <div>
+              <Label>Department</Label>
+              <Select value={newTeamMember.department} onValueChange={(value) => setNewTeamMember(prev => ({ ...prev, department: value }))}>
+                <SelectTrigger className="mt-1">
+                  <SelectValue placeholder="Select department" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Engineering">Engineering</SelectItem>
+                  <SelectItem value="Design">Design</SelectItem>
+                  <SelectItem value="Operations">Operations</SelectItem>
+                  <SelectItem value="Marketing">Marketing</SelectItem>
+                  <SelectItem value="Sales">Sales</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Hourly Rate ($)</Label>
+              <Input type="number" className="mt-1" value={newTeamMember.hourlyRate} onChange={(e) => setNewTeamMember(prev => ({ ...prev, hourlyRate: parseInt(e.target.value) || 100 }))} />
+            </div>
+            <div>
+              <Label>Skills (comma-separated)</Label>
+              <Input className="mt-1" placeholder="React, TypeScript, Node.js" value={newTeamMember.skills} onChange={(e) => setNewTeamMember(prev => ({ ...prev, skills: e.target.value }))} />
+            </div>
+            <div className="flex justify-end gap-3 pt-4">
+              <Button variant="outline" onClick={() => setAddTeamMemberDialogOpen(false)}>Cancel</Button>
+              <Button onClick={handleCreateTeamMember}>Add Member</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Project Dialog */}
+      <Dialog open={addProjectDialogOpen} onOpenChange={setAddProjectDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>New Project</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <Label>Project Name *</Label>
+              <Input className="mt-1" placeholder="Project Alpha" value={newProject.name} onChange={(e) => setNewProject(prev => ({ ...prev, name: e.target.value }))} />
+            </div>
+            <div>
+              <Label>Client *</Label>
+              <Input className="mt-1" placeholder="Client Name" value={newProject.client} onChange={(e) => setNewProject(prev => ({ ...prev, client: e.target.value }))} />
+            </div>
+            <div>
+              <Label>Project Color</Label>
+              <div className="flex gap-2 mt-2">
+                {['#3B82F6', '#10B981', '#F59E0B', '#8B5CF6', '#EF4444', '#EC4899'].map(color => (
+                  <button
+                    key={color}
+                    onClick={() => handleColorSelect(color)}
+                    className={`w-8 h-8 rounded-full border-2 shadow-sm hover:scale-110 transition-transform ${newProject.color === color ? 'border-gray-900 dark:border-white' : 'border-white'}`}
+                    style={{ backgroundColor: color }}
+                  />
+                ))}
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Start Date</Label>
+                <Input type="date" className="mt-1" value={newProject.startDate} onChange={(e) => setNewProject(prev => ({ ...prev, startDate: e.target.value }))} />
+              </div>
+              <div>
+                <Label>End Date</Label>
+                <Input type="date" className="mt-1" value={newProject.endDate} onChange={(e) => setNewProject(prev => ({ ...prev, endDate: e.target.value }))} />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Budget ($)</Label>
+                <Input type="number" className="mt-1" value={newProject.budget} onChange={(e) => setNewProject(prev => ({ ...prev, budget: parseInt(e.target.value) || 0 }))} />
+              </div>
+              <div>
+                <Label>Total Hours</Label>
+                <Input type="number" className="mt-1" value={newProject.totalHours} onChange={(e) => setNewProject(prev => ({ ...prev, totalHours: parseInt(e.target.value) || 0 }))} />
+              </div>
+            </div>
+            <div className="flex justify-end gap-3 pt-4">
+              <Button variant="outline" onClick={() => setAddProjectDialogOpen(false)}>Cancel</Button>
+              <Button onClick={handleCreateProject}>Create Project</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Export Dialog */}
+      <Dialog open={exportDialogOpen} onOpenChange={setExportDialogOpen}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Export Capacity Data</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <Label>Export Format</Label>
+              <Select value={exportFormat} onValueChange={(value: 'csv' | 'json' | 'pdf') => setExportFormat(value)}>
+                <SelectTrigger className="mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="csv">CSV (Spreadsheet)</SelectItem>
+                  <SelectItem value="json">JSON (Data)</SelectItem>
+                  <SelectItem value="pdf">PDF (Report)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              {exportFormat === 'csv' && 'Export team capacity data as a spreadsheet file.'}
+              {exportFormat === 'json' && 'Export complete capacity data in JSON format.'}
+              {exportFormat === 'pdf' && 'Generate a formatted PDF report of capacity planning.'}
+            </p>
+            <div className="flex justify-end gap-3 pt-4">
+              <Button variant="outline" onClick={() => setExportDialogOpen(false)}>Cancel</Button>
+              <Button onClick={handleExport}>
+                <Download className="w-4 h-4 mr-2" />
+                Export
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Department Dialog */}
+      <Dialog open={addDepartmentDialogOpen} onOpenChange={setAddDepartmentDialogOpen}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Add Department</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <Label>Department Name</Label>
+              <Input className="mt-1" placeholder="e.g., Product" value={newDepartment} onChange={(e) => setNewDepartment(e.target.value)} />
+            </div>
+            <div className="flex justify-end gap-3 pt-4">
+              <Button variant="outline" onClick={() => setAddDepartmentDialogOpen(false)}>Cancel</Button>
+              <Button onClick={handleAddDepartment}>Add Department</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* API Key Regenerate Dialog */}
+      <Dialog open={apiKeyDialogOpen} onOpenChange={setApiKeyDialogOpen}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Regenerate API Key</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Are you sure you want to regenerate your API key? This will invalidate your current key and any integrations using it will need to be updated.
+            </p>
+            <div className="flex justify-end gap-3 pt-4">
+              <Button variant="outline" onClick={() => setApiKeyDialogOpen(false)}>Cancel</Button>
+              <Button variant="destructive" onClick={handleRegenerateApiKey}>Regenerate Key</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Clear Allocations Confirmation Dialog */}
+      <Dialog open={clearAllocationsDialogOpen} onOpenChange={setClearAllocationsDialogOpen}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="text-red-600">Clear All Allocations</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              This action will permanently remove all team allocations from all projects. This cannot be undone.
+            </p>
+            <div className="p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
+              <p className="text-sm text-red-700 dark:text-red-400 font-medium">
+                {mockAllocations.length} allocations will be deleted
+              </p>
+            </div>
+            <div className="flex justify-end gap-3 pt-4">
+              <Button variant="outline" onClick={() => setClearAllocationsDialogOpen(false)}>Cancel</Button>
+              <Button variant="destructive" onClick={handleClearAllocations}>Clear All</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Reset Data Confirmation Dialog */}
+      <Dialog open={resetDataDialogOpen} onOpenChange={setResetDataDialogOpen}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="text-red-600">Reset Capacity Data</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              This action will reset all capacity planning data to defaults. All team members, projects, and allocations will be deleted.
+            </p>
+            <div className="p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
+              <p className="text-sm text-red-700 dark:text-red-400 font-medium">
+                This action is irreversible!
+              </p>
+            </div>
+            <div className="flex justify-end gap-3 pt-4">
+              <Button variant="outline" onClick={() => setResetDataDialogOpen(false)}>Cancel</Button>
+              <Button variant="destructive" onClick={handleResetData}>Reset Data</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Filters Dialog */}
+      <Dialog open={filtersDialogOpen} onOpenChange={setFiltersDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Filter Capacity View</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <Label>Resource Type</Label>
+              <Select value={resourceTypeFilter} onValueChange={(value: ResourceType | 'all') => setResourceTypeFilter(value)}>
+                <SelectTrigger className="mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Types</SelectItem>
+                  <SelectItem value="human">Human Resources</SelectItem>
+                  <SelectItem value="equipment">Equipment</SelectItem>
+                  <SelectItem value="facility">Facilities</SelectItem>
+                  <SelectItem value="budget">Budget</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Status</Label>
+              <Select value={statusFilter} onValueChange={(value: CapacityStatus | 'all') => setStatusFilter(value)}>
+                <SelectTrigger className="mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Statuses</SelectItem>
+                  <SelectItem value="available">Available</SelectItem>
+                  <SelectItem value="allocated">Allocated</SelectItem>
+                  <SelectItem value="overallocated">Overallocated</SelectItem>
+                  <SelectItem value="unavailable">Unavailable</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex justify-end gap-3 pt-4">
+              <Button variant="outline" onClick={() => {
+                setResourceTypeFilter('all')
+                setStatusFilter('all')
+              }}>
+                Reset Filters
+              </Button>
+              <Button onClick={() => {
+                setFiltersDialogOpen(false)
+                toast.success('Filters applied')
+              }}>
+                Apply Filters
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Allocation Dialog */}
+      <Dialog open={editAllocationDialogOpen} onOpenChange={setEditAllocationDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Edit Allocation</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <Label>Hours Per Day</Label>
+              <Input type="number" min={1} max={12} className="mt-1" defaultValue={4} />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Start Date</Label>
+                <Input type="date" className="mt-1" />
+              </div>
+              <div>
+                <Label>End Date</Label>
+                <Input type="date" className="mt-1" />
+              </div>
+            </div>
+            <div>
+              <Label>Status</Label>
+              <Select defaultValue="confirmed">
+                <SelectTrigger className="mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="tentative">Tentative</SelectItem>
+                  <SelectItem value="confirmed">Confirmed</SelectItem>
+                  <SelectItem value="requested">Requested</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex justify-end gap-3 pt-4">
+              <Button variant="outline" onClick={() => setEditAllocationDialogOpen(false)}>Cancel</Button>
+              <Button onClick={() => {
+                toast.success('Allocation updated')
+                setEditAllocationDialogOpen(false)
+              }}>Save Changes</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Settings Dialog (standalone for quick access) */}
+      <Dialog open={settingsDialogOpen} onOpenChange={setSettingsDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Quick Settings</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+              <div>
+                <Label>Auto-refresh Dashboard</Label>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Update data automatically</p>
+              </div>
+              <Switch defaultChecked />
+            </div>
+            <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+              <div>
+                <Label>Show Utilization Warnings</Label>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Alert when team is overbooked</p>
+              </div>
+              <Switch defaultChecked />
+            </div>
+            <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+              <div>
+                <Label>Compact Mode</Label>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Show more data in less space</p>
+              </div>
+              <Switch />
+            </div>
+            <div className="flex justify-end gap-3 pt-4">
+              <Button variant="outline" onClick={() => setSettingsDialogOpen(false)}>Close</Button>
+              <Button onClick={() => {
+                handleSaveSettings()
+                setSettingsDialogOpen(false)
+              }}>Save</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

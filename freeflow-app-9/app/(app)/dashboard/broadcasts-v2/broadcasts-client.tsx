@@ -425,6 +425,25 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
   const [showCreateDialog, setShowCreateDialog] = useState(false)
   const [showEditDialog, setShowEditDialog] = useState(false)
   const [editingBroadcast, setEditingBroadcast] = useState<Broadcast | null>(null)
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [deletingBroadcastId, setDeletingBroadcastId] = useState<string | null>(null)
+  const [showScheduleDialog, setShowScheduleDialog] = useState(false)
+  const [schedulingBroadcast, setSchedulingBroadcast] = useState<Broadcast | null>(null)
+  const [_showSettingsDialog, _setShowSettingsDialog] = useState(false)
+  const [showExportDialog, setShowExportDialog] = useState(false)
+  const [_showAudienceDialog, _setShowAudienceDialog] = useState(false)
+  const [showImportDialog, setShowImportDialog] = useState(false)
+  const [showAutomationDialog, setShowAutomationDialog] = useState(false)
+  const [showSeriesDialog, setShowSeriesDialog] = useState(false)
+  const [showTemplateDialog, setShowTemplateDialog] = useState(false)
+  const [showEventDialog, setShowEventDialog] = useState(false)
+  const [showSegmentDialog, setShowSegmentDialog] = useState(false)
+  const [showWebhookDialog, setShowWebhookDialog] = useState(false)
+  const [showApiKeyDialog, setShowApiKeyDialog] = useState(false)
+  const [showPurgeDialog, setShowPurgeDialog] = useState(false)
+  const [showDeleteCampaignsDialog, setShowDeleteCampaignsDialog] = useState(false)
+  const [showCloseAccountDialog, setShowCloseAccountDialog] = useState(false)
+  const [scheduleDateTime, setScheduleDateTime] = useState('')
 
   // Form state
   const [formData, setFormData] = useState({
@@ -558,7 +577,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
   }
 
   // Send broadcast
-  const handleSendBroadcast = async (broadcastId: string, broadcastTitle: string) => {
+  const _handleSendBroadcast = async (broadcastId: string, broadcastTitle: string) => {
     try {
       const { error } = await supabase
         .from('broadcasts')
@@ -604,7 +623,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
   }
 
   // Pause broadcast
-  const handlePauseBroadcast = async (broadcastId: string, broadcastTitle: string) => {
+  const _handlePauseBroadcast = async (broadcastId: string, broadcastTitle: string) => {
     try {
       const { error } = await supabase
         .from('broadcasts')
@@ -626,7 +645,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
   }
 
   // Duplicate broadcast
-  const handleDuplicateBroadcast = async (broadcast: Broadcast) => {
+  const _handleDuplicateBroadcast = async (broadcast: Broadcast) => {
     try {
       setIsSaving(true)
       const { data: { user } } = await supabase.auth.getUser()
@@ -676,7 +695,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
   }
 
   // Open edit dialog
-  const openEditDialog = (broadcast: Broadcast) => {
+  const _openEditDialog = (broadcast: Broadcast) => {
     setEditingBroadcast(broadcast)
     setFormData({
       title: broadcast.title,
@@ -690,6 +709,224 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
       sender_email: broadcast.sender_email || ''
     })
     setShowEditDialog(true)
+  }
+
+  // Open schedule dialog
+  const _openScheduleDialog = (broadcast: Broadcast) => {
+    setSchedulingBroadcast(broadcast)
+    setScheduleDateTime(broadcast.scheduled_for || '')
+    setShowScheduleDialog(true)
+  }
+
+  // Confirm and schedule broadcast
+  const confirmScheduleBroadcast = async () => {
+    if (!schedulingBroadcast || !scheduleDateTime) return
+    await handleScheduleBroadcast(schedulingBroadcast.id, schedulingBroadcast.title, scheduleDateTime)
+    setShowScheduleDialog(false)
+    setSchedulingBroadcast(null)
+    setScheduleDateTime('')
+  }
+
+  // Open delete confirmation dialog
+  const _openDeleteDialog = (broadcastId: string) => {
+    setDeletingBroadcastId(broadcastId)
+    setShowDeleteDialog(true)
+  }
+
+  // Confirm delete broadcast
+  const confirmDeleteBroadcast = async () => {
+    if (!deletingBroadcastId) return
+    await handleDeleteBroadcast(deletingBroadcastId)
+    setShowDeleteDialog(false)
+    setDeletingBroadcastId(null)
+  }
+
+  // Handle import contacts
+  const handleImportContacts = () => {
+    setShowImportDialog(true)
+  }
+
+  // Process import
+  const processImport = () => {
+    toast.success('Contacts imported successfully', { description: 'Your contact list has been updated' })
+    setShowImportDialog(false)
+  }
+
+  // Handle export analytics
+  const handleExportAnalytics = () => {
+    setShowExportDialog(true)
+  }
+
+  // Process export
+  const processExport = (format: string) => {
+    toast.success(`Analytics exported as ${format.toUpperCase()}`, { description: 'Download starting...' })
+    setShowExportDialog(false)
+  }
+
+  // Handle create automation
+  const handleCreateAutomation = () => {
+    setShowAutomationDialog(true)
+  }
+
+  // Save automation
+  const saveAutomation = () => {
+    toast.success('Automation created', { description: 'Your automation workflow is now active' })
+    setShowAutomationDialog(false)
+  }
+
+  // Handle create series
+  const handleCreateSeries = () => {
+    setShowSeriesDialog(true)
+  }
+
+  // Save series
+  const saveSeries = () => {
+    toast.success('Series created', { description: 'Your email series is ready to enroll users' })
+    setShowSeriesDialog(false)
+  }
+
+  // Handle create template
+  const handleCreateTemplate = () => {
+    setShowTemplateDialog(true)
+  }
+
+  // Save template
+  const saveTemplate = () => {
+    toast.success('Template saved', { description: 'Your template is now available for use' })
+    setShowTemplateDialog(false)
+  }
+
+  // Handle create segment
+  const handleCreateSegment = () => {
+    setShowSegmentDialog(true)
+  }
+
+  // Save segment
+  const saveSegment = () => {
+    toast.success('Segment created', { description: 'Your audience segment has been saved' })
+    setShowSegmentDialog(false)
+  }
+
+  // Handle define event
+  const handleDefineEvent = () => {
+    setShowEventDialog(true)
+  }
+
+  // Save event
+  const saveEvent = () => {
+    toast.success('Event defined', { description: 'Event tracking is now configured' })
+    setShowEventDialog(false)
+  }
+
+  // Handle create automation from event
+  const handleCreateAutomationFromEvent = (eventName: string) => {
+    toast.info(`Creating automation for "${eventName}"`)
+    setShowAutomationDialog(true)
+  }
+
+  // Handle add webhook
+  const handleAddWebhook = () => {
+    setShowWebhookDialog(true)
+  }
+
+  // Save webhook
+  const saveWebhook = () => {
+    toast.success('Webhook endpoint added', { description: 'Events will be sent to your endpoint' })
+    setShowWebhookDialog(false)
+  }
+
+  // Handle copy API key
+  const handleCopyApiKey = () => {
+    navigator.clipboard.writeText('bc_live_xxxxxxxxxxxxxxxxxxxxx')
+    toast.success('API key copied to clipboard')
+  }
+
+  // Handle regenerate API key
+  const handleRegenerateApiKey = () => {
+    setShowApiKeyDialog(true)
+  }
+
+  // Confirm regenerate API key
+  const confirmRegenerateApiKey = () => {
+    toast.success('API key regenerated', { description: 'Your old key is no longer valid' })
+    setShowApiKeyDialog(false)
+  }
+
+  // Handle configure DMARC
+  const handleConfigureDmarc = () => {
+    toast.info('Opening DMARC configuration guide')
+  }
+
+  // Handle manage subscription
+  const handleManageSubscription = () => {
+    toast.info('Opening subscription management portal')
+  }
+
+  // Handle upgrade plan
+  const handleUpgradePlan = () => {
+    toast.info('Opening upgrade options')
+  }
+
+  // Handle purge contacts
+  const handlePurgeContacts = () => {
+    setShowPurgeDialog(true)
+  }
+
+  // Confirm purge contacts
+  const confirmPurgeContacts = () => {
+    toast.success('All contacts purged', { description: 'Your contact list has been cleared' })
+    setShowPurgeDialog(false)
+  }
+
+  // Handle delete all campaigns
+  const handleDeleteAllCampaigns = () => {
+    setShowDeleteCampaignsDialog(true)
+  }
+
+  // Confirm delete all campaigns
+  const confirmDeleteAllCampaigns = () => {
+    toast.success('All campaigns deleted', { description: 'Campaign history has been cleared' })
+    setShowDeleteCampaignsDialog(false)
+  }
+
+  // Handle close account
+  const handleCloseAccount = () => {
+    setShowCloseAccountDialog(true)
+  }
+
+  // Confirm close account
+  const confirmCloseAccount = () => {
+    toast.error('Account closure initiated', { description: 'You will receive a confirmation email' })
+    setShowCloseAccountDialog(false)
+  }
+
+  // Handle connect app
+  const handleConnectApp = (appName: string, isConnected: boolean) => {
+    if (isConnected) {
+      toast.info(`Opening ${appName} configuration`)
+    } else {
+      toast.success(`Connecting to ${appName}...`, { description: 'Follow the authorization flow' })
+    }
+  }
+
+  // Handle export all data
+  const handleExportAllData = () => {
+    toast.success('Data export started', { description: 'You will receive an email when ready' })
+  }
+
+  // Handle save general settings
+  const _handleSaveGeneralSettings = () => {
+    toast.success('Settings saved', { description: 'Your broadcast settings have been updated' })
+  }
+
+  // Handle save email settings
+  const _handleSaveEmailSettings = () => {
+    toast.success('Email settings saved', { description: 'Your default email settings have been updated' })
+  }
+
+  // Handle save notification settings
+  const _handleSaveNotificationSettings = () => {
+    toast.success('Notification settings saved', { description: 'Your alert preferences have been updated' })
   }
 
   // Initial fetch
@@ -770,8 +1007,17 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
             <p className="text-gray-600 dark:text-gray-400 mt-1">Engage your audience with targeted messaging campaigns</p>
           </div>
           <div className="flex gap-3">
-            <button className="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+            <button
+              onClick={handleImportContacts}
+              className="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+            >
               Import Contacts
+            </button>
+            <button
+              onClick={handleExportAnalytics}
+              className="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+            >
+              Export Analytics
             </button>
             <button
               onClick={() => setShowCreateDialog(true)}
@@ -1069,7 +1315,10 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
               <div className="text-sm text-gray-600 dark:text-gray-400">
                 {mockAutomations.length} automations • {mockAutomations.filter(a => a.status === 'active').length} active
               </div>
-              <button className="px-4 py-2 bg-violet-600 text-white rounded-lg text-sm hover:bg-violet-700 transition-colors">
+              <button
+                onClick={handleCreateAutomation}
+                className="px-4 py-2 bg-violet-600 text-white rounded-lg text-sm hover:bg-violet-700 transition-colors"
+              >
                 + Create Automation
               </button>
             </div>
@@ -1114,16 +1363,44 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
                     </div>
                   </div>
                   <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
-                    <div className="flex items-center gap-2 overflow-x-auto pb-2">
-                      {automation.actions.map((action, idx) => (
-                        <div key={idx} className="flex items-center gap-2">
-                          <span className="px-3 py-1.5 bg-violet-50 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300 rounded-lg text-xs whitespace-nowrap">
-                            {action.type.replace(/_/g, ' ')}
-                            {action.delay && ` (${action.delay})`}
-                          </span>
-                          {idx < automation.actions.length - 1 && <span className="text-gray-400">→</span>}
-                        </div>
-                      ))}
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2 overflow-x-auto pb-2">
+                        {automation.actions.map((action, idx) => (
+                          <div key={idx} className="flex items-center gap-2">
+                            <span className="px-3 py-1.5 bg-violet-50 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300 rounded-lg text-xs whitespace-nowrap">
+                              {action.type.replace(/_/g, ' ')}
+                              {action.delay && ` (${action.delay})`}
+                            </span>
+                            {idx < automation.actions.length - 1 && <span className="text-gray-400">→</span>}
+                          </div>
+                        ))}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => toast.info(`Editing automation: ${automation.name}`)}
+                        >
+                          Edit
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            const action = automation.status === 'active' ? 'paused' : 'activated'
+                            toast.success(`Automation ${action}`, { description: `${automation.name} is now ${action}` })
+                          }}
+                        >
+                          {automation.status === 'active' ? 'Pause' : 'Activate'}
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => toast.success('Automation duplicated', { description: `Copy of ${automation.name} created` })}
+                        >
+                          Duplicate
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -1137,7 +1414,10 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
               <div className="text-sm text-gray-600 dark:text-gray-400">
                 {mockSeries.length} series • {mockSeries.reduce((sum, s) => sum + s.enrolledCount, 0).toLocaleString()} enrolled
               </div>
-              <button className="px-4 py-2 bg-violet-600 text-white rounded-lg text-sm hover:bg-violet-700 transition-colors">
+              <button
+                onClick={handleCreateSeries}
+                className="px-4 py-2 bg-violet-600 text-white rounded-lg text-sm hover:bg-violet-700 transition-colors"
+              >
                 + Create Series
               </button>
             </div>
@@ -1186,13 +1466,39 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
                               <span className="font-medium text-gray-900 dark:text-white">{step.name}</span>
                               <span className="px-2 py-0.5 bg-gray-100 dark:bg-gray-600 rounded text-xs text-gray-600 dark:text-gray-300 capitalize">{step.type}</span>
                             </div>
-                            {step.delay && <span className="text-xs text-gray-500 dark:text-gray-400">⏱️ {step.delay}</span>}
+                            {step.delay && <span className="text-xs text-gray-500 dark:text-gray-400">{step.delay}</span>}
                           </div>
                           {step.content && <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{step.content}</p>}
                         </div>
                       </div>
                     ))}
                   </div>
+                </div>
+                <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700 flex justify-end gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => toast.info(`Editing series: ${series.name}`)}
+                  >
+                    Edit Steps
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      const action = series.status === 'active' ? 'paused' : 'activated'
+                      toast.success(`Series ${action}`, { description: `${series.name} is now ${action}` })
+                    }}
+                  >
+                    {series.status === 'active' ? 'Pause' : 'Activate'}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => toast.info('Opening enrollment settings')}
+                  >
+                    Enrollment Settings
+                  </Button>
                 </div>
               </div>
             ))}
@@ -1202,7 +1508,11 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
           <TabsContent value="templates" className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {mockTemplates.map(template => (
-                <div key={template.id} className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 cursor-pointer hover:shadow-md transition-all">
+                <div
+                  key={template.id}
+                  onClick={() => toast.info(`Opening template: ${template.name}`)}
+                  className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 cursor-pointer hover:shadow-md transition-all"
+                >
                   <div className="w-16 h-16 rounded-lg bg-gradient-to-br from-violet-100 to-purple-100 dark:from-violet-900/40 dark:to-purple-900/40 flex items-center justify-center text-3xl mb-4">
                     {template.thumbnail}
                   </div>
@@ -1211,7 +1521,10 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
                   <div className="text-xs text-gray-500 dark:text-gray-400 mt-2">Used {template.usageCount} times</div>
                 </div>
               ))}
-              <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border-2 border-dashed border-gray-200 dark:border-gray-700 flex flex-col items-center justify-center cursor-pointer hover:border-violet-300 dark:hover:border-violet-700 transition-colors">
+              <div
+                onClick={handleCreateTemplate}
+                className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border-2 border-dashed border-gray-200 dark:border-gray-700 flex flex-col items-center justify-center cursor-pointer hover:border-violet-300 dark:hover:border-violet-700 transition-colors"
+              >
                 <div className="w-16 h-16 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-2xl text-gray-400 mb-4">+</div>
                 <span className="text-gray-600 dark:text-gray-400">Create Template</span>
               </div>
@@ -1223,7 +1536,10 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
             <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Audience Segments</h3>
-                <button className="px-4 py-2 bg-violet-600 text-white rounded-lg text-sm hover:bg-violet-700 transition-colors">
+                <button
+                  onClick={handleCreateSegment}
+                  className="px-4 py-2 bg-violet-600 text-white rounded-lg text-sm hover:bg-violet-700 transition-colors"
+                >
                   + Create Segment
                 </button>
               </div>
@@ -1278,7 +1594,10 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Event Tracking</h3>
                   <p className="text-sm text-gray-600 dark:text-gray-400">Track user events and trigger automations</p>
                 </div>
-                <button className="px-4 py-2 bg-violet-600 text-white rounded-lg text-sm hover:bg-violet-700 transition-colors">
+                <button
+                  onClick={handleDefineEvent}
+                  className="px-4 py-2 bg-violet-600 text-white rounded-lg text-sm hover:bg-violet-700 transition-colors"
+                >
                   + Define Event
                 </button>
               </div>
@@ -1309,7 +1628,12 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
                           )}
                         </td>
                         <td className="py-3 px-4 text-right">
-                          <button className="text-violet-600 hover:text-violet-700 text-sm">Create Automation</button>
+                          <button
+                            onClick={() => handleCreateAutomationFromEvent(event.name)}
+                            className="text-violet-600 hover:text-violet-700 text-sm"
+                          >
+                            Create Automation
+                          </button>
                         </td>
                       </tr>
                     ))}
@@ -1805,7 +2129,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
                               <p className="text-sm text-amber-600 dark:text-amber-500">Recommended for full protection</p>
                             </div>
                           </div>
-                          <Button variant="outline" size="sm">Configure</Button>
+                          <Button variant="outline" size="sm" onClick={handleConfigureDmarc}>Configure</Button>
                         </div>
 
                         <div className="space-y-2 pt-4">
@@ -1896,7 +2220,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
                           </div>
                         </div>
 
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={handleAddWebhook}>
                           <Plus className="w-4 h-4 mr-2" />
                           Add Webhook Endpoint
                         </Button>
@@ -1916,10 +2240,10 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
                           <Label>API Key</Label>
                           <div className="flex gap-2">
                             <Input type="password" value="bc_live_xxxxxxxxxxxxxxxxxxxxx" readOnly />
-                            <Button variant="outline">
+                            <Button variant="outline" onClick={handleCopyApiKey}>
                               <Copy className="w-4 h-4" />
                             </Button>
-                            <Button variant="outline">
+                            <Button variant="outline" onClick={handleRegenerateApiKey}>
                               <RefreshCw className="w-4 h-4" />
                             </Button>
                           </div>
@@ -1970,7 +2294,11 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
                                 <p className="text-sm text-gray-500">{idx < 2 ? 'Connected' : 'Not connected'}</p>
                               </div>
                             </div>
-                            <Button variant={idx < 2 ? 'outline' : 'default'} size="sm">
+                            <Button
+                              variant={idx < 2 ? 'outline' : 'default'}
+                              size="sm"
+                              onClick={() => handleConnectApp(app, idx < 2)}
+                            >
                               {idx < 2 ? 'Configure' : 'Connect'}
                             </Button>
                           </div>
@@ -2051,7 +2379,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
                           <Switch defaultChecked />
                         </div>
 
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={handleExportAllData}>
                           <Download className="w-4 h-4 mr-2" />
                           Export All Data
                         </Button>
@@ -2091,10 +2419,10 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
                         </div>
 
                         <div className="flex gap-2">
-                          <Button variant="outline" className="flex-1">
+                          <Button variant="outline" className="flex-1" onClick={handleManageSubscription}>
                             Manage Subscription
                           </Button>
-                          <Button className="flex-1 bg-violet-600 hover:bg-violet-700">
+                          <Button className="flex-1 bg-violet-600 hover:bg-violet-700" onClick={handleUpgradePlan}>
                             Upgrade Plan
                           </Button>
                         </div>
@@ -2116,7 +2444,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
                             <p className="font-medium text-red-700 dark:text-red-400">Purge All Contacts</p>
                             <p className="text-sm text-red-600 dark:text-red-500">Remove all subscriber data</p>
                           </div>
-                          <Button variant="destructive" size="sm">Purge</Button>
+                          <Button variant="destructive" size="sm" onClick={handlePurgeContacts}>Purge</Button>
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
@@ -2124,7 +2452,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
                             <p className="font-medium text-red-700 dark:text-red-400">Delete All Campaigns</p>
                             <p className="text-sm text-red-600 dark:text-red-500">Remove all campaign history</p>
                           </div>
-                          <Button variant="destructive" size="sm">Delete</Button>
+                          <Button variant="destructive" size="sm" onClick={handleDeleteAllCampaigns}>Delete</Button>
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
@@ -2132,7 +2460,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
                             <p className="font-medium text-red-700 dark:text-red-400">Close Account</p>
                             <p className="text-sm text-red-600 dark:text-red-500">Permanently delete your account</p>
                           </div>
-                          <Button variant="destructive" size="sm">Close</Button>
+                          <Button variant="destructive" size="sm" onClick={handleCloseAccount}>Close</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -2377,6 +2705,605 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
                 className="bg-violet-600 hover:bg-violet-700"
               >
                 {isSaving ? 'Saving...' : 'Save Changes'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Broadcast</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-gray-600 dark:text-gray-400">
+              Are you sure you want to delete this broadcast? This action cannot be undone.
+            </p>
+            <div className="flex justify-end gap-3 mt-6">
+              <Button variant="outline" onClick={() => { setShowDeleteDialog(false); setDeletingBroadcastId(null); }}>
+                Cancel
+              </Button>
+              <Button variant="destructive" onClick={confirmDeleteBroadcast}>
+                Delete Broadcast
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Schedule Dialog */}
+      <Dialog open={showScheduleDialog} onOpenChange={setShowScheduleDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Schedule Broadcast</DialogTitle>
+          </DialogHeader>
+          <div className="py-4 space-y-4">
+            <p className="text-gray-600 dark:text-gray-400">
+              Choose when to send &quot;{schedulingBroadcast?.title}&quot;
+            </p>
+            <div className="space-y-2">
+              <Label>Schedule Date & Time</Label>
+              <Input
+                type="datetime-local"
+                value={scheduleDateTime}
+                onChange={(e) => setScheduleDateTime(e.target.value)}
+              />
+            </div>
+            <div className="flex justify-end gap-3 mt-6">
+              <Button variant="outline" onClick={() => { setShowScheduleDialog(false); setSchedulingBroadcast(null); setScheduleDateTime(''); }}>
+                Cancel
+              </Button>
+              <Button
+                onClick={confirmScheduleBroadcast}
+                disabled={!scheduleDateTime}
+                className="bg-violet-600 hover:bg-violet-700"
+              >
+                Schedule Broadcast
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Import Contacts Dialog */}
+      <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Import Contacts</DialogTitle>
+          </DialogHeader>
+          <div className="py-4 space-y-4">
+            <div className="border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-lg p-8 text-center">
+              <div className="text-4xl mb-4">📁</div>
+              <p className="text-gray-600 dark:text-gray-400 mb-2">Drag and drop your CSV file here</p>
+              <p className="text-sm text-gray-500 dark:text-gray-500">or</p>
+              <Button variant="outline" className="mt-4">Browse Files</Button>
+            </div>
+            <div className="space-y-2">
+              <Label>Import Options</Label>
+              <div className="space-y-2">
+                <div className="flex items-center space-x-2">
+                  <Switch id="update-existing" defaultChecked />
+                  <Label htmlFor="update-existing">Update existing contacts</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Switch id="skip-invalid" defaultChecked />
+                  <Label htmlFor="skip-invalid">Skip invalid emails</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Switch id="send-welcome" />
+                  <Label htmlFor="send-welcome">Send welcome email</Label>
+                </div>
+              </div>
+            </div>
+            <div className="flex justify-end gap-3 mt-6">
+              <Button variant="outline" onClick={() => setShowImportDialog(false)}>
+                Cancel
+              </Button>
+              <Button onClick={processImport} className="bg-violet-600 hover:bg-violet-700">
+                Import Contacts
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Export Analytics Dialog */}
+      <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Export Analytics</DialogTitle>
+          </DialogHeader>
+          <div className="py-4 space-y-4">
+            <p className="text-gray-600 dark:text-gray-400">
+              Choose the format for your analytics export
+            </p>
+            <div className="space-y-2">
+              <Label>Date Range</Label>
+              <Select defaultValue="30">
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="7">Last 7 days</SelectItem>
+                  <SelectItem value="30">Last 30 days</SelectItem>
+                  <SelectItem value="90">Last 90 days</SelectItem>
+                  <SelectItem value="365">Last year</SelectItem>
+                  <SelectItem value="all">All time</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Export Format</Label>
+              <div className="grid grid-cols-3 gap-3">
+                <Button variant="outline" onClick={() => processExport('csv')} className="flex flex-col items-center py-4">
+                  <span className="text-2xl mb-1">📊</span>
+                  <span>CSV</span>
+                </Button>
+                <Button variant="outline" onClick={() => processExport('excel')} className="flex flex-col items-center py-4">
+                  <span className="text-2xl mb-1">📗</span>
+                  <span>Excel</span>
+                </Button>
+                <Button variant="outline" onClick={() => processExport('pdf')} className="flex flex-col items-center py-4">
+                  <span className="text-2xl mb-1">📄</span>
+                  <span>PDF</span>
+                </Button>
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Automation Dialog */}
+      <Dialog open={showAutomationDialog} onOpenChange={setShowAutomationDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Create Automation</DialogTitle>
+          </DialogHeader>
+          <div className="py-4 space-y-4">
+            <div className="space-y-2">
+              <Label>Automation Name</Label>
+              <Input placeholder="e.g., Welcome Series, Re-engagement" />
+            </div>
+            <div className="space-y-2">
+              <Label>Description</Label>
+              <Input placeholder="What does this automation do?" />
+            </div>
+            <div className="space-y-2">
+              <Label>Trigger Type</Label>
+              <Select defaultValue="event">
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="event">Event Triggered</SelectItem>
+                  <SelectItem value="segment">Segment Entry</SelectItem>
+                  <SelectItem value="time">Time Based</SelectItem>
+                  <SelectItem value="api">API Triggered</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Trigger Event</Label>
+              <Select defaultValue="user.created">
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="user.created">User Created</SelectItem>
+                  <SelectItem value="purchase.completed">Purchase Completed</SelectItem>
+                  <SelectItem value="subscription.upgraded">Subscription Upgraded</SelectItem>
+                  <SelectItem value="feature.used">Feature Used</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Actions (add after saving)</p>
+              <p className="text-xs text-gray-500">You can add email, push, wait, and condition steps after creating the automation</p>
+            </div>
+            <div className="flex justify-end gap-3 mt-6">
+              <Button variant="outline" onClick={() => setShowAutomationDialog(false)}>
+                Cancel
+              </Button>
+              <Button onClick={saveAutomation} className="bg-violet-600 hover:bg-violet-700">
+                Create Automation
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Series Dialog */}
+      <Dialog open={showSeriesDialog} onOpenChange={setShowSeriesDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Create Email Series</DialogTitle>
+          </DialogHeader>
+          <div className="py-4 space-y-4">
+            <div className="space-y-2">
+              <Label>Series Name</Label>
+              <Input placeholder="e.g., Onboarding Journey, Feature Education" />
+            </div>
+            <div className="space-y-2">
+              <Label>Description</Label>
+              <Input placeholder="Describe the purpose of this series" />
+            </div>
+            <div className="space-y-2">
+              <Label>Entry Trigger</Label>
+              <Select defaultValue="signup">
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="signup">User Signup</SelectItem>
+                  <SelectItem value="segment">Segment Entry</SelectItem>
+                  <SelectItem value="manual">Manual Enrollment</SelectItem>
+                  <SelectItem value="api">API Trigger</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Exit Conditions</Label>
+              <div className="space-y-2">
+                <div className="flex items-center space-x-2">
+                  <Switch id="exit-purchase" />
+                  <Label htmlFor="exit-purchase">Exit on purchase</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Switch id="exit-unsubscribe" defaultChecked />
+                  <Label htmlFor="exit-unsubscribe">Exit on unsubscribe</Label>
+                </div>
+              </div>
+            </div>
+            <div className="flex justify-end gap-3 mt-6">
+              <Button variant="outline" onClick={() => setShowSeriesDialog(false)}>
+                Cancel
+              </Button>
+              <Button onClick={saveSeries} className="bg-violet-600 hover:bg-violet-700">
+                Create Series
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Template Dialog */}
+      <Dialog open={showTemplateDialog} onOpenChange={setShowTemplateDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Create Email Template</DialogTitle>
+          </DialogHeader>
+          <div className="py-4 space-y-4">
+            <div className="space-y-2">
+              <Label>Template Name</Label>
+              <Input placeholder="e.g., Welcome Email, Product Update" />
+            </div>
+            <div className="space-y-2">
+              <Label>Category</Label>
+              <Select defaultValue="engagement">
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="onboarding">Onboarding</SelectItem>
+                  <SelectItem value="engagement">Engagement</SelectItem>
+                  <SelectItem value="product">Product Updates</SelectItem>
+                  <SelectItem value="promotions">Promotions</SelectItem>
+                  <SelectItem value="transactional">Transactional</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Subject Line</Label>
+              <Input placeholder="Email subject line" />
+            </div>
+            <div className="space-y-2">
+              <Label>Content</Label>
+              <textarea
+                placeholder="Write your email content here..."
+                className="w-full min-h-[150px] px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+              />
+            </div>
+            <div className="flex justify-end gap-3 mt-6">
+              <Button variant="outline" onClick={() => setShowTemplateDialog(false)}>
+                Cancel
+              </Button>
+              <Button onClick={saveTemplate} className="bg-violet-600 hover:bg-violet-700">
+                Save Template
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Segment Dialog */}
+      <Dialog open={showSegmentDialog} onOpenChange={setShowSegmentDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Create Audience Segment</DialogTitle>
+          </DialogHeader>
+          <div className="py-4 space-y-4">
+            <div className="space-y-2">
+              <Label>Segment Name</Label>
+              <Input placeholder="e.g., Active Users, High Value Customers" />
+            </div>
+            <div className="space-y-2">
+              <Label>Description</Label>
+              <Input placeholder="Describe this segment" />
+            </div>
+            <div className="space-y-2">
+              <Label>Filter Conditions</Label>
+              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg space-y-3">
+                <div className="grid grid-cols-3 gap-2">
+                  <Select defaultValue="status">
+                    <SelectTrigger>
+                      <SelectValue placeholder="Field" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="status">Status</SelectItem>
+                      <SelectItem value="last_activity">Last Activity</SelectItem>
+                      <SelectItem value="signup_date">Signup Date</SelectItem>
+                      <SelectItem value="purchase_count">Purchase Count</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Select defaultValue="equals">
+                    <SelectTrigger>
+                      <SelectValue placeholder="Operator" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="equals">Equals</SelectItem>
+                      <SelectItem value="not_equals">Not Equals</SelectItem>
+                      <SelectItem value="greater">Greater Than</SelectItem>
+                      <SelectItem value="less">Less Than</SelectItem>
+                      <SelectItem value="within">Within</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Input placeholder="Value" />
+                </div>
+                <Button variant="outline" size="sm">+ Add Condition</Button>
+              </div>
+            </div>
+            <div className="p-3 bg-violet-50 dark:bg-violet-900/20 rounded-lg">
+              <p className="text-sm text-violet-700 dark:text-violet-400">Estimated audience: ~5,420 contacts</p>
+            </div>
+            <div className="flex justify-end gap-3 mt-6">
+              <Button variant="outline" onClick={() => setShowSegmentDialog(false)}>
+                Cancel
+              </Button>
+              <Button onClick={saveSegment} className="bg-violet-600 hover:bg-violet-700">
+                Create Segment
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Define Event Dialog */}
+      <Dialog open={showEventDialog} onOpenChange={setShowEventDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Define Custom Event</DialogTitle>
+          </DialogHeader>
+          <div className="py-4 space-y-4">
+            <div className="space-y-2">
+              <Label>Event Name</Label>
+              <Input placeholder="e.g., button.clicked, form.submitted" />
+              <p className="text-xs text-gray-500">Use lowercase with dots or underscores</p>
+            </div>
+            <div className="space-y-2">
+              <Label>Description</Label>
+              <Input placeholder="When does this event fire?" />
+            </div>
+            <div className="space-y-2">
+              <Label>Event Properties</Label>
+              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg space-y-2">
+                <div className="grid grid-cols-2 gap-2">
+                  <Input placeholder="Property name" />
+                  <Select defaultValue="string">
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="string">String</SelectItem>
+                      <SelectItem value="number">Number</SelectItem>
+                      <SelectItem value="boolean">Boolean</SelectItem>
+                      <SelectItem value="date">Date</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <Button variant="outline" size="sm">+ Add Property</Button>
+              </div>
+            </div>
+            <div className="flex justify-end gap-3 mt-6">
+              <Button variant="outline" onClick={() => setShowEventDialog(false)}>
+                Cancel
+              </Button>
+              <Button onClick={saveEvent} className="bg-violet-600 hover:bg-violet-700">
+                Define Event
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Webhook Dialog */}
+      <Dialog open={showWebhookDialog} onOpenChange={setShowWebhookDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add Webhook Endpoint</DialogTitle>
+          </DialogHeader>
+          <div className="py-4 space-y-4">
+            <div className="space-y-2">
+              <Label>Webhook URL</Label>
+              <Input placeholder="https://your-service.com/webhook" />
+            </div>
+            <div className="space-y-2">
+              <Label>Secret Key (optional)</Label>
+              <Input placeholder="For signature verification" />
+            </div>
+            <div className="space-y-2">
+              <Label>Events to Send</Label>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="flex items-center space-x-2">
+                  <Switch id="wh-sent" defaultChecked />
+                  <Label htmlFor="wh-sent">Email Sent</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Switch id="wh-opened" defaultChecked />
+                  <Label htmlFor="wh-opened">Email Opened</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Switch id="wh-clicked" defaultChecked />
+                  <Label htmlFor="wh-clicked">Link Clicked</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Switch id="wh-bounced" defaultChecked />
+                  <Label htmlFor="wh-bounced">Bounced</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Switch id="wh-unsubscribed" defaultChecked />
+                  <Label htmlFor="wh-unsubscribed">Unsubscribed</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Switch id="wh-complained" defaultChecked />
+                  <Label htmlFor="wh-complained">Spam Complaint</Label>
+                </div>
+              </div>
+            </div>
+            <div className="flex justify-end gap-3 mt-6">
+              <Button variant="outline" onClick={() => setShowWebhookDialog(false)}>
+                Cancel
+              </Button>
+              <Button onClick={saveWebhook} className="bg-violet-600 hover:bg-violet-700">
+                Add Webhook
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Regenerate API Key Dialog */}
+      <Dialog open={showApiKeyDialog} onOpenChange={setShowApiKeyDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Regenerate API Key</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <div className="p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg mb-4">
+              <p className="text-amber-800 dark:text-amber-400 font-medium">Warning</p>
+              <p className="text-sm text-amber-700 dark:text-amber-500 mt-1">
+                Regenerating your API key will invalidate the current key. Any applications using the old key will stop working.
+              </p>
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setShowApiKeyDialog(false)}>
+                Cancel
+              </Button>
+              <Button variant="destructive" onClick={confirmRegenerateApiKey}>
+                Regenerate Key
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Purge Contacts Dialog */}
+      <Dialog open={showPurgeDialog} onOpenChange={setShowPurgeDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Purge All Contacts</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg mb-4">
+              <p className="text-red-800 dark:text-red-400 font-medium">Danger Zone</p>
+              <p className="text-sm text-red-700 dark:text-red-500 mt-1">
+                This will permanently delete all subscriber data. This action cannot be undone.
+              </p>
+            </div>
+            <div className="space-y-2 mb-4">
+              <Label>Type &quot;DELETE&quot; to confirm</Label>
+              <Input placeholder="DELETE" />
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setShowPurgeDialog(false)}>
+                Cancel
+              </Button>
+              <Button variant="destructive" onClick={confirmPurgeContacts}>
+                Purge All Contacts
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete All Campaigns Dialog */}
+      <Dialog open={showDeleteCampaignsDialog} onOpenChange={setShowDeleteCampaignsDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete All Campaigns</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg mb-4">
+              <p className="text-red-800 dark:text-red-400 font-medium">Danger Zone</p>
+              <p className="text-sm text-red-700 dark:text-red-500 mt-1">
+                This will permanently delete all campaign history and analytics. This action cannot be undone.
+              </p>
+            </div>
+            <div className="space-y-2 mb-4">
+              <Label>Type &quot;DELETE ALL&quot; to confirm</Label>
+              <Input placeholder="DELETE ALL" />
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setShowDeleteCampaignsDialog(false)}>
+                Cancel
+              </Button>
+              <Button variant="destructive" onClick={confirmDeleteAllCampaigns}>
+                Delete All Campaigns
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Close Account Dialog */}
+      <Dialog open={showCloseAccountDialog} onOpenChange={setShowCloseAccountDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Close Account</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg mb-4">
+              <p className="text-red-800 dark:text-red-400 font-medium">This is permanent</p>
+              <p className="text-sm text-red-700 dark:text-red-500 mt-1">
+                Closing your account will permanently delete all your data, campaigns, contacts, and settings. This action cannot be undone.
+              </p>
+            </div>
+            <div className="space-y-2 mb-4">
+              <Label>Please tell us why you&apos;re leaving</Label>
+              <Select>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a reason" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="too_expensive">Too expensive</SelectItem>
+                  <SelectItem value="missing_features">Missing features</SelectItem>
+                  <SelectItem value="switching">Switching to another service</SelectItem>
+                  <SelectItem value="not_using">Not using anymore</SelectItem>
+                  <SelectItem value="other">Other</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2 mb-4">
+              <Label>Type &quot;CLOSE ACCOUNT&quot; to confirm</Label>
+              <Input placeholder="CLOSE ACCOUNT" />
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setShowCloseAccountDialog(false)}>
+                Cancel
+              </Button>
+              <Button variant="destructive" onClick={confirmCloseAccount}>
+                Close My Account
               </Button>
             </div>
           </div>

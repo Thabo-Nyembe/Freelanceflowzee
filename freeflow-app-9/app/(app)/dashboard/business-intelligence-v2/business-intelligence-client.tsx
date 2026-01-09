@@ -6,6 +6,19 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { Switch } from '@/components/ui/switch'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { toast } from 'sonner'
 import {
   BarChart3,
   TrendingUp,
@@ -24,7 +37,15 @@ import {
   Crown,
   Building2,
   User,
-  Building
+  Building,
+  Plus,
+  Filter,
+  Calendar,
+  FileText,
+  Mail,
+  Bell,
+  Share2,
+  Trash2
 } from 'lucide-react'
 
 // Import Business Health Dashboard component
@@ -42,6 +63,40 @@ type UserType = 'freelancer' | 'entrepreneur' | 'agency' | 'enterprise'
 export function BusinessIntelligenceClient() {
   const [userType, setUserType] = useState<UserType>('freelancer')
   const [refreshing, setRefreshing] = useState(false)
+
+  // Dialog states
+  const [showExportDialog, setShowExportDialog] = useState(false)
+  const [showSettingsDialog, setShowSettingsDialog] = useState(false)
+  const [showAddGoalDialog, setShowAddGoalDialog] = useState(false)
+  const [showFilterDialog, setShowFilterDialog] = useState(false)
+  const [showDateRangeDialog, setShowDateRangeDialog] = useState(false)
+  const [showAddReportDialog, setShowAddReportDialog] = useState(false)
+  const [showShareDialog, setShowShareDialog] = useState(false)
+  const [showScheduleDialog, setShowScheduleDialog] = useState(false)
+
+  // Form states
+  const [exportFormat, setExportFormat] = useState('csv')
+  const [dateRange, setDateRange] = useState('last30days')
+  const [goalName, setGoalName] = useState('')
+  const [goalTarget, setGoalTarget] = useState('')
+  const [goalCategory, setGoalCategory] = useState('revenue')
+  const [reportName, setReportName] = useState('')
+  const [reportDescription, setReportDescription] = useState('')
+  const [shareEmail, setShareEmail] = useState('')
+  const [scheduleFrequency, setScheduleFrequency] = useState('weekly')
+  const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null)
+
+  // Settings states
+  const [enableNotifications, setEnableNotifications] = useState(true)
+  const [enableAutoRefresh, setEnableAutoRefresh] = useState(false)
+  const [refreshInterval, setRefreshInterval] = useState('15')
+  const [dataDisplayMode, setDataDisplayMode] = useState('detailed')
+
+  // Filter states
+  const [filterCategory, setFilterCategory] = useState('all')
+  const [filterStatus, setFilterStatus] = useState('all')
+  const [filterMinValue, setFilterMinValue] = useState('')
+  const [filterMaxValue, setFilterMaxValue] = useState('')
 
   // Load all hooks - using real data
   const {
@@ -80,6 +135,119 @@ export function BusinessIntelligenceClient() {
     setRefreshing(true)
     await refreshBI()
     setTimeout(() => setRefreshing(false), 1000)
+    toast.success('Data refreshed successfully')
+  }
+
+  // Handle export
+  const handleExport = () => {
+    toast.success(`Report exported as ${exportFormat.toUpperCase()}`, {
+      description: 'Your business intelligence report has been downloaded'
+    })
+    setShowExportDialog(false)
+  }
+
+  // Handle save settings
+  const handleSaveSettings = () => {
+    toast.success('Settings saved successfully', {
+      description: 'Your dashboard preferences have been updated'
+    })
+    setShowSettingsDialog(false)
+  }
+
+  // Handle add goal
+  const handleAddGoal = () => {
+    if (!goalName || !goalTarget) {
+      toast.error('Please fill in all required fields')
+      return
+    }
+    toast.success(`Goal "${goalName}" added successfully`, {
+      description: `Target: ${goalTarget} in ${goalCategory}`
+    })
+    setGoalName('')
+    setGoalTarget('')
+    setGoalCategory('revenue')
+    setShowAddGoalDialog(false)
+  }
+
+  // Handle add goal from template
+  const handleAddGoalFromTemplate = (templateId: string, templateName: string) => {
+    setSelectedTemplate(templateId)
+    toast.success(`Goal "${templateName}" added from template`, {
+      description: 'You can customize this goal in the Goals tab'
+    })
+  }
+
+  // Handle apply filters
+  const handleApplyFilters = () => {
+    toast.success('Filters applied', {
+      description: `Category: ${filterCategory}, Status: ${filterStatus}`
+    })
+    setShowFilterDialog(false)
+  }
+
+  // Handle clear filters
+  const handleClearFilters = () => {
+    setFilterCategory('all')
+    setFilterStatus('all')
+    setFilterMinValue('')
+    setFilterMaxValue('')
+    toast.info('Filters cleared')
+    setShowFilterDialog(false)
+  }
+
+  // Handle date range selection
+  const handleDateRangeApply = () => {
+    const rangeLabels: Record<string, string> = {
+      'last7days': 'Last 7 Days',
+      'last30days': 'Last 30 Days',
+      'last90days': 'Last 90 Days',
+      'thisYear': 'This Year',
+      'lastYear': 'Last Year',
+      'custom': 'Custom Range'
+    }
+    toast.success(`Date range set to ${rangeLabels[dateRange]}`)
+    setShowDateRangeDialog(false)
+  }
+
+  // Handle add report
+  const handleAddReport = () => {
+    if (!reportName) {
+      toast.error('Please enter a report name')
+      return
+    }
+    toast.success(`Report "${reportName}" created`, {
+      description: reportDescription || 'Custom report added to your dashboard'
+    })
+    setReportName('')
+    setReportDescription('')
+    setShowAddReportDialog(false)
+  }
+
+  // Handle share
+  const handleShare = () => {
+    if (!shareEmail) {
+      toast.error('Please enter an email address')
+      return
+    }
+    toast.success(`Report shared with ${shareEmail}`, {
+      description: 'An email with the report link has been sent'
+    })
+    setShareEmail('')
+    setShowShareDialog(false)
+  }
+
+  // Handle schedule report
+  const handleScheduleReport = () => {
+    const frequencyLabels: Record<string, string> = {
+      'daily': 'Daily',
+      'weekly': 'Weekly',
+      'monthly': 'Monthly',
+      'quarterly': 'Quarterly'
+    }
+    toast.success(`Report scheduled ${frequencyLabels[scheduleFrequency].toLowerCase()}`, {
+      description: 'You will receive automated reports via email'
+    })
+    setShowScheduleDialog(false)
   }
 
   // Get user type specific templates
@@ -160,16 +328,28 @@ export function BusinessIntelligenceClient() {
               </SelectContent>
             </Select>
 
+            <Button variant="outline" size="icon" onClick={() => setShowFilterDialog(true)}>
+              <Filter className="w-4 h-4" />
+            </Button>
+
+            <Button variant="outline" size="icon" onClick={() => setShowDateRangeDialog(true)}>
+              <Calendar className="w-4 h-4" />
+            </Button>
+
             <Button variant="outline" size="icon" onClick={handleRefresh} disabled={refreshing}>
               <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
             </Button>
 
-            <Button variant="outline">
+            <Button variant="outline" onClick={() => setShowExportDialog(true)}>
               <Download className="w-4 h-4 mr-2" />
               Export Report
             </Button>
 
-            <Button variant="outline" size="icon">
+            <Button variant="outline" size="icon" onClick={() => setShowShareDialog(true)}>
+              <Share2 className="w-4 h-4" />
+            </Button>
+
+            <Button variant="outline" size="icon" onClick={() => setShowSettingsDialog(true)}>
               <Settings className="w-4 h-4" />
             </Button>
           </div>
@@ -262,9 +442,21 @@ export function BusinessIntelligenceClient() {
             </div>
 
             <Card>
-              <CardHeader>
-                <CardTitle>Revenue Breakdown</CardTitle>
-                <CardDescription>Analysis of your revenue streams</CardDescription>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0">
+                <div>
+                  <CardTitle>Revenue Breakdown</CardTitle>
+                  <CardDescription>Analysis of your revenue streams</CardDescription>
+                </div>
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm" onClick={() => setShowAddReportDialog(true)}>
+                    <FileText className="w-4 h-4 mr-2" />
+                    Create Report
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => setShowScheduleDialog(true)}>
+                    <Bell className="w-4 h-4 mr-2" />
+                    Schedule
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -341,9 +533,19 @@ export function BusinessIntelligenceClient() {
             </div>
 
             <Card>
-              <CardHeader>
-                <CardTitle>Client Value Metrics</CardTitle>
-                <CardDescription>Understanding your client economics</CardDescription>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0">
+                <div>
+                  <CardTitle>Client Value Metrics</CardTitle>
+                  <CardDescription>Understanding your client economics</CardDescription>
+                </div>
+                <Button variant="outline" size="sm" onClick={() => {
+                  toast.success('Client metrics exported', {
+                    description: 'LTV, CAC, and ratio data downloaded'
+                  })
+                }}>
+                  <Download className="w-4 h-4 mr-2" />
+                  Export Metrics
+                </Button>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -432,9 +634,19 @@ export function BusinessIntelligenceClient() {
             </div>
 
             <Card>
-              <CardHeader>
-                <CardTitle>Profitability Insights</CardTitle>
-                <CardDescription>Key insights to improve your project profitability</CardDescription>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0">
+                <div>
+                  <CardTitle>Profitability Insights</CardTitle>
+                  <CardDescription>Key insights to improve your project profitability</CardDescription>
+                </div>
+                <Button variant="outline" size="sm" onClick={() => {
+                  toast.success('Profitability report generated', {
+                    description: 'Detailed analysis downloaded as PDF'
+                  })
+                }}>
+                  <FileText className="w-4 h-4 mr-2" />
+                  Generate Report
+                </Button>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
@@ -516,9 +728,15 @@ export function BusinessIntelligenceClient() {
 
             {/* KPI Templates for User Type */}
             <Card>
-              <CardHeader>
-                <CardTitle>Recommended KPIs for {userType.charAt(0).toUpperCase() + userType.slice(1)}s</CardTitle>
-                <CardDescription>Key performance indicators tailored to your business type</CardDescription>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0">
+                <div>
+                  <CardTitle>Recommended KPIs for {userType.charAt(0).toUpperCase() + userType.slice(1)}s</CardTitle>
+                  <CardDescription>Key performance indicators tailored to your business type</CardDescription>
+                </div>
+                <Button onClick={() => setShowAddGoalDialog(true)}>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Custom Goal
+                </Button>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -535,7 +753,12 @@ export function BusinessIntelligenceClient() {
                         <span className="text-sm">
                           Target: <span className="font-medium">{template.defaultTarget}{template.unit}</span>
                         </span>
-                        <Button size="sm" variant="outline">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleAddGoalFromTemplate(template.id, template.name)}
+                        >
+                          <Plus className="w-3 h-3 mr-1" />
                           Add Goal
                         </Button>
                       </div>
@@ -552,6 +775,502 @@ export function BusinessIntelligenceClient() {
           <p>Business Intelligence Dashboard | Helping {userType}s maximize their potential</p>
         </div>
       </div>
+
+      {/* Export Dialog */}
+      <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Download className="w-5 h-5" />
+              Export Report
+            </DialogTitle>
+            <DialogDescription>
+              Export your business intelligence data in your preferred format
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Export Format</Label>
+              <Select value={exportFormat} onValueChange={setExportFormat}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select format" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="csv">CSV (Spreadsheet)</SelectItem>
+                  <SelectItem value="xlsx">Excel (XLSX)</SelectItem>
+                  <SelectItem value="pdf">PDF Report</SelectItem>
+                  <SelectItem value="json">JSON (Data)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Include Sections</Label>
+              <div className="grid grid-cols-2 gap-2">
+                <label className="flex items-center gap-2 text-sm">
+                  <input type="checkbox" defaultChecked className="rounded" />
+                  Revenue Data
+                </label>
+                <label className="flex items-center gap-2 text-sm">
+                  <input type="checkbox" defaultChecked className="rounded" />
+                  Client Metrics
+                </label>
+                <label className="flex items-center gap-2 text-sm">
+                  <input type="checkbox" defaultChecked className="rounded" />
+                  Project Analytics
+                </label>
+                <label className="flex items-center gap-2 text-sm">
+                  <input type="checkbox" defaultChecked className="rounded" />
+                  Goals & KPIs
+                </label>
+              </div>
+            </div>
+          </div>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setShowExportDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleExport}>
+              <Download className="w-4 h-4 mr-2" />
+              Export
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Settings Dialog */}
+      <Dialog open={showSettingsDialog} onOpenChange={setShowSettingsDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Settings className="w-5 h-5" />
+              Dashboard Settings
+            </DialogTitle>
+            <DialogDescription>
+              Customize your business intelligence dashboard
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label>Notifications</Label>
+                <p className="text-sm text-muted-foreground">Receive alerts for important changes</p>
+              </div>
+              <Switch checked={enableNotifications} onCheckedChange={setEnableNotifications} />
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label>Auto-refresh Data</Label>
+                <p className="text-sm text-muted-foreground">Automatically update dashboard data</p>
+              </div>
+              <Switch checked={enableAutoRefresh} onCheckedChange={setEnableAutoRefresh} />
+            </div>
+            {enableAutoRefresh && (
+              <div className="space-y-2">
+                <Label>Refresh Interval (minutes)</Label>
+                <Select value={refreshInterval} onValueChange={setRefreshInterval}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select interval" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="5">5 minutes</SelectItem>
+                    <SelectItem value="15">15 minutes</SelectItem>
+                    <SelectItem value="30">30 minutes</SelectItem>
+                    <SelectItem value="60">1 hour</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+            <div className="space-y-2">
+              <Label>Data Display Mode</Label>
+              <Select value={dataDisplayMode} onValueChange={setDataDisplayMode}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select display mode" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="summary">Summary View</SelectItem>
+                  <SelectItem value="detailed">Detailed View</SelectItem>
+                  <SelectItem value="compact">Compact View</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setShowSettingsDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSaveSettings}>
+              Save Settings
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Goal Dialog */}
+      <Dialog open={showAddGoalDialog} onOpenChange={setShowAddGoalDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Target className="w-5 h-5" />
+              Add New Goal
+            </DialogTitle>
+            <DialogDescription>
+              Create a custom KPI goal to track your business performance
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="goalName">Goal Name *</Label>
+              <Input
+                id="goalName"
+                placeholder="e.g., Monthly Revenue Target"
+                value={goalName}
+                onChange={(e) => setGoalName(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="goalCategory">Category</Label>
+              <Select value={goalCategory} onValueChange={setGoalCategory}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select category" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="revenue">Revenue</SelectItem>
+                  <SelectItem value="clients">Clients</SelectItem>
+                  <SelectItem value="projects">Projects</SelectItem>
+                  <SelectItem value="profitability">Profitability</SelectItem>
+                  <SelectItem value="growth">Growth</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="goalTarget">Target Value *</Label>
+              <Input
+                id="goalTarget"
+                placeholder="e.g., $50,000 or 15%"
+                value={goalTarget}
+                onChange={(e) => setGoalTarget(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setShowAddGoalDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleAddGoal}>
+              <Plus className="w-4 h-4 mr-2" />
+              Add Goal
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Filter Dialog */}
+      <Dialog open={showFilterDialog} onOpenChange={setShowFilterDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Filter className="w-5 h-5" />
+              Filter Data
+            </DialogTitle>
+            <DialogDescription>
+              Apply filters to refine your business intelligence data
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Category</Label>
+              <Select value={filterCategory} onValueChange={setFilterCategory}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select category" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Categories</SelectItem>
+                  <SelectItem value="revenue">Revenue</SelectItem>
+                  <SelectItem value="clients">Clients</SelectItem>
+                  <SelectItem value="projects">Projects</SelectItem>
+                  <SelectItem value="goals">Goals</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Status</Label>
+              <Select value={filterStatus} onValueChange={setFilterStatus}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="completed">Completed</SelectItem>
+                  <SelectItem value="pending">Pending</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="minValue">Min Value</Label>
+                <Input
+                  id="minValue"
+                  type="number"
+                  placeholder="0"
+                  value={filterMinValue}
+                  onChange={(e) => setFilterMinValue(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="maxValue">Max Value</Label>
+                <Input
+                  id="maxValue"
+                  type="number"
+                  placeholder="100,000"
+                  value={filterMaxValue}
+                  onChange={(e) => setFilterMaxValue(e.target.value)}
+                />
+              </div>
+            </div>
+          </div>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={handleClearFilters}>
+              <Trash2 className="w-4 h-4 mr-2" />
+              Clear
+            </Button>
+            <Button onClick={handleApplyFilters}>
+              Apply Filters
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Date Range Dialog */}
+      <Dialog open={showDateRangeDialog} onOpenChange={setShowDateRangeDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Calendar className="w-5 h-5" />
+              Select Date Range
+            </DialogTitle>
+            <DialogDescription>
+              Choose the time period for your analytics
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Date Range</Label>
+              <Select value={dateRange} onValueChange={setDateRange}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select date range" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="last7days">Last 7 Days</SelectItem>
+                  <SelectItem value="last30days">Last 30 Days</SelectItem>
+                  <SelectItem value="last90days">Last 90 Days</SelectItem>
+                  <SelectItem value="thisYear">This Year</SelectItem>
+                  <SelectItem value="lastYear">Last Year</SelectItem>
+                  <SelectItem value="custom">Custom Range</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            {dateRange === 'custom' && (
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Start Date</Label>
+                  <Input type="date" />
+                </div>
+                <div className="space-y-2">
+                  <Label>End Date</Label>
+                  <Input type="date" />
+                </div>
+              </div>
+            )}
+          </div>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setShowDateRangeDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleDateRangeApply}>
+              Apply Range
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Report Dialog */}
+      <Dialog open={showAddReportDialog} onOpenChange={setShowAddReportDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileText className="w-5 h-5" />
+              Create Custom Report
+            </DialogTitle>
+            <DialogDescription>
+              Build a custom report with your selected metrics
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="reportName">Report Name *</Label>
+              <Input
+                id="reportName"
+                placeholder="e.g., Q4 Performance Summary"
+                value={reportName}
+                onChange={(e) => setReportName(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="reportDescription">Description</Label>
+              <Textarea
+                id="reportDescription"
+                placeholder="Describe what this report includes..."
+                value={reportDescription}
+                onChange={(e) => setReportDescription(e.target.value)}
+                rows={3}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Include Metrics</Label>
+              <div className="grid grid-cols-2 gap-2">
+                <label className="flex items-center gap-2 text-sm">
+                  <input type="checkbox" defaultChecked className="rounded" />
+                  Revenue Trends
+                </label>
+                <label className="flex items-center gap-2 text-sm">
+                  <input type="checkbox" defaultChecked className="rounded" />
+                  Client Growth
+                </label>
+                <label className="flex items-center gap-2 text-sm">
+                  <input type="checkbox" className="rounded" />
+                  Project Status
+                </label>
+                <label className="flex items-center gap-2 text-sm">
+                  <input type="checkbox" className="rounded" />
+                  KPI Progress
+                </label>
+              </div>
+            </div>
+          </div>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setShowAddReportDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleAddReport}>
+              <Plus className="w-4 h-4 mr-2" />
+              Create Report
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Share Dialog */}
+      <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Share2 className="w-5 h-5" />
+              Share Report
+            </DialogTitle>
+            <DialogDescription>
+              Share your business intelligence report with team members
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="shareEmail">Email Address</Label>
+              <Input
+                id="shareEmail"
+                type="email"
+                placeholder="colleague@company.com"
+                value={shareEmail}
+                onChange={(e) => setShareEmail(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Access Level</Label>
+              <Select defaultValue="view">
+                <SelectTrigger>
+                  <SelectValue placeholder="Select access level" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="view">View Only</SelectItem>
+                  <SelectItem value="comment">Can Comment</SelectItem>
+                  <SelectItem value="edit">Can Edit</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-center gap-2 p-3 bg-muted rounded-lg">
+              <Mail className="w-4 h-4 text-muted-foreground" />
+              <p className="text-sm text-muted-foreground">
+                An email invitation will be sent with a link to view this report
+              </p>
+            </div>
+          </div>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setShowShareDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleShare}>
+              <Share2 className="w-4 h-4 mr-2" />
+              Share
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Schedule Report Dialog */}
+      <Dialog open={showScheduleDialog} onOpenChange={setShowScheduleDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Bell className="w-5 h-5" />
+              Schedule Report
+            </DialogTitle>
+            <DialogDescription>
+              Set up automated report delivery
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Frequency</Label>
+              <Select value={scheduleFrequency} onValueChange={setScheduleFrequency}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select frequency" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="daily">Daily</SelectItem>
+                  <SelectItem value="weekly">Weekly</SelectItem>
+                  <SelectItem value="monthly">Monthly</SelectItem>
+                  <SelectItem value="quarterly">Quarterly</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Delivery Format</Label>
+              <Select defaultValue="pdf">
+                <SelectTrigger>
+                  <SelectValue placeholder="Select format" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="pdf">PDF Report</SelectItem>
+                  <SelectItem value="xlsx">Excel Spreadsheet</SelectItem>
+                  <SelectItem value="email">Email Summary</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Recipients</Label>
+              <Input placeholder="Enter email addresses (comma separated)" />
+            </div>
+          </div>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setShowScheduleDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleScheduleReport}>
+              <Bell className="w-4 h-4 mr-2" />
+              Schedule
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

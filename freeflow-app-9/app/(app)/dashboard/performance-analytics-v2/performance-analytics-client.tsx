@@ -331,6 +331,21 @@ export default function PerformanceAnalyticsClient() {
   const [showExportDialog, setShowExportDialog] = useState(false)
   const [showRefreshDialog, setShowRefreshDialog] = useState(false)
 
+  // Additional dialog states
+  const [showDateRangeDialog, setShowDateRangeDialog] = useState(false)
+  const [showFiltersDialog, setShowFiltersDialog] = useState(false)
+  const [showShareDialog, setShowShareDialog] = useState(false)
+  const [showScheduleReportDialog, setShowScheduleReportDialog] = useState(false)
+  const [showCustomReportDialog, setShowCustomReportDialog] = useState(false)
+  const [showNewSLODialog, setShowNewSLODialog] = useState(false)
+  const [showIntegrationDialog, setShowIntegrationDialog] = useState(false)
+  const [showSettingsDialog, setShowSettingsDialog] = useState(false)
+  const [showClearDataDialog, setShowClearDataDialog] = useState(false)
+  const [showResetConfigDialog, setShowResetConfigDialog] = useState(false)
+  const [showManageKeysDialog, setShowManageKeysDialog] = useState(false)
+  const [showAcknowledgeAlertDialog, setShowAcknowledgeAlertDialog] = useState(false)
+  const [selectedAlertId, setSelectedAlertId] = useState<string | null>(null)
+
   // New alert form state
   const [newAlertName, setNewAlertName] = useState('')
   const [newAlertMetric, setNewAlertMetric] = useState('latency_p99')
@@ -351,6 +366,23 @@ export default function PerformanceAnalyticsClient() {
   // Refresh state
   const [isRefreshing, setIsRefreshing] = useState(false)
   const [lastRefresh, setLastRefresh] = useState<Date | null>(null)
+
+  // Additional form states
+  const [customDateStart, setCustomDateStart] = useState('')
+  const [customDateEnd, setCustomDateEnd] = useState('')
+  const [shareEmail, setShareEmail] = useState('')
+  const [shareMessage, setShareMessage] = useState('')
+  const [scheduleFrequency, setScheduleFrequency] = useState('daily')
+  const [scheduleTime, setScheduleTime] = useState('09:00')
+  const [scheduleRecipients, setScheduleRecipients] = useState('')
+  const [customReportName, setCustomReportName] = useState('')
+  const [customReportMetrics, setCustomReportMetrics] = useState<string[]>([])
+  const [newSLOName, setNewSLOName] = useState('')
+  const [newSLOTarget, setNewSLOTarget] = useState('')
+  const [newSLOTimeWindow, setNewSLOTimeWindow] = useState('30d')
+  const [filterServiceStatus, setFilterServiceStatus] = useState('all')
+  const [filterSeverity, setFilterSeverity] = useState('all')
+  const [filterTimeRange, setFilterTimeRange] = useState('all')
 
   // Calculate stats
   const healthyServices = mockServices.filter(s => s.status === 'healthy').length
@@ -500,6 +532,227 @@ export default function PerformanceAnalyticsClient() {
     setShowNewAlertDialog(true)
   }
 
+  // Handle date range apply
+  const handleApplyDateRange = () => {
+    if (!customDateStart || !customDateEnd) {
+      toast.error('Invalid date range', {
+        description: 'Please select both start and end dates'
+      })
+      return
+    }
+    setShowDateRangeDialog(false)
+    toast.success('Date range applied', {
+      description: `Showing data from ${customDateStart} to ${customDateEnd}`
+    })
+  }
+
+  // Handle share dashboard
+  const handleShareDashboard = () => {
+    if (!shareEmail) {
+      toast.error('Email required', {
+        description: 'Please enter an email address to share with'
+      })
+      return
+    }
+    setShowShareDialog(false)
+    toast.success('Dashboard shared', {
+      description: `Shared with ${shareEmail}`
+    })
+    setShareEmail('')
+    setShareMessage('')
+  }
+
+  // Handle schedule report
+  const handleScheduleReport = () => {
+    if (!scheduleRecipients) {
+      toast.error('Recipients required', {
+        description: 'Please add at least one recipient email'
+      })
+      return
+    }
+    setShowScheduleReportDialog(false)
+    toast.success('Report scheduled', {
+      description: `${scheduleFrequency.charAt(0).toUpperCase() + scheduleFrequency.slice(1)} report scheduled for ${scheduleTime}`
+    })
+    setScheduleRecipients('')
+  }
+
+  // Handle create custom report
+  const handleCreateCustomReport = () => {
+    if (!customReportName) {
+      toast.error('Report name required', {
+        description: 'Please enter a name for your custom report'
+      })
+      return
+    }
+    setShowCustomReportDialog(false)
+    toast.success('Custom report created', {
+      description: `Report "${customReportName}" has been created`
+    })
+    setCustomReportName('')
+    setCustomReportMetrics([])
+  }
+
+  // Handle create SLO
+  const handleCreateSLO = () => {
+    if (!newSLOName || !newSLOTarget) {
+      toast.error('Missing required fields', {
+        description: 'Please fill in SLO name and target percentage'
+      })
+      return
+    }
+    setShowNewSLODialog(false)
+    toast.success('SLO created', {
+      description: `${newSLOName} with target ${newSLOTarget}% created`
+    })
+    setNewSLOName('')
+    setNewSLOTarget('')
+  }
+
+  // Handle apply filters
+  const handleApplyFilters = () => {
+    setShowFiltersDialog(false)
+    toast.success('Filters applied', {
+      description: 'Data filtered by your selections'
+    })
+  }
+
+  // Handle acknowledge alert
+  const handleAcknowledgeAlert = (alertId: string) => {
+    setSelectedAlertId(alertId)
+    setShowAcknowledgeAlertDialog(true)
+  }
+
+  const handleConfirmAcknowledge = () => {
+    setShowAcknowledgeAlertDialog(false)
+    toast.success('Alert acknowledged', {
+      description: 'Alert has been marked as acknowledged'
+    })
+    setSelectedAlertId(null)
+  }
+
+  // Handle add integration
+  const handleAddIntegration = () => {
+    setShowIntegrationDialog(false)
+    toast.success('Integration added', {
+      description: 'New integration has been configured'
+    })
+  }
+
+  // Handle clear data
+  const handleClearData = () => {
+    setShowClearDataDialog(false)
+    toast.success('Data cleared', {
+      description: 'All metrics and logs have been deleted'
+    })
+  }
+
+  // Handle reset config
+  const handleResetConfig = () => {
+    setShowResetConfigDialog(false)
+    toast.success('Configuration reset', {
+      description: 'All settings have been reset to defaults'
+    })
+  }
+
+  // Handle manage API keys
+  const handleManageKeys = () => {
+    setShowManageKeysDialog(true)
+  }
+
+  // Handle create dashboard
+  const handleCreateDashboard = () => {
+    setShowCreateDashboardDialog(false)
+    toast.success('Dashboard created', {
+      description: 'Your new dashboard has been created successfully'
+    })
+  }
+
+  // Handle view all traces
+  const handleViewAllTraces = () => {
+    setActiveTab('traces')
+    toast.info('Viewing all traces', {
+      description: 'Switched to traces tab'
+    })
+  }
+
+  // Handle view alerts
+  const handleViewAlerts = () => {
+    setActiveTab('alerts')
+    toast.info('Viewing alerts', {
+      description: 'Switched to alerts tab'
+    })
+  }
+
+  // Handle add metric
+  const handleAddMetric = () => {
+    toast.info('Add metric', {
+      description: 'Custom metric configuration coming soon'
+    })
+  }
+
+  // Handle export metrics
+  const handleExportMetrics = () => {
+    setShowExportDialog(true)
+  }
+
+  // Handle template click
+  const handleTemplateClick = (templateName: string) => {
+    toast.info('Template selected', {
+      description: `Creating dashboard from "${templateName}" template`
+    })
+    setShowCreateDashboardDialog(true)
+  }
+
+  // Handle dashboard card click
+  const handleDashboardClick = (dashboardName: string) => {
+    toast.info('Opening dashboard', {
+      description: `Loading "${dashboardName}" dashboard`
+    })
+  }
+
+  // Quick actions handlers
+  const handleQuickAction = (actionLabel: string) => {
+    switch (actionLabel) {
+      case 'New Dashboard':
+        setShowCreateDashboardDialog(true)
+        break
+      case 'Create Alert':
+        setShowNewAlertDialog(true)
+        break
+      case 'Export Data':
+        setShowExportDialog(true)
+        break
+      case 'New SLO':
+        setShowNewSLODialog(true)
+        break
+      case 'Integrations':
+        setShowIntegrationDialog(true)
+        break
+      case 'Trace Search':
+        setActiveTab('traces')
+        toast.info('Trace search', { description: 'Navigate to traces tab' })
+        break
+      case 'View Logs':
+        setActiveTab('logs')
+        toast.info('View logs', { description: 'Navigate to logs tab' })
+        break
+      case 'Analytics':
+        toast.info('Analytics', { description: 'Opening analytics view' })
+        break
+      default:
+        toast.info(`${actionLabel} clicked`)
+    }
+  }
+
+  // Handle integration settings
+  const handleIntegrationSettings = (integrationName: string) => {
+    toast.info('Integration settings', {
+      description: `Opening settings for ${integrationName}`
+    })
+    setShowSettingsDialog(true)
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900 p-8">
       <div className="max-w-7xl mx-auto space-y-8">
@@ -528,7 +781,10 @@ export default function PerformanceAnalyticsClient() {
                 <option value="7d">Last 7 days</option>
               </select>
             </div>
-            <button className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">
+            <button
+              onClick={handleRefreshMetrics}
+              className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
+            >
               <RefreshCw className="w-4 h-4" />
               Refresh
             </button>
@@ -668,6 +924,7 @@ export default function PerformanceAnalyticsClient() {
               ].map((action, i) => (
                 <button
                   key={i}
+                  onClick={() => handleQuickAction(action.label)}
                   className="flex flex-col items-center gap-2 p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:shadow-lg hover:scale-105 transition-all duration-200"
                 >
                   <div className={`p-3 rounded-xl ${action.color}`}>
@@ -722,7 +979,7 @@ export default function PerformanceAnalyticsClient() {
                 <div className="p-6 border-b border-gray-100 dark:border-gray-700">
                   <div className="flex items-center justify-between">
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Recent Traces</h3>
-                    <button className="text-sm text-blue-600 hover:text-blue-700 font-medium">View All</button>
+                    <button onClick={handleViewAllTraces} className="text-sm text-blue-600 hover:text-blue-700 font-medium">View All</button>
                   </div>
                 </div>
                 <ScrollArea className="h-[300px]">
@@ -764,7 +1021,7 @@ export default function PerformanceAnalyticsClient() {
                       {mockAlerts.filter(a => a.status === 'firing').map(a => a.name).join(', ')}
                     </p>
                   </div>
-                  <button className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium">
+                  <button onClick={handleViewAlerts} className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium">
                     View Alerts
                   </button>
                 </div>
@@ -1123,11 +1380,11 @@ export default function PerformanceAnalyticsClient() {
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" onClick={handleAddMetric}>
                   <Plus className="w-4 h-4 mr-2" />
                   Add Metric
                 </Button>
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" onClick={handleExportMetrics}>
                   <Download className="w-4 h-4 mr-2" />
                   Export
                 </Button>
@@ -1325,7 +1582,10 @@ export default function PerformanceAnalyticsClient() {
               <div className="p-6 border-b border-gray-100 dark:border-gray-700">
                 <div className="flex items-center justify-between">
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Alert History</h3>
-                  <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm">
+                  <button
+                    onClick={() => setShowNewAlertDialog(true)}
+                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
+                  >
                     <Plus className="w-4 h-4" />
                     Create Alert
                   </button>
@@ -1371,7 +1631,10 @@ export default function PerformanceAnalyticsClient() {
                         <td className="px-6 py-4 text-sm text-gray-500">{formatDate(alert.triggeredAt)}</td>
                         <td className="px-6 py-4 text-right">
                           {alert.status === 'firing' && (
-                            <button className="px-3 py-1 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700">
+                            <button
+                              onClick={() => handleAcknowledgeAlert(alert.id)}
+                              className="px-3 py-1 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700"
+                            >
                               Acknowledge
                             </button>
                           )}
@@ -1434,7 +1697,7 @@ export default function PerformanceAnalyticsClient() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {mockDashboards.map((dashboard) => (
-                <Card key={dashboard.id} className="bg-white dark:bg-gray-800 hover:shadow-lg transition-shadow cursor-pointer">
+                <Card key={dashboard.id} className="bg-white dark:bg-gray-800 hover:shadow-lg transition-shadow cursor-pointer" onClick={() => handleDashboardClick(dashboard.name)}>
                   <CardHeader className="pb-2">
                     <div className="flex items-center justify-between">
                       <CardTitle className="text-lg">{dashboard.name}</CardTitle>
@@ -1485,7 +1748,11 @@ export default function PerformanceAnalyticsClient() {
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {['APM Overview', 'Infrastructure Health', 'Error Analysis', 'Business Metrics', 'Security Dashboard', 'Cost Optimization'].map((template) => (
-                    <div key={template} className="p-4 border border-dashed border-gray-200 dark:border-gray-700 rounded-lg hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 cursor-pointer transition-colors">
+                    <div
+                      key={template}
+                      onClick={() => handleTemplateClick(template)}
+                      className="p-4 border border-dashed border-gray-200 dark:border-gray-700 rounded-lg hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 cursor-pointer transition-colors"
+                    >
                       <p className="font-medium text-gray-900 dark:text-white">{template}</p>
                       <p className="text-xs text-gray-500 mt-1">Pre-built template</p>
                     </div>
@@ -1592,7 +1859,7 @@ export default function PerformanceAnalyticsClient() {
                     <div className="space-y-6">
                       <div className="flex items-center justify-between mb-4">
                         <h4 className="font-semibold text-gray-900 dark:text-white">Connected Integrations</h4>
-                        <Button variant="outline" size="sm">
+                        <Button variant="outline" size="sm" onClick={() => setShowIntegrationDialog(true)}>
                           <Plus className="w-4 h-4 mr-2" />
                           Add Integration
                         </Button>
@@ -1615,7 +1882,7 @@ export default function PerformanceAnalyticsClient() {
                               }>
                                 {integration.status}
                               </Badge>
-                              <Button variant="ghost" size="sm">
+                              <Button variant="ghost" size="sm" onClick={() => handleIntegrationSettings(integration.name)}>
                                 <Settings className="w-4 h-4" />
                               </Button>
                             </div>
@@ -1726,7 +1993,7 @@ export default function PerformanceAnalyticsClient() {
                             <p className="font-medium text-gray-900 dark:text-white">API Keys</p>
                             <p className="text-sm text-gray-500">Manage API access tokens</p>
                           </div>
-                          <Button variant="outline" size="sm">Manage Keys</Button>
+                          <Button variant="outline" size="sm" onClick={handleManageKeys}>Manage Keys</Button>
                         </div>
                         <div className="flex items-center justify-between py-3 border-b border-gray-100 dark:border-gray-700">
                           <div>
@@ -1790,7 +2057,7 @@ export default function PerformanceAnalyticsClient() {
                             <p className="font-medium text-gray-900 dark:text-white">Export All Metrics</p>
                             <p className="text-sm text-gray-500">Download complete metric history</p>
                           </div>
-                          <Button>
+                          <Button onClick={() => setShowExportDialog(true)}>
                             <Download className="w-4 h-4 mr-2" />
                             Export
                           </Button>
@@ -1800,7 +2067,7 @@ export default function PerformanceAnalyticsClient() {
                             <p className="font-medium text-gray-900 dark:text-white">Export Logs</p>
                             <p className="text-sm text-gray-500">Download log archives</p>
                           </div>
-                          <Button variant="outline">
+                          <Button variant="outline" onClick={() => { setExportLogs(true); setShowExportDialog(true); }}>
                             <Download className="w-4 h-4 mr-2" />
                             Export
                           </Button>
@@ -1819,7 +2086,7 @@ export default function PerformanceAnalyticsClient() {
                             <p className="font-medium text-gray-900 dark:text-white">Clear All Data</p>
                             <p className="text-sm text-gray-500">Delete all metrics and logs</p>
                           </div>
-                          <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50">
+                          <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50" onClick={() => setShowClearDataDialog(true)}>
                             <Trash2 className="w-4 h-4 mr-2" />
                             Clear
                           </Button>
@@ -1829,7 +2096,7 @@ export default function PerformanceAnalyticsClient() {
                             <p className="font-medium text-gray-900 dark:text-white">Reset Configuration</p>
                             <p className="text-sm text-gray-500">Reset all settings to defaults</p>
                           </div>
-                          <Button variant="destructive">
+                          <Button variant="destructive" onClick={() => setShowResetConfigDialog(true)}>
                             <Trash2 className="w-4 h-4 mr-2" />
                             Reset
                           </Button>
@@ -1913,7 +2180,7 @@ export default function PerformanceAnalyticsClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowCreateDashboardDialog(false)}>Cancel</Button>
-              <Button className="bg-blue-600 hover:bg-blue-700">Create Dashboard</Button>
+              <Button className="bg-blue-600 hover:bg-blue-700" onClick={handleCreateDashboard}>Create Dashboard</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -2252,6 +2519,685 @@ export default function PerformanceAnalyticsClient() {
                     Refresh Now
                   </>
                 )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Date Range Dialog */}
+        <Dialog open={showDateRangeDialog} onOpenChange={setShowDateRangeDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Clock className="w-5 h-5 text-blue-600" />
+                Custom Date Range
+              </DialogTitle>
+              <DialogDescription>
+                Select a custom time range for your data
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Start Date</Label>
+                <Input
+                  type="datetime-local"
+                  value={customDateStart}
+                  onChange={(e) => setCustomDateStart(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>End Date</Label>
+                <Input
+                  type="datetime-local"
+                  value={customDateEnd}
+                  onChange={(e) => setCustomDateEnd(e.target.value)}
+                />
+              </div>
+              <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                <p className="text-sm text-blue-700 dark:text-blue-300">
+                  Tip: For performance, limit your date range to 30 days or less.
+                </p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowDateRangeDialog(false)}>Cancel</Button>
+              <Button className="bg-blue-600 hover:bg-blue-700" onClick={handleApplyDateRange}>
+                Apply Range
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Filters Dialog */}
+        <Dialog open={showFiltersDialog} onOpenChange={setShowFiltersDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Sliders className="w-5 h-5 text-purple-600" />
+                Filter Options
+              </DialogTitle>
+              <DialogDescription>
+                Filter your performance data
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Service Status</Label>
+                <Select value={filterServiceStatus} onValueChange={setFilterServiceStatus}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Statuses</SelectItem>
+                    <SelectItem value="healthy">Healthy</SelectItem>
+                    <SelectItem value="degraded">Degraded</SelectItem>
+                    <SelectItem value="critical">Critical</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Alert Severity</Label>
+                <Select value={filterSeverity} onValueChange={setFilterSeverity}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Severities</SelectItem>
+                    <SelectItem value="critical">Critical</SelectItem>
+                    <SelectItem value="high">High</SelectItem>
+                    <SelectItem value="medium">Medium</SelectItem>
+                    <SelectItem value="low">Low</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Time Range</Label>
+                <Select value={filterTimeRange} onValueChange={setFilterTimeRange}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Time</SelectItem>
+                    <SelectItem value="1h">Last Hour</SelectItem>
+                    <SelectItem value="24h">Last 24 Hours</SelectItem>
+                    <SelectItem value="7d">Last 7 Days</SelectItem>
+                    <SelectItem value="30d">Last 30 Days</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => {
+                setFilterServiceStatus('all')
+                setFilterSeverity('all')
+                setFilterTimeRange('all')
+              }}>
+                Reset
+              </Button>
+              <Button className="bg-purple-600 hover:bg-purple-700" onClick={handleApplyFilters}>
+                Apply Filters
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Share Dialog */}
+        <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Globe className="w-5 h-5 text-blue-600" />
+                Share Dashboard
+              </DialogTitle>
+              <DialogDescription>
+                Share this dashboard with team members
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Email Address</Label>
+                <Input
+                  type="email"
+                  placeholder="colleague@company.com"
+                  value={shareEmail}
+                  onChange={(e) => setShareEmail(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Message (optional)</Label>
+                <Input
+                  placeholder="Check out this dashboard..."
+                  value={shareMessage}
+                  onChange={(e) => setShareMessage(e.target.value)}
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch id="share-edit" />
+                <Label htmlFor="share-edit">Allow editing</Label>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowShareDialog(false)}>Cancel</Button>
+              <Button className="bg-blue-600 hover:bg-blue-700" onClick={handleShareDashboard}>
+                Share
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Schedule Report Dialog */}
+        <Dialog open={showScheduleReportDialog} onOpenChange={setShowScheduleReportDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Clock className="w-5 h-5 text-orange-600" />
+                Schedule Report
+              </DialogTitle>
+              <DialogDescription>
+                Set up automated report delivery
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Frequency</Label>
+                <Select value={scheduleFrequency} onValueChange={setScheduleFrequency}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="daily">Daily</SelectItem>
+                    <SelectItem value="weekly">Weekly</SelectItem>
+                    <SelectItem value="monthly">Monthly</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Time</Label>
+                <Input
+                  type="time"
+                  value={scheduleTime}
+                  onChange={(e) => setScheduleTime(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Recipients (comma-separated)</Label>
+                <Input
+                  placeholder="team@company.com, manager@company.com"
+                  value={scheduleRecipients}
+                  onChange={(e) => setScheduleRecipients(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Report Format</Label>
+                <Select defaultValue="pdf">
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="pdf">PDF</SelectItem>
+                    <SelectItem value="csv">CSV</SelectItem>
+                    <SelectItem value="xlsx">Excel</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowScheduleReportDialog(false)}>Cancel</Button>
+              <Button className="bg-orange-600 hover:bg-orange-700" onClick={handleScheduleReport}>
+                Schedule
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Custom Report Dialog */}
+        <Dialog open={showCustomReportDialog} onOpenChange={setShowCustomReportDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <FileText className="w-5 h-5 text-indigo-600" />
+                Create Custom Report
+              </DialogTitle>
+              <DialogDescription>
+                Build a custom report with selected metrics
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Report Name</Label>
+                <Input
+                  placeholder="Weekly Performance Summary"
+                  value={customReportName}
+                  onChange={(e) => setCustomReportName(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Include Metrics</Label>
+                <div className="grid grid-cols-2 gap-2">
+                  {['Latency P99', 'Error Rate', 'Throughput', 'CPU Usage', 'Memory Usage', 'Disk I/O'].map((metric) => (
+                    <div key={metric} className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        id={metric}
+                        checked={customReportMetrics.includes(metric)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setCustomReportMetrics([...customReportMetrics, metric])
+                          } else {
+                            setCustomReportMetrics(customReportMetrics.filter(m => m !== metric))
+                          }
+                        }}
+                        className="rounded"
+                      />
+                      <label htmlFor={metric} className="text-sm">{metric}</label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Time Range</Label>
+                <Select defaultValue="7d">
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="24h">Last 24 Hours</SelectItem>
+                    <SelectItem value="7d">Last 7 Days</SelectItem>
+                    <SelectItem value="30d">Last 30 Days</SelectItem>
+                    <SelectItem value="90d">Last 90 Days</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowCustomReportDialog(false)}>Cancel</Button>
+              <Button className="bg-indigo-600 hover:bg-indigo-700" onClick={handleCreateCustomReport}>
+                Create Report
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* New SLO Dialog */}
+        <Dialog open={showNewSLODialog} onOpenChange={setShowNewSLODialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Target className="w-5 h-5 text-purple-600" />
+                Create New SLO
+              </DialogTitle>
+              <DialogDescription>
+                Define a new Service Level Objective
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>SLO Name</Label>
+                <Input
+                  placeholder="API Availability"
+                  value={newSLOName}
+                  onChange={(e) => setNewSLOName(e.target.value)}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Target (%)</Label>
+                  <Input
+                    type="number"
+                    placeholder="99.9"
+                    value={newSLOTarget}
+                    onChange={(e) => setNewSLOTarget(e.target.value)}
+                    step="0.1"
+                    min="0"
+                    max="100"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Time Window</Label>
+                  <Select value={newSLOTimeWindow} onValueChange={setNewSLOTimeWindow}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="7d">7 Days</SelectItem>
+                      <SelectItem value="30d">30 Days</SelectItem>
+                      <SelectItem value="90d">90 Days</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Metric</Label>
+                <Select defaultValue="availability">
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="availability">Availability</SelectItem>
+                    <SelectItem value="latency">Latency P99</SelectItem>
+                    <SelectItem value="error_rate">Error Rate</SelectItem>
+                    <SelectItem value="throughput">Throughput</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowNewSLODialog(false)}>Cancel</Button>
+              <Button className="bg-purple-600 hover:bg-purple-700" onClick={handleCreateSLO}>
+                Create SLO
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Integration Dialog */}
+        <Dialog open={showIntegrationDialog} onOpenChange={setShowIntegrationDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Webhook className="w-5 h-5 text-orange-600" />
+                Add Integration
+              </DialogTitle>
+              <DialogDescription>
+                Connect a new data source
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Integration Type</Label>
+                <Select defaultValue="cloud">
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="cloud">Cloud Provider</SelectItem>
+                    <SelectItem value="database">Database</SelectItem>
+                    <SelectItem value="messaging">Messaging</SelectItem>
+                    <SelectItem value="monitoring">Monitoring</SelectItem>
+                    <SelectItem value="logging">Logging</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Service</Label>
+                <Select defaultValue="aws">
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="aws">AWS CloudWatch</SelectItem>
+                    <SelectItem value="gcp">Google Cloud Monitoring</SelectItem>
+                    <SelectItem value="azure">Azure Monitor</SelectItem>
+                    <SelectItem value="datadog">Datadog</SelectItem>
+                    <SelectItem value="newrelic">New Relic</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>API Key / Token</Label>
+                <Input type="password" placeholder="Enter your API key" />
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch id="auto-sync" defaultChecked />
+                <Label htmlFor="auto-sync">Enable auto-sync</Label>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowIntegrationDialog(false)}>Cancel</Button>
+              <Button className="bg-orange-600 hover:bg-orange-700" onClick={handleAddIntegration}>
+                Connect
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Acknowledge Alert Dialog */}
+        <Dialog open={showAcknowledgeAlertDialog} onOpenChange={setShowAcknowledgeAlertDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Bell className="w-5 h-5 text-blue-600" />
+                Acknowledge Alert
+              </DialogTitle>
+              <DialogDescription>
+                Confirm that you are aware of this alert and are working on it
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
+                <p className="text-sm text-yellow-700 dark:text-yellow-300">
+                  Acknowledging this alert will notify your team that someone is actively investigating the issue.
+                </p>
+              </div>
+              <div className="space-y-2">
+                <Label>Add a note (optional)</Label>
+                <Input placeholder="Investigating the root cause..." />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowAcknowledgeAlertDialog(false)}>Cancel</Button>
+              <Button className="bg-blue-600 hover:bg-blue-700" onClick={handleConfirmAcknowledge}>
+                Acknowledge
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Clear Data Confirmation Dialog */}
+        <Dialog open={showClearDataDialog} onOpenChange={setShowClearDataDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-600">
+                <Trash2 className="w-5 h-5" />
+                Clear All Data
+              </DialogTitle>
+              <DialogDescription>
+                This action cannot be undone
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                <p className="text-sm text-red-700 dark:text-red-300 font-medium">
+                  Warning: This will permanently delete all metrics, logs, and traces from your account.
+                </p>
+              </div>
+              <div className="space-y-2">
+                <Label>Type DELETE to confirm</Label>
+                <Input placeholder="DELETE" />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowClearDataDialog(false)}>Cancel</Button>
+              <Button variant="destructive" onClick={handleClearData}>
+                Clear All Data
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Reset Config Confirmation Dialog */}
+        <Dialog open={showResetConfigDialog} onOpenChange={setShowResetConfigDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-600">
+                <Trash2 className="w-5 h-5" />
+                Reset Configuration
+              </DialogTitle>
+              <DialogDescription>
+                This will reset all settings to their default values
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                <p className="text-sm text-red-700 dark:text-red-300">
+                  This will reset:
+                </p>
+                <ul className="text-sm text-red-700 dark:text-red-300 list-disc list-inside mt-2">
+                  <li>All dashboard settings</li>
+                  <li>Alert configurations</li>
+                  <li>Integration settings</li>
+                  <li>User preferences</li>
+                </ul>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowResetConfigDialog(false)}>Cancel</Button>
+              <Button variant="destructive" onClick={handleResetConfig}>
+                Reset Configuration
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Manage API Keys Dialog */}
+        <Dialog open={showManageKeysDialog} onOpenChange={setShowManageKeysDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Shield className="w-5 h-5 text-green-600" />
+                Manage API Keys
+              </DialogTitle>
+              <DialogDescription>
+                Create and manage API access tokens
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div>
+                    <p className="font-medium text-gray-900 dark:text-white">Production API Key</p>
+                    <p className="text-xs text-gray-500">Created Dec 15, 2024</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge className="bg-green-100 text-green-700">Active</Badge>
+                    <Button variant="ghost" size="sm" onClick={() => toast.info('Key copied to clipboard')}>
+                      Copy
+                    </Button>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div>
+                    <p className="font-medium text-gray-900 dark:text-white">Development API Key</p>
+                    <p className="text-xs text-gray-500">Created Dec 10, 2024</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge className="bg-green-100 text-green-700">Active</Badge>
+                    <Button variant="ghost" size="sm" onClick={() => toast.info('Key copied to clipboard')}>
+                      Copy
+                    </Button>
+                  </div>
+                </div>
+              </div>
+              <Button variant="outline" className="w-full" onClick={() => toast.success('New API key generated')}>
+                <Plus className="w-4 h-4 mr-2" />
+                Generate New Key
+              </Button>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowManageKeysDialog(false)}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Settings Dialog */}
+        <Dialog open={showSettingsDialog} onOpenChange={setShowSettingsDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Settings className="w-5 h-5 text-gray-600" />
+                Integration Settings
+              </DialogTitle>
+              <DialogDescription>
+                Configure integration options
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="flex items-center justify-between py-2">
+                <div>
+                  <p className="font-medium text-gray-900 dark:text-white">Auto-sync</p>
+                  <p className="text-sm text-gray-500">Automatically sync data</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+              <div className="flex items-center justify-between py-2">
+                <div>
+                  <p className="font-medium text-gray-900 dark:text-white">Sync Interval</p>
+                  <p className="text-sm text-gray-500">How often to fetch data</p>
+                </div>
+                <Select defaultValue="5m">
+                  <SelectTrigger className="w-24">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1m">1 min</SelectItem>
+                    <SelectItem value="5m">5 min</SelectItem>
+                    <SelectItem value="15m">15 min</SelectItem>
+                    <SelectItem value="1h">1 hour</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex items-center justify-between py-2">
+                <div>
+                  <p className="font-medium text-gray-900 dark:text-white">Error Alerts</p>
+                  <p className="text-sm text-gray-500">Notify on sync errors</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowSettingsDialog(false)}>Cancel</Button>
+              <Button onClick={() => { setShowSettingsDialog(false); toast.success('Settings saved'); }}>
+                Save Changes
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Alert Dialog (for viewing all alerts) */}
+        <Dialog open={showAlertDialog} onOpenChange={setShowAlertDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Bell className="w-5 h-5 text-red-600" />
+                Active Alerts ({firingAlerts})
+              </DialogTitle>
+              <DialogDescription>
+                Alerts requiring your attention
+              </DialogDescription>
+            </DialogHeader>
+            <ScrollArea className="max-h-[400px]">
+              <div className="space-y-3 py-4">
+                {mockAlerts.filter(a => a.status === 'firing' || a.status === 'acknowledged').map((alert) => (
+                  <div key={alert.id} className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <span className={`px-2 py-1 rounded text-xs font-medium ${severityColors[alert.severity]}`}>
+                          {alert.severity}
+                        </span>
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">{alert.name}</p>
+                          <p className="text-sm text-gray-500">{alert.metric} {alert.condition}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className={`px-2 py-1 rounded text-xs font-medium ${statusColors[alert.status]}`}>
+                          {alert.status}
+                        </span>
+                        {alert.status === 'firing' && (
+                          <Button size="sm" onClick={() => handleAcknowledgeAlert(alert.id)}>
+                            Acknowledge
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowAlertDialog(false)}>Close</Button>
+              <Button onClick={() => { setShowAlertDialog(false); setActiveTab('alerts'); }}>
+                View All Alerts
               </Button>
             </DialogFooter>
           </DialogContent>
