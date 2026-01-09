@@ -2523,7 +2523,7 @@ export default function ApiClient() {
             <div className="space-y-4 py-4">
               <div className="flex items-center gap-2 mb-4">
                 <Input placeholder="Search documentation..." className="flex-1" />
-                <Button variant="outline" size="icon" onClick={() => toast.success('Searching documentation...')}>
+                <Button variant="outline" size="icon" onClick={() => { /* TODO: Implement documentation search */ }}>
                   <Search className="w-4 h-4" />
                 </Button>
               </div>
@@ -2656,7 +2656,7 @@ export default function ApiClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowRevokeKeyDialog(false)}>Cancel</Button>
-              <Button variant="destructive" onClick={() => { setShowRevokeKeyDialog(false); toast.success('API key revoked'); }}>
+              <Button variant="destructive" onClick={() => { if (confirm('Are you sure you want to revoke this API key? This action cannot be undone.')) { setShowRevokeKeyDialog(false); /* TODO: Implement API key revocation */ } }}>
                 <Lock className="w-4 h-4 mr-2" />
                 Revoke Key
               </Button>
@@ -2953,7 +2953,7 @@ export default function ApiClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowHistoryDialog(false)}>Close</Button>
-              <Button variant="destructive" onClick={() => { toast.success('History cleared'); }}>
+              <Button variant="destructive" onClick={() => { if (confirm('Are you sure you want to clear all request history? This action cannot be undone.')) { /* TODO: Implement history clearing */ } }}>
                 <Trash2 className="w-4 h-4 mr-2" />
                 Clear History
               </Button>
@@ -3117,7 +3117,7 @@ export default function ApiClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowUsageLogDialog(false)}>Close</Button>
-              <Button onClick={() => { toast.success('Usage report exported'); }}>
+              <Button onClick={() => { /* TODO: Implement usage report export */ }}>
                 <Download className="w-4 h-4 mr-2" />
                 Export Report
               </Button>
@@ -3853,7 +3853,7 @@ echo $response;
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowClearHistoryDialog(false)}>Cancel</Button>
-              <Button variant="destructive" onClick={() => { setShowClearHistoryDialog(false); toast.success('History cleared'); }}>
+              <Button variant="destructive" onClick={() => { if (confirm('Are you sure you want to clear history? This action cannot be undone.')) { setShowClearHistoryDialog(false); /* TODO: Implement history clearing */ } }}>
                 <Trash2 className="w-4 h-4 mr-2" /> Clear History
               </Button>
             </DialogFooter>
@@ -4240,7 +4240,7 @@ echo $response;
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowMonitorAnalyticsDialog(false)}>Close</Button>
-              <Button onClick={() => { toast.success('Analytics report exported'); }}>
+              <Button onClick={() => { /* TODO: Implement analytics report export */ }}>
                 <Download className="w-4 h-4 mr-2" /> Export Report
               </Button>
             </DialogFooter>
@@ -4274,7 +4274,7 @@ echo $response;
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowSslCheckDialog(false)}>Close</Button>
-              <Button onClick={() => { toast.success('SSL settings saved'); setShowSslCheckDialog(false); }}>Save Settings</Button>
+              <Button onClick={() => { /* TODO: Implement SSL settings save */ setShowSslCheckDialog(false); }}>Save Settings</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -4477,7 +4477,7 @@ echo $response;
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowWebhookLogsDialog(false)}>Close</Button>
-              <Button onClick={() => { toast.success('Logs exported'); }}>
+              <Button onClick={() => { /* TODO: Implement webhook logs export */ }}>
                 <Download className="w-4 h-4 mr-2" /> Export Logs
               </Button>
             </DialogFooter>
@@ -4499,7 +4499,7 @@ echo $response;
                 <div key={w.id} className="p-3 border rounded-lg">
                   <div className="flex items-center justify-between mb-2">
                     <span className="font-medium">{w.name}</span>
-                    <Button size="sm" variant="outline" onClick={() => toast.success('New secret generated')}>Regenerate</Button>
+                    <Button size="sm" variant="outline" onClick={() => { if (confirm('Are you sure you want to regenerate this secret? This will invalidate existing signatures.')) { /* TODO: Implement secret regeneration */ } }}>Regenerate</Button>
                   </div>
                   <code className="text-sm font-mono bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">whsec_••••••••••••</code>
                 </div>
@@ -4785,7 +4785,7 @@ echo $response;
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowCoverageDialog(false)}>Close</Button>
-              <Button onClick={() => { toast.success('Coverage report exported'); }}>
+              <Button onClick={() => { /* TODO: Implement coverage report export */ }}>
                 <Download className="w-4 h-4 mr-2" /> Export Report
               </Button>
             </DialogFooter>
@@ -4882,7 +4882,7 @@ echo $response;
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowTestReportsDialog(false)}>Close</Button>
-              <Button onClick={() => { toast.success('Report exported'); }}>
+              <Button onClick={() => { /* TODO: Implement test report export */ }}>
                 <Download className="w-4 h-4 mr-2" /> Export Report
               </Button>
             </DialogFooter>
@@ -5398,7 +5398,7 @@ echo $response;
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowTryEndpointDialog(false)}>Close</Button>
-              <Button onClick={() => { toast.success('Request sent', { description: 'Response: 200 OK' }); }}>
+              <Button onClick={() => { /* TODO: Implement API request sending */ }}>
                 <Send className="w-4 h-4 mr-2" /> Send
               </Button>
             </DialogFooter>

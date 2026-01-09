@@ -509,54 +509,74 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
   )
 
   // Handlers
-  const handleCreateTutorial = () => toast.info('Create', { description: 'Opening editor...' })
-  const handlePublishTutorial = (n: string) => toast.success('Published', { description: `"${n}" is live` })
-  const handleStartTutorial = (n: string) => toast.info('Starting', { description: `Loading "${n}"...` })
-  const handleCompleteTutorial = (n: string) => toast.success('Completed', { description: `Finished "${n}"!` })
+  const handleCreateTutorial = () => {
+    /* TODO: Implement create tutorial - open tutorial editor/creator */
+  }
+  const handlePublishTutorial = (n: string) => {
+    /* TODO: Implement publish tutorial API call for "${n}" */
+  }
+  const handleStartTutorial = (n: string) => {
+    /* TODO: Implement start tutorial - navigate to tutorial player for "${n}" */
+  }
+  const handleCompleteTutorial = (n: string) => {
+    /* TODO: Implement complete tutorial - mark "${n}" as completed in database */
+  }
   const handleMyList = () => {
-    toast.info('My List', { description: 'Opening your saved courses...' })
+    /* TODO: Implement my list - navigate to saved courses page or open modal */
   }
   const handleQuickAction = (actionLabel: string) => {
-    toast.success(actionLabel, { description: 'Action completed successfully' })
+    /* TODO: Implement quick action handler for "${actionLabel}" */
   }
   const handleMarkAllRead = () => {
-    toast.success('Notifications', { description: 'All notifications marked as read' })
+    /* TODO: Implement mark all notifications as read API call */
   }
   const handleChangePhoto = () => {
-    toast.info('Change Photo', { description: 'Opening photo upload dialog...' })
+    /* TODO: Implement change photo - open file picker and upload photo */
   }
   const handleUpgradePlan = (planName: string) => {
-    toast.info('Upgrade Plan', { description: `Upgrading to ${planName} plan...` })
+    /* TODO: Implement upgrade plan - navigate to checkout for ${planName} */
   }
   const handleAddPaymentMethod = () => {
-    toast.info('Add Payment', { description: 'Opening payment method form...' })
+    /* TODO: Implement add payment method - open Stripe payment form */
   }
   const handleConnectService = (serviceName: string) => {
-    toast.info('Connect Service', { description: `Connecting to ${serviceName}...` })
+    /* TODO: Implement connect service - OAuth flow for ${serviceName} */
   }
   const handleCopyApiKey = () => {
-    toast.success('Copied', { description: 'API key copied to clipboard' })
+    navigator.clipboard.writeText('learn_xxxxxxxxxxxxxxxx').then(() => {
+      toast.success('Copied', { description: 'API key copied to clipboard' })
+    }).catch(() => {
+      toast.error('Failed', { description: 'Could not copy to clipboard' })
+    })
   }
   const handleRegenerateApiKey = () => {
-    toast.warning('Regenerate API Key', { description: 'Generating new API key...' })
+    if (confirm('Are you sure you want to regenerate your API key? This will invalidate your current key.')) {
+      /* TODO: Implement regenerate API key - call API to generate new key */
+    }
   }
   const handleDownloadData = () => {
-    toast.info('Download Data', { description: 'Preparing your data export...' })
+    /* TODO: Implement download data - trigger data export and download */
   }
   const handleClearHistory = () => {
-    toast.success('History Cleared', { description: 'Watch history has been cleared' })
+    if (confirm('Are you sure you want to clear your watch history? This action cannot be undone.')) {
+      /* TODO: Implement clear history - call API to clear watch history */
+    }
   }
   const handleResetProgress = () => {
-    toast.warning('Reset Progress', { description: 'Resetting all course progress...' })
+    if (confirm('Are you sure you want to reset all your course progress? This action cannot be undone.')) {
+      /* TODO: Implement reset progress - call API to reset all course progress */
+    }
   }
   const handleDeleteAccount = () => {
-    toast.error('Delete Account', { description: 'Please confirm account deletion' })
+    if (confirm('Are you sure you want to delete your account? This action is permanent and cannot be undone. All your data will be lost.')) {
+      /* TODO: Implement delete account - call API to delete user account */
+    }
   }
   const handleEnrollCourse = (courseName: string) => {
-    toast.success('Enrolled', { description: `Successfully enrolled in "${courseName}"` })
+    /* TODO: Implement enroll course - call API to enroll in "${courseName}" */
   }
   const handleCreateGoal = () => {
-    toast.success('Goal Created', { description: 'Your learning goal has been set' })
+    /* TODO: Implement create goal - validate form and save goal to database */
     setShowGoalDialog(false)
   }
 
@@ -1053,7 +1073,7 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
                         <p className="text-sm text-gray-500">{notification.message}</p>
                         <p className="text-xs text-gray-400 mt-1">{notification.createdAt}</p>
                       </div>
-                      <Button variant="ghost" size="icon" onClick={() => toast.success('Options', { description: 'Notification options ready' })}><MoreHorizontal className="w-4 h-4" /></Button>
+                      <Button variant="ghost" size="icon" onClick={() => { /* TODO: Implement notification options - show dropdown menu with mark as read, delete, etc. */ }}><MoreHorizontal className="w-4 h-4" /></Button>
                     </div>
                   ))}
                 </div>
@@ -1982,7 +2002,7 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowNewCourseDialog(false)}>Cancel</Button>
             <Button className="bg-rose-600 hover:bg-rose-700" onClick={() => {
-              toast.success('Course Created', { description: 'Your new course has been created. Start adding content!' })
+              /* TODO: Implement create course - validate form and call API to create course */
               setShowNewCourseDialog(false)
             }}>Create Course</Button>
           </DialogFooter>
@@ -2029,7 +2049,7 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowUploadDialog(false)}>Cancel</Button>
             <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => {
-              toast.success('Upload Started', { description: 'Your files are being uploaded in the background.' })
+              /* TODO: Implement file upload - upload selected files to storage and track progress */
               setShowUploadDialog(false)
             }}>Upload</Button>
           </DialogFooter>
@@ -2100,7 +2120,7 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowAnalyticsDialog(false)}>Close</Button>
             <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => {
-              toast.info('Full Report', { description: 'Opening detailed analytics dashboard...' })
+              /* TODO: Implement view full report - navigate to detailed analytics dashboard */
             }}>View Full Report</Button>
           </DialogFooter>
         </DialogContent>

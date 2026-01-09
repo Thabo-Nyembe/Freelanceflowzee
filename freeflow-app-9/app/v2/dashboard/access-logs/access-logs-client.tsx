@@ -1732,7 +1732,7 @@ export default function AccessLogsClient() {
                     <Bookmark className="w-5 h-5 text-purple-500" />
                     Saved Views
                   </div>
-                  <Button size="sm" onClick={() => toast.success('View saved successfully')}>Save Current View</Button>
+                  <Button size="sm" onClick={() => { /* TODO: Implement save current view functionality */ setShowSaveViewDialog(true) }}>Save Current View</Button>
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -2956,7 +2956,7 @@ export default function AccessLogsClient() {
           </div>
           <div className="flex justify-end gap-3 pt-4 border-t">
             <Button variant="outline" onClick={handleClearFilters}>Clear All</Button>
-            <Button onClick={() => { setShowFilterDialog(false); toast.success('Filters applied') }} className="bg-gradient-to-r from-purple-500 to-pink-600 text-white">
+            <Button onClick={() => { /* TODO: Implement apply filters functionality */ setShowFilterDialog(false) }} className="bg-gradient-to-r from-purple-500 to-pink-600 text-white">
               Apply Filters
             </Button>
           </div>
@@ -3081,14 +3081,14 @@ export default function AccessLogsClient() {
                 </div>
               ))}
             </div>
-            <Button variant="outline" className="w-full" onClick={() => toast.info('Add custom field', { description: 'Feature coming soon' })}>
+            <Button variant="outline" className="w-full" onClick={() => { /* TODO: Implement add custom field functionality */ }}>
               <Tag className="w-4 h-4 mr-2" />
               Add Custom Field
             </Button>
           </div>
           <div className="flex justify-end gap-3 pt-4 border-t">
             <Button variant="outline" onClick={() => setShowCustomFieldsDialog(false)}>Cancel</Button>
-            <Button onClick={() => { setShowCustomFieldsDialog(false); toast.success('Custom fields saved') }} className="bg-gradient-to-r from-purple-500 to-pink-600 text-white">
+            <Button onClick={() => { /* TODO: Implement save custom fields functionality */ setShowCustomFieldsDialog(false) }} className="bg-gradient-to-r from-purple-500 to-pink-600 text-white">
               Save Changes
             </Button>
           </div>

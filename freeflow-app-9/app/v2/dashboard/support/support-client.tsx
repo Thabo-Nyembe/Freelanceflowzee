@@ -2674,7 +2674,7 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
                 <p className="text-sm text-gray-600 dark:text-gray-400">
                   Configure automatic actions based on ticket properties
                 </p>
-                <Button variant="outline" size="sm" onClick={() => toast.success('New automation rule dialog opened')}>
+                <Button variant="outline" size="sm" onClick={() => { /* TODO: Implement add automation rule dialog */ }}>
                   <Plus className="w-4 h-4 mr-2" />
                   Add Rule
                 </Button>

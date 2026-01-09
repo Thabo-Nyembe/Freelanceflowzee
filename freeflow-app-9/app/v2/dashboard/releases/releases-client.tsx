@@ -2361,7 +2361,11 @@ export default function ReleasesClient() {
                             <p className="font-medium text-red-700 dark:text-red-400">Reset All Settings</p>
                             <p className="text-sm text-red-600">This will reset all release configurations</p>
                           </div>
-                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-100" onClick={() => toast.warning('Reset Settings', { description: 'This action cannot be undone. Please contact admin to proceed.' })}>
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-100" onClick={() => {
+                              if (confirm('Are you sure you want to reset all settings? This action cannot be undone.')) {
+                                /* TODO: Implement reset settings functionality */
+                              }
+                            }}>
                             Reset
                           </Button>
                         </div>
@@ -2569,7 +2573,7 @@ export default function ReleasesClient() {
                   <Button
                     variant="outline"
                     onClick={() => {
-                      toast.info('Opening Git', { description: 'Redirecting to repository...' })
+                      /* TODO: Implement view on Git functionality - open repository URL in new tab */
                     }}
                   >
                     <ExternalLink className="w-4 h-4 mr-2" />
@@ -3114,7 +3118,7 @@ export default function ReleasesClient() {
             </Button>
             <Button
               onClick={() => {
-                toast.success('Changelog Exported', { description: 'Changelog exported to markdown' })
+                /* TODO: Implement changelog export functionality - generate and download markdown file */
                 setShowExportChangelogDialog(false)
               }}
               className="bg-indigo-600 text-white hover:bg-indigo-700"
