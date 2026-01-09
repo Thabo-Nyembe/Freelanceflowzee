@@ -804,7 +804,6 @@ export default function SEOClient({ initialKeywords, initialBacklinks }: SEOClie
     if (!selectedKeyword) return;
     const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(selectedKeyword.keyword)}`;
     window.open(searchUrl, '_blank');
-    toast.success('SERP view opened in new tab');
   };
 
   const handleImplementInsight = async (title: string) => {

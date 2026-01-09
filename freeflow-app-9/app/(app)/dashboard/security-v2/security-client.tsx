@@ -2187,7 +2187,6 @@ export default function SecurityClient() {
                       </div>
                       <Button variant="ghost" size="icon" onClick={() => {
                         window.open(`https://${selectedItem.website}`, '_blank')
-                        toast.success('Website opened in new tab')
                       }}>
                         <ExternalLink className="w-4 h-4" />
                       </Button>

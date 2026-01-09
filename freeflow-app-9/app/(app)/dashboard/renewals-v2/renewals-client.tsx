@@ -618,7 +618,6 @@ export default function RenewalsClient({ initialRenewals }: RenewalsClientProps)
   // Quick actions with real functionality
   const handleNewRenewal = () => {
     setIsNewRenewalDialogOpen(true)
-    toast.success('New Renewal form ready!')
   }
 
   const handleRunPlaybook = async () => {

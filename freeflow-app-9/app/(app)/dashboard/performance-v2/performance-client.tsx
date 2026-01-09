@@ -738,9 +738,6 @@ export default function PerformanceClient() {
 
     // Navigate to history tab which shows comparison data
     setActiveTab('history')
-    toast.success('Comparison view ready!', {
-      description: 'Comparing latest test results in History tab'
-    })
   }
 
   // Add performance budget

@@ -845,7 +845,6 @@ export default function ResourcesClient() {
   const handleScheduleResource = (resourceName: string) => {
     // Open schedule tab with the resource selected
     setActiveTab('schedule')
-    toast.success(`Schedule view opened for ${resourceName}`)
   }
 
   // Settings form state

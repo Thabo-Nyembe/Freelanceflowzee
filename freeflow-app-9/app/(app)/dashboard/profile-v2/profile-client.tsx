@@ -1255,7 +1255,6 @@ export default function ProfileClient() {
               {displayProfile.coverStory && (
                 <Button size="sm" variant="secondary" className="absolute bottom-2 right-2" onClick={() => {
                   window.open(displayProfile.coverStory!, '_blank')
-                  toast.success('Cover story opened in new tab')
                 }}>
                   <Play className="w-3 h-3 mr-1" />
                   Cover Story

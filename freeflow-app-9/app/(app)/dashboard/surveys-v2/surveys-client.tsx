@@ -3335,10 +3335,8 @@ export default function SurveysClient() {
               </Button>
               <Button
                 onClick={() => {
-                  toast.success('Logic Flow Builder opened!', {
-                    description: 'Select questions to add conditional logic'
-                  })
                   setShowLogicFlowDialog(false)
+                  // TODO: Implement logic flow builder
                 }}
                 className="bg-gradient-to-r from-yellow-500 to-orange-600 text-white"
               >

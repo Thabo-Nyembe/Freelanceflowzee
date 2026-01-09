@@ -1006,7 +1006,7 @@ export default function TestingClient() {
                 { icon: RefreshCw, label: 'Refresh', color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30', onClick: fetchTests },
                 { icon: Plus, label: 'New Test', color: 'text-indigo-600 bg-indigo-100 dark:bg-indigo-900/30', onClick: () => setShowCreateDialog(true) },
                 { icon: BarChart3, label: 'Analytics', color: 'text-cyan-600 bg-cyan-100 dark:bg-cyan-900/30', onClick: () => setActiveTab('coverage') },
-                { icon: Archive, label: 'Archive', color: 'text-gray-600 bg-gray-100 dark:bg-gray-700', onClick: () => { setActiveTab('archive'); toast.success('Archive opened'); } },
+                { icon: Archive, label: 'Archive', color: 'text-gray-600 bg-gray-100 dark:bg-gray-700', onClick: () => setActiveTab('archive') },
               ].map((action, i) => (
                 <button
                   key={i}
