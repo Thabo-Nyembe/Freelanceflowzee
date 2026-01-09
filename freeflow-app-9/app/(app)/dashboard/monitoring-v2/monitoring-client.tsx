@@ -2668,7 +2668,7 @@ export default function MonitoringClient() {
             </div>
             <div className="flex justify-end gap-3">
               <Button variant="outline" onClick={() => setShowMetricsExplorerDialog(false)}>Close</Button>
-              <Button onClick={() => toast.success('Metrics exported to CSV')}>
+              <Button onClick={() => { /* TODO: Implement metrics export */ }}>
                 Export Data
               </Button>
             </div>

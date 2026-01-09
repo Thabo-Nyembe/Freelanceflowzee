@@ -3239,11 +3239,11 @@ export default function SurveysClient() {
                     </div>
                   </div>
                   <div className="flex gap-2">
-                    <Button variant="outline" className="flex-1" onClick={() => toast.success('QR code downloaded!')}>
+                    <Button variant="outline" className="flex-1" onClick={() => { /* TODO: Implement QR code download */ }}>
                       <Download className="w-4 h-4 mr-2" />
                       Download PNG
                     </Button>
-                    <Button variant="outline" className="flex-1" onClick={() => toast.success('QR code copied!')}>
+                    <Button variant="outline" className="flex-1" onClick={() => { /* TODO: Implement QR code copy */ }}>
                       <Copy className="w-4 h-4 mr-2" />
                       Copy to Clipboard
                     </Button>

@@ -2451,7 +2451,7 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
                     {RUN_LOGS.filter(r => r.status === 'running').length} Running
                   </Badge>
                 </div>
-                <Button size="sm" variant="ghost" onClick={() => toast.success('History refreshed')}>
+                <Button size="sm" variant="ghost" onClick={() => { /* TODO: Implement history refresh */ }}>
                   <RefreshCw className="h-4 w-4" />
                 </Button>
               </div>

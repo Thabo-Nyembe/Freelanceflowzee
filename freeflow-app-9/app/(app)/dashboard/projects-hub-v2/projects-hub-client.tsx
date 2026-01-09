@@ -1263,7 +1263,7 @@ export default function ProjectsHubClient() {
                               </div>
                               <div className="flex items-center gap-2">
                                 <Badge className="bg-green-100 text-green-700">{webhook.status}</Badge>
-                                <Button variant="ghost" size="sm" onClick={() => toast.success(`Webhook ${webhook.url.slice(0, 30)}... deleted`)}>
+                                <Button variant="ghost" size="sm" onClick={() => { if (confirm('Delete this webhook?')) { /* TODO: Implement webhook deletion */ } }}>
                                   <Trash2 className="h-4 w-4" />
                                 </Button>
                               </div>
@@ -1430,7 +1430,7 @@ export default function ProjectsHubClient() {
                               <Button variant="ghost" size="sm" onClick={() => { setSelectedCustomField(field); setCustomFieldForm({ name: field.name, type: field.type, required: field.required, appliesTo: field.appliesTo }); setShowCustomFieldDialog(true) }}>
                                 <Edit className="h-4 w-4" />
                               </Button>
-                              <Button variant="ghost" size="sm" onClick={() => toast.success(`Custom field "${field.name}" deleted`)}>
+                              <Button variant="ghost" size="sm" onClick={() => { if (confirm(`Delete custom field "${field.name}"?`)) { /* TODO: Implement custom field deletion */ } }}>
                                 <Trash2 className="h-4 w-4 text-red-500" />
                               </Button>
                             </div>

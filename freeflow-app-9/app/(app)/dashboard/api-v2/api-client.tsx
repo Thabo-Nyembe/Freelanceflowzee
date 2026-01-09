@@ -1420,7 +1420,7 @@ export default function ApiClient() {
                         ))}
                       </div>
                       <div className="flex gap-2">
-                        <Button variant="outline" size="sm" onClick={() => toast.info('Edit API Key', { description: 'Navigate to Settings tab to update key name, scopes and expiration' })}>Edit</Button>
+                        <Button variant="outline" size="sm" onClick={() => { /* TODO: Implement API key editor dialog */ }}>Edit</Button>
                         <Button variant="outline" size="sm" className="text-red-600" onClick={() => handleRevokeApiKey(key.id, key.name)}>Revoke</Button>
                       </div>
                     </div>

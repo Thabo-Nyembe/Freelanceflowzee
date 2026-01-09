@@ -2265,7 +2265,7 @@ export default function CustomerSuccessClient() {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => toast.info(`Pausing ${enrollment.customer}'s enrollment`)}
+                            onClick={() => { /* TODO: Implement enrollment pause */ }}
                           >
                             Pause
                           </Button>
@@ -2286,7 +2286,7 @@ export default function CustomerSuccessClient() {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => toast.success(`Re-enrolling ${enrollment.customer} in ${enrollment.playbook}`)}
+                          onClick={() => { /* TODO: Implement customer re-enrollment */ }}
                         >
                           Re-enroll
                         </Button>

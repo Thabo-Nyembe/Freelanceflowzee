@@ -2989,7 +2989,7 @@ export default function ContentStudioClient() {
                   {['featured', 'announcement', 'product', 'blog'].map(tag => (
                     <Badge key={tag} variant="secondary" className="px-3 py-1">
                       {tag}
-                      <button className="ml-2 text-gray-500 hover:text-gray-700" onClick={() => toast.success(`Removed tag: ${tag}`)}>x</button>
+                      <button className="ml-2 text-gray-500 hover:text-gray-700" onClick={() => { /* TODO: Implement tag removal */ }}>x</button>
                     </Badge>
                   ))}
                 </div>
@@ -2998,7 +2998,7 @@ export default function ContentStudioClient() {
                 <Label htmlFor="new-tag">Add New Tag</Label>
                 <div className="flex gap-2">
                   <Input id="new-tag" placeholder="Enter tag name" />
-                  <Button onClick={() => toast.success('Tag added')}>Add</Button>
+                  <Button onClick={() => { /* TODO: Implement tag addition */ }}>Add</Button>
                 </div>
               </div>
             </div>

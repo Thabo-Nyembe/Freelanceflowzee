@@ -2824,7 +2824,7 @@ export default function SocialMediaClient() {
               </div>
             </ScrollArea>
             <div className="flex gap-2 pt-4 border-t">
-              <Button variant="outline" className="flex-1" onClick={() => toast.success('All notifications marked as read')}>
+              <Button variant="outline" className="flex-1" onClick={() => { /* TODO: Implement mark all as read */ }}>
                 Mark All Read
               </Button>
               <Button variant="outline" className="flex-1" onClick={() => setIsNotificationsOpen(false)}>

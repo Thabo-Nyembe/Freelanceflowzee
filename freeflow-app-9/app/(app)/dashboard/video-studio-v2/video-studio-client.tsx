@@ -1962,7 +1962,7 @@ export default function VideoStudioClient() {
                             <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => toast.success(`Editing preset: ${preset.name}`)}
+                            onClick={() => { /* TODO: Implement preset editor dialog */ }}
                           >
                             Edit
                           </Button>

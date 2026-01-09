@@ -2461,7 +2461,7 @@ export default function LearningClient() {
                     <p className="text-xs text-gray-500">Earned {cert.date} - Score: {cert.score}</p>
                   </div>
                 </div>
-                <Button variant="outline" size="sm" onClick={() => toast.success('Downloading certificate...')}>
+                <Button variant="outline" size="sm" onClick={() => { /* TODO: Implement certificate download */ }}>
                   <Download className="w-4 h-4" />
                 </Button>
               </div>

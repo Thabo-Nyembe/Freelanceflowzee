@@ -2320,7 +2320,7 @@ export default function MaintenanceClient() {
                                 <p className="text-sm text-gray-500">3.2 GB used of 10 GB</p>
                               </div>
                             </div>
-                            <Button variant="outline" size="sm" onClick={() => toast.info('Storage management coming soon')}>Manage</Button>
+                            <Button variant="outline" size="sm" onClick={() => { /* TODO: Implement storage management */ }}>Manage</Button>
                           </div>
                         </CardContent>
                       </Card>

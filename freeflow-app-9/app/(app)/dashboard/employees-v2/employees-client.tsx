@@ -2293,7 +2293,7 @@ export default function EmployeesClient() {
                 <div className="space-y-2 mt-2">
                   <Input placeholder="Key Result 1" />
                   <Input placeholder="Key Result 2" />
-                  <Button variant="outline" size="sm" className="w-full" onClick={() => toast.success('Key result field added')}><Plus className="h-4 w-4 mr-2" />Add Key Result</Button>
+                  <Button variant="outline" size="sm" className="w-full" onClick={() => { /* TODO: Implement key result addition */ }}><Plus className="h-4 w-4 mr-2" />Add Key Result</Button>
                 </div>
               </div>
             </div>

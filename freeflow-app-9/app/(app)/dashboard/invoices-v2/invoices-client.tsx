@@ -831,7 +831,7 @@ Terms: ${invoice.terms_and_conditions || 'N/A'}
                   <option value="30days">Last 30 Days</option>
                   <option value="90days">Last 90 Days</option>
                 </select>
-                <Button variant="outline" size="icon" onClick={() => toast.info('Filter options', { description: `Showing ${filteredInvoices.length} of ${displayInvoices.length} invoices` })}>
+                <Button variant="outline" size="icon" onClick={() => { /* TODO: Implement filter dropdown */ }}>
                   <Filter className="h-4 w-4" />
                 </Button>
               </div>
