@@ -241,3 +241,173 @@ Today's session added button functionality to **65 more files** with approximate
 21. **Batch 21:** expenses-v2, kazi-automations-v2, kazi-workflows-v2, logistics-v2
 22. **Batch 21:** maintenance-v2, performance-analytics-v2, renewals-v2
 23. **Batch 22:** badges-v2, bugs-v2, desktop-app-v2, milestones-v2, subscriptions-v2, webhooks-v2
+
+---
+
+## Remaining Work Audit (2026-01-09)
+
+### Executive Summary
+
+| Category | Files | Priority |
+|----------|-------|----------|
+| **App V2 Dashboard** (`app/(app)/dashboard/*-v2`) | **82** | HIGH |
+| **V2 Dashboard** (`app/v2/dashboard`) | **60** | HIGH |
+| **V1 Dashboard** (`app/v1/dashboard`) | **24** | LOW |
+| **Other App Dashboard** | **8** | MEDIUM |
+| **Components** (console.log) | **31** | LOW |
+| **TOTAL UNIQUE FILES** | **~150** | - |
+
+---
+
+### TOP PRIORITY FILES (10+ patterns each)
+
+| File | Count | Issue |
+|------|-------|-------|
+| workflow-builder-v2/workflow-builder-client.tsx | **25** | toast "opened/ready" |
+| messages-v2/messages-client.tsx | **21** | toast "opened/ready" |
+| plugins-v2/plugins-client.tsx | **15** | toast "opened/ready" |
+| email-marketing-v2/email-marketing-client.tsx | **12** | toast "opened/ready" |
+| notifications-v2/notifications-client.tsx | **10** | toast "opened/ready" |
+
+---
+
+### MEDIUM PRIORITY FILES (5-9 patterns each)
+
+| File | Count |
+|------|-------|
+| community-hub/page.tsx | 9 |
+| activity-logs-v2/activity-logs-client.tsx | 8 |
+| plugins/plugins-client.tsx (v2) | 8 |
+| theme-store/theme-store-client.tsx | 7 |
+| motion-graphics/motion-graphics-client.tsx | 7 |
+| registrations-v2/registrations-client.tsx | 7 |
+| financial-v2/financial-client.tsx | 7 |
+| marketplace/marketplace-client.tsx | 6 |
+| community/community-client.tsx | 6 |
+| time-tracking-v2/time-tracking-client.tsx | 6 |
+| invoices-v2/invoices-client.tsx | 6 |
+| community-v2/community-client.tsx | 6 |
+
+---
+
+### V2 Dashboard Files (60 total)
+
+1. 3d-modeling, access-logs, advanced-micro-features, ai-assistant, ai-design
+2. ai-voice-synthesis, alerts, analytics, automations, broadcasts
+3. budgets, ci-cd, client-zone, code-repository, collaboration
+4. community, connectors, custom-reports, customer-support, customers
+5. data-export, deployments, escrow, events, extensions
+6. files-hub, gallery, growth-hub, health-score, invoicing
+7. lead-generation, marketing, marketplace, media-library, mobile-app
+8. motion-graphics, permissions, plugins, polls, projects-hub
+9. projects, qa, recruitment, referrals, registrations
+10. release-notes, resource-library, sales, security-audit, shipping
+11. support, team-hub, testing, theme-store, third-party-integrations
+12. time-tracking, training, tutorials, vulnerability-scan, webinars
+
+---
+
+### App Dashboard V2 Files (82 total)
+
+activity-logs-v2, ai-assistant-v2, ai-create-v2, ai-design-v2, allocation-v2,
+analytics-v2, api-keys-v2, api-v2, app-store-v2, audio-studio-v2,
+audit-v2, backups-v2, bookings-v2, broadcasts-v2, budgets-v2,
+bugs-v2, calendar-v2, campaigns-v2, canvas-v2, capacity-v2,
+collaboration-v2, community-v2, component-library-v2, content-studio-v2, contracts-v2,
+courses-v2, customers-v2, data-export-v2, deployments-v2, desktop-app-v2,
+docs-v2, documents-v2, email-marketing-v2, employees-v2, escrow-v2,
+expenses-v2, files-hub-v2, financial-v2, growth-hub-v2, help-docs-v2,
+integrations-v2, inventory-v2, invoices-v2, invoicing-v2, knowledge-articles-v2,
+knowledge-base-v2, logistics-v2, logs-v2, marketplace-v2, messages-v2,
+mobile-app-v2, notifications-v2, orders-v2, performance-v2, permissions-v2,
+plugins-v2, polls-v2, pricing-v2, profile-v2, qa-v2,
+recruitment-v2, registrations-v2, renewals-v2, reporting-v2, resources-v2,
+sales-v2, security-audit-v2, security-v2, seo-v2, shipping-v2,
+support-v2, surveys-v2, team-hub-v2, testing-v2, theme-store-v2,
+time-tracking-v2, training-v2, user-management-v2, video-studio-v2, webhooks-v2,
+webinars-v2, workflow-builder-v2
+
+---
+
+### V1 Dashboard Files (24 total)
+
+1. advanced-micro-features/page.tsx
+2. ai-assistant/page.tsx
+3. ai-design/page.tsx
+4. audio-studio/page.tsx
+5. bookings/clients/page.tsx
+6. client-zone/files/page.tsx
+7. client-zone/layout.tsx
+8. client-zone/page.tsx
+9. client-zone/referrals/page.tsx
+10. client-zone/settings/page.tsx
+11. clients/page.tsx
+12. collaboration/page.tsx
+13. collaboration/teams/page.tsx
+14. community-hub/page.tsx
+15. cv-portfolio/page.tsx
+16. email-marketing/page.tsx
+17. files/page.tsx
+18. referrals/page.tsx
+19. settings/page.tsx
+20. time-tracking/page.tsx
+21. upgrades-showcase/upgrades-showcase-client.tsx
+22. user-management/page.tsx
+23. video-studio/page.tsx
+24. workflow-builder/page.tsx
+
+---
+
+### Component Files (31 with console.log)
+
+| File | Type |
+|------|------|
+| components/ui/enhanced-search.tsx | UI |
+| components/navigation/sidebar-enhanced.tsx | Navigation |
+| components/navigation/sidebar.tsx | Navigation |
+| components/ai/pricing-intelligence.tsx | AI |
+| components/ai/project-intelligence.tsx | AI |
+| components/onboarding/interactive-onboarding-system.tsx | Onboarding |
+| components/communication/presence-status-system.tsx | Communication |
+| components/communication/notification-center.tsx | Communication |
+| components/ai/ai-create-enhanced.tsx | AI |
+| components/hubs/files-hub.tsx | Hubs |
+| components/hubs/community-hub.tsx | Hubs |
+| components/storage/enhanced-file-storage.tsx | Storage |
+| components/admin/agent-dashboard.tsx | Admin |
+| components/projects-hub/ups-controller.tsx | Projects |
+| components/providers/ups-provider.tsx | Providers |
+| components/gallery/advanced-gallery-system.tsx | Gallery |
+| components/messages/realtime-chat.tsx | Messages |
+| components/video/ai/video-ai-panel.tsx | Video |
+| components/video/video-status-monitor.tsx | Video |
+| components/collaboration/BlockEditor.tsx | Collaboration |
+| components/collaboration/real-time-collaboration.tsx | Collaboration |
+| components/collaboration/ai-create.tsx | Collaboration |
+| components/ui/universal-2025-wrapper.tsx | UI |
+| components/ui/optimized-image-enhanced.tsx | UI |
+| components/ui/modern-buttons.tsx | UI |
+| components/ui/enhanced-error-recovery.tsx | UI |
+| components/ui/enhanced-command-palette.tsx | UI |
+| components/ui/coming-soon-system.tsx | UI |
+| components/ui/enhanced-dashboard-2025.tsx | UI |
+| components/ui/enhanced-gui-2025.tsx | UI |
+| components/ui/ai-components.tsx | UI |
+
+---
+
+### Recommended Fix Order
+
+1. **Batch 29**: Top 5 priority files (workflow-builder-v2, messages-v2, plugins-v2, email-marketing-v2, notifications-v2)
+2. **Batch 30-35**: Remaining app/(app)/dashboard/*-v2 files (82 files, ~15 per batch)
+3. **Batch 36-45**: app/v2/dashboard files (60 files, ~6 per batch)
+4. **Batch 46-48**: V1 dashboard files (24 files)
+5. **Batch 49-50**: Component files (31 files)
+
+---
+
+### Estimated Remaining Work
+
+- **~150 unique files** still have toast-only patterns
+- **~500-800 buttons** need proper dialog functionality
+- **Estimated lines to add**: ~30,000-50,000
