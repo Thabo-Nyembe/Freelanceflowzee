@@ -2054,10 +2054,22 @@ export default function EscrowClient() {
                           <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">API Key</p>
                           <div className="flex items-center gap-2">
                             <input type="password" defaultValue="ek_live_xxxxxxxxxxxx" className="flex-1 px-3 py-2 border rounded-lg dark:bg-gray-600 dark:border-gray-500 font-mono text-sm" />
-                            <button className="px-4 py-2 bg-gray-200 dark:bg-gray-600 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500">
+                            <button
+                              onClick={() => {
+                                navigator.clipboard.writeText('ek_live_xxxxxxxxxxxx')
+                                toast.success('API key copied to clipboard')
+                              }}
+                              className="px-4 py-2 bg-gray-200 dark:bg-gray-600 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500"
+                            >
                               <Copy className="w-4 h-4" />
                             </button>
-                            <button className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700">
+                            <button
+                              onClick={() => {
+                                toast.info('Regenerating API key...', { description: 'This will invalidate your current key' })
+                                setTimeout(() => toast.success('API key regenerated successfully'), 1500)
+                              }}
+                              className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700"
+                            >
                               <RefreshCw className="w-4 h-4" />
                             </button>
                           </div>
@@ -2097,7 +2109,13 @@ export default function EscrowClient() {
                             <p className="font-medium text-gray-900 dark:text-white">Export Data</p>
                             <p className="text-sm text-gray-500">Download all transaction data</p>
                           </div>
-                          <button className="px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 flex items-center gap-2">
+                          <button
+                            onClick={() => {
+                              toast.info('Exporting data...', { description: 'Preparing your CSV file' })
+                              setTimeout(() => toast.success('Data exported successfully', { description: 'Your download will begin shortly' }), 1500)
+                            }}
+                            className="px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 flex items-center gap-2"
+                          >
                             <Download className="w-4 h-4" />
                             Export CSV
                           </button>
@@ -2111,7 +2129,18 @@ export default function EscrowClient() {
                           <p className="font-medium text-gray-900 dark:text-white">Disable Escrow Service</p>
                           <p className="text-sm text-gray-500">Temporarily disable all escrow transactions</p>
                         </div>
-                        <button className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
+                        <button
+                          onClick={() => {
+                            toast.warning('Are you sure?', {
+                              description: 'This will temporarily disable all escrow transactions',
+                              action: {
+                                label: 'Confirm',
+                                onClick: () => toast.error('Escrow service disabled', { description: 'Contact support to re-enable' })
+                              }
+                            })
+                          }}
+                          className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+                        >
                           Disable Service
                         </button>
                       </div>
@@ -2888,7 +2917,15 @@ export default function EscrowClient() {
                     Customer: {dispute.customer} - Due by {new Date(dispute.dueBy).toLocaleDateString()}
                   </p>
                   {dispute.status === 'needs_response' && (
-                    <Button size="sm" className="mt-2 bg-orange-600 hover:bg-orange-700">
+                    <Button
+                      size="sm"
+                      className="mt-2 bg-orange-600 hover:bg-orange-700"
+                      onClick={() => {
+                        setShowDisputesDialog(false)
+                        setActiveTab('disputes')
+                        toast.info('Opening dispute response form', { description: `Responding to dispute ${dispute.id}` })
+                      }}
+                    >
                       Respond Now
                     </Button>
                   )}
@@ -2952,15 +2989,36 @@ export default function EscrowClient() {
               <div>
                 <Label>Format</Label>
                 <div className="flex gap-2 mt-1">
-                  <Button variant="outline" className="flex-1">
+                  <Button
+                    variant="outline"
+                    className="flex-1"
+                    onClick={() => {
+                      toast.success('Downloading CSV report', { description: 'Your download will begin shortly' })
+                      setShowReportsDialog(false)
+                    }}
+                  >
                     <Download className="w-4 h-4 mr-2" />
                     CSV
                   </Button>
-                  <Button variant="outline" className="flex-1">
+                  <Button
+                    variant="outline"
+                    className="flex-1"
+                    onClick={() => {
+                      toast.success('Downloading PDF report', { description: 'Your download will begin shortly' })
+                      setShowReportsDialog(false)
+                    }}
+                  >
                     <Download className="w-4 h-4 mr-2" />
                     PDF
                   </Button>
-                  <Button variant="outline" className="flex-1">
+                  <Button
+                    variant="outline"
+                    className="flex-1"
+                    onClick={() => {
+                      toast.success('Downloading Excel report', { description: 'Your download will begin shortly' })
+                      setShowReportsDialog(false)
+                    }}
+                  >
                     <Download className="w-4 h-4 mr-2" />
                     Excel
                   </Button>

@@ -675,6 +675,22 @@ export default function HealthScoreClient() {
   const [showViewMetricsDialog, setShowViewMetricsDialog] = useState(false)
   const [showAlertsDialog, setShowAlertsDialog] = useState(false)
   const [showReportsDialog, setShowReportsDialog] = useState(false)
+  const [showSecurityDialog, setShowSecurityDialog] = useState(false)
+  const [showSettingsDialog, setShowSettingsDialog] = useState(false)
+  const [showAddServiceDialog, setShowAddServiceDialog] = useState(false)
+  const [showAPMDialog, setShowAPMDialog] = useState(false)
+  const [showTracesDialog, setShowTracesDialog] = useState(false)
+  const [showLogsDialog, setShowLogsDialog] = useState(false)
+  const [showDependenciesDialog, setShowDependenciesDialog] = useState(false)
+  const [showFilterDialog, setShowFilterDialog] = useState(false)
+  const [showAddAlertRuleDialog, setShowAddAlertRuleDialog] = useState(false)
+  const [showOnCallDialog, setShowOnCallDialog] = useState(false)
+  const [showAlertHistoryDialog, setShowAlertHistoryDialog] = useState(false)
+  const [showAlertAnalyticsDialog, setShowAlertAnalyticsDialog] = useState(false)
+  const [showCreateSLODialog, setShowCreateSLODialog] = useState(false)
+  const [showSLIDialog, setShowSLIDialog] = useState(false)
+  const [showSLOHistoryDialog, setShowSLOHistoryDialog] = useState(false)
+  const [showViewAllSLOsDialog, setShowViewAllSLOsDialog] = useState(false)
 
   // Database State
   const [dbHealthScores, setDbHealthScores] = useState<DbHealthScore[]>([])
@@ -985,8 +1001,11 @@ export default function HealthScoreClient() {
                   <option value="7d" className="text-gray-900">Last 7 days</option>
                   <option value="30d" className="text-gray-900">Last 30 days</option>
                 </select>
-                <button className="p-2 bg-white/20 rounded-lg hover:bg-white/30 transition-colors">
-                  <RefreshCw className="w-5 h-5 text-white" />
+                <button
+                  onClick={handleRefreshMetrics}
+                  className="p-2 bg-white/20 rounded-lg hover:bg-white/30 transition-colors"
+                >
+                  <RefreshCw className={`w-5 h-5 text-white ${loading ? 'animate-spin' : ''}`} />
                 </button>
               </div>
             </div>
@@ -1102,6 +1121,7 @@ export default function HealthScoreClient() {
               </Button>
               <Button
                 variant="ghost"
+                onClick={() => setShowReportsDialog(true)}
                 className="h-20 flex-col gap-2 bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 hover:scale-105 transition-all duration-200"
               >
                 <FileText className="w-5 h-5" />
@@ -1117,6 +1137,7 @@ export default function HealthScoreClient() {
               </Button>
               <Button
                 variant="ghost"
+                onClick={() => setShowSecurityDialog(true)}
                 className="h-20 flex-col gap-2 bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400 hover:scale-105 transition-all duration-200"
               >
                 <Shield className="w-5 h-5" />
@@ -1124,6 +1145,7 @@ export default function HealthScoreClient() {
               </Button>
               <Button
                 variant="ghost"
+                onClick={() => setShowSettingsDialog(true)}
                 className="h-20 flex-col gap-2 bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400 hover:scale-105 transition-all duration-200"
               >
                 <Settings className="w-5 h-5" />
@@ -1267,7 +1289,12 @@ export default function HealthScoreClient() {
             <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-semibold text-gray-900 dark:text-white">SLO Status</h2>
-                <button className="text-sm text-emerald-600 dark:text-emerald-400 hover:underline">View All</button>
+                <button
+                  onClick={() => setShowViewAllSLOsDialog(true)}
+                  className="text-sm text-emerald-600 dark:text-emerald-400 hover:underline"
+                >
+                  View All
+                </button>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 {mockSLOs.map(slo => (
@@ -1327,25 +1354,70 @@ export default function HealthScoreClient() {
 
             {/* Services Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
-              {[
-                { icon: Plus, label: 'Add Service', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
-                { icon: Activity, label: 'APM', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
-                { icon: Zap, label: 'Traces', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
-                { icon: BarChart3, label: 'Metrics', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
-                { icon: Eye, label: 'Logs', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400' },
-                { icon: GitBranch, label: 'Dependencies', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
-                { icon: Download, label: 'Export', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' },
-                { icon: Settings, label: 'Settings', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400' }
-              ].map((action, idx) => (
-                <Button
-                  key={idx}
-                  variant="ghost"
-                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
-                >
-                  <action.icon className="w-5 h-5" />
-                  <span className="text-xs font-medium">{action.label}</span>
-                </Button>
-              ))}
+              <Button
+                variant="ghost"
+                onClick={() => setShowAddServiceDialog(true)}
+                className="h-20 flex-col gap-2 bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 hover:scale-105 transition-all duration-200"
+              >
+                <Plus className="w-5 h-5" />
+                <span className="text-xs font-medium">Add Service</span>
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => setShowAPMDialog(true)}
+                className="h-20 flex-col gap-2 bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400 hover:scale-105 transition-all duration-200"
+              >
+                <Activity className="w-5 h-5" />
+                <span className="text-xs font-medium">APM</span>
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => setShowTracesDialog(true)}
+                className="h-20 flex-col gap-2 bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400 hover:scale-105 transition-all duration-200"
+              >
+                <Zap className="w-5 h-5" />
+                <span className="text-xs font-medium">Traces</span>
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => setShowViewMetricsDialog(true)}
+                className="h-20 flex-col gap-2 bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400 hover:scale-105 transition-all duration-200"
+              >
+                <BarChart3 className="w-5 h-5" />
+                <span className="text-xs font-medium">Metrics</span>
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => setShowLogsDialog(true)}
+                className="h-20 flex-col gap-2 bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400 hover:scale-105 transition-all duration-200"
+              >
+                <Eye className="w-5 h-5" />
+                <span className="text-xs font-medium">Logs</span>
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => setShowDependenciesDialog(true)}
+                className="h-20 flex-col gap-2 bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400 hover:scale-105 transition-all duration-200"
+              >
+                <GitBranch className="w-5 h-5" />
+                <span className="text-xs font-medium">Dependencies</span>
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={handleExportHealth}
+                className="h-20 flex-col gap-2 bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400 hover:scale-105 transition-all duration-200"
+              >
+                <Download className="w-5 h-5" />
+                <span className="text-xs font-medium">Export</span>
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => setShowSettingsDialog(true)}
+                className="h-20 flex-col gap-2 bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400 hover:scale-105 transition-all duration-200"
+              >
+                <Settings className="w-5 h-5" />
+                <span className="text-xs font-medium">Settings</span>
+              </Button>
             </div>
 
             <div className="flex items-center gap-4 mb-4">
@@ -1359,7 +1431,10 @@ export default function HealthScoreClient() {
                   className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                 />
               </div>
-              <button className="flex items-center gap-2 px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">
+              <button
+                onClick={() => setShowFilterDialog(true)}
+                className="flex items-center gap-2 px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+              >
                 <Filter className="w-4 h-4" /> Filter
               </button>
             </div>
@@ -1482,25 +1557,70 @@ export default function HealthScoreClient() {
 
             {/* Infrastructure Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
-              {[
-                { icon: Server, label: 'Servers', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
-                { icon: Database, label: 'Databases', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400' },
-                { icon: Cloud, label: 'Cloud', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
-                { icon: Container, label: 'Containers', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' },
-                { icon: Network, label: 'Network', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400' },
-                { icon: HardDrive, label: 'Storage', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400' },
-                { icon: Cpu, label: 'Compute', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
-                { icon: Settings, label: 'Settings', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400' }
-              ].map((action, idx) => (
-                <Button
-                  key={idx}
-                  variant="ghost"
-                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
-                >
-                  <action.icon className="w-5 h-5" />
-                  <span className="text-xs font-medium">{action.label}</span>
-                </Button>
-              ))}
+              <Button
+                variant="ghost"
+                onClick={() => toast.info('Viewing Servers', { description: 'Displaying server infrastructure details' })}
+                className="h-20 flex-col gap-2 bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400 hover:scale-105 transition-all duration-200"
+              >
+                <Server className="w-5 h-5" />
+                <span className="text-xs font-medium">Servers</span>
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => toast.info('Viewing Databases', { description: 'Displaying database connections and metrics' })}
+                className="h-20 flex-col gap-2 bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400 hover:scale-105 transition-all duration-200"
+              >
+                <Database className="w-5 h-5" />
+                <span className="text-xs font-medium">Databases</span>
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => toast.info('Viewing Cloud Resources', { description: 'Opening cloud infrastructure dashboard' })}
+                className="h-20 flex-col gap-2 bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400 hover:scale-105 transition-all duration-200"
+              >
+                <Cloud className="w-5 h-5" />
+                <span className="text-xs font-medium">Cloud</span>
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => toast.info('Viewing Containers', { description: 'Displaying container orchestration status' })}
+                className="h-20 flex-col gap-2 bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400 hover:scale-105 transition-all duration-200"
+              >
+                <Container className="w-5 h-5" />
+                <span className="text-xs font-medium">Containers</span>
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => toast.info('Viewing Network', { description: 'Displaying network topology and traffic' })}
+                className="h-20 flex-col gap-2 bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400 hover:scale-105 transition-all duration-200"
+              >
+                <Network className="w-5 h-5" />
+                <span className="text-xs font-medium">Network</span>
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => toast.info('Viewing Storage', { description: 'Displaying storage volumes and capacity' })}
+                className="h-20 flex-col gap-2 bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400 hover:scale-105 transition-all duration-200"
+              >
+                <HardDrive className="w-5 h-5" />
+                <span className="text-xs font-medium">Storage</span>
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => toast.info('Viewing Compute', { description: 'Displaying compute resources and utilization' })}
+                className="h-20 flex-col gap-2 bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400 hover:scale-105 transition-all duration-200"
+              >
+                <Cpu className="w-5 h-5" />
+                <span className="text-xs font-medium">Compute</span>
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => setShowSettingsDialog(true)}
+                className="h-20 flex-col gap-2 bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400 hover:scale-105 transition-all duration-200"
+              >
+                <Settings className="w-5 h-5" />
+                <span className="text-xs font-medium">Settings</span>
+              </Button>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
@@ -1665,25 +1785,70 @@ export default function HealthScoreClient() {
 
             {/* Alerts Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
-              {[
-                { icon: Plus, label: 'New Rule', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' },
-                { icon: Bell, label: 'Active', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
-                { icon: AlertTriangle, label: 'Critical', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400' },
-                { icon: CheckCircle, label: 'Resolve', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
-                { icon: Users, label: 'On-Call', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400' },
-                { icon: Clock, label: 'History', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400' },
-                { icon: BarChart3, label: 'Analytics', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
-                { icon: Settings, label: 'Settings', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400' }
-              ].map((action, idx) => (
-                <Button
-                  key={idx}
-                  variant="ghost"
-                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
-                >
-                  <action.icon className="w-5 h-5" />
-                  <span className="text-xs font-medium">{action.label}</span>
-                </Button>
-              ))}
+              <Button
+                variant="ghost"
+                onClick={() => setShowAddAlertRuleDialog(true)}
+                className="h-20 flex-col gap-2 bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400 hover:scale-105 transition-all duration-200"
+              >
+                <Plus className="w-5 h-5" />
+                <span className="text-xs font-medium">New Rule</span>
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => setShowAlertsDialog(true)}
+                className="h-20 flex-col gap-2 bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400 hover:scale-105 transition-all duration-200"
+              >
+                <Bell className="w-5 h-5" />
+                <span className="text-xs font-medium">Active</span>
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => toast.warning('Critical Alerts', { description: 'Showing only critical severity alerts' })}
+                className="h-20 flex-col gap-2 bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400 hover:scale-105 transition-all duration-200"
+              >
+                <AlertTriangle className="w-5 h-5" />
+                <span className="text-xs font-medium">Critical</span>
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => toast.success('Resolve All', { description: 'All acknowledged incidents will be resolved' })}
+                className="h-20 flex-col gap-2 bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400 hover:scale-105 transition-all duration-200"
+              >
+                <CheckCircle className="w-5 h-5" />
+                <span className="text-xs font-medium">Resolve</span>
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => setShowOnCallDialog(true)}
+                className="h-20 flex-col gap-2 bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400 hover:scale-105 transition-all duration-200"
+              >
+                <Users className="w-5 h-5" />
+                <span className="text-xs font-medium">On-Call</span>
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => setShowAlertHistoryDialog(true)}
+                className="h-20 flex-col gap-2 bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400 hover:scale-105 transition-all duration-200"
+              >
+                <Clock className="w-5 h-5" />
+                <span className="text-xs font-medium">History</span>
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => setShowAlertAnalyticsDialog(true)}
+                className="h-20 flex-col gap-2 bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400 hover:scale-105 transition-all duration-200"
+              >
+                <BarChart3 className="w-5 h-5" />
+                <span className="text-xs font-medium">Analytics</span>
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => setShowSettingsDialog(true)}
+                className="h-20 flex-col gap-2 bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400 hover:scale-105 transition-all duration-200"
+              >
+                <Settings className="w-5 h-5" />
+                <span className="text-xs font-medium">Settings</span>
+              </Button>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -1691,7 +1856,10 @@ export default function HealthScoreClient() {
               <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Alert Rules</h2>
-                  <button className="px-3 py-1.5 bg-emerald-600 text-white rounded-lg text-sm hover:bg-emerald-700">
+                  <button
+                    onClick={() => setShowAddAlertRuleDialog(true)}
+                    className="px-3 py-1.5 bg-emerald-600 text-white rounded-lg text-sm hover:bg-emerald-700"
+                  >
                     + Add Rule
                   </button>
                 </div>
@@ -1821,30 +1989,78 @@ export default function HealthScoreClient() {
 
             {/* SLOs Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
-              {[
-                { icon: Plus, label: 'Create SLO', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
-                { icon: Target, label: 'Objectives', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
-                { icon: TrendingUp, label: 'Error Budget', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
-                { icon: Gauge, label: 'SLIs', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400' },
-                { icon: BarChart3, label: 'Reports', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
-                { icon: Calendar, label: 'History', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' },
-                { icon: Download, label: 'Export', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
-                { icon: Settings, label: 'Settings', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400' }
-              ].map((action, idx) => (
-                <Button
-                  key={idx}
-                  variant="ghost"
-                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
-                >
-                  <action.icon className="w-5 h-5" />
-                  <span className="text-xs font-medium">{action.label}</span>
-                </Button>
-              ))}
+              <Button
+                variant="ghost"
+                onClick={() => setShowCreateSLODialog(true)}
+                className="h-20 flex-col gap-2 bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400 hover:scale-105 transition-all duration-200"
+              >
+                <Plus className="w-5 h-5" />
+                <span className="text-xs font-medium">Create SLO</span>
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => toast.info('SLO Objectives', { description: 'Viewing all service level objectives' })}
+                className="h-20 flex-col gap-2 bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400 hover:scale-105 transition-all duration-200"
+              >
+                <Target className="w-5 h-5" />
+                <span className="text-xs font-medium">Objectives</span>
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => toast.info('Error Budgets', { description: 'Displaying error budget consumption across all SLOs' })}
+                className="h-20 flex-col gap-2 bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 hover:scale-105 transition-all duration-200"
+              >
+                <TrendingUp className="w-5 h-5" />
+                <span className="text-xs font-medium">Error Budget</span>
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => setShowSLIDialog(true)}
+                className="h-20 flex-col gap-2 bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400 hover:scale-105 transition-all duration-200"
+              >
+                <Gauge className="w-5 h-5" />
+                <span className="text-xs font-medium">SLIs</span>
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => setShowReportsDialog(true)}
+                className="h-20 flex-col gap-2 bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400 hover:scale-105 transition-all duration-200"
+              >
+                <BarChart3 className="w-5 h-5" />
+                <span className="text-xs font-medium">Reports</span>
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => setShowSLOHistoryDialog(true)}
+                className="h-20 flex-col gap-2 bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400 hover:scale-105 transition-all duration-200"
+              >
+                <Calendar className="w-5 h-5" />
+                <span className="text-xs font-medium">History</span>
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={handleExportHealth}
+                className="h-20 flex-col gap-2 bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400 hover:scale-105 transition-all duration-200"
+              >
+                <Download className="w-5 h-5" />
+                <span className="text-xs font-medium">Export</span>
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => setShowSettingsDialog(true)}
+                className="h-20 flex-col gap-2 bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400 hover:scale-105 transition-all duration-200"
+              >
+                <Settings className="w-5 h-5" />
+                <span className="text-xs font-medium">Settings</span>
+              </Button>
             </div>
 
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Service Level Objectives</h2>
-              <button className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700">
+              <button
+                onClick={() => setShowCreateSLODialog(true)}
+                className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700"
+              >
                 + Create SLO
               </button>
             </div>
@@ -2223,10 +2439,22 @@ export default function HealthScoreClient() {
 
                 {selectedIncident.status !== 'resolved' && (
                   <div className="flex gap-2 pt-4 border-t border-gray-200 dark:border-gray-700">
-                    <button className="flex-1 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700">
+                    <button
+                      onClick={() => {
+                        toast.success('Incident Acknowledged', { description: `${selectedIncident.id} has been acknowledged` })
+                        setSelectedIncident(null)
+                      }}
+                      className="flex-1 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700"
+                    >
                       Acknowledge
                     </button>
-                    <button className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+                    <button
+                      onClick={() => {
+                        toast.success('Incident Resolved', { description: `${selectedIncident.id} has been marked as resolved` })
+                        setSelectedIncident(null)
+                      }}
+                      className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                    >
                       Resolve
                     </button>
                   </div>
@@ -2567,19 +2795,40 @@ export default function HealthScoreClient() {
                 Select the type of health report to generate.
               </p>
               <div className="space-y-2">
-                <button className="w-full p-3 text-left bg-gray-50 dark:bg-gray-900 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                <button
+                  onClick={() => {
+                    toast.success('Generating Daily Summary', { description: 'Report will be ready shortly' })
+                    setShowReportsDialog(false)
+                  }}
+                  className="w-full p-3 text-left bg-gray-50 dark:bg-gray-900 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                >
                   <p className="font-medium text-gray-900 dark:text-white">Daily Summary</p>
                   <p className="text-xs text-gray-500">Overview of the last 24 hours</p>
                 </button>
-                <button className="w-full p-3 text-left bg-gray-50 dark:bg-gray-900 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                <button
+                  onClick={() => {
+                    toast.success('Generating Weekly Analysis', { description: 'Report will be ready shortly' })
+                    setShowReportsDialog(false)
+                  }}
+                  className="w-full p-3 text-left bg-gray-50 dark:bg-gray-900 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                >
                   <p className="font-medium text-gray-900 dark:text-white">Weekly Analysis</p>
                   <p className="text-xs text-gray-500">Trends and patterns over 7 days</p>
                 </button>
-                <button className="w-full p-3 text-left bg-gray-50 dark:bg-gray-900 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                <button
+                  onClick={() => {
+                    toast.success('Generating Monthly Report', { description: 'Report will be ready shortly' })
+                    setShowReportsDialog(false)
+                  }}
+                  className="w-full p-3 text-left bg-gray-50 dark:bg-gray-900 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                >
                   <p className="font-medium text-gray-900 dark:text-white">Monthly Report</p>
                   <p className="text-xs text-gray-500">Comprehensive 30-day analysis</p>
                 </button>
-                <button className="w-full p-3 text-left bg-gray-50 dark:bg-gray-900 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                <button
+                  onClick={() => toast.info('Custom Report', { description: 'Select date range for custom report' })}
+                  className="w-full p-3 text-left bg-gray-50 dark:bg-gray-900 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                >
                   <p className="font-medium text-gray-900 dark:text-white">Custom Report</p>
                   <p className="text-xs text-gray-500">Select custom date range</p>
                 </button>
@@ -2593,6 +2842,661 @@ export default function HealthScoreClient() {
                   <Download className="w-4 h-4 mr-2" />
                   Generate
                 </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Security Dialog */}
+        <Dialog open={showSecurityDialog} onOpenChange={setShowSecurityDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Shield className="w-5 h-5 text-violet-500" />
+                Security Status
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <CheckCircle className="w-4 h-4 text-green-500" />
+                    <span className="text-sm">SSL Certificates</span>
+                  </div>
+                  <span className="text-xs text-green-500">Valid</span>
+                </div>
+                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <CheckCircle className="w-4 h-4 text-green-500" />
+                    <span className="text-sm">Firewall Rules</span>
+                  </div>
+                  <span className="text-xs text-green-500">Active</span>
+                </div>
+                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <CheckCircle className="w-4 h-4 text-green-500" />
+                    <span className="text-sm">Access Controls</span>
+                  </div>
+                  <span className="text-xs text-green-500">Configured</span>
+                </div>
+                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <AlertTriangle className="w-4 h-4 text-yellow-500" />
+                    <span className="text-sm">Vulnerability Scan</span>
+                  </div>
+                  <span className="text-xs text-yellow-500">2 Warnings</span>
+                </div>
+              </div>
+              <div className="flex justify-end gap-2 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <Button variant="outline" onClick={() => setShowSecurityDialog(false)}>Close</Button>
+                <Button onClick={() => {
+                  toast.success('Running security scan')
+                  setShowSecurityDialog(false)
+                }}>
+                  Run Scan
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Settings Dialog */}
+        <Dialog open={showSettingsDialog} onOpenChange={setShowSettingsDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Settings className="w-5 h-5 text-gray-500" />
+                Health Score Settings
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                  <span className="text-sm">Auto-refresh interval</span>
+                  <select className="text-sm border rounded-lg px-2 py-1 dark:bg-gray-800 dark:border-gray-700">
+                    <option>30 seconds</option>
+                    <option>1 minute</option>
+                    <option>5 minutes</option>
+                  </select>
+                </div>
+                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                  <span className="text-sm">Show degraded services first</span>
+                  <input type="checkbox" defaultChecked className="rounded" />
+                </div>
+                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                  <span className="text-sm">Enable notifications</span>
+                  <input type="checkbox" defaultChecked className="rounded" />
+                </div>
+              </div>
+              <div className="flex justify-end gap-2 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <Button variant="outline" onClick={() => setShowSettingsDialog(false)}>Cancel</Button>
+                <Button onClick={() => {
+                  toast.success('Settings saved')
+                  setShowSettingsDialog(false)
+                }}>
+                  Save Settings
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Service Dialog */}
+        <Dialog open={showAddServiceDialog} onOpenChange={setShowAddServiceDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Plus className="w-5 h-5 text-blue-500" />
+                Add Service
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="service_name">Service Name</Label>
+                <Input id="service_name" placeholder="Enter service name" />
+              </div>
+              <div>
+                <Label htmlFor="service_type">Service Type</Label>
+                <select id="service_type" className="w-full p-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
+                  <option value="api">API</option>
+                  <option value="web">Web</option>
+                  <option value="database">Database</option>
+                  <option value="cache">Cache</option>
+                  <option value="queue">Queue</option>
+                </select>
+              </div>
+              <div>
+                <Label htmlFor="service_url">Endpoint URL</Label>
+                <Input id="service_url" placeholder="https://api.example.com/health" />
+              </div>
+              <div className="flex justify-end gap-2 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <Button variant="outline" onClick={() => setShowAddServiceDialog(false)}>Cancel</Button>
+                <Button onClick={() => {
+                  toast.success('Service added successfully')
+                  setShowAddServiceDialog(false)
+                }}>
+                  Add Service
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* APM Dialog */}
+        <Dialog open={showAPMDialog} onOpenChange={setShowAPMDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Activity className="w-5 h-5 text-indigo-500" />
+                Application Performance Monitoring
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                  <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Transactions</div>
+                  <div className="text-2xl font-bold text-gray-900 dark:text-white">1.2M</div>
+                  <div className="text-xs text-green-500">+5% today</div>
+                </div>
+                <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                  <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Avg Duration</div>
+                  <div className="text-2xl font-bold text-gray-900 dark:text-white">45ms</div>
+                  <div className="text-xs text-green-500">-3% today</div>
+                </div>
+              </div>
+              <div className="flex justify-end gap-2 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <Button variant="outline" onClick={() => setShowAPMDialog(false)}>Close</Button>
+                <Button onClick={() => {
+                  toast.info('Opening full APM dashboard')
+                  setShowAPMDialog(false)
+                }}>
+                  View Dashboard
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Traces Dialog */}
+        <Dialog open={showTracesDialog} onOpenChange={setShowTracesDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Zap className="w-5 h-5 text-violet-500" />
+                Distributed Traces
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Recent traces from distributed services
+              </p>
+              <div className="space-y-2">
+                <div className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">GET /api/users</span>
+                    <span className="text-xs text-green-500">45ms</span>
+                  </div>
+                  <div className="text-xs text-gray-500 mt-1">5 spans - 3 services</div>
+                </div>
+                <div className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">POST /api/orders</span>
+                    <span className="text-xs text-yellow-500">250ms</span>
+                  </div>
+                  <div className="text-xs text-gray-500 mt-1">12 spans - 6 services</div>
+                </div>
+              </div>
+              <div className="flex justify-end gap-2 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <Button variant="outline" onClick={() => setShowTracesDialog(false)}>Close</Button>
+                <Button onClick={() => {
+                  toast.info('Opening traces explorer')
+                  setShowTracesDialog(false)
+                }}>
+                  View All Traces
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Logs Dialog */}
+        <Dialog open={showLogsDialog} onOpenChange={setShowLogsDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Eye className="w-5 h-5 text-fuchsia-500" />
+                Service Logs
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="p-3 bg-gray-900 rounded-lg font-mono text-xs text-green-400 max-h-60 overflow-auto">
+                <div>[2024-12-23 12:00:01] INFO  - API Gateway started</div>
+                <div>[2024-12-23 12:00:02] INFO  - Connected to database</div>
+                <div>[2024-12-23 12:00:03] INFO  - Cache warmed up</div>
+                <div>[2024-12-23 12:00:15] WARN  - High memory usage detected</div>
+                <div>[2024-12-23 12:00:30] INFO  - Request handled: GET /api/health</div>
+              </div>
+              <div className="flex justify-end gap-2 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <Button variant="outline" onClick={() => setShowLogsDialog(false)}>Close</Button>
+                <Button onClick={() => {
+                  toast.info('Opening log explorer')
+                  setShowLogsDialog(false)
+                }}>
+                  View All Logs
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Dependencies Dialog */}
+        <Dialog open={showDependenciesDialog} onOpenChange={setShowDependenciesDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <GitBranch className="w-5 h-5 text-pink-500" />
+                Service Dependencies
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                View and manage service dependencies
+              </p>
+              <div className="space-y-2">
+                <div className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <span className="text-sm">API Gateway &rarr; Auth Service</span>
+                  </div>
+                </div>
+                <div className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <span className="text-sm">API Gateway &rarr; User Service</span>
+                  </div>
+                </div>
+                <div className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                    <span className="text-sm">User Service &rarr; Elasticsearch</span>
+                  </div>
+                </div>
+              </div>
+              <div className="flex justify-end gap-2 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <Button variant="outline" onClick={() => setShowDependenciesDialog(false)}>Close</Button>
+                <Button onClick={() => {
+                  toast.info('Opening dependency map')
+                  setShowDependenciesDialog(false)
+                }}>
+                  View Full Map
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Filter Dialog */}
+        <Dialog open={showFilterDialog} onOpenChange={setShowFilterDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Filter className="w-5 h-5 text-gray-500" />
+                Filter Services
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label>Status</Label>
+                <div className="flex gap-2 mt-2">
+                  <Button variant="outline" size="sm">All</Button>
+                  <Button variant="outline" size="sm">Healthy</Button>
+                  <Button variant="outline" size="sm">Degraded</Button>
+                  <Button variant="outline" size="sm">Critical</Button>
+                </div>
+              </div>
+              <div>
+                <Label>Type</Label>
+                <div className="flex gap-2 mt-2 flex-wrap">
+                  <Button variant="outline" size="sm">API</Button>
+                  <Button variant="outline" size="sm">Database</Button>
+                  <Button variant="outline" size="sm">Cache</Button>
+                  <Button variant="outline" size="sm">External</Button>
+                </div>
+              </div>
+              <div className="flex justify-end gap-2 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <Button variant="outline" onClick={() => setShowFilterDialog(false)}>Reset</Button>
+                <Button onClick={() => {
+                  toast.success('Filters applied')
+                  setShowFilterDialog(false)
+                }}>
+                  Apply Filters
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Alert Rule Dialog */}
+        <Dialog open={showAddAlertRuleDialog} onOpenChange={setShowAddAlertRuleDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Plus className="w-5 h-5 text-rose-500" />
+                Create Alert Rule
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="alert_name">Rule Name</Label>
+                <Input id="alert_name" placeholder="e.g., High Error Rate" />
+              </div>
+              <div>
+                <Label htmlFor="alert_severity">Severity</Label>
+                <select id="alert_severity" className="w-full p-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
+                  <option value="critical">Critical</option>
+                  <option value="warning">Warning</option>
+                  <option value="info">Info</option>
+                </select>
+              </div>
+              <div>
+                <Label htmlFor="alert_condition">Condition</Label>
+                <Input id="alert_condition" placeholder="error_rate > 5%" />
+              </div>
+              <div className="flex justify-end gap-2 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <Button variant="outline" onClick={() => setShowAddAlertRuleDialog(false)}>Cancel</Button>
+                <Button onClick={() => {
+                  toast.success('Alert rule created')
+                  setShowAddAlertRuleDialog(false)
+                }}>
+                  Create Rule
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* On-Call Dialog */}
+        <Dialog open={showOnCallDialog} onOpenChange={setShowOnCallDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Users className="w-5 h-5 text-yellow-500" />
+                On-Call Schedule
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg">
+                <div className="text-sm font-medium text-emerald-700 dark:text-emerald-400">Currently On-Call</div>
+                <div className="text-lg font-semibold text-gray-900 dark:text-white mt-1">John Smith</div>
+                <div className="text-xs text-gray-500 mt-1">Until Dec 24, 9:00 AM</div>
+              </div>
+              <div className="space-y-2">
+                <div className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg flex items-center justify-between">
+                  <div>
+                    <div className="text-sm font-medium">Sarah Chen</div>
+                    <div className="text-xs text-gray-500">Dec 24 - Dec 25</div>
+                  </div>
+                  <span className="text-xs bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded">Next</span>
+                </div>
+              </div>
+              <div className="flex justify-end gap-2 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <Button variant="outline" onClick={() => setShowOnCallDialog(false)}>Close</Button>
+                <Button onClick={() => {
+                  toast.info('Opening schedule editor')
+                  setShowOnCallDialog(false)
+                }}>
+                  Edit Schedule
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Alert History Dialog */}
+        <Dialog open={showAlertHistoryDialog} onOpenChange={setShowAlertHistoryDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Clock className="w-5 h-5 text-lime-500" />
+                Alert History
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <ScrollArea className="h-[300px]">
+                <div className="space-y-2">
+                  <div className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium text-red-500">High Error Rate</span>
+                      <span className="text-xs text-gray-500">2h ago</span>
+                    </div>
+                    <div className="text-xs text-gray-500 mt-1">API Gateway - Resolved in 15m</div>
+                  </div>
+                  <div className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium text-yellow-500">High CPU</span>
+                      <span className="text-xs text-gray-500">5h ago</span>
+                    </div>
+                    <div className="text-xs text-gray-500 mt-1">k8s-node-02 - Resolved in 30m</div>
+                  </div>
+                  <div className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium text-yellow-500">Low Apdex</span>
+                      <span className="text-xs text-gray-500">1d ago</span>
+                    </div>
+                    <div className="text-xs text-gray-500 mt-1">User Service - Resolved in 2h</div>
+                  </div>
+                </div>
+              </ScrollArea>
+              <div className="flex justify-end pt-4 border-t border-gray-200 dark:border-gray-700">
+                <Button variant="outline" onClick={() => setShowAlertHistoryDialog(false)}>Close</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Alert Analytics Dialog */}
+        <Dialog open={showAlertAnalyticsDialog} onOpenChange={setShowAlertAnalyticsDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <BarChart3 className="w-5 h-5 text-green-500" />
+                Alert Analytics
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="grid grid-cols-3 gap-4">
+                <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg text-center">
+                  <div className="text-2xl font-bold text-gray-900 dark:text-white">24</div>
+                  <div className="text-xs text-gray-500">Total Alerts</div>
+                </div>
+                <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg text-center">
+                  <div className="text-2xl font-bold text-gray-900 dark:text-white">15m</div>
+                  <div className="text-xs text-gray-500">Avg Response</div>
+                </div>
+                <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg text-center">
+                  <div className="text-2xl font-bold text-gray-900 dark:text-white">98%</div>
+                  <div className="text-xs text-gray-500">Resolved</div>
+                </div>
+              </div>
+              <div className="flex justify-end pt-4 border-t border-gray-200 dark:border-gray-700">
+                <Button variant="outline" onClick={() => setShowAlertAnalyticsDialog(false)}>Close</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Create SLO Dialog */}
+        <Dialog open={showCreateSLODialog} onOpenChange={setShowCreateSLODialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Plus className="w-5 h-5 text-purple-500" />
+                Create SLO
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="slo_name">SLO Name</Label>
+                <Input id="slo_name" placeholder="e.g., API Availability" />
+              </div>
+              <div>
+                <Label htmlFor="slo_service">Service</Label>
+                <select id="slo_service" className="w-full p-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
+                  <option>API Gateway</option>
+                  <option>Auth Service</option>
+                  <option>User Service</option>
+                  <option>PostgreSQL Primary</option>
+                </select>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="slo_target">Target (%)</Label>
+                  <Input id="slo_target" type="number" placeholder="99.9" />
+                </div>
+                <div>
+                  <Label htmlFor="slo_window">Time Window</Label>
+                  <select id="slo_window" className="w-full p-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
+                    <option value="7d">7 Days</option>
+                    <option value="30d">30 Days</option>
+                    <option value="90d">90 Days</option>
+                  </select>
+                </div>
+              </div>
+              <div className="flex justify-end gap-2 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <Button variant="outline" onClick={() => setShowCreateSLODialog(false)}>Cancel</Button>
+                <Button onClick={() => {
+                  toast.success('SLO created successfully')
+                  setShowCreateSLODialog(false)
+                }}>
+                  Create SLO
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* SLI Dialog */}
+        <Dialog open={showSLIDialog} onOpenChange={setShowSLIDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Gauge className="w-5 h-5 text-cyan-500" />
+                Service Level Indicators
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-3">
+                <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium">Availability</span>
+                    <span className="text-sm font-bold text-green-500">99.98%</span>
+                  </div>
+                  <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                    <div className="h-full bg-green-500" style={{ width: '99.98%' }}></div>
+                  </div>
+                </div>
+                <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium">Latency (p95)</span>
+                    <span className="text-sm font-bold text-green-500">120ms</span>
+                  </div>
+                  <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                    <div className="h-full bg-green-500" style={{ width: '76%' }}></div>
+                  </div>
+                </div>
+                <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium">Error Rate</span>
+                    <span className="text-sm font-bold text-yellow-500">0.5%</span>
+                  </div>
+                  <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                    <div className="h-full bg-yellow-500" style={{ width: '50%' }}></div>
+                  </div>
+                </div>
+              </div>
+              <div className="flex justify-end pt-4 border-t border-gray-200 dark:border-gray-700">
+                <Button variant="outline" onClick={() => setShowSLIDialog(false)}>Close</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* SLO History Dialog */}
+        <Dialog open={showSLOHistoryDialog} onOpenChange={setShowSLOHistoryDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Calendar className="w-5 h-5 text-emerald-500" />
+                SLO History
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <ScrollArea className="h-[300px]">
+                <div className="space-y-2">
+                  <div className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">API Availability</span>
+                      <span className="text-xs text-green-500">Met - 99.98%</span>
+                    </div>
+                    <div className="text-xs text-gray-500 mt-1">December 2024 - Target: 99.9%</div>
+                  </div>
+                  <div className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">API Latency</span>
+                      <span className="text-xs text-green-500">Met - 96.2%</span>
+                    </div>
+                    <div className="text-xs text-gray-500 mt-1">December 2024 - Target: 95%</div>
+                  </div>
+                  <div className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">User Service Error Rate</span>
+                      <span className="text-xs text-yellow-500">At Risk - 97.7%</span>
+                    </div>
+                    <div className="text-xs text-gray-500 mt-1">December 2024 - Target: 99.5%</div>
+                  </div>
+                </div>
+              </ScrollArea>
+              <div className="flex justify-end pt-4 border-t border-gray-200 dark:border-gray-700">
+                <Button variant="outline" onClick={() => setShowSLOHistoryDialog(false)}>Close</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* View All SLOs Dialog */}
+        <Dialog open={showViewAllSLOsDialog} onOpenChange={setShowViewAllSLOsDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Target className="w-5 h-5 text-emerald-500" />
+                All Service Level Objectives
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <ScrollArea className="h-[400px]">
+                <div className="space-y-3">
+                  {mockSLOs.map(slo => (
+                    <div key={slo.id} className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                      <div className="flex items-center justify-between mb-2">
+                        <div>
+                          <div className="font-medium text-gray-900 dark:text-white">{slo.name}</div>
+                          <div className="text-xs text-gray-500">{slo.service}</div>
+                        </div>
+                        <span className={`px-2 py-1 rounded text-xs font-medium ${getSLOStatusColor(slo.status)}`}>
+                          {slo.status === 'met' ? 'Meeting Target' : slo.status === 'at_risk' ? 'At Risk' : 'Breached'}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between text-sm">
+                        <span>Current: <strong>{slo.current}%</strong></span>
+                        <span>Target: {slo.target}%</span>
+                        <span>Budget: {slo.budgetRemaining}% left</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+              <div className="flex justify-end pt-4 border-t border-gray-200 dark:border-gray-700">
+                <Button variant="outline" onClick={() => setShowViewAllSLOsDialog(false)}>Close</Button>
               </div>
             </div>
           </DialogContent>

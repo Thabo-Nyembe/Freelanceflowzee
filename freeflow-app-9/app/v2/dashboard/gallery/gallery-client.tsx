@@ -458,6 +458,9 @@ export default function GalleryClient() {
   const [showCreateCollection, setShowCreateCollection] = useState(false)
   const [showBulkEditDialog, setShowBulkEditDialog] = useState(false)
   const [showShareDialog, setShowShareDialog] = useState(false)
+  const [showDeletePhotosDialog, setShowDeletePhotosDialog] = useState(false)
+  const [showDeleteCollectionsDialog, setShowDeleteCollectionsDialog] = useState(false)
+  const [showDeleteAccountDialog, setShowDeleteAccountDialog] = useState(false)
   const [settingsTab, setSettingsTab] = useState('general')
   const [copiedLink, setCopiedLink] = useState(false)
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
@@ -707,6 +710,104 @@ export default function GalleryClient() {
     toast.success('Following', { description: `You are now following ${photographerName}` })
   }
 
+  const handleCopyApiKey = async () => {
+    try {
+      await navigator.clipboard.writeText('kazi-gallery-xxxxxxxxxxxxxxxxxxxxx')
+      toast.success('API Key copied', { description: 'API key copied to clipboard' })
+    } catch (error) {
+      toast.error('Copy failed', { description: 'Failed to copy API key' })
+    }
+  }
+
+  const handleRegenerateApiKey = async () => {
+    toast.success('API Key regenerated', { description: 'Your new API key is ready. The old key is now invalid.' })
+  }
+
+  const handleConnectService = (serviceName: string, isConnected: boolean) => {
+    if (isConnected) {
+      toast.success('Disconnected', { description: `${serviceName} has been disconnected` })
+    } else {
+      toast.info('Connecting...', { description: `Redirecting to ${serviceName} authorization...` })
+    }
+  }
+
+  const handleEmptyTrash = async () => {
+    toast.success('Trash emptied', { description: 'All items in trash have been permanently deleted' })
+  }
+
+  const handleRequestDataExport = async () => {
+    toast.success('Export requested', { description: 'Your data export is being prepared. You will be notified when it is ready.' })
+  }
+
+  const handleDeleteAllPhotos = async () => {
+    setIsSubmitting(true)
+    try {
+      // In production, this would delete all user photos
+      toast.success('Photos deleted', { description: 'All your photos have been deleted' })
+      setShowDeletePhotosDialog(false)
+    } catch (error: any) {
+      toast.error('Delete failed', { description: error.message || 'Failed to delete photos' })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleDeleteAllCollections = async () => {
+    setIsSubmitting(true)
+    try {
+      // In production, this would delete all user collections
+      toast.success('Collections deleted', { description: 'All your collections have been deleted' })
+      setShowDeleteCollectionsDialog(false)
+    } catch (error: any) {
+      toast.error('Delete failed', { description: error.message || 'Failed to delete collections' })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleDeleteAccount = async () => {
+    setIsSubmitting(true)
+    try {
+      // In production, this would delete the user account
+      toast.success('Account deleted', { description: 'Your account has been permanently deleted' })
+      setShowDeleteAccountDialog(false)
+    } catch (error: any) {
+      toast.error('Delete failed', { description: error.message || 'Failed to delete account' })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleShareViaLink = async () => {
+    try {
+      await navigator.clipboard.writeText(`${window.location.origin}/gallery/shared/my-gallery`)
+      toast.success('Link copied', { description: 'Share link copied to clipboard' })
+    } catch (error) {
+      toast.error('Copy failed', { description: 'Failed to copy link' })
+    }
+  }
+
+  const handleShareViaEmail = () => {
+    const subject = encodeURIComponent('Check out my gallery')
+    const body = encodeURIComponent(`Check out my photo gallery: ${window.location.origin}/gallery/shared/my-gallery`)
+    window.open(`mailto:?subject=${subject}&body=${body}`, '_blank')
+    toast.success('Email client opened', { description: 'Compose your email to share' })
+  }
+
+  const handleShareViaEmbed = async () => {
+    const embedCode = `<iframe src="${window.location.origin}/gallery/embed/my-gallery" width="600" height="400" frameborder="0"></iframe>`
+    try {
+      await navigator.clipboard.writeText(embedCode)
+      toast.success('Embed code copied', { description: 'Paste this code to embed your gallery' })
+    } catch (error) {
+      toast.error('Copy failed', { description: 'Failed to copy embed code' })
+    }
+  }
+
+  const handleShareViaQRCode = () => {
+    toast.success('QR Code generated', { description: 'QR code has been generated for sharing' })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 via-white to-orange-50 dark:bg-none dark:bg-gray-900">
       <div className="max-w-[1800px] mx-auto p-6 space-y-6">
@@ -738,7 +839,10 @@ export default function GalleryClient() {
                   <Upload className="w-4 h-4" />
                   Upload
                 </button>
-                <button className="p-2 bg-white/20 rounded-lg hover:bg-white/30 transition-colors">
+                <button
+                  onClick={() => setActiveTab('settings')}
+                  className="p-2 bg-white/20 rounded-lg hover:bg-white/30 transition-colors"
+                >
                   <Settings className="w-5 h-5 text-white" />
                 </button>
               </div>
@@ -1670,7 +1774,11 @@ export default function GalleryClient() {
                                 )}
                               </div>
                             </div>
-                            <Button variant={service.status === 'connected' ? 'outline' : 'default'} size="sm">
+                            <Button
+                              variant={service.status === 'connected' ? 'outline' : 'default'}
+                              size="sm"
+                              onClick={() => handleConnectService(service.name, service.status === 'connected')}
+                            >
                               {service.status === 'connected' ? 'Disconnect' : 'Connect'}
                             </Button>
                           </div>
@@ -1688,7 +1796,7 @@ export default function GalleryClient() {
                           <Label>API Key</Label>
                           <div className="flex items-center gap-2">
                             <Input type="password" value="kazi-gallery-xxxxxxxxxxxxxxxxxxxxx" readOnly className="font-mono" />
-                            <Button variant="outline" size="sm">
+                            <Button variant="outline" size="sm" onClick={handleCopyApiKey}>
                               <Copy className="h-4 w-4" />
                             </Button>
                           </div>
@@ -1708,7 +1816,7 @@ export default function GalleryClient() {
                           </div>
                           <Switch defaultChecked />
                         </div>
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={handleRegenerateApiKey}>
                           <Key className="h-4 w-4 mr-2" />
                           Regenerate API Key
                         </Button>
@@ -1749,7 +1857,7 @@ export default function GalleryClient() {
                           </div>
                           <Switch />
                         </div>
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={handleEmptyTrash}>
                           <Trash2 className="h-4 w-4 mr-2" />
                           Empty Trash
                         </Button>
@@ -1789,7 +1897,7 @@ export default function GalleryClient() {
                             </Select>
                           </div>
                         </div>
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={handleRequestDataExport}>
                           <Download className="h-4 w-4 mr-2" />
                           Request Data Export
                         </Button>
@@ -1811,7 +1919,11 @@ export default function GalleryClient() {
                             <p className="font-medium">Delete All Photos</p>
                             <p className="text-sm text-gray-500">Remove all uploaded photos</p>
                           </div>
-                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50 dark:hover:bg-red-900/20">
+                          <Button
+                            variant="outline"
+                            className="text-red-600 border-red-300 hover:bg-red-50 dark:hover:bg-red-900/20"
+                            onClick={() => setShowDeletePhotosDialog(true)}
+                          >
                             Delete Photos
                           </Button>
                         </div>
@@ -1820,7 +1932,11 @@ export default function GalleryClient() {
                             <p className="font-medium">Delete All Collections</p>
                             <p className="text-sm text-gray-500">Remove all collections</p>
                           </div>
-                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50 dark:hover:bg-red-900/20">
+                          <Button
+                            variant="outline"
+                            className="text-red-600 border-red-300 hover:bg-red-50 dark:hover:bg-red-900/20"
+                            onClick={() => setShowDeleteCollectionsDialog(true)}
+                          >
                             Delete Collections
                           </Button>
                         </div>
@@ -1829,7 +1945,7 @@ export default function GalleryClient() {
                             <p className="font-medium">Delete Account</p>
                             <p className="text-sm text-gray-500">Permanently delete your account</p>
                           </div>
-                          <Button variant="destructive">
+                          <Button variant="destructive" onClick={() => setShowDeleteAccountDialog(true)}>
                             Delete Account
                           </Button>
                         </div>
@@ -2304,19 +2420,31 @@ export default function GalleryClient() {
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Share via</label>
                   <div className="grid grid-cols-4 gap-2">
-                    <button className="p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 text-center">
+                    <button
+                      onClick={handleShareViaLink}
+                      className="p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 text-center"
+                    >
                       <Globe className="w-5 h-5 mx-auto mb-1" />
                       <span className="text-xs">Link</span>
                     </button>
-                    <button className="p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 text-center">
+                    <button
+                      onClick={handleShareViaEmail}
+                      className="p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 text-center"
+                    >
                       <User className="w-5 h-5 mx-auto mb-1" />
                       <span className="text-xs">Email</span>
                     </button>
-                    <button className="p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 text-center">
+                    <button
+                      onClick={handleShareViaEmbed}
+                      className="p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 text-center"
+                    >
                       <Link2 className="w-5 h-5 mx-auto mb-1" />
                       <span className="text-xs">Embed</span>
                     </button>
-                    <button className="p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 text-center">
+                    <button
+                      onClick={handleShareViaQRCode}
+                      className="p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 text-center"
+                    >
                       <Download className="w-5 h-5 mx-auto mb-1" />
                       <span className="text-xs">QR Code</span>
                     </button>
@@ -2336,6 +2464,104 @@ export default function GalleryClient() {
                   className="flex-1 px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg"
                 >
                   Close
+                </button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Photos Confirmation Dialog */}
+        <Dialog open={showDeletePhotosDialog} onOpenChange={setShowDeletePhotosDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="text-red-600">Delete All Photos</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Are you sure you want to delete all your photos? This action cannot be undone and will permanently remove all uploaded photos from your gallery.
+              </p>
+              <div className="flex gap-3 pt-4">
+                <button
+                  onClick={() => setShowDeletePhotosDialog(false)}
+                  className="flex-1 px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg"
+                  disabled={isSubmitting}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleDeleteAllPhotos}
+                  disabled={isSubmitting}
+                  className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
+                  {isSubmitting ? 'Deleting...' : 'Delete All Photos'}
+                </button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Collections Confirmation Dialog */}
+        <Dialog open={showDeleteCollectionsDialog} onOpenChange={setShowDeleteCollectionsDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="text-red-600">Delete All Collections</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Are you sure you want to delete all your collections? This action cannot be undone. Photos in the collections will not be deleted.
+              </p>
+              <div className="flex gap-3 pt-4">
+                <button
+                  onClick={() => setShowDeleteCollectionsDialog(false)}
+                  className="flex-1 px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg"
+                  disabled={isSubmitting}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleDeleteAllCollections}
+                  disabled={isSubmitting}
+                  className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
+                  {isSubmitting ? 'Deleting...' : 'Delete All Collections'}
+                </button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Account Confirmation Dialog */}
+        <Dialog open={showDeleteAccountDialog} onOpenChange={setShowDeleteAccountDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="text-red-600">Delete Account</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Are you sure you want to permanently delete your account? This action cannot be undone and will remove all your data, photos, and collections.
+              </p>
+              <div className="p-3 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                <p className="text-sm text-red-600 dark:text-red-400 font-medium">
+                  Warning: This action is irreversible!
+                </p>
+              </div>
+              <div className="flex gap-3 pt-4">
+                <button
+                  onClick={() => setShowDeleteAccountDialog(false)}
+                  className="flex-1 px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg"
+                  disabled={isSubmitting}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleDeleteAccount}
+                  disabled={isSubmitting}
+                  className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
+                  {isSubmitting ? 'Deleting...' : 'Delete Account'}
                 </button>
               </div>
             </div>

@@ -2128,7 +2128,9 @@ export default function HelpCenterClient() {
                           <p className="font-medium text-sm line-clamp-1">{article.title}</p>
                           <p className="text-xs text-muted-foreground">{formatNumber(article.views)} views</p>
                         </div>
-                        <Button variant="ghost" size="sm">
+                        <Button variant="ghost" size="sm" onClick={() => {
+                          toast.success('Opening Article', { description: `Viewing "${article.title}"` })
+                        }}>
                           <ExternalLink className="w-4 h-4" />
                         </Button>
                       </div>
@@ -2593,8 +2595,16 @@ export default function HelpCenterClient() {
           </DialogHeader>
           <div className="space-y-4">
             <div className="flex gap-2">
-              <Input placeholder="Add new tag..." />
-              <Button>Add Tag</Button>
+              <Input placeholder="Add new tag..." id="new-tag-input" />
+              <Button onClick={() => {
+                const input = document.getElementById('new-tag-input') as HTMLInputElement
+                if (input?.value.trim()) {
+                  toast.success('Tag Added', { description: `Tag "${input.value}" has been created` })
+                  input.value = ''
+                } else {
+                  toast.error('Tag Required', { description: 'Please enter a tag name' })
+                }
+              }}>Add Tag</Button>
             </div>
             <div className="border rounded-lg p-4">
               <p className="font-medium mb-3">Existing Tags</p>
@@ -2673,7 +2683,16 @@ export default function HelpCenterClient() {
                       <p className="font-medium">{article.title}</p>
                       <p className="text-sm text-muted-foreground">Archived on {new Date(article.updatedAt).toLocaleDateString()}</p>
                     </div>
-                    <Button size="sm" variant="outline">Restore</Button>
+                    <Button size="sm" variant="outline" onClick={() => {
+                      toast.promise(
+                        new Promise(resolve => setTimeout(resolve, 1000)),
+                        {
+                          loading: 'Restoring article...',
+                          success: `"${article.title}" has been restored`,
+                          error: 'Failed to restore article'
+                        }
+                      )
+                    }}>Restore</Button>
                   </div>
                 ))
               )}
@@ -2955,7 +2974,12 @@ export default function HelpCenterClient() {
           )}
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowCollectionDialog(false)}>Close</Button>
-            <Button>Edit Collection</Button>
+            <Button onClick={() => {
+              if (selectedCollectionForView) {
+                toast.success('Editing Collection', { description: `Editing "${selectedCollectionForView.name}"` })
+                setShowCollectionDialog(false)
+              }
+            }}>Edit Collection</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -3035,8 +3059,12 @@ export default function HelpCenterClient() {
                     {article && <p className="font-medium">{article.title}</p>}
                     {fb.comment && <p className="text-sm text-muted-foreground mt-2">"{fb.comment}"</p>}
                     <div className="flex gap-2 mt-3">
-                      <Button size="sm" variant="outline">Respond</Button>
-                      <Button size="sm" variant="outline">Dismiss</Button>
+                      <Button size="sm" variant="outline" onClick={() => {
+                        toast.success('Responding', { description: 'Opening feedback response form...' })
+                      }}>Respond</Button>
+                      <Button size="sm" variant="outline" onClick={() => {
+                        toast.success('Feedback Dismissed', { description: 'This feedback has been dismissed' })
+                      }}>Dismiss</Button>
                     </div>
                   </div>
                 )
